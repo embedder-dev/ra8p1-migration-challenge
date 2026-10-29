@@ -1,0 +1,46 @@
+<?xml version="1.0" ?>
+<raModuleDescription>
+    <module id="module.middleware.lwip_sys_baremetal" display="Networking|lwIP system baremetal (rm_lwip_sys_baremetal)" config="config.middleware.lwip_sys_baremetal" common="1" version="0" visible="false" url="group___r_m___l_w_i_p___s_y_s___b_a_r_e_m_e_t_a_l.html">
+        <constraint display="Timer overflow interrupt must be enabled.">
+            ("${module.middleware.lwip_beametal_on_lwip.requires.lwip_sys_baremetal::module.driver.timer.ipl}" != "_disabled")
+        </constraint>
+        <constraint display="rm_lwip_sys_baremetal does not work by itself. Please add a timer module.">
+        ("${interface.driver.timer.${module.middleware.lwip_beametal_on_lwip.requires.lwip_sys_baremetal::module.driver.timer.name}}" == "1")
+        </constraint>
+        <requires id="module.middleware.lwip_beametal_on_lwip.requires.lwip_sys_baremetal" interface="interface.driver.timer" display="Add Timer Driver">
+            <override property="module.driver.timer.mode" value="module.driver.timer.mode.mode_periodic"/>
+            <override property="module.driver.timer.period" value="1"/>
+            <override property="module.driver.timer.unit" value="module.driver.timer.unit.unit_period_msec"/>
+            <override property="module.driver.timer.p_callback" value="rm_lwip_sys_baremetal_timer_callback"/>
+        </requires>
+        <provides interface="interface.middleware.lwip_sys_port" />
+        <provides interface="interface.middleware.lwip_sys_baremetal" />
+        <header>
+/* Setup fucntion for timer of lwIP bare-metal layer.  */
+rm_lwip_sys_baremetal_instance_t * rm_lwip_sys_baremetal_set_instance(void);
+        </header>
+        <includes>
+#include "rm_lwip_sys_baremetal.h"
+        </includes>
+        <declarations>
+                <![CDATA[
+rm_lwip_sys_baremetal_ctrl_t lwip_sys_baremetal_ctrl;
+rm_lwip_sys_baremetal_cfg_t  lwip_sys_baremetal_cfg =
+{
+    .p_timer_instance = &${module.middleware.lwip_beametal_on_lwip.requires.lwip_sys_baremetal::module.driver.timer.name}
+};
+
+rm_lwip_sys_baremetal_instance_t lwip_sys_baremetal_instance =
+{
+    .p_ctrl = &lwip_sys_baremetal_ctrl,
+    .p_cfg  = &lwip_sys_baremetal_cfg
+};
+
+rm_lwip_sys_baremetal_instance_t * rm_lwip_sys_baremetal_set_instance(void)
+{
+    return &lwip_sys_baremetal_instance;
+}
+                ]]>
+    </declarations>
+    </module>
+</raModuleDescription>

@@ -1,0 +1,271 @@
+﻿<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.driver.poeg" path="fsp_cfg/r_poeg_cfg.h" version="0">
+        <property default="config.driver.poeg.param_checking_enable.bsp" display="Parameter Checking" id="config.driver.poeg.param_checking_enable" description="If selected code for parameter checking is included in the build.">
+            <option display="Default (BSP)" id="config.driver.poeg.param_checking_enable.bsp" value="(BSP_CFG_PARAM_CHECKING_ENABLE)"/>
+            <option display="Enabled" id="config.driver.poeg.param_checking_enable.enabled" value="(1)"/>
+            <option display="Disabled" id="config.driver.poeg.param_checking_enable.disabled" value="(0)"/>
+        </property>
+        <content>
+        #ifdef __cplusplus
+        extern "C" {
+        #endif
+
+        #define POEG_CFG_PARAM_CHECKING_ENABLE ${config.driver.poeg.param_checking_enable}
+
+        #ifdef __cplusplus
+        }
+        #endif
+        </content>
+    </config>
+    <module config="config.driver.poeg" display="Timers|${module.driver.poeg.name} Port Output Enable for GPT (r_poeg)" id="module.driver.poeg_on_poeg" version="1" url="group___p_o_e_g.html">
+	    <constraint display="Requires Interrupts | Interrupt priority enabled.">
+            "${module.driver.poeg.p_callback}" === "NULL" || "${module.driver.poeg.ipl}" != "_disabled"
+        </constraint>
+        <constraint display="Unique name required for each instance">
+            "${interface.driver.poeg.${module.driver.poeg.name}}" === "1"
+        </constraint>
+        <constraint display="Requires POEG peripheral">
+          "${interface.mcu.gpt_poeg}" === "1"
+        </constraint>
+        <requires id="module.driver.poeg.requires.poeg" interface="interface.mcu.gpt_poeg" visible="false" display="Requires POEG peripheral" />
+        <provides interface="interface.driver.poeg" />
+        <provides interface="interface.driver.poeg.${module.driver.poeg.name}" />
+        <provides interface="interface.driver.poeg.${module.driver.poeg.channel}" />
+        <provides interface="interface.peripheral.poeg${module.driver.poeg.channel}" />
+        <property default="g_poeg${_instance}" display="General|Name" id="module.driver.poeg.name" description="Module name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.poeg.name}")</constraint>
+        </property>
+        <property default="0" display="General|Channel" id="module.driver.poeg.channel" description="Specify the hardware channel.">
+            <constraint display="Must be a valid POEG channel">testInteger("${module.driver.poeg.channel}")  &amp;&amp; ("${module.driver.poeg.channel}" &gt;= 0)  &amp;&amp; ("${module.driver.poeg.channel}" &lt;= 3)</constraint>
+            <signal event="event.poeg${module.driver.poeg.channel}.event" />
+        </property>
+        <property bitmapPrefix="" default="module.driver.poeg.trigger.trigger_pin" display="General|Trigger" id="module.driver.poeg.trigger" description="Select the trigger sources that will enable POEG. Software disable is always supported. This configuration can only be set once after reset. It cannot be modified after the initial setting.">
+            <select enum="enum.driver.poeg.trigger"/>
+        </property>
+        <property default="module.driver.poeg.polarity.gtetrg_polarity_active_high" display="Input|GTETRG Polarity" id="module.driver.poeg.polarity" description="Select the polarity of the GTETRG pin. Only applicable if GTETRG pin is selected under Trigger.">
+            <option display="Active High" id="module.driver.poeg.polarity.gtetrg_polarity_active_high" value="POEG_GTETRG_POLARITY_ACTIVE_HIGH"/>
+            <option display="Active Low" id="module.driver.poeg.polarity.gtetrg_polarity_active_low" value="POEG_GTETRG_POLARITY_ACTIVE_LOW"/>
+        </property>
+        <property default="module.driver.poeg.noise_filter.gtetrg_noise_filter_disabled" display="Input|GTETRG Noise Filter" id="module.driver.poeg.noise_filter" description="Configure the noise filter for the GTETRG pin. Only applicable if GTETRG pin is selected under Trigger.">
+            <option display="Disabled" id="module.driver.poeg.noise_filter.gtetrg_noise_filter_disabled" value="POEG_GTETRG_NOISE_FILTER_DISABLED"/>
+            <option display="PCLKB/1" id="module.driver.poeg.noise_filter.gtetrg_noise_filter_pclkb_div_1" value="POEG_GTETRG_NOISE_FILTER_CLK_SOURCE_DIV_1"/>
+            <option display="PCLKB/8" id="module.driver.poeg.noise_filter.gtetrg_noise_filter_pclkb_div_8" value="POEG_GTETRG_NOISE_FILTER_CLK_SOURCE_DIV_8"/>
+            <option display="PCLKB/32" id="module.driver.poeg.noise_filter.gtetrg_noise_filter_pclkb_div_32" value="POEG_GTETRG_NOISE_FILTER_CLK_SOURCE_DIV_32"/>
+            <option display="PCLKB/128" id="module.driver.poeg.noise_filter.gtetrg_noise_filter_pclkb_div_128" value="POEG_GTETRG_NOISE_FILTER_CLK_SOURCE_DIV_128"/>
+        </property>
+        <property default="NULL" display="Interrupts|Callback" id="module.driver.poeg.p_callback" description="A user callback function can be specified here. If this callback function is provided, it will be called from the interrupt service routine (ISR) when GPT output pins are disabled by POEG.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.poeg.p_callback}")</constraint>
+        </property>
+        <property default="" display="Interrupts|Interrupt Priority" id="module.driver.poeg.ipl" description="Select the POEG interrupt priority.">
+            <select enum="enum.mcu.nvic.priorities.optional"/>
+            <interrupt event="event.poeg${module.driver.poeg.channel}.event" isr="poeg_event_isr"/>
+        </property>
+        <peripheral name="GPT_POEG${module.driver.poeg.channel}" component="poeg${module.driver.poeg.channel}" />
+        <!-- For MCU's whose pinmapping files have been generated with MPC Designer Tool -->
+        <peripheral name="GPT_POEG${module.driver.poeg.channel}" component="gpt_poeg${module.driver.poeg.channel}" />
+        <symbol id="symbol.driver.poeg.name" value="${module.driver.poeg.name}"/>
+        <symbol id="symbol.driver.poeg.guard.open" value="${module.driver.poeg.name}_open_guard"/>
+        <symbol id="symbol.driver.poeg.guard.macro.open" value="FSP_GUARD_${module.driver.poeg.name}_R_POEG_Open"/>
+        <symbol id="symbol.driver.poeg.guard.status_get" value="${module.driver.poeg.name}_status_get_guard"/>
+        <symbol id="symbol.driver.poeg.guard.macro.status_get" value="FSP_GUARD_${module.driver.poeg.name}_R_POEG_StatusGet"/>
+        <symbol id="symbol.driver.poeg.guard.callback_set" value="${module.driver.poeg.name}_callback_set_guard"/>
+        <symbol id="symbol.driver.poeg.guard.macro.callback_set" value="FSP_GUARD_${module.driver.poeg.name}_R_POEG_CallbackSet"/>
+        <symbol id="symbol.driver.poeg.guard.output_disable" value="${module.driver.poeg.name}_output_disable_guard"/>
+        <symbol id="symbol.driver.poeg.guard.macro.output_disable" value="FSP_GUARD_${module.driver.poeg.name}_R_POEG_OutputDisable"/>
+        <symbol id="symbol.driver.poeg.guard.reset" value="${module.driver.poeg.name}_reset_guard"/>
+        <symbol id="symbol.driver.poeg.guard.macro.reset" value="FSP_GUARD_${module.driver.poeg.name}_R_POEG_Reset"/>
+        <symbol id="symbol.driver.poeg.guard.close" value="${module.driver.poeg.name}_close_guard"/>
+        <symbol id="symbol.driver.poeg.guard.macro.close" value="FSP_GUARD_${module.driver.poeg.name}_R_POEG_Close"/>
+        <symbol id="symbol.driver.poeg.nsc_api" value="${module.driver.poeg.name}_nsc_api"/>
+        <symbol id="symbol.driver.poeg.cfg" value="${module.driver.poeg.name}_cfg"/>
+        <symbol id="symbol.driver.poeg.ctrl" value="${module.driver.poeg.name}_ctrl"/>
+        <header>
+/** POEG Instance. */
+extern const poeg_instance_t ${module.driver.poeg.name};
+
+/** Access the POEG instance using these structures when calling API functions directly (::p_api is not used). */
+extern poeg_instance_ctrl_t ${module.driver.poeg.name}_ctrl;
+extern const poeg_cfg_t ${module.driver.poeg.name}_cfg;
+
+#ifndef ${module.driver.poeg.p_callback}
+void ${module.driver.poeg.p_callback}(poeg_callback_args_t * p_args);
+#endif
+        </header>
+        <includes>#include &quot;r_poeg.h&quot;
+#include &quot;r_poeg_api.h&quot;</includes>
+        <macros>
+        </macros>
+        <declarations>
+poeg_instance_ctrl_t ${module.driver.poeg.name}_ctrl;
+const poeg_cfg_t ${module.driver.poeg.name}_cfg =
+{
+    .trigger             = (poeg_trigger_t) (${module.driver.poeg.trigger} POEG_TRIGGER_SOFTWARE),
+    .polarity            = ${module.driver.poeg.polarity},
+    .noise_filter        = ${module.driver.poeg.noise_filter},
+    .channel             = ${module.driver.poeg.channel},
+    .ipl                 = ${module.driver.poeg.ipl},
+    .p_callback          = ${module.driver.poeg.p_callback},
+    .p_context           = NULL,
+#if defined(VECTOR_NUMBER_POEG${module.driver.poeg.channel}_EVENT)
+    .irq       = VECTOR_NUMBER_POEG${module.driver.poeg.channel}_EVENT,
+#else
+    .irq       = FSP_INVALID_VECTOR,
+#endif
+};
+/* Instance structure to use this module. */
+const poeg_instance_t ${module.driver.poeg.name} =
+{
+    .p_ctrl        = &amp;${module.driver.poeg.name}_ctrl,
+    .p_cfg         = &amp;${module.driver.poeg.name}_cfg,
+    .p_api         = &amp;g_poeg_on_poeg
+};
+        </declarations>
+        <guard>
+            <header>
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.poeg.name}_open_guard(poeg_ctrl_t *const p_ctrl, poeg_cfg_t const *const p_cfg);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.poeg.name}_status_get_guard(poeg_ctrl_t *const p_ctrl, poeg_status_t *const p_status);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.poeg.name}_callback_set_guard(poeg_ctrl_t *const p_ctrl, void(*p_callback)(poeg_callback_args_t *), void const *const p_context, poeg_callback_args_t *const p_callback_memory);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.poeg.name}_output_disable_guard(poeg_ctrl_t *const p_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.poeg.name}_reset_guard(poeg_ctrl_t *const p_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.poeg.name}_close_guard(poeg_ctrl_t *const p_ctrl);
+
+            </header>
+            <template name="${module.driver.poeg.name}_guard.c">
+                <![CDATA[
+                    #include "guard.h"
+
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.poeg.name}_open_guard (poeg_ctrl_t *const p_ctrl, poeg_cfg_t const *const p_cfg)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+    FSP_PARAMETER_NOT_USED(p_cfg);
+
+    return R_POEG_Open(&${module.driver.poeg.name}_ctrl, &${module.driver.poeg.name}_cfg);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.poeg.name}_status_get_guard (poeg_ctrl_t *const p_ctrl, poeg_status_t *const p_status)
+{
+    /* Verify all pointers are in non-secure memory. */
+    poeg_status_t *const p_status_checked = cmse_check_pointed_object(p_status, CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_status_checked != NULL);
+
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+
+    return R_POEG_StatusGet(&${module.driver.poeg.name}_ctrl, p_status_checked);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.poeg.name}_callback_set_guard (poeg_ctrl_t *const p_ctrl, void(*p_callback)(poeg_callback_args_t *), void const *const p_context, poeg_callback_args_t *const p_callback_memory)
+{
+    /* Verify all pointers are in non-secure memory. */
+    void(*p_callback_checked)(poeg_callback_args_t *) = (void(*)(poeg_callback_args_t *)) cmse_check_address_range((void *) p_callback, sizeof(void *), CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_callback_checked != NULL);
+    poeg_callback_args_t *const p_callback_memory_checked = cmse_check_pointed_object(p_callback_memory, CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_callback_memory_checked != NULL);
+
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+    FSP_PARAMETER_NOT_USED(p_context);
+
+    return R_POEG_CallbackSet(&${module.driver.poeg.name}_ctrl, p_callback_checked, p_context, p_callback_memory_checked);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.poeg.name}_output_disable_guard (poeg_ctrl_t *const p_ctrl)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+
+    return R_POEG_OutputDisable(&${module.driver.poeg.name}_ctrl);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.poeg.name}_reset_guard (poeg_ctrl_t *const p_ctrl)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+
+    return R_POEG_Reset(&${module.driver.poeg.name}_ctrl);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.poeg.name}_close_guard (poeg_ctrl_t *const p_ctrl)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+
+    return R_POEG_Close(&${module.driver.poeg.name}_ctrl);
+}
+
+                ]]>
+            </template>
+        </guard>
+        <nsc>
+            <header>
+
+#define FSP_GUARD_${module.driver.poeg.name}_R_POEG_Open() ${module.driver.poeg.name}_open_guard(FSP_SECURE_ARGUMENT, FSP_SECURE_ARGUMENT)
+
+#define FSP_GUARD_${module.driver.poeg.name}_R_POEG_StatusGet(p_status) ${module.driver.poeg.name}_status_get_guard(FSP_SECURE_ARGUMENT, p_status)
+
+#define FSP_GUARD_${module.driver.poeg.name}_R_POEG_CallbackSet(p_callback, p_context, p_callback_memory) ${module.driver.poeg.name}_callback_set_guard(FSP_SECURE_ARGUMENT, p_callback, p_context, p_callback_memory)
+
+#define FSP_GUARD_${module.driver.poeg.name}_R_POEG_OutputDisable() ${module.driver.poeg.name}_output_disable_guard(FSP_SECURE_ARGUMENT)
+
+#define FSP_GUARD_${module.driver.poeg.name}_R_POEG_Reset() ${module.driver.poeg.name}_reset_guard(FSP_SECURE_ARGUMENT)
+
+#define FSP_GUARD_${module.driver.poeg.name}_R_POEG_Close() ${module.driver.poeg.name}_close_guard(FSP_SECURE_ARGUMENT)
+
+
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.poeg.name}_open_guard(poeg_ctrl_t *const p_ctrl, poeg_cfg_t const *const p_cfg);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.poeg.name}_status_get_guard(poeg_ctrl_t *const p_ctrl, poeg_status_t *const p_status);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.poeg.name}_callback_set_guard(poeg_ctrl_t *const p_ctrl, void(*p_callback)(poeg_callback_args_t *), void const *const p_context, poeg_callback_args_t *const p_callback_memory);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.poeg.name}_output_disable_guard(poeg_ctrl_t *const p_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.poeg.name}_reset_guard(poeg_ctrl_t *const p_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.poeg.name}_close_guard(poeg_ctrl_t *const p_ctrl);
+
+
+extern const poeg_instance_t ${module.driver.poeg.name};
+            </header>
+            <declarations>
+                <![CDATA[
+static const poeg_api_t ${module.driver.poeg.name}_nsc_api =
+{
+    .open = ${module.driver.poeg.name}_open_guard,
+    .statusGet = ${module.driver.poeg.name}_status_get_guard,
+    .callbackSet = ${module.driver.poeg.name}_callback_set_guard,
+    .outputDisable = ${module.driver.poeg.name}_output_disable_guard,
+    .reset = ${module.driver.poeg.name}_reset_guard,
+    .close = ${module.driver.poeg.name}_close_guard,
+};
+const poeg_instance_t ${module.driver.poeg.name} =
+{
+    .p_api = &${module.driver.poeg.name}_nsc_api,
+    .p_ctrl = FSP_SECURE_ARGUMENT,
+    .p_cfg = FSP_SECURE_ARGUMENT,
+};
+                ]]>
+            </declarations>
+        </nsc>
+        <api configurable="true">
+            <file>ra/fsp/inc/instances/r_poeg.h</file>
+            <file>ra/fsp/inc/api/r_poeg_api.h</file>
+        </api>
+    </module>
+</raModuleDescription>

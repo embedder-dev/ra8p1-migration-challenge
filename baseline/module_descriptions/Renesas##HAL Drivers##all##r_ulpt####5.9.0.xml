@@ -1,0 +1,601 @@
+﻿<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.driver.ulpt" path="fsp_cfg/r_ulpt_cfg.h" version="0">
+        <property default="config.driver.ulpt.param_checking_enable.bsp" display="Parameter Checking" id="config.driver.ulpt.param_checking_enable" description="If selected code for parameter checking is included in the build.">
+            <option display="Default (BSP)" id="config.driver.ulpt.param_checking_enable.bsp" value="(BSP_CFG_PARAM_CHECKING_ENABLE)"/>
+            <option display="Enabled" id="config.driver.ulpt.param_checking_enable.enabled" value="(1)"/>
+            <option display="Disabled" id="config.driver.ulpt.param_checking_enable.disabled" value="(0)"/>
+        </property>
+        <property default="config.driver.ulpt.output_support_enable.disabled" display="Pin Output Support" id="config.driver.ulpt.output_support_enable" description="If selected code for outputting a waveform to a pin is included in the build.">
+            <option display="Disabled" id="config.driver.ulpt.output_support_enable.disabled" value="(0)"/>
+            <option display="Enabled" id="config.driver.ulpt.output_support_enable.enabled" value="(1)"/>
+        </property>
+        <property default="config.driver.ulpt.input_support_enable.disabled" display="Pin Input Support" id="config.driver.ulpt.input_support_enable" description="Enable input support to use ULPTEVin as count source">
+            <option display="Disabled" id="config.driver.ulpt.input_support_enable.disabled" value="(0)"/>
+            <option display="Enabled (Required when Count Source is EVI on any channel)" id="config.driver.ulpt.input_support_enable.enabled" value="(1)"/>
+        </property>
+        <content>
+        #ifdef __cplusplus
+        extern "C" {
+        #endif
+
+        #define ULPT_CFG_PARAM_CHECKING_ENABLE ${config.driver.ulpt.param_checking_enable}
+        #define ULPT_CFG_OUTPUT_SUPPORT_ENABLE ${config.driver.ulpt.output_support_enable}
+        #define ULPT_CFG_INPUT_SUPPORT_ENABLE ${config.driver.ulpt.input_support_enable}
+
+        #ifdef __cplusplus
+        }
+        #endif
+        </content>
+    </config>
+    <module config="config.driver.ulpt" display="Timers|${module.driver.timer.name} Timer, Ultra-Low-Power (r_ulpt)" id="module.driver.timer_on_ulpt" version="1" url="group___u_l_p_t.html">
+        <constraint display="Requires Underflow Interrupt (INT) enabled">
+            "${module.driver.timer.p_callback}" === "NULL" || "${module.driver.timer.ipl}" != "_disabled"
+        </constraint>
+        <constraint display="Unique name required for each instance">
+            "${interface.driver.timer.${module.driver.timer.name}}" === "1"
+        </constraint>
+        <constraint display="Requires ULPT peripheral">
+          "${interface.mcu.ulpt}" === "1"
+        </constraint>
+        <constraint display="Enable 'Common->Pin Output Support' to use 'Output pins'.">
+            ("${config.driver.ulpt.output_support_enable}" === "config.driver.ulpt.output_support_enable.enabled" ||
+            ((("${module.driver.timer.ulptob_output_enable}") === ("module.driver.timer.ulptob_output_enable.false")) &amp;&amp;
+            (("${module.driver.timer.ulptoa_output_enable}") === ("module.driver.timer.ulptoa_output_enable.false")) &amp;&amp;
+            (("${module.driver.timer.ulpto_output_enable}") === ("module.driver.timer.ulpto_output_enable.false"))))
+        </constraint>
+        <constraint display="Common->Pin Input Support must be enabled when count source is ULPTEVIn">
+            "${module.driver.timer.count_source}" != "module.driver.timer.count_source.clock_evi" ||
+            "${config.driver.ulpt.input_support_enable}" === "config.driver.ulpt.input_support_enable.enabled"
+        </constraint>
+        <constraint display="Event Pin Edge Falling or Both can only be used with ULPTEVIn">
+            "${module.driver.timer.count_source}" === "module.driver.timer.count_source.clock_evi" ||
+            ("${module.driver.timer.event_pin}" != "module.driver.timer.event_pin.edge_falling" &amp;&amp;
+            "${module.driver.timer.event_pin}" != "module.driver.timer.event_pin.edge_both")
+        </constraint>
+        <constraint display="Period Unit must be Raw Counts when count source is ULPTEVIn">
+            "${module.driver.timer.count_source}" != "module.driver.timer.count_source.clock_evi" ||
+            "${module.driver.timer.unit}" === "module.driver.timer.unit.unit_period_raw_counts"
+        </constraint>
+        <constraint display="Input Filtering can only be done when count source is ULPTEVIn">
+            "${module.driver.timer.count_source}" === "module.driver.timer.count_source.clock_evi"  ||
+            (("${module.driver.timer.ulptevi_filter}" != "module.driver.timer.ulptevi_filter.ulptevi_filter_pclkb") &amp;&amp;
+            ("${module.driver.timer.ulptevi_filter}" != "module.driver.timer.ulptevi_filter.ulptevi_filter_pclkb_div_8") &amp;&amp;
+            ("${module.driver.timer.ulptevi_filter}" != "module.driver.timer.ulptevi_filter.ulptevi_filter_pclkb_div_32"))
+        </constraint>
+        <requires id="module.driver.timer.requires.ulpt" interface="interface.mcu.ulpt" visible="false" display="Requires ULPT peripheral" />
+        <provides interface="interface.driver.timer" />
+        <provides interface="interface.driver.timer" />
+        <provides interface="interface.driver.timer.${module.driver.timer.name}" />
+        <provides interface="interface.peripheral.ulpt${module.driver.timer.channel}" />
+        <property default="g_timer${_instance}" display="General|Name" id="module.driver.timer.name" description="Module name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.timer.name}")</constraint>
+        </property>
+        <property default="0" display="General|Channel" id="module.driver.timer.channel" description="Physical hardware channel.">
+            <constraint display="Channel number does not exist">testInteger("${module.driver.timer.channel}")  &amp;&amp; ("${module.driver.timer.channel}" &gt;= 0)  &amp;&amp; ("${module.driver.timer.channel}" &lt;= 1)</constraint>
+            <signal event="event.ulpt${module.driver.timer.channel}.int" />
+            <signal event="event.ulpt${module.driver.timer.channel}.compare.a" />
+            <signal event="event.ulpt${module.driver.timer.channel}.compare.b" />
+        </property>
+        <property default="module.driver.timer.mode.mode_periodic" display="General|Mode" id="module.driver.timer.mode" description="Mode selection. Note: One-shot mode is implemented in software. ISR's must be enabled for one shot even if callback is unused.">
+            <option display="Periodic" id="module.driver.timer.mode.mode_periodic" value="TIMER_MODE_PERIODIC"/>
+            <option display="One-Shot" id="module.driver.timer.mode.mode_one_shot" value="TIMER_MODE_ONE_SHOT"/>
+            <option display="PWM" id="module.driver.timer.mode.mode_pwm" value="TIMER_MODE_PWM"/>>>
+        </property>
+        <!-- this needs attention as there is no PCLKB source for the counts-->
+        <property default="0x10000" display="General|Period" id="module.driver.timer.period" description="Specify the timer period based on the selected unit.\n\nWhen the unit is set to 'Raw Counts', setting the period to 0x10000 results in the maximum period at the lowest divisor (fastest timer tick). Set the period to 0x10000 for a free running timer, pulse width measurement or pulse period measurement. Setting the period higher will automatically select a higher divider; the period can be set up to 0x80000 when counting from PCLKB or 0x800000 when counting from LOCO/subclock, which will use a divider of 8 or 128 respectively with the maximum period.\n\nIf the requested period cannot be achieved, the settings with the largest possible period that is less than or equal to the requested period are used. The theoretical calculated period is printed in a comment in the timer_cfg_t structure.">
+            <constraint display="Value must be non-negative">
+                "${module.driver.timer.period}" &gt; 0
+            </constraint>
+            <export><![CDATA[eval('' +
+'/* INPUTS */' +
+'    var requested_period = ${module.driver.timer.period};' +
+'    var requested_unit_string = "${module.driver.timer.unit}";' +
+'    var count_source_string = "${module.driver.timer.count_source}";' +
+'    var peripheral_clock_hz = ${board.clock.peripheral.ulpt};' +
+'    var requested_duty = ${module.driver.timer.duty_cycle};' +
+'    var timer_counter_max = 0x10000;' +
+'' +
+'    if ("${module.driver.timer.bits.ch${module.driver.timer.channel}}" == "32")' +
+'    {' +
+'        /* This is a 32 bit timer. */' +
+'        timer_counter_max = 0x100000000;' +
+'    }' +
+'' +
+'    /* Determine the count source frequency. */' +
+'    if (("ULPT_CLOCK_LOCO" == count_source_string) || ("ULPT_CLOCK_SUBCLOCK" == count_source_string))' +
+'    {' +
+'        peripheral_clock_hz = 32768;' +
+'    }' +
+'' +
+'    /* Calculate the number of counts in the requested period. */' +
+'    var requested_period_s = 0;' +
+'    if ("ns" == requested_unit_string)' +
+'    {' +
+'        requested_period_s = requested_period / 1000000000;' +
+'    }' +
+'    else if ("us" == requested_unit_string)' +
+'    {' +
+'        requested_period_s = requested_period / 1000000;' +
+'    }' +
+'    else if ("ms" == requested_unit_string)' +
+'    {' +
+'        requested_period_s = requested_period / 1000;' +
+'    }' +
+'    else if ("s" == requested_unit_string)' +
+'    {' +
+'        requested_period_s = requested_period;' +
+'    }' +
+'    else if ("hz" == requested_unit_string)' +
+'    {' +
+'        requested_period_s = 1 / requested_period;' +
+'    }' +
+'    else if ("khz" == requested_unit_string)' +
+'    {' +
+'        requested_period_s = 1 / (requested_period * 1000);' +
+'    }' +
+'' +
+'    var period_counts = requested_period;' +
+'    if ("raw" != requested_unit_string)' +
+'    {' +
+'        period_counts = requested_period_s * peripheral_clock_hz;' +
+'    }' +
+'' +
+'    /* Calculate the smallest divider required to fit the period in 16 bits. */' +
+'    var divider = 0;' +
+'    var max_divider = 7;' +
+'    while (period_counts > timer_counter_max)' +
+'    {' +
+'        period_counts /= 2;' +
+'        divider += 1;' +
+'' +
+'        /* If the divider is larger than the maximum divider, set the period and divider to the maximum. */' +
+'        if (divider > max_divider)' +
+'        {' +
+'            period_counts = timer_counter_max;' +
+'            divider = max_divider;' +
+'            break;' +
+'        }' +
+'    }' +
+'' +
+'    /* Round period down. */' +
+'    period_counts = Math.floor(period_counts);' +
+'' +
+'    /* If the requested period is less than one count, set the period to 1 count and the divider to 1. */' +
+'    if (period_counts === 0)' +
+'    {' +
+'        period_counts = 1;' +
+'        divider = 0;' +
+'    }' +
+'' +
+'    /* Calculate the duty cycle. */' +
+'    var duty_counts = Math.floor(requested_duty * period_counts / 100);' +
+'' +
+'    /* Calculate the actual values. */' +
+'    var actual_period = period_counts / (peripheral_clock_hz >> divider);' +
+'    var actual_duty = 100 * duty_counts / period_counts;' +
+'' +
+'    period_setting = "/* Actual period: " + actual_period.toString() + " seconds. Actual duty: " + actual_duty.toString() + "%. */" + ' +
+'                   " .period_counts = (uint32_t) 0x" + period_counts.toString(16) +' +
+'                   ", .duty_cycle_counts = 0x" + duty_counts.toString(16) +' +
+'                   ", .source_div = (timer_source_div_t)" + divider.toString();' +
+'    period_setting' +
+'')
+]]>            </export>
+        </property>
+        <!-- Get the number of bits in the timer from an enum. -->
+        <property default="" id="module.driver.timer.bits.ch0" description="">
+            <select enum="enum.mcu.ulpt.bits.ch0"/>
+        </property>
+        <property default="" id="module.driver.timer.bits.ch1" description="">
+            <select enum="enum.mcu.ulpt.bits.ch1"/>
+        </property>
+        <property default="" id="module.driver.timer.bits.ch2" description="">
+            <select enum="enum.mcu.ulpt.bits.ch2"/>
+        </property>
+        <property default="" id="module.driver.timer.bits.ch3" description="">
+            <select enum="enum.mcu.ulpt.bits.ch3"/>
+        </property>
+        <property default="" id="module.driver.timer.bits.ch4" description="">
+            <select enum="enum.mcu.ulpt.bits.ch4"/>
+        </property>
+        <property default="" id="module.driver.timer.bits.ch5" description="">
+            <select enum="enum.mcu.ulpt.bits.ch5"/>
+        </property>
+        <property default="module.driver.timer.unit.unit_period_raw_counts" display="General|Period Unit" id="module.driver.timer.unit" description="Unit of the period specified above">
+            <option display="Raw Counts" id="module.driver.timer.unit.unit_period_raw_counts" value="raw"/>
+            <option display="Nanoseconds" id="module.driver.timer.unit.unit_period_nsec" value="ns"/>
+            <option display="Microseconds" id="module.driver.timer.unit.unit_period_usec" value="us"/>
+            <option display="Milliseconds" id="module.driver.timer.unit.unit_period_msec" value="ms"/>
+            <option display="Seconds" id="module.driver.timer.unit.unit_period_sec" value="s"/>
+            <option display="Hertz" id="module.driver.timer.unit.unit_frequency_hz" value="hz"/>
+            <option display="Kilohertz" id="module.driver.timer.unit.unit_frequency_khz" value="khz"/>
+        </property>
+        <property default="50" display="Output|Duty Cycle Percent (only applicable in PWM mode)" id="module.driver.timer.duty_cycle" description="Specify the timer duty cycle percent. Only used in PWM mode.">
+            <constraint display="Value must be between 0 and 100">("${module.driver.timer.duty_cycle}" &gt;= 0)  &amp;&amp; ("${module.driver.timer.duty_cycle}" &lt;= 100)</constraint>
+        </property>
+        <property default="module.driver.timer.count_source.clock_loco" display="General|Count Source" id="module.driver.timer.count_source" description="ULPT count source.  NOTE: The divisor is calculated automatically based on the selected period. See ulpt_count_source_t documentation for details.">
+            <option display="LOCO" id="module.driver.timer.count_source.clock_loco" value="ULPT_CLOCK_LOCO"/>
+            <option display="SUBCLOCK" id="module.driver.timer.count_source.clock_fsub" value="ULPT_CLOCK_SUBCLOCK"/>
+            <option display="EVI (Requires Pin Input Support-Enabled)" id="module.driver.timer.count_source.clock_evi" value="ULPT_CLOCK_ULPTEVI"/>
+        </property>
+        <property default="module.driver.timer.ulptoa_output_enable.false" display="Output|ULPTOA Output" id="module.driver.timer.ulptoa_output_enable" description="Configure Match ULPTOA output.">
+            <option display="Disabled" id="module.driver.timer.ulptoa_output_enable.false" value="ULPT_MATCH_PIN_CFG_DISABLED"/>
+            <option display="Start Level Low" id="module.driver.timer.ulptoa_output_enable.low" value="ULPT_MATCH_PIN_CFG_START_LEVEL_LOW"/>
+            <option display="Start Level High" id="module.driver.timer.ulptoa_output_enable.high" value="ULPT_MATCH_PIN_CFG_START_LEVEL_HIGH"/>
+        </property>
+        <property default="module.driver.timer.ulptob_output_enable.false" display="Output|ULPTOB Output" id="module.driver.timer.ulptob_output_enable" description="Configure Match ULPTOB output.">
+            <option display="Disabled" id="module.driver.timer.ulptob_output_enable.false" value="ULPT_MATCH_PIN_CFG_DISABLED"/>
+            <option display="Start Level Low" id="module.driver.timer.ulptob_output_enable.low" value="ULPT_MATCH_PIN_CFG_START_LEVEL_LOW"/>
+            <option display="Start Level High" id="module.driver.timer.ulptob_output_enable.high" value="ULPT_MATCH_PIN_CFG_START_LEVEL_HIGH"/>
+        </property>
+        <property default="module.driver.timer.ulpto_output_enable.false" display="Output|ULPTO Output" id="module.driver.timer.ulpto_output_enable" description="Configure Pulse ULPTO output.">
+            <option display="Disabled" id="module.driver.timer.ulpto_output_enable.false" value="ULPT_PULSE_PIN_CFG_DISABLED"/>
+            <option display="Start Level Low" id="module.driver.timer.ulpto_output_enable.low" value="ULPT_PULSE_PIN_CFG_ENABLED_START_LEVEL_LOW"/>
+            <option display="Start Level High" id="module.driver.timer.ulpto_output_enable.high" value="ULPT_PULSE_PIN_CFG_ENABLED_START_LEVEL_HIGH"/>
+        </property>
+        <property default="module.driver.timer.ulptevi_filter.ulptevi_filter_none" display="Input|Input Filter" id="module.driver.timer.ulptevi_filter" description="ULPTEVIn filter. Only applies if the count source is ULPTEVIn, event counter mode. The filter requires the signal to be at the same level for 3 successive reads at the specified filter frequency.">
+            <option display="No Filter" id="module.driver.timer.ulptevi_filter.ulptevi_filter_none" value="ULPT_ULPTEVI_FILTER_NONE"/>
+            <option display="Filter sampled at PCLKB" id="module.driver.timer.ulptevi_filter.ulptevi_filter_pclkb" value="ULPT_ULPTEVI_FILTER_PCLKB"/>
+            <option display="Filter sampled at PCLKB / 8" id="module.driver.timer.ulptevi_filter.ulptevi_filter_pclkb_div_8" value="ULPT_ULPTEVI_FILTER_PCLKB_DIV_8"/>
+            <option display="Filter sampled at PCLKB / 32" id="module.driver.timer.ulptevi_filter.ulptevi_filter_pclkb_div_32" value="ULPT_ULPTEVI_FILTER_PCLKB_DIV_32"/>
+        </property>
+        <property default="module.driver.timer.enable_function.enable_function_ignored" display="Input|Enable Pin" id="module.driver.timer.enable_function" description="ULPTEEn enable edge.  Only applies if the count source is ULPTEVIn, event counter mode">
+            <option display="Enable Function Ignored" id="module.driver.timer.enable_function.enable_function_ignored" value="ULPT_ENABLE_FUNCTION_IGNORED"/>
+            <option display="Enable Function Low" id="module.driver.timer.enable_function.enable_function_enable_low" value="ULPT_ENABLE_FUNCTION_ENABLE_LOW"/>
+            <option display="Enable Function High" id="module.driver.timer.enable_function.enable_function_enable_high" value="ULPT_ENABLE_FUNCTION_ENABLE_HIGH"/>
+            <option display="Enable Function Start" id="module.driver.timer.enable_function.enable_function_function_start" value="ULPT_ENABLE_FUNCTION_START"/>
+            <option display="Enable Function Restart" id="module.driver.timer.enable_function.enable_function_function_restart" value="ULPT_ENABLE_FUNCTION_RESTART"/>
+        </property>
+        <property default="module.driver.timer.trigger_edge.trigger_edge_rising" display="Input|Trigger Edge" id="module.driver.timer.trigger_edge" description="ULPTEVIn trigger edge. Applies Only applies if the count source is ULPTEVIn, event counter mode.">
+            <option display="Trigger Edge Rising" id="module.driver.timer.trigger_edge.trigger_edge_rising" value="ULPT_TRIGGER_EDGE_RISING"/>
+            <option display="Trigger Edge Falling" id="module.driver.timer.trigger_edge.trigger_edge_falling" value="ULPT_TRIGGER_EDGE_FALLING"/>
+            <option display="Trigger Edge Both" id="module.driver.timer.trigger_edge.trigger_edge_both" value="ULPT_TRIGGER_EDGE_BOTH"/>
+        </property>
+        <property default="module.driver.timer.event_pin.edge_rising" display="Input|Event Edge" id="module.driver.timer.event_pin" description="Select the ULPTEVin edge. Applies if count input is ULPTEVin.">
+            <option display="Event Edge Rising" id="module.driver.timer.event_pin.edge_rising" value="ULPT_EVENT_PIN_RISING"/>
+            <option display="Event Edge Falling" id="module.driver.timer.event_pin.edge_falling" value="ULPT_EVENT_PIN_FALLING"/>
+            <option display="Event Edge Both" id="module.driver.timer.event_pin.edge_both" value="ULPT_EVENT_PIN_BOTH"/>
+        </property>
+
+        <property default="NULL" display="Interrupts|Callback" id="module.driver.timer.p_callback" description="A user callback function. If this callback function is provided, it is called from the interrupt service routine (ISR) each time the timer period elapses.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.timer.p_callback}")</constraint>
+        </property>
+        <property default="NULL" id="module.driver.timer.p_context" />
+        <property default="" display="Interrupts|Underflow Interrupt Priority" id="module.driver.timer.ipl" description="Timer interrupt priority.">
+            <select enum="enum.mcu.nvic.priorities.optional"/>
+            <interrupt event="event.ulpt${module.driver.timer.channel}.int" isr="ulpt_int_isr"/>
+        </property>
+        <peripheral name="ULPT${module.driver.timer.channel}" component="ulpt${module.driver.timer.channel}" />
+        <symbol id="symbol.driver.timer.name" value="${module.driver.timer.name}"/>
+        <symbol id="symbol.driver.timer.guard.close" value="${module.driver.timer.name}_close_guard"/>
+        <symbol id="symbol.driver.timer.guard.macro.close" value="FSP_GUARD_${module.driver.timer.name}_R_ULPT_Close"/>
+        <symbol id="symbol.driver.timer.guard.period_set" value="${module.driver.timer.name}_period_set_guard"/>
+        <symbol id="symbol.driver.timer.guard.macro.period_set" value="FSP_GUARD_${module.driver.timer.name}_R_ULPT_PeriodSet"/>
+        <symbol id="symbol.driver.timer.guard.duty_cycle_set" value="${module.driver.timer.name}_duty_cycle_set_guard"/>
+        <symbol id="symbol.driver.timer.guard.macro.duty_cycle_set" value="FSP_GUARD_${module.driver.timer.name}_R_ULPT_DutyCycleSet"/>
+        <symbol id="symbol.driver.timer.guard.reset" value="${module.driver.timer.name}_reset_guard"/>
+        <symbol id="symbol.driver.timer.guard.macro.reset" value="FSP_GUARD_${module.driver.timer.name}_R_ULPT_Reset"/>
+        <symbol id="symbol.driver.timer.guard.start" value="${module.driver.timer.name}_start_guard"/>
+        <symbol id="symbol.driver.timer.guard.macro.start" value="FSP_GUARD_${module.driver.timer.name}_R_ULPT_Start"/>
+        <symbol id="symbol.driver.timer.guard.enable" value="${module.driver.timer.name}_enable_guard"/>
+        <symbol id="symbol.driver.timer.guard.macro.enable" value="FSP_GUARD_${module.driver.timer.name}_R_ULPT_Enable"/>
+        <symbol id="symbol.driver.timer.guard.disable" value="${module.driver.timer.name}_disable_guard"/>
+        <symbol id="symbol.driver.timer.guard.macro.disable" value="FSP_GUARD_${module.driver.timer.name}_R_ULPT_Disable"/>
+        <symbol id="symbol.driver.timer.guard.info_get" value="${module.driver.timer.name}_info_get_guard"/>
+        <symbol id="symbol.driver.timer.guard.macro.info_get" value="FSP_GUARD_${module.driver.timer.name}_R_ULPT_InfoGet"/>
+        <symbol id="symbol.driver.timer.guard.status_get" value="${module.driver.timer.name}_status_get_guard"/>
+        <symbol id="symbol.driver.timer.guard.macro.status_get" value="FSP_GUARD_${module.driver.timer.name}_R_ULPT_StatusGet"/>
+        <symbol id="symbol.driver.timer.guard.stop" value="${module.driver.timer.name}_stop_guard"/>
+        <symbol id="symbol.driver.timer.guard.macro.stop" value="FSP_GUARD_${module.driver.timer.name}_R_ULPT_Stop"/>
+        <symbol id="symbol.driver.timer.guard.open" value="${module.driver.timer.name}_open_guard"/>
+        <symbol id="symbol.driver.timer.guard.macro.open" value="FSP_GUARD_${module.driver.timer.name}_R_ULPT_Open"/>
+        <symbol id="symbol.driver.timer.guard.callback_set" value="${module.driver.timer.name}_callback_set_guard"/>
+        <symbol id="symbol.driver.timer.guard.macro.callback_set" value="FSP_GUARD_${module.driver.timer.name}_R_ULPT_CallbackSet"/>
+        <symbol id="symbol.driver.timer.nsc_api" value="${module.driver.timer.name}_nsc_api"/>
+        <symbol id="symbol.driver.timer.cfg" value="${module.driver.timer.name}_cfg"/>
+        <symbol id="symbol.driver.timer.ctrl" value="${module.driver.timer.name}_ctrl"/>
+        <symbol id="symbol.driver.timer.extend" value="${module.driver.timer.name}_extend"/>
+        <header>
+/** ULPT Timer Instance */
+extern const timer_instance_t ${module.driver.timer.name};
+
+/** Access the ULPT instance using these structures when calling API functions directly (::p_api is not used). */
+extern ulpt_instance_ctrl_t ${module.driver.timer.name}_ctrl;
+extern const timer_cfg_t ${module.driver.timer.name}_cfg;
+
+#ifndef ${module.driver.timer.p_callback}
+void ${module.driver.timer.p_callback}(timer_callback_args_t * p_args);
+#endif
+        </header>
+        <includes>#include &quot;r_ulpt.h&quot;
+#include &quot;r_timer_api.h&quot;</includes>
+        <declarations>
+ulpt_instance_ctrl_t ${module.driver.timer.name}_ctrl;
+const ulpt_extended_cfg_t ${module.driver.timer.name}_extend =
+{
+    .count_source            = ${module.driver.timer.count_source},
+    .ulpto                    = ${module.driver.timer.ulpto_output_enable},
+    .ulptoab_settings_b.ulptoa = ${module.driver.timer.ulptoa_output_enable},
+    .ulptoab_settings_b.ulptob = ${module.driver.timer.ulptob_output_enable},
+    .ulptevi_filter            = ${module.driver.timer.ulptevi_filter},
+    .enable_function           = ${module.driver.timer.enable_function},
+    .trigger_edge            = ${module.driver.timer.trigger_edge},
+    .event_pin               = ${module.driver.timer.event_pin},
+
+};
+const timer_cfg_t ${module.driver.timer.name}_cfg =
+{
+    .mode                = ${module.driver.timer.mode},
+    ${module.driver.timer.period},
+    .channel             = ${module.driver.timer.channel},
+    .p_callback          = ${module.driver.timer.p_callback},
+    /** If NULL then do not add &amp; */
+#if defined(${module.driver.timer.p_context})
+    .p_context           = ${module.driver.timer.p_context},
+#else
+    .p_context           = &amp;${module.driver.timer.p_context},
+#endif
+    .p_extend            = &amp;${module.driver.timer.name}_extend,
+    .cycle_end_ipl       = ${module.driver.timer.ipl},
+#if defined(VECTOR_NUMBER_ULPT${module.driver.timer.channel}_INT)
+    .cycle_end_irq       = VECTOR_NUMBER_ULPT${module.driver.timer.channel}_INT,
+#else
+    .cycle_end_irq       = FSP_INVALID_VECTOR,
+#endif
+};
+/* Instance structure to use this module. */
+const timer_instance_t ${module.driver.timer.name} =
+{
+    .p_ctrl        = &amp;${module.driver.timer.name}_ctrl,
+    .p_cfg         = &amp;${module.driver.timer.name}_cfg,
+    .p_api         = &amp;g_timer_on_ulpt
+};
+        </declarations>
+        <guard>
+            <header>
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.timer.name}_close_guard(timer_ctrl_t *const p_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.timer.name}_period_set_guard(timer_ctrl_t *const p_ctrl, uint32_t const period_counts);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.timer.name}_duty_cycle_set_guard(timer_ctrl_t *const p_ctrl, uint32_t const duty_cycle_counts, uint32_t const pin);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.timer.name}_reset_guard(timer_ctrl_t *const p_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.timer.name}_start_guard(timer_ctrl_t *const p_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.timer.name}_enable_guard(timer_ctrl_t *const p_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.timer.name}_disable_guard(timer_ctrl_t *const p_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.timer.name}_info_get_guard(timer_ctrl_t *const p_ctrl, timer_info_t *const p_info);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.timer.name}_status_get_guard(timer_ctrl_t *const p_ctrl, timer_status_t *const p_status);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.timer.name}_stop_guard(timer_ctrl_t *const p_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.timer.name}_open_guard(timer_ctrl_t *const p_ctrl, timer_cfg_t const *const p_cfg);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.timer.name}_callback_set_guard(timer_ctrl_t *const p_api_ctrl, void(*p_callback)(timer_callback_args_t *), void const *const p_context, timer_callback_args_t *const p_callback_memory);
+
+            </header>
+            <template name="${module.driver.timer.name}_guard.c">
+                <![CDATA[
+                    #include "guard.h"
+
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.timer.name}_close_guard (timer_ctrl_t *const p_ctrl)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+
+    return R_ULPT_Close(&${module.driver.timer.name}_ctrl);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.timer.name}_period_set_guard (timer_ctrl_t *const p_ctrl, uint32_t const period_counts)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+
+    return R_ULPT_PeriodSet(&${module.driver.timer.name}_ctrl, period_counts);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.timer.name}_duty_cycle_set_guard (timer_ctrl_t *const p_ctrl, uint32_t const duty_cycle_counts, uint32_t const pin)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+
+    return R_ULPT_DutyCycleSet(&${module.driver.timer.name}_ctrl, duty_cycle_counts, pin);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.timer.name}_reset_guard (timer_ctrl_t *const p_ctrl)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+
+    return R_ULPT_Reset(&${module.driver.timer.name}_ctrl);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.timer.name}_start_guard (timer_ctrl_t *const p_ctrl)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+
+    return R_ULPT_Start(&${module.driver.timer.name}_ctrl);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.timer.name}_enable_guard (timer_ctrl_t *const p_ctrl)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+
+    return R_ULPT_Enable(&${module.driver.timer.name}_ctrl);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.timer.name}_disable_guard (timer_ctrl_t *const p_ctrl)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+
+    return R_ULPT_Disable(&${module.driver.timer.name}_ctrl);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.timer.name}_info_get_guard (timer_ctrl_t *const p_ctrl, timer_info_t *const p_info)
+{
+    /* Verify all pointers are in non-secure memory. */
+    timer_info_t *const p_info_checked = cmse_check_pointed_object(p_info, CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_info == p_info_checked);
+
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+
+    return R_ULPT_InfoGet(&${module.driver.timer.name}_ctrl, p_info_checked);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.timer.name}_status_get_guard (timer_ctrl_t *const p_ctrl, timer_status_t *const p_status)
+{
+    /* Verify all pointers are in non-secure memory. */
+    timer_status_t *const p_status_checked = cmse_check_pointed_object(p_status, CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_status == p_status_checked);
+
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+
+    return R_ULPT_StatusGet(&${module.driver.timer.name}_ctrl, p_status_checked);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.timer.name}_stop_guard (timer_ctrl_t *const p_ctrl)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+
+    return R_ULPT_Stop(&${module.driver.timer.name}_ctrl);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.timer.name}_open_guard (timer_ctrl_t *const p_ctrl, timer_cfg_t const *const p_cfg)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+    FSP_PARAMETER_NOT_USED(p_cfg);
+
+    return R_ULPT_Open(&${module.driver.timer.name}_ctrl, &${module.driver.timer.name}_cfg);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.timer.name}_callback_set_guard (timer_ctrl_t *const p_api_ctrl, void(*p_callback)(timer_callback_args_t *), void const *const p_context, timer_callback_args_t *const p_callback_memory)
+{
+    /* Verify all pointers are in non-secure memory. */
+    void(*p_callback_checked)(timer_callback_args_t *) = (void(*)(timer_callback_args_t *)) cmse_check_address_range((void *) p_callback, sizeof(void *), CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_callback == p_callback_checked);
+    timer_callback_args_t *const p_callback_memory_checked = cmse_check_pointed_object(p_callback_memory, CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_callback_memory == p_callback_memory_checked);
+
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+    FSP_PARAMETER_NOT_USED(p_context);
+
+    return R_ULPT_CallbackSet(&${module.driver.timer.name}_ctrl, p_callback_checked, p_context, p_callback_memory_checked);
+}
+
+                ]]>
+            </template>
+        </guard>
+        <nsc>
+            <header>
+
+#define FSP_GUARD_${module.driver.timer.name}_R_ULPT_Close() ${module.driver.timer.name}_close_guard(FSP_SECURE_ARGUMENT)
+
+#define FSP_GUARD_${module.driver.timer.name}_R_ULPT_PeriodSet(period_counts) ${module.driver.timer.name}_period_set_guard(FSP_SECURE_ARGUMENT, period_counts)
+
+#define FSP_GUARD_${module.driver.timer.name}_R_ULPT_DutyCycleSet(duty_cycle_counts, pin) ${module.driver.timer.name}_duty_cycle_set_guard(FSP_SECURE_ARGUMENT, duty_cycle_counts, pin)
+
+#define FSP_GUARD_${module.driver.timer.name}_R_ULPT_Reset() ${module.driver.timer.name}_reset_guard(FSP_SECURE_ARGUMENT)
+
+#define FSP_GUARD_${module.driver.timer.name}_R_ULPT_Start() ${module.driver.timer.name}_start_guard(FSP_SECURE_ARGUMENT)
+
+#define FSP_GUARD_${module.driver.timer.name}_R_ULPT_Enable() ${module.driver.timer.name}_enable_guard(FSP_SECURE_ARGUMENT)
+
+#define FSP_GUARD_${module.driver.timer.name}_R_ULPT_Disable() ${module.driver.timer.name}_disable_guard(FSP_SECURE_ARGUMENT)
+
+#define FSP_GUARD_${module.driver.timer.name}_R_ULPT_InfoGet(p_info) ${module.driver.timer.name}_info_get_guard(FSP_SECURE_ARGUMENT, p_info)
+
+#define FSP_GUARD_${module.driver.timer.name}_R_ULPT_StatusGet(p_status) ${module.driver.timer.name}_status_get_guard(FSP_SECURE_ARGUMENT, p_status)
+
+#define FSP_GUARD_${module.driver.timer.name}_R_ULPT_Stop() ${module.driver.timer.name}_stop_guard(FSP_SECURE_ARGUMENT)
+
+#define FSP_GUARD_${module.driver.timer.name}_R_ULPT_Open() ${module.driver.timer.name}_open_guard(FSP_SECURE_ARGUMENT, FSP_SECURE_ARGUMENT)
+
+#define FSP_GUARD_${module.driver.timer.name}_R_ULPT_CallbackSet(p_callback, p_context, p_callback_memory) ${module.driver.timer.name}_callback_set_guard(FSP_SECURE_ARGUMENT, p_callback, p_context, p_callback_memory)
+
+
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.timer.name}_close_guard(timer_ctrl_t *const p_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.timer.name}_period_set_guard(timer_ctrl_t *const p_ctrl, uint32_t const period_counts);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.timer.name}_duty_cycle_set_guard(timer_ctrl_t *const p_ctrl, uint32_t const duty_cycle_counts, uint32_t const pin);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.timer.name}_reset_guard(timer_ctrl_t *const p_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.timer.name}_start_guard(timer_ctrl_t *const p_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.timer.name}_enable_guard(timer_ctrl_t *const p_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.timer.name}_disable_guard(timer_ctrl_t *const p_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.timer.name}_info_get_guard(timer_ctrl_t *const p_ctrl, timer_info_t *const p_info);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.timer.name}_status_get_guard(timer_ctrl_t *const p_ctrl, timer_status_t *const p_status);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.timer.name}_stop_guard(timer_ctrl_t *const p_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.timer.name}_open_guard(timer_ctrl_t *const p_ctrl, timer_cfg_t const *const p_cfg);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.timer.name}_callback_set_guard(timer_ctrl_t *const p_api_ctrl, void(*p_callback)(timer_callback_args_t *), void const *const p_context, timer_callback_args_t *const p_callback_memory);
+
+extern const timer_instance_t ${module.driver.timer.name};
+            </header>
+            <declarations>
+                <![CDATA[
+static const timer_api_t ${module.driver.timer.name}_nsc_api =
+{
+    .close = ${module.driver.timer.name}_close_guard,
+    .periodSet = ${module.driver.timer.name}_period_set_guard,
+    .dutyCycleSet = ${module.driver.timer.name}_duty_cycle_set_guard,
+    .reset = ${module.driver.timer.name}_reset_guard,
+    .start = ${module.driver.timer.name}_start_guard,
+    .enable = ${module.driver.timer.name}_enable_guard,
+    .disable = ${module.driver.timer.name}_disable_guard,
+    .infoGet = ${module.driver.timer.name}_info_get_guard,
+    .statusGet = ${module.driver.timer.name}_status_get_guard,
+    .stop = ${module.driver.timer.name}_stop_guard,
+    .open = ${module.driver.timer.name}_open_guard,
+    .callbackSet = ${module.driver.timer.name}_callback_set_guard,
+};
+const timer_instance_t ${module.driver.timer.name} =
+{
+    .p_api = &${module.driver.timer.name}_nsc_api,
+    .p_ctrl = FSP_SECURE_ARGUMENT,
+    .p_cfg = FSP_SECURE_ARGUMENT,
+};
+                ]]>
+            </declarations>
+        </nsc>
+        <api configurable="true">
+            <file>ra/fsp/inc/instances/r_ulpt.h</file>
+            <file>ra/fsp/inc/api/r_timer_api.h</file>
+        </api>
+    </module>
+</raModuleDescription>

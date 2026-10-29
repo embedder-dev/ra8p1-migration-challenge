@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<raModuleDescription>
+  <config id="config.board.ra2l1_voice" path="fsp_cfg/bsp/board_cfg.h" version="0">
+    <content>#include "../../../ra/board/ra2l1_voice/board.h"</content>
+  </config>
+  <board config="config.board.ra2l1_voice" device="R7FA2L1AB3CFL" display="RA2|RA2L1|VOICE-RA2L1" id="board.ra2l1_voice" version="0">
+    <description>Voice User Interface for RA2L1 MCU Group&#xA;Visit https://www.renesas.com/us/en/products/microcontrollers-microprocessors/ra-cortex-m-mcus/tw001-vuia2l1pocz-ra2l1-voice-user-reference-kit to get kit user’s manual, quick start guide, errata, design package, example projects, etc</description>
+    <capability id="capability.led"/>
+  </board>
+</raModuleDescription>

@@ -1,0 +1,410 @@
+<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.lwip.mqtt_client" path="lwip/lwip/apps/mqtt_opts.h" version="0">
+        <property display="Connect Response Timeout" id="config.lwip.mqtt_client.mqtt_connect_timeout" default="100" description="Seconds for MQTT connect response timeout after sending connect request.">
+            <constraint display="Value must be a positive integer value">testInteger("${config.lwip.mqtt_client.mqtt_connect_timeout}")  &amp;&amp; ("${config.lwip.mqtt_client.mqtt_connect_timeout}" &gt;= 0)</constraint>
+        </property>
+        <property display="Cyclic Timer Interval" id="config.lwip.mqtt_client.mqtt_cyclic_timer_interval" default="5" description="Seconds between each cyclic timer call.">
+            <constraint display="Value must be a positive integer value">testInteger("${config.lwip.mqtt_client.mqtt_cyclic_timer_interval}")  &amp;&amp; ("${config.lwip.mqtt_client.mqtt_cyclic_timer_interval}" &gt;= 0)</constraint>
+        </property>
+        <property display="Output Ring Buffer Size" id="config.lwip.mqtt_client.mqtt_output_ringbuf_size" default="256" description="Output ring-buffer size.">
+            <constraint display="Value must be able to fit largest outgoing publish message topic+payloads">testInteger("${config.lwip.mqtt_client.mqtt_output_ringbuf_size}")  &amp;&amp; ("${config.lwip.mqtt_client.mqtt_output_ringbuf_size}" &gt;= 0)</constraint>
+        </property>
+        <property display="Maximum Number of Pending Requests" id="config.lwip.mqtt_client.mqtt_req_max_in_flight" default="4" description="Maximum number of pending subscribe, unsubscribe and publish requests to server.">
+            <constraint display="Value must be a positive integer value">testInteger("${config.lwip.mqtt_client.mqtt_req_max_in_flight}")  &amp;&amp; ("${config.lwip.mqtt_client.mqtt_req_max_in_flight}" &gt;= 0)</constraint>
+        </property>
+        <property display="Request Timeout" id="config.lwip.mqtt_client.mqtt_req_timeout" default="30" description="Publish, subscribe and unsubscribe request timeout in seconds.">
+            <constraint display="Value must be a positive integer value">testInteger("${config.lwip.mqtt_client.mqtt_req_timeout}")  &amp;&amp; ("${config.lwip.mqtt_client.mqtt_req_timeout}" &gt;= 0)</constraint>
+        </property>
+        <property display="Number Of Bytes In Receive Buffer" id="config.lwip.mqtt_client.mqtt_var_header_buffer_len" default="128" description="Number of bytes in receive buffer.">
+            <constraint display="Value must be at least the size of the longest incoming topic + 8. If one wants to avoid fragmented incoming publish, set length to max incoming topic length + max payload length + 8">testInteger("${config.lwip.mqtt_client.mqtt_var_header_buffer_len}")  &amp;&amp; ("${config.lwip.mqtt_client.mqtt_var_header_buffer_len}" &gt;= 0)</constraint>
+        </property>
+        <property display="MQTT DEBUG" id="config.lwip.mqtt_client.mqtt_debug" default="LWIP_DBG_OFF" description="Enable debugging for MQTT.">
+            <option display="Enabled" id="config.lwip.mqtt_client.mqtt_debug.enabled" value="LWIP_DBG_ON"/>
+            <option display="Disabled" id="config.lwip.mqtt_client.mqtt_debug.disabled" value="LWIP_DBG_OFF"/>
+        </property>
+        <content>
+
+#include "lwip/opt.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#define MQTT_CONNECT_TIMOUT                             (${config.lwip.mqtt_client.mqtt_connect_timeout})
+
+#define MQTT_CYCLIC_TIMER_INTERVAL                      (${config.lwip.mqtt_client.mqtt_cyclic_timer_interval})
+
+#define MQTT_OUTPUT_RINGBUF_SIZE                        (${config.lwip.mqtt_client.mqtt_output_ringbuf_size})
+
+#define MQTT_REQ_MAX_IN_FLIGHT                          (${config.lwip.mqtt_client.mqtt_req_max_in_flight})
+
+#define MQTT_REQ_TIMEOUT                                (${config.lwip.mqtt_client.mqtt_req_timeout})
+
+#define MQTT_VAR_HEADER_BUFFER_LEN                      (${config.lwip.mqtt_client.mqtt_var_header_buffer_len})
+
+#define MQTT_DEBUG                                      (${config.lwip.mqtt_client.mqtt_debug})
+
+#ifdef __cplusplus
+}
+#endif
+        </content>
+    </config>
+    <module id="module.lwip.mqtt_client" display="Networking|lwIP MQTT Client" config="config.lwip.mqtt_client" common="1" visible="true" version="1" url="https://www.nongnu.org/lwip/2_1_x/group__mqtt.html">
+        <requires id="module.lwip.mqtt_client.requires.TCPIP" interface="interface.lwip.tcpip" display="Add lwIP TCP/IP Interface" find="true"/>
+        <provides interface="interface.lwip.mqtt_client" />
+        <property default="lwip_mqtt" display="Name" id="module.lwip.mqtt_client.name" description="Module name.">
+            <constraint display="Name must be a valid C symbol">
+                testSymbol("${module.lwip.mqtt_client.name}")
+            </constraint>
+        </property>
+        <property default="lwip_mqtt_example_connection_callback" display="Connection Callback" id="module.lwip.mqtt_client.conn_callback" description="A user MQTT connection callback function can be provided.  Called when client has connected to the server or when connection is closed by server or an error">
+            <constraint display="Name must be a valid C symbol">
+                testSymbol("${module.lwip.mqtt_client.conn_callback}")
+            </constraint>
+        </property>
+        <property default="lwip_mqtt_example_request_callback" display="Request Callback" id="module.lwip.mqtt_client.request_callback" description="A user MQTT request callback function can be provided. Called when a subscribe, unsubscribe or publish request has completed.">
+            <constraint display="Name must be a valid C symbol">
+                testSymbol("${module.lwip.mqtt_client.request_callback}")
+            </constraint>
+        </property>
+        <property default="lwip_mqtt_example_incoming_data_callback" display="Incoming Publish Data Callback" id="module.lwip.mqtt_client.incoming_data_callback" description="A user MQTT incoming publish data callback function can be provided. Called when data arrives to a subscribed topic.">
+            <constraint display="Name must be a valid C symbol">
+                testSymbol("${module.lwip.mqtt_client.incoming_data_callback}")
+            </constraint>
+        </property>
+        <property default="lwip_mqtt_example_incoming_publish_callback" display="Incoming Publish Callback" id="module.lwip.mqtt_client.incoming_publish_callback" description="A user MQTT incoming publish callback function can be provided. Called when an incoming publish arrives to a subscribed topic.">
+            <constraint display="Name must be a valid C symbol">
+                testSymbol("${module.lwip.mqtt_client.incoming_publish_callback}")
+            </constraint>
+        </property>
+        <property default="" id="module.lwip.mqtt_client.name_upper">
+            <export>"${module.lwip.mqtt_client.name}".toUpperCase()</export>
+        </property>
+    </module>
+    <!-- Developer Assistance -->
+    <developerSupport>
+        <api version="1">
+            <platform id="fsp" max="" min="1.1.0"/>
+            <moduleRef id="module.lwip.mqtt_client"/>
+            <description><![CDATA[<form><p><span color="header" font="header">Overview</span></p><p>lwIP MQTT client quick examples.</p></form>]]></description>
+            <function display="Setup" id="lwip_mqtt_setup_example">
+                <description><![CDATA[<form><p>This function provides a quick example for how to setup lwIP MQTT connection.</p></form>]]></description>
+            </function>
+            <function display="Declare Callback Functions" id="lwip_mqtt_callback_example">
+                <description><![CDATA[<form><p>This function provides a quick example for declaring the lwIP MQTT callback functions.</p></form>]]></description>
+            </function>
+            <function display="Subscribe" id="lwip_mqtt_subscribe_example">
+                <description><![CDATA[<form><p>This function provides a quick example for how to use lwIP MQTT subscribe function.</p></form>]]></description>
+            </function>
+            <function display="Unsubscribe" id="lwip_mqtt_unsubscribe_example">
+                <description><![CDATA[<form><p>This function provides a quick example for how to use lwIP MQTT unsubscribe function.</p></form>]]></description>
+            </function>
+            <function display="Publish" id="lwip_mqtt_publish_example">
+                <description><![CDATA[<form><p>This function provides a quick example for how to use lwIP MQTT publish function.</p></form>]]></description>
+            </function>
+            <function display="Tear Down" id="lwip_mqtt_teardown_example">
+                <description><![CDATA[<form><p>This function provides a quick example for how to tear down lwIP MQTT connection.</p></form>]]></description>
+            </function>
+        </api>
+        <template category="function_call" display="Call lwIP MQTT Setup Example" id="module.lwip.mqtt_client.lwip_mqtt_setup_example" version="1">
+            <platform id="fsp" max="" min="1.1.0"/>
+            <moduleRef id="module.lwip.mqtt_client">
+                <function id="lwip_mqtt_setup_example"/>
+            </moduleRef>
+            <content>
+/* Quick setup example for ${lwip_mqtt_name:raProperty(module.lwip.mqtt_client.name)}.
+ */
+
+/* Please change the port number if you want to use another port */
+#define ${lwip_mqtt_name_upper:raProperty(module.lwip.mqtt_client.name_upper)}_PORT_NUMBER       8883
+
+/* lwIP MQTT connection information. */
+const struct mqtt_connect_client_info_t ${lwip_mqtt_name}_client_info =
+{
+    "${lwip_mqtt_name}",
+    NULL,                              /* user */
+    NULL,                              /* pass */
+    100,                               /* keep alive */
+    NULL,                              /* will_topic */
+    NULL,                              /* will_msg */
+    0,                                 /* will_qos */
+    0                                  /* will_retain */
+#if LWIP_ALTCP &amp;&amp; LWIP_ALTCP_TLS
+    , NULL
+#endif
+};
+
+mqtt_client_t * g_${lwip_mqtt_name}_client;
+
+void ${lwip_mqtt_name}_quick_setup(void);
+
+/* Quick setup for ${lwip_mqtt_name}. */
+void ${lwip_mqtt_name}_quick_setup(void)
+{
+    ip_addr_t server_ip_address;
+
+    IP4_ADDR(&amp;server_ip_address, 192, 168, 10, 1);
+
+     /* Initialize lwIP MQTT Client */
+    g_${lwip_mqtt_name}_client = mqtt_client_new();
+
+    #if ${lwip_mqtt_name_upper}_CONNECTION_CALLBACK_ENABLE
+        g_${lwip_mqtt_name}_connected_flag = false;
+        assert(ERR_OK == mqtt_client_connect(g_${lwip_mqtt_name}_client, &amp;server_ip_address, ${lwip_mqtt_name_upper}_PORT_NUMBER,
+                                             ${lwip_mqtt_conn_callback:raProperty(module.lwip.mqtt_client.conn_callback)}, NULL, &amp;${lwip_mqtt_name}_client_info));
+
+        /* Waiting for connection to be established. */
+        while (false == g_${lwip_mqtt_name}_connected_flag)
+        {
+            #if NO_SYS
+                R_BSP_SoftwareDelay(1, BSP_DELAY_UNITS_MILLISECONDS);
+                sys_check_timeouts();
+            #else
+                sys_msleep(1);
+            #endif
+        }
+    #else
+        assert(ERR_OK == mqtt_client_connect(g_${lwip_mqtt_name}_client, &amp;server_ip_address, ${lwip_mqtt_name_upper}_PORT_NUMBER,
+                                             NULL, NULL, &amp;${lwip_mqtt_name}_client_info));
+    #endif
+}
+            </content>
+        </template>
+        <template category="function_call" display="Call lwIP MQTT Declare Callback Example" id="module.lwip.mqtt_client.lwip_mqtt_callback_example" version="1">
+            <platform id="fsp" max="" min="1.1.0"/>
+            <moduleRef id="module.lwip.mqtt_client">
+                <function id="lwip_mqtt_callback_example"/>
+            </moduleRef>
+            <content>
+/* Quick declare callbacks example for ${lwip_mqtt_name:raProperty(module.lwip.mqtt_client.name)}.
+ */
+
+/* TODO: Enable if you want to use a connection callback */
+#define ${lwip_mqtt_name_upper:raProperty(module.lwip.mqtt_client.name_upper)}_CONNECTION_CALLBACK_ENABLE (0)
+#if ${lwip_mqtt_name_upper}_CONNECTION_CALLBACK_ENABLE
+volatile uint8_t g_${lwip_mqtt_name}_connected_flag = false;
+
+void ${lwip_mqtt_conn_callback:raProperty(module.lwip.mqtt_client.conn_callback)}(mqtt_client_t * client, void * arg, mqtt_connection_status_t status);
+
+void ${lwip_mqtt_conn_callback}(mqtt_client_t * client, void * arg, mqtt_connection_status_t status)
+{
+    FSP_PARAMETER_NOT_USED(client);
+    FSP_PARAMETER_NOT_USED(arg);
+    if (MQTT_CONNECT_ACCEPTED == status)
+    {
+        g_${lwip_mqtt_name}_connected_flag = true;
+    }
+}
+#endif
+
+/* TODO: Enable if you want to use a publish - subcribe request callback */
+#define ${lwip_mqtt_name_upper}_REQUEST_CALLBACK_ENABLE (0)
+#if ${lwip_mqtt_name_upper}_REQUEST_CALLBACK_ENABLE
+volatile uint8_t g_${lwip_mqtt_name}_pub_sub_request_flag = false;
+
+void ${lwip_mqtt_request_callback:raProperty(module.lwip.mqtt_client.request_callback)}(void * arg, err_t result);
+void ${lwip_mqtt_request_callback}(void * arg, err_t result)
+{
+    FSP_PARAMETER_NOT_USED(arg);
+    if (ERR_OK == result)
+    {
+        g_${lwip_mqtt_name}_pub_sub_request_flag = true;
+    }
+}
+#endif
+
+/* TODO: Enable if you want to use a incomming message callback */
+#define ${lwip_mqtt_name_upper}_INCOMING_MSG_CALLBACK_ENABLE (0)
+#if ${lwip_mqtt_name_upper}_INCOMING_MSG_CALLBACK_ENABLE
+
+#define ${lwip_mqtt_name_upper}_INCOMING_MSG_BUF_SIZE  (50)
+
+volatile uint8_t g_${lwip_mqtt_name}_receive_incomming_msg_flag = false;
+
+static char g_${lwip_mqtt_name}_incoming_topic[${lwip_mqtt_name_upper}_INCOMING_MSG_BUF_SIZE];
+static unsigned char g_${lwip_mqtt_name}_incoming_msg[${lwip_mqtt_name_upper}_INCOMING_MSG_BUF_SIZE];
+
+void ${lwip_mqtt_incoming_data_callback:raProperty(module.lwip.mqtt_client.incoming_data_callback)}(void * arg, const u8_t * data, u16_t len, u8_t flags);
+void ${lwip_mqtt_incoming_publish_callback:raProperty(module.lwip.mqtt_client.incoming_publish_callback)}(void * arg, const char * topic, u32_t tot_len);
+
+void ${lwip_mqtt_incoming_data_callback}(void * arg, const u8_t * data, u16_t len, u8_t flags)
+{
+    FSP_PARAMETER_NOT_USED(arg);
+    if (flags &amp; MQTT_DATA_FLAG_LAST)
+    {
+        memcpy(g_${lwip_mqtt_name}_incoming_msg, data, len);
+        g_${lwip_mqtt_name}_receive_incomming_msg_flag = true;
+    }
+}
+
+void ${lwip_mqtt_incoming_publish_callback}(void * arg, const char * topic, u32_t tot_len)
+{
+    FSP_PARAMETER_NOT_USED(arg);
+    memcpy(g_${lwip_mqtt_name}_incoming_topic, topic, tot_len);
+}
+
+#endif
+
+            </content>
+        </template>
+        <template category="function_call" display="Call lwIP MQTT Publish Example" id="module.lwip.mqtt_client.lwip_mqtt_publish_example" version="1">
+            <platform id="fsp" max="" min="1.1.0"/>
+            <moduleRef id="module.lwip.mqtt_client">
+                <function id="lwip_mqtt_publish_example"/>
+            </moduleRef>
+            <content>
+/* Quick publish example for ${lwip_mqtt_name:raProperty(module.lwip.mqtt_client.name)}.
+*  Please call example after calling quick setup example
+*/
+
+#define ${lwip_mqtt_name_upper:raProperty(module.lwip.mqtt_client.name_upper)}_PUBLISH_TOPIC      "/lwip/example"
+
+void ${lwip_mqtt_name}_quick_publish_example(void);
+/* Quick publish example for ${lwip_mqtt_name}. */
+void ${lwip_mqtt_name}_quick_publish_example(void)
+{
+    const char data[] = "lwIP MQTT Hello world.";
+
+    /* Publish message to MQTT topic with Qos 0 and retain flag disabled */
+#if ${lwip_mqtt_name_upper}_REQUEST_CALLBACK_ENABLE
+    g_${lwip_mqtt_name}_pub_sub_request_flag = false;
+    assert(ERR_OK == mqtt_publish(g_${lwip_mqtt_name}_client, ${lwip_mqtt_name_upper}_PUBLISH_TOPIC, data,
+                                  strlen(data), 0, 0,
+                                  ${lwip_mqtt_conn_callback:raProperty(module.lwip.mqtt_client.request_callback)}, NULL));
+
+     /* Waiting for publish process completed. */
+    while (false == g_${lwip_mqtt_name}_pub_sub_request_flag)
+    {
+        #if NO_SYS
+            R_BSP_SoftwareDelay(1, BSP_DELAY_UNITS_MILLISECONDS);
+            sys_check_timeouts();
+        #else
+            sys_msleep(1);
+        #endif
+    }
+#else
+    /* Publish message to MQTT topic with Qos 0 and retain flag disabled */
+    assert(ERR_OK == mqtt_publish(g_${lwip_mqtt_name}_client, ${lwip_mqtt_name_upper}_PUBLISH_TOPIC, data,
+                                  strlen(data), 0, 0, NULL, NULL));
+#endif
+}
+            </content>
+        </template>
+        <template category="function_call" display="Call lwIP MQTT Subcribe Example" id="module.lwip.mqtt_client.lwip_mqtt_subscribe_example" version="1">
+            <platform id="fsp" max="" min="1.1.0"/>
+            <moduleRef id="module.lwip.mqtt_client">
+                <function id="lwip_mqtt_subscribe_example"/>
+            </moduleRef>
+            <content>
+/* Quick subcribe example for ${lwip_mqtt_name:raProperty(module.lwip.mqtt_client.name)}.*/
+
+#define ${lwip_mqtt_name_upper:raProperty(module.lwip.mqtt_client.name_upper)}_SUBCRIBE_TOPIC      "/lwip/example"
+
+void ${lwip_mqtt_name}_quick_subcribe_example(void);
+/* Quick subcribe example for ${lwip_mqtt_name}. */
+void ${lwip_mqtt_name}_quick_subcribe_example(void)
+{
+
+#if ${lwip_mqtt_name_upper}_INCOMING_MSG_CALLBACK_ENABLE
+    g_${lwip_mqtt_name}_receive_incomming_msg_flag = false;
+
+    /* Set callback for receiving incomming messsage from subscribed MQTT topic */
+    mqtt_set_inpub_callback(g_${lwip_mqtt_name}_client, ${lwip_mqtt_incoming_publish_callback:raProperty(module.lwip.mqtt_client.incoming_publish_callback)},
+                            ${lwip_mqtt_incoming_data_callback:raProperty(module.lwip.mqtt_client.incoming_data_callback)}, NULL);
+#endif
+
+#if ${lwip_mqtt_name_upper}_REQUEST_CALLBACK_ENABLE
+    g_${lwip_mqtt_name}_pub_sub_request_flag = false;
+    /* Subcribe to MQTT topic with Qos 0 */
+    assert(ERR_OK == mqtt_subscribe(g_${lwip_mqtt_name}_client, ${lwip_mqtt_name_upper}_SUBCRIBE_TOPIC, 0,
+                                    ${lwip_mqtt_conn_callback:raProperty(module.lwip.mqtt_client.request_callback)}, NULL));
+
+     /* Waiting for subcribe process completed. */
+    while (false == g_${lwip_mqtt_name}_pub_sub_request_flag)
+    {
+        #if NO_SYS
+            R_BSP_SoftwareDelay(1, BSP_DELAY_UNITS_MILLISECONDS);
+            sys_check_timeouts();
+        #else
+            sys_msleep(1);
+        #endif
+    }
+#else
+    /* Subcribe to MQTT topic with Qos 0 */
+    assert(ERR_OK == mqtt_subscribe(g_${lwip_mqtt_name}_client, ${lwip_mqtt_name_upper}_SUBCRIBE_TOPIC, 0,
+                                    NULL, NULL));
+#endif
+
+    /* If ${lwip_mqtt_name_upper}_INCOMING_MSG_CALLBACK_ENABLE macro is enabled, the incoming message from subscribed topic will be stored in g_${lwip_mqtt_name}_incoming_msg
+    * and the incoming topic will be stored in g_${lwip_mqtt_name}_incoming_topic, g_${lwip_mqtt_name}_receive_incomming_msg_flag will be set to 1 when receiving incoming
+    * message from subscribed topic.
+    */
+
+    /* Please add your code */
+}
+            </content>
+        </template>
+        <template category="function_call" display="Call lwIP MQTT Unsubscribe Example" id="module.lwip.mqtt_client.lwip_mqtt_unsubscribe_example" version="1">
+            <platform id="fsp" max="" min="1.1.0"/>
+            <moduleRef id="module.lwip.mqtt_client">
+                <function id="lwip_mqtt_unsubscribe_example"/>
+            </moduleRef>
+            <content>
+/* Quick unsubscribe example for ${lwip_mqtt_name:raProperty(module.lwip.mqtt_client.name)}.
+*  Please use this example after calling quick subscribe example and quick setup example
+*/
+
+void ${lwip_mqtt_name}_quick_unsubscribe_example(void);
+/* Quick unsubcribe example for ${lwip_mqtt_name}. */
+void ${lwip_mqtt_name}_quick_unsubscribe_example(void)
+{
+
+#if ${lwip_mqtt_name_upper}_REQUEST_CALLBACK_ENABLE
+    g_${lwip_mqtt_name}_pub_sub_request_flag = false;
+
+    /* Unsubcribe to MQTT topic */
+    assert(ERR_OK == mqtt_unsubscribe(g_${lwip_mqtt_name}_client, ${lwip_mqtt_name_upper:raProperty(module.lwip.mqtt_client.name_upper)}_SUBCRIBE_TOPIC,
+                                      ${lwip_mqtt_conn_callback:raProperty(module.lwip.mqtt_client.request_callback)}, NULL));
+
+     /* Waiting for unsubcribe process completed. */
+    while (false == g_${lwip_mqtt_name}_pub_sub_request_flag)
+    {
+        #if NO_SYS
+            R_BSP_SoftwareDelay(1, BSP_DELAY_UNITS_MILLISECONDS);
+            sys_check_timeouts();
+        #else
+            sys_msleep(1);
+        #endif
+    }
+#else
+    /* Unsubcribe to MQTT topic */
+    assert(ERR_OK == mqtt_unsubscribe(g_${lwip_mqtt_name}_client, ${lwip_mqtt_name_upper:raProperty(module.lwip.mqtt_client.name_upper)}_SUBCRIBE_TOPIC,
+                                      NULL, NULL));
+#endif
+
+}
+            </content>
+        </template>
+        <template category="function_call" display="Call lwIP MQTT Tear Down Example" id="module.lwip.mqtt_client.lwip_mqtt_teardown_example" version="1">
+            <platform id="fsp" max="" min="1.1.0"/>
+            <moduleRef id="module.lwip.mqtt_client">
+                <function id="lwip_mqtt_teardown_example"/>
+            </moduleRef>
+            <content>
+/* Quick tear down example for ${lwip_mqtt_name:raProperty(module.lwip.mqtt_client.name)}.
+*  Please use this example after calling quick setup example
+*/
+
+void ${lwip_mqtt_name}_quick_teardown_example(void);
+/* Quick tear down example for ${lwip_mqtt_name}. */
+void ${lwip_mqtt_name}_quick_teardown_example(void)
+{
+    /* Close MQTT connection. */
+    mqtt_disconnect(g_${lwip_mqtt_name}_client);
+    mqtt_client_free(g_${lwip_mqtt_name}_client);
+}
+            </content>
+        </template>
+    </developerSupport>
+</raModuleDescription>

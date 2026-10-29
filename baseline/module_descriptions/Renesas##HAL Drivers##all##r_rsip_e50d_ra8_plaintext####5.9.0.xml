@@ -1,0 +1,12 @@
+<?xml version="1.0" ?>
+<raModuleDescription>
+  <module display="Security|RSIP-E50D Compatibility Mode" id="module.driver.rsip_e50d.plaintext" common="1" version="1" visible="false" url="">
+    <requires id="module.driver.sce.requires.rsip_e50d" interface="interface.mcu.rsip.rsip_e50d" visible="false" display="Requires RSIP-E50D" />
+    <requires id="module.driver.sce.requires.rsip_e50d_key_injection" interface="interface.driver.rsip_e50d_key_injection" visible="true" display="Add Key Injection for PSA Crypto (Optional)" find="false" optional="true" />
+    <provides interface="interface.peripheral.rsip"/>
+    <provides interface="interface.driver.rsip.dotf"/>
+    <provides interface="interface.driver.rsip.plaintext"/>
+    <provides interface="interface.driver.sce"/>
+    <provides interface="interface.driver.sce_for_nx"/>
+  </module>
+</raModuleDescription>

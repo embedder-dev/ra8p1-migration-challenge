@@ -1,0 +1,41 @@
+<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.middleware.rm_netx_secure_crypto_sw_port" path="fsp_cfg/middleware/rm_netx_secure_crypto_cfg.h" version="0">
+        <property default="config.middleware.rm_netx_secure_crypto_sw_port.standalone.enabled" description="Defines NX_CRYPTO_STANDALONE_ENABLE." display="Standalone Usage" id="config.middleware.rm_netx_secure_crypto_sw_port.standalone">
+            <option display="Use Standalone Crypto Only" id="config.middleware.rm_netx_secure_crypto_sw_port.standalone.enabled" value="1"/>
+            <option display="Use with TLS" id="config.middleware.rm_netx_secure_crypto_sw_port.standalone.disabled" value="0"/>
+        </property>
+        <property default="config.middleware.rm_netx_secure_crypto_sw_port.rsa_modulus_expected.b4096" display="Maximum RSA Modulus size (bits)" id="config.middleware.rm_netx_secure_crypto_sw_port.rsa_modulus_expected">
+            <option display="1024" id="config.middleware.rm_netx_secure_crypto_sw_port.rsa_modulus_expected.b1024" value="1024"/>
+            <option display="2048" id="config.middleware.rm_netx_secure_crypto_sw_port.rsa_modulus_expected.b2048" value="2048"/>
+            <option display="3072" id="config.middleware.rm_netx_secure_crypto_sw_port.rsa_modulus_expected.b3072" value="3072"/>
+            <option display="4096" id="config.middleware.rm_netx_secure_crypto_sw_port.rsa_modulus_expected.b4096" value="4096"/>
+        </property>
+        <content>
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#if (${config.middleware.rm_netx_secure_crypto_sw_port.standalone})
+#define NX_CRYPTO_STANDALONE_ENABLE
+#endif
+#define NX_CRYPTO_MAX_RSA_MODULUS_SIZE                     (${config.middleware.rm_netx_secure_crypto_sw_port.rsa_modulus_expected})
+#define NETX_SECURE_CRYPTO_SOFTWARE_ONLY                   (1U)
+
+#ifdef __cplusplus
+}
+#endif
+        </content>
+    </config>
+    <module config="config.middleware.rm_netx_secure_crypto_sw_port" display="Security|Azure RTOS NetX Crypto Software Only" id="module.middleware.rm_netx_secure_crypto_sw_port" visible="false" version="1" url="group___r_m___n_e_t_x___s_e_c_u_r_e___c_r_y_p_t_o.html">
+        <constraint display="NetX Crypto implementation must be configured as standalone when used without NetX Secure.">
+        "${config.middleware.rm_netx_secure_crypto_sw_port.standalone}" === "config.middleware.rm_netx_secure_crypto_sw_port.standalone.enabled" || "${interface.nx_secure}" &gt;= "1"
+        </constraint>
+        <requires id="module.middleware.rm_netx_secure_crypto_sw_port.requires.threadx" interface="interface.rtos.tx" visible="false" display="Requires ThreadX"/>
+        <provides interface="interface.middleware.rm_netx_secure_crypto_sw_port" />
+        <provides interface="interface.nx_crypto_implementation" />
+        <includes>
+#include &quot;rm_netx_secure_crypto.h&quot;
+        </includes>
+    </module>
+</raModuleDescription>

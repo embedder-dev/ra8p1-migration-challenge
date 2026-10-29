@@ -1,0 +1,432 @@
+<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.driver.comms_i2c" path="fsp_cfg/rm_comms_i2c_cfg.h" version="0">
+        <property default="config.driver.comms_i2c.param_checking_enable.bsp" display="Parameter Checking" id="config.driver.comms_i2c.param_checking_enable" description="If selected code for parameter checking is included in the build.">
+            <option display="Default (BSP)" id="config.driver.comms_i2c.param_checking_enable.bsp" value="(BSP_CFG_PARAM_CHECKING_ENABLE)"/>
+            <option display="Enabled" id="config.driver.comms_i2c.param_checking_enable.enabled" value="(1)"/>
+            <option display="Disabled" id="config.driver.comms_i2c.param_checking_enable.disabled" value="(0)"/>
+        </property>
+
+        <content>
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#define RM_COMMS_I2C_CFG_PARAM_CHECKING_ENABLE          ${config.driver.comms_i2c.param_checking_enable}
+
+#ifdef __cplusplus
+}
+#endif
+        </content>
+    </config>
+
+    <!-- I2C Shared Bus -->
+    <module config="config.driver.comms_i2c" display="Connectivity|${module.driver.comms_i2c_bus.name} I2C Shared Bus (rm_comms_i2c)" id="module.driver.comms_i2c_on_comms_i2c_bus" version="1" url="group___r_m___c_o_m_m_s___i2_c.html" common="100">
+        <constraint display="Unique name required for each instance">
+            "${interface.driver.comms_i2c_bus.${module.driver.comms_i2c_bus.name}}" === "1"
+        </constraint>
+        <constraint display="Common|General|Use Mutexes must be Enabled in FreeRTOS Thread">
+          ("${config.awsfreertos.thread.configuse_mutexes}" === "config.awsfreertos.thread.configuse_mutexes.enabled") ||
+            !testExists("${interface.rtos.awsfreertos}")
+        </constraint>
+        <constraint display="Common|General|Use Recursive Mutexes must be Enabled in FreeRTOS Thread">
+          ("${config.awsfreertos.thread.configuse_recursive_mutexes}" === "config.awsfreertos.thread.configuse_recursive_mutexes.enabled") ||
+            !testExists("${interface.rtos.awsfreertos}")
+        </constraint>
+        <constraint display="Requires an I2C Peripheral">
+            testExists("${interface.driver.i2c_master}")
+        </constraint>
+        <constraint display="&quot;Semaphore for Blocking&quot; must be Use if &quot;Recursive Mutex for Bus&quot; is Use.">
+            ("${module.driver.comms_i2c_bus.bus_recursive_mutex}" != "module.driver.comms_i2c_bus.bus_recursive_mutex.use") ||
+            ("${module.driver.comms_i2c_bus.blocking_semaphore}"  === "module.driver.comms_i2c_bus.blocking_semaphore.use")
+        </constraint>
+        <requires id="module.driver.comms_i2c_bus.requires.i2c" interface="interface.driver.i2c_master" display="I2C Communications Peripheral" find="false">
+            <override property="module.driver.i2c_master.p_callback" value="rm_comms_i2c_callback"/>
+            <override property="module.driver.i2c.p_callback" value="rm_comms_i2c_callback"/>
+            <override property="module.driver.i2c_master.channel" value="${module.driver.comms_i2c_bus.channel}"/>
+            <override property="module.driver.i2c_master.rate" value="${module.driver.comms_i2c_bus.rate}"/>
+            <override property="module.driver.i2c_master.smbus_secret_name" value="${module.driver.comms_i2c_bus.smbus_secret_name}"/>
+            <override property="module.driver.i2c_master.smbus_operation" value="${module.driver.comms_i2c_bus.smbus_enabled}"/>
+        </requires>
+
+        <provides interface="interface.driver.comms_i2c_bus" />
+        <provides interface="interface.driver.comms_i2c_on_comms_i2c_bus" />
+        <provides interface="interface.driver.comms_i2c_bus.${module.driver.comms_i2c_bus.name}" />
+        <property default="g_comms_i2c_bus${_instance}" display="Name" id="module.driver.comms_i2c_bus.name" description="Module name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.comms_i2c_bus.name}")</constraint>
+        </property>
+        <property default="0xFFFFFFFF" display="Bus Timeout" id="module.driver.comms_i2c_bus.bus_timeout" description="Set timeout for locking bus in using RTOS.">
+            <constraint display="Value must be a non-negative integer less than or equal to 0xFFFFFFFF">testInteger("${module.driver.comms_i2c_bus.bus_timeout}")  &amp;&amp; ("${module.driver.comms_i2c_bus.bus_timeout}" &gt;= 0) &amp;&amp; ("${module.driver.comms_i2c_bus.bus_timeout}" &lt;= 0xFFFFFFFF)</constraint>
+        </property>
+        <property default="module.driver.comms_i2c_bus.blocking_semaphore.use" display="Semaphore for Blocking (RTOS only)" id="module.driver.comms_i2c_bus.blocking_semaphore" description="Set Semaphore for blocking in using RTOS.">
+            <option display="Unuse" id="module.driver.comms_i2c_bus.blocking_semaphore.unuse" value="NULL"/>
+            <option display="Use" id="module.driver.comms_i2c_bus.blocking_semaphore.use" value="${module.driver.comms_i2c_bus.name}_blocking_semaphore"/>
+        </property>
+        <property default="module.driver.comms_i2c_bus.bus_recursive_mutex.use" display="Recursive Mutex for Bus (RTOS only)" id="module.driver.comms_i2c_bus.bus_recursive_mutex" description="Set Mutex for locking bus in using RTOS.">
+            <option display="Unuse" id="module.driver.comms_i2c_bus.bus_recursive_mutex.unuse" value="NULL"/>
+            <option display="Use" id="module.driver.comms_i2c_bus.bus_recursive_mutex.use" value="${module.driver.comms_i2c_bus.name}_recursive_mutex"/>
+        </property>
+        <property default="0" id="module.driver.comms_i2c_bus.channel" display="Channel" description="IIC channel"/>
+        <property default="module.driver.comms_i2c_bus.rate.rate_standard" display="Rate" id="module.driver.comms_i2c_bus.rate" description="Transfer rate for lower level driver.">
+            <option display="Standard" id="module.driver.comms_i2c_bus.rate.rate_standard" value="module.driver.i2c_master.rate.rate_standard"/>
+            <option display="Fast-mode" id="module.driver.comms_i2c_bus.rate.rate_fast" value="module.driver.i2c_master.rate.rate_fast"/>
+            <option display="Fast-mode plus" id="module.driver.comms_i2c_bus.rate.rate_fastplus" value="module.driver.i2c_master.rate.rate_fastplus"/>
+        </property>
+        <property default="g_timer" id="module.driver.comms_i2c_bus.timer" description="Timer instance name"/>
+        <property default="0" id="module.driver.comms_i2c_bus.smbus_enabled" description="When SMBus is used, this value will be overwritten by 1"/>
+        <property default="" id="module.driver.comms_i2c_bus.smbus_secret_name" description="Secret name when using with SMBus"/>
+
+        <header>
+/* I2C Shared Bus */
+extern rm_comms_i2c_bus_extended_cfg_t ${module.driver.comms_i2c_bus.name}_extended_cfg;
+        </header>
+        <includes>
+#include &quot;rm_comms_i2c.h&quot;
+#include &quot;rm_comms_api.h&quot;
+        </includes>
+        <declarations>
+#if BSP_CFG_RTOS
+#if BSP_CFG_RTOS == 1
+#if !defined(${module.driver.comms_i2c_bus.bus_recursive_mutex})
+TX_MUTEX ${module.driver.comms_i2c_bus.bus_recursive_mutex}_handle;
+CHAR ${module.driver.comms_i2c_bus.bus_recursive_mutex}_name[] = &quot;${module.driver.comms_i2c_bus.name} recursive mutex&quot;;
+#endif
+#if !defined(${module.driver.comms_i2c_bus.blocking_semaphore})
+TX_SEMAPHORE ${module.driver.comms_i2c_bus.blocking_semaphore}_handle;
+CHAR ${module.driver.comms_i2c_bus.blocking_semaphore}_name[] = &quot;${module.driver.comms_i2c_bus.name} blocking semaphore&quot;;
+#endif
+#elif BSP_CFG_RTOS == 2
+#if !defined(${module.driver.comms_i2c_bus.bus_recursive_mutex})
+SemaphoreHandle_t ${module.driver.comms_i2c_bus.bus_recursive_mutex}_handle;
+StaticSemaphore_t ${module.driver.comms_i2c_bus.bus_recursive_mutex}_memory;
+#endif
+#if !defined(${module.driver.comms_i2c_bus.blocking_semaphore})
+SemaphoreHandle_t ${module.driver.comms_i2c_bus.blocking_semaphore}_handle;
+StaticSemaphore_t ${module.driver.comms_i2c_bus.blocking_semaphore}_memory;
+#endif
+#endif
+
+#if !defined(${module.driver.comms_i2c_bus.bus_recursive_mutex})
+/* Recursive Mutex for I2C bus */
+rm_comms_i2c_mutex_t ${module.driver.comms_i2c_bus.bus_recursive_mutex} =
+{
+    .p_mutex_handle = &amp;${module.driver.comms_i2c_bus.bus_recursive_mutex}_handle,
+#if BSP_CFG_RTOS == 1 // ThradX
+    .p_mutex_name = &amp;${module.driver.comms_i2c_bus.bus_recursive_mutex}_name[0],
+#elif BSP_CFG_RTOS == 2 // FreeRTOS
+    .p_mutex_memory = &amp;${module.driver.comms_i2c_bus.bus_recursive_mutex}_memory,
+#endif
+};
+#endif
+
+#if !defined(${module.driver.comms_i2c_bus.blocking_semaphore})
+/* Semaphore for blocking */
+rm_comms_i2c_semaphore_t ${module.driver.comms_i2c_bus.blocking_semaphore} =
+{
+    .p_semaphore_handle = &amp;${module.driver.comms_i2c_bus.blocking_semaphore}_handle,
+#if BSP_CFG_RTOS == 1 // ThreadX
+    .p_semaphore_name = &amp;${module.driver.comms_i2c_bus.blocking_semaphore}_name[0],
+#elif BSP_CFG_RTOS == 2 // FreeRTOS
+    .p_semaphore_memory = &amp;${module.driver.comms_i2c_bus.blocking_semaphore}_memory,
+#endif
+};
+#endif
+#endif
+
+/* Shared I2C Bus */
+#define RA_NOT_DEFINED (1)
+rm_comms_i2c_bus_extended_cfg_t ${module.driver.comms_i2c_bus.name}_extended_cfg =
+{
+#if !defined(${module.driver.comms_i2c_bus.requires.i2c::module.driver.i2c_master.name})
+    .p_driver_instance      = (void*)&amp;${module.driver.comms_i2c_bus.requires.i2c::module.driver.i2c_master.name},
+#elif !defined(${module.driver.comms_i2c_bus.requires.i2c::module.driver.i2c.name})
+    .p_driver_instance      = (void*)&amp;${module.driver.comms_i2c_bus.requires.i2c::module.driver.i2c.name},
+#elif !defined(${module.driver.comms_i2c_bus.requires.i2c::module.driver.sau.name})
+    .p_driver_instance      = (void*)&amp;${module.driver.comms_i2c_bus.requires.i2c::module.driver.sau.name},
+#endif
+    .p_current_ctrl = NULL,
+    .bus_timeout = ${module.driver.comms_i2c_bus.bus_timeout},
+#if BSP_CFG_RTOS
+#if !defined(${module.driver.comms_i2c_bus.blocking_semaphore})
+    .p_blocking_semaphore = &amp;${module.driver.comms_i2c_bus.blocking_semaphore},
+#if !defined(${module.driver.comms_i2c_bus.bus_recursive_mutex})
+    .p_bus_recursive_mutex = &amp;${module.driver.comms_i2c_bus.bus_recursive_mutex},
+#else
+    .p_bus_recursive_mutex = NULL,
+#endif
+#else
+    .p_bus_recursive_mutex = NULL,
+    .p_blocking_semaphore = NULL,
+#endif
+#else
+#endif
+
+#if (${module.driver.comms_i2c_bus.smbus_enabled})
+    .p_elc = (void*)&amp;g_elc,
+    .p_timer = (void*)&amp;${module.driver.comms_i2c_bus.timer},
+#else
+    .p_elc = NULL,
+    .p_timer = NULL,
+#endif
+};
+        </declarations>
+    </module>
+
+    <!-- I2C Communication Device -->
+    <module config="config.driver.comms_i2c" display="Connectivity|${module.driver.comms_i2c_device.name} I2C Communication Device (rm_comms_i2c)" id="module.driver.comms_i2c_on_comms_i2c_device" version="1" url="group___r_m___c_o_m_m_s___i2_c.html">
+        <constraint display="Unique name required for each instance">
+            "${interface.driver.comms_i2c_device.${module.driver.comms_i2c_device.name}}" === "1"
+        </constraint>
+        <constraint display="Requires an I2C shared bus">
+            testExists("${interface.driver.comms_i2c_bus}")
+        </constraint>
+        <constraint display="Maximum configurable value for 7 bit address mode is 0x7F ">
+            ((testInteger("${module.driver.comms_i2c_device.slave_address}")  &amp;&amp; ("${module.driver.comms_i2c_device.slave_address}" &gt;= 0)&amp;&amp; ("${module.driver.comms_i2c_device.slave_address}" &lt;= 127)) || (("${module.driver.comms_i2c_device.address_mode}") != ("module.driver.comms_i2c_device.address_mode.address_mode_7bit")))
+        </constraint>
+        <constraint display="Maximum configurable value for 10 bit address mode is 0x3FF ">
+            ((testInteger("${module.driver.comms_i2c_device.slave_address}")  &amp;&amp; ("${module.driver.comms_i2c_device.slave_address}" &gt;= 0)&amp;&amp; ("${module.driver.comms_i2c_device.slave_address}" &lt;= 1023)) || (("${module.driver.comms_i2c_device.address_mode}") != ("module.driver.comms_i2c_device.address_mode.address_mode_10bit")))
+        </constraint>
+        <requires id="module.driver.comms_i2c_device.requires.comms_i2c_bus" interface="interface.driver.comms_i2c_bus" display="I2C Shared Bus" find="true"/>
+        <provides interface="interface.driver.comms_i2c_device" />
+        <provides interface="interface.driver.comms_i2c_on_comms_i2c_device" />
+        <provides interface="interface.driver.comms_i2c_device.${module.driver.comms_i2c_device.name}" />
+        <property default="g_comms_i2c_device${_instance}" display="Name" id="module.driver.comms_i2c_device.name" description="Module name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.comms_i2c_device.name}")</constraint>
+        </property>
+        <property default="0xFFFFFFFF" display="Semaphore Timeout (RTOS only)" id="module.driver.comms_i2c_device.semaphore_timeout" description="Set timeout for blocking in using RTOS.">
+            <constraint display="Value must be a non-negative integer less than or equal to 0xFFFFFFFF">testInteger("${module.driver.comms_i2c_device.semaphore_timeout}")  &amp;&amp; ("${module.driver.comms_i2c_device.semaphore_timeout}" &gt;= 0) &amp;&amp; ("${module.driver.comms_i2c_device.semaphore_timeout}" &lt;= 0xFFFFFFFF)</constraint>
+        </property>
+        <property default="0x00" display="Slave Address" id="module.driver.comms_i2c_device.slave_address" description="Specify the slave address.">
+            <constraint display="Value must be non-negative">testInteger("${module.driver.comms_i2c_device.slave_address}")  &amp;&amp; ("${module.driver.comms_i2c_device.slave_address}" &gt;= 0)</constraint>
+        </property>
+        <property default="module.driver.comms_i2c_device.address_mode.address_mode_7bit" display="Address Mode" id="module.driver.comms_i2c_device.address_mode" description="Select the I2C address mode.">
+            <option display="7-Bit" id="module.driver.comms_i2c_device.address_mode.address_mode_7bit" value="I2C_MASTER_ADDR_MODE_7BIT"/>
+            <option display="10-Bit" id="module.driver.comms_i2c_device.address_mode.address_mode_10bit" value="I2C_MASTER_ADDR_MODE_10BIT"/>
+        </property>
+        <property default="NULL" id="module.driver.comms_i2c_device.p_context" />
+        <property default="comms_i2c_callback" display="Callback" id="module.driver.comms_i2c_device.p_callback" description="A user callback function can be provided.">
+            <constraint display="Name must be a valid C symbol">
+                testSymbol("${module.driver.comms_i2c_device.p_callback}")
+            </constraint>
+        </property>
+        <property default="" id="module.driver.comms_i2c_device.name_upper">
+            <export>"${module.driver.comms_i2c_device.name}".toUpperCase()</export>
+        </property>
+
+        <header>
+/* I2C Communication Device */
+extern const rm_comms_instance_t ${module.driver.comms_i2c_device.name};
+extern rm_comms_i2c_instance_ctrl_t ${module.driver.comms_i2c_device.name}_ctrl;
+extern const rm_comms_cfg_t ${module.driver.comms_i2c_device.name}_cfg;
+#ifndef ${module.driver.comms_i2c_device.p_callback}
+void ${module.driver.comms_i2c_device.p_callback}(rm_comms_callback_args_t * p_args);
+#endif
+        </header>
+        <includes>
+#include &quot;rm_comms_i2c.h&quot;
+#include &quot;rm_comms_api.h&quot;
+        </includes>
+        <declarations>
+/* I2C Communication Device */
+#define RA_NOT_DEFINED (1)
+rm_comms_i2c_instance_ctrl_t ${module.driver.comms_i2c_device.name}_ctrl;
+
+/* Lower level driver configuration */
+const i2c_master_cfg_t ${module.driver.comms_i2c_device.name}_lower_level_cfg =
+{
+    .slave = ${module.driver.comms_i2c_device.slave_address},
+    .addr_mode = ${module.driver.comms_i2c_device.address_mode},
+    .p_callback = rm_comms_i2c_callback,
+};
+
+const rm_comms_cfg_t ${module.driver.comms_i2c_device.name}_cfg =
+{
+    .semaphore_timeout  = ${module.driver.comms_i2c_device.semaphore_timeout},
+    .p_lower_level_cfg  = (void*)&amp;${module.driver.comms_i2c_device.name}_lower_level_cfg,
+    .p_extend           = (void*)&amp;${module.driver.comms_i2c_device.requires.comms_i2c_bus::module.driver.comms_i2c_bus.name}_extended_cfg,
+    .p_callback         = ${module.driver.comms_i2c_device.p_callback},
+#if defined(${module.driver.comms_i2c_device.p_context})
+    .p_context          = ${module.driver.comms_i2c_device.p_context},
+#else
+    .p_context          = (void*)&amp;${module.driver.comms_i2c_device.p_context},
+#endif
+};
+
+const rm_comms_instance_t ${module.driver.comms_i2c_device.name} =
+{
+    .p_ctrl = &amp;${module.driver.comms_i2c_device.name}_ctrl,
+    .p_cfg  = &amp;${module.driver.comms_i2c_device.name}_cfg,
+    .p_api  = &amp;g_comms_on_comms_i2c,
+};
+        </declarations>
+    </module>
+
+    <!-- Developer Assistance -->
+    <developerSupport>
+        <api version="1">
+            <platform id="fsp" max="" min="1.1.0"/>
+            <moduleRef id="module.driver.comms_i2c_on_comms_i2c_bus"/>
+            <description><![CDATA[<form><p><span color="header" font="header">Overview</span></p><p>I2C Shared Bus provides snippets of code for operating the I2C driver.</p></form>]]></description>
+            <function display="Quick Setup" id="comms_i2c_bus_quick_setup">
+                <description><![CDATA[<form><p>This function provides quick setup for I2C driver instance using the properties from the RA configurator.</p></form>]]></description>
+            </function>
+            <function display="Quick Shutdown" id="comms_i2c_bus_quick_shutdown">
+                <description><![CDATA[<form><p>This function provides quick shutdown for I2C driver instance using the properties from the RA configurator.</p></form>]]></description>
+            </function>
+        </api>
+        <template category="function_call" display="Call Quick Setup" id="module.driver.comms_i2c_bus.quick_setup" version="1">
+            <platform id="fsp" max="" min="1.1.0"/>
+            <moduleRef id="module.driver.comms_i2c_on_comms_i2c_bus">
+                <function id="comms_i2c_bus_quick_setup"/>
+            </moduleRef>
+            <content>
+/* TODO: Enable if you want to open I2C bus */
+void ${i2c_bus_name:raProperty(module.driver.comms_i2c_bus.name)}_quick_setup(void);
+
+/* Quick setup for ${i2c_bus_name}. */
+void ${i2c_bus_name}_quick_setup(void)
+{
+    fsp_err_t err;
+    i2c_master_instance_t * p_driver_instance = (i2c_master_instance_t *) ${i2c_bus_name}_extended_cfg.p_driver_instance;
+
+    /* Open I2C driver, this must be done before calling any COMMS API */
+    err = p_driver_instance->p_api->open(p_driver_instance->p_ctrl, p_driver_instance->p_cfg);
+    assert(FSP_SUCCESS == err);
+
+#if BSP_CFG_RTOS
+    /* Create a semaphore for blocking if a semaphore is not NULL */
+    if (NULL != ${i2c_bus_name}_extended_cfg.p_blocking_semaphore)
+    {
+#if BSP_CFG_RTOS == 1 // AzureOS
+        tx_semaphore_create(${i2c_bus_name}_extended_cfg.p_blocking_semaphore->p_semaphore_handle,
+                            ${i2c_bus_name}_extended_cfg.p_blocking_semaphore->p_semaphore_name,
+                            (ULONG) 0);
+#elif BSP_CFG_RTOS == 2 // FreeRTOS
+        *(${i2c_bus_name}_extended_cfg.p_blocking_semaphore->p_semaphore_handle)
+            = xSemaphoreCreateCountingStatic((UBaseType_t) 1, (UBaseType_t) 0, ${i2c_bus_name}_extended_cfg.p_blocking_semaphore->p_semaphore_memory);
+#endif
+    }
+
+    /* Create a recursive mutex for bus lock if a recursive mutex is not NULL */
+    if (NULL != ${i2c_bus_name}_extended_cfg.p_bus_recursive_mutex)
+    {
+#if BSP_CFG_RTOS == 1 // AzureOS
+        tx_mutex_create(${i2c_bus_name}_extended_cfg.p_bus_recursive_mutex->p_mutex_handle,
+                        ${i2c_bus_name}_extended_cfg.p_bus_recursive_mutex->p_mutex_name,
+                        TX_INHERIT);
+#elif BSP_CFG_RTOS == 2 // FreeRTOS
+        *(${i2c_bus_name}_extended_cfg.p_bus_recursive_mutex->p_mutex_handle)
+            = xSemaphoreCreateRecursiveMutexStatic(${i2c_bus_name}_extended_cfg.p_bus_recursive_mutex->p_mutex_memory);
+#endif
+    }
+#endif
+}
+            </content>
+        </template>
+
+        <template category="function_call" display="Call Quick Shutdown" id="module.driver.comms_i2c_bus.quick_shutdown" version="1">
+            <platform id="fsp" max="" min="1.1.0"/>
+            <moduleRef id="module.driver.comms_i2c_on_comms_i2c_bus">
+                <function id="comms_i2c_bus_quick_shutdown"/>
+            </moduleRef>
+            <content>
+/* TODO: Enable if you want to close I2C bus */
+void ${i2c_bus_name:raProperty(module.driver.comms_i2c_bus.name)}_quick_shutdown(void);
+
+/* Quick shutdown for ${i2c_bus_name}. */
+void ${i2c_bus_name}_quick_shutdown(void)
+{
+    i2c_master_instance_t * p_driver_instance = (i2c_master_instance_t *) ${i2c_bus_name}_extended_cfg.p_driver_instance;
+
+    /* Close I2C driver */
+    p_driver_instance->p_api->close(p_driver_instance->p_ctrl);
+
+#if BSP_CFG_RTOS
+    /* Delete a semaphore for blocking if a semaphore is not NULL */
+    if (NULL != ${i2c_bus_name}_extended_cfg.p_blocking_semaphore)
+    {
+#if BSP_CFG_RTOS == 1 // AzureOS
+        tx_semaphore_delete(${i2c_bus_name}_extended_cfg.p_blocking_semaphore->p_semaphore_handle);
+#elif BSP_CFG_RTOS == 2 // FreeRTOS
+        vSemaphoreDelete(*(${i2c_bus_name}_extended_cfg.p_blocking_semaphore->p_semaphore_handle));
+#endif
+    }
+
+    /* Delete a recursive mutex for bus lock if a recursive mutex is not NULL */
+    if (NULL != ${i2c_bus_name}_extended_cfg.p_bus_recursive_mutex)
+    {
+#if BSP_CFG_RTOS == 1 // AzureOS
+        tx_mutex_delete(${i2c_bus_name}_extended_cfg.p_bus_recursive_mutex->p_mutex_handle);
+#elif BSP_CFG_RTOS == 2 // FreeRTOS
+        vSemaphoreDelete(*(${i2c_bus_name}_extended_cfg.p_bus_recursive_mutex->p_mutex_handle));
+#endif
+    }
+#endif
+}
+            </content>
+        </template>
+
+        <api version="1">
+            <platform id="fsp" max="" min="1.1.0"/>
+            <moduleRef id="module.driver.comms_i2c_on_comms_i2c_device"/>
+            <description><![CDATA[<form><p><span color="header" font="header">Overview</span></p><p>I2C Communication Device provides snippets of code for operating the I2C Communications Middleware.</p></form>]]></description>
+            <function display="Quick Setup" id="comms_i2c_device_quick_setup">
+                <description><![CDATA[<form><p>This function provides quick setup for I2C Communications Device using the properties from the RA configurator.</p></form>]]></description>
+            </function>
+        </api>
+        <template category="function_call" display="Call Quick Setup" id="module.driver.comms_i2c_device.quick_setup" version="1">
+            <platform id="fsp" max="" min="1.1.0"/>
+            <moduleRef id="module.driver.comms_i2c_on_comms_i2c_device">
+                <function id="comms_i2c_device_quick_setup"/>
+            </moduleRef>
+            <content>
+/* TODO: Enable if you want to open I2C Communications Device */
+#define ${i2c_device_name_upper:raProperty(module.driver.comms_i2c_device.name_upper)}_NON_BLOCKING (0)
+
+#if ${i2c_device_name_upper}_NON_BLOCKING
+volatile bool g_i2c_completed = false;
+#endif
+
+/* TODO: Enable if you want to use a callback */
+#define ${i2c_device_name_upper}_CALLBACK_ENABLE (0)
+#if ${i2c_device_name_upper}_CALLBACK_ENABLE
+void ${comms_device_callback:raProperty(module.driver.comms_i2c_device.p_callback)}(rm_comms_callback_args_t * p_args)
+{
+#if ${i2c_device_name_upper}_NON_BLOCKING
+    if (RM_COMMS_EVENT_OPERATION_COMPLETE == p_args->event)
+    {
+        g_i2c_completed = true;
+    }
+#else
+    FSP_PARAMETER_NOT_USED(p_args);
+#endif
+}
+#endif
+
+/* Quick setup for ${i2c_device_name:raProperty(module.driver.comms_i2c_device.name)}.
+ * - ${i2c_bus_name:raProperty(module.driver.comms_i2c_bus.name)} must be setup before calling this function
+ *     (See Developer Assistance -> ${i2c_device_name} -> ${i2c_bus_name} -> Quick Setup).
+ */
+void ${i2c_device_name}_quick_setup(void);
+
+/* Quick setup for ${i2c_device_name}. */
+void ${i2c_device_name}_quick_setup(void)
+{
+    fsp_err_t err;
+
+    /* Open I2C Communications device instance, this must be done before calling any COMMS_I2C API */
+    err = ${i2c_device_name}.p_api->open(${i2c_device_name}.p_ctrl, ${i2c_device_name}.p_cfg);
+    assert(FSP_SUCCESS == err);
+
+#if ${i2c_device_name_upper}_NON_BLOCKING
+    while (!g_i2c_completed)
+    {
+        ;
+    }
+#endif
+}
+            </content>
+        </template>
+    </developerSupport>
+
+</raModuleDescription>

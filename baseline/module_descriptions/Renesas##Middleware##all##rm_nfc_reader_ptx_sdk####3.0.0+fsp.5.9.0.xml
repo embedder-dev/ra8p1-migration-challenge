@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<raModuleDescription>
+    <module id="module.driver.rm_nfc_reader_ptx_sdk" display="Networking|NFC Reader PTX SDK" common="1" visible="false" version="0" url="">
+        <provides interface="interface.driver.rm_nfc_reader_ptx_sdk" />
+    </module>
+</raModuleDescription>

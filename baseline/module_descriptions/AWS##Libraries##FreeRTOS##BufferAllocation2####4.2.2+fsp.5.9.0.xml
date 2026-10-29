@@ -1,0 +1,12 @@
+<?xml version="1.0" ?>
+<raModuleDescription>
+  <module id="module.freertos.bufferallocation2" display="RTOS|FreeRTOS Buffer Allocation 2" common="1" version="0" url="https://www.freertos.org/Documentation/03-Libraries/02-FreeRTOS-plus/02-FreeRTOS-plus-TCP/05-Buffer-management">
+    <!-- Heap 4 or 5 is recommended https://www.freertos.org/Documentation/03-Libraries/02-FreeRTOS-plus/02-FreeRTOS-plus-TCP/05-Buffer-management -->
+    <constraint display="Requires FreeRTOS heap implementation 4 or 5">
+          "${interface.freertos.heap_4_or_5}" === "1"
+    </constraint>
+    <requires id="module.freertos.bufferallocation2.requires.awsfreertos" interface="interface.rtos.awsfreertos" visible="false" display="Requires FreeRTOS"/>
+    <provides interface="interface.freertos.bufferallocation" />
+    <provides interface="interface.freertos.bufferallocation2" />
+  </module>
+</raModuleDescription>

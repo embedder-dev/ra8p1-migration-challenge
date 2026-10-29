@@ -1,0 +1,161 @@
+<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.middleware.mcuboot_image_utilities" path="mcu-tools/include/mcuboot_image_utilities_config/sysflash/sysflash.h" version="0">
+    <property default="" description="Add a path to the mcuboot_config.h file from the bootloader project. It is used to provide the flash layout configuration." display="General|Bootloader mcuboot_config.h" id="config.middleware.mcuboot_image_utilities.mcuboot_config">
+         <export>eval('' +
+'var input = "${config.middleware.mcuboot_image_utilities.mcuboot_config}";' +
+'if (input != "")' +
+'{' +
+'    input = \'#include "\' + input + \'"\';' +
+'}' +
+'    input' +
+                '')</export>
+    </property>
+    <property default="" description="Add a path to the sysflash.h file from the bootloader project." display="General|Bootloader sysflash.h" id="config.middleware.mcuboot_image_utilities.sysflash">
+        <export>eval('' +
+'var input = "${config.middleware.mcuboot_image_utilities.sysflash}";' +
+'if (input != "")' +
+'{' +
+'    input = \'#include "\' + input + \'"\';' +
+'}' +
+'    input' +
+                '')</export>
+    </property>
+    <property default="" description="Add a path to the mcuboot_logging.h file from the bootloader project." display="General|Bootloader mcuboot_logging.h" id="config.middleware.mcuboot_image_utilities.mcuboot_logging">
+        <export>eval('' +
+'var input = "${config.middleware.mcuboot_image_utilities.mcuboot_logging}";' +
+'if (input != "")' +
+'{' +
+'    input = \'#include "\' + input + \'"\';' +
+'}' +
+'    input' +
+                '')</export>
+    </property>
+        <content>
+#ifndef MCUBOOT_IMAGE_UTILITIES_SYSFLASH_H_
+#define MCUBOOT_IMAGE_UTILITIES_SYSFLASH_H_
+#undef SYSFLASH_H_
+${config.middleware.mcuboot_image_utilities.mcuboot_config}
+${config.middleware.mcuboot_image_utilities.sysflash}
+${config.middleware.mcuboot_image_utilities.mcuboot_logging}
+#endif
+         </content>
+    </config>
+     <config id="config.middleware.mcuboot_image_utilities_mcuboot_config" path="mcu-tools/include/mcuboot_image_utilities_config/mcuboot_config/mcuboot_config.h" version="0">
+        <content>
+#ifndef MCUBOOT_IMAGE_UTILITIES_MCUBOOT_CONFIG_H_
+#define MCUBOOT_IMAGE_UTILITIES_MCUBOOT_CONFIG_H_
+#undef MCUBOOT_CONFIG_H_
+#include "sysflash/sysflash.h"
+#endif
+         </content>
+    </config>
+
+    <config id="config.middleware.mcuboot_image_utilities_mcuboot_logging" path="mcu-tools/include/mcuboot_image_utilities_config/mcuboot_config/mcuboot_logging.h" version="0">
+        <content>
+#ifndef MCUBOOT_IMAGE_UTILITIES_MCUBOOT_LOGGING_H_
+#define MCUBOOT_IMAGE_UTILITIES_MCUBOOT_LOGGING_H_
+#undef MCUBOOT_LOGGING_H_
+#include "sysflash/sysflash.h"
+#endif
+        </content>
+    </config>
+
+    <module config="config.middleware.mcuboot_image_utilities" display="Bootloader|MCUboot Image Utilities" id="module.middleware.mcuboot_image_utilities" version="1" url="group___r_m___m_c_u_b_o_o_t___p_o_r_t.html">
+        <constraint display="Only one MCUboot image utilities instance can be used at a time.">
+          "${interface.middleware.mcuboot_image_utilities}" === "1"
+        </constraint>
+        <constraint display="Code Flash Programming must be Enabled under Flash|Common|Code Flash Programming Enable">
+              ("${config.driver.flash_hp.param_code_flash_programming_enable}" === "config.driver.flash_hp.param_code_flash_programming_enable.enabled") ||
+              ("${config.driver.flash_lp.param_code_flash_programming_enable}" === "config.driver.flash_lp.param_code_flash_programming_enable.enabled")
+        </constraint>
+        <constraint display="Path to the mcuboot_config.h file of the Bootloader project must be provided">
+              ("${config.middleware.mcuboot_image_utilities.mcuboot_config}" !== "")
+        </constraint>
+        <constraint display="Path to the sysflash.h file of the Bootloader project must be provided">
+              ("${config.middleware.mcuboot_image_utilities.sysflash}" !== "")
+        </constraint>
+        <constraint display="Path to the mcuboot_logging.h file of the Bootloader project must be provided">
+              ("${config.middleware.mcuboot_image_utilities.mcuboot_logging}" !== "")
+        </constraint>
+        <constraint display="Cannot be used in a non-secure project">
+            "${_project.nonsecure}" !== "1"
+        </constraint>
+        <constraint display="Not supported in MCUboot project">
+            !testExists("${interface.middleware.mcuboot}")
+        </constraint>
+        <constraint display="Requires flash driver">
+            testExists("${module.middleware.mcuboot_image_utilities.requires.flash::module.driver.flash.name}")
+        </constraint>
+        <constraint display="Data flash bgo must be disabled under Flash|Module|Data Flash Background Operation">
+            "${module.middleware.mcuboot_image_utilities.requires.flash::module.driver.flash.data_flash_bgo}" === "module.driver.flash.data_flash_bgo.disabled"
+        </constraint>
+        <requires id="module.middleware.mcuboot_image_utilities.requires.flash" interface="interface.driver.flash" visible="true" find="false" display="Requires Flash">
+        </requires>
+        <requires id="module.middleware.mcuboot_image_utilities.requires.mcuboot_logging" interface="interface.middleware.mcuboot_image_utilities_mcuboot_logging" visible="false" />
+        <requires id="module.middleware.mcuboot_image_utilities.requires.mcuboot_config" interface="interface.middleware.mcuboot_image_utilities_mcuboot_config" visible="false" />
+        <provides interface="interface.middleware.mcuboot_image_utilities" />
+        <header>
+void mcuboot_image_utilities_quick_setup();
+        </header>
+        <includes>
+#include "bootutil/bootutil.h"
+        </includes>
+        <declarations>
+void * const gp_mcuboot_flash_ctrl = &amp;${module.middleware.mcuboot_image_utilities.requires.flash::module.driver.flash.name}_ctrl;
+flash_cfg_t const * const gp_mcuboot_flash_cfg = &amp;${module.middleware.mcuboot_image_utilities.requires.flash::module.driver.flash.name}_cfg;
+flash_instance_t const * const gp_mcuboot_flash_instance = &amp;${module.middleware.mcuboot_image_utilities.requires.flash::module.driver.flash.name};
+        </declarations>
+    </module>
+
+    <module config="config.middleware.mcuboot_image_utilities_mcuboot_logging" display="Bootloader|MCUboot logging" id="module.middleware.mcuboot_image_utilities_mcuboot_logging" version="1" visible="false" url="https://github.com/mcu-tools/mcuboot">
+        <provides interface="interface.middleware.mcuboot_image_utilities_mcuboot_logging" />
+    </module>
+
+    <module config="config.middleware.mcuboot_image_utilities_mcuboot_config" display="Bootloader|MCUboot config" id="module.middleware.mcuboot_image_utilities_mcuboot_config" version="1" visible="false" url="https://github.com/mcu-tools/mcuboot">
+        <provides interface="interface.middleware.mcuboot_image_utilities_mcuboot_config" />
+    </module>
+
+    <developerSupport>
+        <api version="1">
+            <platform id="fsp" max="" min="1.1.0"/>
+            <moduleRef id="module.middleware.mcuboot_image_utilities"/>
+            <description><![CDATA[<form><p><span color="header" font="header">Overview</span></p><p>Provides snippets of code to create an MCUboot image utilities.</p></form>]]></description>
+            <function display="Quick Setup" id="mcuboot_image_utilities_setup">
+                <description><![CDATA[<form><p>Template to start an MCUboot Image Utilities application.</p></form>]]></description>
+            </function>
+        </api>
+        <template category="function_call" display="Confirm Primary Image" id="module.middleware.mcuboot_image_utilities.confirm_primary_image" version="1">
+            <platform id="fsp" max="" min="1.1.0"/>
+            <moduleRef id="module.middleware.mcuboot_image_utilities">
+                <function id="mcuboot_image_utilities_setup"/>
+            </moduleRef>
+            <content>
+/* Confirm the image in the primary slot.
+ * This is required after a test update in swap mode.
+ * This makes the swap permanent, and prevents MCUboot from reverting to the previous image.
+ */
+
+assert(0 == boot_set_confirmed());
+
+            </content>
+
+        </template>
+        <template category="function_call" display="Pending Secondary Image" id="module.middleware.mcuboot_image_utilities.pending_secondary_image" version="1">
+            <platform id="fsp" max="" min="1.1.0"/>
+            <moduleRef id="module.middleware.mcuboot_image_utilities">
+                <function id="mcuboot_image_utilities_setup"/>
+            </moduleRef>
+            <content>
+/* Mark an image downloaded into the secondary slot as pending in swap mode.
+ * This will trigger a swap after the next reset.
+ * Reference: https://github.com/mcu-tools/mcuboot/blob/master/docs/design.md#image-swapping
+ */
+
+assert(0 == boot_set_pending(0));
+
+            </content>
+        </template>
+
+    </developerSupport>
+</raModuleDescription>

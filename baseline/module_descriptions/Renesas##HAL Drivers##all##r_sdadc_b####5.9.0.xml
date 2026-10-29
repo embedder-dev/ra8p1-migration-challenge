@@ -1,0 +1,622 @@
+﻿<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.driver.sdadc_b" path="fsp_cfg/r_sdadc_b_cfg.h" version="0">
+        <property default="config.driver.sdadc_b.param_checking_enable.bsp" display="Parameter Checking" id="config.driver.sdadc_b.param_checking_enable" description="If selected code for parameter checking is included in the build.">
+            <option display="Default (BSP)" id="config.driver.sdadc_b.param_checking_enable.bsp" value="(BSP_CFG_PARAM_CHECKING_ENABLE)"/>
+            <option display="Enabled" id="config.driver.sdadc_b.param_checking_enable.enabled" value="(1)"/>
+            <option display="Disabled" id="config.driver.sdadc_b.param_checking_enable.disabled" value="(0)"/>
+        </property>
+        <content>
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#define SDADC_B_CFG_PARAM_CHECKING_ENABLE ${config.driver.sdadc_b.param_checking_enable}
+
+#ifdef __cplusplus
+}
+#endif
+        </content>
+    </config>
+    <module config="config.driver.sdadc_b" display="Analog|${module.driver.adc.name} ADC (r_sdadc_b)" id="module.driver.sdadc_b_on_adc" version="1" url="group___s_d_a_d_c___b.html">
+        <constraint display="Unique name required for each instance">
+            ("${interface.driver.adc.${module.driver.adc.name}}" === "1")
+        </constraint>
+        <constraint display="Requires SDADC_B peripheral">
+            "${interface.mcu.sdadc_b.external}" === "1"
+        </constraint>
+        <constraint display="SDADCCLK must be configured">
+            (testInteger("${board.clock.peripheral.sdadc_b.sdadcclk}")) &amp;&amp;
+            ("${board.clock.peripheral.sdadc_b.sdadcclk}" &gt; 0)
+        </constraint>
+        <constraint display="Minimum PCLKB frequency is 1 MHz in SDADC24 operation">
+            ("${board.clock.peripheral.sdadc_b.pclkb}" &gt;= 1000000)
+        </constraint>
+        <constraint display="Add at least one channel configuration">
+            (("${module.driver.adc.sampling_mode}" !== "module.driver.adc.sampling_mode.Hybrid_mode") &amp;&amp;
+            (("${module.driver.adc.channel0.analog_input}" !== "module.driver.adc.channel0.disabled") ||
+            ("${module.driver.adc.channel1.analog_input}" !== "module.driver.adc.channel1.disabled") ||
+            ("${module.driver.adc.channel2.analog_input}" !== "module.driver.adc.channel2.disabled") ||
+            ("${module.driver.adc.channel3.analog_input}" !== "module.driver.adc.channel3.disabled") ||
+            ("${module.driver.adc.channel4.analog_input}" !== "module.driver.adc.channel4.disabled") ||
+            ("${module.driver.adc.channel5.analog_input}" !== "module.driver.adc.channel5.disabled") ||
+            ("${module.driver.adc.channel6.analog_input}" !== "module.driver.adc.channel6.disabled"))) ||
+            (("${module.driver.adc.sampling_mode}" === "module.driver.adc.sampling_mode.Hybrid_mode") &amp;&amp;
+            (("${module.driver.adc.channel0.analog_input}" !== "module.driver.adc.channel0.disabled") ||
+            ("${module.driver.adc.channel1.analog_input}" !== "module.driver.adc.channel1.disabled") ||
+            ("${module.driver.adc.channel2.analog_input}" !== "module.driver.adc.channel2.disabled") ||
+            ("${module.driver.adc.channel3.analog_input}" !== "module.driver.adc.channel3.disabled")))
+        </constraint>
+        <constraint display="Analog input 0 must be configured for Channel 4 if Analog input 0 is configured for Channel 0 and Hybrid mode is enabled. Analog input 4 cannot be configured for Channel 4 when Hybrid mode is enabled.">
+            (("${module.driver.adc.channel0.analog_input}" === "module.driver.adc.channel0.disabled") &amp;&amp;
+            ("${module.driver.adc.channel4.analog_input}" === "module.driver.adc.channel4.disabled")) ||
+            (("${module.driver.adc.channel0.analog_input}" === "module.driver.adc.channel0.disabled") &amp;&amp;
+            ("${module.driver.adc.channel4.analog_input}" === "module.driver.adc.channel4.analog_input_4") &amp;&amp;
+            ("${module.driver.adc.sampling_mode}" !== "module.driver.adc.sampling_mode.Hybrid_mode")) ||
+            (("${module.driver.adc.channel0.analog_input}" === "module.driver.adc.channel0.analog_input_0") &amp;&amp;
+            ("${module.driver.adc.channel4.analog_input}" === "module.driver.adc.channel4.disabled") &amp;&amp;
+            ("${module.driver.adc.sampling_mode}" !== "module.driver.adc.sampling_mode.Hybrid_mode")) ||
+            (("${module.driver.adc.channel0.analog_input}" === "module.driver.adc.channel0.analog_input_0") &amp;&amp;
+            ("${module.driver.adc.channel4.analog_input}" === "module.driver.adc.channel4.analog_input_4") &amp;&amp;
+            ("${module.driver.adc.sampling_mode}" !== "module.driver.adc.sampling_mode.Hybrid_mode")) ||
+            (("${module.driver.adc.channel0.analog_input}" === "module.driver.adc.channel0.analog_input_0") &amp;&amp;
+            ("${module.driver.adc.channel4.analog_input}" === "module.driver.adc.channel4.analog_input_0") &amp;&amp;
+            ("${module.driver.adc.sampling_mode}" === "module.driver.adc.sampling_mode.Hybrid_mode"))
+        </constraint>
+        <constraint display="Analog input 1 must be configured for Channel 5 if Analog input 1 is configured for Channel 1 and Hybrid mode is enabled. Analog input 5 cannot be configured for Channel 5 when Hybrid mode is enabled.">
+            (("${module.driver.adc.channel1.analog_input}" === "module.driver.adc.channel1.disabled") &amp;&amp;
+            ("${module.driver.adc.channel5.analog_input}" === "module.driver.adc.channel5.disabled")) ||
+            (("${module.driver.adc.channel1.analog_input}" === "module.driver.adc.channel1.disabled") &amp;&amp;
+            ("${module.driver.adc.channel5.analog_input}" === "module.driver.adc.channel5.analog_input_5") &amp;&amp;
+            ("${module.driver.adc.sampling_mode}" !== "module.driver.adc.sampling_mode.Hybrid_mode")) ||
+            (("${module.driver.adc.channel1.analog_input}" === "module.driver.adc.channel1.analog_input_1") &amp;&amp;
+            ("${module.driver.adc.channel5.analog_input}" === "module.driver.adc.channel5.disabled") &amp;&amp;
+            ("${module.driver.adc.sampling_mode}" !== "module.driver.adc.sampling_mode.Hybrid_mode")) ||
+            (("${module.driver.adc.channel1.analog_input}" === "module.driver.adc.channel1.analog_input_1") &amp;&amp;
+            ("${module.driver.adc.channel5.analog_input}" === "module.driver.adc.channel5.analog_input_5") &amp;&amp;
+            ("${module.driver.adc.sampling_mode}" !== "module.driver.adc.sampling_mode.Hybrid_mode")) ||
+            (("${module.driver.adc.channel1.analog_input}" === "module.driver.adc.channel1.analog_input_1") &amp;&amp;
+            ("${module.driver.adc.channel5.analog_input}" === "module.driver.adc.channel5.analog_input_1") &amp;&amp;
+            ("${module.driver.adc.sampling_mode}" === "module.driver.adc.sampling_mode.Hybrid_mode"))
+        </constraint>
+        <constraint display="Analog input 2 must be configured for Channel 6 if Analog input 2 is configured for Channel 2 and Hybrid mode is enabled. Analog input 6 cannot be configured for Channel 6 when Hybrid mode is enabled.">
+            (("${module.driver.adc.channel2.analog_input}" === "module.driver.adc.channel2.disabled") &amp;&amp;
+            ("${module.driver.adc.channel6.analog_input}" === "module.driver.adc.channel6.disabled")) ||
+            (("${module.driver.adc.channel2.analog_input}" === "module.driver.adc.channel2.disabled") &amp;&amp;
+            ("${module.driver.adc.channel6.analog_input}" === "module.driver.adc.channel6.analog_input_6") &amp;&amp;
+            ("${module.driver.adc.sampling_mode}" !== "module.driver.adc.sampling_mode.Hybrid_mode")) ||
+            (("${module.driver.adc.channel2.analog_input}" === "module.driver.adc.channel2.analog_input_2") &amp;&amp;
+            ("${module.driver.adc.channel6.analog_input}" === "module.driver.adc.channel6.disabled") &amp;&amp;
+            ("${module.driver.adc.sampling_mode}" !== "module.driver.adc.sampling_mode.Hybrid_mode")) ||
+            (("${module.driver.adc.channel2.analog_input}" === "module.driver.adc.channel2.analog_input_2") &amp;&amp;
+            ("${module.driver.adc.channel6.analog_input}" === "module.driver.adc.channel6.analog_input_6") &amp;&amp;
+            ("${module.driver.adc.sampling_mode}" !== "module.driver.adc.sampling_mode.Hybrid_mode")) ||
+            (("${module.driver.adc.channel2.analog_input}" === "module.driver.adc.channel2.analog_input_2") &amp;&amp;
+            ("${module.driver.adc.channel6.analog_input}" === "module.driver.adc.channel6.analog_input_2") &amp;&amp;
+            ("${module.driver.adc.sampling_mode}" === "module.driver.adc.sampling_mode.Hybrid_mode"))
+        </constraint>
+        <constraint display="Analog input 3 must be configured for Channel 7 if Analog input 3 is configured for Channel 3 and Hybrid mode is enabled. Channel 7 can only be configured when Hybrid mode is enabled.">
+            (("${module.driver.adc.channel3.analog_input}" === "module.driver.adc.channel3.disabled") &amp;&amp;
+            ("${module.driver.adc.channel7.analog_input}" === "module.driver.adc.channel7.disabled")) ||
+            (("${module.driver.adc.channel3.analog_input}" === "module.driver.adc.channel3.analog_input_3") &amp;&amp;
+            ("${module.driver.adc.channel7.analog_input}" === "module.driver.adc.channel7.disabled") &amp;&amp;
+            ("${module.driver.adc.sampling_mode}" !== "module.driver.adc.sampling_mode.Hybrid_mode")) ||
+            (("${module.driver.adc.channel3.analog_input}" === "module.driver.adc.channel3.analog_input_3") &amp;&amp;
+            ("${module.driver.adc.channel7.analog_input}" === "module.driver.adc.channel7.analog_input_3") &amp;&amp;
+            ("${module.driver.adc.sampling_mode}" === "module.driver.adc.sampling_mode.Hybrid_mode"))
+        </constraint>
+        <requires id="module.driver.sdadc_b_on_adc.requires.sdadc_b" interface="interface.mcu.sdadc_b.external" visible="false" display="Requires SDADC_B Peripheral" />
+        <provides interface="interface.driver.adc" />
+        <provides interface="interface.driver.adc_on_sdadc_b" />
+        <provides interface="interface.driver.adc.${module.driver.adc.name}" />
+        <property default="g_adc${_instance}" display="General|Name" id="module.driver.adc.name" description="Module name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.adc.name}")</constraint>
+        </property>
+        <property default="module.driver.adc.sampling_mode.4kHz_mode" display="General|Sampling Mode" id="module.driver.adc.sampling_mode" description="Sampling mode selection.">
+            <option display="4kHz" id="module.driver.adc.sampling_mode.4kHz_mode" value="SDADC_B_4KHZ_SAMPLING_MODE"/>
+            <option display="8kHz" id="module.driver.adc.sampling_mode.8kHz_mode" value="SDADC_B_8KHZ_SAMPLING_MODE"/>
+            <option display="8kHz/4kHz Hybrid Mode" id="module.driver.adc.sampling_mode.Hybrid_mode" value="SDADC_B_HYBRID_SAMPLING_MODE"/>
+        </property>
+        <property default="module.driver.adc.resolution.resolution_24_bit" display="General|Resolution" id="module.driver.adc.resolution" description="Select 24-bit or 16-bit resolution.">
+            <option display="16 Bit" id="module.driver.adc.resolution.resolution_16_bit" value="ADC_RESOLUTION_16_BIT"/>
+            <option display="24 Bit" id="module.driver.adc.resolution.resolution_24_bit" value="ADC_RESOLUTION_24_BIT"/>
+        </property>
+        <property default="NULL" display="General|Callback" id="module.driver.adc.p_callback" description="Enter the name of the callback function to be called when conversion completes or a scan ends.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.adc.p_callback}")</constraint>
+        </property>
+        <property default="module.driver.adc.hpf_cutoff.hpf_cutoff_0" display="General|Cut-off Frequency Of High-pass Filter" id="module.driver.adc.hpf_cutoff" description="Cut-off frequency of high-pass filter. See Usage Notes for more information about cutoff frequency configuration.">
+            <option display="COF 0" id="module.driver.adc.hpf_cutoff.hpf_cutoff_0" value="SDADC_B_CUTOFF_00B"/>
+            <option display="COF 1" id="module.driver.adc.hpf_cutoff.hpf_cutoff_1" value="SDADC_B_CUTOFF_01B"/>
+            <option display="COF 2" id="module.driver.adc.hpf_cutoff.hpf_cutoff_2" value="SDADC_B_CUTOFF_10B"/>
+            <option display="COF 3" id="module.driver.adc.hpf_cutoff.hpf_cutoff_3" value="SDADC_B_CUTOFF_11B"/>
+        </property>
+        <property default="board.icu.common.irq.priority12" display="General|Interrupts|Conversion End Interrupt Priority" id="module.driver.adc.conv_end_ipl" description="[Required] Select the interrupt priority for the conversion end interrupt.">
+            <select enum="enum.mcu.nvic.priorities.mandatory"/>
+            <interrupt event="event.sdadc0.adi" isr="sdadc_b_adi_isr"/>
+            <interrupt event="event.sdadc0.adi2" isr="sdadc_b_adi2_isr"/>
+        </property>
+        <property default="_disabled" display="General|Interrupts|Zero-cross Detection 0 Interrupt Priority" id="module.driver.adc.zc_ipl" description="[Optional] Select the interrupt priority for the Zero-cross detection 0 end interrupt.">
+            <select enum="enum.mcu.nvic.priorities.optional"/>
+            <interrupt event="event.sdadc0.adzc0" isr="sdadc_b_adzc0_isr"/>
+        </property>
+        <property default="_disabled" display="General|Interrupts|Zero-cross Detection 1 Interrupt Priority" id="module.driver.adc.zc_ipl2" description="[Optional] Select the interrupt priority for the Zero-cross detection 1 end interrupt.">
+            <select enum="enum.mcu.nvic.priorities.optional"/>
+            <interrupt event="event.sdadc0.adzc1" isr="sdadc_b_adzc1_isr"/>
+        </property>
+        <property default="module.driver.adc.zero_detection0.channel2" display="General|Zero-cross Detection 0|Channel" id="module.driver.adc.zero_detection0" description="Zero-cross detection is performed with the target of channel.">
+            <option display="Channel 2" id="module.driver.adc.zero_detection0.channel2" value="0"/>
+            <option display="Channel 1" id="module.driver.adc.zero_detection0.channel1" value="1"/>
+        </property>
+        <property default="module.driver.adc.falling_edge0.enabled" display="General|Zero-cross Detection 0|Falling edge" id="module.driver.adc.falling_edge0" description="Falling edge detection enable for zero-cross detection 0.">
+            <option display="Enabled" id="module.driver.adc.falling_edge0.enabled" value="1"/>
+            <option display="Disabled" id="module.driver.adc.falling_edge0.disabled" value="0"/>
+            <export>
+                <![CDATA[eval('' +
+                'var falling_edge0 = ${module.driver.adc.falling_edge0} << 2; \n' +
+                'falling_edge0')]]>
+            </export>
+        </property>
+        <property default="module.driver.adc.rising_edge0.enabled" display="General|Zero-cross Detection 0|Rising edge" id="module.driver.adc.rising_edge0" description="Rising edge detection enable for zero-cross detection 0.">
+            <option display="Enabled" id="module.driver.adc.rising_edge0.enabled" value="1"/>
+            <option display="Disabled" id="module.driver.adc.rising_edge0.disabled" value="0"/>
+            <export>
+                <![CDATA[eval('' +
+                'var rising_edge0 = ${module.driver.adc.rising_edge0} << 3; \n' +
+                'rising_edge0')]]>
+            </export>
+        </property>
+        <property default="module.driver.adc.zero_detection1.channel3" display="General|Zero-cross Detection 1|Channel" id="module.driver.adc.zero_detection1" description="Zero-cross detection is performed with the target of channel.">
+            <option display="Channel 3" id="module.driver.adc.zero_detection1.channel3" value="0"/>
+            <option display="Channel 0" id="module.driver.adc.zero_detection1.channel0" value="1"/>
+            <export>
+                <![CDATA[eval('' +
+                'var channel = ${module.driver.adc.zero_detection1} << 4; \n' +
+                'channel')]]>
+            </export>
+        </property>
+        <property default="module.driver.adc.falling_edge1.enabled" display="General|Zero-cross Detection 1|Falling edge" id="module.driver.adc.falling_edge1" description="Falling edge detection enable for zero-cross detection 1.">
+            <option display="Enabled" id="module.driver.adc.falling_edge1.enabled" value="1"/>
+            <option display="Disabled" id="module.driver.adc.falling_edge1.disabled" value="0"/>
+            <export>
+                <![CDATA[eval('' +
+                'var falling_edge1 = ${module.driver.adc.falling_edge1} << 6; \n' +
+                'falling_edge1')]]>
+            </export>
+        </property>
+        <property default="module.driver.adc.rising_edge1.enabled" display="General|Zero-cross Detection 1|Rising edge" id="module.driver.adc.rising_edge1" description="Rising edge detection enable for zero-cross detection 1.">
+            <option display="Enabled" id="module.driver.adc.rising_edge1.enabled" value="1"/>
+            <option display="Disabled" id="module.driver.adc.rising_edge1.disabled" value="0"/>
+            <export>
+                <![CDATA[eval('' +
+                'var rising_edge1 = ${module.driver.adc.rising_edge1} << 7; \n' +
+                'rising_edge1')]]>
+            </export>
+        </property>
+        <property default="0" id="module.driver.adc.operating_clk">
+            <export>
+            eval('' +
+'               var sdadc_clk = "${module.driver.adc.operating_clk}";' +
+'               var peripheral_clock = "${board.clock.peripheral.sdadc_b.sdadcclk}";' +
+'               if ((peripheral_clock == "12000000") ||' +
+'                   (peripheral_clock == "12800000") ||' +
+'                   (peripheral_clock == "11993088") ||' +
+'                   (peripheral_clock == "12795904"))' +
+'               {' +
+'                   sdadc_clk = "SDADC_B_CLOCK_IS_12MHZ";' +
+'               }' +
+'               else if (peripheral_clock == 16000000)' +
+'               {' +
+'                   sdadc_clk = "SDADC_B_CLOCK_IS_16MHZ";' +
+'               }' +
+'               sdadc_clk' +
+'')
+            </export>
+        </property>
+        <property default="module.driver.adc.channel0.disabled" display="Channel Configuration|Virtual Channel 0|Analog input channel" id="module.driver.adc.channel0.analog_input" description="Analog input selection for Virtual Channel 0.">
+            <option display="Disabled" id="module.driver.adc.channel0.disabled" value="0xFF"/>
+            <option display="0" id="module.driver.adc.channel0.analog_input_0" value="0"/>
+            <export>
+                <![CDATA[eval('' +
+                'var channel = 0; \n' +
+                'var analog_input = ${module.driver.adc.channel0.analog_input}; \n' +
+                'if (analog_input == "0") \n' +
+                '{ \n' +
+                '    channel = 1; \n' +
+                '} \n' +
+                'channel')]]>
+            </export>
+        </property>
+        <property default="module.driver.adc.channel0.channel_gain_1" display="Channel Configuration|Virtual Channel 0|Preamplifier Gain" id="module.driver.adc.channel0.gain" description="Select the gain of the PGA.">
+            <option display="Gain of 1" id="module.driver.adc.channel0.channel_gain_1" value="0"/>
+            <option display="Gain of 2" id="module.driver.adc.channel0.channel_gain_2" value="1"/>
+            <option display="Gain of 4" id="module.driver.adc.channel0.channel_gain_4" value="2"/>
+            <option display="Gain of 8" id="module.driver.adc.channel0.channel_gain_8" value="3"/>
+            <option display="Gain of 16" id="module.driver.adc.channel0.channel_gain_16" value="4"/>
+            <option display="Gain of 32" id="module.driver.adc.channel0.channel_gain_32" value="5"/>
+            <export>
+                <![CDATA[eval('' +
+                'var pre_gain = 0; \n' +
+                'var analog_input = ${module.driver.adc.channel0.analog_input}; \n' +
+                'if (analog_input == "0") \n' +
+                '{ \n' +
+                '    pre_gain = ${module.driver.adc.channel0.gain}; \n' +
+                '} \n' +
+                'pre_gain')]]>
+            </export>
+        </property>
+        <property default="module.driver.adc.hpf.hpf_disabled" display="Channel Configuration|Virtual Channel 0|HPF bypass enabled" id="module.driver.adc.channel0.hpf" description="HPF bypass output enabled.">
+            <option display="Enabled" id="module.driver.adc.hpf.hpf_enabled" value="0"/>
+            <option display="Disabled" id="module.driver.adc.hpf.hpf_disabled" value="1"/>
+        </property>
+        <property default="0" display="Channel Configuration|Virtual Channel 0|Phase Adjustment Amount" id="module.driver.adc.channel0.phase_adj" description="Specify the phase adjustment amount for each channel in 1152 steps.">
+            <constraint display="Value must be a positive integer between 0 and 1151.">testInteger("${module.driver.adc.channel0.phase_adj}") &amp;&amp; ("${module.driver.adc.channel0.phase_adj}" &gt;= 0) &amp;&amp; ("${module.driver.adc.channel0.phase_adj}" &lt;= 1151)</constraint>
+        </property>
+        <property default="module.driver.adc.channel1.disabled" display="Channel Configuration|Virtual Channel 1|Analog input channel" id="module.driver.adc.channel1.analog_input" description="Analog input selection for Virtual Channel 1.">
+            <option display="Disabled" id="module.driver.adc.channel1.disabled" value="0xFF"/>
+            <option display="1" id="module.driver.adc.channel1.analog_input_1" value="1"/>
+            <export>
+                <![CDATA[eval('' +
+                'var channel = 0; \n' +
+                'var analog_input = ${module.driver.adc.channel1.analog_input}; \n' +
+                'if (analog_input == "1") \n' +
+                '{ \n' +
+                '    channel = 1; \n' +
+                '} \n' +
+                'channel')]]>
+            </export>
+        </property>
+        <property default="module.driver.adc.channel1.channel_gain_1" display="Channel Configuration|Virtual Channel 1|Preamplifier Gain" id="module.driver.adc.channel1.gain" description="Select the gain of the PGA.">
+            <option display="Gain of 1" id="module.driver.adc.channel1.channel_gain_1" value="0"/>
+            <option display="Gain of 2" id="module.driver.adc.channel1.channel_gain_2" value="1"/>
+            <option display="Gain of 4" id="module.driver.adc.channel1.channel_gain_4" value="2"/>
+            <option display="Gain of 8" id="module.driver.adc.channel1.channel_gain_8" value="3"/>
+            <option display="Gain of 16" id="module.driver.adc.channel1.channel_gain_16" value="4"/>
+            <option display="Gain of 32" id="module.driver.adc.channel1.channel_gain_32" value="5"/>
+            <export>
+                <![CDATA[eval('' +
+                'var pre_gain = 0; \n' +
+                'var analog_input = ${module.driver.adc.channel1.analog_input}; \n' +
+                'if (analog_input == "1") \n' +
+                '{ \n' +
+                '    pre_gain = ${module.driver.adc.channel1.gain}; \n' +
+                '} \n' +
+                'pre_gain')]]>
+            </export>
+        </property>
+        <property default="module.driver.adc.channel1.hpf_disabled" display="Channel Configuration|Virtual Channel 1|HPF bypass enabled" id="module.driver.adc.channel1.hpf" description="HPF bypass output enabled.">
+            <option display="Enabled" id="module.driver.adc.channel1.hpf_enabled" value="0"/>
+            <option display="Disabled" id="module.driver.adc.channel1.hpf_disabled" value="1"/>
+        </property>
+        <property default="0" display="Channel Configuration|Virtual Channel 1|Phase Adjustment Amount" id="module.driver.adc.channel1.phase_adj" description="Specify the phase adjustment amount for each channel in 1152 steps.">
+            <constraint display="Value must be a positive integer between 0 and 1151.">testInteger("${module.driver.adc.channel1.phase_adj}") &amp;&amp; ("${module.driver.adc.channel1.phase_adj}" &gt;= 0) &amp;&amp; ("${module.driver.adc.channel1.phase_adj}" &lt;= 1151)</constraint>
+        </property>
+        <property default="module.driver.adc.channel2.disabled" display="Channel Configuration|Virtual Channel 2|Analog input channel" id="module.driver.adc.channel2.analog_input" description="Analog input selection for virtual channel 2.">
+            <option display="Disabled" id="module.driver.adc.channel2.disabled" value="0xFF"/>
+            <option display="2" id="module.driver.adc.channel2.analog_input_2" value="2"/>
+            <export>
+                <![CDATA[eval('' +
+                'var channel = 0; \n' +
+                'var analog_input = ${module.driver.adc.channel2.analog_input}; \n' +
+                'if (analog_input == "2") \n' +
+                '{ \n' +
+                '    channel = 1; \n' +
+                '} \n' +
+                'channel')]]>
+            </export>
+        </property>
+        <property default="module.driver.adc.channel2.channel_gain_1" display="Channel Configuration|Virtual Channel 2|Preamplifier Gain" id="module.driver.adc.channel2.gain" description="Select the gain of the PGA.">
+            <option display="Gain of 1" id="module.driver.adc.channel2.channel_gain_1" value="0"/>
+            <option display="Gain of 2" id="module.driver.adc.channel2.channel_gain_2" value="1"/>
+            <option display="Gain of 4" id="module.driver.adc.channel2.channel_gain_4" value="2"/>
+            <option display="Gain of 8" id="module.driver.adc.channel2.channel_gain_8" value="3"/>
+            <option display="Gain of 16" id="module.driver.adc.channel2.channel_gain_16" value="4"/>
+            <option display="Gain of 32" id="module.driver.adc.channel2.channel_gain_32" value="5"/>
+            <export>
+                <![CDATA[eval('' +
+                'var pre_gain = 0; \n' +
+                'var analog_input = ${module.driver.adc.channel2.analog_input}; \n' +
+                'if (analog_input == "2") \n' +
+                '{ \n' +
+                '    pre_gain = ${module.driver.adc.channel2.gain}; \n' +
+                '} \n' +
+                'pre_gain')]]>
+            </export>
+        </property>
+        <property default="module.driver.adc.channel2.hpf_disabled" display="Channel Configuration|Virtual Channel 2|HPF bypass enabled" id="module.driver.adc.channel2.hpf" description="HPF bypass output enabled.">
+            <option display="Enabled" id="module.driver.adc.channel2.hpf_enabled" value="0"/>
+            <option display="Disabled" id="module.driver.adc.channel2.hpf_disabled" value="1"/>
+        </property>
+        <property default="0" display="Channel Configuration|Virtual Channel 2|Phase Adjustment Amount" id="module.driver.adc.channel2.phase_adj" description="Specify the phase adjustment amount for each channel in 1152 steps.">
+            <constraint display="Value must be a positive integer between 0 and 1151.">testInteger("${module.driver.adc.channel2.phase_adj}") &amp;&amp; ("${module.driver.adc.channel2.phase_adj}" &gt;= 0) &amp;&amp; ("${module.driver.adc.channel2.phase_adj}" &lt;= 1151)</constraint>
+        </property>
+        <property default="module.driver.adc.channel3.disabled" display="Channel Configuration|Virtual Channel 3|Analog input channel" id="module.driver.adc.channel3.analog_input" description="Analog input selection for virtual channel 3.">
+            <option display="Disabled" id="module.driver.adc.channel3.disabled" value="0xFF"/>
+            <option display="3" id="module.driver.adc.channel3.analog_input_3" value="3"/>
+            <export>
+                <![CDATA[eval('' +
+                'var channel = 0; \n' +
+                'var analog_input = ${module.driver.adc.channel3.analog_input}; \n' +
+                'if (analog_input == "3") \n' +
+                '{ \n' +
+                '    channel = 1; \n' +
+                '} \n' +
+                'channel')]]>
+            </export>
+        </property>
+        <property default="module.driver.adc.channel3.channel_gain_1" display="Channel Configuration|Virtual Channel 3|Preamplifier Gain" id="module.driver.adc.channel3.gain" description="Select the gain of the PGA.">
+            <option display="Gain of 1" id="module.driver.adc.channel3.channel_gain_1" value="0"/>
+            <option display="Gain of 2" id="module.driver.adc.channel3.channel_gain_2" value="1"/>
+            <option display="Gain of 4" id="module.driver.adc.channel3.channel_gain_4" value="2"/>
+            <option display="Gain of 8" id="module.driver.adc.channel3.channel_gain_8" value="3"/>
+            <option display="Gain of 16" id="module.driver.adc.channel3.channel_gain_16" value="4"/>
+            <option display="Gain of 32" id="module.driver.adc.channel3.channel_gain_32" value="5"/>
+            <export>
+                <![CDATA[eval('' +
+                'var pre_gain = 0; \n' +
+                'var analog_input = ${module.driver.adc.channel3.analog_input}; \n' +
+                'if (analog_input == "3") \n' +
+                '{ \n' +
+                '    pre_gain = ${module.driver.adc.channel3.gain}; \n' +
+                '} \n' +
+                'pre_gain')]]>
+            </export>
+        </property>
+        <property default="module.driver.adc.channel3.hpf_disabled" display="Channel Configuration|Virtual Channel 3|HPF bypass enabled" id="module.driver.adc.channel3.hpf" description="HPF bypass output enabled.">
+            <option display="Enabled" id="module.driver.adc.channel3.hpf_enabled" value="0"/>
+            <option display="Disabled" id="module.driver.adc.channel3.hpf_disabled" value="1"/>
+        </property>
+        <property default="0" display="Channel Configuration|Virtual Channel 3|Phase Adjustment Amount" id="module.driver.adc.channel3.phase_adj" description="Specify the phase adjustment amount for each channel in 1152 steps.">
+            <constraint display="Value must be a positive integer between 0 and 1151.">testInteger("${module.driver.adc.channel3.phase_adj}") &amp;&amp; ("${module.driver.adc.channel3.phase_adj}" &gt;= 0) &amp;&amp; ("${module.driver.adc.channel3.phase_adj}" &lt;= 1151)</constraint>
+        </property>
+        <property default="module.driver.adc.channel4.disabled" display="Channel Configuration|Virtual Channel 4|Analog input channel" id="module.driver.adc.channel4.analog_input" description="Analog input selection for virtual channel 4.">
+            <option display="Disabled" id="module.driver.adc.channel4.disabled" value="0xFF"/>
+            <option display="0 (4KHz Hybrid Mode Only)" id="module.driver.adc.channel4.analog_input_0" value="0"/>
+            <option display="4" id="module.driver.adc.channel4.analog_input_4" value="4"/>
+            <export>
+                <![CDATA[eval('' +
+                'var channel = 0; \n' +
+                'var analog_input = ${module.driver.adc.channel4.analog_input}; \n' +
+                'if (analog_input == "4") \n' +
+                '{ \n' +
+                '    channel = 1; \n' +
+                '} \n' +
+                'channel')]]>
+            </export>
+        </property>
+        <property default="module.driver.adc.channel4.channel_gain_1" display="Channel Configuration|Virtual Channel 4|Preamplifier Gain" id="module.driver.adc.channel4.gain" description="Select the gain of the PGA.">
+            <option display="Gain of 1" id="module.driver.adc.channel4.channel_gain_1" value="0"/>
+            <option display="Gain of 2" id="module.driver.adc.channel4.channel_gain_2" value="1"/>
+            <option display="Gain of 4" id="module.driver.adc.channel4.channel_gain_4" value="2"/>
+            <option display="Gain of 8" id="module.driver.adc.channel4.channel_gain_8" value="3"/>
+            <option display="Gain of 16" id="module.driver.adc.channel4.channel_gain_16" value="4"/>
+            <option display="Gain of 32" id="module.driver.adc.channel4.channel_gain_32" value="5"/>
+            <export>
+                <![CDATA[eval('' +
+                'var pre_gain = 0; \n' +
+                'var analog_input = ${module.driver.adc.channel4.analog_input}; \n' +
+                'if (analog_input == "4") \n' +
+                '{ \n' +
+                '    pre_gain = ${module.driver.adc.channel4.gain}; \n' +
+                '} \n' +
+                'pre_gain')]]>
+            </export>
+        </property>
+        <property default="module.driver.adc.channel4.hpf_disabled" display="Channel Configuration|Virtual Channel 4|HPF bypass enabled" id="module.driver.adc.channel4.hpf" description="HPF bypass output enabled.">
+            <option display="Enabled" id="module.driver.adc.channel4.hpf_enabled" value="0"/>
+            <option display="Disabled" id="module.driver.adc.channel4.hpf_disabled" value="1"/>
+        </property>
+        <property default="0" display="Channel Configuration|Virtual Channel 4|Phase Adjustment Amount" id="module.driver.adc.channel4.phase_adj" description="Specify the phase adjustment amount for each channel in 1152 steps.">
+            <constraint display="Value must be a positive integer between 0 and 1151.">testInteger("${module.driver.adc.channel4.phase_adj}") &amp;&amp; ("${module.driver.adc.channel4.phase_adj}" &gt;= 0) &amp;&amp; ("${module.driver.adc.channel4.phase_adj}" &lt;= 1151)</constraint>
+        </property>
+        <property default="module.driver.adc.channel5.disabled" display="Channel Configuration|Virtual Channel 5|Analog input channel" id="module.driver.adc.channel5.analog_input" description="Analog input selection for virtual channel 5.">
+            <option display="Disabled" id="module.driver.adc.channel5.disabled" value="0xFF"/>
+            <option display="1 (4KHz Hybrid Mode Only)" id="module.driver.adc.channel5.analog_input_1" value="1"/>
+            <option display="5" id="module.driver.adc.channel5.analog_input_5" value="5"/>
+            <export>
+                <![CDATA[eval('' +
+                'var channel = 0; \n' +
+                'var analog_input = ${module.driver.adc.channel5.analog_input}; \n' +
+                'if (analog_input == "5") \n' +
+                '{ \n' +
+                '    channel = 1; \n' +
+                '} \n' +
+                'channel')]]>
+            </export>
+        </property>
+        <property default="module.driver.adc.channel5.channel_gain_1" display="Channel Configuration|Virtual Channel 5|Preamplifier Gain" id="module.driver.adc.channel5.gain" description="Select the gain of the PGA.">
+            <option display="Gain of 1" id="module.driver.adc.channel5.channel_gain_1" value="0"/>
+            <option display="Gain of 2" id="module.driver.adc.channel5.channel_gain_2" value="1"/>
+            <option display="Gain of 4" id="module.driver.adc.channel5.channel_gain_4" value="2"/>
+            <option display="Gain of 8" id="module.driver.adc.channel5.channel_gain_8" value="3"/>
+            <option display="Gain of 16" id="module.driver.adc.channel5.channel_gain_16" value="4"/>
+            <option display="Gain of 32" id="module.driver.adc.channel5.channel_gain_32" value="5"/>
+            <export>
+                <![CDATA[eval('' +
+                'var pre_gain = 0; \n' +
+                'var analog_input = ${module.driver.adc.channel5.analog_input}; \n' +
+                'if (analog_input == "5") \n' +
+                '{ \n' +
+                '    pre_gain = ${module.driver.adc.channel5.gain}; \n' +
+                '} \n' +
+                'pre_gain')]]>
+            </export>
+        </property>
+        <property default="module.driver.adc.channel5.hpf_disabled" display="Channel Configuration|Virtual Channel 5|HPF bypass enabled" id="module.driver.adc.channel5.hpf" description="HPF bypass output enabled.">
+            <option display="Enabled" id="module.driver.adc.channel5.hpf_enabled" value="0"/>
+            <option display="Disabled" id="module.driver.adc.channel5.hpf_disabled" value="1"/>
+        </property>
+        <property default="0" display="Channel Configuration|Virtual Channel 5|Phase Adjustment Amount" id="module.driver.adc.channel5.phase_adj" description="Specify the phase adjustment amount for each channel in 1152 steps.">
+            <constraint display="Value must be a positive integer between 0 and 1151.">testInteger("${module.driver.adc.channel5.phase_adj}") &amp;&amp; ("${module.driver.adc.channel5.phase_adj}" &gt;= 0) &amp;&amp; ("${module.driver.adc.channel5.phase_adj}" &lt;= 1151)</constraint>
+        </property>
+        <property default="module.driver.adc.channel6.disabled" display="Channel Configuration|Virtual Channel 6|Analog input channel" id="module.driver.adc.channel6.analog_input" description="Analog input selection for virtual channel 6.">
+            <option display="Disabled" id="module.driver.adc.channel6.disabled" value="0xFF"/>
+            <option display="2 (4KHz Hybrid Mode Only)" id="module.driver.adc.channel6.analog_input_2" value="2"/>
+            <option display="6" id="module.driver.adc.channel6.analog_input_6" value="6"/>
+            <export>
+                <![CDATA[eval('' +
+                'var channel = 0; \n' +
+                'var analog_input = ${module.driver.adc.channel6.analog_input}; \n' +
+                'if (analog_input == "6") \n' +
+                '{ \n' +
+                '    channel = 1; \n' +
+                '} \n' +
+                'channel')]]>
+            </export>
+        </property>
+        <property default="module.driver.adc.channel6.channel_gain_1" display="Channel Configuration|Virtual Channel 6|Preamplifier Gain" id="module.driver.adc.channel6.gain" description="Select the gain of the PGA.">
+            <option display="Gain of 1" id="module.driver.adc.channel6.channel_gain_1" value="0"/>
+            <option display="Gain of 2" id="module.driver.adc.channel6.channel_gain_2" value="1"/>
+            <option display="Gain of 4" id="module.driver.adc.channel6.channel_gain_4" value="2"/>
+            <option display="Gain of 8" id="module.driver.adc.channel6.channel_gain_8" value="3"/>
+            <option display="Gain of 16" id="module.driver.adc.channel6.channel_gain_16" value="4"/>
+            <option display="Gain of 32" id="module.driver.adc.channel6.channel_gain_32" value="5"/>
+            <export>
+                <![CDATA[eval('' +
+                'var pre_gain = 0; \n' +
+                'var analog_input = ${module.driver.adc.channel6.analog_input}; \n' +
+                'if (analog_input == "6") \n' +
+                '{ \n' +
+                '    pre_gain = ${module.driver.adc.channel6.gain}; \n' +
+                '} \n' +
+                'pre_gain')]]>
+            </export>
+        </property>
+        <property default="module.driver.adc.channel6.hpf_disabled" display="Channel Configuration|Virtual Channel 6|HPF bypass enabled" id="module.driver.adc.channel6.hpf" description="HPF bypass output enabled.">
+            <option display="Enabled" id="module.driver.adc.channel6.hpf_enabled" value="0"/>
+            <option display="Disabled" id="module.driver.adc.channel6.hpf_disabled" value="1"/>
+        </property>
+        <property default="0" display="Channel Configuration|Virtual Channel 6|Phase Adjustment Amount" id="module.driver.adc.channel6.phase_adj" description="Specify the phase adjustment amount for each channel in 1152 steps.">
+            <constraint display="Value must be a positive integer between 0 and 1151.">testInteger("${module.driver.adc.channel6.phase_adj}") &amp;&amp; ("${module.driver.adc.channel6.phase_adj}" &gt;= 0) &amp;&amp; ("${module.driver.adc.channel6.phase_adj}" &lt;= 1151)</constraint>
+        </property>
+        <property default="module.driver.adc.channel7.disabled" display="Channel Configuration|Virtual Channel 7|Analog input channel" id="module.driver.adc.channel7.analog_input" description="Analog input selection for virtual channel 7.">
+            <option display="Disabled" id="module.driver.adc.channel7.disabled" value="0xFF"/>
+            <option display="3 (4KHz Hybrid Mode Only)" id="module.driver.adc.channel7.analog_input_3" value="3"/>
+            <export>
+                <![CDATA[eval('' +
+                'var channel = 0; \n' +
+                'var analog_input = ${module.driver.adc.channel7.analog_input}; \n' +
+                'if (analog_input == "3") \n' +
+                '{ \n' +
+                '    channel = 1; \n' +
+                '} \n' +
+                'channel')]]>
+            </export>
+        </property>
+        <property default="module.driver.adc.channel7.hpf_disabled" display="Channel Configuration|Virtual Channel 7|HPF bypass enabled" id="module.driver.adc.channel7.hpf" description="HPF bypass output enabled.">
+            <option display="Enabled" id="module.driver.adc.channel7.hpf_enabled" value="0"/>
+            <option display="Disabled" id="module.driver.adc.channel7.hpf_disabled" value="1"/>
+        </property>
+        <property default="0" display="Channel Configuration|Virtual Channel 7|Phase Adjustment Amount" id="module.driver.adc.channel7.phase_adj" description="Specify the phase adjustment amount for each channel in 1152 steps.">
+            <constraint display="Value must be a positive integer between 0 and 1151.">testInteger("${module.driver.adc.channel7.phase_adj}") &amp;&amp; ("${module.driver.adc.channel7.phase_adj}" &gt;= 0) &amp;&amp; ("${module.driver.adc.channel7.phase_adj}" &lt;= 1151)</constraint>
+        </property>
+        <peripheral name="SDADC" component="sdadc${module.driver.adc.channel}" />
+        <header>
+            /** ADC on ADC Instance. */
+            extern const adc_instance_t ${module.driver.adc.name};
+            extern sdadc_b_instance_ctrl_t ${module.driver.adc.name}_ctrl;
+            extern const adc_cfg_t ${module.driver.adc.name}_cfg;
+            #ifndef ${module.driver.adc.p_callback}
+            void ${module.driver.adc.p_callback}(adc_callback_args_t * p_args);
+            #endif
+        </header>
+        <includes>
+#include &quot;r_sdadc_b.h&quot;
+#include &quot;r_adc_api.h&quot;
+        </includes>
+        <declarations>
+sdadc_b_instance_ctrl_t ${module.driver.adc.name}_ctrl;
+
+const sdadc_b_scan_cfg_t ${module.driver.adc.name}_channel_cfg =
+{
+    .scan_cfg_mask   = ((${module.driver.adc.channel0.analog_input}) | (${module.driver.adc.channel1.analog_input} &lt;&lt; 1) | (${module.driver.adc.channel2.analog_input} &lt;&lt; 2) | (${module.driver.adc.channel3.analog_input} &lt;&lt; 3) | (${module.driver.adc.channel4.analog_input} &lt;&lt; 4) | (${module.driver.adc.channel5.analog_input} &lt;&lt; 5) | (${module.driver.adc.channel6.analog_input} &lt;&lt; 6) | (${module.driver.adc.channel7.analog_input} &lt;&lt; 7)),
+    .hpf_cutoff      = ${module.driver.adc.hpf_cutoff},
+    .gain_setting    =
+    {
+        (sdadc_b_channel_gain_t) ${module.driver.adc.channel0.gain},
+        (sdadc_b_channel_gain_t) ${module.driver.adc.channel1.gain},
+        (sdadc_b_channel_gain_t) ${module.driver.adc.channel2.gain},
+        (sdadc_b_channel_gain_t) ${module.driver.adc.channel3.gain},
+        (sdadc_b_channel_gain_t) ${module.driver.adc.channel4.gain},
+        (sdadc_b_channel_gain_t) ${module.driver.adc.channel5.gain},
+        (sdadc_b_channel_gain_t) ${module.driver.adc.channel6.gain},
+    },
+    .hpf_setting     =
+    {
+        (sdadc_b_channel_hpf_t) ${module.driver.adc.channel0.hpf},
+        (sdadc_b_channel_hpf_t) ${module.driver.adc.channel1.hpf},
+        (sdadc_b_channel_hpf_t) ${module.driver.adc.channel2.hpf},
+        (sdadc_b_channel_hpf_t) ${module.driver.adc.channel3.hpf},
+        (sdadc_b_channel_hpf_t) ${module.driver.adc.channel4.hpf},
+        (sdadc_b_channel_hpf_t) ${module.driver.adc.channel5.hpf},
+        (sdadc_b_channel_hpf_t) ${module.driver.adc.channel6.hpf},
+        (sdadc_b_channel_hpf_t) ${module.driver.adc.channel7.hpf},
+    },
+    .phase_adjustment =
+    {
+        ${module.driver.adc.channel0.phase_adj},
+        ${module.driver.adc.channel1.phase_adj},
+        ${module.driver.adc.channel2.phase_adj},
+        ${module.driver.adc.channel3.phase_adj},
+        ${module.driver.adc.channel4.phase_adj},
+        ${module.driver.adc.channel5.phase_adj},
+        ${module.driver.adc.channel6.phase_adj},
+        ${module.driver.adc.channel7.phase_adj},
+    },
+};
+
+const sdadc_b_extended_cfg_t ${module.driver.adc.name}_cfg_extend =
+{
+    .oper_clk        = ${module.driver.adc.operating_clk},
+    .sampling_mode   = ${module.driver.adc.sampling_mode},
+    .p_channel_cfg   = &amp;${module.driver.adc.name}_channel_cfg,
+    .conv_end_ipl    = ${module.driver.adc.conv_end_ipl},
+    .conv_end_irq    = VECTOR_NUMBER_SDADC0_ADI,
+    .conv_end_irq2   = VECTOR_NUMBER_SDADC0_ADI2,
+    .zc_ipl          = ${module.driver.adc.zc_ipl},
+#if defined(VECTOR_NUMBER_SDADC0_ADZC0)
+    .zc_irq          = VECTOR_NUMBER_SDADC0_ADZC0,
+#else
+    .zc_irq          = FSP_INVALID_VECTOR,
+#endif
+    .zc_ipl2         = ${module.driver.adc.zc_ipl2},
+#if defined(VECTOR_NUMBER_SDADC0_ADZC1)
+    .zc_irq2         = VECTOR_NUMBER_SDADC0_ADZC1,
+#else
+    .zc_irq2         = FSP_INVALID_VECTOR,
+#endif
+    .zc_detection_setting = (${module.driver.adc.zero_detection0} | (SDADC_B_ZC_LEVEL_OUTPUT_MODE &lt;&lt; 1) | ${module.driver.adc.falling_edge0} | ${module.driver.adc.rising_edge0} | ${module.driver.adc.zero_detection1} | (SDADC_B_ZC_LEVEL_OUTPUT_MODE &lt;&lt; 5) | ${module.driver.adc.falling_edge1} | ${module.driver.adc.rising_edge1}),
+};
+
+const adc_cfg_t ${module.driver.adc.name}_cfg =
+{
+    .unit                = 0,
+    .mode                = (adc_mode_t) 0,
+    .resolution          = ${module.driver.adc.resolution},
+    .alignment           = ADC_ALIGNMENT_RIGHT,
+    .trigger             = ADC_TRIGGER_SOFTWARE,
+    .scan_end_irq        = FSP_INVALID_VECTOR,
+    .scan_end_ipl        = 0,
+    .scan_end_b_irq      = FSP_INVALID_VECTOR,
+    .scan_end_b_ipl      = 0,
+    .p_callback          = ${module.driver.adc.p_callback},
+    .p_context           = NULL,
+    .p_extend            = &amp;${module.driver.adc.name}_cfg_extend,
+};
+
+/* Instance structure to use this module. */
+const adc_instance_t ${module.driver.adc.name} =
+{
+    .p_ctrl        = &amp;${module.driver.adc.name}_ctrl,
+    .p_cfg         = &amp;${module.driver.adc.name}_cfg,
+    .p_channel_cfg = NULL,
+    .p_api         = &amp;g_adc_on_sdadc_b
+};
+        </declarations>
+        <api configurable="true">
+            <file>ra/fsp/inc/instances/r_sdadc_b.h</file>
+            <file>ra/fsp/inc/api/r_adc_api.h</file>
+            <file>ra/fsp/inc/api/r_elc_api.h</file>
+            <file>ra/fsp/inc/api/r_transfer_api.h</file>
+        </api>
+    </module>
+</raModuleDescription>

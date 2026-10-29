@@ -1,0 +1,10 @@
+<?xml version="1.0" ?>
+<raModuleDescription>
+  <module display="Security|Crypto RA2" id="module.driver.crypto_ra2" common="1" version="1" visible="false" url="">
+    <constraint display="Requires AES">
+      "${interface.mcu.rsip.aes}" === "1"
+    </constraint>
+    <requires id="module.driver.sce.requires.rsip_aes" interface="interface.mcu.rsip.aes" visible="false" display="Requires AES" />
+    <provides interface="interface.driver.sce"/>
+  </module>
+</raModuleDescription>

@@ -1,0 +1,354 @@
+<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.lwip.http_server" path="lwip/lwip/apps/httpd_opts.h" version="0">
+        <property display="LwIP HTTPD CGI (old style)" id="config.lwip.http_server.cgi" default="config.lwip.http_server.cgi.disabled" description="Enable CGI support (old style). Use this CGI type e.g. to execute specific actions and return a page that does not depend on the CGI parameters.">
+            <option display="Enabled" id="config.lwip.http_server.cgi.enabled" value="(1)"/>
+            <option display="Disabled" id="config.lwip.http_server.cgi.disabled" value="(0)"/>
+        </property>
+        <property display="LwIP HTTPD CGI SSI (new style)" id="config.lwip.http_server.cgi_ssi" default="config.lwip.http_server.cgi_ssi.disabled" description="Enable CGI support with SSI feature (new style). Use this CGI handler if you want CGI information passed on to SSI.">
+            <option display="Enabled" id="config.lwip.http_server.cgi_ssi.enabled" value="(1)"/>
+            <option display="Disabled" id="config.lwip.http_server.cgi_ssi.disabled" value="(0)"/>
+        </property>
+        <property display="LwIP HTTPD SSI" id="config.lwip.http_server.ssi" default="config.lwip.http_server.ssi.disabled" description="Enable SSI support (Server-Side-Includes).">
+            <option display="Enabled" id="config.lwip.http_server.ssi.enabled" value="(1)"/>
+            <option display="Disabled" id="config.lwip.http_server.ssi.disabled" value="(0)"/>
+        </property>
+        <property display="LwIP HTTPD SSI Raw" id="config.lwip.http_server.ssi_raw" default="config.lwip.http_server.ssi_raw.disabled" description="Enable to implement an SSI tag handler callback that gets a const char* to the tag (instead of an index into a pre-registered array of known tags).">
+            <option display="Enabled" id="config.lwip.http_server.ssi_raw.enabled" value="(1)"/>
+            <option display="Disabled" id="config.lwip.http_server.ssi_raw.disabled" value="(0)"/>
+        </property>
+        <property display="LwIP HTTPD SSI By File Extension" id="config.lwip.http_server.ssi_by_file_extension" default="config.lwip.http_server.ssi_by_file_extension.enabled" description="enable/disable or override the file SSI tag scan function. You need to provide an external function to perform the check: u8_t http_uri_is_ssi(struct fs_file *file, const char *uri)">
+            <option display="Overriden" id="config.lwip.http_server.ssi_by_file_extension.overriden" value="(2)"/>
+            <option display="Enabled" id="config.lwip.http_server.ssi_by_file_extension.enabled" value="(1)"/>
+            <option display="Disabled" id="config.lwip.http_server.ssi_by_file_extension.disabled" value="(0)"/>
+        </property>
+        <property display="LwIP HTTPD SSI Extension" id="config.lwip.http_server.ssi_extension" default='".shtml", ".shtm", ".ssi", ".xml", ".json"'
+        description="List of file extensions handled as SSI files. Only used if LWIP_HTTPD_SSI_BY_FILE_EXTENSION != 0.">
+        </property>
+        <property display="LwIP HTTPD Support POST" id="config.lwip.http_server.support_post" default="config.lwip.http_server.support_post.disabled" description="Set this to 1 to support HTTP POST.">
+            <option display="Enabled" id="config.lwip.http_server.support_post.enabled" value="(1)"/>
+            <option display="Disabled" id="config.lwip.http_server.support_post.disabled" value="(0)"/>
+        </property>
+        <property display="LwIP HTTPD Maximum CGI Parameters" id="config.lwip.http_server.max_cgi_parameters" default="16" description="The maximum number of parameters that the CGI handler can be sent.">
+            <constraint display="Must be a non zero positive interger.">testInteger("${config.lwip.http_server.max_cgi_parameters}")  &amp;&amp; ("${config.lwip.http_server.max_cgi_parameters}" &gt;= 1)</constraint>
+        </property>
+        <property display="LwIP HTTPD SSI Multipart" id="config.lwip.http_server.ssi_multipart" default="config.lwip.http_server.ssi_multipart.disabled" description="SSI handler function is called with 2 more arguments to handle string too long to be inserted at once">
+            <option display="Enabled" id="config.lwip.http_server.ssi_multipart.enabled" value="(1)"/>
+            <option display="Disabled" id="config.lwip.http_server.ssi_multipart.disabled" value="(0)"/>
+        </property>
+        <property display="LwIP HTTPD Maximum Tag Name Length" id="config.lwip.http_server.max_tag_name_len" default="8" description="The maximum length of the string comprising the SSI tag name. The longer tags are ignored.">
+            <constraint display="Must be a non zero positive interger.">testInteger("${config.lwip.http_server.max_tag_name_len}")  &amp;&amp; ("${config.lwip.http_server.max_tag_name_len}" &gt;= 1)</constraint>
+        </property>
+        <property display="LwIP HTTPD Maximum Tag Insert Length" id="config.lwip.http_server.max_tag_insert_len" default="192" description="The maximum length of string that can be returned to replace any given tag.">
+            <constraint display="Must be a non zero positive interger.">testInteger("${config.lwip.http_server.max_tag_insert_len}")  &amp;&amp; ("${config.lwip.http_server.max_tag_insert_len}" &gt;= 0)</constraint>
+        </property>
+        <property display="LwIP HTTPD POST Manual WND" id="config.lwip.http_server.post_manual_wnd" default="config.lwip.http_server.post_manual_wnd.disabled" description="Enable configurating POST window response for HTTP server">
+            <option display="Enabled" id="config.lwip.http_server.post_manual_wnd.enabled" value="(1)"/>
+            <option display="Disabled" id="config.lwip.http_server.post_manual_wnd.disabled" value="(0)"/>
+        </property>
+        <property display="HTTPD Server Agent" id="config.lwip.http_server.agent" default='lwIP/" LWIP_VERSION_STRING " (http://savannah.nongnu.org/projects/lwip)' description="This string is passed in the HTTP header as 'Server: HTTPD_SERVER_AGENT'."/>
+        <property display="LwIP HTTPD Dynamic Headers" id="config.lwip.http_server.dynamic_headers" default="config.lwip.http_server.dynamic_headers.disabled" description="Set this to 1 if you want to include code that creates HTTP headers at runtime. Else use static header created by the makefsdata tool.">
+            <option display="Enabled" id="config.lwip.http_server.dynamic_headers.enabled" value="(1)"/>
+            <option display="Disabled" id="config.lwip.http_server.dynamic_headers.disabled" value="(0)"/>
+        </property>
+        <property display="HTTPD Debug" id="config.lwip.http_server.debug" default="config.lwip.http_server.debug.lwip_dbg_off" description="Configure debug for HTTPD file send timing">
+            <option display="Disabled" id="config.lwip.http_server.debug.lwip_dbg_off" value="(LWIP_DBG_OFF)"/>
+            <option display="Enabled" id="config.lwip.http_server.debug.lwip_dbg_on" value="(LWIP_DBG_ON)"/>
+        </property>
+        <property display="HTTPD Use Mem Pool" id="config.lwip.http_server.use_mem_pool" default="config.lwip.http_server.use_mem_pool.disabled" description="Set this to 1 to allocate http_state instead of using heap.If enabled, define MEMP_NUM_PARALLEL_HTTPD_CONNS (and MEMP_NUM_PARALLEL_HTTPD_SSI_CONNS for SSI) to set the size of the pool(s). ">
+            <option display="Enabled" id="config.lwip.http_server.use_mem_pool.enabled" value="(1)"/>
+            <option display="Disabled" id="config.lwip.http_server.use_mem_pool.disabled" value="(0)"/>
+        </property>
+        <property display="HTTPD Server Port" id="config.lwip.http_server.http_server_port" default="80" description="The http server port for HTTPD to use">
+            <constraint display="Must be an interger in range 0-65535.">testInteger("${config.lwip.http_server.http_server_port}")  &amp;&amp; ("${config.lwip.http_server.http_server_port}" &gt;= 0) &amp;&amp; ("${config.lwip.http_server.http_server_port}" &lt;= 65535)</constraint>
+        </property>
+        <property display="HTTPD Server Port HTTPS" id="config.lwip.http_server.https_server_port" default="443" description="The https server port for HTTPD to use">
+            <constraint display="Must be an interger in range 0-65535.">testInteger("${config.lwip.http_server.https_server_port}")  &amp;&amp; ("${config.lwip.http_server.https_server_port}" &gt;= 0) &amp;&amp; ("${config.lwip.http_server.https_server_port}" &lt;= 65535)</constraint>
+        </property>
+        <property display="HTTPD Enable HTTPS" id="config.lwip.http_server.enable_https" default="config.lwip.http_server.enable_https.disabled" description="Enable https support.">
+            <option display="Enabled" id="config.lwip.http_server.enable_https.enabled" value="(1)"/>
+            <option display="Disabled" id="config.lwip.http_server.enable_https.disabled" value="(0)"/>
+		</property>
+        <property display="HTTPD Maximum Retries" id="config.lwip.http_server.max_retries" default="4" description="Maximum retries before the connection is aborted/closed.">
+            <constraint display="Must be a positive integer.">testInteger("${config.lwip.http_server.max_retries}")  &amp;&amp; ("${config.lwip.http_server.max_retries}" &gt;= 0)</constraint>
+        </property>
+        <property display="HTTPD Poll Interval" id="config.lwip.http_server.poll_interval" default="4" description="How long the Server will keep the connection. The poll delay is X*500ms.">
+            <constraint display="Must be a non zero positive interger.">testInteger("${config.lwip.http_server.poll_interval}")  &amp;&amp; ("${config.lwip.http_server.poll_interval}" &gt;= 1)</constraint>
+        </property>
+        <property display="HTTPD TCP Priority" id="config.lwip.http_server.tcp_prio" default="1" description="Priority for tcp pcbs created by HTTPD 1 by default range from 1-127.">
+            <constraint display="Must be an interger in range 1-127.">testInteger("${config.lwip.http_server.tcp_prio}")  &amp;&amp; ("${config.lwip.http_server.tcp_prio}" &gt;= 1) &amp;&amp; ("${config.lwip.http_server.tcp_prio}" &lt;= 127)</constraint>
+        </property>
+        <property display="LwIP HTTPD Timing" id="config.lwip.http_server.timing" default="config.lwip.http_server.timing.disabled" description="Set this to 1 to enable timing each file sent.">
+            <option display="Enabled" id="config.lwip.http_server.timing.enabled" value="(1)"/>
+            <option display="Disabled" id="config.lwip.http_server.timing.disabled" value="(0)"/>
+        </property>
+        <property display="HTTPD Debug Timing" id="config.lwip.http_server.debug_timing" default="config.lwip.http_server.debug_timing.lwip_dbg_off" description="Set this to 1 to enable timing each file sent.">
+            <option display="Disabled" id="config.lwip.http_server.debug_timing.lwip_dbg_off" value="(LWIP_DBG_OFF)"/>
+            <option display="Enabled" id="config.lwip.http_server.debug_timing.lwip_dbg_on" value="(LWIP_DBG_ON)"/>
+        </property>
+        <property display="LwIP HTTPD Support Extstatus" id="config.lwip.http_server.support_extstatus" default="config.lwip.http_server.support_extstatus.disabled" description="Set this to one to show error pages when parsing request fail. Else simply close the connection">
+            <option display="Enabled" id="config.lwip.http_server.support_extstatus.enabled" value="(1)"/>
+            <option display="Disabled" id="config.lwip.http_server.support_extstatus.disabled" value="(0)"/>
+        </property>
+        <property display="LwIP HTTPD Support V09" id="config.lwip.http_server.support_v09" default="config.lwip.http_server.support_v09.enabled" description="Set this to 0 to drop support for HTTP/0.9 clients (to save some bytes).">
+            <option display="Enabled" id="config.lwip.http_server.support_v09.enabled" value="(1)"/>
+            <option display="Disabled" id="config.lwip.http_server.support_v09.disabled" value="(0)"/>
+        </property>
+        <property display="LwIP HTTPD Support 11 Keepalive" id="config.lwip.http_server.support_11_keepalive" default="config.lwip.http_server.support_11_keepalive.disabled" description="Set this to 1 to enable HTTP/1.1 persistent connections.">
+            <option display="Enabled" id="config.lwip.http_server.support_11_keepalive.enabled" value="(1)"/>
+            <option display="Disabled" id="config.lwip.http_server.support_11_keepalive.disabled" value="(0)"/>
+        </property>
+        <property display="LwIP HTTPD Support Requestlist" id="config.lwip.http_server.support_requestlist" default="config.lwip.http_server.support_requestlist.enabled" description="Set this to 1 to support HTTP request coming in in multiple packets/pbufs.">
+            <option display="Enabled" id="config.lwip.http_server.support_requestlist.enabled" value="(1)"/>
+            <option display="Disabled" id="config.lwip.http_server.support_requestlist.disabled" value="(0)"/>
+        </property>
+        <property display="LwIP HTTPD Request Queuelen" id="config.lwip.http_server.req_queuelen" default="5" description="Number of rx pbufs to enqueue to parse an incoming request.">
+            <constraint display="Must be a non zero positive interger.">testInteger("${config.lwip.http_server.req_queuelen}")  &amp;&amp; ("${config.lwip.http_server.req_queuelen}" &gt;= 1)</constraint>
+        </property>
+        <property display="LwIP HTTPD Request Bufsize" id="config.lwip.http_server.req_bufsize" default="LWIP_HTTPD_MAX_REQ_LENGTH" description="Number of (TCP payload-) bytes (in pbufs) to enqueue to parse and incoming request.">
+            <constraint display="Must be a non zero positive interger.">(testInteger("${config.lwip.http_server.req_bufsize}")  &amp;&amp; ("${config.lwip.http_server.req_bufsize}" &gt;= 1)) &amp;&amp; ("${config.lwip.http_server.req_bufsize}".length != 0) </constraint>
+        </property>
+        <property display="LwIP HTTPD Maximum Request Length" id="config.lwip.http_server.max_req_length" default="LWIP_MIN(1023, (LWIP_HTTPD_REQ_QUEUELEN * PBUF_POOL_BUFSIZE))" description="Defines the maximum length of a HTTP request line.">
+            <constraint display="Must be a non zero positive interger.">(testInteger("${config.lwip.http_server.max_req_length}")  &amp;&amp; ("${config.lwip.http_server.max_req_length}" &gt;= 1)) &amp;&amp; ("${config.lwip.http_server.max_req_length}".length != 0)</constraint>
+        </property>
+        <property display="LwIP HTTPD Maximum Request URI Length" id="config.lwip.http_server.max_request_uri_len" default="63" description="This is the size of a static buffer used when URIs end with '/'.">
+            <constraint display="Must be a positive interger.">testInteger("${config.lwip.http_server.max_request_uri_len}")  &amp;&amp; ("${config.lwip.http_server.max_request_uri_len}" &gt;= 0)</constraint>
+        </property>
+        <property display="LwIP HTTPD POST Maximum Response URI Length" id="config.lwip.http_server.max_response_uri_len" default="63" description="Maximum length of the filename to send as response to a POST request.">
+            <constraint display="Must be a non zero positive interger.">testInteger("${config.lwip.http_server.max_response_uri_len}")  &amp;&amp; ("${config.lwip.http_server.max_response_uri_len}" &gt;= 1)</constraint>
+        </property>
+        <property display="LwIP HTTPD SSI Include Tag" id="config.lwip.http_server.ssi_include_tag" default="config.lwip.http_server.ssi_include_tag.enabled" description="Set this to 0 to not send the SSI tag.">
+            <option display="Enabled" id="config.lwip.http_server.ssi_include_tag.enabled" value="(1)"/>
+            <option display="Disabled" id="config.lwip.http_server.ssi_include_tag.disabled" value="(0)"/>
+        </property>
+        <property display="LwIP HTTPD Abort On Close Memory Error" id="config.lwip.http_server.abort_on_close_mem_error" default="config.lwip.http_server.abort_on_close_mem_error.disabled" description="Set this to 1 to call tcp_abort when tcp_close fails with memory error.">
+            <option display="Enabled" id="config.lwip.http_server.abort_on_close_mem_error.enabled" value="(1)"/>
+            <option display="Disabled" id="config.lwip.http_server.abort_on_close_mem_error.disabled" value="(0)"/>
+        </property>
+        <property display="LwIP HTTPD Kill Old On Connections Exceeded" id="config.lwip.http_server.kill_old_on_connections_exceeded" default="config.lwip.http_server.kill_old_on_connections_exceeded.disabled" description="Set this to 1 to kill the oldest connection.">
+            <option display="Enabled" id="config.lwip.http_server.kill_old_on_connections_exceeded.enabled" value="(1)"/>
+            <option display="Disabled" id="config.lwip.http_server.kill_old_on_connections_exceeded.disabled" value="(0)"/>
+        </property>
+        <property display="LwIP HTTPD Omit Header For Extensionless URI" id="config.lwip.http_server.omit_header_for_extensionless_uri" default="config.lwip.http_server.omit_header_for_extensionless_uri.disabled" description="Set this to 1 to send URIs without extension without headers.">
+            <option display="Enabled" id="config.lwip.http_server.omit_header_for_extensionless_uri.enabled" value="(1)"/>
+            <option display="Disabled" id="config.lwip.http_server.omit_header_for_extensionless_uri.disabled" value="(0)"/>
+        </property>
+        <property display="HTTPD Limit Sending To 2mss" id="config.lwip.http_server.limit_sending_to_2mss" default="config.lwip.http_server.limit_sending_to_2mss.enabled" description="By default, the httpd is limited to send 2*pcb->mss.">
+            <option display="Enabled" id="config.lwip.http_server.limit_sending_to_2mss.enabled" value="(1)"/>
+            <option display="Disabled" id="config.lwip.http_server.limit_sending_to_2mss.disabled" value="(0)"/>
+        </property>
+        <property display="HTTPD Maximum Write Length" id="config.lwip.http_server.max_write_len" default="altcp_mss" description="Define this to a function that returns the maximum amount of data to enqueue. The function have this signature: u16_t fn(struct altcp_pcb* pcb);.">
+            <constraint display="The name function must be a valid C symbol">testSymbol("${config.lwip.http_server.max_write_len}") </constraint>
+        </property>
+        <property display="LwIP HTTPD Custom Files" id="config.lwip.http_server.custom_files" default="config.lwip.http_server.custom_files.disabled" description=
+        "Set this to 1 and provide the functions:
+        \n- int fs_open_custom(struct fs_file *file, const char *name)
+        \nCalled first for every opened file to allow opening files
+        \nthat are not included in fsdata(_custom).c
+        \n- void fs_close_custom(struct fs_file *file)
+        \nCalled to free resources allocated by fs_open_custom().">
+            <option display="Enabled" id="config.lwip.http_server.custom_files.enabled" value="(1)"/>
+            <option display="Disabled" id="config.lwip.http_server.custom_files.disabled" value="(0)"/>
+        </property>
+        <property display="LwIP HTTPD Dynamic File Read" id="config.lwip.http_server.dynamic_file_read" default="config.lwip.http_server.dynamic_file_read.disabled" description="Set this to 1 to support fs_read(). Else only one-block files are supported, and the contents must be ready after fs_open(). ">
+            <option display="Enabled" id="config.lwip.http_server.dynamic_file_read.enabled" value="(1)"/>
+            <option display="Disabled" id="config.lwip.http_server.dynamic_file_read.disabled" value="(0)"/>
+        </property>
+        <property display="LwIP HTTPD File State" id="config.lwip.http_server.file_state" default="config.lwip.http_server.file_state.disabled" description="Set this to 1 to include an application stateargument per file that is opened.">
+            <option display="Enabled" id="config.lwip.http_server.file_state.enabled" value="(1)"/>
+            <option display="Disabled" id="config.lwip.http_server.file_state.disabled" value="(0)"/>
+        </property>
+        <property display="LwIP HTTPD File Extension" id="config.lwip.http_server.file_extension" default="config.lwip.http_server.file_extension.disabled" description="Set this to 1 to add the pextension field to the fs_file structure.New code should use LWIP_HTTPD_FILE_STATE instead.">
+            <option display="Enabled" id="config.lwip.http_server.file_extension.enabled" value="(1)"/>
+            <option display="Disabled" id="config.lwip.http_server.file_extension.disabled" value="(0)"/>
+        </property>
+        <property display="HTTPD Precalculated Checksum" id="config.lwip.http_server.precalculated_checksum" default="config.lwip.http_server.precalculated_checksum.disabled" description="Support asynchronous read operations.">
+            <option display="Enabled" id="config.lwip.http_server.precalculated_checksum.enabled" value="(1)"/>
+            <option display="Disabled" id="config.lwip.http_server.precalculated_checksum.disabled" value="(0)"/>
+        </property>
+        <property display="LwIP HTTPD FS Async Read" id="config.lwip.http_server.fs_async_read" default="config.lwip.http_server.fs_async_read.disabled" description="Set this to 1 to add the pextension field.">
+            <option display="Enabled" id="config.lwip.http_server.fs_async_read.enabled" value="(1)"/>
+            <option display="Disabled" id="config.lwip.http_server.fs_async_read.disabled" value="(0)"/>
+        </property>
+        <property display="HTTPD Fsdata File" id="config.lwip.http_server.fsdata_file" default="fsdata_sample.c" description="Provide source name file of FS custom data. This data file will be included by fs.c file">
+        </property>
+        <property display="HTTP Is Data Volatile" id="config.lwip.http_server.http_isdata_volatile" default="config.lwip.http_server.http_isdata_volatile.copy"
+        description="Determines if HTTP data should be copied into the TCP buffer before transmission.
+        \n Allow Copy: data will be copied into memory belonging to the stack.
+        \n Allow Copy and More: Notify to TCP that data will be copied into memory belonging to the stack
+        \n and additional data will follow in subsequent TCP transmissions.">
+            <option display="Allow Copy and More" id="config.lwip.http_server.http_isdata_volatile.copy_and_more" value="(TCP_WRITE_FLAG_COPY | TCP_WRITE_FLAG_MORE)"/>
+            <option display="Allow Copy" id="config.lwip.http_server.http_isdata_volatile.copy" value="(TCP_WRITE_FLAG_COPY)"/>
+            <option display="Undefined" id="config.lwip.http_server.http_isdata_volatile.disabled" value="(0)"/>
+        </property>
+        <property display="LwIP HTTPD Use Default Template" id="config.lwip.http_server.use_default_template" default="config.lwip.http_server.use_default_template.enabled" description="Set this to 1 to when intent to use the default template from the generator">
+            <option display="Enabled FSdata Generator" id="config.lwip.http_server.use_default_template.enabled" value="(1)"/>
+            <option display="Disabled FSdata Generator" id="config.lwip.http_server.use_default_template.disabled" value="(0)"/>
+        </property>
+        <content>
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#define LWIP_HTTPD_CGI                                  ${config.lwip.http_server.cgi}
+
+#define LWIP_HTTPD_CGI_SSI                              ${config.lwip.http_server.cgi_ssi}
+
+#define LWIP_HTTPD_SSI                                  ${config.lwip.http_server.ssi}
+
+#define LWIP_HTTPD_SSI_RAW                              ${config.lwip.http_server.ssi_raw}
+
+#define LWIP_HTTPD_SSI_BY_FILE_EXTENSION                ${config.lwip.http_server.ssi_by_file_extension}
+
+#define LWIP_HTTPD_SSI_EXTENSIONS                       ${config.lwip.http_server.ssi_extension}
+
+#define LWIP_HTTPD_SUPPORT_POST                         ${config.lwip.http_server.support_post}
+
+#define LWIP_HTTPD_MAX_CGI_PARAMETERS                   (${config.lwip.http_server.max_cgi_parameters})
+
+#define LWIP_HTTPD_SSI_MULTIPART                        ${config.lwip.http_server.ssi_multipart}
+
+#define LWIP_HTTPD_MAX_TAG_NAME_LEN                     (${config.lwip.http_server.max_tag_name_len})
+
+#define LWIP_HTTPD_MAX_TAG_INSERT_LEN                   (${config.lwip.http_server.max_tag_insert_len})
+
+#define LWIP_HTTPD_POST_MANUAL_WND                      ${config.lwip.http_server.post_manual_wnd}
+
+#define HTTPD_SERVER_AGENT                              "${config.lwip.http_server.agent}"
+
+#define LWIP_HTTPD_DYNAMIC_HEADERS                      ${config.lwip.http_server.dynamic_headers}
+
+#define HTTPD_DEBUG                                     ${config.lwip.http_server.debug}
+
+#define HTTPD_USE_MEM_POOL                              ${config.lwip.http_server.use_mem_pool}
+
+#define HTTPD_SERVER_PORT                               (${config.lwip.http_server.http_server_port})
+
+#define HTTPD_SERVER_PORT_HTTPS                         (${config.lwip.http_server.https_server_port})
+
+#define HTTPD_ENABLE_HTTPS                              ${config.lwip.http_server.enable_https}
+
+#define HTTPD_MAX_RETRIES                               (${config.lwip.http_server.max_retries})
+
+#define HTTPD_POLL_INTERVAL                             (${config.lwip.http_server.poll_interval})
+
+#define HTTPD_TCP_PRIO                                  (${config.lwip.http_server.tcp_prio})
+
+#define LWIP_HTTPD_TIMING                               ${config.lwip.http_server.timing}
+
+#define HTTPD_DEBUG_TIMING                              ${config.lwip.http_server.debug_timing}
+
+#define LWIP_HTTPD_SUPPORT_EXTSTATUS                    ${config.lwip.http_server.support_extstatus}
+
+#define LWIP_HTTPD_SUPPORT_V09                          ${config.lwip.http_server.support_v09}
+
+#define LWIP_HTTPD_SUPPORT_11_KEEPALIVE                 ${config.lwip.http_server.support_11_keepalive}
+
+#define LWIP_HTTPD_SUPPORT_REQUESTLIST                  ${config.lwip.http_server.support_requestlist}
+
+#if LWIP_HTTPD_SUPPORT_REQUESTLIST
+ #define LWIP_HTTPD_REQ_QUEUELEN                         (${config.lwip.http_server.req_queuelen})
+
+ #define LWIP_HTTPD_REQ_BUFSIZE                          (${config.lwip.http_server.req_bufsize})
+
+ #define LWIP_HTTPD_MAX_REQ_LENGTH                       (${config.lwip.http_server.max_req_length})
+#endif
+
+#define LWIP_HTTPD_MAX_REQUEST_URI_LEN                  (${config.lwip.http_server.max_request_uri_len})
+
+#define LWIP_HTTPD_POST_MAX_RESPONSE_URI_LEN            (${config.lwip.http_server.max_response_uri_len})
+
+#define LWIP_HTTPD_SSI_INCLUDE_TAG                      ${config.lwip.http_server.ssi_include_tag}
+
+#define LWIP_HTTPD_ABORT_ON_CLOSE_MEM_ERROR             ${config.lwip.http_server.abort_on_close_mem_error}
+
+#define LWIP_HTTPD_KILL_OLD_ON_CONNECTIONS_EXCEEDED     ${config.lwip.http_server.kill_old_on_connections_exceeded}
+
+#define LWIP_HTTPD_OMIT_HEADER_FOR_EXTENSIONLESS_URI    ${config.lwip.http_server.omit_header_for_extensionless_uri}
+
+#define HTTP_IS_TAG_VOLATILE(ptr)                       (TCP_WRITE_FLAG_COPY)
+
+#define HTTPD_LIMIT_SENDING_TO_2MSS                     ${config.lwip.http_server.limit_sending_to_2mss}
+
+#if HTTPD_LIMIT_SENDING_TO_2MSS
+#define HTTPD_MAX_WRITE_LEN(pcb)                        ((u16_t)(2 * ${config.lwip.http_server.max_write_len}(pcb)))
+#endif
+
+#define LWIP_HTTPD_CUSTOM_FILES                         ${config.lwip.http_server.custom_files}
+
+#define LWIP_HTTPD_DYNAMIC_FILE_READ                    ${config.lwip.http_server.dynamic_file_read}
+
+#define LWIP_HTTPD_FILE_STATE                           ${config.lwip.http_server.file_state}
+
+#define LWIP_HTTPD_FILE_EXTENSION                       ${config.lwip.http_server.file_extension}
+
+#define HTTPD_PRECALCULATED_CHECKSUM                    ${config.lwip.http_server.precalculated_checksum}
+
+#define LWIP_HTTPD_FS_ASYNC_READ                        ${config.lwip.http_server.fs_async_read}
+
+#if (${config.lwip.http_server.use_default_template})
+#define HTTPD_FSDATA_FILE                               "fsdata_sample.c"
+#else
+#define HTTPD_FSDATA_FILE                               "${config.lwip.http_server.fsdata_file}"
+#endif
+
+#define HTTP_IS_DATA_VOLATILE(hs)                        ${config.lwip.http_server.http_isdata_volatile}
+
+#ifdef __cplusplus
+}
+#endif
+        </content>
+    </config>
+    <module id="module.lwip.http_server" display="Networking|LwIP HTTP Server" config="config.lwip.http_server" common="1" visible="true" version="0" url="https://www.nongnu.org/lwip/2_1_x/group__httpd.html">
+        <constraint display= "LwIP HTTP Server FS stack existance need to match the LwIP HTTPD Use Default Template flag">
+            ((("${config.lwip.http_server.use_default_template}" === "config.lwip.http_server.use_default_template.enabled") &amp;&amp; (testExists("${interface.lwip.http_server_fsdata}"))) ||
+            (("${config.lwip.http_server.use_default_template}" === "config.lwip.http_server.use_default_template.disabled") &amp;&amp; (!testExists("${interface.lwip.http_server_fsdata}"))))
+        </constraint>
+        <constraint display= "When using custom file HTTPD_FSDATA_FILE field must not leave blank">
+            (!(("${config.lwip.http_server.fsdata_file}".length === 0) &amp;&amp; ("${config.lwip.http_server.use_default_template}" === "config.lwip.http_server.use_default_template.disabled")))
+        </constraint>
+        <requires id="module.lwip.http_server.requires.lwip.tcpip" interface="interface.lwip.tcpip" display="Add lwIP TCP/IP Interface" find="true"/>
+        <requires id="module.lwip.http_server.requires.lwip.http_server_fsdata" interface="interface.lwip.http_server_fsdata" visible="true" display="Add LwIP HTTP Server FS [Optional]"  find="true" optional="true" />
+        <provides interface="interface.lwip.http_server" />
+    </module>
+    <developerSupport>
+        <api version="1">
+            <platform id="fsp" max="" min="1.1.0"/>
+            <moduleRef id="module.lwip.http_server"/>
+            <description><![CDATA[<form><p><span color="header" font="header">Overview</span></p><p>lwIP HTTP server quick examples.</p></form>]]></description>
+            <function display="Setup" id="lwip_httpd_setup_example">
+                <description><![CDATA[<form><p>This function provides a quick example for how to setup lwIP HTTP server.</p></form>]]></description>
+            </function>
+        </api>
+        <template category="function_call" display="Call lwIP HTTP Server Setup Example" id="module.lwip.http_server.lwip_httpd_setup_example" version="1">
+            <platform id="fsp" max="" min="1.1.0"/>
+            <moduleRef id="module.lwip.http_server">
+                <function id="lwip_httpd_setup_example"/>
+            </moduleRef>
+            <content>
+/* Quick setup example for HTTP Server.
+*/
+
+void lwip_http_server_quick_setup(void);
+
+/* Quick setup for HTTP Server. */
+void lwip_http_server_quick_setup(void)
+{
+    /* Initialize the lwIP HTTP Server */
+    httpd_init();
+
+    /* Waiting for connection to be established. */
+    while (true)
+    {
+        #if NO_SYS
+            R_BSP_SoftwareDelay(1, BSP_DELAY_UNITS_MILLISECONDS);
+            sys_check_timeouts();
+        #else
+            sys_msleep(1);
+        #endif
+    }
+}
+            </content>
+        </template>
+    </developerSupport>
+</raModuleDescription>

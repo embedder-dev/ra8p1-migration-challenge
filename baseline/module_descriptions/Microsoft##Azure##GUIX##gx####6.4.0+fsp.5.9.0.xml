@@ -1,0 +1,87 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<raModuleDescription>
+    <config id="config.azure.gx" path="fsp_cfg/azure/gx/gx_user.h" version="0">
+        <property default="" display="Hardware Acceleration|JPEG Codec Support" id="config.azure.gx.use_jpeg" description="Select whether or not to use the JPEG Codec for hardware acceleration.">
+            <select enum="enum.mcu.azure.gx.use_jpeg"/>
+        </property>
+        <property default="config.azure.gx.use_drw.enable" display="Hardware Acceleration|DRW Engine Support" id="config.azure.gx.use_drw" description="Select whether or not to use the DRW Engine for hardware acceleration.">
+            <option display="Enabled" id="config.azure.gx.use_drw.enable" value="(1)"/>
+            <option display="Disabled" id="config.azure.gx.use_drw.disable" value="(0)"/>
+        </property>
+        <property default="30" display="Hardware Acceleration|Max DRW Operations" id="config.azure.gx.dave2d_max_ops" description="Specifies the maximum number of DRW operations before flushing the display list. Reducing this value may reduce the peak heap used by the application but may reduce performance.">
+            <constraint display="Value must be a positive integer">testInteger("${config.azure.gx.dave2d_max_ops}")  &amp;&amp; ("${config.azure.gx.dave2d_max_ops}" &gt;= 0)</constraint>
+        </property>
+        <property default="4096" display="Internal Thread|Stack Size" id="config.azure.gx.stack_size" description="GUIX internal thread stack size in bytes. Must be greater than zero.">
+            <constraint display="Value must be greater than zero">("${config.azure.gx.stack_size}" &gt; 0)</constraint>
+        </property>
+        <property default="30" display="Internal Thread|Priority" id="config.azure.gx.thread_priority" description="Priority of the GUIX Internal Thread. The value must be between 0 to 31.">
+            <constraint display="Value must be between 0 to 31">(("${config.azure.gx.thread_priority}" &gt;= 0) &amp;&amp; ("${config.azure.gx.thread_priority}" &lt;= 31))</constraint>
+        </property>
+        <property default="10" display="Internal Thread|Time Slice" id="config.azure.gx.thread_time_slice" description="Time Slice value of the GUIX Internal Thread. The value must be between 0 (TX_NO_TIME_SLICE) to 0xFFFFFFFF.">
+            <constraint display="Value must be in range 0 to 0xFFFFFFFF">(testInteger("${config.azure.gx.thread_time_slice}") &amp;&amp; ("${config.azure.gx.thread_time_slice}" &gt;= 0) &amp;&amp; ("${config.azure.gx.thread_time_slice}" &lt;= 0xFFFFFFFF))</constraint>
+        </property>
+        <property default="20" display="System Timer (ms)" id="config.azure.gx.system_timer_ms" description="GUIX system timer period (GX_SYSTEM_TIMER_MS). This value will be internally converted to RTOS ticks and will be rounded down to the next smallest multiple of the RTOS tick period (1000 / TX_TIMER_TICKS_PER_SECOND).">
+            <constraint display="Value must be greater than or equal to 10">("${config.azure.gx.system_timer_ms}" &gt; 9)</constraint>
+            <constraint display="Value must be less than or equal to 1000">("${config.azure.gx.system_timer_ms}" &lt;= 1000)</constraint>
+        </property>
+        <property id="config.azure.gx.multithread_support" display="Multithread Support" default="config.azure.gx.multithread_support.enabled" description="Must be enabled if GUIX functions are called from multiple threads. Set to Disabled when calling GUIX from only one thread to reduce system overhead.">
+            <option id="config.azure.gx.multithread_support.disabled" display="Disabled" value="1" />
+            <option id="config.azure.gx.multithread_support.enabled" display="Enabled" value="0" />
+        </property>
+        <property id="config.azure.gx.utf8_support" display="UTF8 Support" default="config.azure.gx.utf8_support.enabled" description="Select whether to enable or disable support for UTF8 characters.">
+            <option id="config.azure.gx.utf8_support.disabled" display="Disabled" value="1" />
+            <option id="config.azure.gx.utf8_support.enabled" display="Enabled" value="0" />
+        </property>
+        <property default="48" display="Event Queue Size" id="config.azure.gx.max_queue_events" description="Maximum number of events in the GUIX event queue.">
+            <constraint display="Value must be greater than zero">("${config.azure.gx.max_queue_events}" &gt; 0)</constraint>
+        </property>
+        <property id="config.azure.gx.widget_user_data" display="Enable GX_WIDGET User Data" default="config.azure.gx.widget_user_data.disabled" description="Set to Enabled to to use the gx_widget_user_data member in the GX_WIDGET structure.">
+            <option id="config.azure.gx.widget_user_data.enabled" display="Enabled" value="1" />
+            <option id="config.azure.gx.widget_user_data.disabled" display="Disabled" value="0" />
+        </property>
+        <content>
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#define GX_USE_RENESAS_JPEG ${config.azure.gx.use_jpeg}
+#define GX_RENESAS_DAVE2D_DRAW  ${config.azure.gx.use_drw}
+
+#define GX_RENESAS_DAVE2D_COMMAND_COUNT_TO_REFRESH ${config.azure.gx.dave2d_max_ops}
+#define GX_RENESAS_DAVE2D_FONT_SUPPORT
+
+#define GX_THREAD_STACK_SIZE       (${config.azure.gx.stack_size})
+#define GX_SYSTEM_THREAD_PRIORITY  (${config.azure.gx.thread_priority})
+#define GX_SYSTEM_THREAD_TIMESLICE (${config.azure.gx.thread_time_slice})
+
+#define GX_SYSTEM_TIMER_MS    (${config.azure.gx.system_timer_ms})
+#define GX_TICKS_SECOND       (1000 / GX_SYSTEM_TIMER_MS)
+
+#if (${config.azure.gx.multithread_support})
+  #define GUIX_DISABLE_MULTITHREAD_SUPPORT
+#endif
+#if (${config.azure.gx.utf8_support})
+  #define GX_DISABLE_UTF8_SUPPORT
+#endif
+
+#define GX_MAX_QUEUE_EVENTS (${config.azure.gx.max_queue_events})
+
+#if (${config.azure.gx.widget_user_data})
+  #define GX_WIDGET_USER_DATA
+#endif
+
+#ifdef __cplusplus
+}
+#endif
+        </content>
+    </config>
+    <module config="config.azure.gx" display="Graphics|Azure RTOS GUIX" id="module.azure.gx" common="1" version="0" url="https://github.com/eclipse-threadx/rtos-docs/blob/main/rtos-docs/guix/index.md">
+        <constraint display="A heap is required for Azure RTOS GUIX application. Please add a heap under BSP|RA Common|Heap Size (Recommended - 8K to 32K bytes)">
+            ("${config.bsp.common.heap}" &gt; 0)
+        </constraint>
+        <requires interface="_rtos" />
+        <requires id="module.azure.gx.requires.threadx" interface="interface.rtos.tx" visible="false" display="Requires ThreadX"/>
+        <requires id="module.azure.gx.requires.rm_guix_port" interface="interface.middleware.rm_guix_port" display="Add GUIX Port" />
+        <provides interface="interface.azure.gx" />
+    </module>
+</raModuleDescription>

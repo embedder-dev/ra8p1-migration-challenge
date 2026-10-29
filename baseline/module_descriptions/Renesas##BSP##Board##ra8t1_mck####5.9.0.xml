@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<raModuleDescription>
+    <config id="config.board.ra8t1mck" path="fsp_cfg/bsp/board_cfg.h" version="0">
+        <content>
+            #include "../../../ra/board/ra8t1_mck/board.h"
+        </content>
+    </config>
+    <board id="board.ra8t1mck" display="RA8|RA8T1|MCK-RA8T1" device="R7FA8T1AHECBD" config="config.board.ra8t1mck" version="0" debugger="com.renesas.hardwaredebug.rz.jlink">
+        <provides interface="interface.board.ether_phy.ics1894" />
+        <description>Motor Control Evaluation System for RA8T1 MCU Group&#xA;Visit https://www.renesas.com/us/en/products/microcontrollers-microprocessors/ra-cortex-m-mcus/rtk0ema5k0s00020bj-mck-ra8t1-renesas-flexible-motor-control-kit-ra8t1-mcu-group to get kit user’s manual, quick start guide, errata, design package, example projects, etc.</description>
+        <capability id="capability.led"/>
+    </board>
+</raModuleDescription>

@@ -1,0 +1,205 @@
+<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.driver.fs2012" path="fsp_cfg/rm_fs2012_cfg.h" version="0">
+        <property default="config.driver.fs2012.param_checking_enable.bsp" display="Parameter Checking" id="config.driver.fs2012.param_checking_enable" description="If selected code for parameter checking is included in the build.">
+            <option display="Default (BSP)" id="config.driver.fs2012.param_checking_enable.bsp" value="(BSP_CFG_PARAM_CHECKING_ENABLE)"/>
+            <option display="Enabled" id="config.driver.fs2012.param_checking_enable.enabled" value="(1)"/>
+            <option display="Disabled" id="config.driver.fs2012.param_checking_enable.disabled" value="(0)"/>
+        </property>
+        <!-- First version supports devices that measure gas data only -->
+        <property default="config.driver.fs2012.device_type.fs2012_1100_ng" display="Device Type" id="config.driver.fs2012.device_type" description="Select FS2012 device type.">
+            <option display="FS2012-1020-NG" id="config.driver.fs2012.device_type.fs2012_1020_ng" value="(0)"/>
+            <option display="FS2012-1100-NG" id="config.driver.fs2012.device_type.fs2012_1100_ng" value="(0)"/>
+            <!-- <option display="FS2012-1001-LQ" id="config.driver.fs2012.device_type.fs2012_1001_lq" value="(1)"/>
+            <option display="FS2012-1002-LQ" id="config.driver.fs2012.device_type.fs2012_1002_lq" value="(1)"/> -->
+        </property>
+        <content>
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#define RM_FS2012_CFG_PARAM_CHECKING_ENABLE   ${config.driver.fs2012.param_checking_enable}
+#define RM_FS2012_CFG_DEVICE_TYPE (${config.driver.fs2012.device_type})
+
+#ifdef __cplusplus
+}
+#endif
+        </content>
+    </config>
+    <module config="config.driver.fs2012" display="Sensor|${module.driver.fs2012.name} FS2012 Flow Sensor (rm_fs2012) [Deprecated]" id="module.driver.fsxxxx_on_fs2012" version="1" url="group___r_m___f_s2012.html">
+        <constraint display="Unique name required for each instance">
+            "${interface.driver.fs2012.${module.driver.fs2012.name}}" === "1"
+        </constraint>
+        <requires id="module.driver.fs2012.requires.comms_i2c_device" interface="interface.driver.comms_i2c_device" visible="true" display="Requires I2C Communications Device">
+            <override property="module.driver.comms_i2c_device.slave_address" value="0x07"/>
+            <override property="module.driver.comms_i2c_device.address_mode" value="I2C_MASTER_ADDR_MODE_7BIT"/>
+            <override property="module.driver.comms_i2c_device.p_context" value="${module.driver.fs2012.name}_ctrl"/>
+            <override property="module.driver.comms_i2c_device.p_callback" value="rm_fs2012_callback"/>
+        </requires>
+
+        <provides interface="interface.driver.fs2012" />
+        <provides interface="interface.driver.fsxxxx_on_fs2012" />
+        <provides interface="interface.driver.fs2012.${module.driver.fs2012.name}" />
+        <property default="g_fs2012_sensor${_instance}" display="Name" id="module.driver.fs2012.name" description="Module name.">
+            <constraint display="Name must be a valid C symbol">
+                testSymbol("${module.driver.fs2012.name}")
+            </constraint>
+        </property>
+        <property default="NULL" id="module.driver.fs2012.p_context" />
+        <property default="fs2012_callback" display="Callback" id="module.driver.fs2012.p_callback" description="A user callback function can be provided.">
+            <constraint display="Name must be a valid C symbol">
+                testSymbol("${module.driver.fs2012.p_callback}")
+            </constraint>
+        </property>
+        <property default="" id="module.driver.fs2012.name_upper">
+            <export>"${module.driver.fs2012.name}".toUpperCase()</export>
+        </property>
+
+        <header>
+/* FS2012 Sensor */
+extern const rm_fsxxxx_instance_t ${module.driver.fs2012.name};
+extern rm_fs2012_instance_ctrl_t ${module.driver.fs2012.name}_ctrl;
+extern const rm_fsxxxx_cfg_t ${module.driver.fs2012.name}_cfg;
+#ifndef ${module.driver.fs2012.p_callback}
+void ${module.driver.fs2012.p_callback}(rm_fsxxxx_callback_args_t * p_args);
+#endif
+        </header>
+
+        <includes>
+#include &quot;rm_fs2012.h&quot;
+#include &quot;rm_fsxxxx_api.h&quot;
+        </includes>
+
+        <declarations>
+rm_fs2012_instance_ctrl_t ${module.driver.fs2012.name}_ctrl;
+
+const rm_fsxxxx_cfg_t ${module.driver.fs2012.name}_cfg =
+{
+    .p_instance = &amp;${module.driver.fs2012.requires.comms_i2c_device::module.driver.comms_i2c_device.name},
+    .p_callback = ${module.driver.fs2012.p_callback},
+#if defined(${module.driver.fs2012.p_context})
+    .p_context           = ${module.driver.fs2012.p_context},
+#else
+    .p_context           = &amp;${module.driver.fs2012.p_context},
+#endif
+};
+
+const rm_fsxxxx_instance_t ${module.driver.fs2012.name} =
+{
+    .p_ctrl = &amp;${module.driver.fs2012.name}_ctrl,
+    .p_cfg  = &amp;${module.driver.fs2012.name}_cfg,
+    .p_api  = &amp;g_fsxxxx_on_fs2012,
+};
+        </declarations>
+    </module>
+
+    <!-- Developer Assistance -->
+    <developerSupport>
+        <api version="1">
+            <platform id="fsp" max="" min="1.1.0"/>
+            <moduleRef id="module.driver.fsxxxx_on_fs2012"/>
+            <description><![CDATA[<form><p><span color="header" font="header">Overview</span></p><p>FS2012 provides snippets of code for operating the FS2012 Middleware.</p></form>]]></description>
+            <function display="Quick Setup" id="fs2012_quick_setup">
+                <description><![CDATA[<form><p>This function provides quick setup for FS2012 using the properties from the RA configurator.</p></form>]]></description>
+            </function>
+            <function display="Quick Getting Flow" id="fs2012_quick_getting_flow">
+                <description><![CDATA[<form><p>This function provides quick getting flow values for FS2012 using the properties from the RA configurator.</p></form>]]></description>
+            </function>
+        </api>
+        <template category="function_call" display="Call Quick Setup" id="module.driver.fs2012.quick_setup" version="1">
+            <platform id="fsp" max="" min="1.1.0"/>
+            <moduleRef id="module.driver.fsxxxx_on_fs2012">
+                <function id="fs2012_quick_setup"/>
+            </moduleRef>
+            <content>
+/* TODO: Enable if you want to open FS2012 */
+#define ${fs2012_name_upper:raProperty(module.driver.fs2012.name_upper)}_NON_BLOCKING (0)
+
+#if ${fs2012_name_upper}_NON_BLOCKING
+volatile bool g_fs2012_completed = false;
+#endif
+
+/* TODO: Enable if you want to use a callback */
+#define ${fs2012_name_upper}_CALLBACK_ENABLE (0)
+#if ${fs2012_name_upper}_CALLBACK_ENABLE
+void ${fs2012_callback:raProperty(module.driver.fs2012.p_callback)}(rm_fsxxxx_callback_args_t * p_args)
+{
+#if ${fs2012_name_upper}_NON_BLOCKING
+    if (RM_FSXXXX_EVENT_SUCCESS == p_args->event)
+    {
+        g_fs2012_completed = true;
+    }
+#else
+    FSP_PARAMETER_NOT_USED(p_args);
+#endif
+}
+#endif
+
+/* Delay */
+#define ${fs2012_name_upper}_DELAY_410 (410)
+#define ${fs2012_name_upper}_DELAY_MS  (1000)
+
+/* Quick setup for ${fs2012_name:raProperty(module.driver.fs2012.name)}.
+ * - ${i2c_bus_name:raProperty(module.driver.comms_i2c_bus.name)} must be setup before calling this function
+ *     (See Developer Assistance -> ${fs2012_name} -> ${i2c_device_name:raProperty(module.driver.comms_i2c_device.name)} -> ${i2c_bus_name} -> Quick Setup).
+ */
+void ${fs2012_name}_quick_setup(void);
+
+/* Quick setup for ${fs2012_name}. */
+void ${fs2012_name}_quick_setup(void)
+{
+    fsp_err_t err;
+
+    /* Open FS2012 sensor instance, this must be done before calling any FSXXXX API */
+    err = ${fs2012_name}.p_api->open(${fs2012_name}.p_ctrl, ${fs2012_name}.p_cfg);
+    assert(FSP_SUCCESS == err);
+}
+            </content>
+        </template>
+        <template category="function_call" display="Call Quick Getting Flow" id="module.driver.fs2012.quick_getting_flow" version="1">
+            <platform id="fsp" max="" min="1.1.0"/>
+            <moduleRef id="module.driver.fsxxxx_on_fs2012">
+                <function id="fs2012_quick_getting_flow"/>
+            </moduleRef>
+            <content>
+/* Quick getting flow values for ${fs2012_name:raProperty(module.driver.fs2012.name)}.
+ * - ${fs2012_name} must be setup before calling this function.
+ */
+void ${fs2012_name}_quick_getting_flow(rm_fsxxxx_data_t * p_flow);
+
+/* Quick getting flow for ${fs2012_name}. */
+void ${fs2012_name}_quick_getting_flow(rm_fsxxxx_data_t * p_flow)
+{
+    fsp_err_t            err;
+    rm_fsxxxx_raw_data_t fs2012_raw_data;
+
+    /* Read ADC data from FS2012 sensor */
+    err = ${fs2012_name}.p_api->read(${fs2012_name}.p_ctrl, &amp;fs2012_raw_data);
+    assert(FSP_SUCCESS == err);
+
+#if ${fs2012_name_upper:raProperty(module.driver.fs2012.name_upper)}_NON_BLOCKING
+    while (!g_fs2012_completed)
+    {
+        ;
+    }
+    g_fs2012_completed = false;
+#endif
+
+    /* Calculate flow values from FS2012 ADC data */
+    err = ${fs2012_name}.p_api->dataCalculate(${fs2012_name}.p_ctrl, &amp;fs2012_raw_data, p_flow);
+    assert(FSP_SUCCESS == err);
+
+    /* FS2012 sample rate. See table 4 on the page 5 of the datasheet. */
+    /* Gas : 409.6ms, Liquid : 716.8ms */
+#if BSP_CFG_RTOS == 1 // AzureOS
+    tx_thread_sleep(${fs2012_name_upper}_DELAY_410 * TX_TIMER_TICKS_PER_SECOND / ${fs2012_name_upper}_DELAY_MS);
+#elif BSP_CFG_RTOS == 2 // FreeRTOS
+    vTaskDelay(${fs2012_name_upper}_DELAY_410 * configTICK_RATE_HZ / ${fs2012_name_upper}_DELAY_MS);
+#else // Bare Metal
+    R_BSP_SoftwareDelay(${fs2012_name_upper}_DELAY_410, BSP_DELAY_UNITS_MILLISECONDS);
+#endif
+}
+            </content>
+        </template>
+    </developerSupport>
+</raModuleDescription>

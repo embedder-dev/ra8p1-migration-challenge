@@ -1,0 +1,101 @@
+<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.middleware.rm_mesh_light_hsl_srv" path="fsp_cfg/rm_mesh_light_hsl_srv_cfg.h" version="0">
+        <content>
+            #ifdef __cplusplus
+            extern "C" {
+            #endif
+
+            #ifdef __cplusplus
+            }
+            #endif
+        </content>
+    </config>
+    <module id="module.middleware.rm_ble_mesh_model_server_on_rm_mesh_light_hsl_srv" display="Networking|BLE Mesh Network modules|BLE Mesh Model Light HSL Server (rm_mesh_light_hsl_srv)" config="config.middleware.rm_mesh_light_hsl_srv" version="0" visible="true" url="group___r_m___m_e_s_h___l_i_g_h_t___h_s_l___s_r_v.html">
+
+        <!-- <constraint display="Requires Low Level Library Implementation">
+            "${interface.middleware.rm_ble_mesh_access_on_rm_ble_mesh_access}" === "1"
+        </constraint> -->
+        <constraint display="BLE Mesh Model Light HSL Server middleware not support R_BLE_SPP module">
+            "${interface.mcu.radio}" === "1"
+        </constraint>
+
+        <requires id="module.middleware.rm_ble_mesh_model_server.requires.rm_ble_mesh_access" interface="interface.middleware.rm_ble_mesh_access_on_rm_ble_mesh_access" visible="true" display="Add BLE Mesh Access Module" find="false"/>
+        <requires id="module.middleware.rm_ble_mesh_model_server.requires.rm_ble_mesh_access_hue" interface="interface.middleware.rm_ble_mesh_access_on_rm_ble_mesh_access" visible="true" display="Add BLE Mesh Access Module for Hue" find="false"/>
+        <requires id="module.middleware.rm_ble_mesh_model_server.requires.rm_ble_mesh_access_saturation" interface="interface.middleware.rm_ble_mesh_access_on_rm_ble_mesh_access" visible="true" display="Add BLE Mesh Access Module for Saturation" find="false"/>
+
+
+        <provides interface="interface.middleware.rm_ble_mesh_model_server"/>
+        <provides interface="interface.middleware.rm_ble_mesh_model_server_on_rm_mesh_light_hsl_srv"/>
+        <provides interface="interface.middleware.rm_ble_mesh_model_server.${module.middleware.rm_ble_mesh_model_server.name}"/>
+
+        <property display="Name" default="g_rm_mesh_light_hsl_srv${_instance}" id="module.middleware.rm_ble_mesh_model_server.name" description="Module name.">
+            <constraint display="Name Must Be a Valid C Symbol">testSymbol("${module.middleware.rm_ble_mesh_model_server.name}")</constraint>
+        </property>
+
+        <property display="Interrupts|Callback Provided when Timeout Occurs" id="module.middleware.rm_ble_mesh_model_server.p_callback" default="NULL" description="Callback provided when mesh light HSL server ISR occurs">
+            <constraint display="Name Must Be a Valid C Symbol">testSymbol("${module.middleware.rm_ble_mesh_model_server.p_callback}")</constraint>
+        </property>
+
+        <property display="Interrupts|Callback Provided when an Timeout ISR Occurs" id="module.middleware.rm_ble_mesh_model_server.p_timeout_callback" default="NULL" description="Callback provided when mesh light HSL server timeout ISR occurs">
+            <constraint display="Name Must Be a Valid C Symbol">testSymbol("${module.middleware.rm_ble_mesh_model_server.p_timeout_callback}")</constraint>
+        </property>
+
+        <property id="module.middleware.rm_ble_mesh_model_server.p_context" default="NULL">
+            <constraint display="Name Must Be a Valid C Symbol">testSymbol("${module.middleware.rm_ble_mesh_model_server.p_context}")</constraint>
+            <export>eval('' +
+                'var output = "${module.middleware.rm_ble_mesh_model_server.p_context}";' +
+                'if ("NULL" !== output) {' +
+                'output = "&amp;" + output;' +
+                '}' +
+                'output')
+            </export>
+        </property>
+
+        <header>
+/** BLE Mesh Model Light HSL on BLE Mesh Model Server Instance. */
+extern const rm_ble_mesh_model_server_instance_t ${module.middleware.rm_ble_mesh_model_server.name};
+
+/** Access the BLE Mesh model light HSL server instance using these structures when calling API functions directly (::p_api is not used). */
+extern rm_mesh_light_hsl_srv_instance_ctrl_t ${module.middleware.rm_ble_mesh_model_server.name}_ctrl;
+extern const rm_ble_mesh_model_server_cfg_t ${module.middleware.rm_ble_mesh_model_server.name}_cfg;
+
+#ifndef ${module.middleware.rm_ble_mesh_model_server.p_callback}
+void ${module.middleware.rm_ble_mesh_model_server.p_callback}(rm_ble_mesh_model_server_callback_args_t * p_args);;
+#endif
+
+#ifndef ${module.middleware.rm_ble_mesh_model_server.p_timeout_callback}
+void ${module.middleware.rm_ble_mesh_model_server.p_timeout_callback}(rm_ble_mesh_model_server_timeout_callback_args_t * p_args);
+#endif
+        </header>
+        <includes>
+#include "rm_ble_mesh_model_server_api.h"
+#include "rm_mesh_light_hsl_srv.h"
+        </includes>
+        <declarations>
+rm_mesh_light_hsl_srv_instance_ctrl_t ${module.middleware.rm_ble_mesh_model_server.name}_ctrl;
+
+const rm_mesh_light_hsl_srv_extended_cfg_t ${module.middleware.rm_ble_mesh_model_server.name}_extend =
+{
+    .p_hue_access_instance        = &amp;${module.middleware.rm_ble_mesh_model_server.requires.rm_ble_mesh_access_hue::module.middleware.rm_ble_mesh_access.name},
+    .p_saturation_access_instance = &amp;${module.middleware.rm_ble_mesh_model_server.requires.rm_ble_mesh_access_saturation::module.middleware.rm_ble_mesh_access.name}
+};
+
+const rm_ble_mesh_model_server_cfg_t ${module.middleware.rm_ble_mesh_model_server.name}_cfg =
+{
+    .p_access_instance   = &amp;${module.middleware.rm_ble_mesh_model_server.requires.rm_ble_mesh_access::module.middleware.rm_ble_mesh_access.name},
+    .p_callback          = ${module.middleware.rm_ble_mesh_model_server.p_callback},
+    .p_timeout_callback  = ${module.middleware.rm_ble_mesh_model_server.p_timeout_callback},
+    .p_context           = ${module.middleware.rm_ble_mesh_model_server.p_context},
+    .p_extend            = &amp;${module.middleware.rm_ble_mesh_model_server.name}_extend
+};
+
+const rm_ble_mesh_model_server_instance_t ${module.middleware.rm_ble_mesh_model_server.name} =
+{
+    .p_ctrl = &amp;${module.middleware.rm_ble_mesh_model_server.name}_ctrl,
+    .p_cfg  = &amp;${module.middleware.rm_ble_mesh_model_server.name}_cfg,
+    .p_api  = &amp;g_rm_ble_mesh_model_server_on_rm_mesh_light_hsl_srv
+};
+        </declarations>
+    </module>
+</raModuleDescription>

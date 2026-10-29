@@ -1,0 +1,57 @@
+<?xml version="1.0" ?>
+<raModuleDescription>
+    <module display="Sensor|ZMOD4410 IAQ 1st Generation (rm_zmod4xxx)" id="module.driver.zmod4410_iaq_1st_on_zmod4xxx" version="1" visible="false" url="group___r_m___z_m_o_d4_x_x_x.html">
+        <requires id="module.driver.zmod4xxx.requires.comms_i2c_device" interface="interface.driver.comms_i2c_device" visible="true" display="Requires I2C Communications Device">
+            <override property="module.driver.comms_i2c_device.slave_address" value="0x32"/>
+            <override property="module.driver.comms_i2c_device.address_mode" value="I2C_MASTER_ADDR_MODE_7BIT"/>
+            <override property="module.driver.comms_i2c_device.p_context" value="${module.driver.zmod4xxx_lib.p_context}"/>
+            <override property="module.driver.comms_i2c_device.p_callback" value="rm_zmod4xxx_comms_i2c_callback"/>
+        </requires>
+
+        <provides interface="interface.driver.zmod4xxx_lib" />
+        <provides interface="interface.driver.zmod4xxx_lib_on_zmod4xxx" />
+        <property default="NULL" id="module.driver.zmod4xxx_lib.p_context" />
+        <property default="zmod4xxx" id="module.driver.zmod4xxx_lib.instance_name" />
+        <property default="module.driver.zmod4xxx_lib.operation_mode.continuous" display="Operation Mode" id="module.driver.zmod4xxx_lib.operation_mode" description="Select the operation mode.">
+            <option display="Continuous" id="module.driver.zmod4xxx_lib.operation_mode.continuous" value="1"/>
+            <option display="Low Power" id="module.driver.zmod4xxx_lib.operation_mode.low_power" value="2"/>
+        </property>
+
+        <header>
+/* ZMOD4410 IAQ 1st Gen. */
+extern rm_zmod4xxx_lib_extended_cfg_t ${module.driver.zmod4xxx_lib.instance_name}_extended_cfg;
+        </header>
+
+        <includes>
+#include "../ra/fsp/src/rm_zmod4xxx/zmod4xxx_types.h"
+#include "../ra/fsp/src/rm_zmod4xxx/iaq_1st_gen/iaq_1st_gen.h"
+        </includes>
+
+        <declarations>
+zmod4xxx_dev_t          ${module.driver.zmod4xxx_lib.instance_name}_dev;
+iaq_1st_gen_handle_t    ${module.driver.zmod4xxx_lib.instance_name}_lib_handle;
+iaq_1st_gen_results_t   ${module.driver.zmod4xxx_lib.instance_name}_lib_results;
+uint8_t                 ${module.driver.zmod4xxx_lib.instance_name}_product_data[6];
+extern rm_zmod4xxx_api_t const  g_zmod4xxx_on_zmod4410_iaq_1st_gen;
+extern zmod4xxx_conf            g_zmod4410_iaq_1st_gen_sensor_type[];
+rm_zmod4xxx_lib_extended_cfg_t ${module.driver.zmod4xxx_lib.instance_name}_extended_cfg =
+{
+#if (1 == ${module.driver.zmod4xxx_lib.operation_mode}) // Continuous mode
+    .lib_type = RM_ZMOD4410_LIB_TYPE_IAQ_1ST_GEN_CONTINUOUS,
+    .sample_period = 2.0F,
+#else                                                   // Low Power mode
+    .lib_type = RM_ZMOD4410_LIB_TYPE_IAQ_1ST_GEN_LOW_POWER,
+    .sample_period = 6.0F,
+#endif
+    .product_id = 0x2310,
+    .p_api = (void *)&amp;g_zmod4xxx_on_zmod4410_iaq_1st_gen,
+    .p_data_set = (void *)g_zmod4410_iaq_1st_gen_sensor_type,
+    .p_product_data = ${module.driver.zmod4xxx_lib.instance_name}_product_data,
+    .p_device = (void *)&amp;${module.driver.zmod4xxx_lib.instance_name}_dev,
+    .p_handle = (void *)&amp;${module.driver.zmod4xxx_lib.instance_name}_lib_handle,
+    .p_results = (void *)&amp;${module.driver.zmod4xxx_lib.instance_name}_lib_results,
+};
+        </declarations>
+
+    </module>
+</raModuleDescription>

@@ -1,0 +1,49 @@
+<?xml version="1.0" ?>
+<raModuleDescription>
+  <config id="config.driver.rm_bl2_port" path="fsp_cfg/rm_bl2_port_cfg.h" version="0">
+    <content>
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#define RM_TFM_PORT_SECURE_UPDATE_ADDRESS    (${config.middleware.mcuboot.flash_area_bootloader_size} + ${config.middleware.mcuboot.scratch_partition_size})
+#define RM_TFM_PORT_SECURE_IMAGE_SIZE        (${config.middleware.mcuboot.flash_s_partition_size})
+
+#define RM_TFM_PORT_NONSECURE_UPDATE_ADDRESS (${config.middleware.mcuboot.flash_area_bootloader_size} + ${config.middleware.mcuboot.scratch_partition_size} \
+                                             (${config.middleware.mcuboot.flash_s_partition_size} * 2) + ${config.middleware.mcuboot.flash_ns_partition_size})
+#define RM_TFM_PORT_NONSECURE_IMAGE_SIZE     (${config.middleware.mcuboot.flash_ns_partition_size})
+
+#ifdef __cplusplus
+}
+#endif
+    </content>
+  </config>
+  <module config="config.driver.rm_bl2_port" display="Security|Trusted Firmware-M BL2 Port (rm_bl2_port)" id="module.driver.rm_bl2_port" visible="false" version="1" url="https://github.com/ARM-software/arm-trusted-firmware/blob/master/docs/design/firmware-design.rst#bl2">
+    <constraint display="Data Flash Programming must be Enabled under Flash|Common|Data Flash Programming Enable">
+        ("${config.driver.flash_hp.param_data_flash_programming_enable}" === "config.driver.flash_hp.param_data_flash_programming_enable.enabled")
+    </constraint>
+    <constraint display="Requires flash driver">
+          testExists("${module.driver.rm_bl2_port.requires.flash::module.driver.flash.name}")
+    </constraint>
+    <constraint display="Data flash bgo must be disabled under Flash|Module|Data Flash Background Operation">
+              "${module.driver.rm_bl2_port.requires.flash::module.driver.flash.data_flash_bgo}" === "module.driver.flash.data_flash_bgo.disabled"
+    </constraint>
+    <constraint display="Requires RA6E1, RA6M4, RA6M5 or RA8">
+         (("${interface.mcu.ra6m4}" === "1") || ("${interface.mcu.ra6m5}" === "1") || ("${interface.mcu.ra8m1}" === "1") || ("${interface.mcu.ra8d1}" === "1") || ("${interface.mcu.ra6e1}" === "1") || ("${interface.mcu.ra8e1}" === "1"))
+    </constraint>
+    <requires id="module.driver.rm_bl2_port.requires.flash" interface="interface.driver.flash" visible="true" find="false" display="Requires Flash">
+    </requires>
+    <requires id="module.driver.rm_bl2_port.requires.tzf" interface="interface.mcu.tzf" visible="false" find="true" display="Requires TZF">
+    </requires>
+
+    <provides interface="interface.driver.rm_bl2_port" />
+    <includes>
+
+    </includes>
+    <declarations>
+void * const gp_tfm_flash_ctrl = &amp;${module.driver.rm_bl2_port.requires.flash::module.driver.flash.name}_ctrl;
+flash_cfg_t const * const gp_tfm_flash_cfg = &amp;${module.driver.rm_bl2_port.requires.flash::module.driver.flash.name}_cfg;
+flash_instance_t const * const gp_tfm_flash_instance = &amp;${module.driver.rm_bl2_port.requires.flash::module.driver.flash.name};
+    </declarations>
+  </module>
+</raModuleDescription>

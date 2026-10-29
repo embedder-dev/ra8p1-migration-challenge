@@ -1,0 +1,537 @@
+<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.middleware.motor_current" path="fsp_cfg/rm_motor_current_cfg.h" version="0">
+        <property default="config.middleware.motor_current.param_checking_enable.bsp" display="Parameter Checking" id="config.middleware.motor_current.param_checking_enable" description="If selected code for parameter checking is included in the build.">
+            <option display="Default (BSP)" id="config.middleware.motor_current.param_checking_enable.bsp" value="(BSP_CFG_PARAM_CHECKING_ENABLE)"/>
+            <option display="Enabled" id="config.middleware.motor_current.param_checking_enable.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.motor_current.param_checking_enable.disabled" value="(0)"/>
+        </property>
+
+        <content>
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#define MOTOR_CURRENT_CFG_PARAM_CHECKING_ENABLE   ${config.middleware.motor_current.param_checking_enable}
+
+#ifdef __cplusplus
+}
+#endif
+        </content>
+    </config>
+    <module config="config.middleware.motor_current" display="Motor| Motor Current Controller (rm_motor_current)" id="module.middleware.motor_current" version="1" url="group___m_o_t_o_r___c_u_r_r_e_n_t.html">
+        <constraint display="Requires Motor Angle Module">
+            testExists("${module.middleware.motor_current.requires.angle::module.middleware.motor_angle.name}")
+        </constraint>
+        <constraint display="Requires Motor Driver Module">
+            testExists("${module.middleware.motor_current.requires.driver::module.middleware.motor_driver.name}")
+        </constraint>
+        <constraint display="Unique name required for each instance">
+            ("${interface.middleware.motor_current.${module.middleware.motor_current.name}}" === "1")
+        </constraint>
+        <!-- Driver Module  -->
+        <requires id="module.middleware.motor_current.requires.driver" interface="interface.middleware.motor_driver" display="Add Motor Driver Module [Mandatory]">
+            <override property="module.middleware.motor_driver.driver_callback" value="rm_motor_current_cyclic"/>
+            <override property="module.middleware.motor_driver.driver_context" value="${module.middleware.motor_current.name}"/>
+        </requires>
+
+        <!-- Angle Module  -->
+        <requires id="module.middleware.motor_current.requires.angle" interface="interface.middleware.motor_angle" display="Add Motor Angle Module [Mandatory]">
+        </requires>
+
+        <provides interface="interface.middleware.motor_current" />
+        <provides interface="interface.middleware.motor_current.${module.middleware.motor_current.name}" />
+
+        <!-- Module Name -->
+        <property default="g_motor_current${_instance}" display="General|Name" id="module.middleware.motor_current.name" description="Module name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.middleware.motor_current.name}")</constraint>
+        </property>
+
+        <!-- General Settings -->
+        <property display="General|Sensor type" id="module.middleware.motor_current.ctrl_type" default="module.middleware.motor_current.ctrl_type.sensorless" description="Select sensor type">
+            <option id="module.middleware.motor_current.ctrl_type.sensorless" display="Sensorless" value="MOTOR_CURRENT_CONTROL_TYPE_SENSORLESS" />
+            <option id="module.middleware.motor_current.ctrl_type.encoder" display="Encoder" value="MOTOR_CURRENT_CONTROL_TYPE_ENCODER" />
+            <option id="module.middleware.motor_current.ctrl_type.induction" display="Induction" value="MOTOR_CURRENT_CONTROL_TYPE_INDUCTION" />
+            <option id="module.middleware.motor_current.ctrl_type.hall" display="Hall" value="MOTOR_CURRENT_CONTROL_TYPE_HALL" />
+        </property>
+        <property display="General|Shunt type" id="module.middleware.motor_current.shunt" default="module.middleware.motor_current.shunt.2_shunt" description="Select shunt type">
+            <option id="module.middleware.motor_current.shunt.1_shunt" display="1 shunt" value="MOTOR_CURRENT_SHUNT_TYPE_1_SHUNT" />
+            <option id="module.middleware.motor_current.shunt.2_shunt" display="2 shunt" value="MOTOR_CURRENT_SHUNT_TYPE_2_SHUNT" />
+            <option id="module.middleware.motor_current.shunt.3_shunt" display="3 shunt" value="MOTOR_CURRENT_SHUNT_TYPE_3_SHUNT" />
+        </property>
+        <property default="0" display="General|Current control decimation" id="module.middleware.motor_current.u_decimation" description="Decimation of current control.">
+            <constraint display="Must be a valid non-negative value.">testInteger("${module.middleware.motor_current.u_decimation}") &amp;&amp; ("${module.middleware.motor_current.u_decimation}" &gt;= 0)</constraint>
+        </property>
+        <property default="20.0F" display="General|PWM carrier frequency (kHz)" id="module.middleware.motor_current.f_carrier_freq" description="PWM carrier frequency.">
+            <constraint display="Must be a valid value">
+            eval('' +
+            'var input = "${module.middleware.motor_current.f_carrier_freq}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?$","i");' +
+            'var regex_float_with_suffix = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?F$","i");' +
+            ' ( regex_float.test(input) || regex_float_with_suffix.test(input))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${module.middleware.motor_current.f_carrier_freq}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)$","i");' +
+            'if (regex_float.test(output)){' +
+            'output = output + "F";' +
+            '}' +
+            'output')
+            </export>
+        </property>
+        <property default="24.0F" display="General|Input voltage (V)" id="module.middleware.motor_current.f_ilimit" description="Input voltage for limitation of current PI control.">
+            <constraint display="Must be a valid value">
+            eval('' +
+            'var input = "${module.middleware.motor_current.f_ilimit}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?$","i");' +
+            'var regex_float_with_suffix = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?F$","i");' +
+            ' ( regex_float.test(input) || regex_float_with_suffix.test(input))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${module.middleware.motor_current.f_ilimit}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)$","i");' +
+            'if (regex_float.test(output)){' +
+            'output = output + "F";' +
+            '}' +
+            'output')
+            </export>
+        </property>
+        <property default="module.middleware.motor_current.smpl_dly_comp.enable" display="General|Sample delay compensation" id="module.middleware.motor_current.smpl_dly_comp" description="Select enable/disable sample delay compensation.">
+            <option display="Disable" id="module.middleware.motor_current.smpl_dly_comp.disable" value="MOTOR_CURRENT_SAMPLE_DELAY_COMPENSATION_DISABLE"/>
+            <option display="Enable" id="module.middleware.motor_current.smpl_dly_comp.enable" value="MOTOR_CURRENT_SAMPLE_DELAY_COMPENSATION_ENABLE"/>
+        </property>
+        <property default="1.5" display="General|Period magnification value" id="module.middleware.motor_current.period_magnitude" description="Period magnification value for sampling delay compensation.">
+            <constraint display="Must be a valid value">
+            eval('' +
+            'var input = "${module.middleware.motor_current.period_magnitude}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?$","i");' +
+            'var regex_float_with_suffix = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?F$","i");' +
+            ' ( regex_float.test(input) || regex_float_with_suffix.test(input))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${module.middleware.motor_current.period_magnitude}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)$","i");' +
+            'if (regex_float.test(output)){' +
+            'output = output + "F";' +
+            '}' +
+            'output')
+            </export>
+        </property>
+        <property default="module.middleware.motor_current.voltage_comp.enable" display="General|Voltage error compensation" id="module.middleware.motor_current.voltage_comp" description="Select enable/disable voltage error compensation.">
+            <option display="Disable" id="module.middleware.motor_current.voltage_comp.disable" value="MOTOR_CURRENT_VOLTAGE_COMPENSATION_SELECT_DISABLE"/>
+            <option display="Enable" id="module.middleware.motor_current.voltage_comp.enable" value="MOTOR_CURRENT_VOLTAGE_COMPENSATION_SELECT_ENABLE"/>
+        </property>
+        <property default="0.672F" display="General|Voltage error compensation table of voltage 1" id="module.middleware.motor_current.voltage_comp.v1" description="Voltage error compensation table of voltage.">
+            <constraint display="Must be a valid value">
+            eval('' +
+            'var input = "${module.middleware.motor_current.voltage_comp.v1}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?$","i");' +
+            'var regex_float_with_suffix = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?F$","i");' +
+            ' ( regex_float.test(input) || regex_float_with_suffix.test(input))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${module.middleware.motor_current.voltage_comp.v1}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)$","i");' +
+            'if (regex_float.test(output)){' +
+            'output = output + "F";' +
+            '}' +
+            'output')
+            </export>
+        </property>
+        <property default="0.945F" display="General|Voltage error compensation table of voltage 2" id="module.middleware.motor_current.voltage_comp.v2" description="Voltage error compensation table of voltage.">
+            <constraint display="Must be a valid value">
+            eval('' +
+            'var input = "${module.middleware.motor_current.voltage_comp.v2}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?$","i");' +
+            'var regex_float_with_suffix = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?F$","i");' +
+            ' ( regex_float.test(input) || regex_float_with_suffix.test(input))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${module.middleware.motor_current.voltage_comp.v2}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)$","i");' +
+            'if (regex_float.test(output)){' +
+            'output = output + "F";' +
+            '}' +
+            'output')
+            </export>
+        </property>
+        <property default="1.054F" display="General|Voltage error compensation table of voltage 3" id="module.middleware.motor_current.voltage_comp.v3" description="Voltage error compensation table of voltage.">
+            <constraint display="Must be a valid value">
+            eval('' +
+            'var input = "${module.middleware.motor_current.voltage_comp.v3}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?$","i");' +
+            'var regex_float_with_suffix = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?F$","i");' +
+            ' ( regex_float.test(input) || regex_float_with_suffix.test(input))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${module.middleware.motor_current.voltage_comp.v3}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)$","i");' +
+            'if (regex_float.test(output)){' +
+            'output = output + "F";' +
+            '}' +
+            'output')
+            </export>
+        </property>
+        <property default="1.109F" display="General|Voltage error compensation table of voltage 4" id="module.middleware.motor_current.voltage_comp.v4" description="Voltage error compensation table of voltage.">
+            <constraint display="Must be a valid value">
+            eval('' +
+            'var input = "${module.middleware.motor_current.voltage_comp.v4}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?$","i");' +
+            'var regex_float_with_suffix = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?F$","i");' +
+            ' ( regex_float.test(input) || regex_float_with_suffix.test(input))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${module.middleware.motor_current.voltage_comp.v4}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)$","i");' +
+            'if (regex_float.test(output)){' +
+            'output = output + "F";' +
+            '}' +
+            'output')
+            </export>
+        </property>
+        <property default="1.192F" display="General|Voltage error compensation table of voltage 5" id="module.middleware.motor_current.voltage_comp.v5" description="Voltage error compensation table of voltage.">
+            <constraint display="Must be a valid value">
+            eval('' +
+            'var input = "${module.middleware.motor_current.voltage_comp.v5}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?$","i");' +
+            'var regex_float_with_suffix = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?F$","i");' +
+            ' ( regex_float.test(input) || regex_float_with_suffix.test(input))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${module.middleware.motor_current.voltage_comp.v5}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)$","i");' +
+            'if (regex_float.test(output)){' +
+            'output = output + "F";' +
+            '}' +
+            'output')
+            </export>
+        </property>
+        <property default="0.013F" display="General|Voltage error compensation table of current 1" id="module.middleware.motor_current.voltage_comp.i1" description="Voltage error compensation table of current.">
+            <constraint display="Must be a valid value">
+            eval('' +
+            'var input = "${module.middleware.motor_current.voltage_comp.i1}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?$","i");' +
+            'var regex_float_with_suffix = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?F$","i");' +
+            ' ( regex_float.test(input) || regex_float_with_suffix.test(input))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${module.middleware.motor_current.voltage_comp.i1}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)$","i");' +
+            'if (regex_float.test(output)){' +
+            'output = output + "F";' +
+            '}' +
+            'output')
+            </export>
+        </property>
+        <property default="0.049F" display="General|Voltage error compensation table of current 2" id="module.middleware.motor_current.voltage_comp.i2" description="Voltage error compensation table of current.">
+            <constraint display="Must be a valid value">
+            eval('' +
+            'var input = "${module.middleware.motor_current.voltage_comp.i2}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?$","i");' +
+            'var regex_float_with_suffix = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?F$","i");' +
+            ' ( regex_float.test(input) || regex_float_with_suffix.test(input))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${module.middleware.motor_current.voltage_comp.i2}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)$","i");' +
+            'if (regex_float.test(output)){' +
+            'output = output + "F";' +
+            '}' +
+            'output')
+            </export>
+        </property>
+        <property default="0.080F" display="General|Voltage error compensation table of current 3" id="module.middleware.motor_current.voltage_comp.i3" description="Voltage error compensation table of current.">
+            <constraint display="Must be a valid value">
+            eval('' +
+            'var input = "${module.middleware.motor_current.voltage_comp.i3}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?$","i");' +
+            'var regex_float_with_suffix = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?F$","i");' +
+            ' ( regex_float.test(input) || regex_float_with_suffix.test(input))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${module.middleware.motor_current.voltage_comp.i3}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)$","i");' +
+            'if (regex_float.test(output)){' +
+            'output = output + "F";' +
+            '}' +
+            'output')
+            </export>
+        </property>
+        <property default="0.184F" display="General|Voltage error compensation table of current 4" id="module.middleware.motor_current.voltage_comp.i4" description="Voltage error compensation table of current.">
+            <constraint display="Must be a valid value">
+            eval('' +
+            'var input = "${module.middleware.motor_current.voltage_comp.i4}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?$","i");' +
+            'var regex_float_with_suffix = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?F$","i");' +
+            ' ( regex_float.test(input) || regex_float_with_suffix.test(input))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${module.middleware.motor_current.voltage_comp.i4}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)$","i");' +
+            'if (regex_float.test(output)){' +
+            'output = output + "F";' +
+            '}' +
+            'output')
+            </export>
+        </property>
+        <property default="0.751F" display="General|Voltage error compensation table of current 5" id="module.middleware.motor_current.voltage_comp.i5" description="Voltage error compensation table of current.">
+            <constraint display="Must be a valid value">
+            eval('' +
+            'var input = "${module.middleware.motor_current.voltage_comp.i5}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?$","i");' +
+            'var regex_float_with_suffix = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?F$","i");' +
+            ' ( regex_float.test(input) || regex_float_with_suffix.test(input))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${module.middleware.motor_current.voltage_comp.i5}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)$","i");' +
+            'if (regex_float.test(output)){' +
+            'output = output + "F";' +
+            '}' +
+            'output')
+            </export>
+        </property>
+
+        <!-- Callback Settings -->
+        <property default="NULL" display="Interrupts|Callback" id="module.middleware.motor_current.cc_callback" description="A user callback function. If this callback function is provided, it is called at A/D conversion finish interrupt.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.middleware.motor_current.cc_callback}")
+            </constraint>
+        </property>
+        <property default="NULL" id="module.middleware.motor_current.cc_context">
+            <export>eval('' +
+            'var string = "${module.middleware.motor_current.cc_context}";' +
+            'if ("NULL" !== string){' +
+            'string = "&amp;" + string  ;' +
+            '}' +
+            'String(string)')
+            </export>
+        </property>
+
+        <!-- Design Parameters Settings -->
+        <property default="300.0F" display="Design Parameter|Current PI loop omega (Hz)" id="module.middleware.motor_current.f_current_omega" description="Current PI loop omega">
+            <constraint display="Must be a valid value">
+            eval('' +
+            'var input = "${module.middleware.motor_current.f_current_omega}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?$","i");' +
+            'var regex_float_with_suffix = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?F$","i");' +
+            ' ( regex_float.test(input) || regex_float_with_suffix.test(input))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${module.middleware.motor_current.f_current_omega}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)$","i");' +
+            'if (regex_float.test(output)){' +
+            'output = output + "F";' +
+            '}' +
+            'output')
+            </export>
+        </property>
+        <property default="1.0F" display="Design Parameter|Current PI loop zeta" id="module.middleware.motor_current.f_current_zeta" description="Current PI loop zeta">
+            <constraint display="Must be a valid value">
+            eval('' +
+            'var input = "${module.middleware.motor_current.f_current_zeta}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?$","i");' +
+            'var regex_float_with_suffix = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?F$","i");' +
+            ' ( regex_float.test(input) || regex_float_with_suffix.test(input))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${module.middleware.motor_current.f_current_zeta}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)$","i");' +
+            'if (regex_float.test(output)){' +
+            'output = output + "F";' +
+            '}' +
+            'output')
+            </export>
+        </property>
+
+        <!-- Motor Parameters Settings -->
+        <property default="2" display="Motor Parameter|Pole pairs" id="module.middleware.motor_current.u2_mtr_pp" description="Pole pairs">
+            <constraint display="Must be a valid non-negative value.">testInteger("${module.middleware.motor_current.u2_mtr_pp}") &amp;&amp; ("${module.middleware.motor_current.u2_mtr_pp}" &gt;= 0)</constraint>
+        </property>
+        <property default="8.5F" display="Motor Parameter|Resistance (ohm)" id="module.middleware.motor_current.f4_mtr_r" description="Resistance">
+            <constraint display="Must be a valid value">
+            eval('' +
+            'var input = "${module.middleware.motor_current.f4_mtr_r}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?$","i");' +
+            'var regex_float_with_suffix = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?F$","i");' +
+            ' ( regex_float.test(input) || regex_float_with_suffix.test(input))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${module.middleware.motor_current.f4_mtr_r}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)$","i");' +
+            'if (regex_float.test(output)){' +
+            'output = output + "F";' +
+            '}' +
+            'output')
+            </export>
+        </property>
+        <property default="0.0045F" display="Motor Parameter|Inductance of d-axis (H)" id="module.middleware.motor_current.f4_mtr_ld" description="Inductance of d-axis">
+            <constraint display="Must be a valid value">
+            eval('' +
+            'var input = "${module.middleware.motor_current.f4_mtr_ld}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?$","i");' +
+            'var regex_float_with_suffix = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?F$","i");' +
+            ' ( regex_float.test(input) || regex_float_with_suffix.test(input))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${module.middleware.motor_current.f4_mtr_ld}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)$","i");' +
+            'if (regex_float.test(output)){' +
+            'output = output + "F";' +
+            '}' +
+            'output')
+            </export>
+        </property>
+        <property default="0.0045F" display="Motor Parameter|Inductance of q-axis (H)" id="module.middleware.motor_current.f4_mtr_lq" description="Inductance of q-axis">
+            <constraint display="Must be a valid value">
+            eval('' +
+            'var input = "${module.middleware.motor_current.f4_mtr_lq}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?$","i");' +
+            'var regex_float_with_suffix = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?F$","i");' +
+            ' ( regex_float.test(input) || regex_float_with_suffix.test(input))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${module.middleware.motor_current.f4_mtr_lq}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)$","i");' +
+            'if (regex_float.test(output)){' +
+            'output = output + "F";' +
+            '}' +
+            'output')
+            </export>
+        </property>
+        <property default="0.02159F" display="Motor Parameter|Permanent magnetic flux (Wb)" id="module.middleware.motor_current.f4_mtr_m" description="Permanent magnetic flux">
+            <constraint display="Must be a valid value">
+            eval('' +
+            'var input = "${module.middleware.motor_current.f4_mtr_m}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?$","i");' +
+            'var regex_float_with_suffix = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?F$","i");' +
+            ' ( regex_float.test(input) || regex_float_with_suffix.test(input))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${module.middleware.motor_current.f4_mtr_m}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)$","i");' +
+            'if (regex_float.test(output)){' +
+            'output = output + "F";' +
+            '}' +
+            'output')
+            </export>
+        </property>
+        <property default="0.0000028F" display="Motor Parameter|Rotor inertia (kgm^2)" id="module.middleware.motor_current.f4_mtr_j" description="Rotor inertia">
+            <constraint display="Must be a valid value">
+            eval('' +
+            'var input = "${module.middleware.motor_current.f4_mtr_j}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?$","i");' +
+            'var regex_float_with_suffix = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?F$","i");' +
+            ' ( regex_float.test(input) || regex_float_with_suffix.test(input))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${module.middleware.motor_current.f4_mtr_j}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)$","i");' +
+            'if (regex_float.test(output)){' +
+            'output = output + "F";' +
+            '}' +
+            'output')
+            </export>
+        </property>
+
+        <!-- Contents -->
+        <header>
+/** Motor Current Instance. */
+extern const motor_current_instance_t ${module.middleware.motor_current.name};
+
+/** Access the Motor Current instance using these structures
+    when calling API functions directly (::p_api is not used). */
+extern motor_current_instance_ctrl_t ${module.middleware.motor_current.name}_ctrl;
+extern const motor_current_extended_cfg_t ${module.middleware.motor_current.name}_extend;
+extern const motor_current_cfg_t ${module.middleware.motor_current.name}_cfg;
+
+#ifndef ${module.middleware.motor_current.cc_callback}
+void ${module.middleware.motor_current.cc_callback}(motor_current_callback_args_t * p_args);
+#endif
+        </header>
+
+        <includes>
+#include &quot;rm_motor_current.h&quot;
+        </includes>
+        <declarations>
+
+/* Motor Current Configuration */
+motor_current_instance_ctrl_t ${module.middleware.motor_current.name}_ctrl;
+
+motor_current_design_parameter_t ${module.middleware.motor_current.name}_design =
+{
+  .f_current_omega = ${module.middleware.motor_current.f_current_omega},
+  .f_current_zeta = ${module.middleware.motor_current.f_current_zeta},
+};
+
+motor_current_motor_parameter_t ${module.middleware.motor_current.name}_motor =
+{
+  .u2_mtr_pp = ${module.middleware.motor_current.u2_mtr_pp},
+  .f4_mtr_r = ${module.middleware.motor_current.f4_mtr_r},
+  .f4_mtr_ld = ${module.middleware.motor_current.f4_mtr_ld},
+  .f4_mtr_lq = ${module.middleware.motor_current.f4_mtr_lq},
+  .f4_mtr_m = ${module.middleware.motor_current.f4_mtr_m},
+  .f4_mtr_j = ${module.middleware.motor_current.f4_mtr_j},
+};
+
+const motor_current_extended_cfg_t ${module.middleware.motor_current.name}_extend =
+{
+  .f_comp_v[0] = ${module.middleware.motor_current.voltage_comp.v1},
+  .f_comp_v[1] = ${module.middleware.motor_current.voltage_comp.v2},
+  .f_comp_v[2] = ${module.middleware.motor_current.voltage_comp.v3},
+  .f_comp_v[3] = ${module.middleware.motor_current.voltage_comp.v4},
+  .f_comp_v[4] = ${module.middleware.motor_current.voltage_comp.v5},
+  .f_comp_i[0] = ${module.middleware.motor_current.voltage_comp.i1},
+  .f_comp_i[1] = ${module.middleware.motor_current.voltage_comp.i2},
+  .f_comp_i[2] = ${module.middleware.motor_current.voltage_comp.i3},
+  .f_comp_i[3] = ${module.middleware.motor_current.voltage_comp.i4},
+  .f_comp_i[4] = ${module.middleware.motor_current.voltage_comp.i5},
+  .vcomp_enable = ${module.middleware.motor_current.voltage_comp},
+  .f_current_ctrl_period = (${module.middleware.motor_current.u_decimation} + 1.0F) / ${module.middleware.motor_current.f_carrier_freq},
+  .f_ilimit = ${module.middleware.motor_current.f_ilimit} / 2.0F,
+  .p_motor_parameter = &amp;${module.middleware.motor_current.name}_motor,
+  .p_design_parameter = &amp;${module.middleware.motor_current.name}_design,
+  .u1_control_type = ${module.middleware.motor_current.ctrl_type},
+  .shunt = ${module.middleware.motor_current.shunt},
+  .u1_sample_delay_comp_enable = ${module.middleware.motor_current.smpl_dly_comp},
+  .f_period_magnitude_value = ${module.middleware.motor_current.period_magnitude},
+};
+
+const motor_current_cfg_t ${module.middleware.motor_current.name}_cfg =
+{
+  .p_motor_driver_instance = &amp;${module.middleware.motor_current.requires.driver::module.middleware.motor_driver.name},
+  .p_motor_angle_instance = &amp;${module.middleware.motor_current.requires.angle::module.middleware.motor_angle.name},
+  .p_callback = ${module.middleware.motor_current.cc_callback},
+  .p_context = ${module.middleware.motor_current.cc_context},
+  .p_extend = &amp;${module.middleware.motor_current.name}_extend,
+};
+
+/* Instance structure to use motor current control module. */
+const motor_current_instance_t ${module.middleware.motor_current.name} =
+{
+    .p_ctrl = &amp;${module.middleware.motor_current.name}_ctrl,
+    .p_cfg  = &amp;${module.middleware.motor_current.name}_cfg,
+    .p_api  = &amp;g_motor_current_on_motor_current,
+};
+        </declarations>
+    </module>
+</raModuleDescription>

@@ -1,0 +1,278 @@
+﻿<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.driver.icu" path="fsp_cfg/r_icu_cfg.h" version="0">
+        <property default="config.driver.icu.param_checking_enable.bsp" display="Parameter Checking" id="config.driver.icu.param_checking_enable" description="If selected code for parameter checking is included in the build.">
+            <option display="Default (BSP)" id="config.driver.icu.param_checking_enable.bsp" value="(BSP_CFG_PARAM_CHECKING_ENABLE)"/>
+            <option display="Enabled" id="config.driver.icu.param_checking_enable.enabled" value="(1)"/>
+            <option display="Disabled" id="config.driver.icu.param_checking_enable.disabled" value="(0)"/>
+        </property>
+        <content>
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#define ICU_CFG_PARAM_CHECKING_ENABLE ${config.driver.icu.param_checking_enable}
+
+#ifdef __cplusplus
+}
+#endif
+        </content>
+    </config>
+    <module config="config.driver.icu" display="Input|${module.driver.external_irq.name} External IRQ (r_icu)" id="module.driver.external_irq_on_icu" version="1" url="group___i_c_u.html" common="100">
+        <constraint display="Module instances must have unique names">
+            "${interface.driver.external_irq.${module.driver.external_irq.name}}" === "1"
+        </constraint>
+        <constraint display="Requires ICU Peripheral">
+          "${interface.mcu.icu_ext_irq.external}" === "1"
+        </constraint>
+        <constraint display="Channel not available on selected MCU">
+            "${interface.mcu.icu_ext_irq.external.${module.driver.external_irq.channel}}" === "1"
+        </constraint>
+        <constraint display="Choose another trigger mode when Digital Filtering clock source is LOCO.">
+          !(("${module.driver.external_irq.trigger}" === "module.driver.external_irq.trigger.trig_lowlev") &amp;&amp;
+		  ("${module.driver.external_irq.filter_enable}" === "module.driver.external_irq.filter_enable.true") &amp;&amp;
+          ("${module.driver.external_irq.filter_source}" === "module.driver.external_irq.filter_source.loco"))
+        </constraint>
+        <requires id="module.driver.external_irq_on_icu.requires.icu" interface="interface.mcu.icu_ext_irq.external" visible="false" display="Requires ICU Peripheral" />
+        <provides interface="interface.peripheral.irq${module.driver.external_irq.channel}" />
+        <provides interface="interface.driver.external_irq" />
+        <provides interface="interface.driver.external_irq_on_icu" />
+        <provides interface="interface.driver.external_irq.${module.driver.external_irq.name}" />
+        <provides interface="interface.driver.icu.${module.driver.external_irq.name}" />
+        <property default="g_external_irq${_instance}" display="Name" id="module.driver.external_irq.name" description="Module name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.external_irq.name}")</constraint>
+        </property>
+        <property default="0" display="Channel" id="module.driver.external_irq.channel" description="Specify the hardware channel.">
+            <constraint display="Value must be a non-negative integer">testInteger("${module.driver.external_irq.channel}") &amp;&amp; ("${module.driver.external_irq.channel}" &gt;= 0)</constraint>
+            <signal event="event.icu.irq${module.driver.external_irq.channel}" />
+        </property>
+        <property default="module.driver.external_irq.trigger.trig_rising" display="Trigger" id="module.driver.external_irq.trigger" description="Select the signal edge or state that triggers an interrupt.">
+            <select enum="enum.mcu.external_irq.trigger" />
+        </property>
+        <property default="module.driver.external_irq.filter_enable.false" display="Digital Filtering" id="module.driver.external_irq.filter_enable" description="Select if the digital noise filter should be enabled.">
+            <select enum="enum.mcu.external_irq.filter_enable" />
+        </property>
+        <property default="module.driver.external_irq.filter_source.pclk" display="Filter Source" id="module.driver.external_irq.filter_source" description="Select the clock source for digital filter (Only affected when the digital filter is enabled).">
+            <select enum="enum.mcu.external_irq.filter_source" />
+        </property>
+        <property default="" display="Digital Filtering Sample Clock (Only valid when Digital Filtering is Enabled)" id="module.driver.external_irq.clock_source_div" description="Select the clock divider for the digital noise filter.">
+            <select enum="enum.mcu.external_irq.clock_source_div" />
+        </property>
+        <property default="NULL" id="module.driver.external_irq.p_context" />
+        <property default="NULL" display="Callback" id="module.driver.external_irq.p_callback" description="A user callback function can be provided here. If this callback function is provided, it is called from the interrupt service routine (ISR) each time the IRQn triggers">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.external_irq.p_callback}")</constraint>
+        </property>
+        <property default="" display="Pin Interrupt Priority" id="module.driver.external_irq.ipl" description="Select the PIN interrupt priority.">
+            <select enum="enum.mcu.nvic.priorities.mandatory"/>
+            <interrupt event="event.icu.irq${module.driver.external_irq.channel}" isr="r_icu_isr"/>
+        </property>
+        <property default="&amp;g_external_irq_on_icu" id="module.driver.external_irq.p_api" description="Hidden property that can be used to override p_api." />
+        <peripheral name="ICU_EXT_IRQ${module.driver.external_irq.channel}" component="irq0" pin="irq0.irq${module.driver.external_irq.channel}" />
+        <peripheral name="ICU_EXT_IRQ${module.driver.external_irq.channel}" component="irq" pin="irq.irq${module.driver.external_irq.channel}" />
+        <peripheral name="ICU_EXT_IRQ${module.driver.external_irq.channel}" component="irq" pin="irq.irq${module.driver.external_irq.channel}_dash_ds" />
+        <peripheral name="ICU_EXT_IRQ${module.driver.external_irq.channel}" component="irq${module.driver.external_irq.channel}" pin="irq${module.driver.external_irq.channel}.irq${module.driver.external_irq.channel}" />
+        <peripheral name="ICU_EXT_IRQ${module.driver.external_irq.channel}" component="irq${module.driver.external_irq.channel}" pin="irq${module.driver.external_irq.channel}.irq${module.driver.external_irq.channel}_dash_ds" />
+        <!-- For MCU's whose pinmapping files have been generated with MPC Designer Tool -->
+        <peripheral name="ICU_EXT_IRQ${module.driver.external_irq.channel}" component="icu" pin="icu.irq${module.driver.external_irq.channel}" />
+        <peripheral name="ICU_EXT_IRQ${module.driver.external_irq.channel}" component="icu" pin="icu.irq${module.driver.external_irq.channel}_dash_ds" />
+        <peripheral name="ICU_EXT_IRQ${module.driver.external_irq.channel}" component="icu${module.driver.external_irq.channel}" pin="icu${module.driver.external_irq.channel}.irq${module.driver.external_irq.channel}" />
+        <peripheral name="ICU_EXT_IRQ${module.driver.external_irq.channel}" component="icu${module.driver.external_irq.channel}" pin="icu${module.driver.external_irq.channel}.irq${module.driver.external_irq.channel}_dash_ds" />
+        <!-- Leading zero required for channels less than 10. -->
+        <peripheral name="" component="irq0" pin="irq0.irq0${module.driver.external_irq.channel}" />
+        <peripheral name="" component="icu" pin="icu.irq${module.driver.external_irq.channel}" />
+        <symbol id="symbol.driver.external_irq.name" value="${module.driver.external_irq.name}"/>
+        <symbol id="symbol.driver.external_irq.guard.external_irq_open" value="${module.driver.external_irq.name}_external_irq_open_guard"/>
+        <symbol id="symbol.driver.external_irq.guard.macro.external_irq_open" value="FSP_GUARD_${module.driver.external_irq.name}_R_ICU_ExternalIrqOpen"/>
+        <symbol id="symbol.driver.external_irq.guard.external_irq_enable" value="${module.driver.external_irq.name}_external_irq_enable_guard"/>
+        <symbol id="symbol.driver.external_irq.guard.macro.external_irq_enable" value="FSP_GUARD_${module.driver.external_irq.name}_R_ICU_ExternalIrqEnable"/>
+        <symbol id="symbol.driver.external_irq.guard.external_irq_disable" value="${module.driver.external_irq.name}_external_irq_disable_guard"/>
+        <symbol id="symbol.driver.external_irq.guard.macro.external_irq_disable" value="FSP_GUARD_${module.driver.external_irq.name}_R_ICU_ExternalIrqDisable"/>
+        <symbol id="symbol.driver.external_irq.guard.external_irq_callback_set" value="${module.driver.external_irq.name}_external_irq_callback_set_guard"/>
+        <symbol id="symbol.driver.external_irq.guard.macro.external_irq_callback_set" value="FSP_GUARD_${module.driver.external_irq.name}_R_ICU_ExternalIrqCallbackSet"/>
+        <symbol id="symbol.driver.external_irq.guard.external_irq_close" value="${module.driver.external_irq.name}_external_irq_close_guard"/>
+        <symbol id="symbol.driver.external_irq.guard.macro.external_irq_close" value="FSP_GUARD_${module.driver.external_irq.name}_R_ICU_ExternalIrqClose"/>
+        <symbol id="symbol.driver.external_irq.nsc_api" value="${module.driver.external_irq.name}_nsc_api"/>
+        <symbol id="symbol.driver.external_irq.cfg" value="${module.driver.external_irq.name}_cfg"/>
+        <symbol id="symbol.driver.external_irq.ctrl" value="${module.driver.external_irq.name}_ctrl"/>
+        <header>
+/** External IRQ on ICU Instance. */
+extern const external_irq_instance_t ${module.driver.external_irq.name};
+
+/** Access the ICU instance using these structures when calling API functions directly (::p_api is not used). */
+extern icu_instance_ctrl_t ${module.driver.external_irq.name}_ctrl;
+extern const external_irq_cfg_t ${module.driver.external_irq.name}_cfg;
+
+#ifndef ${module.driver.external_irq.p_callback}
+void ${module.driver.external_irq.p_callback}(external_irq_callback_args_t * p_args);
+#endif
+        </header>
+        <includes>
+#include &quot;r_icu.h&quot;
+#include &quot;r_external_irq_api.h&quot;
+        </includes>
+        <declarations>
+icu_instance_ctrl_t ${module.driver.external_irq.name}_ctrl;
+
+/** External IRQ extended configuration for ICU HAL driver */
+const icu_extended_cfg_t ${module.driver.external_irq.name}_ext_cfg =
+{
+    .filter_src         = ${module.driver.external_irq.filter_source},
+};
+
+const external_irq_cfg_t ${module.driver.external_irq.name}_cfg =
+{
+    .channel             = ${module.driver.external_irq.channel},
+    .trigger             = ${module.driver.external_irq.trigger},
+    .filter_enable       = ${module.driver.external_irq.filter_enable},
+    .clock_source_div            = ${module.driver.external_irq.clock_source_div},
+    .p_callback          = ${module.driver.external_irq.p_callback},
+    /** If NULL then do not add &amp; */
+#if defined(${module.driver.external_irq.p_context})
+    .p_context           = ${module.driver.external_irq.p_context},
+#else
+    .p_context           = &amp;${module.driver.external_irq.p_context},
+#endif
+    .p_extend            = (void *)&amp;${module.driver.external_irq.name}_ext_cfg,
+    .ipl                 = ${module.driver.external_irq.ipl},
+#if defined(VECTOR_NUMBER_ICU_IRQ${module.driver.external_irq.channel})
+    .irq                 = VECTOR_NUMBER_ICU_IRQ${module.driver.external_irq.channel},
+#else
+    .irq                 = FSP_INVALID_VECTOR,
+#endif
+};
+/* Instance structure to use this module. */
+const external_irq_instance_t ${module.driver.external_irq.name} =
+{
+    .p_ctrl        = &amp;${module.driver.external_irq.name}_ctrl,
+    .p_cfg         = &amp;${module.driver.external_irq.name}_cfg,
+    .p_api         = ${module.driver.external_irq.p_api}
+};
+        </declarations>
+        <guard>
+            <header>
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.external_irq.name}_external_irq_open_guard(external_irq_ctrl_t *const p_api_ctrl, external_irq_cfg_t const *const p_cfg);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.external_irq.name}_external_irq_enable_guard(external_irq_ctrl_t *const p_api_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.external_irq.name}_external_irq_disable_guard(external_irq_ctrl_t *const p_api_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.external_irq.name}_external_irq_callback_set_guard(external_irq_ctrl_t *const p_api_ctrl, void(*p_callback)(external_irq_callback_args_t *), void const *const p_context, external_irq_callback_args_t *const p_callback_memory);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.external_irq.name}_external_irq_close_guard(external_irq_ctrl_t *const p_api_ctrl);
+
+            </header>
+            <template name="${module.driver.external_irq.name}_guard.c">
+                <![CDATA[
+                    #include "guard.h"
+
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.external_irq.name}_external_irq_open_guard (external_irq_ctrl_t *const p_api_ctrl, external_irq_cfg_t const *const p_cfg)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+    FSP_PARAMETER_NOT_USED(p_cfg);
+
+    return R_ICU_ExternalIrqOpen(&${module.driver.external_irq.name}_ctrl, &${module.driver.external_irq.name}_cfg);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.external_irq.name}_external_irq_enable_guard (external_irq_ctrl_t *const p_api_ctrl)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+
+    return R_ICU_ExternalIrqEnable(&${module.driver.external_irq.name}_ctrl);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.external_irq.name}_external_irq_disable_guard (external_irq_ctrl_t *const p_api_ctrl)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+
+    return R_ICU_ExternalIrqDisable(&${module.driver.external_irq.name}_ctrl);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.external_irq.name}_external_irq_callback_set_guard (external_irq_ctrl_t *const p_api_ctrl, void(*p_callback)(external_irq_callback_args_t *), void const *const p_context, external_irq_callback_args_t *const p_callback_memory)
+{
+    /* Verify all pointers are in non-secure memory. */
+    void(*p_callback_checked)(external_irq_callback_args_t *) = (void(*)(external_irq_callback_args_t *)) cmse_check_address_range((void *) p_callback, sizeof(void *), CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_callback_checked != NULL);
+    external_irq_callback_args_t *const p_callback_memory_checked = cmse_check_pointed_object(p_callback_memory, CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_callback_memory_checked != NULL);
+
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+    FSP_PARAMETER_NOT_USED(p_context);
+
+    return R_ICU_ExternalIrqCallbackSet(&${module.driver.external_irq.name}_ctrl, p_callback_checked, p_context, p_callback_memory_checked);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.external_irq.name}_external_irq_close_guard (external_irq_ctrl_t *const p_api_ctrl)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+
+    return R_ICU_ExternalIrqClose(&${module.driver.external_irq.name}_ctrl);
+}
+
+                ]]>
+            </template>
+        </guard>
+        <nsc>
+            <header>
+
+#define FSP_GUARD_${module.driver.external_irq.name}_R_ICU_ExternalIrqOpen() ${module.driver.external_irq.name}_external_irq_open_guard(FSP_SECURE_ARGUMENT, FSP_SECURE_ARGUMENT)
+
+#define FSP_GUARD_${module.driver.external_irq.name}_R_ICU_ExternalIrqEnable() ${module.driver.external_irq.name}_external_irq_enable_guard(FSP_SECURE_ARGUMENT)
+
+#define FSP_GUARD_${module.driver.external_irq.name}_R_ICU_ExternalIrqDisable() ${module.driver.external_irq.name}_external_irq_disable_guard(FSP_SECURE_ARGUMENT)
+
+#define FSP_GUARD_${module.driver.external_irq.name}_R_ICU_ExternalIrqCallbackSet(p_callback, p_context, p_callback_memory) ${module.driver.external_irq.name}_external_irq_callback_set_guard(FSP_SECURE_ARGUMENT, p_callback, p_context, p_callback_memory)
+
+#define FSP_GUARD_${module.driver.external_irq.name}_R_ICU_ExternalIrqClose() ${module.driver.external_irq.name}_external_irq_close_guard(FSP_SECURE_ARGUMENT)
+
+
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.external_irq.name}_external_irq_open_guard(external_irq_ctrl_t *const p_api_ctrl, external_irq_cfg_t const *const p_cfg);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.external_irq.name}_external_irq_enable_guard(external_irq_ctrl_t *const p_api_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.external_irq.name}_external_irq_disable_guard(external_irq_ctrl_t *const p_api_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.external_irq.name}_external_irq_callback_set_guard(external_irq_ctrl_t *const p_api_ctrl, void(*p_callback)(external_irq_callback_args_t *), void const *const p_context, external_irq_callback_args_t *const p_callback_memory);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.external_irq.name}_external_irq_close_guard(external_irq_ctrl_t *const p_api_ctrl);
+
+
+extern const external_irq_instance_t ${module.driver.external_irq.name};
+            </header>
+            <declarations>
+                <![CDATA[
+static const external_irq_api_t ${module.driver.external_irq.name}_nsc_api =
+{
+    .open = ${module.driver.external_irq.name}_external_irq_open_guard,
+    .enable = ${module.driver.external_irq.name}_external_irq_enable_guard,
+    .disable = ${module.driver.external_irq.name}_external_irq_disable_guard,
+    .callbackSet = ${module.driver.external_irq.name}_external_irq_callback_set_guard,
+    .close = ${module.driver.external_irq.name}_external_irq_close_guard,
+};
+const external_irq_instance_t ${module.driver.external_irq.name} =
+{
+    .p_api = &${module.driver.external_irq.name}_nsc_api,
+    .p_ctrl = FSP_SECURE_ARGUMENT,
+    .p_cfg = FSP_SECURE_ARGUMENT,
+};
+                ]]>
+            </declarations>
+        </nsc>
+        <api configurable="true">
+            <file>ra/fsp/inc/instances/r_icu.h</file>
+            <file>ra/fsp/inc/api/r_external_irq_api.h</file>
+        </api>
+    </module>
+</raModuleDescription>

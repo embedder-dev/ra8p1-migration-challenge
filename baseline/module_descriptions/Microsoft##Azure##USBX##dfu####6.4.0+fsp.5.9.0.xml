@@ -1,0 +1,35 @@
+﻿<?xml version="1.0" ?>
+<raModuleDescription>
+    <module config="config.driver.usbx_dfu" display="Connectivity|Azure RTOS USBX DFU" id="module.driver.usbx_dfu" version="1" url="https://github.com/eclipse-threadx/rtos-docs/blob/main/rtos-docs/usbx/index.md">
+        <constraint display="Unique name required for each instance">
+            "${interface.driver.usbx_dfu.${module.driver.usbx_dfu.name}}" === "1"
+        </constraint>
+        <constraint display="Requires USB Peripheral">
+          "${interface.mcu.usb_fs.external}" === "1"
+        </constraint>
+        <requires id="module.azure.usbx_dfu.requires.threadx" interface="interface.rtos.tx" visible="false" display="Requires ThreadX"/>
+        <requires id="module.driver.usbx_dfu.requires.usb_basic" interface="interface.middleware.rm_usbx_port_hid" visible="true" display="USBX DFU">
+            <override property="module.middleware.rm_usbx_port.usb_mode" value="module.middleware.rm_usbx_port.usb_mode.peri"/>
+            <override property="module.middleware.rm_usbx_port.usb_classtype" value="module.middleware.rm_usbx_port.usb_classtype.dfu"/>
+            <override property="module.middleware.rm_usbx_port.p_usb_reg" value="NULL"/>
+        </requires>
+        <provides interface="interface.driver.usbx_dfu" />
+        <provides interface="interface.driver.usbx_dfu.${module.driver.usbx_dfu.name}" />
+        <property default="usbx_dfu" id="module.driver.usbx_dfu.usbx_dfu_interface" description=""/>
+        <property default="g_usbx_dfu${_instance}" display="Name" id="module.driver.usbx_dfu.name" description="Module name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.usbx_dfu.name}")</constraint>
+        </property>
+        <header>
+        /** Printer Driver on USB Instance. */
+        </header>
+        <includes>
+#include "ux_device_class_dfu.h"
+        </includes>
+        <declarations>
+        </declarations>
+        <functions>
+        </functions>
+        <api configurable="true">
+        </api>
+    </module>
+</raModuleDescription>

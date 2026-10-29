@@ -1,0 +1,260 @@
+<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.driver.comms_spi" path="fsp_cfg/rm_comms_spi_cfg.h" version="0">
+        <property default="config.driver.comms_spi.param_checking_enable.bsp" display="Parameter Checking" id="config.driver.comms_spi.param_checking_enable" description="If selected code for parameter checking is included in the build.">
+            <option display="Default (BSP)" id="config.driver.comms_spi.param_checking_enable.bsp" value="(BSP_CFG_PARAM_CHECKING_ENABLE)"/>
+            <option display="Enabled" id="config.driver.comms_spi.param_checking_enable.enabled" value="(1)"/>
+            <option display="Disabled" id="config.driver.comms_spi.param_checking_enable.disabled" value="(0)"/>
+        </property>
+        <property default="config.driver.comms_spi.slave_select.disabled" display="Auto Slave Select" id="config.driver.comms_spi.slave_select" description="if selected slave select pin will be configured by module instance.">
+            <option display="Enabled" id="config.driver.comms_spi.slave_select.enabled" value="(1)"/>
+            <option display="Disabled" id="config.driver.comms_spi.slave_select.disabled" value="(0)"/>
+        </property>
+        <content>
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#define RM_COMMS_SPI_CFG_PARAM_CHECKING_ENABLE          ${config.driver.comms_spi.param_checking_enable}
+#define RM_COMMS_SPI_CFG_SLAVE_SELECT_ENABLE          ${config.driver.comms_spi.slave_select}
+
+#ifdef __cplusplus
+}
+#endif
+        </content>
+    </config>
+
+    <!-- SPI Shared Bus -->
+    <module config="config.driver.comms_spi" display="Connectivity|${module.driver.comms_spi_bus.name} SPI Shared Bus (rm_comms_spi)" id="module.driver.comms_spi_on_comms_spi_bus" version="1" url="group___r_m___c_o_m_m_s___s_p_i.html" common="100">
+        <constraint display="Unique name required for each instance">
+            "${interface.driver.comms_spi_bus.${module.driver.comms_spi_bus.name}}" === "1"
+        </constraint>
+        <constraint display="Mutexes must be Enabled in FreeRTOS Thread">
+          ("${config.awsfreertos.thread.configuse_mutexes}" === "config.awsfreertos.thread.configuse_mutexes.enabled") ||
+            !testExists("${interface.rtos.awsfreertos}")
+        </constraint>
+        <constraint display="Recursive Mutexes must be Enabled in FreeRTOS Thread">
+          ("${config.awsfreertos.thread.configuse_recursive_mutexes}" === "config.awsfreertos.thread.configuse_recursive_mutexes.enabled") ||
+            !testExists("${interface.rtos.awsfreertos}")
+        </constraint>
+        <constraint display="&quot;Semaphore for Blocking&quot; must be Use if &quot;Recursive Mutex for Bus&quot; is Use.">
+            ("${module.driver.comms_spi_bus.bus_recursive_mutex}" != "module.driver.comms_spi_bus.bus_recursive_mutex.use") ||
+            ("${module.driver.comms_spi_bus.blocking_semaphore}"  === "module.driver.comms_spi_bus.blocking_semaphore.use")
+        </constraint>
+        <provides interface="interface.driver.comms_spi_bus" />
+        <provides interface="interface.driver.comms_spi_on_comms_spi_bus" />
+        <provides interface="interface.driver.comms_spi_bus.${module.driver.comms_spi_bus.name}" />
+        <property default="g_comms_spi_bus${_instance}" display="Name" id="module.driver.comms_spi_bus.name" description="Module name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.comms_spi_bus.name}")</constraint>
+        </property>
+        <property default="0xFFFFFFFF" display="Bus Timeout" id="module.driver.comms_spi_bus.bus_timeout" description="Set timeout for locking bus in using RTOS.">
+            <constraint display="Value must be a non-negative integer less than or equal to 0xFFFFFFFF">testInteger("${module.driver.comms_spi_bus.bus_timeout}")  &amp;&amp; ("${module.driver.comms_spi_bus.bus_timeout}" &gt;= 0) &amp;&amp; ("${module.driver.comms_spi_bus.bus_timeout}" &lt;= 0xFFFFFFFF)</constraint>
+        </property>
+        <property default="module.driver.comms_spi_bus.blocking_semaphore.use" display="Semaphore for Blocking (RTOS only)" id="module.driver.comms_spi_bus.blocking_semaphore" description="Set Semaphore for blocking in using RTOS.">
+            <option display="Unuse" id="module.driver.comms_spi_bus.blocking_semaphore.unuse" value="NULL"/>
+            <option display="Use" id="module.driver.comms_spi_bus.blocking_semaphore.use" value="${module.driver.comms_spi_bus.name}_blocking_semaphore"/>
+        </property>
+        <property default="module.driver.comms_spi_bus.bus_recursive_mutex.use" display="Recursive Mutex for Bus (RTOS only)" id="module.driver.comms_spi_bus.bus_recursive_mutex" description="Set Mutex for locking bus in using RTOS.">
+            <option display="Unuse" id="module.driver.comms_spi_bus.bus_recursive_mutex.unuse" value="NULL"/>
+            <option display="Use" id="module.driver.comms_spi_bus.bus_recursive_mutex.use" value="${module.driver.comms_spi_bus.name}_recursive_mutex"/>
+        </property>
+
+        <header>
+/* SPI Shared Bus */
+extern rm_comms_spi_bus_extended_cfg_t ${module.driver.comms_spi_bus.name}_extended_cfg;
+        </header>
+        <includes>
+#include &quot;../ra/fsp/src/rm_comms_lock/rm_comms_lock.h&quot;
+#include &quot;rm_comms_spi.h&quot;
+#include &quot;rm_comms_api.h&quot;
+        </includes>
+        <declarations>
+
+#if BSP_CFG_RTOS
+#if BSP_CFG_RTOS == 1
+#if !defined(${module.driver.comms_spi_bus.bus_recursive_mutex})
+rm_comms_mutex_t ${module.driver.comms_spi_bus.bus_recursive_mutex} =
+{
+    .p_name = &quot;${module.driver.comms_spi_bus.name} recursive mutex&quot;,
+};
+#endif
+#if !defined(${module.driver.comms_spi_bus.blocking_semaphore})
+rm_comms_semaphore_t ${module.driver.comms_spi_bus.blocking_semaphore} =
+{
+    .p_name =  &quot;${module.driver.comms_spi_bus.name} blocking semaphore&quot;,
+};
+#endif
+#elif BSP_CFG_RTOS == 2
+#if !defined(${module.driver.comms_spi_bus.bus_recursive_mutex})
+rm_comms_mutex_t ${module.driver.comms_spi_bus.bus_recursive_mutex};
+#endif
+#if !defined(${module.driver.comms_spi_bus.blocking_semaphore})
+rm_comms_semaphore_t ${module.driver.comms_spi_bus.blocking_semaphore};
+#endif
+#endif
+
+#endif
+
+/* Shared SPI Bus */
+rm_comms_spi_bus_extended_cfg_t ${module.driver.comms_spi_bus.name}_extended_cfg =
+{
+#if BSP_CFG_RTOS
+
+#if !defined(${module.driver.comms_spi_bus.bus_recursive_mutex})
+    .p_mutex = &amp;${module.driver.comms_spi_bus.bus_recursive_mutex},
+#else
+    .p_mutex = NULL,
+#endif
+
+#if !defined(${module.driver.comms_spi_bus.blocking_semaphore})
+    .p_semaphore = &amp;${module.driver.comms_spi_bus.blocking_semaphore},
+#else
+    .p_semaphore = NULL,
+#endif
+
+    .mutex_timeout  = ${module.driver.comms_spi_bus.bus_timeout},
+    .initialized = false,
+#endif
+
+    .p_current_ctrl = NULL,
+};
+        </declarations>
+    </module>
+
+    <!-- SPI Communication Device -->
+    <module config="config.driver.comms_spi" display="Connectivity|${module.driver.comms_spi_device.name} SPI Communication Device (rm_comms_spi)" id="module.driver.comms_spi_on_comms_spi_device" version="1" url="group___r_m___c_o_m_m_s___s_p_i.html">
+        <constraint display="Unique name required for each instance">
+            "${interface.driver.comms_spi_device.${module.driver.comms_spi_device.name}}" === "1"
+        </constraint>
+        <constraint display="Requires an SPI Peripheral">
+            testExists("${interface.driver.spi}")
+        </constraint>
+        <constraint display="Requires an SPI shared bus">
+            testExists("${interface.driver.comms_spi_bus}")
+        </constraint>
+        <constraint display="SSL Port and SSL Pin must be enabled (or disabled) at the same time">
+            (("${module.driver.comms_spi_device.ssl.port_number}" == "module.driver.comms_spi_device.ssl.port_number.PORT_DISABLE") &amp;&amp; ("${module.driver.comms_spi_device.ssl.pin_number}" == "module.driver.comms_spi_device.ssl.pin_number.PIN_DISABLE"))
+         || (("${module.driver.comms_spi_device.ssl.port_number}" != "module.driver.comms_spi_device.ssl.port_number.PORT_DISABLE") &amp;&amp; ("${module.driver.comms_spi_device.ssl.pin_number}" != "module.driver.comms_spi_device.ssl.pin_number.PIN_DISABLE"))
+        </constraint>
+        <constraint display="Slave Select must be enabled to use SSL">
+            (("${module.driver.comms_spi_device.ssl.port_number}" == "module.driver.comms_spi_device.ssl.port_number.PORT_DISABLE") &amp;&amp; ("${module.driver.comms_spi_device.ssl.pin_number}" == "module.driver.comms_spi_device.ssl.pin_number.PIN_DISABLE")) || ("${config.driver.comms_spi.slave_select}" == "config.driver.comms_spi.slave_select.enabled")
+        </constraint>
+        <requires id="module.driver.comms_spi_device.requires.spi" interface="interface.driver.spi" display="SPI Communications Peripheral" find="true">
+            <override property="module.driver.spi.p_callback" value="rm_comms_spi_callback"/>
+            <override property="module.driver.spi_b.p_callback" value="rm_comms_spi_callback"/>
+        </requires>
+        <requires id="module.driver.comms_spi_device.requires.comms_spi_bus" interface="interface.driver.comms_spi_bus" display="SPI Shared Bus" find="true"/>
+        <provides interface="interface.driver.comms_spi_device" />
+        <provides interface="interface.driver.comms_spi_on_comms_spi_device" />
+        <provides interface="interface.driver.comms_on_rm_nfc_reader_ptx" />
+        <provides interface="interface.driver.comms_spi_device.${module.driver.comms_spi_device.name}" />
+        <property default="g_comms_spi_device${_instance}" display="Name" id="module.driver.comms_spi_device.name" description="Module name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.comms_spi_device.name}")</constraint>
+        </property>
+        <property default="module.driver.comms_spi_device.ssl.port_number.PORT_DISABLE" display="SSL Port Number" id="module.driver.comms_spi_device.ssl.port_number" description="GPIO output port number to select slave device.">
+            <option id="module.driver.comms_spi_device.ssl.port_number.PORT_DISABLE" display="Disabled" value="FF" />
+            <option id="module.driver.comms_spi_device.ssl.port_number.PORT_00" display="00" value="00" />
+            <option id="module.driver.comms_spi_device.ssl.port_number.PORT_01" display="01" value="01" />
+            <option id="module.driver.comms_spi_device.ssl.port_number.PORT_02" display="02" value="02" />
+            <option id="module.driver.comms_spi_device.ssl.port_number.PORT_03" display="03" value="03" />
+            <option id="module.driver.comms_spi_device.ssl.port_number.PORT_04" display="04" value="04" />
+            <option id="module.driver.comms_spi_device.ssl.port_number.PORT_05" display="05" value="05" />
+            <option id="module.driver.comms_spi_device.ssl.port_number.PORT_06" display="06" value="06" />
+            <option id="module.driver.comms_spi_device.ssl.port_number.PORT_07" display="07" value="07" />
+            <option id="module.driver.comms_spi_device.ssl.port_number.PORT_08" display="08" value="08" />
+            <option id="module.driver.comms_spi_device.ssl.port_number.PORT_09" display="09" value="09" />
+            <option id="module.driver.comms_spi_device.ssl.port_number.PORT_10" display="10" value="10" />
+            <option id="module.driver.comms_spi_device.ssl.port_number.PORT_11" display="11" value="11" />
+            <option id="module.driver.comms_spi_device.ssl.port_number.PORT_12" display="12" value="12" />
+            <option id="module.driver.comms_spi_device.ssl.port_number.PORT_13" display="13" value="13" />
+            <option id="module.driver.comms_spi_device.ssl.port_number.PORT_14" display="14" value="14" />
+        </property>
+        <property default="module.driver.comms_spi_device.ssl.pin_number.PIN_DISABLE" display="SSL Pin Number" id="module.driver.comms_spi_device.ssl.pin_number" description="GPIO output pin number to select slave device.">
+            <option id="module.driver.comms_spi_device.ssl.pin_number.PIN_DISABLE" display="Disabled" value="FF" />
+            <option id="module.driver.comms_spi_device.ssl.pin_number.PIN_00" display="00" value="00" />
+            <option id="module.driver.comms_spi_device.ssl.pin_number.PIN_01" display="01" value="01" />
+            <option id="module.driver.comms_spi_device.ssl.pin_number.PIN_02" display="02" value="02" />
+            <option id="module.driver.comms_spi_device.ssl.pin_number.PIN_03" display="03" value="03" />
+            <option id="module.driver.comms_spi_device.ssl.pin_number.PIN_04" display="04" value="04" />
+            <option id="module.driver.comms_spi_device.ssl.pin_number.PIN_05" display="05" value="05" />
+            <option id="module.driver.comms_spi_device.ssl.pin_number.PIN_06" display="06" value="06" />
+            <option id="module.driver.comms_spi_device.ssl.pin_number.PIN_07" display="07" value="07" />
+            <option id="module.driver.comms_spi_device.ssl.pin_number.PIN_08" display="08" value="08" />
+            <option id="module.driver.comms_spi_device.ssl.pin_number.PIN_09" display="09" value="09" />
+            <option id="module.driver.comms_spi_device.ssl.pin_number.PIN_10" display="10" value="10" />
+            <option id="module.driver.comms_spi_device.ssl.pin_number.PIN_11" display="11" value="11" />
+            <option id="module.driver.comms_spi_device.ssl.pin_number.PIN_12" display="12" value="12" />
+            <option id="module.driver.comms_spi_device.ssl.pin_number.PIN_13" display="13" value="13" />
+            <option id="module.driver.comms_spi_device.ssl.pin_number.PIN_14" display="14" value="14" />
+            <option id="module.driver.comms_spi_device.ssl.pin_number.PIN_15" display="15" value="15" />
+        </property>
+        <property default="1" display="SSL Next Access Delay (Microseconds)" id="module.driver.comms_spi_device.ssl.access_delay" description="SSL next access delay.">
+            <constraint display="Value must be a non-negative integer">testInteger("${module.driver.comms_spi_device.ssl.access_delay}")  &amp;&amp; ("${module.driver.comms_spi_device.ssl.access_delay}" &gt;= 0)</constraint>
+        </property>
+        <property default="module.driver.comms_spi_device.ssl_polarity.low" display="Slave Select Polarity" id="module.driver.comms_spi_device.ssl_polarity" description="Select the slave select active level.">
+            <option display="Active Low" id="module.driver.comms_spi_device.ssl_polarity.low" value="BSP_IO_LEVEL_LOW"/>
+            <option display="Active High" id="module.driver.comms_spi_device.ssl_polarity.high" value="BSP_IO_LEVEL_HIGH"/>
+        </property>
+        <property default="0xFFFFFFFF" display="Semaphore Timeout (RTOS only)" id="module.driver.comms_spi_device.semaphore_timeout" description="Set timeout for blocking in using RTOS.">
+            <constraint display="Value must be a non-negative integer less than or equal to 0xFFFFFFFF">testInteger("${module.driver.comms_spi_device.semaphore_timeout}")  &amp;&amp; ("${module.driver.comms_spi_device.semaphore_timeout}" &gt;= 0) &amp;&amp; ("${module.driver.comms_spi_device.semaphore_timeout}" &lt;= 0xFFFFFFFF)</constraint>
+        </property>
+        <property default="NULL" id="module.driver.comms_spi_device.p_context" />
+        <property default="NULL" display="Callback" id="module.driver.comms_spi_device.p_callback" description="A user callback function can be provided.">
+            <constraint display="Name must be a valid C symbol">
+                testSymbol("${module.driver.comms_spi_device.p_callback}")
+            </constraint>
+        </property>
+
+        <header>
+/* SPI Communication Device */
+extern const rm_comms_instance_t ${module.driver.comms_spi_device.name};
+extern rm_comms_spi_instance_ctrl_t ${module.driver.comms_spi_device.name}_ctrl;
+extern const rm_comms_cfg_t ${module.driver.comms_spi_device.name}_cfg;
+#ifndef ${module.driver.comms_spi_device.p_callback}
+void ${module.driver.comms_spi_device.p_callback}(rm_comms_callback_args_t * p_args);
+#endif
+        </header>
+        <includes>
+#include &quot;rm_comms_spi.h&quot;
+#include &quot;rm_comms_api.h&quot;
+        </includes>
+        <declarations>
+/* SPI Communication Device */
+rm_comms_spi_instance_ctrl_t ${module.driver.comms_spi_device.name}_ctrl;
+
+#define RA_NOT_DEFINED (1)
+rm_comms_spi_device_extended_cfg_t ${module.driver.comms_spi_device.name}_device_cfg =
+{
+    .ssl_pin = BSP_IO_PORT_${module.driver.comms_spi_device.ssl.port_number}_PIN_${module.driver.comms_spi_device.ssl.pin_number},
+    .ssl_level = ${module.driver.comms_spi_device.ssl_polarity},
+    .ssl_delay = ${module.driver.comms_spi_device.ssl.access_delay},
+#if !defined(${module.driver.comms_spi_device.requires.spi::module.driver.spi.name})
+    .p_driver_instance = &amp;${module.driver.comms_spi_device.requires.spi::module.driver.spi.name},
+#else
+    .p_driver_instance = &amp;${module.driver.comms_spi_device.requires.spi::module.driver.spi_b.name},
+#endif
+};
+
+#undef RA_NOT_DEFINED
+const rm_comms_cfg_t ${module.driver.comms_spi_device.name}_cfg =
+{
+    .semaphore_timeout  = ${module.driver.comms_spi_device.semaphore_timeout},
+    .p_lower_level_cfg  = (void*)&amp;${module.driver.comms_spi_device.name}_device_cfg,
+    .p_extend           = (void*)&amp;${module.driver.comms_spi_device.requires.comms_spi_bus::module.driver.comms_spi_bus.name}_extended_cfg,
+    .p_callback         = ${module.driver.comms_spi_device.p_callback},
+#if defined(${module.driver.comms_spi_device.p_context})
+    .p_context          = ${module.driver.comms_spi_device.p_context},
+#else
+    .p_context          = (void*)&amp;${module.driver.comms_spi_device.p_context},
+#endif
+};
+
+const rm_comms_instance_t ${module.driver.comms_spi_device.name} =
+{
+    .p_ctrl = &amp;${module.driver.comms_spi_device.name}_ctrl,
+    .p_cfg  = &amp;${module.driver.comms_spi_device.name}_cfg,
+    .p_api  = &amp;g_comms_on_comms_spi,
+};
+        </declarations>
+    </module>
+</raModuleDescription>

@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<raModuleDescription>
+      <config id="config.driver.bl2" path="arm/bl2/rm_bl2_cfg.h" version="0">
+
+            <property default="BSP_FEATURE_FLASH_DATA_FLASH_START" description="Data Flash address to store provisioning data." display="Flash Layout|FLASH_OTP_NV_COUNTERS_AREA_OFFSET" id="config.driver.bl2.cfg_data_flash_nv_counters_area_offset">
+            </property>
+            <content>
+           /*-----------------------------------------------------------
+            * BL2 Configuration file.
+            *----------------------------------------------------------*/
+
+            #include "bsp_api.h"
+
+            /* Common macro for FSP header files. There is also a corresponding FSP_FOOTER macro at the end of this file. */
+            FSP_HEADER
+
+            /* This macro is used to determine if BL2 is used in the system (for memory_region_limits memory_regions) */
+            #define BL2
+            /* This macro is used to determine if the current project is a BL2 project */
+            #define BL2_PROJECT
+
+            #define CFG_DATA_FLASH_OTP_NV_COUNTERS_AREA_OFFSET (${config.driver.bl2.cfg_data_flash_nv_counters_area_offset})
+
+            #define TFM_SPM_LOG_LEVEL 0
+            #define PLATFORM_DEFAULT_NV_COUNTERS 1
+            #define PLATFORM_DEFAULT_OTP
+
+            #define OTP_WRITEABLE
+            #define TFM_DUMMY_PROVISIONING
+
+            /* Common macro for FSP header files. There is also a corresponding FSP_HEADER macro at the top of this file. */
+            FSP_FOOTER
+            </content>
+      </config>
+      <module config="config.driver.bl2" display="Security|Trusted Firmware-M BL2" id="module.driver.bl2" common="1" version="1" url="https://tf-m-user-guide.trustedfirmware.org/design_docs/booting/tfm_secure_boot.html">
+            <constraint display="Requires BL2 Port">
+          "${interface.driver.rm_bl2_port}" === "1"
+            </constraint>
+            <constraint display="Requires MCUboot">
+          "${interface.middleware.mcuboot}" === "1"
+            </constraint>
+            <constraint display="MbedTLS (Crypto Only) must be used as the Crypto Stack for the MCUboot Port module.">
+          (testExists("${interface.driver.psa_crypto}"))
+            </constraint>
+            <constraint display="MCUBOOT_MEASURED_BOOT in MCUboot must be defined under MCUboot|General|Measured Boot.">
+          ("${config.middleware.mcuboot.measured_boot}" === "config.middleware.mcuboot.measured_boot.enabled")
+            </constraint>
+            <constraint display="MCUBOOT_DATA_SHARING in MCUboot must be defined under MCUboot|General|Data Sharing.">
+          ("${config.middleware.mcuboot.data_sharing}" === "config.middleware.mcuboot.data_sharing.enabled")
+            </constraint>
+
+            <requires id="module.driver.rm_bl2_port" interface="interface.driver.rm_bl2_port" visible="true" display="BL2 Port" />
+            <requires id="module.driver.bl2.requires.mcuboot" interface="interface.middleware.mcuboot" visible="true" display="MCUboot" />
+            <requires id="module.driver.tfm.requires._project.secure" interface="_project.secure" visible="false" display="Requires secure project" />
+            <provides interface="interface.driver.bl2" />
+            <provides interface="_bootloader" />
+            <includes>
+
+            </includes>
+            <declarations>
+            </declarations>
+      </module>
+</raModuleDescription>

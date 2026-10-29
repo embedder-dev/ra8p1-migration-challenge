@@ -1,0 +1,7 @@
+<?xml version="1.0" ?>
+<raModuleDescription>
+    <module display="Networking|LwIP HTTP Server FS" id="module.lwip.http_server_fsdata_template" version="0" visible="true" url="https://www.nongnu.org/lwip/2_1_x/group__httpd.html">
+        <provides interface="interface.lwip.http_server_fsdata" />
+        <provides interface="interface.lwip.http_server_fsdata_template" />
+    </module>
+</raModuleDescription>

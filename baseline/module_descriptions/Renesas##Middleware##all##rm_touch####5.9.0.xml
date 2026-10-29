@@ -1,0 +1,107 @@
+﻿<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.driver.touch" path="fsp_cfg/rm_touch_cfg.h" version="0">
+        <property default="config.driver.touch.param_checking_enable.bsp" display="Parameter Checking" id="config.driver.touch.param_checking_enable" description="If selected code for parameter checking is included in the build.">
+            <option display="Default (BSP)" id="config.driver.touch.param_checking_enable.bsp" value="(BSP_CFG_PARAM_CHECKING_ENABLE)"/>
+            <option display="Enabled" id="config.driver.touch.param_checking_enable.enabled" value="(1)"/>
+            <option display="Disabled" id="config.driver.touch.param_checking_enable.disabled" value="(0)"/>
+        </property>
+
+        <property default="config.driver.touch.uart_support.disabled" display="Support for QE monitoring using UART" id="config.driver.touch.uart_support" description="Enable SCI_UART support for QE monitoring.">
+            <option display="Enabled" id="config.driver.touch.uart_support.enabled" value="(1)"/>
+            <option display="Disabled" id="config.driver.touch.uart_support.disabled" value="(0)"/>
+        </property>
+
+        <property default="config.driver.touch.tuning_support.disabled" display="Support for QE Tuning using UART" id="config.driver.touch.tuning_support" description="Enable SCI_UART support for QE Tuning.">
+            <option display="Enabled" id="config.driver.touch.tuning_support.enabled" value="(1)"/>
+            <option display="Disabled" id="config.driver.touch.tuning_support.disabled" value="(0)"/>
+        </property>
+
+        <property default="config.driver.touch.chattering_suppression_type.TypeA" display="Type of chattering suppression" id="config.driver.touch.chattering_suppression_type" description="TypeA of chattering suppression : Counter of exceed threshold is hold within hysteresis range. / TypeB of chattering suppression : Counter of exceed threshold is reset within hysteresis range.">
+            <option display="TypeA : Counter of exceed threshold is hold within hysteresis range" id="config.driver.touch.chattering_suppression_type.TypeA" value="(0)"/>
+            <option display="TypeB : Counter of exceed threshold is reset within hysteresis range." id="config.driver.touch.chattering_suppression_type.TypeB" value="(1)"/>
+        </property>
+
+        <content>
+                    #ifdef __cplusplus
+                    extern "C" {
+                    #endif
+
+                    #define TOUCH_CFG_PARAM_CHECKING_ENABLE       ${config.driver.touch.param_checking_enable}
+                    #define TOUCH_CFG_UART_MONITOR_SUPPORT        ${config.driver.touch.uart_support}
+                    #define TOUCH_CFG_UART_TUNING_SUPPORT         ${config.driver.touch.tuning_support}
+                    #define TOUCH_CFG_CHATTERING_SUPPRESSION_TYPE ${config.driver.touch.chattering_suppression_type}
+                    #ifndef QE_TOUCH_CONFIGURATION
+                    #define TOUCH_CFG_NUM_BUTTONS             (1)
+                    #define TOUCH_CFG_NUM_SLIDERS             (0)
+                    #define TOUCH_CFG_NUM_WHEELS              (0)
+                    #if (BSP_FEATURE_CTSU_VERSION == 2)
+                     #define TOUCH_CFG_PAD_ENABLE             (0)
+                    #endif
+                    #endif
+
+                    #ifdef __cplusplus
+                    }
+                    #endif
+        </content>
+    </config>
+    <module common="1" config="config.driver.touch" display="CapTouch|Touch (rm_touch)" id="module.driver.touch_on_touch" version="1" url="group___t_o_u_c_h.html">
+        <constraint display="Unique name required for each instance">
+            "${interface.driver.touch.g_touch0}" === "1"
+        </constraint>
+        <constraint display="Requires touch Peripheral">
+            "${interface.mcu.ctsu.external}" === "1"
+        </constraint>
+        <constraint display="UART support must be enabled to use UART">
+            (("${config.driver.touch.uart_support}" === "config.driver.touch.uart_support.enabled") ||
+             ("${config.driver.touch.tuning_support}" === "config.driver.touch.tuning_support.enabled")) ||
+            ((!testExists("${module.driver.touch_on_touch.requires.uart::module.driver.uart.name}")))
+        </constraint>
+        <constraint display="Requires SCI_UART module">
+            (("${config.driver.touch.uart_support}" === "config.driver.touch.uart_support.disabled") &amp;&amp;
+             ("${config.driver.touch.tuning_support}" === "config.driver.touch.tuning_support.disabled")) ||
+            ((testExists("${module.driver.touch_on_touch.requires.uart::module.driver.uart.name}")))
+        </constraint>
+
+        <requires id="module.driver.touch_on_touch.requires.touch" interface="interface.mcu.ctsu.external" visible="false" display="Requires TOUCH Peripheral" />
+        <requires id="module.driver.touch_on_touch.requires.ctsu" interface="interface.driver.ctsu_on_ctsu" display="Add CTSU Driver" />
+        <requires id="module.driver.touch_on_touch.requires.uart" interface="interface.driver.uart_on_sci_uart" display="Add SCI UART Driver for monitor of QE" find="false">
+            <override property="module.driver.uart.name" value="g_uart_qe"/>
+            <override property="module.driver.uart.data_bits" value="module.driver.uart.data_bits.data_bits_8"/>
+            <override property="module.driver.uart.parity" value="module.driver.uart.parity.parity_off"/>
+            <override property="module.driver.uart.stop_bits" value="module.driver.uart.stop_bits.stop_bits_1"/>
+            <override property="module.driver.uart.callback" value="touch_uart_callback"/>
+        </requires>
+
+        <provides interface="interface.driver.touch" />
+        <provides interface="interface.driver.touch_on_touch" />
+        <!-- touch configuration -->
+        <provides interface="interface.driver.touch.g_touch0" />
+        <property default="touch" id="module.driver.touch.touch_interface" description=""/>
+        <property default="g_touch0" id="module.driver.touch.name" description="Module name.">
+        </property>
+
+        <symbol id="symbol.driver.touch.name" value="${module.driver.touch.name}"/>
+
+        <includes>
+            #include &quot;rm_touch.h&quot;
+            #include &quot;rm_touch_api.h&quot;
+        </includes>
+
+
+        <guard>
+        <header>
+        </header>
+        <template name="${module.driver.touch.name}_guard.c">
+        </template>
+        </guard>
+        <nsc>
+        <header>
+        </header>
+        <declarations>
+        </declarations>
+        </nsc>
+
+
+    </module>
+</raModuleDescription>

@@ -1,0 +1,110 @@
+﻿<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.middleware.rm_freertos_plus_fat" path="fsp_cfg/middleware/rm_freertos_plus_fat_cfg.h" version="0">
+        <property default="config.middleware.rm_freertos_plus_fat.param_checking_enable.bsp" display="Parameter Checking" id="config.middleware.rm_freertos_plus_fat.param_checking_enable" description="If selected code for parameter checking is included in the build.">
+            <option display="Default (BSP)" id="config.middleware.rm_freertos_plus_fat.param_checking_enable.bsp" value="(BSP_CFG_PARAM_CHECKING_ENABLE)"/>
+            <option display="Enabled" id="config.middleware.rm_freertos_plus_fat.param_checking_enable.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.rm_freertos_plus_fat.param_checking_enable.disabled" value="(0)"/>
+        </property>
+        <content>
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#define RM_FREERTOS_PLUS_FAT_CFG_PARAM_CHECKING_ENABLE ${config.middleware.rm_freertos_plus_fat.param_checking_enable}
+
+#ifdef __cplusplus
+}
+#endif
+        </content>
+    </config>
+    <module id="module.middleware.rm_freertos_plus_fat" display="Storage|FreeRTOS+FAT Port for RA (rm_freertos_plus_fat)" config="config.middleware.rm_freertos_plus_fat" common="1" version="0" visible="false" url="https://www.freertos.org/FreeRTOS-Plus/FreeRTOS_Plus_FAT/index.html">
+        <constraint display="Unique name required for each instance">
+            "${interface.driver.rm_freertos_plus_fat.${module.middleware.rm_freertos_plus_fat.name}}" === "1"
+        </constraint>
+        <constraint display="Requires lower level memory implementation">
+            testExists("${module.middleware.rm_freertos_plus_fat.requires.rm_block_media::module.driver.rm_block_media.name}")
+        </constraint>
+        <constraint display="Requires Recursive Mutexes set to Enabled in FreeRTOS Common configurations.">
+          "${config.awsfreertos.thread.configuse_recursive_mutexes}" === "config.awsfreertos.thread.configuse_recursive_mutexes.enabled" ||
+            "1" != "${interface.rtos.awsfreertos}"
+        </constraint>
+        <constraint display="Cache size must be a multiple of sector size and at least twice the sector size.">
+          ${module.middleware.rm_freertos_plus_fat.cache_size} &gt;= 2 * ${module.middleware.rm_freertos_plus_fat.sector_size} &amp;&amp;
+          0 === ${module.middleware.rm_freertos_plus_fat.cache_size} % ${module.middleware.rm_freertos_plus_fat.sector_size}
+        </constraint>
+        <requires id="module.middleware.rm_freertos_plus_fat.requires.rm_block_media" interface="interface.driver.rm_block_media" display="Add Memory Implementation [Required]">
+            <override property="module.driver.rm_block_media.callback" value="rm_freertos_plus_fat_memory_callback"/>
+            <override property="module.driver.rm_block_media.p_context" value="&amp;${module.middleware.rm_freertos_plus_fat.name}_ctrl"/>
+        </requires>
+        <requires id="module.middleware.rm_freertos_plus_fat.requires.rtos" interface="interface.rtos.supports.freertos_plus_fat" visible="false" display="Requires FreeRTOS or Bare Metal project"/>
+        <provides interface="interface.driver.rm_freertos_plus_fat" />
+        <provides interface="interface.driver.rm_freertos_plus_fat_sdmmc_on_rm_freertos_plus_fat" />
+        <provides interface="interface.driver.rm_freertos_plus_fat.${module.middleware.rm_freertos_plus_fat.name}" />
+        <property default="g_rm_freertos_plus_fat${_instance}" display="Name" id="module.middleware.rm_freertos_plus_fat.name" description="Module name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.middleware.rm_freertos_plus_fat.name}")</constraint>
+        </property>
+        <property display="Total Number of Sectors" id="module.middleware.rm_freertos_plus_fat.num_sectors" default="31293440" description="Enter the total number of sectors on the device. If this is not known, update @ref rm_freertos_plus_fat_disk_cfg_t::num_blocks after calling RM_FREERTOS_PLUS_FAT_MediaInit().">
+            <constraint display="Must be a non-negative integer">testInteger("${module.middleware.rm_freertos_plus_fat.num_sectors}") &amp;&amp; ("${module.middleware.rm_freertos_plus_fat.num_sectors}" &gt;= 0) </constraint>
+        </property>
+        <property display="Sector Size (bytes)" id="module.middleware.rm_freertos_plus_fat.sector_size" default="512" description="Select the sector size.  Must match the underlying media sector size and at least 512. If this is not known, update @ref rm_freertos_plus_fat_disk_cfg_t::num_blocks after calling RM_FREERTOS_PLUS_FAT_MediaInit().">
+            <constraint display="Must be a power of 2 multiple of 512">testInteger("${module.middleware.rm_freertos_plus_fat.sector_size}") &amp;&amp; ("${module.middleware.rm_freertos_plus_fat.sector_size}" &gt;= 0) &amp;&amp; ("${module.middleware.rm_freertos_plus_fat.sector_size}" % 512 === 0) </constraint>
+        </property>
+        <property display="Cache Size (bytes)" id="module.middleware.rm_freertos_plus_fat.cache_size" default="1024" description="Select the cache size.  Must be a multiple of the sector size and at least 2 times the sector size.">
+            <constraint display="Must be a power of 2 multiple of 512">testInteger("${module.middleware.rm_freertos_plus_fat.cache_size}") &amp;&amp; ("${module.middleware.rm_freertos_plus_fat.cache_size}" &gt;= 0) &amp;&amp; ("${module.middleware.rm_freertos_plus_fat.cache_size}" % 512 === 0) </constraint>
+        </property>
+        <property display="Partition Number" id="module.middleware.rm_freertos_plus_fat.partition_number" default="0" description="Select the partition number for this disk.">
+            <constraint display="Must be a non-negative integer">testInteger("${module.middleware.rm_freertos_plus_fat.partition_number}") &amp;&amp; ("${module.middleware.rm_freertos_plus_fat.partition_number}" &gt;= 0) </constraint>
+        </property>
+        <property default="NULL" display="Callback" id="module.middleware.rm_freertos_plus_fat.callback" description="A user callback function can be provided. If this callback function is provided, it will be  called when a card is inserted or removed.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.middleware.rm_freertos_plus_fat.callback}")</constraint>
+        </property>
+        <header>
+        /** fat on freertos Instance. */
+extern const rm_freertos_plus_fat_instance_t ${module.middleware.rm_freertos_plus_fat.name};
+extern rm_freertos_plus_fat_instance_ctrl_t ${module.middleware.rm_freertos_plus_fat.name}_ctrl;
+extern const rm_freertos_plus_fat_cfg_t ${module.middleware.rm_freertos_plus_fat.name}_cfg;
+extern rm_freertos_plus_fat_disk_cfg_t ${module.middleware.rm_freertos_plus_fat.name}_disk_cfg;
+
+#ifndef ${module.middleware.rm_freertos_plus_fat.callback}
+void ${module.middleware.rm_freertos_plus_fat.callback}(rm_freertos_plus_fat_callback_args_t * p_args);
+#endif
+
+        </header>
+        <includes>
+#include "ff_headers.h"
+#include "rm_freertos_plus_fat_api.h"
+#include "rm_freertos_plus_fat.h"
+        </includes>
+        <declarations>
+rm_freertos_plus_fat_instance_ctrl_t ${module.middleware.rm_freertos_plus_fat.name}_ctrl;
+
+const rm_freertos_plus_fat_cfg_t ${module.middleware.rm_freertos_plus_fat.name}_cfg =
+{
+    .p_block_media = &amp;${module.middleware.rm_freertos_plus_fat.requires.rm_block_media::module.driver.rm_block_media.name},
+    .p_callback    = ${module.middleware.rm_freertos_plus_fat.callback},
+};
+
+static uint8_t ${module.middleware.rm_freertos_plus_fat.name}_cache[${module.middleware.rm_freertos_plus_fat.cache_size}];
+rm_freertos_plus_fat_disk_cfg_t ${module.middleware.rm_freertos_plus_fat.name}_disk_cfg =
+{
+    .device.sector_count      = ${module.middleware.rm_freertos_plus_fat.num_sectors},
+    .device.sector_size_bytes = ${module.middleware.rm_freertos_plus_fat.sector_size},
+    .cache_size_bytes         = ${module.middleware.rm_freertos_plus_fat.cache_size},
+    .p_cache                  = &amp;${module.middleware.rm_freertos_plus_fat.name}_cache[0],
+    .partition_number         = ${module.middleware.rm_freertos_plus_fat.partition_number},
+};
+
+/* Instance structure to use this module. */
+const rm_freertos_plus_fat_instance_t ${module.middleware.rm_freertos_plus_fat.name} =
+{
+    .p_ctrl        = &amp;${module.middleware.rm_freertos_plus_fat.name}_ctrl,
+    .p_cfg         = &amp;${module.middleware.rm_freertos_plus_fat.name}_cfg,
+    .p_api         = &amp;g_fat_on_freertos,
+};
+        </declarations>
+        <functions>
+        </functions>
+    </module>
+</raModuleDescription>
+

@@ -1,0 +1,58 @@
+<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.driver.sce" path="fsp_cfg/r_sce_cfg.h" version="0">
+        <property id="config.driver.sce.fastboot" display="Initialization" default="config.driver.sce.fastboot.disabled" description="SCE intialization sequence can be sped up for use cases where cryptographic operations are limited to just ECC-P256 and RSA 3K/4K signature verification.">
+            <option id="config.driver.sce.fastboot.enabled" display="Only support operations required for fast boot" value="(1)" />
+            <option id="config.driver.sce.fastboot.disabled" display="Support all cryptographic operations" value="(0)" />
+        </property>
+        <property id="config.driver.sce.rsa_key_generation_retry_count" display="RSA|RSA key generation retry count" default="10240" macro="SCE_RSA_RETRY_COUNT_FOR_RSA_KEY_GENERATION" description="The RSA key generation retry count. 5*(key_length/2) is recommended by NIST FIPS186-4, 10240 (5120*2) is for key_length = 2048. *2 means the margin.">
+            <constraint display="Value must be a non-negative integer">testInteger("${config.driver.sce.rsa_key_generation_retry_count}") &amp;&amp; ("${config.driver.sce.rsa_key_generation_retry_count}" &gt;= 0)</constraint>
+        </property>
+        <property id="config.driver.sce.sha384" display="Hash|SHA-384|User Implementation (Software)" default="config.driver.sce.sha384.disabled" description="SCE doesn't support SHA-384 hash algorithm. Set this to 'Enabled' to provide your own software implementation of SHA-384.">
+            <option id="config.driver.sce.sha384.enabled" display="Enabled" value="(1)" />
+            <option id="config.driver.sce.sha384.disabled" display="Disabled" value="(0)" />
+        </property>
+        <property id="config.driver.sce.sha_384_function" display="Hash|SHA-384|User Implementation Function" default="crypto_sha384_user_function" macro="SCE_USER_SHA_384_FUNCTION" description="When 'User Implementation (Software)' is 'Enabled', the function specified here should implement the software SHA-384. The specification of the function can be found in FSP documentation.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${config.driver.sce.sha_384_function}")</constraint>
+        </property>
+        <content>
+            #define SCE_RSA_RETRY_COUNT_FOR_RSA_KEY_GENERATION ${config.driver.sce.rsa_key_generation_retry_count}
+            #define SCE_USER_SHA_384_ENABLED                   ${config.driver.sce.sha384}
+            #define SCE_USER_SHA_384_FUNCTION                  ${config.driver.sce.sha_384_function}
+            #ifndef SCE_USER_FAST_BOOT
+            #define SCE_USER_FAST_BOOT                         ${config.driver.sce.fastboot}
+            #endif
+        </content>
+    </config>
+    <module config="config.driver.sce" display="Security|SCE Protected Mode" id="module.driver.sce_protected" common="1" version="1" url="group___s_c_e___p_r_o_t_e_c_t_e_d.html">
+        <constraint display="Driver used multiple times. Can only be used once.">
+            "${interface.driver.sce_on_sce_protected}" === "1"
+        </constraint>
+        <constraint display="Requires SCE9 peripheral">
+            "${interface.mcu.rsip.sce9}" === "1"
+        </constraint>
+        <constraint display="Only secure projects are supported">
+            "${_project.nonsecure}" !== "1"
+        </constraint>
+        <requires id="module.driver.sce.requires.sce9" interface="interface.mcu.rsip.sce9" visible="false" display="Requires SCE9 peripheral with Protected Mode." />
+        <provides interface="interface.driver.sce_on_sce_protected"/>
+        <provides interface="interface.peripheral.rsip"/>
+        <property default="sce" display="General|Name" id="module.driver.sce_protected.name" description="Module name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.sce_protected.name}")</constraint>
+        </property>
+        <header>
+extern sce_instance_ctrl_t ${module.driver.sce_protected.name}_ctrl;
+extern const sce_cfg_t ${module.driver.sce_protected.name}_cfg;
+        </header>
+        <includes>
+#include &quot;r_sce.h&quot;
+        </includes>
+        <declarations>
+sce_instance_ctrl_t ${module.driver.sce_protected.name}_ctrl;
+const sce_cfg_t ${module.driver.sce_protected.name}_cfg;
+#if SCE_USER_SHA_384_ENABLED
+uint32_t SCE_USER_SHA_384_FUNCTION(uint8_t * message, uint8_t * digest, uint32_t message_length);
+#endif
+        </declarations>
+    </module>
+</raModuleDescription>

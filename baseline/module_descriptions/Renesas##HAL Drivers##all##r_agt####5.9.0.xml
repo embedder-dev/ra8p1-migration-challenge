@@ -1,0 +1,646 @@
+﻿<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.driver.agt" path="fsp_cfg/r_agt_cfg.h" version="0">
+        <property default="config.driver.agt.param_checking_enable.bsp" display="Parameter Checking" id="config.driver.agt.param_checking_enable" description="If selected code for parameter checking is included in the build.">
+            <option display="Default (BSP)" id="config.driver.agt.param_checking_enable.bsp" value="(BSP_CFG_PARAM_CHECKING_ENABLE)"/>
+            <option display="Enabled" id="config.driver.agt.param_checking_enable.enabled" value="(1)"/>
+            <option display="Disabled" id="config.driver.agt.param_checking_enable.disabled" value="(0)"/>
+        </property>
+        <property default="config.driver.agt.output_support_enable.disabled" display="Pin Output Support" id="config.driver.agt.output_support_enable" description="If selected code for outputting a waveform to a pin is included in the build.">
+            <option display="Disabled" id="config.driver.agt.output_support_enable.disabled" value="(0)"/>
+            <option display="Enabled" id="config.driver.agt.output_support_enable.enabled" value="(1)"/>
+        </property>
+        <property default="config.driver.agt.input_support_enable.disabled" display="Pin Input Support" id="config.driver.agt.input_support_enable" description="Enable input support to use pulse width measurement mode, pulse period measurement mode, or input from P402, P403, P404, or AGTIO.">
+            <option display="Disabled" id="config.driver.agt.input_support_enable.disabled" value="(0)"/>
+            <option display="Enabled" id="config.driver.agt.input_support_enable.enabled" value="(1)"/>
+        </property>
+        <content>
+        #ifdef __cplusplus
+        extern "C" {
+        #endif
+
+        #define AGT_CFG_PARAM_CHECKING_ENABLE ${config.driver.agt.param_checking_enable}
+        #define AGT_CFG_OUTPUT_SUPPORT_ENABLE ${config.driver.agt.output_support_enable}
+        #define AGT_CFG_INPUT_SUPPORT_ENABLE ${config.driver.agt.input_support_enable}
+
+        #ifdef __cplusplus
+        }
+        #endif
+        </content>
+    </config>
+    <module config="config.driver.agt" display="Timers|${module.driver.timer.name} Timer, Low-Power (r_agt)" id="module.driver.timer_on_agt" version="1" url="group___a_g_t.html">
+        <constraint display="Requires Underflow Interrupt (INT) enabled">
+            "${module.driver.timer.p_callback}" === "NULL" || "${module.driver.timer.ipl}" != "_disabled"
+        </constraint>
+        <constraint display="Unique name required for each instance">
+            "${interface.driver.timer.${module.driver.timer.name}}" === "1"
+        </constraint>
+        <constraint display="Requires AGT peripheral">
+          "${interface.mcu.agt}" === "1"
+        </constraint>
+        <constraint display="Enable 'Common->Pin Output Support' to use 'Output pins'.">
+            ("${config.driver.agt.output_support_enable}" === "config.driver.agt.output_support_enable.enabled" ||
+            ((("${module.driver.timer.agtob_output_enable}") === ("module.driver.timer.agtob_output_enable.false")) &amp;&amp;
+            (("${module.driver.timer.agtoa_output_enable}") === ("module.driver.timer.agtoa_output_enable.false")) &amp;&amp;
+            (("${module.driver.timer.agto_output_enable}") === ("module.driver.timer.agto_output_enable.false"))))
+        </constraint>
+        <constraint display="Enable Pin Input Support to use measurement modes">
+            "${config.driver.agt.input_support_enable}" === "config.driver.agt.input_support_enable.enabled" ||
+            "${module.driver.timer.measurement_mode}" === "module.driver.timer.measurement_mode.measure_disabled"
+        </constraint>
+        <constraint display="Enable Pin Input Support to use P402, P403, P404 or AGTIO as count source">
+            "${config.driver.agt.input_support_enable}" === "config.driver.agt.input_support_enable.enabled" ||
+            ("${module.driver.timer.count_source}" != "module.driver.timer.count_source.clock_p402_input" &amp;&amp;
+            "${module.driver.timer.count_source}" != "module.driver.timer.count_source.clock_p403_input" &amp;&amp;
+            "${module.driver.timer.count_source}" != "module.driver.timer.count_source.clock_p404_input" &amp;&amp;
+            "${module.driver.timer.count_source}" != "module.driver.timer.count_source.clock_agtio_input")
+        </constraint>
+        <constraint display="Enable Pin can only be used with P402, P403, P404 or AGTIO as count source">
+            "${module.driver.timer.enable_pin}" === "module.driver.timer.enable_pin.enable_pin_not_used" ||
+            ("${module.driver.timer.count_source}" === "module.driver.timer.count_source.clock_p402_input" ||
+            "${module.driver.timer.count_source}" === "module.driver.timer.count_source.clock_p403_input" ||
+            "${module.driver.timer.count_source}" === "module.driver.timer.count_source.clock_p404_input" ||
+            "${module.driver.timer.count_source}" === "module.driver.timer.count_source.clock_agtio_input")
+        </constraint>
+        <constraint display="Trigger Edge Both can only be used with P402, P403, P404 or AGTIO as count source">
+            "${module.driver.timer.trigger_edge}" != "module.driver.timer.trigger_edge.trigger_edge_both" ||
+            ("${module.driver.timer.count_source}" === "module.driver.timer.count_source.clock_p402_input" ||
+            "${module.driver.timer.count_source}" === "module.driver.timer.count_source.clock_p403_input" ||
+            "${module.driver.timer.count_source}" === "module.driver.timer.count_source.clock_p404_input" ||
+            "${module.driver.timer.count_source}" === "module.driver.timer.count_source.clock_agtio_input")
+        </constraint>
+        <constraint display="Period Unit must be Raw Counts when Count Source is AGT Underflow.">
+            "${module.driver.timer.count_source}" != "module.driver.timer.count_source.clock_agt_underflow" ||
+            "${module.driver.timer.unit}" === "module.driver.timer.unit.unit_period_raw_counts"
+        </constraint>
+        <constraint display="Channel not available on selected MCU">
+            "${interface.mcu.agt.${module.driver.timer.channel}}" === "1"
+        </constraint>
+        <constraint display="Channel not available with AGT 16-bit">
+            (("${module.driver.timer.bit_width}" === "module.driver.timer.bit_width.16") &amp;&amp; ("${interface.mcu.agt.external.${module.driver.timer.channel}}" === "1")) ||
+            ("${module.driver.timer.bit_width}" != "module.driver.timer.bit_width.16") || ("${interface.mcu.agt.external}" != "${interface.mcu.agtw.external}")
+        </constraint>
+        <constraint display="Channel not available with AGTW 32-bit">
+            (("${module.driver.timer.bit_width}" === "module.driver.timer.bit_width.32") &amp;&amp; ("${interface.mcu.agtw.external.${module.driver.timer.channel}}" === "1")) ||
+            ("${module.driver.timer.bit_width}" != "module.driver.timer.bit_width.32") || ("${interface.mcu.agt.external}" != "${interface.mcu.agtw.external}")
+        </constraint>
+        <requires id="module.driver.timer.requires.agt" interface="interface.mcu.agt" visible="false" display="Requires AGT peripheral" />
+        <provides interface="interface.driver.timer" />
+        <provides interface="interface.driver.timer.${module.driver.timer.name}" />
+        <provides interface="interface.peripheral.agt${module.driver.timer.channel}" />
+        <property default="g_timer${_instance}" display="General|Name" id="module.driver.timer.name" description="Module name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.timer.name}")</constraint>
+        </property>
+        <property default="" display="General|Counter Bit Width" id="module.driver.timer.bit_width" description="Counter register bit width (16-bit or 32-bit))">
+            <select enum="enum.driver.timer.bit_width"/>
+        </property>
+        <property default="" id="module.driver.timer.agtw.id">
+            <select enum="enum.driver.agtw.id"/>
+        </property>
+        <!-- These properties emit 'w'/'W' only for MCUs with both AGT and AGTW; MCUs with only AGTW refer to it as "AGT" -->
+        <property default="" id="module.driver.timer.bit_width_event">
+            <export>("${module.driver.timer.bit_width}" === "AGT_COUNTER_BIT_WIDTH_32") ? "${module.driver.timer.agtw.id}" : ""</export>
+        </property>
+        <property default="" id="module.driver.timer.bit_width_event.upper">
+            <export>("${module.driver.timer.bit_width}" === "AGT_COUNTER_BIT_WIDTH_32") ? "${module.driver.timer.agtw.id}".toUpperCase() : ""</export>
+        </property>
+        <property default="0" display="General|Channel" id="module.driver.timer.channel" description="Physical hardware channel.">
+            <constraint display="Channel number must be a non-negative integer">testInteger("${module.driver.timer.channel}")  &amp;&amp; ("${module.driver.timer.channel}" &gt;= 0)</constraint>
+            <signal event="event.agt${module.driver.timer.bit_width_event}${module.driver.timer.channel}.int" />
+            <signal event="event.agt${module.driver.timer.bit_width_event}${module.driver.timer.channel}.compare.a" />
+            <signal event="event.agt${module.driver.timer.bit_width_event}${module.driver.timer.channel}.compare.b" />
+        </property>
+        <property default="module.driver.timer.mode.mode_periodic" display="General|Mode" id="module.driver.timer.mode" description="Mode selection. Note: One-shot mode is implemented in software. ISR's must be enabled for one shot even if callback is unused.">
+            <option display="Periodic" id="module.driver.timer.mode.mode_periodic" value="TIMER_MODE_PERIODIC"/>
+            <option display="One-Shot" id="module.driver.timer.mode.mode_one_shot" value="TIMER_MODE_ONE_SHOT"/>
+            <option display="PWM" id="module.driver.timer.mode.mode_pwm" value="TIMER_MODE_PWM"/>
+        </property>
+        <property default="0x10000" display="General|Period" id="module.driver.timer.period" description="Specify the timer period based on the selected unit.\n\nWhen the unit is set to 'Raw Counts', setting the period to 0x100000000 (32-bit) or 0x10000 (16-bit) results in the maximum period at the lowest divisor (fastest timer tick). Set the period to 0x100000000 (32-bit) or 0x10000 (16-bit) for a free running timer, pulse width measurement or pulse period measurement. Setting the period higher will automatically select a higher divider; the period can be set up to 0x800000000 (32-bit) or 0x80000 (16-bit) when counting from PCLKB or 0x8000000000 (32-bit) or 0x800000 (16-bit) when counting from LOCO/subclock, which will use a divider of 8 or 128 respectively with the maximum period.\n\nIf the requested period cannot be achieved, the settings with the largest possible period that is less than or equal to the requested period are used. The theoretical calculated period is printed in a comment in the timer_cfg_t structure.">
+            <constraint display="Value must be non-negative">
+                "${module.driver.timer.period}" &gt; 0
+            </constraint>
+            <export><![CDATA[eval('' +
+'/* INPUTS */' +
+'    var requested_period = ${module.driver.timer.period};' +
+'    var requested_unit_string = "${module.driver.timer.unit}";' +
+'    var count_source_string = "${module.driver.timer.count_source}";' +
+'    var peripheral_clock_hz = ${board.clock.peripheral.agt};' +
+'    var requested_duty = ${module.driver.timer.duty_cycle};' +
+'    var timer_counter_max = 0x10000;' +
+'' +
+'    if ("${module.driver.timer.bits.ch${module.driver.timer.channel}}" == "32")' +
+'    {' +
+'        /* This is a 32 bit timer. */' +
+'        timer_counter_max = 0x100000000;' +
+'    }' +
+'' +
+'    /* Determine the count source frequency. */' +
+'    if (("AGT_CLOCK_LOCO" == count_source_string) || ("AGT_CLOCK_SUBCLOCK" == count_source_string))' +
+'    {' +
+'        peripheral_clock_hz = 32768;' +
+'    }' +
+'' +
+'    /* Calculate the number of counts in the requested period. */' +
+'    var requested_period_s = 0;' +
+'    if ("ns" == requested_unit_string)' +
+'    {' +
+'        requested_period_s = requested_period / 1000000000;' +
+'    }' +
+'    else if ("us" == requested_unit_string)' +
+'    {' +
+'        requested_period_s = requested_period / 1000000;' +
+'    }' +
+'    else if ("ms" == requested_unit_string)' +
+'    {' +
+'        requested_period_s = requested_period / 1000;' +
+'    }' +
+'    else if ("s" == requested_unit_string)' +
+'    {' +
+'        requested_period_s = requested_period;' +
+'    }' +
+'    else if ("hz" == requested_unit_string)' +
+'    {' +
+'        requested_period_s = 1 / requested_period;' +
+'    }' +
+'    else if ("khz" == requested_unit_string)' +
+'    {' +
+'        requested_period_s = 1 / (requested_period * 1000);' +
+'    }' +
+'' +
+'    var period_counts = requested_period;' +
+'    if ("raw" != requested_unit_string)' +
+'    {' +
+'        period_counts = requested_period_s * peripheral_clock_hz;' +
+'    }' +
+'' +
+'    /* Calculate the smallest divider required to fit the period in 16 bits. */' +
+'    var divider = 0;' +
+'    var max_divider = 7;' +
+'    if ("AGT_CLOCK_PCLKB" == count_source_string)' +
+'    {' +
+'        max_divider = 3;' +
+'    }' +
+'    while (period_counts > timer_counter_max)' +
+'    {' +
+'        period_counts /= 2;' +
+'        divider += 1;' +
+'' +
+'        /* PCLKB only supports dividers of 1, 2, and 8. Skip divider of 4. */' +
+'        if ("AGT_CLOCK_PCLKB" == count_source_string)' +
+'        {' +
+'            if (2 == divider)' +
+'            {' +
+'                period_counts /= 2;' +
+'                divider += 1;' +
+'            }' +
+'        }' +
+'' +
+'        /* If the divider is larger than the maximum divider, set the period and divider to the maximum. */' +
+'        if (divider > max_divider)' +
+'        {' +
+'            period_counts = timer_counter_max;' +
+'            divider = max_divider;' +
+'            break;' +
+'        }' +
+'    }' +
+'' +
+'    /* Round period down. */' +
+'    period_counts = Math.floor(period_counts);' +
+'' +
+'    /* If the requested period is less than one count, set the period to 1 count and the divider to 1. */' +
+'    if (period_counts === 0)' +
+'    {' +
+'        period_counts = 1;' +
+'        divider = 0;' +
+'    }' +
+'' +
+'    /* Calculate the duty cycle. */' +
+'    var duty_counts = Math.floor(requested_duty * period_counts / 100);' +
+'' +
+'    /* Calculate the actual values. */' +
+'    var actual_period = period_counts / (peripheral_clock_hz / Math.pow(2, divider) );' +
+'    var actual_duty = 100 * duty_counts / period_counts;' +
+'' +
+'    period_setting = "/* Actual period: " + actual_period.toString() + " seconds. Actual duty: " + actual_duty.toString() + "%. */" + ' +
+'                   " .period_counts = (uint32_t) 0x" + period_counts.toString(16) +' +
+'                   ", .duty_cycle_counts = 0x" + duty_counts.toString(16) +' +
+'                   ", .source_div = (timer_source_div_t)" + divider.toString();' +
+'    period_setting' +
+'')
+]]>            </export>
+        </property>
+        <!-- Get the number of bits in the timer from an enum. -->
+        <property default="" id="module.driver.timer.bits.ch0" description="">
+            <select enum="enum.mcu.agt.bits.ch0"/>
+        </property>
+        <property default="" id="module.driver.timer.bits.ch1" description="">
+            <select enum="enum.mcu.agt.bits.ch1"/>
+        </property>
+        <property default="" id="module.driver.timer.bits.ch2" description="">
+            <select enum="enum.mcu.agt.bits.ch2"/>
+        </property>
+        <property default="" id="module.driver.timer.bits.ch3" description="">
+            <select enum="enum.mcu.agt.bits.ch3"/>
+        </property>
+        <property default="" id="module.driver.timer.bits.ch4" description="">
+            <select enum="enum.mcu.agt.bits.ch4"/>
+        </property>
+        <property default="" id="module.driver.timer.bits.ch5" description="">
+            <select enum="enum.mcu.agt.bits.ch5"/>
+        </property>
+        <property default="module.driver.timer.unit.unit_period_raw_counts" display="General|Period Unit" id="module.driver.timer.unit" description="Unit of the period specified above">
+            <option display="Raw Counts" id="module.driver.timer.unit.unit_period_raw_counts" value="raw"/>
+            <option display="Nanoseconds" id="module.driver.timer.unit.unit_period_nsec" value="ns"/>
+            <option display="Microseconds" id="module.driver.timer.unit.unit_period_usec" value="us"/>
+            <option display="Milliseconds" id="module.driver.timer.unit.unit_period_msec" value="ms"/>
+            <option display="Seconds" id="module.driver.timer.unit.unit_period_sec" value="s"/>
+            <option display="Hertz" id="module.driver.timer.unit.unit_frequency_hz" value="hz"/>
+            <option display="Kilohertz" id="module.driver.timer.unit.unit_frequency_khz" value="khz"/>
+        </property>
+        <property default="50" display="Output|Duty Cycle Percent (only applicable in PWM mode)" id="module.driver.timer.duty_cycle" description="Specify the timer duty cycle percent. Only used in PWM mode.">
+            <constraint display="Value must be between 0 and 100">("${module.driver.timer.duty_cycle}" &gt;= 0)  &amp;&amp; ("${module.driver.timer.duty_cycle}" &lt;= 100)</constraint>
+        </property>
+
+        <property default="module.driver.timer.count_source.clock_pclkb" display="General|Count Source" id="module.driver.timer.count_source" description="AGT counter clock source.  NOTE: The divisor is calculated automatically based on the selected period. See agt_clock_t documentation for details.">
+            <select enum="enum.driver.timer.count_source"/>
+        </property>
+        <property default="module.driver.timer.agtoa_output_enable.false" display="Output|AGTOA Output" id="module.driver.timer.agtoa_output_enable" description="Configure AGTOA output.">
+            <option display="Disabled" id="module.driver.timer.agtoa_output_enable.false" value="AGT_PIN_CFG_DISABLED"/>
+            <option display="Start Level Low" id="module.driver.timer.agtoa_output_enable.true" value="AGT_PIN_CFG_START_LEVEL_LOW"/>
+            <option display="Start Level High" id="module.driver.timer.agtoa_output_enable.high" value="AGT_PIN_CFG_START_LEVEL_HIGH"/>
+        </property>
+        <property default="module.driver.timer.agtob_output_enable.false" display="Output|AGTOB Output" id="module.driver.timer.agtob_output_enable" description="Configure AGTOB output.">
+            <option display="Disabled" id="module.driver.timer.agtob_output_enable.false" value="AGT_PIN_CFG_DISABLED"/>
+            <option display="Start Level Low" id="module.driver.timer.agtob_output_enable.true" value="AGT_PIN_CFG_START_LEVEL_LOW"/>
+            <option display="Start Level High" id="module.driver.timer.agtob_output_enable.high" value="AGT_PIN_CFG_START_LEVEL_HIGH"/>
+        </property>
+        <property default="module.driver.timer.agto_output_enable.false" display="Output|AGTO Output" id="module.driver.timer.agto_output_enable" description="Configure AGTO output.">
+            <option display="Disabled" id="module.driver.timer.agto_output_enable.false" value="AGT_PIN_CFG_DISABLED"/>
+            <option display="Start Level Low" id="module.driver.timer.agto_output_enable.true" value="AGT_PIN_CFG_START_LEVEL_LOW"/>
+            <option display="Start Level High" id="module.driver.timer.agto_output_enable.high" value="AGT_PIN_CFG_START_LEVEL_HIGH"/>
+        </property>
+        <property default="module.driver.timer.measurement_mode.measure_disabled" display="Input|Measurement Mode" id="module.driver.timer.measurement_mode" description="Select if the AGT should be used to measure pulse width or pulse period. In high level pulse width measurement mode, the AGT counts when AGTIO is high and starts counting immediately in the middle of a pulse if AGTIO is high when R_AGT_Start() is called. In low level pulse width measurement mode, the AGT counts when AGTIO is low and could start counting in the middle of a pulse if AGTIO is low when R_AGT_Start() is called.">
+            <option display="Measure Disabled" id="module.driver.timer.measurement_mode.measure_disabled" value="AGT_MEASURE_DISABLED"/>
+            <option display="Measure Low Level Pulse Width" id="module.driver.timer.measurement_mode.measure_pulse_width_low_level" value="AGT_MEASURE_PULSE_WIDTH_LOW_LEVEL"/>
+            <option display="Measure High Level Pulse Width" id="module.driver.timer.measurement_mode.measure_pulse_width_high_level" value="AGT_MEASURE_PULSE_WIDTH_HIGH_LEVEL"/>
+            <option display="Measure Pulse Period" id="module.driver.timer.measurement_mode.measure_pulse_period" value="AGT_MEASURE_PULSE_PERIOD"/>
+        </property>
+        <property default="module.driver.timer.agtio_filter.agtio_filter_none" display="Input|Input Filter" id="module.driver.timer.agtio_filter" description="Input filter, applies AGTIO in pulse period measurement, pulse width measurement, or event counter mode. The filter requires the signal to be at the same level for 3 successive reads at the specified filter frequency.">
+            <option display="No Filter" id="module.driver.timer.agtio_filter.agtio_filter_none" value="AGT_AGTIO_FILTER_NONE"/>
+            <option display="Filter sampled at PCLKB" id="module.driver.timer.agtio_filter.agtio_filter_pclkb" value="AGT_AGTIO_FILTER_PCLKB"/>
+            <option display="Filter sampled at PCLKB / 8" id="module.driver.timer.agtio_filter.agtio_filter_pclkb_div_8" value="AGT_AGTIO_FILTER_PCLKB_DIV_8"/>
+            <option display="Filter sampled at PCLKB / 32" id="module.driver.timer.agtio_filter.agtio_filter_pclkb_div_32" value="AGT_AGTIO_FILTER_PCLKB_DIV_32"/>
+        </property>
+        <property default="module.driver.timer.enable_pin.enable_pin_not_used" display="Input|Enable Pin" id="module.driver.timer.enable_pin" description="Select active edge for the AGTEE pin if used.  Only applies if the count source is P402, P403 or AGTIO.">
+            <option display="Enable Pin Not Used" id="module.driver.timer.enable_pin.enable_pin_not_used" value="AGT_ENABLE_PIN_NOT_USED"/>
+            <option display="Enable Pin Active Low" id="module.driver.timer.enable_pin.enable_pin_active_low" value="AGT_ENABLE_PIN_ACTIVE_LOW"/>
+            <option display="Enable Pin Active High" id="module.driver.timer.enable_pin.enable_pin_active_high" value="AGT_ENABLE_PIN_ACTIVE_HIGH"/>
+        </property>
+        <property default="module.driver.timer.trigger_edge.trigger_edge_rising" display="Input|Trigger Edge" id="module.driver.timer.trigger_edge" description="Select the trigger edge. Applies if measurement mode is pulse period, or if the count source is P402, P403, or AGTIO. Do not select Trigger Edge Both with pulse period measurement.">
+            <option display="Trigger Edge Rising" id="module.driver.timer.trigger_edge.trigger_edge_rising" value="AGT_TRIGGER_EDGE_RISING"/>
+            <option display="Trigger Edge Falling" id="module.driver.timer.trigger_edge.trigger_edge_falling" value="AGT_TRIGGER_EDGE_FALLING"/>
+            <option display="Trigger Edge Both" id="module.driver.timer.trigger_edge.trigger_edge_both" value="AGT_TRIGGER_EDGE_BOTH"/>
+        </property>
+        <property default="NULL" display="Interrupts|Callback" id="module.driver.timer.p_callback" description="A user callback function. If this callback function is provided, it is called from the interrupt service routine (ISR) each time the timer period elapses.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.timer.p_callback}")</constraint>
+        </property>
+        <property default="NULL" id="module.driver.timer.p_context" />
+        <property default="" display="Interrupts|Underflow Interrupt Priority" id="module.driver.timer.ipl" description="Timer interrupt priority.">
+            <select enum="enum.mcu.nvic.priorities.optional"/>
+            <interrupt event="event.agt${module.driver.timer.bit_width_event}${module.driver.timer.channel}.int" isr="agt_int_isr"/>
+        </property>
+        <peripheral name="AGT${module.driver.timer.channel}" component="agt${module.driver.timer.channel}" />
+        <peripheral name="AGTW${module.driver.timer.channel}" component="agtw${module.driver.timer.channel}" />
+        <symbol id="symbol.driver.timer.name" value="${module.driver.timer.name}"/>
+        <symbol id="symbol.driver.timer.guard.close" value="${module.driver.timer.name}_close_guard"/>
+        <symbol id="symbol.driver.timer.guard.macro.close" value="FSP_GUARD_${module.driver.timer.name}_R_AGT_Close"/>
+        <symbol id="symbol.driver.timer.guard.period_set" value="${module.driver.timer.name}_period_set_guard"/>
+        <symbol id="symbol.driver.timer.guard.macro.period_set" value="FSP_GUARD_${module.driver.timer.name}_R_AGT_PeriodSet"/>
+        <symbol id="symbol.driver.timer.guard.duty_cycle_set" value="${module.driver.timer.name}_duty_cycle_set_guard"/>
+        <symbol id="symbol.driver.timer.guard.macro.duty_cycle_set" value="FSP_GUARD_${module.driver.timer.name}_R_AGT_DutyCycleSet"/>
+        <symbol id="symbol.driver.timer.guard.reset" value="${module.driver.timer.name}_reset_guard"/>
+        <symbol id="symbol.driver.timer.guard.macro.reset" value="FSP_GUARD_${module.driver.timer.name}_R_AGT_Reset"/>
+        <symbol id="symbol.driver.timer.guard.start" value="${module.driver.timer.name}_start_guard"/>
+        <symbol id="symbol.driver.timer.guard.macro.start" value="FSP_GUARD_${module.driver.timer.name}_R_AGT_Start"/>
+        <symbol id="symbol.driver.timer.guard.enable" value="${module.driver.timer.name}_enable_guard"/>
+        <symbol id="symbol.driver.timer.guard.macro.enable" value="FSP_GUARD_${module.driver.timer.name}_R_AGT_Enable"/>
+        <symbol id="symbol.driver.timer.guard.disable" value="${module.driver.timer.name}_disable_guard"/>
+        <symbol id="symbol.driver.timer.guard.macro.disable" value="FSP_GUARD_${module.driver.timer.name}_R_AGT_Disable"/>
+        <symbol id="symbol.driver.timer.guard.info_get" value="${module.driver.timer.name}_info_get_guard"/>
+        <symbol id="symbol.driver.timer.guard.macro.info_get" value="FSP_GUARD_${module.driver.timer.name}_R_AGT_InfoGet"/>
+        <symbol id="symbol.driver.timer.guard.status_get" value="${module.driver.timer.name}_status_get_guard"/>
+        <symbol id="symbol.driver.timer.guard.macro.status_get" value="FSP_GUARD_${module.driver.timer.name}_R_AGT_StatusGet"/>
+        <symbol id="symbol.driver.timer.guard.stop" value="${module.driver.timer.name}_stop_guard"/>
+        <symbol id="symbol.driver.timer.guard.macro.stop" value="FSP_GUARD_${module.driver.timer.name}_R_AGT_Stop"/>
+        <symbol id="symbol.driver.timer.guard.open" value="${module.driver.timer.name}_open_guard"/>
+        <symbol id="symbol.driver.timer.guard.macro.open" value="FSP_GUARD_${module.driver.timer.name}_R_AGT_Open"/>
+        <symbol id="symbol.driver.timer.guard.callback_set" value="${module.driver.timer.name}_callback_set_guard"/>
+        <symbol id="symbol.driver.timer.guard.macro.callback_set" value="FSP_GUARD_${module.driver.timer.name}_R_AGT_CallbackSet"/>
+        <symbol id="symbol.driver.timer.nsc_api" value="${module.driver.timer.name}_nsc_api"/>
+        <symbol id="symbol.driver.timer.cfg" value="${module.driver.timer.name}_cfg"/>
+        <symbol id="symbol.driver.timer.ctrl" value="${module.driver.timer.name}_ctrl"/>
+        <symbol id="symbol.driver.timer.extend" value="${module.driver.timer.name}_extend"/>
+        <header>
+/** AGT Timer Instance */
+extern const timer_instance_t ${module.driver.timer.name};
+
+/** Access the AGT instance using these structures when calling API functions directly (::p_api is not used). */
+extern agt_instance_ctrl_t ${module.driver.timer.name}_ctrl;
+extern const timer_cfg_t ${module.driver.timer.name}_cfg;
+
+#ifndef ${module.driver.timer.p_callback}
+void ${module.driver.timer.p_callback}(timer_callback_args_t * p_args);
+#endif
+        </header>
+        <includes>#include &quot;r_agt.h&quot;
+#include &quot;r_timer_api.h&quot;</includes>
+        <declarations>
+agt_instance_ctrl_t ${module.driver.timer.name}_ctrl;
+const agt_extended_cfg_t ${module.driver.timer.name}_extend =
+{
+    .count_source            = ${module.driver.timer.count_source},
+    .agto                    = ${module.driver.timer.agto_output_enable},
+    .agtoab_settings_b.agtoa = ${module.driver.timer.agtoa_output_enable},
+    .agtoab_settings_b.agtob = ${module.driver.timer.agtob_output_enable},
+    .measurement_mode        = ${module.driver.timer.measurement_mode},
+    .agtio_filter            = ${module.driver.timer.agtio_filter},
+    .enable_pin              = ${module.driver.timer.enable_pin},
+    .trigger_edge            = ${module.driver.timer.trigger_edge},
+    .counter_bit_width       = ${module.driver.timer.bit_width},
+};
+const timer_cfg_t ${module.driver.timer.name}_cfg =
+{
+    .mode                = ${module.driver.timer.mode},
+    ${module.driver.timer.period},
+    .channel             = ${module.driver.timer.channel},
+    .p_callback          = ${module.driver.timer.p_callback},
+    /** If NULL then do not add &amp; */
+#if defined(${module.driver.timer.p_context})
+    .p_context           = ${module.driver.timer.p_context},
+#else
+    .p_context           = &amp;${module.driver.timer.p_context},
+#endif
+    .p_extend            = &amp;${module.driver.timer.name}_extend,
+    .cycle_end_ipl       = ${module.driver.timer.ipl},
+#if defined(VECTOR_NUMBER_AGT${module.driver.timer.bit_width_event.upper}${module.driver.timer.channel}_INT)
+    .cycle_end_irq       = VECTOR_NUMBER_AGT${module.driver.timer.bit_width_event.upper}${module.driver.timer.channel}_INT,
+#else
+    .cycle_end_irq       = FSP_INVALID_VECTOR,
+#endif
+};
+/* Instance structure to use this module. */
+const timer_instance_t ${module.driver.timer.name} =
+{
+    .p_ctrl        = &amp;${module.driver.timer.name}_ctrl,
+    .p_cfg         = &amp;${module.driver.timer.name}_cfg,
+    .p_api         = &amp;g_timer_on_agt
+};
+        </declarations>
+        <guard>
+            <header>
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.timer.name}_close_guard(timer_ctrl_t *const p_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.timer.name}_period_set_guard(timer_ctrl_t *const p_ctrl, uint32_t const period_counts);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.timer.name}_duty_cycle_set_guard(timer_ctrl_t *const p_ctrl, uint32_t const duty_cycle_counts, uint32_t const pin);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.timer.name}_reset_guard(timer_ctrl_t *const p_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.timer.name}_start_guard(timer_ctrl_t *const p_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.timer.name}_enable_guard(timer_ctrl_t *const p_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.timer.name}_disable_guard(timer_ctrl_t *const p_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.timer.name}_info_get_guard(timer_ctrl_t *const p_ctrl, timer_info_t *const p_info);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.timer.name}_status_get_guard(timer_ctrl_t *const p_ctrl, timer_status_t *const p_status);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.timer.name}_stop_guard(timer_ctrl_t *const p_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.timer.name}_open_guard(timer_ctrl_t *const p_ctrl, timer_cfg_t const *const p_cfg);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.timer.name}_callback_set_guard(timer_ctrl_t *const p_api_ctrl, void(*p_callback)(timer_callback_args_t *), void const *const p_context, timer_callback_args_t *const p_callback_memory);
+
+            </header>
+            <template name="${module.driver.timer.name}_guard.c">
+                <![CDATA[
+                    #include "guard.h"
+
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.timer.name}_close_guard (timer_ctrl_t *const p_ctrl)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+
+    return R_AGT_Close(&${module.driver.timer.name}_ctrl);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.timer.name}_period_set_guard (timer_ctrl_t *const p_ctrl, uint32_t const period_counts)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+
+    return R_AGT_PeriodSet(&${module.driver.timer.name}_ctrl, period_counts);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.timer.name}_duty_cycle_set_guard (timer_ctrl_t *const p_ctrl, uint32_t const duty_cycle_counts, uint32_t const pin)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+
+    return R_AGT_DutyCycleSet(&${module.driver.timer.name}_ctrl, duty_cycle_counts, pin);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.timer.name}_reset_guard (timer_ctrl_t *const p_ctrl)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+
+    return R_AGT_Reset(&${module.driver.timer.name}_ctrl);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.timer.name}_start_guard (timer_ctrl_t *const p_ctrl)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+
+    return R_AGT_Start(&${module.driver.timer.name}_ctrl);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.timer.name}_enable_guard (timer_ctrl_t *const p_ctrl)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+
+    return R_AGT_Enable(&${module.driver.timer.name}_ctrl);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.timer.name}_disable_guard (timer_ctrl_t *const p_ctrl)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+
+    return R_AGT_Disable(&${module.driver.timer.name}_ctrl);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.timer.name}_info_get_guard (timer_ctrl_t *const p_ctrl, timer_info_t *const p_info)
+{
+    /* Verify all pointers are in non-secure memory. */
+    timer_info_t *const p_info_checked = cmse_check_pointed_object(p_info, CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_info_checked != NULL);
+
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+
+    return R_AGT_InfoGet(&${module.driver.timer.name}_ctrl, p_info_checked);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.timer.name}_status_get_guard (timer_ctrl_t *const p_ctrl, timer_status_t *const p_status)
+{
+    /* Verify all pointers are in non-secure memory. */
+    timer_status_t *const p_status_checked = cmse_check_pointed_object(p_status, CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_status_checked != NULL);
+
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+
+    return R_AGT_StatusGet(&${module.driver.timer.name}_ctrl, p_status_checked);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.timer.name}_stop_guard (timer_ctrl_t *const p_ctrl)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+
+    return R_AGT_Stop(&${module.driver.timer.name}_ctrl);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.timer.name}_open_guard (timer_ctrl_t *const p_ctrl, timer_cfg_t const *const p_cfg)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+    FSP_PARAMETER_NOT_USED(p_cfg);
+
+    return R_AGT_Open(&${module.driver.timer.name}_ctrl, &${module.driver.timer.name}_cfg);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.timer.name}_callback_set_guard (timer_ctrl_t *const p_api_ctrl, void(*p_callback)(timer_callback_args_t *), void const *const p_context, timer_callback_args_t *const p_callback_memory)
+{
+    /* Verify all pointers are in non-secure memory. */
+    void(*p_callback_checked)(timer_callback_args_t *) = (void(*)(timer_callback_args_t *)) cmse_check_address_range((void *) p_callback, sizeof(void *), CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_callback_checked != NULL);
+    timer_callback_args_t *const p_callback_memory_checked = cmse_check_pointed_object(p_callback_memory, CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_callback_memory_checked != NULL);
+
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+    FSP_PARAMETER_NOT_USED(p_context);
+
+    return R_AGT_CallbackSet(&${module.driver.timer.name}_ctrl, p_callback_checked, p_context, p_callback_memory_checked);
+}
+
+                ]]>
+            </template>
+        </guard>
+        <nsc>
+            <header>
+
+#define FSP_GUARD_${module.driver.timer.name}_R_AGT_Close() ${module.driver.timer.name}_close_guard(FSP_SECURE_ARGUMENT)
+
+#define FSP_GUARD_${module.driver.timer.name}_R_AGT_PeriodSet(period_counts) ${module.driver.timer.name}_period_set_guard(FSP_SECURE_ARGUMENT, period_counts)
+
+#define FSP_GUARD_${module.driver.timer.name}_R_AGT_DutyCycleSet(duty_cycle_counts, pin) ${module.driver.timer.name}_duty_cycle_set_guard(FSP_SECURE_ARGUMENT, duty_cycle_counts, pin)
+
+#define FSP_GUARD_${module.driver.timer.name}_R_AGT_Reset() ${module.driver.timer.name}_reset_guard(FSP_SECURE_ARGUMENT)
+
+#define FSP_GUARD_${module.driver.timer.name}_R_AGT_Start() ${module.driver.timer.name}_start_guard(FSP_SECURE_ARGUMENT)
+
+#define FSP_GUARD_${module.driver.timer.name}_R_AGT_Enable() ${module.driver.timer.name}_enable_guard(FSP_SECURE_ARGUMENT)
+
+#define FSP_GUARD_${module.driver.timer.name}_R_AGT_Disable() ${module.driver.timer.name}_disable_guard(FSP_SECURE_ARGUMENT)
+
+#define FSP_GUARD_${module.driver.timer.name}_R_AGT_InfoGet(p_info) ${module.driver.timer.name}_info_get_guard(FSP_SECURE_ARGUMENT, p_info)
+
+#define FSP_GUARD_${module.driver.timer.name}_R_AGT_StatusGet(p_status) ${module.driver.timer.name}_status_get_guard(FSP_SECURE_ARGUMENT, p_status)
+
+#define FSP_GUARD_${module.driver.timer.name}_R_AGT_Stop() ${module.driver.timer.name}_stop_guard(FSP_SECURE_ARGUMENT)
+
+#define FSP_GUARD_${module.driver.timer.name}_R_AGT_Open() ${module.driver.timer.name}_open_guard(FSP_SECURE_ARGUMENT, FSP_SECURE_ARGUMENT)
+
+#define FSP_GUARD_${module.driver.timer.name}_R_AGT_CallbackSet(p_callback, p_context, p_callback_memory) ${module.driver.timer.name}_callback_set_guard(FSP_SECURE_ARGUMENT, p_callback, p_context, p_callback_memory)
+
+
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.timer.name}_close_guard(timer_ctrl_t *const p_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.timer.name}_period_set_guard(timer_ctrl_t *const p_ctrl, uint32_t const period_counts);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.timer.name}_duty_cycle_set_guard(timer_ctrl_t *const p_ctrl, uint32_t const duty_cycle_counts, uint32_t const pin);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.timer.name}_reset_guard(timer_ctrl_t *const p_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.timer.name}_start_guard(timer_ctrl_t *const p_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.timer.name}_enable_guard(timer_ctrl_t *const p_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.timer.name}_disable_guard(timer_ctrl_t *const p_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.timer.name}_info_get_guard(timer_ctrl_t *const p_ctrl, timer_info_t *const p_info);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.timer.name}_status_get_guard(timer_ctrl_t *const p_ctrl, timer_status_t *const p_status);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.timer.name}_stop_guard(timer_ctrl_t *const p_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.timer.name}_open_guard(timer_ctrl_t *const p_ctrl, timer_cfg_t const *const p_cfg);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.timer.name}_callback_set_guard(timer_ctrl_t *const p_api_ctrl, void(*p_callback)(timer_callback_args_t *), void const *const p_context, timer_callback_args_t *const p_callback_memory);
+
+
+extern const timer_instance_t ${module.driver.timer.name};
+            </header>
+            <declarations>
+                <![CDATA[
+static const timer_api_t ${module.driver.timer.name}_nsc_api =
+{
+    .close = ${module.driver.timer.name}_close_guard,
+    .periodSet = ${module.driver.timer.name}_period_set_guard,
+    .dutyCycleSet = ${module.driver.timer.name}_duty_cycle_set_guard,
+    .reset = ${module.driver.timer.name}_reset_guard,
+    .start = ${module.driver.timer.name}_start_guard,
+    .enable = ${module.driver.timer.name}_enable_guard,
+    .disable = ${module.driver.timer.name}_disable_guard,
+    .infoGet = ${module.driver.timer.name}_info_get_guard,
+    .statusGet = ${module.driver.timer.name}_status_get_guard,
+    .stop = ${module.driver.timer.name}_stop_guard,
+    .open = ${module.driver.timer.name}_open_guard,
+    .callbackSet = ${module.driver.timer.name}_callback_set_guard,
+};
+const timer_instance_t ${module.driver.timer.name} =
+{
+    .p_api = &${module.driver.timer.name}_nsc_api,
+    .p_ctrl = FSP_SECURE_ARGUMENT,
+    .p_cfg = FSP_SECURE_ARGUMENT,
+};
+                ]]>
+            </declarations>
+        </nsc>
+        <api configurable="true">
+            <file>ra/fsp/inc/instances/r_agt.h</file>
+            <file>ra/fsp/inc/api/r_timer_api.h</file>
+        </api>
+    </module>
+</raModuleDescription>

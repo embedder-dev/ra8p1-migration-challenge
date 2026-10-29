@@ -1,0 +1,9 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<raModuleDescription>
+    <module config="config.azure.ewf" id="module.azure.ewf.platform.threadx" display="Networking|Azure EWF Platform on ThreadX" common="1" version="0" url="https://azure.github.io/embedded-wireless-framework/html/index.html" visible="false">
+        <requires id="module.azure.ewf.platform.threadx.requires.threadx" interface="interface.rtos.tx" visible="false" display="Requires ThreadX"/>
+        <requires id="module.azure.ewf.platform.threadx.requires.ewf_allocator" interface="interface.azure.ewf.allocator" find="true" display="Requires EWF Allocator"/>
+        <provides interface="interface.azure.ewf.platform" />
+        <provides interface="interface.azure.ewf.platform.threadx" />
+    </module>
+</raModuleDescription>

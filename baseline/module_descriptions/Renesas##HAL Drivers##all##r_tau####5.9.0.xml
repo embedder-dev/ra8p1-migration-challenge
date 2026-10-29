@@ -1,0 +1,675 @@
+﻿<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.driver.tau" path="fsp_cfg/r_tau_cfg.h" version="0">
+        <property default="config.driver.tau.param_checking_enable.bsp" display="Parameter Checking" id="config.driver.tau.param_checking_enable" description="If selected code for parameter checking is included in the build.">
+            <option display="Default (BSP)" id="config.driver.tau.param_checking_enable.bsp" value="(BSP_CFG_PARAM_CHECKING_ENABLE)"/>
+            <option display="Enabled" id="config.driver.tau.param_checking_enable.enabled" value="(1)"/>
+            <option display="Disabled" id="config.driver.tau.param_checking_enable.disabled" value="(0)"/>
+        </property>
+        <property default="config.driver.tau.interrupt_support_enable.enabled" display="Interrupt Support" id="config.driver.tau.interrupt_support_enable" description="Enable support for interrupts">
+            <option display="Disabled" id="config.driver.tau.interrupt_support_enable.disabled" value="(0)"/>
+            <option display="Enabled" id="config.driver.tau.interrupt_support_enable.enabled" value="(1)"/>
+        </property>
+        <property default="config.driver.tau.output_support_enable.disabled" display="Pin Output Support" id="config.driver.tau.output_support_enable" description="Enable output for either square wave or divider output">
+            <option display="Disabled" id="config.driver.tau.output_support_enable.disabled" value="(0)"/>
+            <option display="Enabled" id="config.driver.tau.output_support_enable.enabled" value="(1)"/>
+        </property>
+        <property default="config.driver.tau.input_support_enable.disabled" display="Pin Input Support" id="config.driver.tau.input_support_enable" description="Enable input for pulse width measurement, level width measurement, pulse/edge counting or divider functions." >
+            <option display="Disabled" id="config.driver.tau.input_support_enable.disabled" value="(0)"/>
+            <option display="Enabled" id="config.driver.tau.input_support_enable.enabled" value="(1)"/>
+        </property>
+        <property default="config.driver.tau.extra_input_support_enable.disabled" display="Extra Input Mode Support" id="config.driver.tau.extra_input_support_enable" description="Enable support for event counting, system clock count sources and input noise filtering when Pin Input Support is enabled." >
+            <option display="Disabled" id="config.driver.tau.extra_input_support_enable.disabled" value="(0)"/>
+            <option display="Enabled" id="config.driver.tau.extra_input_support_enable.enabled" value="(1)"/>
+        </property>
+        <property default="config.driver.tau.8bit_mode_support_enable.disabled" display="8-Bit Mode Support" id="config.driver.tau.8bit_mode_support_enable" description="Enable support for 8-bit timer modes (only available on channels 1 and 3)." >
+            <option display="Disabled" id="config.driver.tau.8bit_mode_support_enable.disabled" value="(0)"/>
+            <option display="Enabled" id="config.driver.tau.8bit_mode_support_enable.enabled" value="(1)"/>
+        </property>
+        <content>
+        #ifdef __cplusplus
+        extern "C" {
+        #endif
+
+        #define TAU_CFG_INTERRUPT_SUPPORT_ENABLE     ${config.driver.tau.interrupt_support_enable}
+        #define TAU_CFG_PARAM_CHECKING_ENABLE        ${config.driver.tau.param_checking_enable}
+        #define TAU_CFG_OUTPUT_SUPPORT_ENABLE        ${config.driver.tau.output_support_enable}
+        #define TAU_CFG_INPUT_SUPPORT_ENABLE         ${config.driver.tau.input_support_enable}
+        #define TAU_CFG_EXTRA_INPUT_SUPPORT_ENABLE   ${config.driver.tau.extra_input_support_enable}
+        #define TAU_CFG_8BIT_MODE_SUPPORT_ENABLE     ${config.driver.tau.8bit_mode_support_enable}
+
+        #ifdef __cplusplus
+        }
+        #endif
+        </content>
+    </config>
+    <module config="config.driver.tau" display="Timers|${module.driver.timer.name} Timer, Independent Channel, 16-bit and 8-bit Timer Operation (r_tau)" id="module.driver.timer_on_tau" version="1" url="group___t_a_u.html">
+        <constraint display="Callback requires Interrupts|Interrupt Priority to be enabled.">
+            "${module.driver.timer.p_callback}" === "NULL" || "${module.driver.timer.ipl}" != "_disabled"
+            || "${module.driver.timer.bit_mode_timer}" === "module.driver.timer.bit_mode_timer.higher_8bit_timer"
+        </constraint>
+        <constraint display="Callback requires Interrupts|Higher 8-bit Interrupt Priority to be enabled.">
+            "${module.driver.timer.p_callback}" === "NULL" || "${module.driver.timer.higher_8bit_ipl}" != "_disabled"
+            || "${module.driver.timer.bit_mode_timer}" === "module.driver.timer.bit_mode_timer.16bit_timer"
+            || "${module.driver.timer.bit_mode_timer}" === "module.driver.timer.bit_mode_timer.lower_8bit_timer"
+        </constraint>
+        <constraint display="Unique name required for each instance">
+            "${interface.driver.timer.${module.driver.timer.name}}" === "1"
+        </constraint>
+        <constraint display="Requires TAU peripheral">
+          "${interface.mcu.tau}" === "1"
+        </constraint>
+        <constraint display="Divider function is only available for channel 0">
+           "${module.driver.timer.func}" != "module.driver.timer.func.func_divider" ||
+           "${module.driver.timer.channel}" === "0"
+        </constraint>
+        <constraint display="Interrupts must be disabled when Common->Interrupt Support is set to Disabled">
+            ("${module.driver.timer.higher_8bit_ipl}" === "_disabled" &amp;&amp; "${module.driver.timer.ipl}" === "_disabled") ||
+            ("${config.driver.tau.interrupt_support_enable}" === "config.driver.tau.interrupt_support_enable.enabled")
+        </constraint>
+        <constraint display="8-Bit Mode Support must be enabled to use 8-bit count modes or the Higher 8-bit interrupt">
+           (("${module.driver.timer.bit_mode_timer}" === "module.driver.timer.bit_mode_timer.16bit_timer") &amp;&amp; ("${module.driver.timer.higher_8bit_ipl}" === "_disabled")) ||
+           ("${config.driver.tau.8bit_mode_support_enable}" === "config.driver.tau.8bit_mode_support_enable.enabled")
+        </constraint>
+        <constraint display="Higher 8-bit timer, Lower 8-bit timer, or Higher and Lower 8-bit timer mode are only available for channels 1 and 3">
+           "${module.driver.timer.bit_mode_timer}" === "module.driver.timer.bit_mode_timer.16bit_timer" ||
+           "${module.driver.timer.channel}" === "1" ||
+           "${module.driver.timer.channel}" === "3"
+        </constraint>
+        <constraint display="Higher 8-bit timer, Higher or Lower 8-bit timer are only available for the 'Interval Timer' function">
+           "${module.driver.timer.bit_mode_timer}" === "module.driver.timer.bit_mode_timer.16bit_timer" ||
+           "${module.driver.timer.bit_mode_timer}" === "module.driver.timer.bit_mode_timer.lower_8bit_timer" ||
+           "${module.driver.timer.func}" === "module.driver.timer.func.func_interval_timer"
+        </constraint>
+        <constraint display="Lower 8-bit timer mode available in 'Interval Timer', 'Square Wave Output', 'External Event Counter', or 'Delay Counter' function">
+           "${module.driver.timer.bit_mode_timer}" != "module.driver.timer.bit_mode_timer.lower_8bit_timer" ||
+           "${module.driver.timer.func}" === "module.driver.timer.func.func_interval_timer" ||
+           "${module.driver.timer.func}" === "module.driver.timer.func.func_squarewave" ||
+           "${module.driver.timer.func}" === "module.driver.timer.func.func_external_event_count" ||
+           "${module.driver.timer.func}" === "module.driver.timer.func.func_delay_counter"
+        </constraint>
+        <constraint display="Higher 8-bit timer, Lower 8-bit timer, or Higher and Lower 8-bit timer are available when the 'Operation Clock' is set to CK02 or CK03">
+           "${module.driver.timer.bit_mode_timer}" === "module.driver.timer.bit_mode_timer.16bit_timer" ||
+           "${module.driver.timer.operation_clock}" === "module.driver.timer.operation_clock.CK02" ||
+           "${module.driver.timer.operation_clock}" === "module.driver.timer.operation_clock.CK03"
+        </constraint>
+        <constraint display="Operation Clock CK02 or Operation Clock CK03 are only available for channels 1 and 3">
+           "${module.driver.timer.operation_clock}" === "module.driver.timer.operation_clock.CK00" ||
+           "${module.driver.timer.operation_clock}" === "module.driver.timer.operation_clock.CK01" ||
+           "${module.driver.timer.channel}" === "1" ||
+           "${module.driver.timer.channel}" === "3"
+        </constraint>
+        <constraint display="Input selection of MOCO, LOCO, or FSUB are only available in channel 5">
+           "${module.driver.timer.channel}" === "5" ||
+           "${module.driver.timer.input_source}" === "module.driver.timer.input_source.no_input_source" ||
+           "${module.driver.timer.input_source}" === "module.driver.timer.input_source.timer_input_pin_source" ||
+           "${module.driver.timer.input_source}" === "module.driver.timer.input_source.rxd2_pin_source" ||
+           "${module.driver.timer.input_source}".startsWith("_signal.")
+        </constraint>
+        <constraint display="Input selection of MOCO, LOCO, or FSUB are only available in 'External Event Counter', 'Input Pulse', 'High-Low Level Pulse Width Measure', or 'Delay Counter' function">
+           "${module.driver.timer.input_source}" === "module.driver.timer.input_source.no_input_source" ||
+           "${module.driver.timer.input_source}" === "module.driver.timer.input_source.timer_input_pin_source" ||
+           "${module.driver.timer.input_source}" === "module.driver.timer.input_source.rxd2_pin_source" ||
+           "${module.driver.timer.input_source}".startsWith("_signal.") ||
+           "${module.driver.timer.func}" === "module.driver.timer.func.func_external_event_count" ||
+           "${module.driver.timer.func}" === "module.driver.timer.func.func_input_pulse" ||
+           "${module.driver.timer.func}" === "module.driver.timer.func.func_delay_counter"||
+           "${module.driver.timer.func}" === "module.driver.timer.func.func_high_level_measure" ||
+           "${module.driver.timer.func}" === "module.driver.timer.func.func_low_level_measure"
+        </constraint>
+        <constraint display="Input selection of the RXD2 pin is only available for channel 7">
+           "${module.driver.timer.channel}" === "7" ||
+           "${module.driver.timer.input_source}" != "module.driver.timer.input_source.rxd2_pin_source"
+        </constraint>
+        <constraint display="Input selection of the RXD2 pin is only available for 'Input Pulse' or 'High-Low Level Pulse Width Measure' function">
+           "${module.driver.timer.input_source}" != "module.driver.timer.input_source.rxd2_pin_source" ||
+           "${module.driver.timer.func}" === "module.driver.timer.func.func_high_level_measure" ||
+           "${module.driver.timer.func}" === "module.driver.timer.func.func_low_level_measure" ||
+           "${module.driver.timer.func}" === "module.driver.timer.func.func_input_pulse"
+        </constraint>
+        <constraint display="When 'Measure Low Level Pulse Width' or 'Measure High Level Pulse Width' function is selected, 'Input->Trigger Edge' should be 'Trigger Edge Both'">
+           "${module.driver.timer.trigger_edge}" === "module.driver.timer.trigger_edge.trigger_edge_both" ||
+           ("${module.driver.timer.func}" != "module.driver.timer.func.func_high_level_measure"  &amp;&amp;
+            "${module.driver.timer.func}" != "module.driver.timer.func.func_low_level_measure")
+        </constraint>
+        <constraint display="Enable 'Common->Pin Input Support' and 'Common->Extra Input Mode Support' when 'Input->Input Filter' is 'Enabled'">
+            ("${config.driver.tau.input_support_enable}" === "config.driver.tau.input_support_enable.enabled" &amp;&amp; "${config.driver.tau.extra_input_support_enable}" === "config.driver.tau.extra_input_support_enable.enabled") ||
+            "${module.driver.timer.input_filter}" === "module.driver.timer.input_filter.disabled"
+        </constraint>
+        <constraint display="Enable Common|Pin Input Support when Input|Input Source is not 'No input signal'.">
+            "${config.driver.tau.input_support_enable}" === "config.driver.tau.input_support_enable.enabled" ||
+            "${module.driver.timer.input_source}" === "module.driver.timer.input_source.no_input_source"
+        </constraint>
+        <constraint display="When a 'General->Function' is selected that does not require an input signal 'Input->Input Source' should be set to 'No input signal'">
+            "${module.driver.timer.input_source}" != "module.driver.timer.input_source.no_input_source" ||
+            "${module.driver.timer.func}" === "module.driver.timer.func.func_interval_timer" ||
+            "${module.driver.timer.func}" === "module.driver.timer.func.func_squarewave"
+        </constraint>
+        <constraint display="Set 'Interrupt->Setting of starting count and interrupt' to 'Timer interrupt is NOT generated when counting is started...' when 'High-Low Measurement' or 'External Event Count' function is used">
+            "${module.driver.timer.opirq}" === "module.driver.timer.opirq.reset" ||
+            "${module.driver.timer.func}" === "module.driver.timer.func.func_interval_timer" ||
+            "${module.driver.timer.func}" === "module.driver.timer.func.func_input_pulse" ||
+            "${module.driver.timer.func}" === "module.driver.timer.func.func_delay_counter"||
+            "${module.driver.timer.func}" === "module.driver.timer.func.func_squarewave" ||
+            "${module.driver.timer.func}" === "module.driver.timer.func.func_divider"
+        </constraint>
+       <constraint display="Enable 'Common->Pin Output Support' when 'Output->Initial Output' is enabled">
+            "${config.driver.tau.output_support_enable}" === "config.driver.tau.output_support_enable.enabled" ||
+            "${module.driver.timer.initial_output}" === "module.driver.timer.initial_output.disabled"
+        </constraint>
+        <constraint display="Enable 'Output->Initial Output' when 'Square Wave Output' or 'Divider' function is used">
+            "${module.driver.timer.initial_output}" != "module.driver.timer.initial_output.disabled" ||
+            ("${module.driver.timer.func}" != "module.driver.timer.func.func_squarewave" &amp;&amp;
+             "${module.driver.timer.func}" != "module.driver.timer.func.func_divider")
+        </constraint>
+        <constraint display="Set 'Period Unit' to 'Raw Counts' when 'External Event Counter' or 'Divider' function is used">
+            "${module.driver.timer.unit}" === "module.driver.timer.unit.unit_period_raw_counts" ||
+           ("${module.driver.timer.func}" != "module.driver.timer.func.func_external_event_count"  &amp;&amp;
+            "${module.driver.timer.func}" != "module.driver.timer.func.func_divider")
+        </constraint>
+        <constraint display="The high-level and low-level widths of timer input to be selected are no less than 1/fMCK + 10 ns when MOCO, LOCO or FSUB are selected as an input source">
+               eval('' +
+                    'var operation_clock_tau = {'   +
+                    '"module.driver.timer.operation_clock.CK00": "${board.clock.peripheral.tau.ck00}", ' +
+                    '"module.driver.timer.operation_clock.CK01": "${board.clock.peripheral.tau.ck01}", ' +
+                    '"module.driver.timer.operation_clock.CK02": "${board.clock.peripheral.tau.ck02}", ' +
+                    '"module.driver.timer.operation_clock.CK03": "${board.clock.peripheral.tau.ck03}", ' +
+                    '}; ' +
+                    'var f_mck = operation_clock_tau["${module.driver.timer.operation_clock}"];'+
+                    'var input_source_lookup = {'   +
+                    '"module.driver.timer.input_source.no_input_source": "NULL", ' +
+                    '"module.driver.timer.input_source.timer_input_pin_source": "NULL", ' +
+                    '"module.driver.timer.input_source.moco_input_source": 4000000, ' +
+                    '"module.driver.timer.input_source.loco_input_source": 32768,  ' +
+                    '"module.driver.timer.input_source.fsub_input_source": 32768, ' +
+                    '"module.driver.timer.input_source.rxd2_pin_source": "NULL",  ' +
+                    '}; ' +
+                    'var get_input_source = input_source_lookup["${module.driver.timer.input_source}"];'+
+                    'var cond1 = ((get_input_source === "NULL") || ("${module.driver.timer.input_source}".startsWith("_signal.")) || ((1/get_input_source) &gt; (1/f_mck + 1/10000000000)));' +
+                    'cond1'
+                )
+        </constraint>
+       <constraint display="ELC input source is only available for channels 0 or 1">
+           "${module.driver.timer.channel}" === "0" ||
+           "${module.driver.timer.channel}" === "1" ||
+            !"${module.driver.timer.input_source}".startsWith("_signal.")
+        </constraint>
+        <constraint display="ELC input source is only available for 'External Event Counter', 'Input Pulse Interval Measurement', or 'Delay Counter' function">
+             !"${module.driver.timer.input_source}".startsWith("_signal.") ||
+            "${module.driver.timer.func}" === "module.driver.timer.func.func_external_event_count" ||
+            "${module.driver.timer.func}" === "module.driver.timer.func.func_input_pulse" ||
+            "${module.driver.timer.func}" === "module.driver.timer.func.func_delay_counter"
+        </constraint>
+        <constraint display="Disable 'Input->Input Filter' when ELC signal is selected as an input signal">
+            (!"${module.driver.timer.input_source}".startsWith("_signal.")) || ("module.driver.timer.input_filter.disabled" === "${module.driver.timer.input_filter}")
+        </constraint>
+        <constraint display="ELC signal source selection requires an ELC Driver">
+            (!"${module.driver.timer.input_source}".startsWith("_signal.")) || ("1" === "${interface.driver.elc}")
+        </constraint>
+        <constraint display="Channel not available on selected MCU">
+            "${interface.mcu.tau.0${module.driver.timer.channel}}" === "1"
+        </constraint>
+        <requires id="module.driver.timer.requires.tau" interface="interface.mcu.tau" visible="false" display="Requires TAU peripheral" />
+        <provides interface="interface.driver.timer" />
+        <provides interface="interface.driver.timer" />
+        <provides interface="interface.driver.timer.${module.driver.timer.name}" />
+        <provides interface="interface.driver.timer_on_tau" />
+        <provides interface="interface.peripheral.tau0${module.driver.timer.channel}" />
+
+        <property default="g_timer${_instance}" display="General|Name" id="module.driver.timer.name" description="Module name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.timer.name}")</constraint>
+        </property>
+        <property default="0" display="General|Channel" id="module.driver.timer.channel" description="Physical hardware channel.">
+            <constraint display="Channel number must be a non-negative integer">testInteger("${module.driver.timer.channel}") &amp;&amp; ("${module.driver.timer.channel}" &gt;= 0)</constraint>
+        </property>
+        <property default="module.driver.timer.func.func_interval_timer" display="General|Function" id="module.driver.timer.func" description="Function selection. Note: The calculation of the input pulse function and the high-low level pulse width measurement function is implemented using interrupts. ISR's must be enabled for these functions even if callback is unused.">
+            <option display="Interval Timer" id="module.driver.timer.func.func_interval_timer" value="TAU_FUNCTION_INTERVAL"/>
+            <option display="Square Wave Output" id="module.driver.timer.func.func_squarewave" value="TAU_FUNCTION_SQUARE_WAVE"/>
+            <option display="External Event Counter" id="module.driver.timer.func.func_external_event_count" value="TAU_FUNCTION_EXTERNAL_EVENT_COUNT"/>
+            <option display="Divider" id="module.driver.timer.func.func_divider" value="TAU_FUNCTION_DIVIDER"/>
+            <option display="Input Pulse Interval Measurement" id="module.driver.timer.func.func_input_pulse" value="TAU_FUNCTION_INPUT_PULSE_INTERVAL_MEASUREMENT"/>
+            <option display="Measure Low Level Pulse Width" id="module.driver.timer.func.func_low_level_measure" value="TAU_FUNCTION_LOW_LEVEL_WIDTH_MEASUREMENT"/>
+            <option display="Measure High Level Pulse Width" id="module.driver.timer.func.func_high_level_measure" value="TAU_FUNCTION_HIGH_LEVEL_WIDTH_MEASUREMENT"/>
+            <option display="Delay Counter" id="module.driver.timer.func.func_delay_counter" value="TAU_FUNCTION_DELAY_COUNT"/>
+        </property>
+        <property default="module.driver.timer.bit_mode_timer.16bit_timer" display="General|Bit Timer Mode" id="module.driver.timer.bit_mode_timer" description="Specify the 16 or 8-bit timer mode">
+            <option display="16-bit timer" id="module.driver.timer.bit_mode_timer.16bit_timer" value="TAU_BIT_MODE_16BIT"/>
+            <option display="Higher 8-bit timer" id="module.driver.timer.bit_mode_timer.higher_8bit_timer" value="TAU_BIT_MODE_HIGHER_8BIT"/>
+            <option display="Lower 8-bit timer" id="module.driver.timer.bit_mode_timer.lower_8bit_timer" value="TAU_BIT_MODE_LOWER_8BIT"/>
+            <option display="Higher and Lower 8-bit timer" id="module.driver.timer.bit_mode_timer.higher_lower_8bit_timer" value="TAU_BIT_MODE_HIGHER_LOWER_8BIT"/>
+        </property>
+        <property default="0" id="module.driver.timer.channel.elc">
+            <export><![CDATA[eval('' +
+'    var channel = "${module.driver.timer.channel}";' +
+'    if ((["4","5","6","7"].indexOf(channel) !== -1) || ("${module.driver.timer.bit_mode_timer}" === "TAU_BIT_MODE_HIGHER_8BIT"))' +
+'    {' +
+'        channel = "invalid";' +
+'    }' +
+'    channel' +
+'')
+]]>         </export>
+            <signal event="event.tau0.tmi0${module.driver.timer.channel.elc}" />
+        </property>
+        <property default="module.driver.timer.operation_clock.CK00" display="General|Operation Clock" id="module.driver.timer.operation_clock" description="Specify the selection of operation clock">
+            <option display="CK00" id="module.driver.timer.operation_clock.CK00" value="TAU_OPERATION_CK00"/>
+            <option display="CK01" id="module.driver.timer.operation_clock.CK01" value="TAU_OPERATION_CK01"/>
+            <option display="CK02" id="module.driver.timer.operation_clock.CK02" value="TAU_OPERATION_CK02"/>
+            <option display="CK03" id="module.driver.timer.operation_clock.CK03" value="TAU_OPERATION_CK03"/>
+        </property>
+        <property default="0x10000" display="General|Period" id="module.driver.timer.period" description="Specify the timer period based on the selected units.\n\nWhen the unit is set to 'Raw Counts', setting the period to 0x10000 results in the maximum period at the lowest divisor (fastest timer tick). When Pulse width measurement or high-low level pulse width measurement is enabled, this period is always generated as zero.. The period should be set maximally 0x100 when lower 8-bit mode or higher and lower 8-bit mode is enabled. \nWhen 'Input->Trigger Edge' is set to 'Trigger Edge Rising' or 'Trigger Edge Falling', this period can be maximally set to 0x20000 when using the divider function.\n\nIf the requested period cannot be achieved, the settings with the largest possible period, that does not exceed the requested period, are used. The theoretical calculated period is printed in a comment in the timer_cfg_t structure.">
+            <constraint display="Value must be a non-negative integer">testInteger("${module.driver.timer.period}")  &amp;&amp; ("${module.driver.timer.period}" &gt;= 0) </constraint>
+            <export><![CDATA[eval('' +
+'/* INPUTS */' +
+'    var requested_period = ${module.driver.timer.period};' +
+'    var requested_unit_string = "${module.driver.timer.unit}";' +
+'    var bit_mode  = "${module.driver.timer.bit_mode_timer}";' +
+'    var peripheral_clock_hz = ${board.clock.peripheral.tau};' +
+'    var timer_range_inform = "";' +
+'    var operation_clock_tau = {'   +
+'    "TAU_OPERATION_CK00": "${board.clock.peripheral.tau.ck00}", ' +
+'    "TAU_OPERATION_CK01": "${board.clock.peripheral.tau.ck01}", ' +
+'    "TAU_OPERATION_CK02": "${board.clock.peripheral.tau.ck02}", ' +
+'    "TAU_OPERATION_CK03": "${board.clock.peripheral.tau.ck03}", ' +
+'     }; ' +
+'    var clock_div = 0;'+
+'    if("TAU_OPERATION_CK00" == "${module.driver.timer.operation_clock}")'+
+'    {' +
+'        clock_div = "BSP_CFG_TAU_CK00";' +
+'    }' +
+'    else if ("TAU_OPERATION_CK01" == "${module.driver.timer.operation_clock}")'+
+'    {' +
+'        clock_div = "BSP_CFG_TAU_CK01";' +
+'    }' +
+'    else if ("TAU_OPERATION_CK02" == "${module.driver.timer.operation_clock}")'+
+'    {' +
+'        clock_div = "BSP_CFG_TAU_CK02";' +
+'    }' +
+'    else '+
+'    {' +
+'        clock_div = "BSP_CFG_TAU_CK03";' +
+'    }' +
+'    var timer_counter_max = 0x10000;' +
+'    var timer_counter_min = 0x00001;' +
+'    var timerfunction = "${module.driver.timer.func}";' +
+''+
+'    /* Calculate the number of counts in the requested period. */' +
+'    var requested_period_s = 0;' +
+'    if (0 != requested_period)' +
+'    {' +
+'        if ("ns" == requested_unit_string)' +
+'        {' +
+'            requested_period_s = requested_period / 1000000000;' +
+'        }' +
+'        else if ("us" == requested_unit_string)' +
+'        {' +
+'            requested_period_s = requested_period / 1000000;' +
+'        }' +
+'        else if ("ms" == requested_unit_string)' +
+'        {' +
+'            requested_period_s = requested_period / 1000;' +
+'        }' +
+'        else if ("s" == requested_unit_string)' +
+'        {' +
+'            requested_period_s = requested_period;' +
+'        }' +
+'        else if ("hz" == requested_unit_string)' +
+'        {' +
+'            requested_period_s = 1 / requested_period;' +
+'        }' +
+'        else if ("khz" == requested_unit_string)' +
+'        {' +
+'            requested_period_s = 1 / (requested_period * 1000);' +
+'        }' +
+'    }' +
+'' +
+'    var f_mck = operation_clock_tau["${module.driver.timer.operation_clock}"];'+
+'' +
+'    var period_counts = requested_period;' +
+'    if ("raw" != requested_unit_string)' +
+'    {' +
+'        period_counts = Math.round(requested_period_s * f_mck);' +
+'    }' +
+'    var period_setting;'+
+'    if ("TAU_FUNCTION_INTERVAL" == timerfunction| "TAU_FUNCTION_SQUARE_WAVE" == timerfunction | "TAU_FUNCTION_DELAY_COUNT" == timerfunction) ' +
+'    {' +
+'       if("TAU_BIT_MODE_16BIT" != bit_mode)' +
+'       {' +
+'           timer_counter_max = 0x00100;' +
+'       }' +
+'       if(f_mck == peripheral_clock_hz)' +
+'       {' +
+'           if("TAU_FUNCTION_DELAY_COUNT" != timerfunction)'+
+'           {' +
+'               timer_counter_min = 0x00002;' +
+'           }' +
+'       }' +
+'       if (period_counts > timer_counter_max)' +
+'       {' +
+'           /* If the period is larger than the maximum divider, set the period to the maximum. */' +
+'           timer_range_inform = "/* The current period count(0x" + period_counts.toString(16) + ") is exceeding the maximum limit; the actual value is assigned to the maximum value.*/\\n";'+
+'           period_counts = timer_counter_max;' +
+'       }' +
+'       if (period_counts < timer_counter_min)' +
+'       {' +
+'           /* If the period is larger than the minimum divider, set the period to the minimum. */' +
+'           timer_range_inform = "/* The current period count(0x" + period_counts.toString(16) + ") is lower than the minimum limit; the actual value is assigned to the minimum value.*/\\n";'+
+'           period_counts = timer_counter_min;' +
+'       }' +
+'       /* Calculate the actual values. */' +
+'       var actual_period = period_counts / f_mck;' +
+'       maximum_period = timer_counter_max/f_mck;' +
+'       minimum_period = timer_counter_min/f_mck;' +
+'       if("${module.driver.timer.bit_mode_timer}" != "TAU_BIT_MODE_HIGHER_8BIT")' +
+'       {' +
+'          period_setting = timer_range_inform + "/* Actual Period: " + actual_period.toFixed(10) + " seconds. */" + ' +
+'                           "\\n/* Minimum Period ~ Maximum Period: " + minimum_period.toFixed(10) + " ~ " + maximum_period.toFixed(8) + " seconds. */";' +
+'       }' +
+'       else'+
+'       {' +
+'          period_setting = "/* Unuse this value for higher 8bit mode */"; ' +
+'       }' +
+'       period_setting += "  .period_counts = (uint32_t) 0x" + period_counts.toString(16);' +
+'    }' +
+'    else if ("TAU_FUNCTION_EXTERNAL_EVENT_COUNT" == timerfunction) ' +
+'    {' +
+'       if("TAU_BIT_MODE_16BIT" != bit_mode)' +
+'       {' +
+'           timer_counter_max = 0x00100;' +
+'       }' +
+'       if (period_counts > timer_counter_max)' +
+'       {' +
+'           /* If the period is larger than the maximum divider, set the period to the maximum. */' +
+'           timer_range_inform = "/* The current Event count(0x" + period_counts.toString(16) + ") exceeds the maximum limit; maximum value shall be used.*/\\n";'+
+'           period_counts = timer_counter_max;' +
+'       }' +
+'       if (period_counts < timer_counter_min)' +
+'       {' +
+'           /* If the period is larger than the minimum divider, set the period to the minimum. */' +
+'           timer_range_inform = "/* The current Event count(0x" + period_counts.toString(16) + ") is lower than the minimum limit; minimum value shall be used.*/\\n";'+
+'           period_counts = timer_counter_min;' +
+'       }' +
+'       /* Calculate the actual values. */' +
+'       var actual_period = period_counts;' +
+'       if ("raw" != requested_unit_string)' +
+'       {' +
+'           actual_period = Math.round(requested_period_s * f_mck);' +
+'       }' +
+'       period_setting = timer_range_inform + "/* Actual Event Count Value: " + actual_period.toString() + " Raw Counts. */" + ' +
+'                        "\\n/* Minimum Event Count Value ~ Maximum Event Count Value: " + timer_counter_min + " ~ " + timer_counter_max + " (Raw Counts). */" + ' +
+'                        "  .period_counts = (uint32_t) 0x" + period_counts.toString(16);' +
+'    }' +
+'    else if ("TAU_FUNCTION_DIVIDER" == timerfunction) ' +
+'    {' +
+'       if("TAU_TRIGGER_EDGE_BOTH" != "${module.driver.timer.trigger_edge}")' +
+'       {' +
+'           timer_counter_max = 0x20000;' +
+'           timer_counter_min = 0x00002;' +
+'       }' +
+'       if (period_counts > timer_counter_max)' +
+'       {' +
+'           /* If the period is larger than the maximum divider, set the period to the maximum. */' +
+'           timer_range_inform = "/* The current divider value (0x" + period_counts.toString(16) + ") exceeds the maximum limit; to the maximum value shall be used.*/\\n";'+
+'           period_counts = timer_counter_max;' +
+'       }' +
+'       if (period_counts < timer_counter_min)' +
+'       {' +
+'           /* If the period is larger than the minimum divider, set the period to the minimum. */' +
+'           timer_range_inform = "/* The current divider value(0x" + period_counts.toString(16) + ") is lower than the minimum limit; minimum value shall be used.*/\\n";'+
+'           period_counts = timer_counter_min;' +
+'       }' +
+'       /* Calculate the actual values. */' +
+'       var actual_period = period_counts;' +
+'       if ("raw" != requested_unit_string)' +
+'       {' +
+'           actual_period = Math.round(requested_period_s * f_mck);' +
+'       }' +
+'       period_setting = timer_range_inform + "/* Actual Divider Value: " + actual_period.toString() + " Raw Counts. */" + ' +
+'                        "\\n/* Minimum Divider Value ~ Maximum Divider Value: " + timer_counter_min + " ~ " + timer_counter_max + " (Raw Counts). */" + ' +
+'                        "  .period_counts = (uint32_t) 0x" + period_counts.toString(16);' +
+'    }' +
+'    else if("TAU_FUNCTION_INPUT_PULSE_INTERVAL_MEASUREMENT" == timerfunction| "TAU_FUNCTION_LOW_LEVEL_WIDTH_MEASUREMENT" == timerfunction | "TAU_FUNCTION_HIGH_LEVEL_WIDTH_MEASUREMENT" == timerfunction){' +
+'       period_counts = 0; ' +
+'       max_measure_value = (2 * timer_counter_max * 1000) /f_mck;' +
+'       min_measure_value = (timer_counter_min * 1000000) /f_mck;' +
+'       period_setting = "/* Input signal range can be detected: " + min_measure_value.toFixed(5) + " us" + " ~ " + max_measure_value.toFixed(5) + " ms" + " */\\n" + ' +
+'                        " .period_counts = (uint32_t) 0x" + period_counts.toString(16);' +
+'    }' +
+'    period_setting += ", .duty_cycle_counts = 0" + ' +
+'                     ", .source_div = (timer_source_div_t)" + clock_div.toString(); '+
+'    period_setting' +
+'')
+]]>            </export>
+        </property>
+        <property default="module.driver.timer.unit.unit_period_raw_counts" display="General|Period Unit" id="module.driver.timer.unit" description="Unit of the period specified above">
+            <option display="Raw Counts" id="module.driver.timer.unit.unit_period_raw_counts" value="raw"/>
+            <option display="Nanoseconds" id="module.driver.timer.unit.unit_period_nsec" value="ns"/>
+            <option display="Microseconds" id="module.driver.timer.unit.unit_period_usec" value="us"/>
+            <option display="Milliseconds" id="module.driver.timer.unit.unit_period_msec" value="ms"/>
+            <option display="Seconds" id="module.driver.timer.unit.unit_period_sec" value="s"/>
+            <option display="Hertz" id="module.driver.timer.unit.unit_frequency_hz" value="hz"/>
+            <option display="Kilohertz" id="module.driver.timer.unit.unit_frequency_khz" value="khz"/>
+        </property>
+        <property default="0x100" display="General|Period (Higher 8-bit timer)" id="module.driver.timer.higher8bitperiod" description="Specify the higher 8-bit timer period based on the selected unit.\n\nWhen the unit is set to 'Raw Counts', setting the period to 0x100 results in the maximum period at the lowest divisor (fastest timer tick). This setting is only applicable in interval timer function with higher 8bit mode or higher and lower 8bit mode.\n\nIf the requested period cannot be achieved, the settings with the largest possible period that is less than or equal to the requested period are used. The theoretical calculated period is printed in a comment in the tau_extended_cfg_t structure.">
+            <constraint display="Value must be a non-negative integer">testInteger("${module.driver.timer.higher8bitperiod}") &amp;&amp; ("${module.driver.timer.higher8bitperiod}" &gt;= 0)</constraint>
+            <export><![CDATA[eval('' +
+'/* INPUTS */' +
+'    var requested_higher8bit_period = ${module.driver.timer.higher8bitperiod};' +
+'    var requested_unit_higher8bit_string = "${module.driver.timer.higher8bitunit}";' +
+'    var peripheral_clock_hz = ${board.clock.peripheral.tau};' +
+'    var timer_counter_higher8bit_max = 0x100;' +
+'    var timer_counter_higher8bit_min = 0x001;' +
+'    var timer_8_bit_range_inform = "";' +
+'    var operation_clock_tau_8_bit = {'   +
+'    "TAU_OPERATION_CK00": "${board.clock.peripheral.tau.ck00}", ' +
+'    "TAU_OPERATION_CK01": "${board.clock.peripheral.tau.ck01}", ' +
+'    "TAU_OPERATION_CK02": "${board.clock.peripheral.tau.ck02}", ' +
+'    "TAU_OPERATION_CK03": "${board.clock.peripheral.tau.ck03}", ' +
+'     }; ' +
+'    /* Calculate the number of counts in the requested period. */' +
+'    var requested_higher_8bit_period_s = 0;' +
+'    if (0 != requested_higher8bit_period)' +
+'    {' +
+'        if ("ns" == requested_unit_higher8bit_string)' +
+'        {' +
+'            requested_higher_8bit_period_s = requested_higher8bit_period / 1000000000;' +
+'        }' +
+'        else if ("us" == requested_unit_higher8bit_string)' +
+'        {' +
+'            requested_higher_8bit_period_s = requested_higher8bit_period / 1000000;' +
+'        }' +
+'        else if ("ms" == requested_unit_higher8bit_string)' +
+'        {' +
+'            requested_higher_8bit_period_s = requested_higher8bit_period / 1000;' +
+'        }' +
+'        else if ("s" == requested_unit_higher8bit_string)' +
+'        {' +
+'            requested_higher_8bit_period_s = requested_higher8bit_period;' +
+'        }' +
+'        else if ("hz" == requested_unit_higher8bit_string)' +
+'        {' +
+'            requested_higher_8bit_period_s = 1 / requested_higher8bit_period;' +
+'        }' +
+'        else if ("khz" == requested_unit_higher8bit_string)' +
+'        {' +
+'            requested_higher_8bit_period_s = 1 / (requested_higher8bit_period * 1000);' +
+'        }' +
+'    }' +
+'' +
+'    var f_mck_higher8bit = operation_clock_tau_8_bit["${module.driver.timer.operation_clock}"];'+
+'' +
+'    var period_higher_8bit_counts = requested_higher8bit_period;' +
+'    if ("raw" != requested_unit_higher8bit_string)' +
+'    {' +
+'        period_higher_8bit_counts = Math.round(requested_higher_8bit_period_s * f_mck_higher8bit);' +
+'    }' +
+'    if (period_higher_8bit_counts > timer_counter_higher8bit_max)' +
+'    {' +
+'       /* If the period is larger than the maximum divider, set the period to the maximum. */' +
+'       timer_8_bit_range_inform = "/* The current period count(0x" + period_higher_8bit_counts.toString(16) + ") is exceeding the maximum limit; the actual value is assigned to the maximum value.*/\\n";'+
+'       period_higher_8bit_counts = timer_counter_higher8bit_max;' +
+'    }' +
+'    if (period_higher_8bit_counts < timer_counter_higher8bit_min)' +
+'    {' +
+'       /* If the period is larger than the minimum divider, set the period to the minimum. */' +
+'       timer_8_bit_range_inform = "/* The current period count(0x" + period_higher_8bit_counts.toString(16) + ") is lower than the minimum limit; the actual value is assigned to the minimum value.*/\\n";'+
+'       period_higher_8bit_counts = timer_counter_higher8bit_min;' +
+'    }' +
+'    var actual_higher_8bit_period = period_higher_8bit_counts/f_mck_higher8bit;' +
+'    var maximum_higher_8bit_period = timer_counter_higher8bit_max/f_mck_higher8bit;' +
+'    var minimum_higher_8bit_period = timer_counter_higher8bit_min/f_mck_higher8bit;' +
+'    var period_higher8bit_setting;'+
+'    if(("${module.driver.timer.bit_mode_timer}" == "TAU_BIT_MODE_HIGHER_8BIT") || ("${module.driver.timer.bit_mode_timer}" == "TAU_BIT_MODE_HIGHER_LOWER_8BIT"))' +
+'    {' +
+'       period_higher8bit_setting = timer_8_bit_range_inform + "/* Actual Higher 8-bit Period: " + actual_higher_8bit_period.toFixed(10) + " seconds */" + '+
+'                                    "\\n/* Minimum Period ~ Maximum Period: " + minimum_higher_8bit_period.toFixed(10) + " ~ " + maximum_higher_8bit_period.toFixed(8) + " seconds. */\\n"; ' +
+'    }' +
+'    else'+
+'    {' +
+'       period_higher8bit_setting = "/* Not used for 16-bit or lower 8-bit mode */\\n"; ' +
+'       period_higher_8bit_counts = timer_counter_higher8bit_max; ' +
+'    }' +
+'    period_higher8bit_setting  += " .period_higher_8bit_counts = (uint16_t) 0x" + period_higher_8bit_counts.toString(16);' +
+'    period_higher8bit_setting' +
+'')
+]]>            </export>
+        </property>
+
+        <property default="module.driver.timer.higher8bitunit.unit_period_raw_counts" display="General|Period Unit (Higher 8-bit timer)" id="module.driver.timer.higher8bitunit" description="Unit of the period specified above">
+            <option display="Raw Counts" id="module.driver.timer.higher8bitunit.unit_period_raw_counts" value="raw"/>
+            <option display="Nanoseconds" id="module.driver.timer.higher8bitunit.unit_period_nsec" value="ns"/>
+            <option display="Microseconds" id="module.driver.timer.higher8bitunit.unit_period_usec" value="us"/>
+            <option display="Milliseconds" id="module.driver.timer.higher8bitunit.unit_period_msec" value="ms"/>
+            <option display="Seconds" id="module.driver.timer.higher8bitunit.unit_period_sec" value="s"/>
+            <option display="Hertz" id="module.driver.timer.higher8bitunit.unit_frequency_hz" value="hz"/>
+            <option display="Kilohertz" id="module.driver.timer.higher8bitunit.unit_frequency_khz" value="khz"/>
+        </property>
+        <property default="module.driver.timer.input_source.no_input_source" display="Input|Input Source" id="module.driver.timer.input_source" description="Input source, applies in input pulse width measurement function, high-low level pulse width measurement function, external event count function, and divider function.">
+            <select enum="enum.driver.tau.input_source" />
+            <select enum="_signal" />
+            <linkConstraint display="Requires an ELC peripheral function for TAU">
+                "${_link}" === "link.tau0${module.driver.timer.channel}"
+            </linkConstraint>
+        </property>
+        <property default="module.driver.timer.trigger_edge.trigger_edge_rising" display="Input|Trigger Edge" id="module.driver.timer.trigger_edge" description="Select the trigger edge. Applies in input pulse width measurement function, high-low level pulse width measurement function, external event count function, and divider function.">
+            <option display="Trigger Edge Rising" id="module.driver.timer.trigger_edge.trigger_edge_rising" value="TAU_TRIGGER_EDGE_RISING"/>
+            <option display="Trigger Edge Falling" id="module.driver.timer.trigger_edge.trigger_edge_falling" value="TAU_TRIGGER_EDGE_FALLING"/>
+            <option display="Trigger Edge Both" id="module.driver.timer.trigger_edge.trigger_edge_both" value="TAU_TRIGGER_EDGE_BOTH"/>
+        </property>
+        <property default="module.driver.timer.input_filter.disabled" display="Input|Input Filter" id="module.driver.timer.input_filter" description="Input filter, applies in input pulse width measurement function, high-low level pulse width measurement function, external event count function, and divider function.">
+            <option display="Disabled" id="module.driver.timer.input_filter.disabled" value="TAU_INPUT_NOISE_FILTER_DISABLE"/>
+            <option display="Enabled" id="module.driver.timer.input_filter.enabled" value="TAU_INPUT_NOISE_FILTER_ENABLE"/>
+        </property>
+        <property default="module.driver.timer.initial_output.disabled" display="Output|Initial Output" id="module.driver.timer.initial_output" description="Initial output, applies in divider function and square wave.">
+            <option display="Disabled" id="module.driver.timer.initial_output.disabled" value="TAU_PIN_OUTPUT_CFG_DISABLED"/>
+            <option display="Start Level High" id="module.driver.timer.initial_output.high_level" value="TAU_PIN_OUTPUT_CFG_START_LEVEL_HIGH"/>
+            <option display="Start Level Low" id="module.driver.timer.initial_output.low_level" value="TAU_PIN_OUTPUT_CFG_START_LEVEL_LOW"/>
+        </property>
+        <property default="module.driver.timer.opirq.reset"  display="Interrupts|Setting of starting count and interrupt" id="module.driver.timer.opirq" description="Specify OPIRQ bit setting">
+            <option display="Timer interrupt is not generated when counting is started/Start trigger is invalid during counting operation." id="module.driver.timer.opirq.reset" value="TAU_INTERRUPT_OPIRQ_BIT_RESET"/>
+            <option display="Timer interrupt is generated when counting is started/Start trigger is valid during counting operation." id="module.driver.timer.opirq.set" value="TAU_INTERRUPT_OPIRQ_BIT_SET"/>
+        </property>
+        <property default="NULL" display="Interrupts|Callback" id="module.driver.timer.p_callback" description="A user callback function. If this callback function is provided, it is called from the interrupt service routine (ISR) each time the timer period elapses.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.timer.p_callback}")</constraint>
+        </property>
+
+        <property default="NULL" id="module.driver.timer.p_context" />
+
+        <property default="" display="Interrupts|Interrupt Priority" id="module.driver.timer.ipl" description="Timer interrupt priority.">
+            <select enum="enum.mcu.nvic.priorities.optional"/>
+            <interrupt event="event.tau0.tmi0${module.driver.timer.channel}" isr="tau_tmi_isr"/>
+        </property>
+
+        <property default="" display="Interrupts|Higher 8-bit Interrupt Priority" id="module.driver.timer.higher_8bit_ipl" description="Timer higher 8-bit interrupt priority.">
+            <select enum="enum.mcu.nvic.priorities.optional"/>
+            <interrupt event="event.tau0.tmi0${module.driver.timer.channel}h" isr="tau_tmih_isr"/>
+        </property>
+        <property default="" id="module.driver.timer.input_source_select">
+            <export><![CDATA[eval('' +
+'    var source = "${module.driver.timer.input_source}";' +
+'    var input_source;'+
+'    if (source == "TAU_INPUT_SOURCE_NONE" || source == "TAU_INPUT_SOURCE_TI_PIN" || source == "TAU_INPUT_SOURCE_MOCO" || source ==  "TAU_INPUT_SOURCE_LOCO" || source ==  "TAU_INPUT_SOURCE_FSUB" || source ==  "TAU_INPUT_SOURCE_RXD2_PIN")' +
+'    {' +
+'       input_source = source;' +
+'    }' +
+'    else' +
+'    {'+
+'       input_source =  "TAU_INPUT_SOURCE_ELC";' +
+'    }'+
+'    input_source' +
+'')
+]]>          </export>
+        </property>
+        <property default="&amp;g_timer_on_tau" id="module.driver.timer.p_api" description="Hidden property that can be used to override p_api." />
+        <peripheral name="TAU0${module.driver.timer.channel}" component="tau0${module.driver.timer.channel}"/>
+        <symbol id="symbol.driver.timer.cfg" value="${module.driver.timer.name}_cfg"/>
+        <symbol id="symbol.driver.timer.ctrl" value="${module.driver.timer.name}_ctrl"/>
+        <symbol id="symbol.driver.timer.extend" value="${module.driver.timer.name}_extend"/>
+        <header>
+
+/** TAU Timer Instance */
+extern const timer_instance_t ${module.driver.timer.name};
+
+/** Access the TAU instance using these structures when calling API functions directly (::p_api is not used). */
+extern tau_instance_ctrl_t ${module.driver.timer.name}_ctrl;
+extern const timer_cfg_t ${module.driver.timer.name}_cfg;
+
+#ifndef ${module.driver.timer.p_callback}
+void ${module.driver.timer.p_callback}(timer_callback_args_t * p_args);
+#endif
+        </header>
+        <includes>#include &quot;r_tau.h&quot;
+#include &quot;r_timer_api.h&quot;</includes>
+        <declarations>
+tau_instance_ctrl_t ${module.driver.timer.name}_ctrl;
+const tau_extended_cfg_t ${module.driver.timer.name}_extend =
+{
+    .opirq                           = ${module.driver.timer.opirq},
+    .tau_func                        = ${module.driver.timer.func},
+    .bit_mode                        = ${module.driver.timer.bit_mode_timer},
+    .initial_output                  = ${module.driver.timer.initial_output},
+    .input_source                    = ${module.driver.timer.input_source_select},
+    .tau_filter                      = ${module.driver.timer.input_filter},
+    .trigger_edge                    = ${module.driver.timer.trigger_edge},
+    .operation_clock                 = ${module.driver.timer.operation_clock},
+    ${module.driver.timer.higher8bitperiod},
+    .higher_8bit_cycle_end_ipl       = ${module.driver.timer.higher_8bit_ipl},
+#if defined(VECTOR_NUMBER_TAU0_TMI0${module.driver.timer.channel}H)
+    .higher_8bit_cycle_end_irq       = VECTOR_NUMBER_TAU0_TMI0${module.driver.timer.channel}H,
+#else
+    .higher_8bit_cycle_end_irq       = FSP_INVALID_VECTOR,
+#endif
+};
+const timer_cfg_t ${module.driver.timer.name}_cfg =
+{
+    .mode                = (timer_mode_t) 0,
+    ${module.driver.timer.period},
+    .channel             = ${module.driver.timer.channel},
+    .p_callback          = ${module.driver.timer.p_callback},
+    /** If NULL then do not add &amp; */
+#if defined(${module.driver.timer.p_context})
+    .p_context           = ${module.driver.timer.p_context},
+#else
+    .p_context           = &amp;${module.driver.timer.p_context},
+#endif
+    .p_extend            = &amp;${module.driver.timer.name}_extend,
+    .cycle_end_ipl       = ${module.driver.timer.ipl},
+#if defined(VECTOR_NUMBER_TAU0_TMI0${module.driver.timer.channel})
+    .cycle_end_irq       = VECTOR_NUMBER_TAU0_TMI0${module.driver.timer.channel},
+#else
+    .cycle_end_irq       = FSP_INVALID_VECTOR,
+#endif
+};
+/* Instance structure to use this module. */
+const timer_instance_t ${module.driver.timer.name} =
+{
+    .p_ctrl        = &amp;${module.driver.timer.name}_ctrl,
+    .p_cfg         = &amp;${module.driver.timer.name}_cfg,
+    .p_api         = ${module.driver.timer.p_api}
+};
+        </declarations>
+        <api configurable="true">
+            <file>ra/fsp/inc/instances/r_tau.h</file>
+            <file>ra/fsp/inc/api/r_timer_api.h</file>
+        </api>
+    </module>
+</raModuleDescription>

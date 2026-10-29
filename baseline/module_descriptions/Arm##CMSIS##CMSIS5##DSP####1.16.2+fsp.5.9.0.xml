@@ -1,0 +1,10 @@
+<?xml version="1.0" ?>
+<raModuleDescription>
+    <module id="module.arm.cmsis5.dsp" display="DSP|Arm CMSIS DSP Library Source" common="1" version="0" url="https://arm-software.github.io/CMSIS-DSP/latest/" visible="true">
+        <requires id="module.arm.cmsis5.dsp.requires.macl" interface="interface.middleware.rm_cmsis_dsp" find="false" optional="true" display="Arm CMSIS DSP Acceleration [Optional]" />
+        <provides interface="interface.cmsis5.dsp" />
+        <includes>
+#include &quot;arm_math.h&quot;
+        </includes>
+    </module>
+</raModuleDescription>

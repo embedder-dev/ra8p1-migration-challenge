@@ -1,0 +1,95 @@
+﻿<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.driver.usbx_otg_hid" path="fsp_cfg/r_usb_otg_hid_cfg.h" version="0">
+        <property id="config.driver.usbx_otg_hid.int_in" display="OTG HID Interrupt In Pipe" default="config.driver.usbx_otg_hid.int_in.pipe6" description="Select the pipe number for HID Interrupt In.">
+            <option id="config.driver.usbx_otg_hid.int_in.pipe6" display="USB PIPE6" value="USB_PIPE6"/>
+            <option id="config.driver.usbx_otg_hid.int_in.pipe7" display="USB PIPE7" value="USB_PIPE7"/>
+            <option id="config.driver.usbx_otg_hid.int_in.pipe8" display="USB PIPE8" value="USB_PIPE8"/>
+            <option id="config.driver.usbx_otg_hid.int_in.pipe9" display="USB PIPE9" value="USB_PIPE9"/>
+            <option id="config.driver.usbx_otg_hid.int_in.pipe_no_use" display="NO USE" value="USB_NULL"/>
+        </property>
+        <property id="config.driver.usbx_otg_hid.int_out" display="OTG HID Interrupt Out Pipe" default="config.driver.usbx_otg_hid.int_out.pipe_no_use" description="Select the pipe number for HID Interrupt Out.">
+            <option id="config.driver.usbx_otg_hid.int_out.pipe6" display="USB PIPE6" value="USB_PIPE6"/>
+            <option id="config.driver.usbx_otg_hid.int_out.pipe7" display="USB PIPE7" value="USB_PIPE7"/>
+            <option id="config.driver.usbx_otg_hid.int_out.pipe8" display="USB PIPE8" value="USB_PIPE8"/>
+            <option id="config.driver.usbx_otg_hid.int_out.pipe9" display="USB PIPE9" value="USB_PIPE9"/>
+            <option id="config.driver.usbx_otg_hid.int_out.pipe_no_use" display="NO USE" value="USB_NULL"/>
+        </property>
+        <content>
+            #ifdef __cplusplus
+            extern "C" {
+            #endif
+
+            #define USB_CFG_PHID_INT_IN  (${config.driver.usbx_otg_hid.int_in})
+            #define USB_CFG_PHID_INT_OUT  (${config.driver.usbx_otg_hid.int_out})
+
+            #define USB_CFG_HHID_INT_IN  (${config.driver.usbx_otg_hid.int_in})
+            #define USB_CFG_HHID_INT_OUT  (${config.driver.usbx_otg_hid.int_out})
+            #define USB_CFG_HHID_INT_IN2 (USB_NULL)
+            #define USB_CFG_HHID_INT_IN3 (USB_NULL)
+            #ifdef __cplusplus
+            }
+            #endif
+        </content>
+    </config>
+    <module config="config.driver.usbx_otg_hid" display="Connectivity|Azure RTOS USBX OTG HID" id="module.driver.usbx_otg_hid" visible="true" version="1" url="https://github.com/eclipse-threadx/rtos-docs/blob/main/rtos-docs/usbx/index.md">
+        <constraint display="Unique name required for each instance">
+            "${interface.driver.usbx_otg_hid.${module.driver.usbx_otg_hid.name}}" === "1"
+        </constraint>
+        <constraint display="Requires USB Peripheral">
+          "${interface.mcu.usb_fs.external}" === "1"
+        </constraint>
+        <constraint display="The USB pipe numbers for Interrupt In and Interrupt Out for OTG HID must be different.">
+            !(("${config.driver.usbx_otg_hid.int_in}" === "config.driver.usbx_otg_hid.int_in.pipe6") &amp;&amp;
+            ("${config.driver.usbx_otg_hid.int_out}" === "config.driver.usbx_otg_hid.int_out.pipe6"))
+        </constraint>
+        <constraint display="The USB pipe numbers for Interrupt In and Interrupt Out for OTG HID must be different.">
+            !(("${config.driver.usbx_otg_hid.int_in}" === "config.driver.usbx_otg_hid.int_in.pipe7") &amp;&amp;
+            ("${config.driver.usbx_otg_hid.int_out}" === "config.driver.usbx_otg_hid.int_out.pipe7"))
+        </constraint>
+        <constraint display="The USB pipe numbers for Interrupt In and Interrupt Out for OTG HID must be different.">
+            !(("${config.driver.usbx_otg_hid.int_in}" === "config.driver.usbx_otg_hid.int_in.pipe8") &amp;&amp;
+            ("${config.driver.usbx_otg_hid.int_out}" === "config.driver.usbx_otg_hid.int_out.pipe8"))
+        </constraint>
+        <constraint display="The USB pipe numbers for Interrupt In and Interrupt Out for OTG HID must be different.">
+            !(("${config.driver.usbx_otg_hid.int_in}" === "config.driver.usbx_otg_hid.int_in.pipe9") &amp;&amp;
+            ("${config.driver.usbx_otg_hid.int_out}" === "config.driver.usbx_otg_hid.int_out.pipe9"))
+        </constraint>
+        <constraint display="The USB pipe numbers for Interrupt In and Interrupt Out for OTG HID must be different.">
+            !(("${config.driver.usbx_otg_hid.int_in}" === "config.driver.usbx_otg_hid.int_in.pipe_no_use") &amp;&amp;
+            ("${config.driver.usbx_otg_hid.int_out}" === "config.driver.usbx_otg_hid.int_out.pipe_no_use"))
+        </constraint>
+        <requires id="module.azure.usbx_otg_hid.requires.threadx" interface="interface.rtos.tx" visible="false" display="Requires ThreadX"/>
+        <requires id="module.azure.usbx_basic.requires.full_module" interface="interface.mcu.usb.pipes.0.1.2.3.4.5.6.7.8.9" visible="false" display="Requires USB Full Module" />
+        <requires id="module.driver.usbx_otg_hid.requires.usb_basic" interface="interface.middleware.rm_usbx_port_hid" visible="true" display="USBX OTG HID">
+            <override property="module.middleware.rm_usbx_port.usb_mode" value="module.middleware.rm_usbx_port.usb_mode.host_and_peri"/>
+            <override property="module.middleware.rm_usbx_port.usb_classtype" value="module.middleware.rm_usbx_port.usb_classtype.phid"/>
+            <override property="module.middleware.rm_usbx_port.usb_classtype" value="module.middleware.rm_usbx_port.usb_classtype.hhid"/>
+            <override property="module.middleware.rm_usbx_port.p_usb_reg" value="NULL"/>
+        </requires>
+        <provides interface="interface.driver.usbx_hhid" />
+        <provides interface="interface.driver.usbx_phid" />
+        <provides interface="interface.driver.usbx_otg_hid" />
+        <provides interface="interface.driver.usbx_otg_hid.${module.driver.usbx_otg_hid.name}" />
+        <property default="usbx_otg_hid" id="module.driver.usbx_otg_hid.usbx_otg_hid_interface" description=""/>
+        <property default="g_usbx_otg_hid${_instance}" display="Name" id="module.driver.usbx_otg_hid.name" description="Module name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.usbx_hhid.name}")</constraint>
+        </property>
+        <header>
+        /** HID Driver on USB Instance. */
+        </header>
+        <includes>
+#include "ux_host_class_hid.h"
+#include "ux_host_class_hid_keyboard.h"
+#include "ux_host_class_hid_mouse.h"
+#include "ux_host_class_hid_remote_control.h"
+#include "ux_device_class_hid.h"
+        </includes>
+        <declarations>
+        </declarations>
+        <functions>
+        </functions>
+        <api configurable="true">
+        </api>
+    </module>
+</raModuleDescription>

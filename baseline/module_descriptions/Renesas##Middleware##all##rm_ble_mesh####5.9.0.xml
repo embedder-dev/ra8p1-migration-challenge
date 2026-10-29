@@ -1,0 +1,564 @@
+<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.middleware.rm_ble_mesh" path="fsp_cfg/rm_ble_mesh_cfg.h" version="0">
+        <property id="config.middleware.rm_ble_mesh.parameter_checking_enable" display="Parameter Checking" default="config.middleware.rm_ble_mesh.parameter_checking_enable.bsp" description="Specify whether to include code for API parameter checking. Valid settings include.">
+            <option id="config.middleware.rm_ble_mesh.parameter_checking_enable.bsp" display="Default (BSP)" value="BSP_CFG_PARAM_CHECKING_ENABLE" />
+            <option id="config.middleware.rm_ble_mesh.parameter_checking_enable.enabled" display="Enable" value="1" />
+            <option id="config.middleware.rm_ble_mesh.parameter_checking_enable.disabled" display="Disable" value="0" />
+        </property>
+        <content>
+            #ifdef __cplusplus
+            extern "C" {
+            #endif
+
+            #ifdef __cplusplus
+            }
+            #endif
+        </content>
+    </config>
+    <module config="config.middleware.rm_ble_mesh" display="Networking|BLE Mesh Network modules|BLE Mesh (rm_ble_mesh)" id="module.middleware.rm_ble_mesh_on_rm_ble_mesh" common="1" visible="true" version="0" url="group___r_m___b_l_e___m_e_s_h.html">
+        <constraint display="BLE Mesh middleware not support R_BLE_SPP module">
+          "${interface.mcu.radio}" === "1"
+        </constraint>
+        <constraint display="Memory Size Error">eval('' +
+	             '/* Storage size is calculated as 1024 * number of blocks. */' +
+	             'var storage_size = 1024 * ${module.middleware.rm_ble_mesh.storage_block_num};' +
+
+	             '/* Variable */' +
+	             'var size_uint16 = 2; //Memory size of UINT16.\n' +
+	             'var size_uint32 = 4; //Memory size of UINT32.\n' +
+	             'var size_access_element_type = 6; //Memory size of MS_ACCESS_ELEMENT_TYPE.\n' +
+	             'var size_access_element_count = ${module.middleware.rm_ble_mesh.maximum_access_element_num}; //Memory size of MS_ACCESS_ELEMENT_COUNT.\n' +
+	             'var size_access_model_count = ${module.middleware.rm_ble_mesh.maximum_access_model_num}; //Memory size of MS_ACCESS_MODEL_COUNT.\n' +
+	             'var size_max_apps = ${module.middleware.rm_ble_mesh.maximum_application}; //Memory size of MS_MAX_APPS.\n' +
+	             'var size_max_apps32 = (${module.middleware.rm_ble_mesh.maximum_application} + 32 -1) / 32; //Memory size of (MS_MAX_APPS + 32 -1) /32.\n' +
+	             'var size_element_addr_entry = 4; //Memory size of MS_ELEMENT_ADDR_ENTRY.\n' +
+	             'var size_virtual_addr_entry = 20; //Memory size of MS_VIRTUAL_ADDR_ENTRY.\n' +
+	             'var size_max_virtual_addrs = ${module.middleware.rm_ble_mesh.maximum_virtual_address}; //Memory size of MS_MAX_VIRTUAL_ADDRS.\n' +
+	             'var size_non_virtual_addr_entry = 4; //Memory size of MS_NON_VIRTUAL_ADDR_ENTRY.\n' +
+	             'var size_max_non_virtual_addrs = ${module.middleware.rm_ble_mesh.maximum_non_virtual_address}; //Memory size of MS_MAX_NON_VIRTUAL_ADDRS.\n' +
+	             'var size_virtual_non_virtual_addrs32 = (${module.middleware.rm_ble_mesh.maximum_virtual_address} + ${module.middleware.rm_ble_mesh.maximum_non_virtual_address} + 32 -1) / 32; //Memory size of (MS_MAX_VIRTUAL_ADDRS + MS_MAX_NON_VIRTUAL_ADDRS + 32 - 1) / 32.\n' +
+	             'var size_max_lpns = ${module.middleware.rm_ble_mesh.maximum_lpn}; //Memory size of MS_MAX_LPNS.\n' +
+	             'var size_max_lpns_plus1 = 1 + ${module.middleware.rm_ble_mesh.maximum_lpn}; //Memory size of 1 + MS_MAX_LPNS.\n' +
+	             'var size_max_lpns32 = (${module.middleware.rm_ble_mesh.maximum_lpn} + 32 -1) / 32; //Memory size of (MS_MAX_LPNS + 32 - 1) / 32.\n' +
+	             'var size_max_subnets = ${module.middleware.rm_ble_mesh.maximum_subnets}; //Memory size of MS_MAX_SUBNETS.\n' +
+	             'var size_dev_key_entry = 20; //Memory size of MS_DEV_KEY_ENTRY.\n' +
+	             'var size_max_dev_keys = ${module.middleware.rm_ble_mesh.maximum_device_keys}; //Memory size of MS_MAX_DEV_KEYS.\n' +
+	             'var size_appkey_entry = 40; //Memory size of MS_APPKEY_ENTRY.\n' +
+	             'var size_iv_index = 12; //Memory size of ms_iv_index.\n' +
+	             'var size_netkey_count = 2; //Memory size of ms_netkey_count.\n' +
+	             'var size_composition_data_hdr = 10; //Memory size of composition_data_hdr.\n' +
+	             'var size_subnet_table0 = 110; //Memory size of ms_subnet_table[0].fixed.\n' +
+	             'var size_access_model_list0 = 52; //Memory size of ms_access_model_list[0].fixed.\n' +
+	             'var size_tx_state = 4; //Memory size of ms_tx_state.\n' +
+	             'var size_features = 1; //Memory size of ms_features.\n' +
+	             'var size_signature = 11; //Memory size of signature.\n' +
+
+	             '/* Calculation of size of offset. */' +
+	             '/* Calculation of memory size of MS_PS_RECORD_ELEMENTS_OFFSET. */' +
+	             'var size_elements_offset = size_uint16 + size_access_element_type * size_access_element_count + size_composition_data_hdr;' +
+	             '/* Calculation of memory size of MS_PS_RECORD_MODELS_OFFSET. */' +
+	             'var size_models_offset = size_uint16 + (size_access_model_list0 + size_uint32 * size_max_apps32 + size_uint32 * size_virtual_non_virtual_addrs32) * size_access_model_count;' +
+	             '/* Calculation of memory size of MS_PS_RECORD_SUBNETS_OFFSET. */' +
+	             'var size_subnets_offset = size_uint16 + size_iv_index + size_netkey_count + (size_subnet_table0 + size_uint32 * size_max_apps32 + size_uint32 * size_max_lpns32) * (size_max_subnets + size_max_lpns);' +
+	             '/* Calculation of memory size of MS_PS_RECORD_DEV_KEYS_OFFSET. */' +
+	             'var size_dev_keys_offset = size_uint16 + size_uint16 + (size_dev_key_entry * size_max_dev_keys);' +
+	             '/* Calculation of memory size of MS_PS_RECORD_APP_KEYS_OFFSET. */' +
+	             'var size_app_keys_offset = size_uint16 + size_appkey_entry * size_max_apps;' +
+	             '/* Calculation of memory size of MS_PS_RECORD_ELEMENT_ADDRS_OFFSET. */' +
+	             'var size_element_addrs_offset = size_uint16 + size_element_addr_entry * size_max_lpns_plus1;' +
+	             '/* Calculation of memory size of MS_PS_RECORD_VIRTUAL_ADDRS_OFFSET. */' +
+	             'var size_virtual_addrs_offset = size_uint16 + size_virtual_addr_entry * size_max_virtual_addrs;' +
+	             '/* Calculation of memory size of MS_PS_RECORD_NON_VIRTUAL_ADDRS_OFFSET. */' +
+	             'var size_non_virtual_addrs_offset = size_uint16 + size_non_virtual_addr_entry * size_max_non_virtual_addrs;' +
+	             '/* Calculation of memory size of MS_PS_RECORD_SEQ_NUMBER_OFFSET. */' +
+	             'var size_seq_number_offset = size_uint32;' +
+	             '/* Calculation of memory size of MS_PS_RECORD_TX_STATES_FEATURES_OFFSET. */' +
+	             'var size_tx_states_features_offset = size_uint16 + size_tx_state + size_features;' +
+
+	             '/* Total memory size used (calculation of memory size of MS_PS_RECORD_CORE_MODULES_OFFSET). */' +
+	             'var size_core_modules_offset = size_elements_offset + size_models_offset + size_subnets_offset + size_dev_keys_offset + size_app_keys_offset + size_element_addrs_offset + size_virtual_addrs_offset + size_non_virtual_addrs_offset + size_seq_number_offset + size_tx_states_features_offset + size_signature;' +
+
+	             '/* Determine if the total memory size is within the storage size. */' +
+	             'size_core_modules_offset &lt;= storage_size')
+        </constraint>
+
+        <requires id="module.middleware.rm_ble_mesh.requires.rm_ble_mesh_os" interface="interface.middleware.rm_ble_mesh_os" display="Add BLE Mesh OS Module" visible="true" find="true" />
+        <requires id="module.middleware.rm_ble_mesh.requires.rm_ble_mesh_timer" interface="interface.middleware.rm_ble_mesh_timer" display="Add BLE Mesh Timer Module" visible="true" find="true" />
+        <requires id="module.middleware.rm_ble_mesh.requires.timer" interface="interface.driver.timer" display="Add Timer Driver" visible="true" find="false" />
+        <requires id="module.middleware.rm_ble_mesh.requires.flash" interface="interface.driver.flash" display="Add Flash Driver" visible="true" find="true" />
+
+        <provides interface="interface.middleware.rm_ble_mesh" />
+        <provides interface="interface.middleware.rm_ble_mesh_on_rm_ble_mesh" />
+        <provides interface="interface.middleware.rm_ble_mesh.${module.middleware.rm_ble_mesh.name}" />
+
+        <property display="General|Name" id="module.middleware.rm_ble_mesh.name" default="g_rm_ble_mesh${_instance}" description="Module name.">
+            <constraint display="Name Must Be a Valid C Symbol">testSymbol("${module.middleware.rm_ble_mesh.name}")</constraint>
+        </property>
+
+        <property display="General|Channel Number" id="module.middleware.rm_ble_mesh.channel" default="0" description="Select channel corresponding to the channel number of the hardware.">
+            <constraint display="Invalid Channel Number">testInteger("${module.middleware.rm_ble_mesh.channel}") &amp;&amp; ("${module.middleware.rm_ble_mesh.channel}" &gt;= 0 ) &amp;&amp; ("${module.middleware.rm_ble_mesh.channel}" &lt;= 4294967295)</constraint>
+        </property>
+
+        <property display="Bearer|Network Interface Number" id="module.middleware.rm_ble_mesh.network_interfaces_num" default="2" description="Network interfaces number.">
+            <constraint display="Invalid Network Interface Number">testInteger("${module.middleware.rm_ble_mesh.network_interfaces_num}") &amp;&amp; ("${module.middleware.rm_ble_mesh.network_interfaces_num}" &gt;= 1 ) &amp;&amp; ("${module.middleware.rm_ble_mesh.network_interfaces_num}" &lt;= 65535)</constraint>
+        </property>
+
+        <property display="Bearer|Provisioning Interface Number" id="module.middleware.rm_ble_mesh.provisioning_interfaces_num" default="2" description="Provisioning interfaces number.">
+            <constraint display="Invalid Provisioning Interface Number">testInteger("${module.middleware.rm_ble_mesh.provisioning_interfaces_num}") &amp;&amp; ("${module.middleware.rm_ble_mesh.provisioning_interfaces_num}" &gt;= 1 ) &amp;&amp; ("${module.middleware.rm_ble_mesh.provisioning_interfaces_num}" &lt;= 65535)</constraint>
+        </property>
+
+        <property display="Provisioning|Unprovisioned Device Beacon Timeout in Milliseconds" id="module.middleware.rm_ble_mesh.unprov_device_beacon_timeout" default="200" description="Unprovisioned device beacon timeout in milliseconds.">
+            <constraint display="Invalid Unprovisioned Device Beacon Timeout in Milliseconds">testInteger("${module.middleware.rm_ble_mesh.unprov_device_beacon_timeout}") &amp;&amp; ("${module.middleware.rm_ble_mesh.unprov_device_beacon_timeout}" &gt;= 0 ) &amp;&amp; ("${module.middleware.rm_ble_mesh.unprov_device_beacon_timeout}" &lt;= 65535)</constraint>
+        </property>
+
+        <property display="Network|Network Cache Size" id="module.middleware.rm_ble_mesh.network_cache_size" default="10" description="Network cache size.">
+            <constraint display="Invalid Network Cache Size">testInteger("${module.middleware.rm_ble_mesh.network_cache_size}") &amp;&amp; ("${module.middleware.rm_ble_mesh.network_cache_size}" &gt;= 2) &amp;&amp; ("${module.middleware.rm_ble_mesh.network_cache_size}" &lt;= 65535)</constraint>
+        </property>
+
+        <property display="Network|Network Sequence Number Cache Size" id="module.middleware.rm_ble_mesh.network_sequence_num_cache_size" default="32" description="Network sequence number cache size.">
+            <constraint display="Invalid Network Sequence Number Cache Size">testInteger("${module.middleware.rm_ble_mesh.network_sequence_num_cache_size}") &amp;&amp; ("${module.middleware.rm_ble_mesh.network_sequence_num_cache_size}" &gt;= 32) &amp;&amp; ("${module.middleware.rm_ble_mesh.network_sequence_num_cache_size}" &lt;= 65535)</constraint>
+        </property>
+
+        <property display="Network|Maximum Number of Subnet" id="module.middleware.rm_ble_mesh.maximum_subnets" default="4" description="Maximum number of subnets">
+            <constraint display="Invalid Maximum Number of Subnets">testInteger("${module.middleware.rm_ble_mesh.maximum_subnets}") &amp;&amp; ("${module.middleware.rm_ble_mesh.maximum_subnets}" &gt;= 1) &amp;&amp; ("${module.middleware.rm_ble_mesh.maximum_subnets}" &lt;= 65535)</constraint>
+        </property>
+
+        <property display="Network|Maximum Number of Device Key" id="module.middleware.rm_ble_mesh.maximum_device_keys" default="4" description="Maximum number of device keys.">
+            <constraint display="Invalid Maximum Number of Device Keys">testInteger("${module.middleware.rm_ble_mesh.maximum_device_keys}") &amp;&amp; ("${module.middleware.rm_ble_mesh.maximum_device_keys}" &gt;= 1) &amp;&amp; ("${module.middleware.rm_ble_mesh.maximum_device_keys}" &lt;= 65535)</constraint>
+        </property>
+
+        <property display="Network|Proxy Filter List Size" id="module.middleware.rm_ble_mesh.proxy_filter_list_size" default="2" description="Maximum number of addresses present in each proxy filter list.">
+            <constraint display="Invalid Proxy Filter List Size">testInteger("${module.middleware.rm_ble_mesh.proxy_filter_list_size}") &amp;&amp; ("${module.middleware.rm_ble_mesh.proxy_filter_list_size}" &gt;= 1) &amp;&amp; ("${module.middleware.rm_ble_mesh.proxy_filter_list_size}" &lt;= 65535)</constraint>
+        </property>
+
+        <property display="Network|Network Sequence Number Block Size" id="module.middleware.rm_ble_mesh.net_sequence_number_block_size" default="2048" description="The distance between the network sequence numbers, for every persistent storage write.">
+            <constraint display="Invalid Network Sequence Number Block Size">testInteger("${module.middleware.rm_ble_mesh.net_sequence_number_block_size}") &amp;&amp; ("${module.middleware.rm_ble_mesh.net_sequence_number_block_size}" &gt;= 0 ) &amp;&amp; ("${module.middleware.rm_ble_mesh.net_sequence_number_block_size}" &lt;= 65535)</constraint>
+        </property>
+
+        <property display="Network|Network Transmit Count for Network Packets" id="module.middleware.rm_ble_mesh.net_tx_count" default="1" description="Network transmit count for network packets.">
+            <constraint display="Invalid Network Transmit Count for Network Packets">testInteger("${module.middleware.rm_ble_mesh.net_tx_count}") &amp;&amp; ("${module.middleware.rm_ble_mesh.net_tx_count}" &gt;= 0 ) &amp;&amp; ("${module.middleware.rm_ble_mesh.net_tx_count}" &lt;= 7)</constraint>
+        </property>
+
+        <property display="Network|Network Interval Steps for Network Packets" id="module.middleware.rm_ble_mesh.net_tx_interval_steps" default="4" description="Network interval steps for network packets.">
+            <constraint display="Invalid Network Interval Steps for Network Packets">testInteger("${module.middleware.rm_ble_mesh.net_tx_interval_steps}") &amp;&amp; ("${module.middleware.rm_ble_mesh.net_tx_interval_steps}" &gt;= 0 ) &amp;&amp; ("${module.middleware.rm_ble_mesh.net_tx_interval_steps}" &lt;= 31)</constraint>
+        </property>
+
+        <property display="Network|Network Transmit Count for Relayed Packets" id="module.middleware.rm_ble_mesh.net_relay_tx_count" default="0" description="Network transmit count for relayed packets.">
+            <constraint display="Invalid Network Transmit Count for Relayed Packets">testInteger("${module.middleware.rm_ble_mesh.net_relay_tx_count}") &amp;&amp; ("${module.middleware.rm_ble_mesh.net_relay_tx_count}" &gt;= 0 ) &amp;&amp; ("${module.middleware.rm_ble_mesh.net_relay_tx_count}" &lt;= 7)</constraint>
+        </property>
+
+        <property display="Network|Network Interval Steps for Relayed Packets" id="module.middleware.rm_ble_mesh.net_relay_tx_interval_steps" default="9" description="Network interval steps for relayed packets.">
+            <constraint display="Invalid Network Interval Steps for Relayed Packets">testInteger("${module.middleware.rm_ble_mesh.net_relay_tx_interval_steps}") &amp;&amp; ("${module.middleware.rm_ble_mesh.net_relay_tx_interval_steps}" &gt;= 0 ) &amp;&amp; ("${module.middleware.rm_ble_mesh.net_relay_tx_interval_steps}" &lt;= 31)</constraint>
+        </property>
+
+        <property display="Network|Proxy ADV Network ID Timeout for Each Subnet in Milliseconds." id="module.middleware.rm_ble_mesh.proxy_subnet_netid_adv_timeout" default="100" description="Proxy ADV network ID timeout for each subnet in milliseconds.">
+            <constraint display="Invalid Proxy ADV Network ID Timeout">testInteger("${module.middleware.rm_ble_mesh.proxy_subnet_netid_adv_timeout}") &amp;&amp; ("${module.middleware.rm_ble_mesh.proxy_subnet_netid_adv_timeout}" &gt;= 0 ) &amp;&amp; ("${module.middleware.rm_ble_mesh.proxy_subnet_netid_adv_timeout}" &lt;= 65535)</constraint>
+        </property>
+
+        <property display="Network|Proxy ADV Node Identity Timeout for Each Subnet in Milliseconds" id="module.middleware.rm_ble_mesh.proxy_subnet_nodeid_adv_timeout" default="300" description="Proxy ADV node identity timeout for each subnet in milliseconds.">
+            <constraint display="Invalid Proxy ADV Node Identity Timeout for Each Subnet in Milliseconds">testInteger("${module.middleware.rm_ble_mesh.proxy_subnet_nodeid_adv_timeout}") &amp;&amp; ("${module.middleware.rm_ble_mesh.proxy_subnet_nodeid_adv_timeout}" &gt;= 300 ) &amp;&amp; ("${module.middleware.rm_ble_mesh.proxy_subnet_nodeid_adv_timeout}" &lt;= 65535)</constraint>
+        </property>
+
+        <property display="Network|Proxy ADV Node Identity Overall Time Period in Seconds" id="module.middleware.rm_ble_mesh.proxy_nodeid_adv_timeout" default="60" description="Proxy ADV node identity overall time period in seconds.">
+            <constraint display="Invalid Proxy ADV Node Identity Overall Time Period in Seconds">testInteger("${module.middleware.rm_ble_mesh.proxy_nodeid_adv_timeout}") &amp;&amp; ("${module.middleware.rm_ble_mesh.proxy_nodeid_adv_timeout}" &gt;= 60 ) &amp;&amp; ("${module.middleware.rm_ble_mesh.proxy_nodeid_adv_timeout}" &lt;= 4294967295)</constraint>
+        </property>
+
+        <property display="Network|Maximum Number of Queued Messages for Transmission" id="module.middleware.rm_ble_mesh.net_tx_queue_size" default="64" description="Maximum number of queued messages for transmission.">
+            <constraint display="Invalid Maximum Number of Queued Messages for Transmission">testInteger("${module.middleware.rm_ble_mesh.net_tx_queue_size}") &amp;&amp; ("${module.middleware.rm_ble_mesh.net_tx_queue_size}" &gt;= 2 ) &amp;&amp; ("${module.middleware.rm_ble_mesh.net_tx_queue_size}" &lt;= 65535)</constraint>
+        </property>
+
+        <property display="Transport|Maximum Number of LPN" id="module.middleware.rm_ble_mesh.maximum_lpn" default="1" description="Maximum number of LPNs.">
+            <constraint display="Invalid Maximum Number of LPNs">testInteger("${module.middleware.rm_ble_mesh.maximum_lpn}") &amp;&amp; ("${module.middleware.rm_ble_mesh.maximum_lpn}" &gt;= 1) &amp;&amp; ("${module.middleware.rm_ble_mesh.maximum_lpn}" &lt;= 65535)</constraint>
+        </property>
+
+        <property display="Transport|Replay Protection Cache Size" id="module.middleware.rm_ble_mesh.replay_cache_size" default="10" description="Replay protection cache size.">
+            <constraint display="Invalid Replay Protection Cache Size">testInteger("${module.middleware.rm_ble_mesh.replay_cache_size}") &amp;&amp; ("${module.middleware.rm_ble_mesh.replay_cache_size}" &gt;= 2) &amp;&amp; ("${module.middleware.rm_ble_mesh.replay_cache_size}" &lt;= 255)</constraint>
+        </property>
+
+        <property display="Transport|Reassembled Cache Size" id="module.middleware.rm_ble_mesh.reassembled_cache_size" default="8" description="Reassembled cach size.">
+            <constraint display="Invalid Reassembled Cache Size">testInteger("${module.middleware.rm_ble_mesh.reassembled_cache_size}") &amp;&amp; ("${module.middleware.rm_ble_mesh.reassembled_cache_size}" &gt;= 2) &amp;&amp; ("${module.middleware.rm_ble_mesh.reassembled_cache_size}" &lt;= 65535)</constraint>
+        </property>
+
+        <property display="Transport|Friend Poll Retry Count" id="module.middleware.rm_ble_mesh.frnd_poll_retry_count" default="10" description="Friend poll retry count.">
+            <constraint display="Invalid Friend Poll Retry Count">testInteger("${module.middleware.rm_ble_mesh.frnd_poll_retry_count}") &amp;&amp; ("${module.middleware.rm_ble_mesh.frnd_poll_retry_count}" &gt;= 1 ) &amp;&amp; ("${module.middleware.rm_ble_mesh.frnd_poll_retry_count}" &lt;= 65535)</constraint>
+        </property>
+
+        <property display="Transport|Maximum Number of Segmentation and Reassembly Context" id="module.middleware.rm_ble_mesh.maximum_ltrn_sar_context" default="8" description="Number of segmentation and reassembly contexts.">
+            <constraint display="Invalid Maximum Number of Segmentation and Reassembly Context">testInteger("${module.middleware.rm_ble_mesh.maximum_ltrn_sar_context}") &amp;&amp; ("${module.middleware.rm_ble_mesh.maximum_ltrn_sar_context}" &gt;= 2) &amp;&amp; ("${module.middleware.rm_ble_mesh.maximum_ltrn_sar_context}" &lt;= 65535)</constraint>
+        </property>
+
+        <property display="Transport|Lower Transport Segment Transmission Timeout in Milliseconds" id="module.middleware.rm_ble_mesh.ltrn_rtx_timeout" default="300" description="Lower transport segment transmission timeout in milliseconds.">
+            <constraint display="Invalid Lower Transport Segment Transmission Timeout in Milliseconds">testInteger("${module.middleware.rm_ble_mesh.ltrn_rtx_timeout}") &amp;&amp; ("${module.middleware.rm_ble_mesh.ltrn_rtx_timeout}" &gt;= 200 ) &amp;&amp; ("${module.middleware.rm_ble_mesh.ltrn_rtx_timeout}" &lt;= 65535)</constraint>
+        </property>
+
+        <property display="Transport|Lower Transport Segment Re-Transmission Count" id="module.middleware.rm_ble_mesh.ltrn_rtx_count" default="2" description="Lower transport segment re-transmission count.">
+            <constraint display="Invalid Lower Transport Segment Re-Transmission Count">testInteger("${module.middleware.rm_ble_mesh.ltrn_rtx_count}") &amp;&amp; ("${module.middleware.rm_ble_mesh.ltrn_rtx_count}" &gt;= 2 ) &amp;&amp; ("${module.middleware.rm_ble_mesh.ltrn_rtx_count}" &lt;= 255)</constraint>
+        </property>
+
+        <property display="Transport|Lower Transport Acknowledgement Timeout in Milliseconds" id="module.middleware.rm_ble_mesh.ltrn_ack_timeout" default="200" description="Lower transport acknowledgement timeout in milliseconds.">
+            <constraint display="Invalid Lower Transport Acknowledgement Timeout in Milliseconds">testInteger("${module.middleware.rm_ble_mesh.ltrn_ack_timeout}") &amp;&amp; ("${module.middleware.rm_ble_mesh.ltrn_ack_timeout}" &gt;= 200 ) &amp;&amp; ("${module.middleware.rm_ble_mesh.ltrn_ack_timeout}" &lt;= 65535)</constraint>
+        </property>
+
+        <property display="Transport|Lower Transport Incomplete Timeout in Seconds" id="module.middleware.rm_ble_mesh.ltrn_incomplete_timeout" default="20" description="Lower transport incomplete timeout in seconds.">
+            <constraint display="Invalid Lower Transport Incomplete Timeout in Seconds">testInteger("${module.middleware.rm_ble_mesh.ltrn_incomplete_timeout}") &amp;&amp; ("${module.middleware.rm_ble_mesh.ltrn_incomplete_timeout}" &gt;= 10 ) &amp;&amp; ("${module.middleware.rm_ble_mesh.ltrn_incomplete_timeout}" &lt;= 65535)</constraint>
+        </property>
+
+        <property display="Transport|Friendship Receive Window" id="module.middleware.rm_ble_mesh.frnd_receive_window" default="100" description="Friendship receive window.">
+            <constraint display="Invalid Friendship Receive Window">testInteger("${module.middleware.rm_ble_mesh.frnd_receive_window}") &amp;&amp; ("${module.middleware.rm_ble_mesh.frnd_receive_window}" &gt;= 100 ) &amp;&amp; ("${module.middleware.rm_ble_mesh.frnd_receive_window}" &lt;= 255)</constraint>
+        </property>
+
+        <property display="Transport|Maximum Number of Friend Message Queue" id="module.middleware.rm_ble_mesh.maximum_friend_message_queue" default="15" description="Maximum number of messages that the friend is capabale to queue for a single Low Power Node.">
+            <constraint display="Invalid Maximum Number of Friend Messages Queue">testInteger("${module.middleware.rm_ble_mesh.maximum_friend_message_queue}") &amp;&amp; ("${module.middleware.rm_ble_mesh.maximum_friend_message_queue}" &gt;= 2) &amp;&amp; ("${module.middleware.rm_ble_mesh.maximum_friend_message_queue}" &lt;= 65535)</constraint>
+        </property>
+
+        <property display="Transport|Maximum Number of Friend Subscription List" id="module.middleware.rm_ble_mesh.maximum_friend_subscription_list" default="8" description="Maximum number of subscription addresses that the friend is capable to store for a single Low Power Node.">
+            <constraint display="Invalid Maximum Number of Friend Subscription List">testInteger("${module.middleware.rm_ble_mesh.maximum_friend_subscription_list}") &amp;&amp; ("${module.middleware.rm_ble_mesh.maximum_friend_subscription_list}" &gt;= 1) &amp;&amp; ("${module.middleware.rm_ble_mesh.maximum_friend_subscription_list}" &lt;= 65535)</constraint>
+        </property>
+
+        <property display="Transport|Friend Clear Confirmation Timeout in Milliseconds" id="module.middleware.rm_ble_mesh.lpn_clear_retry_timeout_initial" default="1000" description="Friend clear confirmation timeout in milliseconds.">
+            <constraint display="Invalid Friend Clear Confirmation Timeout in Milliseconds">testInteger("${module.middleware.rm_ble_mesh.lpn_clear_retry_timeout_initial}") &amp;&amp; ("${module.middleware.rm_ble_mesh.lpn_clear_retry_timeout_initial}" &gt;= 1000 ) &amp;&amp; ("${module.middleware.rm_ble_mesh.lpn_clear_retry_timeout_initial}" &lt;= 65535)</constraint>
+        </property>
+
+        <property display="Transport|Friend Clear Retry Count" id="module.middleware.rm_ble_mesh.lpn_clear_retry_count" default="5" description="Friend clear retry count.">
+            <constraint display="Invalid Friend Clear Retry Count">testInteger("${module.middleware.rm_ble_mesh.lpn_clear_retry_count}") &amp;&amp; ("${module.middleware.rm_ble_mesh.lpn_clear_retry_count}" &gt;= 1 ) &amp;&amp; ("${module.middleware.rm_ble_mesh.lpn_clear_retry_count}" &lt;= 65535)</constraint>
+        </property>
+
+        <property display="Transport|Friendship Retry Timeout in Milliseconds" id="module.middleware.rm_ble_mesh.trn_frndreq_retry_timeout" default="1200" description="Friendship retry timeout in milliseconds.">
+            <constraint display="Invalid Friendship Retry Timeout in Milliseconds">testInteger("${module.middleware.rm_ble_mesh.trn_frndreq_retry_timeout}") &amp;&amp; ("${module.middleware.rm_ble_mesh.trn_frndreq_retry_timeout}" &gt;= 1100 ) &amp;&amp; ("${module.middleware.rm_ble_mesh.trn_frndreq_retry_timeout}" &lt;= 65535)</constraint>
+        </property>
+
+        <property display="Access|Maximum Number of Element" id="module.middleware.rm_ble_mesh.maximum_access_element_num" default="4" description="Maximum number of elements.">
+            <constraint display="Invalid Maximum Number of Element">testInteger("${module.middleware.rm_ble_mesh.maximum_access_element_num}") &amp;&amp; ("${module.middleware.rm_ble_mesh.maximum_access_element_num}" &gt;= 1) &amp;&amp; ("${module.middleware.rm_ble_mesh.maximum_access_element_num}" &lt;= 65535)</constraint>
+        </property>
+
+        <property display="Access|Maximum Number of Model" id="module.middleware.rm_ble_mesh.maximum_access_model_num" default="60" description="Maximum number of models.">
+            <constraint display="Invalid Maximum Number of Model">testInteger("${module.middleware.rm_ble_mesh.maximum_access_model_num}") &amp;&amp; ("${module.middleware.rm_ble_mesh.maximum_access_model_num}" &gt;= 1) &amp;&amp; ("${module.middleware.rm_ble_mesh.maximum_access_model_num}" &lt;= 65535)</constraint>
+        </property>
+
+        <property display="Access|Maximum Number of Application" id="module.middleware.rm_ble_mesh.maximum_application" default="8" description="Maximum number of applications (keys) the device can store information about.">
+            <constraint display="Invalid Maximum Number of Application">testInteger("${module.middleware.rm_ble_mesh.maximum_application}") &amp;&amp; ("${module.middleware.rm_ble_mesh.maximum_application}" &gt;= 1) &amp;&amp; ("${module.middleware.rm_ble_mesh.maximum_application}" &lt;= 65535)</constraint>
+        </property>
+
+        <property display="Access|Maximum Number of Virtual Address" id="module.middleware.rm_ble_mesh.maximum_virtual_address" default="8" description="Maximum number of virtual addresses the device can store information about.">
+            <constraint display="Invalid Maximum Number of Virtual Address">testInteger("${module.middleware.rm_ble_mesh.maximum_virtual_address}") &amp;&amp; ("${module.middleware.rm_ble_mesh.maximum_virtual_address}" &gt;= 1) &amp;&amp; ("${module.middleware.rm_ble_mesh.maximum_virtual_address}" &lt;= 65535)</constraint>
+        </property>
+
+        <property display="Access|Maximum Number of Non-Virtual Address" id="module.middleware.rm_ble_mesh.maximum_non_virtual_address" default="8" description="Maximum number of non-virtual addresses the device can store information about.">
+            <constraint display="Invalid Maximum Number of Non-Virtual Address">testInteger("${module.middleware.rm_ble_mesh.maximum_non_virtual_address}") &amp;&amp; ("${module.middleware.rm_ble_mesh.maximum_non_virtual_address}" &gt;= 1) &amp;&amp; ("${module.middleware.rm_ble_mesh.maximum_non_virtual_address}" &lt;= 65535)</constraint>
+        </property>
+
+        <property display="Access|Maximum Number of Transition Timers" id="module.middleware.rm_ble_mesh.max_num_transition_timers" default="5" description="Maximum number of transition timers.">
+            <constraint display="Invalid Maximum Number of Transition Timers">testInteger("${module.middleware.rm_ble_mesh.max_num_transition_timers}") &amp;&amp; ("${module.middleware.rm_ble_mesh.max_num_transition_timers}" &gt;= 1 ) &amp;&amp; ("${module.middleware.rm_ble_mesh.max_num_transition_timers}" &lt;= 65535)</constraint>
+        </property>
+
+        <property display="Access|Maximum Number of Periodic Step Timers" id="module.middleware.rm_ble_mesh.max_num_periodic_step_timers" default="5" description="Maximum number of periodic step timers.">
+            <constraint display="Invalid Maximum Number of Periodic Step Timers">testInteger("${module.middleware.rm_ble_mesh.max_num_periodic_step_timers}") &amp;&amp; ("${module.middleware.rm_ble_mesh.max_num_periodic_step_timers}" &gt;= 1 ) &amp;&amp; ("${module.middleware.rm_ble_mesh.max_num_periodic_step_timers}" &lt;= 65535)</constraint>
+        </property>
+
+        <property display="Foundation|Config Server Secure Network Beacon Interval" id="module.middleware.rm_ble_mesh.config_server_snb_timeout" default="10" description="Config server secure network beacon interval.">
+            <constraint display="Invalid Config Server Secure Network Beacon Interval">testInteger("${module.middleware.rm_ble_mesh.config_server_snb_timeout}") &amp;&amp; ("${module.middleware.rm_ble_mesh.config_server_snb_timeout}" &gt;= 10 ) &amp;&amp; ("${module.middleware.rm_ble_mesh.config_server_snb_timeout}" &lt;= 600)</constraint>
+        </property>
+
+        <property display="Foundation|Maximum Number of Health Server Instance" id="module.middleware.rm_ble_mesh.maximum_health_server_num" default="2" description="Maximum number of health server instances.">
+            <constraint display="Invalid Maximum Number of Health Server Instance">testInteger("${module.middleware.rm_ble_mesh.maximum_health_server_num}") &amp;&amp; ("${module.middleware.rm_ble_mesh.maximum_health_server_num}" &gt;= 1) &amp;&amp; ("${module.middleware.rm_ble_mesh.maximum_health_server_num}" &lt;= 255)</constraint>
+        </property>
+
+        <property display="Model|Maximum Number of Light Lightness Controller Server Instance" id="module.middleware.rm_ble_mesh.maximum_light_lc_server_num" default="1" description="Maximum number of light lightness controller server instances.">
+            <constraint display="Invalid Maximum Number of Light Lightness Controller Server Instance">testInteger("${module.middleware.rm_ble_mesh.maximum_light_lc_server_num}") &amp;&amp; ("${module.middleware.rm_ble_mesh.maximum_light_lc_server_num}" &gt;= 1) &amp;&amp; ("${module.middleware.rm_ble_mesh.maximum_light_lc_server_num}" &lt;= 255)</constraint>
+        </property>
+
+        <property display="ID|Company ID" id="module.middleware.rm_ble_mesh.default_company_id" default="0x0036" description="Company ID.">
+            <constraint display="Invalid Company ID">testInteger("${module.middleware.rm_ble_mesh.default_company_id}") &amp;&amp; ("${module.middleware.rm_ble_mesh.default_company_id}" &gt;= 0 ) &amp;&amp; ("${module.middleware.rm_ble_mesh.default_company_id}" &lt;= 65535)</constraint>
+        </property>
+
+        <property display="ID|Product ID" id="module.middleware.rm_ble_mesh.default_product_id" default="0x0001" description="Product ID.">
+            <constraint display="Invalid Product ID">testInteger("${module.middleware.rm_ble_mesh.default_product_id}") &amp;&amp; ("${module.middleware.rm_ble_mesh.default_product_id}" &gt;= 0 ) &amp;&amp; ("${module.middleware.rm_ble_mesh.default_product_id}" &lt;= 65535)</constraint>
+        </property>
+
+        <property display="ID|Vendor ID" id="module.middleware.rm_ble_mesh.default_vendor_id" default="0x0100" description="Vendor ID.">
+            <constraint display="Invalid Vendor ID">testInteger("${module.middleware.rm_ble_mesh.default_vendor_id}") &amp;&amp; ("${module.middleware.rm_ble_mesh.default_vendor_id}" &gt;= 0 ) &amp;&amp; ("${module.middleware.rm_ble_mesh.default_vendor_id}" &lt;= 65535)</constraint>
+        </property>
+
+        <property id="module.middleware.rm_ble_mesh.p_context" default="NULL">
+            <constraint display="Name Must Be a Valid C Symbol">testSymbol("${module.middleware.rm_ble_mesh.p_context}")</constraint>
+            <export>eval('' +
+                'var output = "${module.middleware.rm_ble_mesh.p_context}";' +
+                'if ("NULL" !== output) {' +
+                'output = "&amp;" + output;' +
+                '}' +
+                'output')
+            </export>
+        </property>
+
+        <property display="Platform|Storage|Block Number" id="module.middleware.rm_ble_mesh.storage_block_num" default="5" description="Block number.">
+            <constraint display="Invalid Block Number">testInteger("${module.middleware.rm_ble_mesh.storage_block_num}") &amp;&amp; ("${module.middleware.rm_ble_mesh.storage_block_num}" &gt; 0 ) &amp;&amp; ("${module.middleware.rm_ble_mesh.storage_block_num}" &lt;= 8)</constraint>
+        </property>
+
+        <property display="Platform|Memory Pool|Memory Pool Size" id="module.middleware.rm_ble_mesh.memory_pool_size" default="0x4000" description="Memory pool size.">
+            <constraint display="Invalid Memory Pool Size">testInteger("${module.middleware.rm_ble_mesh.memory_pool_size}") &amp;&amp; ("${module.middleware.rm_ble_mesh.memory_pool_size}" &gt; 0 ) &amp;&amp; ("${module.middleware.rm_ble_mesh.memory_pool_size}" &lt;= 4294967295)</constraint>
+        </property>
+
+        <property bitmapPrefix="RM_BLE_MESH_LOGGING_TARGET_MASK_" default="" display="Platform|Logging|Packet Bitfield" id="module.middleware.rm_ble_mesh.packet_bitfield" description="Specifies if this is included in the packet_bitfield mask.">
+            <option display="Network" id="module.middleware.rm_ble_mesh.packet_bitfield.target_mask_network" value="NETWORK"/>
+            <option display="Lower Trans" id="module.middleware.rm_ble_mesh.packet_bitfield.target_mask_lower_trans" value="LOWER_TRANS"/>
+            <option display="Upper Trans" id="module.middleware.rm_ble_mesh.packet_bitfield.target_mask_upper_trans" value="UPPER_TRANS"/>
+            <option display="Access" id="module.middleware.rm_ble_mesh.packet_bitfield.target_mask_access" value="ACCESS"/>
+        </property>
+
+        <property bitmapPrefix="RM_BLE_MESH_LOGGING_TARGET_MASK_" default="" display="Platform|Logging|Module Info Bitfield" id="module.middleware.rm_ble_mesh.module_info_bitfield" description="Specifies if this is included in the module information bitfield mask.">
+            <option display="Network" id="module.middleware.rm_ble_mesh.packet_bitfield.target_mask_network" value="NETWORK"/>
+            <option display="Lower Trans" id="module.middleware.rm_ble_mesh.packet_bitfield.target_mask_lower_trans" value="LOWER_TRANS"/>
+            <option display="Upper Trans" id="module.middleware.rm_ble_mesh.packet_bitfield.target_mask_upper_trans" value="UPPER_TRANS"/>
+            <option display="Access" id="module.middleware.rm_ble_mesh.packet_bitfield.target_mask_access" value="ACCESS"/>
+        </property>
+
+        <property bitmapPrefix="RM_BLE_MESH_LOGGING_TARGET_MASK_" default="" display="Platform|Logging|Generic Log Bitfield" id="module.middleware.rm_ble_mesh.generic_log_bitfield" description="Specifies if this is included in the generic log bitfield mask.">
+            <option display="Network" id="module.middleware.rm_ble_mesh.packet_bitfield.target_mask_network" value="NETWORK"/>
+            <option display="Lower Trans" id="module.middleware.rm_ble_mesh.packet_bitfield.target_mask_lower_trans" value="LOWER_TRANS"/>
+            <option display="Upper Trans" id="module.middleware.rm_ble_mesh.packet_bitfield.target_mask_upper_trans" value="UPPER_TRANS"/>
+            <option display="Access" id="module.middleware.rm_ble_mesh.packet_bitfield.target_mask_access" value="ACCESS"/>
+        </property>
+
+        <property display="Platform|Logging|function" id="module.middleware.rm_ble_mesh.p_logging_func" default="NULL">
+            <constraint display="Name Must Be a Valid C Symbol">testSymbol("${module.middleware.rm_ble_mesh.p_logging_func}")</constraint>
+        </property>
+
+        <property id="module.middleware.rm_ble_mesh.p_extend" default="${module.middleware.rm_ble_mesh_access.name}_extended_cfg">
+            <constraint display="Name Must Be a Valid C Symbol">testSymbol("${module.middleware.rm_ble_mesh.p_extend}")</constraint>
+            <export>eval('' +
+                'var output = "${module.middleware.rm_ble_mesh.p_extend}";' +
+                'if ("NULL" !== output) {' +
+                'output = "&amp;" + output;' +
+                '}' +
+                'output')
+            </export>
+        </property>
+
+        <header>
+/** BLE Mesh Instance. */
+extern rm_ble_mesh_instance_ctrl_t ${module.middleware.rm_ble_mesh.name}_ctrl;
+
+/** Access the BLE Mesh instance using these structures when calling API functions directly (::p_api is not used). */
+extern const rm_ble_mesh_cfg_t ${module.middleware.rm_ble_mesh.name}_cfg;
+extern const rm_ble_mesh_instance_t ${module.middleware.rm_ble_mesh.name};
+
+#ifndef ${module.middleware.rm_ble_mesh.p_logging_func}
+void ${module.middleware.rm_ble_mesh.p_logging_func}(rm_ble_mesh_logging_args_t * p_args);
+#endif
+        </header>
+        <includes>
+#include "rm_ble_mesh.h"
+#include "rm_ble_mesh_api.h"
+#include "rm_ble_mesh_cfg.h"
+#include "r_timer_api.h"
+#include "r_flash_api.h"
+        </includes>
+        <declarations>
+rm_ble_mesh_instance_ctrl_t ${module.middleware.rm_ble_mesh.name}_ctrl;
+
+rm_ble_mesh_platform_system_time_cfg_t ${module.middleware.rm_ble_mesh.name}_platform_sytem_time_cfg =
+{
+    .p_timer_instance = &amp;${module.middleware.rm_ble_mesh.requires.timer::module.driver.timer.name}
+};
+
+rm_ble_mesh_platform_storage_cfg_t ${module.middleware.rm_ble_mesh.name}_platform_storage_cfg =
+{
+    .block_num        = ${module.middleware.rm_ble_mesh.storage_block_num},
+    .p_flash_instance = &amp;${module.middleware.rm_ble_mesh.requires.flash::module.driver.flash.name}
+};
+
+static uint8_t memory_pool[${module.middleware.rm_ble_mesh.memory_pool_size}];
+
+const rm_ble_mesh_platform_memory_pool_cfg_t ${module.middleware.rm_ble_mesh.name}_platform_memory_pool_cfg =
+{
+    .p_base_address = memory_pool,
+    .memory_size    = sizeof(memory_pool)
+};
+
+static rm_ble_mesh_platform_logging_cfg_t ${module.middleware.rm_ble_mesh.name}_plarform_logging_cfg =
+{
+    .packet_bitfield      = ${module.middleware.rm_ble_mesh.packet_bitfield} 0,
+    .module_info_bitfield = ${module.middleware.rm_ble_mesh.module_info_bitfield} 0,
+    .generic_log_bitfield = ${module.middleware.rm_ble_mesh.generic_log_bitfield} 0,
+    .p_logging_func       = ${module.middleware.rm_ble_mesh.p_logging_func}
+};
+
+rm_ble_mesh_platform_cfg_t ${module.middleware.rm_ble_mesh.name}_platform_cfg =
+{
+    .p_system_time_cfg = &amp;${module.middleware.rm_ble_mesh.name}_platform_sytem_time_cfg,
+    .p_storage_cfg     = &amp;${module.middleware.rm_ble_mesh.name}_platform_storage_cfg,
+    .p_memory_pool_cfg = &amp;${module.middleware.rm_ble_mesh.name}_platform_memory_pool_cfg,
+    .p_logging_cfg     = &amp;${module.middleware.rm_ble_mesh.name}_plarform_logging_cfg
+};
+
+const rm_ble_mesh_extended_cfg_t ${module.middleware.rm_ble_mesh.name}_extend =
+{
+    .p_platform_cfg           = &amp;${module.middleware.rm_ble_mesh.name}_platform_cfg
+};
+
+/** BLE MESH configuration parameters. */
+const rm_ble_mesh_cfg_t ${module.middleware.rm_ble_mesh.name}_cfg =
+{
+    /** the parameters for initialization. */
+    .channel                          = ${module.middleware.rm_ble_mesh.channel},
+    .network_interfaces_num           = ${module.middleware.rm_ble_mesh.network_interfaces_num},
+    .provisioning_interfaces_num      = ${module.middleware.rm_ble_mesh.provisioning_interfaces_num},
+    .network_cache_size               = ${module.middleware.rm_ble_mesh.network_cache_size},
+    .network_sequence_num_cache_size  = ${module.middleware.rm_ble_mesh.network_sequence_num_cache_size},
+    .maximum_subnets                  = ${module.middleware.rm_ble_mesh.maximum_subnets},
+    .maximum_device_keys              = ${module.middleware.rm_ble_mesh.maximum_device_keys},
+    .proxy_filter_list_size           = ${module.middleware.rm_ble_mesh.proxy_filter_list_size},
+    .maximum_lpn                      = ${module.middleware.rm_ble_mesh.maximum_lpn},
+    .reassembled_cache_size           = ${module.middleware.rm_ble_mesh.reassembled_cache_size},
+    .maximum_ltrn_sar_context         = ${module.middleware.rm_ble_mesh.maximum_ltrn_sar_context},
+    .maximum_friend_message_queue     = ${module.middleware.rm_ble_mesh.maximum_friend_message_queue},
+    .maximum_friend_subscription_list = ${module.middleware.rm_ble_mesh.maximum_friend_subscription_list},
+    .maximum_access_element_num       = ${module.middleware.rm_ble_mesh.maximum_access_element_num},
+    .maximum_access_model_num         = ${module.middleware.rm_ble_mesh.maximum_access_model_num},
+    .maximum_application              = ${module.middleware.rm_ble_mesh.maximum_application},
+    .maximum_virtual_address          = ${module.middleware.rm_ble_mesh.maximum_virtual_address},
+    .maximum_non_virtual_address      = ${module.middleware.rm_ble_mesh.maximum_non_virtual_address},
+    .net_sequence_number_block_size   = ${module.middleware.rm_ble_mesh.net_sequence_number_block_size},
+    .net_tx_count                     = ${module.middleware.rm_ble_mesh.net_tx_count},
+    .net_tx_interval_steps            = ${module.middleware.rm_ble_mesh.net_tx_interval_steps},
+    .net_relay_tx_count               = ${module.middleware.rm_ble_mesh.net_relay_tx_count},
+    .net_relay_tx_interval_steps      = ${module.middleware.rm_ble_mesh.net_relay_tx_interval_steps},
+    .config_server_snb_timeout        = ${module.middleware.rm_ble_mesh.config_server_snb_timeout},
+    .proxy_subnet_netid_adv_timeout   = ${module.middleware.rm_ble_mesh.proxy_subnet_netid_adv_timeout},
+    .proxy_subnet_nodeid_adv_timeout  = ${module.middleware.rm_ble_mesh.proxy_subnet_nodeid_adv_timeout},
+    .proxy_nodeid_adv_timeout         = ${module.middleware.rm_ble_mesh.proxy_nodeid_adv_timeout},
+    .frnd_poll_retry_count            = ${module.middleware.rm_ble_mesh.frnd_poll_retry_count},
+    .ltrn_rtx_timeout                 = ${module.middleware.rm_ble_mesh.ltrn_rtx_timeout},
+    .ltrn_rtx_count                   = ${module.middleware.rm_ble_mesh.ltrn_rtx_count},
+    .ltrn_ack_timeout                 = ${module.middleware.rm_ble_mesh.ltrn_ack_timeout},
+    .ltrn_incomplete_timeout          = ${module.middleware.rm_ble_mesh.ltrn_incomplete_timeout},
+    .frnd_receive_window              = ${module.middleware.rm_ble_mesh.frnd_receive_window},
+    .lpn_clear_retry_timeout_initial  = ${module.middleware.rm_ble_mesh.lpn_clear_retry_timeout_initial},
+    .lpn_clear_retry_count            = ${module.middleware.rm_ble_mesh.lpn_clear_retry_count},
+    .trn_frndreq_retry_timeout        = ${module.middleware.rm_ble_mesh.trn_frndreq_retry_timeout},
+    .unprov_device_beacon_timeout     = ${module.middleware.rm_ble_mesh.unprov_device_beacon_timeout},
+    .net_tx_queue_size                = ${module.middleware.rm_ble_mesh.net_tx_queue_size},
+    .max_num_transition_timers        = ${module.middleware.rm_ble_mesh.max_num_transition_timers},
+    .max_num_periodic_step_timers     = ${module.middleware.rm_ble_mesh.max_num_periodic_step_timers},
+    .maximum_health_server_num        = ${module.middleware.rm_ble_mesh.maximum_health_server_num},
+    .maximum_light_lc_server_num      = ${module.middleware.rm_ble_mesh.maximum_light_lc_server_num},
+    .replay_cache_size                = ${module.middleware.rm_ble_mesh.replay_cache_size},
+    .default_company_id               = ${module.middleware.rm_ble_mesh.default_company_id},
+    .default_product_id               = ${module.middleware.rm_ble_mesh.default_product_id},
+    .default_vendor_id                = ${module.middleware.rm_ble_mesh.default_vendor_id},
+    .p_context                        = ${module.middleware.rm_ble_mesh.p_context},
+    .p_extend                         = &amp;${module.middleware.rm_ble_mesh.name}_extend
+};
+
+/** This structure encompasses everything that is needed to use an instance of this interface. */
+const rm_ble_mesh_instance_t ${module.middleware.rm_ble_mesh.name} =
+{
+    .p_ctrl = &amp;${module.middleware.rm_ble_mesh.name}_ctrl,
+    .p_cfg  = &amp;${module.middleware.rm_ble_mesh.name}_cfg,
+    .p_api  = &amp;g_rm_ble_mesh_on_rm_ble_mesh
+};
+
+
+        </declarations>
+        <functions>
+        </functions>
+    </module>
+
+    <!-- Developer Assistance -->
+    <developerSupport>
+        <template category="none" display="Main Routine" id="module.middleware.rm_ble_mesh.main_routine" version="1">
+            <platform id="fsp" max="" min="3.6.0"/>
+            <moduleRef id="module.middleware.rm_ble_mesh_on_rm_ble_mesh"/>
+            <content><![CDATA[
+#if ((BSP_CFG_RTOS == 2) && (BLE_CFG_SYNCHRONIZATION_TYPE != 0))
+#error "Set 'Semaphore' to 'Synchronization Type' of BLE driver when using BLE driver on FreeRTOS environment."
+#endif /* ((BSP_CFG_RTOS == 2) && (BLE_CFG_SYNCHRONIZATION_TYPE != 0)) */
+
+/* Prototype declaration */
+void ${rm_ble_mesh_name:raProperty(module.middleware.rm_ble_mesh.name)}_main_routine(void);
+
+#if (BSP_CFG_RTOS == 2)
+#ifndef RM_BLE_MESH_CFG_RTOS_TASK_STACK_DEPTH
+#define RM_BLE_MESH_CFG_RTOS_TASK_STACK_DEPTH	(1280)
+#endif /* RM_BLE_MESH_CFG_RTOS_TASK_STACK_DEPTH */
+
+#ifndef RM_BLE_MESH_CFG_RTOS_TASK_PRIORITY
+#define RM_BLE_MESH_CFG_RTOS_TASK_PRIORITY		(4)
+#endif /* RM_BLE_MESH_CFG_RTOS_TASK_PRIORITY */
+
+/* Prototype declaration */
+void ${rm_ble_mesh_name}_execute_task(void *pvParameters);
+
+SemaphoreHandle_t   g_ble_event_group_handle;
+TaskHandle_t        ${rm_ble_mesh_name}_execute_task_handle;
+TaskHandle_t        ${rm_ble_mesh_name}_ble_core_task_handle;
+#endif /* (BSP_CFG_RTOS == 2) */
+
+/*
+ * This function opens ${rm_ble_mesh_name}, ${rm_ble_mesh_bearer_name:raProperty(module.middleware.rm_ble_mesh_bearer.name)} and
+ * ${rm_ble_mesh_bearer_platform_name:raProperty(module.middleware.rm_mesh_bearer_platform.name)} after opening the BLE driver.
+ */
+void ${rm_ble_mesh_name}_main_routine(void)
+{
+    /* Initialize Bluetooth LE protocol stack */
+    R_BLE_Open();
+
+#if (BSP_CFG_RTOS == 2)
+    /* Create semaphore */
+    g_ble_event_group_handle = xSemaphoreCreateBinary();
+
+    /* Get current task handle */
+    ${rm_ble_mesh_name}_ble_core_task_handle = xTaskGetCurrentTaskHandle();
+
+    /* Create execute task */
+    xTaskCreate(${rm_ble_mesh_name}_execute_task, "execute_task", RM_BLE_MESH_CFG_RTOS_TASK_STACK_DEPTH, &${rm_ble_mesh_name}_ble_core_task_handle, RM_BLE_MESH_CFG_RTOS_TASK_PRIORITY, &${rm_ble_mesh_name}_execute_task_handle);
+#endif /* (BSP_CFG_RTOS == 2) */
+
+    /* Hint: Input process that should be done before main loop such as calling initial function or variable definitions */
+
+    /* Initialize underlying Bluetooth LE protocol stack to use as a MESH BEARER */
+    RM_MESH_BEARER_PLATFORM_Open(&${rm_ble_mesh_bearer_platform_name}_ctrl, &${rm_ble_mesh_bearer_platform_name}_cfg);
+
+    /* main loop */
+    while (1)
+    {
+
+/* When this BLE application works on the FreeRTOS */
+#if (BSP_CFG_RTOS == 2)
+        if(0 != R_BLE_IsTaskFree())
+        {
+            vTaskSuspend(NULL);
+        }
+        else
+        {
+            xSemaphoreGive(g_ble_event_group_handle);
+        }
+#else /* (BSP_CFG_RTOS == 2) */
+        /* Process BLE Event */
+        R_BLE_Execute();
+#endif /* (BSP_CFG_RTOS == 2) */
+
+    }
+}
+
+#if (BSP_CFG_RTOS == 2)
+/* Register the BLE task with FreeRTOS. */
+void ${rm_ble_mesh_name}_execute_task(void *pvParameters)
+{
+    FSP_PARAMETER_NOT_USED(pvParameters);
+    while(1)
+    {
+        xSemaphoreTake(g_ble_event_group_handle, portMAX_DELAY);
+
+        while(0 == R_BLE_IsTaskFree())
+            R_BLE_Execute();
+
+        vTaskResume(${rm_ble_mesh_name}_ble_core_task_handle);
+    }
+}
+#endif /* (BSP_CFG_RTOS == 2) */
+]]>            </content>
+        </template>
+    </developerSupport>
+</raModuleDescription>

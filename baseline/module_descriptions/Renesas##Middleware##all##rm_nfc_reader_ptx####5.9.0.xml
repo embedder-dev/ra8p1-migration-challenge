@@ -1,0 +1,181 @@
+<?xml version="1.0" ?>
+
+<raModuleDescription>
+    <config id="config.driver.nfc_reader_ptx" path="fsp_cfg/rm_nfc_reader_ptx_cfg.h" version="0">
+        <property default="config.driver.nfc_reader_ptx.param_checking_enable.bsp" display="Parameter Checking" id="config.driver.nfc_reader_ptx.param_checking_enable" description="If selected code for parameter checking is included in the build.">
+            <option display="Default (BSP)" id="config.driver.nfc_reader_ptx.param_checking_enable.bsp" value="(BSP_CFG_PARAM_CHECKING_ENABLE)"/>
+            <option display="Enabled" id="config.driver.nfc_reader_ptx.param_checking_enable.enabled" value="(1)"/>
+            <option display="Disabled" id="config.driver.nfc_reader_ptx.param_checking_enable.disabled" value="(0)"/>
+        </property>
+        <content>
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#define NFC_READER_PTX_CFG_PARAM_CHECKING_ENABLED          (${config.driver.nfc_reader_ptx.param_checking_enable})
+
+#ifdef __cplusplus
+}
+#endif
+        </content>
+    </config>
+    <!-- NFC Reader PTX Device -->
+    <module config="config.driver.nfc_reader_ptx" id="module.driver.nfc_reader_ptx" display="Networking|${module.driver.nfc_reader_ptx_device.name} NFC IoT Reader on PTX (rm_nfc_reader_ptx)" version="1" visible="true" url="group___n_f_c___r_e_a_d_e_r___p_t_x.html">
+        <constraint display="Unique name required for each instance">
+            "${interface.driver.nfc_reader_ptx.${module.driver.nfc_reader_ptx_device.name}}" === "1"
+        </constraint>
+        <constraint display="A heap is required to use NFC Reader PTX. Please add a heap under BSP|RA Common|Heap Size.">
+            ("${config.bsp.common.heap}" &gt; 0)
+        </constraint>
+        <constraint display="Ambient temperature sensor value must be less than or equal to shutdown temperature">
+            (${module.driver.nfc_reader_ptx.temp_sensor_ambient} &lt;= ${module.driver.nfc_reader_ptx.temp_sensor_shutdown})
+        </constraint>
+        <constraint display="Requires lower level timer implementation">
+            testExists("${interface.driver.timer}")
+        </constraint>
+        <constraint display="At least one type of polling must be enabled for NFC.">
+            (("${module.driver.nfc_reader_ptx.poll_type_a}" === "module.driver.nfc_reader_ptx.poll_type_a.enabled") || (${module.driver.nfc_reader_ptx.poll_type_b} === "module.driver.nfc_reader_ptx.poll_type_b.enabled") || (${module.driver.nfc_reader_ptx.poll_type_v} === "module.driver.nfc_reader_ptx.poll_type_v.enabled") || (${module.driver.nfc_reader_ptx.poll_type_f} === "module.driver.nfc_reader_ptx.poll_type_f.enabled"))
+        </constraint>
+
+        <!-- HAL components required by NFC -->
+        <requires id="module.driver.nfc_reader_ptx.requires.comms" interface="interface.driver.comms_on_rm_nfc_reader_ptx" display="Requires Communications Interface" find="true">
+        <override property="module.driver.comms_spi_device.p_callback" value="ptxPLAT_SPI_TransferCallback"/>
+        </requires>
+        <requires id="module.driver.nfc_reader_ptx.requires.sleep_timer" interface="interface.driver.timer" display="Requires Timer (PTX Sleep)" find="true">
+        <override property="module.driver.timer.p_callback" value="ptxPLAT_TIMER_IsrCallback"/>
+        </requires>
+        <requires id="module.driver.nfc_reader_ptx.requires.tdc_timer" interface="interface.driver.timer" display="Requires Timer (PTX Transparent Data Channel)" find="true">
+        <override property="module.driver.transfer.p_callback" value="ptxPERIPH_APPTIMER_IsrCallback"/>
+        </requires>
+        <requires id="module.driver.nfc_reader_ptx.requires.irq" interface="interface.driver.external_irq" display="Requires External Interrupt" find="true">
+        <override property="module.driver.external_irq.p_callback" value="ptxPLAT_GPIO_IsrCallback"/>
+        </requires>
+        <requires id="module.driver.nfc_reader_ptx.requires.nfc_sdk" interface="interface.driver.rm_nfc_reader_ptx_sdk" display="Requires NFC SDK" find="true">
+        </requires>
+
+        <provides interface="interface.driver.nfc_reader_ptx.${module.driver.nfc_reader_ptx_device.name}"/>
+        <provides interface="interface.driver.nfc"/>
+        <property default="g_nfc_reader_ptx${_instance}" display="Name" id="module.driver.nfc_reader_ptx_device.name" description="Module name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.nfc_reader_ptx_device.name}")</constraint>
+        </property>
+
+        <!-- NFC block properties -->
+        <property default="module.driver.nfc_reader_ptx.poll_type_a.enabled" display="NFC Poll Type|Type-A" id="module.driver.nfc_reader_ptx.poll_type_a" description="Select to discover NFC Type-A tags">
+            <option id="module.driver.nfc_reader_ptx.poll_type_a.disabled" display="Disabled" value="0"/>
+            <option id="module.driver.nfc_reader_ptx.poll_type_a.enabled" display="Enabled" value="1"/>
+        </property>
+        <property default="module.driver.nfc_reader_ptx.poll_type_b.enabled" display="NFC Poll Type|Type-B" id="module.driver.nfc_reader_ptx.poll_type_b" description="Select to discover NFC Type-B tags">
+            <option id="module.driver.nfc_reader_ptx.poll_type_b.disabled" display="Disabled" value="0"/>
+            <option id="module.driver.nfc_reader_ptx.poll_type_b.enabled" display="Enabled" value="1"/>
+        </property>
+        <property default="module.driver.nfc_reader_ptx.poll_type_v.enabled" display="NFC Poll Type|Type-V" id="module.driver.nfc_reader_ptx.poll_type_v" description="Select to discover NFC Type-V tags">
+            <option id="module.driver.nfc_reader_ptx.poll_type_v.disabled" display="Disabled" value="0"/>
+            <option id="module.driver.nfc_reader_ptx.poll_type_v.enabled" display="Enabled" value="1"/>
+        </property>
+        <property default="module.driver.nfc_reader_ptx.poll_type_f.enabled" display="NFC Poll Type|Type-F" id="module.driver.nfc_reader_ptx.poll_type_f" description="Select to discover NFC Type-F tags">
+            <option id="module.driver.nfc_reader_ptx.poll_type_f.disabled" display="Disabled" value="0"/>
+            <option id="module.driver.nfc_reader_ptx.poll_type_f.enabled" display="Enabled" value="1"/>
+        </property>
+        <property default="module.driver.nfc_reader_ptx.temp_sensor_calibrate.enabled" display="Temperature Sensor|Calibrate Sensor" id="module.driver.nfc_reader_ptx.temp_sensor_calibrate" description="Enable/Disable on-board temperature sensor calibration. Must be executed once per chip (lifetime), it is not needed after.">
+            <option id="module.driver.nfc_reader_ptx.temp_sensor_calibrate.disabled" display="Disabled" value="0"/>
+            <option id="module.driver.nfc_reader_ptx.temp_sensor_calibrate.enabled" display="Enabled" value="1"/>
+        </property>
+        <property default="100" display="Temperature Sensor|Shutdown Temperature (°C)" id="module.driver.nfc_reader_ptx.temp_sensor_shutdown" description="Set the expected thermal shutdown threshold value (Celsius).">
+            <constraint display="Must be an integer greater than 0 and less than 223">
+            testInteger("${module.driver.nfc_reader_ptx.temp_sensor_shutdown}")  &amp;&amp; ("${module.driver.nfc_reader_ptx.temp_sensor_shutdown}" &gt; 0) &amp;&amp; ("${module.driver.nfc_reader_ptx.temp_sensor_shutdown}" &lt; 223)
+            </constraint>
+        </property>
+        <property default="25" display="Temperature Sensor|Ambient Temperature (°C)" id="module.driver.nfc_reader_ptx.temp_sensor_ambient" description="Set the ambient temperature value at which calibration takes place (Celsius).">
+            <constraint display="Must be an integer greater than 0 and less than 85">
+            testInteger("${module.driver.nfc_reader_ptx.temp_sensor_ambient}")  &amp;&amp; ("${module.driver.nfc_reader_ptx.temp_sensor_ambient}" &gt; 0) &amp;&amp; ("${module.driver.nfc_reader_ptx.temp_sensor_ambient}" &lt; 85)
+            </constraint>
+        </property>
+        <property default="module.driver.nfc_reader_ptx.pin_control_port.PORT_DISABLE" display="NFC Interrupt Port" id="module.driver.nfc_reader_ptx.pin_control_port" description="Specify the interrupt port/pin used by the NFC chip to signal for SPI communications.">
+            <option id="module.driver.nfc_reader_ptx.pin_control_port.PORT_DISABLE" display="Disabled" value="FF" />
+            <option id="module.driver.nfc_reader_ptx.pin_control_port.PORT_00" display="00" value="00" />
+            <option id="module.driver.nfc_reader_ptx.pin_control_port.PORT_01" display="01" value="01" />
+            <option id="module.driver.nfc_reader_ptx.pin_control_port.PORT_02" display="02" value="02" />
+            <option id="module.driver.nfc_reader_ptx.pin_control_port.PORT_03" display="03" value="03" />
+            <option id="module.driver.nfc_reader_ptx.pin_control_port.PORT_04" display="04" value="04" />
+            <option id="module.driver.nfc_reader_ptx.pin_control_port.PORT_05" display="05" value="05" />
+            <option id="module.driver.nfc_reader_ptx.pin_control_port.PORT_06" display="06" value="06" />
+            <option id="module.driver.nfc_reader_ptx.pin_control_port.PORT_07" display="07" value="07" />
+            <option id="module.driver.nfc_reader_ptx.pin_control_port.PORT_08" display="08" value="08" />
+            <option id="module.driver.nfc_reader_ptx.pin_control_port.PORT_09" display="09" value="09" />
+            <option id="module.driver.nfc_reader_ptx.pin_control_port.PORT_10" display="10" value="10" />
+            <option id="module.driver.nfc_reader_ptx.pin_control_port.PORT_11" display="11" value="11" />
+        </property>
+        <property default="module.driver.nfc_reader_ptx.pin_control_pin.PIN_DISABLE" display="NFC Interrupt Pin" id="module.driver.nfc_reader_ptx.pin_control_pin" description="Specify the interrupt port/pin used by the NFC chip to signal for SPI communications.">
+            <option id="module.driver.nfc_reader_ptx.pin_control_port.PIN_DISABLE" display="Disabled" value="FF" />
+            <option id="module.driver.nfc_reader_ptx.pin_control_pin.PIN_00" display="00" value="00" />
+            <option id="module.driver.nfc_reader_ptx.pin_control_pin.PIN_01" display="01" value="01" />
+            <option id="module.driver.nfc_reader_ptx.pin_control_pin.PIN_02" display="02" value="02" />
+            <option id="module.driver.nfc_reader_ptx.pin_control_pin.PIN_03" display="03" value="03" />
+            <option id="module.driver.nfc_reader_ptx.pin_control_pin.PIN_04" display="04" value="04" />
+            <option id="module.driver.nfc_reader_ptx.pin_control_pin.PIN_05" display="05" value="05" />
+            <option id="module.driver.nfc_reader_ptx.pin_control_pin.PIN_06" display="06" value="06" />
+            <option id="module.driver.nfc_reader_ptx.pin_control_pin.PIN_07" display="07" value="07" />
+            <option id="module.driver.nfc_reader_ptx.pin_control_pin.PIN_08" display="08" value="08" />
+            <option id="module.driver.nfc_reader_ptx.pin_control_pin.PIN_09" display="09" value="09" />
+            <option id="module.driver.nfc_reader_ptx.pin_control_pin.PIN_10" display="10" value="10" />
+            <option id="module.driver.nfc_reader_ptx.pin_control_pin.PIN_11" display="11" value="11" />
+            <option id="module.driver.nfc_reader_ptx.pin_control_pin.PIN_12" display="12" value="12" />
+            <option id="module.driver.nfc_reader_ptx.pin_control_pin.PIN_13" display="13" value="13" />
+            <option id="module.driver.nfc_reader_ptx.pin_control_pin.PIN_14" display="14" value="14" />
+            <option id="module.driver.nfc_reader_ptx.pin_control_pin.PIN_15" display="15" value="15" />
+        </property>
+
+        <property default="5" display="Device Limit" id="module.driver.nfc_reader_ptx.device_limit" description="Select the max number of tags to discover.">
+            <constraint display="Must be an integer greater than 0 and less than 50">testInteger("${module.driver.nfc_reader_ptx.device_limit}")  &amp;&amp; ("${module.driver.nfc_reader_ptx.device_limit}" &gt; 0) &amp;&amp; ("${module.driver.nfc_reader_ptx.device_limit}" &lt; 50)</constraint>
+        </property>
+        <property default="100" display="Idle Time" id="module.driver.nfc_reader_ptx.idle_time" description="Select idle time between polling cycles (ms).">
+            <constraint display="Must be an integer greater than 0 and less than 65535">testInteger("${module.driver.nfc_reader_ptx.idle_time}")  &amp;&amp; ("${module.driver.nfc_reader_ptx.idle_time}" &gt; 0) &amp;&amp; ("${module.driver.nfc_reader_ptx.idle_time}" &lt; 65535)</constraint>
+        </property>
+        <header>
+/** NFC Reader PTX Device*/
+extern  nfc_reader_ptx_instance_ctrl_t  ${module.driver.nfc_reader_ptx_device.name}_ctrl;
+extern const nfc_reader_ptx_cfg_t       ${module.driver.nfc_reader_ptx_device.name}_cfg;
+
+        </header>
+        <includes>
+#include &quot;rm_nfc_reader_ptx.h&quot;
+        </includes>
+        <declarations>
+/** NFC Reader PTX configuration */
+ptxIoTRd_t ptx_nfc_context;
+
+/** NFC Reader PTX Interrupt Pin */
+#define NFC_READER_PTX_INTERRUPT_PIN    BSP_IO_PORT_${module.driver.nfc_reader_ptx.pin_control_port}_PIN_${module.driver.nfc_reader_ptx.pin_control_pin}
+
+/** NFC Reader PTX Device*/
+nfc_reader_ptx_instance_ctrl_t ${module.driver.nfc_reader_ptx_device.name}_ctrl;
+
+/** NFC Reader PTX configuration */
+const nfc_reader_ptx_cfg_t     ${module.driver.nfc_reader_ptx_device.name}_cfg =
+{
+    #define RA_NOT_DEFINED (1)
+
+    .poll_type_a              = (${module.driver.nfc_reader_ptx.poll_type_a}),
+    .poll_type_b              = (${module.driver.nfc_reader_ptx.poll_type_b}),
+    .poll_type_v              = (${module.driver.nfc_reader_ptx.poll_type_v}),
+    .poll_type_f              = (${module.driver.nfc_reader_ptx.poll_type_f}),
+    .temp_sensor_calibrate    = (${module.driver.nfc_reader_ptx.temp_sensor_calibrate}),
+    .temp_sensor_shutdown     = (${module.driver.nfc_reader_ptx.temp_sensor_shutdown}),
+    .temp_sensor_ambient      = (${module.driver.nfc_reader_ptx.temp_sensor_ambient}),
+    .device_limit           = (${module.driver.nfc_reader_ptx.device_limit}),
+    .interrupt_pin          = NFC_READER_PTX_INTERRUPT_PIN,
+    .idle_time_ms           = (${module.driver.nfc_reader_ptx.idle_time}),
+    .iot_reader_context     = &amp;ptx_nfc_context,
+    .p_comms_instance_ctrl    = (rm_comms_instance_t *)&amp;${module.driver.nfc_reader_ptx.requires.comms::module.driver.comms_spi_device.name},
+    .p_gpio_context         = (ioport_instance_t *)&amp;g_ioport,
+    .p_irq_context          = (external_irq_instance_t *)&amp;${module.driver.nfc_reader_ptx.requires.irq::module.driver.external_irq.name},
+    .p_timer_context        = (timer_instance_t *)&amp;${module.driver.nfc_reader_ptx.requires.sleep_timer::module.driver.timer.name},
+    .p_app_timer            = (timer_instance_t *)&amp;${module.driver.nfc_reader_ptx.requires.tdc_timer::module.driver.timer.name},
+};
+
+        </declarations>
+    </module>
+</raModuleDescription>
+
+
+

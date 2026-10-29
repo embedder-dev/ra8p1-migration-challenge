@@ -1,0 +1,427 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+IMPORTANT NOTE:
+Do not modify this file directly.
+
+This file is generated using: scripts/jinja/mdf_render.sh
+-->
+<raModuleDescription>
+    <config id="config.driver.sau_uart" path="fsp_cfg/r_sau_uart_cfg.h" version="0">
+        <property default="config.driver.sau_uart.param_checking_enable.bsp" display="Parameter Checking" id="config.driver.sau_uart.param_checking_enable" description="If selected code for parameter checking is included in the build.">
+            <option display="Default (BSP)" id="config.driver.sau_uart.param_checking_enable.bsp" value="(BSP_CFG_PARAM_CHECKING_ENABLE)"/>
+            <option display="Enabled" id="config.driver.sau_uart.param_checking_enable.enabled" value="(1)"/>
+            <option display="Disabled" id="config.driver.sau_uart.param_checking_enable.disabled" value="(0)"/>
+        </property>
+        <property default="config.driver.sau_uart.critical_section_enable.disabled" display="Critical Section Guarding" id="config.driver.sau_uart.critical_section_enable" description="Enable critical section guarding around peripheral configuration updates. This should be enabled if the R_SAU_I2C module is being used simultaneously with this module.">
+            <option display="Enabled" id="config.driver.sau_uart.critical_section_enable.enabled" value="(1)"/>
+            <option display="Disabled" id="config.driver.sau_uart.critical_section_enable.disabled" value="(0)"/>
+        </property>
+        <property default="config.driver.sau_uart.dtc_support.disabled" display="DTC Support" id="config.driver.sau_uart.dtc_support" description="Enable DTC support for the SAU_UART module.">
+            <option display="Enable" id="config.driver.sau_uart.dtc_support.enabled" value="(1)"/>
+            <option display="Disable" id="config.driver.sau_uart.dtc_support.disabled" value="(0)"/>
+        </property>
+        <property default="config.driver.sau_uart.single_channel.disabled" display="Enable Single Channel" id="config.driver.sau_uart.single_channel" description="Enable single channel to reduce code size if only channel 0, 1, or 2 is needed.">
+            <option display="Disable" id="config.driver.sau_uart.single_channel.disabled" value="(0)"/>
+            <option display="Channel 0" id="config.driver.sau_uart.single_channel.0" value="(1)"/>
+            <option display="Channel 1" id="config.driver.sau_uart.single_channel.1" value="(2)"/>
+            <option display="Channel 2" id="config.driver.sau_uart.single_channel.2" value="(3)"/>
+        </property>
+        <property default="config.driver.sau_uart.fixed_baudrate_enable.enabled" display="Enable Fixed Baudrate" id="config.driver.sau_uart.fixed_baudrate_enable" description="Disable baudrate calculation and setter functions to reduce code size.">
+            <option display="Enable" id="config.driver.sau_uart.fixed_baudrate_enable.enabled" value="(1)"/>
+            <option display="Disable" id="config.driver.sau_uart.fixed_baudrate_enable.disabled" value="(0)"/>
+        </property>
+        <content>
+            #ifdef __cplusplus
+            extern "C" {
+            #endif
+
+            #define SAU_UART_CFG_CRITICAL_SECTION_ENABLE ${config.driver.sau_uart.critical_section_enable}
+            #define SAU_UART_CFG_PARAM_CHECKING_ENABLE   ${config.driver.sau_uart.param_checking_enable}
+            #define SAU_UART_CFG_DTC_SUPPORT_ENABLE      ${config.driver.sau_uart.dtc_support}
+            #define SAU_UART_CFG_SINGLE_CHANNEL          ${config.driver.sau_uart.single_channel}
+            #define SAU_UART_CFG_FIXED_BAUDRATE_ENABLE   ${config.driver.sau_uart.fixed_baudrate_enable}
+
+            #ifdef __cplusplus
+            }
+            #endif
+        </content>
+    </config>
+    <module config="config.driver.sau_uart" display="Connectivity|${module.driver.uart.name} UART (r_sau_uart)" id="module.driver.uart_on_sau_uart" version="1" url="group___s_a_u___u_a_r_t.html">
+        <constraint display="Unique name required for each instance">
+            "${interface.driver.uart.${module.driver.uart.name}}" === "1"
+        </constraint>
+        <constraint display="DTC support must be enabled to use DTC">
+            ("${config.driver.sau_uart.dtc_support}" === "config.driver.sau_uart.dtc_support.enabled") ||
+            ((!testExists("${module.driver.sau_uart.requires.transfer_tx::module.driver.transfer.name}")) &amp;&amp;
+             (!testExists("${module.driver.sau_uart.requires.transfer_rx::module.driver.transfer.name}")))
+        </constraint>
+        <constraint display="9 bits length not available for this UART channel">
+            "${module.driver.uart.data_bits}" != "module.driver.uart.data_bits.data_bits_9" || ("${module.driver.uart.channel}" == "0" || "${module.driver.uart.channel}" == "2")
+        </constraint>
+        <constraint display="Channel not available on selected MCU">
+            "${interface.mcu.sau_uart.external.${module.driver.uart.channel}}" === "1"
+        </constraint>
+        <constraint display="Channel must match value configured for single channel mode.">
+            testOption("${config.driver.sau_uart.single_channel}", "config.driver.sau_uart.single_channel.disabled") ||
+            (testInteger("${module.driver.uart.channel}") &amp;&amp;
+                testOption("${config.driver.sau_uart.single_channel}", "config.driver.sau_uart.single_channel." + "${module.driver.uart.channel}"))
+        </constraint>
+        <constraint display="Specified 'Baud Rate' is not available on selected MCU.">
+            testInteger("${module.driver.uart.baud}") &amp;&amp; ("${module.driver.uart.baud}" &gt; 0) &amp;&amp; ("${module.driver.uart.baud}" &lt;= (Number("${config.bsp.fsp.mcu.sau_uart.max_baud}")))
+        </constraint>
+        <constraint id="module.driver.sau_uart.constraint.baudrate">
+            <![CDATA[eval('/* Converter for SAU unit to configured operation clock frequency */' +
+'var fclk_freq_by_unit_get = {' +
+'    "0": function (operation_clock) { return operation_clock === "0" ? ${board.clock.peripheral.sau.ck00} : ${board.clock.peripheral.sau.ck01}; },' +
+'    "1": function (operation_clock) { return operation_clock === "0" ? ${board.clock.peripheral.sau.ck10} : ${board.clock.peripheral.sau.ck11}; },' +
+'};' +
+'' +
+'/* Function to calculate SDR.STCLK register value. Note: This function does not check whether the value is in range. */' +
+'function stclk_calculate(f_mck, bitrate)' +
+'{' +
+'    return Math.round(f_mck / (2 * bitrate)) - 1;' +
+'}' +
+'' +
+'/* Function to calculate SAU unit value */' +
+'function sau_unit_calculate(channel) {' +
+'    return Math.floor(channel / 2);' +
+'}' +
+'' +
+'/* Function to calculate and validate bitrate */' +
+'function validate_stclk(f_mck, bitrate, stclk_limits)' +
+'{' +
+'    /* Calculate SDR.STCLK register value */' +
+'    var stclk = stclk_calculate(f_mck, bitrate);' +
+'' +
+'    return ((stclk <= stclk_limits.max) && (stclk >= stclk_limits.min));' +
+'}' +
+'function stclk_calculate_break_field(f_mck, bitrate)' +
+'{' +
+'    return Math.ceil(f_mck / (2 * bitrate)) - 1;' +
+'}' +
+'/* Function to calculate and validate bitrate */' +
+'function validate_stclk_break_field(f_mck, bitrate, stclk_limits)' +
+'{' +
+'    /* Calculate SDR.STCLK register value */' +
+'    var stclk = stclk_calculate_break_field(f_mck, bitrate);' +
+'' +
+'    return ((stclk <= stclk_limits.max) && (stclk >= stclk_limits.min));' +
+'}' +
+'/* Function to validate the operation clock divisor for typical and LIN break field bitrate */' +
+'function validate_divisor(divisor, bitrate, stclk_limits)' +
+'{' +
+'    var f_pclk = ${board.clock.peripheral.sau};' +
+'    var best_f_mck = f_pclk / (1 << divisor);' +
+'    var is_valid = validate_stclk(best_f_mck, bitrate, stclk_limits);' +
+'' +
+'    var lin_mode = "${module.driver.uart.sau_lin.mode}";' +
+'    if (lin_mode == "LIN_MODE_MASTER")' +
+'    {' +
+'        var bitrate_break_field = Math.floor(bitrate * 9 / 13);' +
+'        is_valid = is_valid && validate_stclk_break_field(best_f_mck, bitrate_break_field, stclk_limits);' +
+'    }' +
+'' +
+'    return is_valid;' +
+'}' +
+'' +
+'/* Function to validate typical and LIN break field bitrate, generating a constraint message if invalid */' +
+'function validate_bitrate(f_mck, bitrate, stclk_limits)' +
+'{' +
+'    constraint_message = null;' +
+'    var lin_mode = "${module.driver.uart.sau_lin.mode}";' +
+'    var bitrate_break_field = Math.floor(bitrate * 9 / 13);' +
+'' +
+'    if (false === validate_stclk(f_mck, bitrate, stclk_limits)) {' +
+'        constraint_message = "bitrate of " + bitrate.toString();' +
+'    }' +
+'    else if ((lin_mode == "LIN_MODE_MASTER") && (false === validate_stclk(f_mck, bitrate_break_field, stclk_limits))) {' +
+'        constraint_message = "LIN break field bitrate (calculated as " + bitrate_break_field.toString() + " from base baud rate of " + bitrate.toString() +")";' +
+'    }' +
+'' +
+'    return constraint_message;' +
+'}' +
+'' +
+'function check_bitrate_valid(bitrate, sau_unit, operation_clock, stclk_limits) {' +
+'    /* Look up SAU operation clock frequency */' +
+'    var f_mck = fclk_freq_by_unit_get[sau_unit](operation_clock);' +
+'' +
+'    /* Get operation source clock frequency (PCLKB/ICLK) */' +
+'    var f_pclk = ${board.clock.peripheral.sau};' +
+'' +
+'    /* Validate bitrate, if not valid will generate constraint message */' +
+'    var constraint_message = validate_bitrate(f_mck, bitrate, stclk_limits);' +
+'' +
+'    if (constraint_message != null)' +
+'    {' +
+'        var ck_str = "SAU CK" + sau_unit + operation_clock;' +
+'        constraint_message = "SAU UART " + constraint_message + " is not achievable with selected operation clock settings.\\n" +' +
+'            "Change the Operation clock in the SAU UART properties, or adjust operation clock frequency on the Clocks tab.";' +
+'' +
+'        /* Search for best valid divisor setting. Valid divisor is 0-0xF */' +
+'        for (var divisor = 0; divisor <= 15; divisor++)' +
+'        {' +
+'            /* Add recommendation to constraint message if valid combination found and exit loop, since the smallest valid divisor will have the lowest error. */' +
+'            if (validate_divisor(divisor, bitrate, stclk_limits)){' +
+'                var best_f_mck = f_pclk / (1 << divisor);' +
+'                constraint_message += "\\nRecommended frequency: " + best_f_mck.toString() + " Hz (" + ck_str + " Div /" + (1 << divisor).toString() + ")";' +
+'                break;' +
+'            }' +
+'        }' +
+'    }' +
+'' +
+'    return constraint_message;' +
+'}' +
+'' +
+'var bitrate = ${module.driver.uart.baud};' +
+'var sau_unit = sau_unit_calculate("${module.driver.uart.channel}");' +
+'var operation_clock = "${module.driver.uart.operation_clock}".slice(-1);' +
+'var stclk_limits = { min : 2, max : 127 };' +
+'' +
+'check_bitrate_valid(bitrate, sau_unit, operation_clock, stclk_limits)')]]>
+        </constraint>
+        <requires id="module.driver.uart_on_sau_uart.requires.sau" interface="interface.mcu.sau_uart.external" visible="false" display="Requires SAU Peripheral" />
+        <requires id="module.driver.sau_uart.requires.transfer_tx" interface="interface.driver.transfer_on_dtc" display="Add DTC Driver for Transmission [Optional]" find="false" optional="true" >
+            <override property="module.driver.transfer.size" value="module.driver.transfer.size.size_1_byte"/>
+            <override property="module.driver.transfer.mode" value="module.driver.transfer.mode.mode_normal"/>
+            <override property="module.driver.transfer.dest_addr_mode" value="module.driver.transfer.dest_addr_mode.addr_mode_fixed"/>
+            <override property="module.driver.transfer.src_addr_mode" value="module.driver.transfer.src_addr_mode.addr_mode_incremented"/>
+            <override property="module.driver.transfer.repeat_area" value="module.driver.transfer.repeat_area.repeat_area_source"/>
+            <override property="module.driver.transfer.p_dest" value="NULL"/>
+            <override property="module.driver.transfer.p_src" value="NULL"/>
+            <override property="module.driver.transfer.length" value="0"/>
+            <override property="module.driver.transfer.interrupt" value="module.driver.transfer.interrupt.interrupt_end"/>
+            <override property="module.driver.transfer.num_blocks" value="0"/>
+            <override property="module.driver.transfer.auto_enable" value="module.driver.transfer.auto_enable.false"/>
+            <override property="module.driver.transfer.p_callback" value="NULL"/>
+            <override property="module.driver.transfer.activation_source" value="_interrupt.event.sau${module.driver.sau.unit.number}.uart.txi${module.driver.uart.channel}"/>
+        </requires>
+        <requires id="module.driver.sau_uart.requires.transfer_rx" interface="interface.driver.transfer_on_dtc" display="Add DTC Driver for Reception [Optional]" find="false" optional="true" >
+            <override property="module.driver.transfer.size" value="module.driver.transfer.size.size_1_byte"/>
+            <override property="module.driver.transfer.mode" value="module.driver.transfer.mode.mode_normal"/>
+            <override property="module.driver.transfer.dest_addr_mode" value="module.driver.transfer.dest_addr_mode.addr_mode_incremented"/>
+            <override property="module.driver.transfer.src_addr_mode" value="module.driver.transfer.src_addr_mode.addr_mode_fixed"/>
+            <override property="module.driver.transfer.repeat_area" value="module.driver.transfer.repeat_area.repeat_area_destination"/>
+            <override property="module.driver.transfer.p_dest" value="NULL"/>
+            <override property="module.driver.transfer.p_src" value="NULL"/>
+            <override property="module.driver.transfer.length" value="0"/>
+            <override property="module.driver.transfer.interrupt" value="module.driver.transfer.interrupt.interrupt_end"/>
+            <override property="module.driver.transfer.num_blocks" value="0"/>
+            <override property="module.driver.transfer.auto_enable" value="module.driver.transfer.auto_enable.false"/>
+            <override property="module.driver.transfer.p_callback" value="NULL"/>
+            <override property="module.driver.transfer.activation_source" value="_interrupt.event.sau${module.driver.sau.unit.number}.uart.rxi${module.driver.uart.channel}"/>
+        </requires>
+        <provides interface="interface.peripheral.sau${module.driver.uart.channel}" />
+        <provides interface="interface.driver.uart" />
+        <provides interface="interface.driver.uart_on_sau_uart" />
+        <provides interface="interface.driver.uart.${module.driver.uart.name}" />
+        <provides interface="interface.snooze_mode.${module.driver.uart.channel}" />
+
+        <!-- UART interface configuration -->
+        <!-- ${module.driver.sau_uart.requires.channel0::module.driver.uart.transmit.baud} -->
+        <property default="g_uart${_instance}" display="General|Name" id="module.driver.uart.name" description="Module name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.uart.name}")</constraint>
+        </property>
+        <property default="0" display="General|Channel" id="module.driver.uart.channel" description="Select the UART channel.">
+            <constraint display="Value must be a non-negative integer">testInteger("${module.driver.uart.channel}") &amp;&amp; ("${module.driver.uart.channel}" &gt;= 0)</constraint>
+            <signal event="event.sau${module.driver.sau.unit.number}.uart.txi${module.driver.uart.channel}"/>
+            <signal event="event.sau${module.driver.sau.unit.number}.uart.rxi${module.driver.uart.channel}"/>
+            <signal event="event.sau${module.driver.sau.unit.number}.uart.erri${module.driver.uart.channel}"/>
+        </property>
+        <property default="0" id="module.driver.sau.unit.number" description="">
+            <export>Math.floor("${module.driver.uart.channel}" / 2)</export>
+        </property>
+        <property default="module.driver.uart.data_bits.data_bits_8" display="General|Data Bits" id="module.driver.uart.data_bits" description="Select the number of bits per word.">
+            <option display="7 bits" id="module.driver.uart.data_bits.data_bits_7" value="UART_DATA_BITS_7"/>
+            <option display="8 bits" id="module.driver.uart.data_bits.data_bits_8" value="UART_DATA_BITS_8"/>
+            <option display="9 bits" id="module.driver.uart.data_bits.data_bits_9" value="UART_DATA_BITS_9"/>
+        </property>
+        <property default="module.driver.uart.parity.parity_off" display="General|Parity" id="module.driver.uart.parity" description="Select the parity mode.">
+            <option display="None" id="module.driver.uart.parity.parity_off" value="UART_PARITY_OFF"/>
+            <option display="Zero" id="module.driver.uart.parity.parity_zero" value="UART_PARITY_ZERO"/>
+            <option display="Odd" id="module.driver.uart.parity.parity_odd" value="UART_PARITY_ODD"/>
+            <option display="Even" id="module.driver.uart.parity.parity_even" value="UART_PARITY_EVEN"/>
+        </property>
+        <property default="module.driver.uart.stop_bits.stop_bits_1" display="General|Stop Bits" id="module.driver.uart.stop_bits" description="Select the number of stop bits. In receive, 2 bit is not available.">
+            <option display="1 bit" id="module.driver.uart.stop_bits.stop_bits_1" value="UART_STOP_BITS_1"/>
+            <option display="2 bits" id="module.driver.uart.stop_bits.stop_bits_2" value="UART_STOP_BITS_2"/>
+        </property>
+        <property default="module.driver.uart.data_direct.data_direct_lsb" display="General|Bit Order" id="module.driver.uart.data_direct" description="Select of data transfer sequence.">
+            <option display="LSB First" id="module.driver.uart.data_direct.data_direct_lsb" value="SAU_UART_DATA_SEQUENCE_LSB"/>
+            <option display="MSB First" id="module.driver.uart.data_direct.data_direct_msb" value="SAU_UART_DATA_SEQUENCE_MSB"/>
+        </property>
+        <property default="115200" display="Baud|Baud Rate" id="module.driver.uart.baud" description="Enter the desired baud rate.\n\nIf the requested baud rate cannot be achieved, adjust the operation clock frequency until the baud rate is achievable. The calculated baud rate is printed in a comment in the generated sau_uart_baudrate_setting_t structure.">
+            <constraint display="Value must be an integer greater than 0">
+            testInteger("${module.driver.uart.baud}")  &amp;&amp; ("${module.driver.uart.baud}" &gt; 0)
+            </constraint>
+            <export><![CDATA[eval('/* Converter for SAU unit to configured operation clock frequency */' +
+'var fclk_freq_by_unit_get = {' +
+'    "0": function (operation_clock) { return operation_clock === "0" ? ${board.clock.peripheral.sau.ck00} : ${board.clock.peripheral.sau.ck01}; },' +
+'    "1": function (operation_clock) { return operation_clock === "0" ? ${board.clock.peripheral.sau.ck10} : ${board.clock.peripheral.sau.ck11}; },' +
+'};' +
+'' +
+'/* Function to calculate SDR.STCLK register value. Note: This function does not check whether the value is in range. */' +
+'function stclk_calculate(f_mck, bitrate)' +
+'{' +
+'    return Math.round(f_mck / (2 * bitrate)) - 1;' +
+'}' +
+'' +
+'/* Function to calculate SAU unit value */' +
+'function sau_unit_calculate(channel) {' +
+'    return Math.floor(channel / 2);' +
+'}' +
+'function bitrate_calculate(bitrate, sau_unit, operation_clock, stclk_limits) {' +
+'    /* Look up SAU operation clock frequency */' +
+'    var f_mck = fclk_freq_by_unit_get[sau_unit](operation_clock);' +
+'' +
+'    /* Calculate SDR.STCLK register value */' +
+'    var stclk = stclk_calculate(f_mck, bitrate);' +
+'' +
+'    /* Cap the setting within the valid register range */' +
+'    stclk = Math.min(stclk, stclk_limits.max);' +
+'    stclk = Math.max(stclk, stclk_limits.min);' +
+'' +
+'   /* Calculate actual bitrate with this SDR.STCLK value for printing in the comment */' +
+'    var actual_bitrate = f_mck / (2 * (stclk + 1));' +
+'' +
+'    return "/* Actual calculated bitrate: " + actual_bitrate.toFixed(0) + " */\\n" +' +
+'        ".stclk = " + stclk.toString();' +
+'}' +
+'' +
+'var bitrate = ${module.driver.uart.baud};' +
+'var sau_unit = sau_unit_calculate("${module.driver.uart.channel}");' +
+'var operation_clock = "${module.driver.uart.operation_clock}".slice(-1);' +
+'var stclk_limits = { min : 2, max : 127 };' +
+'' +
+'var f_iclk = ${board.clock.peripheral.sau};' +
+'var f_mck = fclk_freq_by_unit_get[sau_unit](operation_clock);' +
+'var prs = Math.floor(Math.log(f_iclk/f_mck)/Math.log(2));' +
+'' +
+'var c_bitrate = bitrate_calculate(bitrate, sau_unit, operation_clock, stclk_limits);' +
+'c_bitrate += ",\\n.prs = " + prs.toString();' +
+'' +
+'c_bitrate')]]></export>
+        </property>
+        <property default="module.driver.uart.operation_clock.ckm0" display="Extra|Operation Clock" id="module.driver.uart.operation_clock" description="Select the operation clock. Use the Clocks tab to set the operation clock divider.">
+            <option display="CKm0" id="module.driver.uart.operation_clock.ckm0" value="SAU_UART_OPERATION_CLOCK_CK0"/>
+            <option display="CKm1" id="module.driver.uart.operation_clock.ckm1" value="SAU_UART_OPERATION_CLOCK_CK1"/>
+        </property>
+        <property default="module.driver.uart.signallevel.standard" display="Extra|Tx Signal Level" id="module.driver.uart.signallevel" description="Select the level of transmitted signal.">
+            <option display="Standard" id="module.driver.uart.signallevel.standard" value="SAU_UART_SIGNAL_LEVEL_STANDARD"/>
+            <option display="Inverted" id="module.driver.uart.signallevel.inverted" value="SAU_UART_SIGNAL_LEVEL_INVERTED"/>
+        </property>
+        <property default="NULL" display="Interrupts|Callback" id="module.driver.uart.callback" description="A user callback function can be provided. If this callback function is provided, it will be called from the interrupt service routine (ISR).">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.uart.callback}")</constraint>
+        </property>
+        <property default="" display="Interrupts|Transmit End Interrupt Priority" id="module.driver.uart.transmitend.priority" description="Select the transmit end interrupt priority.">
+            <select enum="enum.mcu.nvic.priorities.mandatory"/>
+            <interrupt event="event.sau${module.driver.sau.unit.number}.uart.txi${module.driver.uart.channel}" isr="sau_uart_txi_isr"/>
+        </property>
+        <property default="" display="Interrupts|Receive End Interrupt Priority" id="module.driver.uartend.priority" description="Select the receive end interrupt priority.">
+            <select enum="enum.mcu.nvic.priorities.mandatory"/>
+            <interrupt event="event.sau${module.driver.sau.unit.number}.uart.rxi${module.driver.uart.channel}" isr="sau_uart_rxi_isr"/>
+        </property>
+        <property default="" display="Interrupts|Error Interrupt Priority" id="module.driver.uarterror.priority" description="Select the error interrupt priority.">
+            <select enum="enum.mcu.nvic.priorities.optional"/>
+            <interrupt event="event.sau${module.driver.sau.unit.number}.uart.erri${module.driver.uart.channel}" isr="sau_uart_eri_isr"/>
+        </property>
+        <property default="&amp;g_uart_on_sau" id="module.driver.uart.p_api" description="Hidden property that can be used to override p_api." />
+        <property default="" id="module.driver.uart.sau_lin.mode" description="Hidden property to determine which SAU LIN mode utilizes UART MDF." />
+        <peripheral name="sau_uart${module.driver.uart.channel}" component="sau_uart${module.driver.uart.channel}" pin="sau_uart${module.driver.uart.channel}.txd${module.driver.uart.channel}" />
+        <peripheral name="sau_uart${module.driver.uart.channel}" component="sau_uart${module.driver.uart.channel}" pin="sau_uart${module.driver.uart.channel}.rxd${module.driver.uart.channel}" />
+        <symbol id="symbol.driver.uart.name" value="${module.driver.uart.name}"/>
+        <symbol id="symbol.driver.uart.cfg" value="${module.driver.uart.name}_cfg"/>
+        <symbol id="symbol.driver.uart.cfg_extend" value="${module.driver.uart.name}_cfg_extend"/>
+        <symbol id="symbol.driver.uart.ctrl" value="${module.driver.uart.name}_ctrl"/>
+        <header>
+            /** UART on SAU Instance. */
+            extern const uart_instance_t      ${module.driver.uart.name};
+
+            /** Access the UART instance using these structures when calling API functions directly (::p_api is not used). */
+            extern sau_uart_instance_ctrl_t     ${module.driver.uart.name}_ctrl;
+            extern const uart_cfg_t ${module.driver.uart.name}_cfg;
+            extern const sau_uart_extended_cfg_t ${module.driver.uart.name}_cfg_extend;
+
+            #ifndef ${module.driver.uart.callback}
+            void ${module.driver.uart.callback}(uart_callback_args_t * p_args);
+            #endif
+        </header>
+        <includes>
+            #include &quot;r_sau_uart.h&quot;
+            #include &quot;r_uart_api.h&quot;
+        </includes>
+        <declarations>
+            sau_uart_instance_ctrl_t     ${module.driver.uart.name}_ctrl;
+
+            sau_uart_baudrate_setting_t  ${module.driver.uart.name}_baud_setting =
+            {
+                ${module.driver.uart.baud},
+               .operation_clock = ${module.driver.uart.operation_clock},
+            };
+
+            /** UART extended configuration for UARTonSAU HAL driver */
+            const sau_uart_extended_cfg_t ${module.driver.uart.name}_cfg_extend =
+            {
+                .sequence        = ${module.driver.uart.data_direct},
+                .signal_level    = ${module.driver.uart.signallevel},
+                .p_baudrate      = &amp;${module.driver.uart.name}_baud_setting,
+            };
+
+            /** UART interface configuration */
+            const uart_cfg_t ${module.driver.uart.name}_cfg =
+            {
+                .channel         = ${module.driver.uart.channel},
+                .data_bits       = ${module.driver.uart.data_bits},
+                .parity          = ${module.driver.uart.parity},
+                .stop_bits       = ${module.driver.uart.stop_bits},
+                .p_callback      = ${module.driver.uart.callback},
+                .rxi_ipl         = ${module.driver.uartend.priority},
+                .txi_ipl         = ${module.driver.uart.transmitend.priority},
+                .eri_ipl         = ${module.driver.uarterror.priority},
+#if defined(VECTOR_NUMBER_SAU${module.driver.sau.unit.number}_UART_RXI${module.driver.uart.channel})
+                .rxi_irq         = VECTOR_NUMBER_SAU${module.driver.sau.unit.number}_UART_RXI${module.driver.uart.channel},
+#else
+                .rxi_irq         = FSP_INVALID_VECTOR,
+#endif
+#if defined(VECTOR_NUMBER_SAU${module.driver.sau.unit.number}_UART_TXI${module.driver.uart.channel})
+                .txi_irq         = VECTOR_NUMBER_SAU${module.driver.sau.unit.number}_UART_TXI${module.driver.uart.channel},
+#else
+                .txi_irq         = FSP_INVALID_VECTOR,
+#endif
+#if defined(VECTOR_NUMBER_SAU${module.driver.sau.unit.number}_UART_ERRI${module.driver.uart.channel})
+                .eri_irq         = VECTOR_NUMBER_SAU${module.driver.sau.unit.number}_UART_ERRI${module.driver.uart.channel},
+#else
+                .eri_irq         = FSP_INVALID_VECTOR,
+#endif
+                .p_context       = NULL,
+                .p_extend        = &amp;${module.driver.uart.name}_cfg_extend,
+
+#define RA_NOT_DEFINED (1)
+#if (RA_NOT_DEFINED == ${module.driver.sau_uart.requires.transfer_tx::module.driver.transfer.name})
+                .p_transfer_tx   = NULL,
+#else
+                .p_transfer_tx   = &amp;${module.driver.sau_uart.requires.transfer_tx::module.driver.transfer.name},
+#endif
+#if (RA_NOT_DEFINED == ${module.driver.sau_uart.requires.transfer_rx::module.driver.transfer.name})
+                .p_transfer_rx   = NULL,
+#else
+                .p_transfer_rx   = &amp;${module.driver.sau_uart.requires.transfer_rx::module.driver.transfer.name},
+#endif
+#undef RA_NOT_DEFINED
+            };
+
+            /* Instance structure to use this module. */
+            const uart_instance_t ${module.driver.uart.name} =
+            {
+                .p_ctrl          = &amp;${module.driver.uart.name}_ctrl,
+                .p_cfg           = &amp;${module.driver.uart.name}_cfg,
+                .p_api           = ${module.driver.uart.p_api}
+            };
+
+        </declarations>
+        <api configurable="true">
+            <file>ra/fsp/inc/instances/r_sau_uart.h</file>
+            <file>ra/fsp/inc/api/r_uart_api.h</file>
+            <file>ra/fsp/inc/api/r_transfer_api.h</file>
+        </api>
+    </module>
+</raModuleDescription>

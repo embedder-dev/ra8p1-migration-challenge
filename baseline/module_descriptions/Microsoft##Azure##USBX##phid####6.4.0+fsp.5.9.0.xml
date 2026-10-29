@@ -1,0 +1,99 @@
+﻿<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.driver.usbx_phid" path="fsp_cfg/r_usb_phid_cfg.h" version="0">
+        <property id="config.driver.usbx_phid.int_in" display="Interrupt In Pipe" default="config.driver.usbx_phid.int_in.pipe6" description="Select the pipe number for input interrupt events.">
+            <option id="config.driver.usbx_phid.int_in.pipe6" display="USB PIPE6" value="USB_PIPE6"/>
+            <option id="config.driver.usbx_phid.int_in.pipe7" display="USB PIPE7" value="USB_PIPE7"/>
+            <option id="config.driver.usbx_phid.int_in.pipe8" display="USB PIPE8" value="USB_PIPE8"/>
+            <option id="config.driver.usbx_phid.int_in.pipe9" display="USB PIPE9" value="USB_PIPE9"/>
+            <option id="config.driver.usbx_phid.int_in.pipe_no_use" display="NO USE" value="USB_NULL"/>
+        </property>
+        <property id="config.driver.usbx_phid.int_out" display="Interrupt Out Pipe" default="config.driver.usbx_phid.int_out.pipe_no_use" description="Select the pipe number for output interrupt events.">
+            <option id="config.driver.usbx_phid.int_out.pipe6" display="USB PIPE6" value="USB_PIPE6"/>
+            <option id="config.driver.usbx_phid.int_out.pipe7" display="USB PIPE7" value="USB_PIPE7"/>
+            <option id="config.driver.usbx_phid.int_out.pipe8" display="USB PIPE8" value="USB_PIPE8"/>
+            <option id="config.driver.usbx_phid.int_out.pipe9" display="USB PIPE9" value="USB_PIPE9"/>
+            <option id="config.driver.usbx_phid.int_out.pipe_no_use" display="NO USE" value="USB_NULL"/>
+        </property>
+        <content>
+            #ifdef __cplusplus
+            extern "C" {
+            #endif
+
+            #define USB_CFG_PHID_INT_IN  (${config.driver.usbx_phid.int_in})
+            #define USB_CFG_PHID_INT_OUT (${config.driver.usbx_phid.int_out})
+
+            #ifdef __cplusplus
+            }
+            #endif
+        </content>
+    </config>
+    <module config="config.driver.usbx_phid" display="Connectivity|Azure RTOS USBX PHID" id="module.driver.usbx_phid" version="1" url="https://github.com/eclipse-threadx/rtos-docs/blob/main/rtos-docs/usbx/index.md">
+        <constraint display="Unique name required for each instance">
+            "${interface.driver.usbx_phid.${module.driver.usbx_phid.name}}" === "1"
+        </constraint>
+        <constraint display="Requires USB Peripheral">
+          "${interface.mcu.usb_fs.external}" === "1"
+        </constraint>
+        <constraint display="The USB pipe numbers for Interrupt In and Interrupt Out must be different.">
+            !(("${config.driver.usbx_phid.int_in}" === "config.driver.usbx_phid.int_in.pipe6") &amp;&amp;
+            ("${config.driver.usbx_phid.int_out}" === "config.driver.usbx_phid.int_out.pipe6"))
+        </constraint>
+        <constraint display="The USB pipe numbers for Interrupt In and Interrupt Out must be different.">
+            !(("${config.driver.usbx_phid.int_in}" === "config.driver.usbx_phid.int_in.pipe7") &amp;&amp;
+            ("${config.driver.usbx_phid.int_out}" === "config.driver.usbx_phid.int_out.pipe7"))
+        </constraint>
+        <constraint display="The USB pipe numbers for Interrupt In and Interrupt Out must be different.">
+            !(("${config.driver.usbx_phid.int_in}" === "config.driver.usbx_phid.int_in.pipe8") &amp;&amp;
+            ("${config.driver.usbx_phid.int_out}" === "config.driver.usbx_phid.int_out.pipe8"))
+        </constraint>
+        <constraint display="The USB pipe numbers for Interrupt In and Interrupt Out must be different.">
+            !(("${config.driver.usbx_phid.int_in}" === "config.driver.usbx_phid.int_in.pipe9") &amp;&amp;
+            ("${config.driver.usbx_phid.int_out}" === "config.driver.usbx_phid.int_out.pipe9"))
+        </constraint>
+        <constraint display="Specify either the Interrupt In or Interrupt Out USB pipe.">
+            !(("${config.driver.usbx_phid.int_in}" === "config.driver.usbx_phid.int_in.pipe_no_use") &amp;&amp;
+            ("${config.driver.usbx_phid.int_out}" === "config.driver.usbx_phid.int_out.pipe_no_use"))
+        </constraint>
+        <constraint display="Requires USB PIPE6 or PIPE7 for Interrupt IN transfer when using this MCU.">
+            !(("${interface.mcu.usb.pipes.0.4.5.6.7}" === "1") &amp;&amp;
+            ("${config.driver.usbx_phid.int_in}" === "config.driver.usbx_phid.int_in.pipe8"))
+        </constraint>
+        <constraint display="Requires USB PIPE6 or PIPE7 for Interrupt IN transfer when using this MCU.">
+            !(("${interface.mcu.usb.pipes.0.4.5.6.7}" === "1") &amp;&amp;
+            ("${config.driver.usbx_phid.int_in}" === "config.driver.usbx_phid.int_in.pipe9"))
+        </constraint>
+        <constraint display="Requires USB PIPE6 or PIPE7 for Interrupt OUT transfer when using this MCU.">
+            !(("${interface.mcu.usb.pipes.0.4.5.6.7}" === "1") &amp;&amp;
+            ("${config.driver.usbx_phid.int_out}" === "config.driver.usbx_phid.int_out.pipe8"))
+        </constraint>
+        <constraint display="Requires USB PIPE6 or PIPE7 for Interrupt OUT transfer when using this MCU.">
+            !(("${interface.mcu.usb.pipes.0.4.5.6.7}" === "1") &amp;&amp;
+            ("${config.driver.usbx_phid.int_out}" === "config.driver.usbx_phid.int_out.pipe9"))
+        </constraint>
+        <requires id="module.azure.usbx_phid.requires.threadx" interface="interface.rtos.tx" visible="false" display="Requires ThreadX"/>
+        <requires id="module.driver.usbx_phid.requires.usb_basic" interface="interface.middleware.rm_usbx_port_hid" visible="true" display="USBX PHID">
+            <override property="module.middleware.rm_usbx_port.usb_mode" value="module.middleware.rm_usbx_port.usb_mode.peri"/>
+            <override property="module.middleware.rm_usbx_port.usb_classtype" value="module.middleware.rm_usbx_port.usb_classtype.phid"/>
+            <override property="module.middleware.rm_usbx_port.p_usb_reg" value="NULL"/>
+        </requires>
+        <provides interface="interface.driver.usbx_phid" />
+        <provides interface="interface.driver.usbx_phid.${module.driver.usbx_phid.name}" />
+        <property default="usbx_phid" id="module.driver.usbx_phid.usbx_phid_interface" description=""/>
+        <property default="g_usbx_phid${_instance}" display="Name" id="module.driver.usbx_phid.name" description="Module name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.usbx_phid.name}")</constraint>
+        </property>
+        <header>
+        /** CDC Driver on USB Instance. */
+        </header>
+        <includes>
+#include "ux_device_class_hid.h"
+        </includes>
+        <declarations>
+        </declarations>
+        <functions>
+        </functions>
+        <api configurable="true">
+        </api>
+    </module>
+</raModuleDescription>

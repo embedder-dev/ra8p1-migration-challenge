@@ -1,0 +1,452 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<raModuleDescription>
+    <module config="config.azure.nxd" display="Networking|${module.azure.nxd_ftp_server.name} Azure RTOS NetX Duo FTP Server" id="module.azure.nxd_ftp_server" version="1" url="https://github.com/eclipse-threadx/rtos-docs/blob/main/rtos-docs/netx-duo/netx-duo-ftp/chapter1.md">
+        <constraint display="Module instances must have unique names">
+            "${interface.azure.nxd_ftp_server.${module.azure.nxd_ftp_server.name}}" === "1"
+        </constraint>
+        <constraint display="FTP Server/TCP Server not supported when using NetX Duo over WiFi.">
+            !testExists("${interface.middleware.rm_netxduo_wifi.${module.azure.nxd_ftp_server.requires.nxd.ip::module.azure.nxd.ip.name}}")
+        </constraint>
+        <constraint display ="Requires FileX">
+            testExists("${interface.azure.fx}")
+        </constraint>
+        <requires id="module.azure.nxd_ftp_server.requires.threadx" interface="interface.rtos.tx" visible="false" display="Requires ThreadX"/>
+        <requires id="module.azure.nxd_ftp_server.requires.nxd.ip" interface="interface.azure.nxd.ip" display="Add NetX Duo IP Instance">
+            <override property="module.azure.nx.ip.arp" value="module.azure.nx.ip.arp.enable" />
+            <override property="module.azure.nx.ip.tcp" value="module.azure.nx.ip.tcp.enable" />
+        </requires>
+        <requires id="module.azure.nxd_ftp_server.requires.fx" interface="interface.azure.fx" display="Add FileX" />
+        <requires id="module.azure.nxd_ftp_server.requires.nxd.packet_pool" interface="interface.azure.nxd.packet_pool" display="Add NetX Duo Packet Pool" />
+
+        <!-- NetX and NetX Duo -->
+        <provides interface="interface.azure.nx_ftp_server" />
+        <provides interface="interface.azure.nx_ftp_server.${module.azure.nxd_ftp_server.name}" />
+        <!-- NetX Duo only -->
+        <provides interface="interface.azure.nxd_ftp_server" />
+        <provides interface="interface.azure.nxd_ftp_server.${module.azure.nxd_ftp_server.name}" />
+
+        <property default="g_ftp_server${_instance}" display="Name" id="module.azure.nxd_ftp_server.name">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.azure.nxd_ftp_server.name}")</constraint>
+        </property>
+        <property default="4096" display="Internal thread stack size (bytes)" id="module.azure.nxd_ftp_server.stack_size">
+            <constraint display="Value must be a non-negative integer and divisible by 8">
+                testInteger("${module.azure.nxd_ftp_server.stack_size}")  &amp;&amp; (("${module.azure.nxd_ftp_server.stack_size}" % 8) == 0)
+            </constraint>
+        </property>
+        <property default="" id="module.azure.nxd_ftp_server.name_upper">
+            <export>"${module.azure.nxd_ftp_server.name}".toUpperCase()</export>
+        </property>
+        <header>
+#define ${module.azure.nxd_ftp_server.name_upper}_STACK_SIZE (${module.azure.nxd_ftp_server.stack_size})
+
+void ${module.azure.nxd_ftp_server.name}_quick_setup();
+        </header>
+        <includes>
+#include "nxd_ftp_server.h"
+        </includes>
+    </module>
+    <module config="config.azure.nxd" display="Networking|${module.azure.nxd_http_server.name} Azure RTOS NetX Duo HTTP Server" id="module.azure.nxd_http_server" version="1" url="https://github.com/eclipse-threadx/rtos-docs/blob/main/rtos-docs/netx-duo/netx-duo-http/Chapter1.md">
+        <constraint display="Module instances must have unique names">
+            "${interface.azure.nxd_http_server.${module.azure.nxd_http_server.name}}" === "1"
+        </constraint>
+        <constraint display="HTTP Server/TCP Server not supported when using NetX Duo over WiFi.">
+            !testExists("${interface.middleware.rm_netxduo_wifi.${module.azure.nxd_http_server.requires.nxd.ip::module.azure.nxd.ip.name}}")
+        </constraint>
+        <constraint display="If FileX stub is used 'FileX support' must be 'Disabled' else must be 'Enabled'.">
+            (!testExists("${interface.azure.fx.stub}") &amp;&amp; ("${config.azure.nxd_http_server.filex}" === "config.azure.nxd_http_server.filex.enable")) ||
+            (testExists("${interface.azure.fx.stub}") &amp;&amp; ("${config.azure.nxd_http_server.filex}" === "config.azure.nxd_http_server.filex.disable"))
+        </constraint>
+        <constraint display ="Requires FileX">
+            testExists("${interface.azure.fx}")
+        </constraint>
+        <requires id="module.azure.nxd_http_server.requires.nxd.ip" interface="interface.azure.nxd.ip" display="Add NetX Duo IP Instance">
+            <override property="module.azure.nx.ip.arp" value="module.azure.nx.ip.arp.enable" />
+            <override property="module.azure.nx.ip.tcp" value="module.azure.nx.ip.tcp.enable" />
+        </requires>
+        <requires id="module.azure.nxd_http_server.requires.threadx" interface="interface.rtos.tx" visible="false" display="Requires ThreadX"/>
+        <requires id="module.azure.nxd_http_server.requires.fx" interface="interface.azure.fx" display="Add FileX" />
+        <requires id="module.azure.nxd_http_server.requires.nxd.packet_pool" interface="interface.azure.nxd.packet_pool" display="Add NetX Duo Packet Pool" />
+
+        <!-- NetX and NetX Duo -->
+        <provides interface="interface.azure.nx_http_server" />
+        <provides interface="interface.azure.nx_http_server.${module.azure.nxd_http_server.name}" />
+        <!-- NetX Duo only -->
+        <provides interface="interface.azure.nxd_http_server" />
+        <provides interface="interface.azure.nxd_http_server.${module.azure.nxd_http_server.name}" />
+
+        <property default="g_http_server${_instance}" display="Name" id="module.azure.nxd_http_server.name">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.azure.nxd_http_server.name}")</constraint>
+        </property>
+        <property default="4096" display="Internal thread stack size (bytes)" id="module.azure.nxd_http_server.stack_size">
+            <constraint display="Value must be a non-negative integer and divisible by 8">
+                testInteger("${module.azure.nxd_http_server.stack_size}")  &amp;&amp; (("${module.azure.nxd_http_server.stack_size}" % 8) == 0)
+            </constraint>
+        </property>
+        <property default="" id="module.azure.nxd_http_server.name_upper">
+            <export>"${module.azure.nxd_http_server.name}".toUpperCase()</export>
+        </property>
+        <header>
+#define ${module.azure.nxd_http_server.name_upper}_STACK_SIZE (${module.azure.nxd_http_server.stack_size})
+
+void ${module.azure.nxd_http_server.name}_quick_setup();
+        </header>
+        <includes>
+#include "nxd_http_server.h"
+        </includes>
+    </module>
+    <module config="config.azure.nxd" display="Networking|${module.azure.nxd_tftp_server.name} Azure RTOS NetX Duo TFTP Server" id="module.azure.nxd_tftp_server" version="1" url="https://github.com/eclipse-threadx/rtos-docs/blob/main/rtos-docs/netx-duo/netx-duo-tftp/chapter1.md">
+        <constraint display="Module instances must have unique names">
+            "${interface.azure.nxd_tftp_server.${module.azure.nxd_tftp_server.name}}" === "1"
+        </constraint>
+        <constraint display="NetX Duo TFTP Server requires a FileX">
+            testExists("${module.azure.nxd_tftp_server.requires.fx::module.azure.fx.name}")
+        </constraint>
+        <constraint display="TFTP Server/UDP Server not supported when using NetX Duo over WiFi.">
+            !testExists("${interface.middleware.rm_netxduo_wifi.${module.azure.nxd_tftp_server.requires.nxd.ip::module.azure.nxd.ip.name}}")
+        </constraint>
+        <constraint display="If FileX Stub module is used 'FileX support' must be 'Disabled' else must be 'Enabled'.">
+            (!testExists("${interface.azure.fx.stub}") &amp;&amp; ("${config.azure.nxd_tftp_server.filex}" === "config.azure.nxd_tftp_server.filex.enable")) ||
+            (testExists("${interface.azure.fx.stub}") &amp;&amp; ("${config.azure.nxd_tftp_server.filex}" === "config.azure.nxd_tftp_server.filex.disable"))
+        </constraint>
+        <requires id="module.azure.nxd_tftp_server.requires.nxd.ip" interface="interface.azure.nxd.ip" display="Add NetX Duo IP Instance">
+            <override property="module.azure.nx.ip.arp" value="module.azure.nx.ip.arp.enable" />
+            <override property="module.azure.nx.ip.udp" value="module.azure.nx.ip.udp.enable" />
+        </requires>
+        <requires id="module.azure.nxd_tftp_server.requires.fx" interface="interface.azure.fx" display="Add FileX" />
+        <requires id="module.azure.nxd_tftp_server.requires.nxd.packet_pool" interface="interface.azure.nxd.packet_pool" display="Add NetX Duo Packet Pool [Optional]" find="false" optional="true" />
+        <requires id="module.azure.nxd_tftp_server.requires.threadx" interface="interface.rtos.tx" visible="false" display="Requires ThreadX"/>
+
+        <!-- NetX and NetX Duo -->
+        <provides interface="interface.azure.nx_tftp_server" />
+        <provides interface="interface.azure.nx_tftp_server.${module.azure.nxd_tftp_server.name}" />
+        <!-- NetX Duo only -->
+        <provides interface="interface.azure.nxd_tftp_server" />
+        <provides interface="interface.azure.nxd_tftp_server.${module.azure.nxd_tftp_server.name}" />
+
+        <property default="g_tftp_server${_instance}" display="Name" id="module.azure.nxd_tftp_server.name">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.azure.nxd_tftp_server.name}")</constraint>
+        </property>
+        <property default="2048" display="Internal thread stack size (bytes)" id="module.azure.nxd_tftp_server.stack_size">
+            <constraint display="Value must be a non-negative integer and divisible by 8">
+                testInteger("${module.azure.nxd_tftp_server.stack_size}")  &amp;&amp; (("${module.azure.nxd_tftp_server.stack_size}" % 8) == 0)
+            </constraint>
+        </property>
+        <property default="" id="module.azure.nxd_tftp_server.name_upper">
+            <export>"${module.azure.nxd_tftp_server.name}".toUpperCase()</export>
+        </property>
+        <header>
+#define ${module.azure.nxd_tftp_server.name_upper}_STACK_SIZE (${module.azure.nxd_tftp_server.stack_size})
+
+void ${module.azure.nxd_tftp_server.name}_quick_setup();
+        </header>
+        <includes>
+#include "nxd_tftp_server.h"
+        </includes>
+    </module>
+    <module config="config.azure.nxd" display="Networking|${module.azure.nxd_web_http_server.name} Azure RTOS NetX Duo Web HTTP/HTTPS Server" id="module.azure.nxd_web_http_server" version="1" url="https://github.com/eclipse-threadx/rtos-docs/blob/main/rtos-docs/netx-duo/netx-duo-web-http/chapter1.md">
+        <constraint display="Module instances must have unique names">
+            "${interface.azure.nxd_web_http_server.${module.azure.nxd_web_http_server.name}}" === "1"
+        </constraint>
+        <constraint display="HTTP Web Server/TCP Server not supported when using NetX Duo over WiFi.">
+            !testExists("${interface.middleware.rm_netxduo_wifi.${module.azure.nxd_web_http_server.requires.nxd.ip::module.azure.nxd.ip.name}}")
+        </constraint>
+        <constraint display ="Requires FileX">
+            testExists("${interface.azure.fx}")
+        </constraint>
+        <constraint display="If FileX Stub module is used then 'FileX support' must be 'Disabled' from the properties of Web HTTP Server">
+            (!testExists("${interface.azure.fx.stub}") &amp;&amp; ("${config.azure.nxd_web_http_server.filex}" === "config.azure.nxd_web_http_server.filex.enable")) ||
+            (testExists("${interface.azure.fx.stub}") &amp;&amp; ("${config.azure.nxd_web_http_server.filex}" === "config.azure.nxd_web_http_server.filex.disable"))
+        </constraint>
+        <!-- Highlight Error when HTTPS Support is disabled and NetX Secure block is added -->
+        <constraint display ="Enable HTTPS Support">
+			("${config.azure.nxd_web_http_server.secure}" === "config.azure.nxd_web_http_server.secure.enable") || ("${interface.nx_secure}" &lt; "1")
+        </constraint>
+        <!-- Highlight Error when HTTPS Support is enabled and NetX Secure block is missing -->
+        <constraint display ="Requires NetX Duo Secure">
+			("${config.azure.nxd_web_http_server.secure}" === "config.azure.nxd_web_http_server.secure.disable") || ("${interface.nx_secure}" &gt;= "1")
+        </constraint>
+        <requires id="module.azure.nxd_web_http_server.requires.nxd.ip" interface="interface.azure.nxd.ip" display="Add NetX Duo IP Instance">
+            <override property="module.azure.nx.ip.arp" value="module.azure.nx.ip.arp.enable" />
+            <override property="module.azure.nx.ip.tcp" value="module.azure.nx.ip.tcp.enable" />
+        </requires>
+        <requires id="module.azure.nxd_web_http_server.requires.fx" interface="interface.azure.fx" display="Add FileX" />
+        <requires id="module.azure.nxd_web_http_server.requires.nxd.packet_pool" interface="interface.azure.nxd.packet_pool" display="Add NetX Duo Packet Pool" />
+        <requires id="module.azure.nxd_web_http_server.requires.nx_secure" interface="interface.nx_secure" display="Add NetX Duo Secure [Optional]" find="false" optional="true" />
+        <requires id="module.azure.nxd_web_http_server.requires.threadx" interface="interface.rtos.tx" visible="false" display="Requires ThreadX"/>
+        <!-- NetX Duo only -->
+        <provides interface="interface.azure.nxd_web_http_server" />
+        <provides interface="interface.azure.nxd_web_http_server.${module.azure.nxd_web_http_server.name}" />
+
+        <property default="g_web_http_server${_instance}" display="Name" id="module.azure.nxd_web_http_server.name">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.azure.nxd_web_http_server.name}")</constraint>
+        </property>
+        <property default="4096" display="Internal thread stack size (bytes)" id="module.azure.nxd_web_http_server.stack_size" description=" Thread stack size of HTTP Server">
+            <constraint display="Value must be a non-negative integer and divisible by 8">
+                testInteger("${module.azure.nxd_web_http_server.stack_size}")  &amp;&amp; (("${module.azure.nxd_web_http_server.stack_size}" % 8) == 0) &amp;&amp; ("${module.azure.nxd_web_http_server.stack_size}" &gt;= 0)
+            </constraint>
+        </property>
+        <property default="80" display="TCP listening port for HTTP/HTTPS Server" id="module.azure.nxd_web_http_server.port_number" description=" TCP listening port for server instance">
+            <constraint display="Value must be in range 0 to 65535"> testInteger("${module.azure.nxd_web_http_server.port_number}") &amp;&amp; ("${module.azure.nxd_web_http_server.port_number}" &gt;= 0) &amp;&amp;("${module.azure.nxd_web_http_server.port_number}" &lt; 65536)
+            </constraint>
+        </property>
+        <property default="" id="module.azure.nxd_web_http_server.name_upper">
+            <export>"${module.azure.nxd_web_http_server.name}".toUpperCase()</export>
+        </property>
+        <header>
+#define ${module.azure.nxd_web_http_server.name_upper}_STACK_SIZE   (${module.azure.nxd_web_http_server.stack_size})
+#define ${module.azure.nxd_web_http_server.name_upper}_PORT_NUMBER  (${module.azure.nxd_web_http_server.port_number})
+
+void ${module.azure.nxd_web_http_server.name}_quick_setup();
+        </header>
+        <includes>
+#include "nx_web_http_server.h"
+        </includes>
+    </module>
+    <developerSupport>
+        <api version="1">
+            <platform id="fsp" max="" min="1.1.0"/>
+            <moduleRef id="module.azure.nxd_ftp_server"/>
+            <description><![CDATA[<form><p><span color="header" font="header">Overview</span></p><p>The FTP Server module provides snippets of code for configuring a FTP Server.</p></form>]]></description>
+            <function display="Quick Setup" id="ftp_server_quick_setup">
+                <description><![CDATA[<form><p>This function provides quick setup for the FTP Server instance using the properties from the RA configurator. Make sure to setup the IP instance before calling this function.</p></form>]]></description>
+            </function>
+        </api>
+        <api version="1">
+            <platform id="fsp" max="" min="1.1.0"/>
+            <moduleRef id="module.azure.nxd_http_server"/>
+            <description><![CDATA[<form><p><span color="header" font="header">Overview</span></p><p>The HTTP Server module provides snippets of code for configuring a HTTP Server.</p></form>]]></description>
+            <function display="Quick Setup" id="http_server_quick_setup">
+                <description><![CDATA[<form><p>This function provides quick setup for the HTTP Server instance using the properties from the RA configurator. Make sure to setup the IP instance before calling this function.</p></form>]]></description>
+            </function>
+        </api>
+        <api version="1">
+            <platform id="fsp" max="" min="1.1.0"/>
+            <moduleRef id="module.azure.nxd_tftp_server"/>
+            <description><![CDATA[<form><p><span color="header" font="header">Overview</span></p><p>The TFTP Server module provides snippets of code for configuring a TFTP Server.</p></form>]]></description>
+            <function display="Quick Setup" id="tftp_server_quick_setup">
+                <description><![CDATA[<form><p>This function provides quick setup for the TFTP Server instance using the properties from the RA configurator. Make sure to setup the IP instance before calling this function.</p></form>]]></description>
+            </function>
+        </api>
+        <api version="1">
+            <platform id="fsp" max="" min="1.1.0"/>
+            <moduleRef id="module.azure.nxd_web_http_server"/>
+            <description><![CDATA[<form><p><span color="header" font="header">Overview</span></p><p>The Web HTTP Server module provides snippets of code for configuring a Web HTTP Server.</p></form>]]></description>
+            <function display="Quick Setup" id="web_http_server_quick_setup">
+                <description><![CDATA[<form><p>This function provides quick setup for the Web HTTP Server instance using the properties from the RA configurator. Make sure to setup the IP instance before calling this function.</p></form>]]></description>
+            </function>
+        </api>
+        <template category="function_call" display="Call Quick Setup" id="module.azure.nxd_ftp_server.ftp_server_quick_setup" version="1">
+            <platform id="fsp" max="" min="1.1.0"/>
+            <moduleRef id="module.azure.nxd_ftp_server">
+                <function id="ftp_server_quick_setup"/>
+            </moduleRef>
+            <content>
+/* FTP Server instance. */
+NX_FTP_SERVER ${ftp_server_name:raProperty(module.azure.nxd_ftp_server.name)};
+uint8_t ${ftp_server_name}_stack_memory[${ftp_server_name_upper:raProperty(module.azure.nxd_ftp_server.name_upper)}_STACK_SIZE] BSP_PLACE_IN_SECTION(".stack.${ftp_server_name}") BSP_ALIGN_VARIABLE(BSP_STACK_ALIGNMENT);
+
+/* Login handler - replace with your own function if desired */
+UINT ${snmp_agent_name}LoginHandler(struct NX_FTP_SERVER_STRUCT *ftp_server_ptr, NXD_ADDRESS * client_ip_address, UINT client_port, CHAR *name, CHAR *password, CHAR *extra_info);
+UINT ${snmp_agent_name}LoginHandler(struct NX_FTP_SERVER_STRUCT *ftp_server_ptr, NXD_ADDRESS * client_ip_address, UINT client_port, CHAR *name, CHAR *password, CHAR *extra_info)
+{
+    FSP_PARAMETER_NOT_USED(ftp_server_ptr);
+    FSP_PARAMETER_NOT_USED(client_ip_address);
+    FSP_PARAMETER_NOT_USED(client_port);
+    FSP_PARAMETER_NOT_USED(name);
+    FSP_PARAMETER_NOT_USED(password);
+    FSP_PARAMETER_NOT_USED(extra_info);
+    return NX_SUCCESS;
+}
+
+/* Logout handler - replace with your own function if desired */
+UINT ${snmp_agent_name}LogoutHandler(struct NX_FTP_SERVER_STRUCT *ftp_server_ptr, NXD_ADDRESS * client_ip_address, UINT client_port, CHAR *name, CHAR *password, CHAR *extra_info);
+UINT ${snmp_agent_name}LogoutHandler(struct NX_FTP_SERVER_STRUCT *ftp_server_ptr, NXD_ADDRESS * client_ip_address, UINT client_port, CHAR *name, CHAR *password, CHAR *extra_info)
+{
+    FSP_PARAMETER_NOT_USED(ftp_server_ptr);
+    FSP_PARAMETER_NOT_USED(client_ip_address);
+    FSP_PARAMETER_NOT_USED(client_port);
+    FSP_PARAMETER_NOT_USED(name);
+    FSP_PARAMETER_NOT_USED(password);
+    FSP_PARAMETER_NOT_USED(extra_info);
+    return NX_SUCCESS;
+}
+
+/* Quick setup for ${ftp_server_name}.
+ * - ${ip_name:raProperty(module.azure.nxd.ip.name)} must be setup before calling this function
+ *     (See Developer Assistance -> ${ftp_server_name} -> ${ip_name} -> Quick Setup).
+ * - ${packet_pool_name:raProperty(module.azure.nxd.packet_pool.name)} must be setup before calling this function
+ *     (See Developer Assistance -> ${ftp_server_name} -> ${packet_pool_name} -> Quick Setup).
+ * - ${fx_name:raProperty(module.azure.fx.name)} must be setup before calling this function
+ *     (See Developer Assistance -> ${ftp_server_name} -> ${fx_name} -> Quick Setup).
+ * - nx_system_initialize() must be called before calling this function.
+ */
+void ${ftp_server_name}_quick_setup()
+{
+    /* Create the FTP Server instance. */
+    UINT status = nxd_ftp_server_create(&amp;${ftp_server_name},
+                        "${ftp_server_name}",
+                        &amp;${ip_name},
+                        &amp;${fx_name},
+                        ${ftp_server_name}_stack_memory,
+                        ${ftp_server_name_upper}_STACK_SIZE,
+                        &amp;${packet_pool_name},
+                        ${snmp_agent_name}LoginHandler,
+                        ${snmp_agent_name}LogoutHandler);
+    assert(NX_SUCCESS == status);
+}
+            </content>
+        </template>
+        <template category="function_call" display="Call Quick Setup" id="module.azure.nxd_http_server.http_server_quick_setup" version="1">
+            <platform id="fsp" max="" min="1.1.0"/>
+            <moduleRef id="module.azure.nxd_http_server">
+                <function id="http_server_quick_setup"/>
+            </moduleRef>
+            <content>
+/* HTTP Server instance. */
+NX_HTTP_SERVER ${http_server_name:raProperty(module.azure.nxd_http_server.name)};
+uint8_t ${http_server_name}_stack_memory[${http_server_name_upper:raProperty(module.azure.nxd_http_server.name_upper)}_STACK_SIZE] BSP_PLACE_IN_SECTION(".stack.${http_server_name}") BSP_ALIGN_VARIABLE(BSP_STACK_ALIGNMENT);
+
+/* Authentication check function - replace with your own function if desired */
+UINT ${http_server_name}AuthenticationCheck(NX_HTTP_SERVER *server_ptr, UINT request_type, CHAR *resource, CHAR **name, CHAR **password, CHAR **realm);
+UINT ${http_server_name}AuthenticationCheck(NX_HTTP_SERVER *server_ptr, UINT request_type, CHAR *resource, CHAR **name, CHAR **password, CHAR **realm)
+{
+    FSP_PARAMETER_NOT_USED(server_ptr);
+    FSP_PARAMETER_NOT_USED(request_type);
+    FSP_PARAMETER_NOT_USED(resource);
+    FSP_PARAMETER_NOT_USED(name);
+    FSP_PARAMETER_NOT_USED(password);
+    FSP_PARAMETER_NOT_USED(realm);
+    return NX_SUCCESS;
+}
+
+/* Request notify handler - replace with your own function if desired */
+UINT ${http_server_name}RequestNotifyHandler(NX_HTTP_SERVER *server_ptr, UINT request_type, CHAR *resource, NX_PACKET *packet_ptr);
+UINT ${http_server_name}RequestNotifyHandler(NX_HTTP_SERVER *server_ptr, UINT request_type, CHAR *resource, NX_PACKET *packet_ptr)
+{
+    FSP_PARAMETER_NOT_USED(server_ptr);
+    FSP_PARAMETER_NOT_USED(request_type);
+    FSP_PARAMETER_NOT_USED(resource);
+    FSP_PARAMETER_NOT_USED(packet_ptr);
+    return NX_SUCCESS;
+}
+
+/* Quick setup for ${http_server_name}.
+ * - ${ip_name:raProperty(module.azure.nxd.ip.name)} must be setup before calling this function
+ *     (See Developer Assistance -> ${http_server_name} -> ${ip_name} -> Quick Setup).
+ * - ${packet_pool_name:raProperty(module.azure.nxd.packet_pool.name)} must be setup before calling this function
+ *     (See Developer Assistance -> ${http_server_name} -> ${packet_pool_name} -> Quick Setup).
+ * - ${fx_name:raProperty(module.azure.fx.name)} must be setup before calling this function
+ *     (See Developer Assistance -> ${http_server_name} -> ${fx_name} -> Quick Setup).
+ * - nx_system_initialize() must be called before calling this function.
+ */
+void ${http_server_name}_quick_setup()
+{
+    /* Create the HTTP Server instance. */
+    UINT status = nx_http_server_create(&amp;${http_server_name},
+                        "${http_server_name}",
+                        &amp;${ip_name},
+                        &amp;${fx_name},
+                        ${http_server_name}_stack_memory,
+                        ${http_server_name_upper}_STACK_SIZE,
+                        &amp;${packet_pool_name},
+                        ${http_server_name}AuthenticationCheck,
+                        ${http_server_name}RequestNotifyHandler);
+    assert(NX_SUCCESS == status);
+}
+            </content>
+        </template>
+        <template category="function_call" display="Call Quick Setup" id="module.azure.nxd_tftp_server.tftp_server_quick_setup" version="1">
+            <platform id="fsp" max="" min="1.1.0"/>
+            <moduleRef id="module.azure.nxd_tftp_server">
+                <function id="tftp_server_quick_setup"/>
+            </moduleRef>
+            <content>
+/* TFTP Server instance. */
+NX_TFTP_SERVER ${tftp_server_name:raProperty(module.azure.nxd_tftp_server.name)};
+uint8_t ${tftp_server_name}_stack_memory[${tftp_server_name_upper:raProperty(module.azure.nxd_tftp_server.name_upper)}_STACK_SIZE] BSP_PLACE_IN_SECTION(".stack.${tftp_server_name}") BSP_ALIGN_VARIABLE(BSP_STACK_ALIGNMENT);
+
+/* Quick setup for ${tftp_server_name}.
+ * - ${ip_name:raProperty(module.azure.nxd.ip.name)} must be setup before calling this function
+ *     (See Developer Assistance -> ${tftp_server_name} -> ${ip_name} -> Quick Setup).
+ * - ${packet_pool_name:raProperty(module.azure.nxd.packet_pool.name)} must be setup before calling this function
+ *     (See Developer Assistance -> ${tftp_server_name} -> ${packet_pool_name} -> Quick Setup).
+ * - ${fx_name:raProperty(module.azure.fx.name)} must be setup before calling this function
+ *     (See Developer Assistance -> ${tftp_server_name} -> ${fx_name} -> Quick Setup).
+ * - nx_system_initialize() must be called before calling this function.
+ */
+void ${tftp_server_name}_quick_setup()
+{
+    /* Create the TFTP Server instance. */
+    UINT status = nxd_tftp_server_create(&amp;${tftp_server_name},
+                        "${tftp_server_name}",
+                        &amp;${ip_name},
+                        &amp;${fx_name},
+                        ${tftp_server_name}_stack_memory,
+                        ${tftp_server_name_upper}_STACK_SIZE,
+                        &amp;${packet_pool_name});
+    assert(NX_SUCCESS == status);
+}
+            </content>
+        </template>
+        <template category="function_call" display="Call Quick Setup" id="module.azure.nxd_web_http_server.web_http_server_quick_setup" version="1">
+            <platform id="fsp" max="" min="1.1.0"/>
+            <moduleRef id="module.azure.nxd_web_http_server">
+                <function id="web_http_server_quick_setup"/>
+            </moduleRef>
+            <content>
+/* Web HTTP Server instance. */
+NX_WEB_HTTP_SERVER ${http_server_name:raProperty(module.azure.nxd_web_http_server.name)};
+uint8_t ${http_server_name}_stack_memory[${http_server_name_upper:raProperty(module.azure.nxd_web_http_server.name_upper)}_STACK_SIZE] BSP_PLACE_IN_SECTION(".stack.${http_server_name}") BSP_ALIGN_VARIABLE(BSP_STACK_ALIGNMENT);
+
+/* Authentication check function - replace with your own function if desired */
+UINT ${http_server_name}AuthenticationCheck(NX_WEB_HTTP_SERVER *server_ptr, UINT request_type, CHAR *resource, CHAR **name, CHAR **password, CHAR **realm);
+UINT ${http_server_name}AuthenticationCheck(NX_WEB_HTTP_SERVER *server_ptr, UINT request_type, CHAR *resource, CHAR **name, CHAR **password, CHAR **realm)
+{
+    FSP_PARAMETER_NOT_USED(server_ptr);
+    FSP_PARAMETER_NOT_USED(request_type);
+    FSP_PARAMETER_NOT_USED(resource);
+    FSP_PARAMETER_NOT_USED(name);
+    FSP_PARAMETER_NOT_USED(password);
+    FSP_PARAMETER_NOT_USED(realm);
+    return NX_SUCCESS;
+}
+
+/* Request notify handler - replace with your own function if desired */
+UINT ${http_server_name}RequestNotifyHandler(NX_WEB_HTTP_SERVER *server_ptr, UINT request_type, CHAR *resource, NX_PACKET *packet_ptr);
+UINT ${http_server_name}RequestNotifyHandler(NX_WEB_HTTP_SERVER *server_ptr, UINT request_type, CHAR *resource, NX_PACKET *packet_ptr)
+{
+    FSP_PARAMETER_NOT_USED(server_ptr);
+    FSP_PARAMETER_NOT_USED(request_type);
+    FSP_PARAMETER_NOT_USED(resource);
+    FSP_PARAMETER_NOT_USED(packet_ptr);
+    return NX_SUCCESS;
+}
+
+/* Quick setup for ${http_server_name}.
+ * - ${ip_name:raProperty(module.azure.nxd.ip.name)} must be setup before calling this function
+ *     (See Developer Assistance -> ${http_server_name} -> ${ip_name} -> Quick Setup).
+ * - ${packet_pool_name:raProperty(module.azure.nxd.packet_pool.name)} must be setup before calling this function
+ *     (See Developer Assistance -> ${http_server_name} -> ${packet_pool_name} -> Quick Setup).
+ * - ${fx_name:raProperty(module.azure.fx.name)} must be setup before calling this function
+ *     (See Developer Assistance -> ${http_server_name} -> ${fx_name} -> Quick Setup).
+ * - nx_system_initialize() must be called before calling this function.
+ */
+void ${http_server_name}_quick_setup()
+{
+    /* Create the HTTP Server instance. */
+    UINT status = nx_web_http_server_create(&amp;${http_server_name},
+                        "${http_server_name}",
+                        &amp;${ip_name},
+                        ${http_server_name_upper}_PORT_NUMBER,
+                        &amp;${fx_name},
+                        ${http_server_name}_stack_memory,
+                        ${http_server_name_upper}_STACK_SIZE,
+                         &amp;${packet_pool_name},
+                        ${http_server_name}AuthenticationCheck,
+                        ${http_server_name}RequestNotifyHandler);
+    assert(NX_SUCCESS == status);
+}
+            </content>
+        </template>
+    </developerSupport>
+</raModuleDescription>

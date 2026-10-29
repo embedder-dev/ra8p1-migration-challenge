@@ -1,0 +1,530 @@
+﻿<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.driver.sci_spi" path="fsp_cfg/r_sci_spi_cfg.h" version="0">
+        <property default="config.driver.sci_spi.param_checking_enable.bsp" display="Parameter Checking" id="config.driver.sci_spi.param_checking_enable" description="If selected code for parameter checking is included in the build.">
+            <option display="Default (BSP)" id="config.driver.sci_spi.param_checking_enable.bsp" value="(BSP_CFG_PARAM_CHECKING_ENABLE)"/>
+            <option display="Enabled" id="config.driver.sci_spi.param_checking_enable.enabled" value="(1)"/>
+            <option display="Disabled" id="config.driver.sci_spi.param_checking_enable.disabled" value="(0)"/>
+        </property>
+        <property default="config.driver.sci_spi.dtc_support_enable.enabled" display="DTC Support" id="config.driver.sci_spi.dtc_support_enable" description="If support for transfering data using the DTC will be compiled in.">
+            <option display="Enabled" id="config.driver.sci_spi.dtc_support_enable.enabled" value="(1)"/>
+            <option display="Disabled" id="config.driver.sci_spi.dtc_support_enable.disabled" value="(0)"/>
+        </property>
+        <content>
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#define SCI_SPI_DTC_SUPPORT_ENABLE ${config.driver.sci_spi.dtc_support_enable}
+#define SCI_SPI_CFG_PARAM_CHECKING_ENABLE ${config.driver.sci_spi.param_checking_enable}
+
+#ifdef __cplusplus
+}
+#endif
+        </content>
+    </config>
+    <module config="config.driver.sci_spi" display="Connectivity|${module.driver.spi.name} SPI (r_sci_spi)" id="module.driver.spi_on_sci_spi" version="1" url="group___s_c_i___s_p_i.html">
+        <constraint display="Unique name required for each instance">
+            "${interface.driver.spi.${module.driver.spi.name}}" === "1"
+        </constraint>
+        <constraint display="Requires same priority for RXI and TXI interrupts">
+            "${module.driver.spi.rxi_ipl}" == "${module.driver.spi.txi_ipl}"
+        </constraint>
+        <constraint display="Requires SCI Peripheral">
+          "${interface.mcu.sci.external}" === "1"
+        </constraint>
+        <constraint display="DTC support must be enabled to use DTC">
+            ("${config.driver.sci_spi.dtc_support_enable}" === "config.driver.sci_spi.dtc_support_enable.enabled") ||
+            ((!testExists("${module.driver.spi_on_sci_spi.requires.transfer_tx::module.driver.transfer.name}")) &amp;&amp;
+             (!testExists("${module.driver.spi_on_sci_spi.requires.transfer_rx::module.driver.transfer.name}")))
+        </constraint>
+        <constraint display="Add DTC TX or RX stack if DTC support is enabled">
+            ((testExists("${module.driver.spi_on_sci_spi.requires.transfer_tx::module.driver.transfer.name}")) ||
+             (testExists("${module.driver.spi_on_sci_spi.requires.transfer_rx::module.driver.transfer.name}"))) ||
+             ("${config.driver.sci_spi.dtc_support_enable}" != "config.driver.sci_spi.dtc_support_enable.enabled")
+        </constraint>
+        <constraint display="Requires DTC for both or neither">
+            (("${interface.driver.transfer_on_dtc.${module.driver.spi_on_sci_spi.requires.transfer_tx::module.driver.transfer.name}}" === "1") &amp;&amp; ("${interface.driver.transfer_on_dtc.${module.driver.spi_on_sci_spi.requires.transfer_rx::module.driver.transfer.name}}" === "1")) || (("${interface.driver.transfer_on_dtc.${module.driver.spi_on_sci_spi.requires.transfer_tx::module.driver.transfer.name}}" != "1") &amp;&amp; ("${interface.driver.transfer_on_dtc.${module.driver.spi_on_sci_spi.requires.transfer_rx::module.driver.transfer.name}}" != "1"))
+        </constraint>
+        <constraint display="Specified 'Bitrate' is not available on selected MCU.">
+            testInteger("${module.driver.spi.bitrate}") &amp;&amp; ("${module.driver.spi.bitrate}" &gt; 0) &amp;&amp; ("${module.driver.spi.bitrate}" &lt;= (Number("${config.bsp.fsp.mcu.sci_spi.max_bitrate}")))
+        </constraint>
+        <constraint display="Channel not avaliable on selected MCU">
+            ("${interface.mcu.sci.${module.driver.spi.channel}}" === "1")
+        </constraint>
+        <requires id="module.driver.spi_on_sci_spi.requires.sci" interface="interface.mcu.sci.external" visible="false" display="Requires SCI Peripheral" />
+
+        <requires id="module.driver.spi_on_sci_spi.requires.transfer_tx" interface="interface.driver.transfer_on_dtc" display="Add DTC Driver for Transmission [Recommended but optional]" optional="true" >
+            <override property="module.driver.transfer.size" value="module.driver.transfer.size.size_1_byte"/>
+            <override property="module.driver.transfer.mode" value="module.driver.transfer.mode.mode_normal"/>
+            <override property="module.driver.transfer.dest_addr_mode" value="module.driver.transfer.dest_addr_mode.addr_mode_fixed"/>
+            <override property="module.driver.transfer.src_addr_mode" value="module.driver.transfer.src_addr_mode.addr_mode_incremented"/>
+            <override property="module.driver.transfer.repeat_area" value="module.driver.transfer.repeat_area.repeat_area_source"/>
+            <override property="module.driver.transfer.p_dest" value="NULL"/>
+            <override property="module.driver.transfer.p_src" value="NULL"/>
+            <override property="module.driver.transfer.length" value="0"/>
+            <override property="module.driver.transfer.interrupt" value="module.driver.transfer.interrupt.interrupt_end"/>
+            <override property="module.driver.transfer.num_blocks" value="0"/>
+            <override property="module.driver.transfer.activation_source" value="_signal.event.sci${module.driver.spi.channel}.txi"/>
+        </requires>
+        <requires id="module.driver.spi_on_sci_spi.requires.transfer_rx" interface="interface.driver.transfer_on_dtc" display="Add DTC Driver for Reception [Recommended but optional]" optional="true" >
+            <override property="module.driver.transfer.size" value="module.driver.transfer.size.size_1_byte"/>
+            <override property="module.driver.transfer.mode" value="module.driver.transfer.mode.mode_normal"/>
+            <override property="module.driver.transfer.dest_addr_mode" value="module.driver.transfer.dest_addr_mode.addr_mode_incremented"/>
+            <override property="module.driver.transfer.src_addr_mode" value="module.driver.transfer.src_addr_mode.addr_mode_fixed"/>
+            <override property="module.driver.transfer.repeat_area" value="module.driver.transfer.repeat_area.repeat_area_destination"/>
+            <override property="module.driver.transfer.p_dest" value="NULL"/>
+            <override property="module.driver.transfer.p_src" value="NULL"/>
+            <override property="module.driver.transfer.length" value="0"/>
+            <override property="module.driver.transfer.interrupt" value="module.driver.transfer.interrupt.interrupt_end"/>
+            <override property="module.driver.transfer.num_blocks" value="0"/>
+            <override property="module.driver.transfer.activation_source" value="_signal.event.sci${module.driver.spi.channel}.rxi"/>
+        </requires>
+        <provides interface="interface.driver.spi" />
+        <provides interface="interface.driver.spi_on_sci_spi" />
+        <provides interface="interface.driver.spi.${module.driver.spi.name}" />
+        <provides interface="interface.peripheral.sci${module.driver.spi.channel}" />
+        <property default="sci" id="module.driver.spi.spi_interface" description=""/>
+        <property default="g_spi${_instance}" display="Name" id="module.driver.spi.name" description="Module name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.spi.name}")</constraint>
+        </property>
+        <property default="0" display="Channel" id="module.driver.spi.channel" description="Select the SCI channel.">
+            <constraint display="Value must be a non-negative integer">testInteger("${module.driver.spi.channel}")  &amp;&amp; ("${module.driver.spi.channel}" &gt;= 0)</constraint>
+            <signal event="event.sci${module.driver.spi.channel}.rxi" />
+            <signal event="event.sci${module.driver.spi.channel}.txi" />
+            <signal event="event.sci${module.driver.spi.channel}.tei" />
+            <signal event="event.sci${module.driver.spi.channel}.eri" />
+            <signal event="event.sci${module.driver.spi.channel}.am" />
+        </property>
+        <property default="module.driver.spi.operating_mode.mode_master" display="Operating Mode" id="module.driver.spi.operating_mode" description="Select the SPI operating mode.">
+            <option display="Master" id="module.driver.spi.operating_mode.mode_master" value="SPI_MODE_MASTER"/>
+            <option display="Slave" id="module.driver.spi.operating_mode.mode_slave" value="SPI_MODE_SLAVE"/>
+        </property>
+        <property default="module.driver.spi.clk_phase.clk_phase_edge_odd" display="Clock Phase" id="module.driver.spi.clk_phase" description="Select the clock edge to sample data.">
+            <option display="Data sampling on odd edge, data variation on even edge" id="module.driver.spi.clk_phase.clk_phase_edge_odd" value="SPI_CLK_PHASE_EDGE_ODD"/>
+            <option display="Data sampling on even edge, data variation on odd edge" id="module.driver.spi.clk_phase.clk_phase_edge_even" value="SPI_CLK_PHASE_EDGE_EVEN"/>
+        </property>
+        <property default="module.driver.spi.clk_polarity.clk_polarity_low" display="Clock Polarity" id="module.driver.spi.clk_polarity" description="Select clock level when idle.">
+            <option display="Low when idle" id="module.driver.spi.clk_polarity.clk_polarity_low" value="SPI_CLK_POLARITY_LOW"/>
+            <option display="High when idle" id="module.driver.spi.clk_polarity.clk_polarity_high" value="SPI_CLK_POLARITY_HIGH"/>
+        </property>
+        <property default="module.driver.spi.mode_fault.mode_fault_error_disable" display="Mode Fault Error" id="module.driver.spi.mode_fault" description="Detect master/slave mode conflicts.">
+            <option display="Enable" id="module.driver.spi.mode_fault.mode_fault_error_enable" value="SPI_MODE_FAULT_ERROR_ENABLE"/>
+            <option display="Disable" id="module.driver.spi.mode_fault.mode_fault_error_disable" value="SPI_MODE_FAULT_ERROR_DISABLE"/>
+        </property>
+        <property default="module.driver.spi.bit_order.bit_order_msb_first" display="Bit Order" id="module.driver.spi.bit_order" description="Select the data bit order.">
+            <option display="MSB First" id="module.driver.spi.bit_order.bit_order_msb_first" value="SPI_BIT_ORDER_MSB_FIRST"/>
+            <option display="LSB First" id="module.driver.spi.bit_order.bit_order_lsb_first" value="SPI_BIT_ORDER_LSB_FIRST"/>
+        </property>
+        <property default="sci_spi_callback" display="Callback" id="module.driver.spi.p_callback" description="A user callback function that is called from the sci spi interrupts when a transfer is completed or an error has occurred.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.spi.p_callback}") &amp;&amp;("${module.driver.spi.p_callback}" != "NULL") </constraint>
+        </property>
+        <property default="" display="Receive Interrupt Priority" id="module.driver.spi.rxi_ipl" description="Select the receive interrupt priority.">
+            <select enum="enum.mcu.nvic.priorities.mandatory"/>
+            <interrupt event="event.sci${module.driver.spi.channel}.rxi" isr="sci_spi_rxi_isr"/>
+        </property>
+        <property default="" display="Transmit Interrupt Priority" id="module.driver.spi.txi_ipl" description="Select the transmit interrupt priority.">
+            <select enum="enum.mcu.nvic.priorities.mandatory"/>
+            <interrupt event="event.sci${module.driver.spi.channel}.txi" isr="sci_spi_txi_isr"/>
+        </property>
+        <property default="" display="Transmit End Interrupt Priority" id="module.driver.spi.tei_ipl" description="Select the transmit end interrupt priority.">
+            <select enum="enum.mcu.nvic.priorities.mandatory"/>
+            <interrupt event="event.sci${module.driver.spi.channel}.tei" isr="sci_spi_tei_isr"/>
+        </property>
+        <property default="" display="Error Interrupt Priority" id="module.driver.spi.eri_ipl" description="Select the error interrupt priority.">
+            <select enum="enum.mcu.nvic.priorities.mandatory"/>
+            <interrupt event="event.sci${module.driver.spi.channel}.eri" isr="sci_spi_eri_isr"/>
+        </property>
+        <property default="8000000" display="Bitrate" id="module.driver.spi.bitrate" description="Enter the desired bitrate.\n\nIf the requested bitrate cannot be achieved, the settings with the largest possible value that is less than or equal to the requested bitrate is used. The theoretical bitrate is printed in a comment in the generated sci_spi_extended_cfg_t structure.">
+            <constraint display="Value must be an integer greater than 0">testInteger("${module.driver.spi.bitrate}")  &amp;&amp; ("${module.driver.spi.bitrate}" &gt; 0)</constraint>
+            <export><![CDATA[eval('' +
+'/* INPUTS */' +
+'    var bitrate = ${module.driver.spi.bitrate};' +
+'    var peripheral_clock = ${board.clock.peripheral.sci};' +
+'    var use_mddr = ${module.driver.spi.bitrate_modulation};' +
+'    var divisor = 0;' +
+'    var divisor_bitrate_multiple = 0;' +
+'    var brr     = 0;' +
+'    var cks     = -1;' +
+'    var MDDR_DISABLED = 256;' +
+'    var delta_error = 0;' +
+'    /* MDDR is disabled by default. */' +
+'    var mddr = MDDR_DISABLED;' +
+'' +
+'    for (var i = 0; i <= 3; i++)' +
+'    {' +
+'        cks++;' +
+'        divisor_bitrate_multiple = (1 << (2 * (i + 1)));' +
+'        divisor = divisor_bitrate_multiple * bitrate;' +
+'' +
+'        /* Calculate BRR so that the bit rate is the largest possible value less than or equal to the desired' +
+'         * bitrate. */' +
+'        brr = Math.ceil(peripheral_clock / divisor - 1);' +
+'' +
+'        if (brr <= 255)' +
+'        {' +
+'            break;' +
+'        }' +
+'    }' +
+'' +
+'    actual_bitrate = peripheral_clock / (divisor_bitrate_multiple * (256 / mddr) * (brr + 1));' +
+'    delta_error = bitrate - actual_bitrate;' +
+'' +
+'    if (use_mddr)' +
+'    {' +
+'        for (var temp_brr = brr; temp_brr > 0; temp_brr--)' +
+'        {' +
+'' +
+'            /** Calculate the MDDR (M) value if bit rate modulation is enabled,' +
+'             * The formula to calculate MBBR (from the M and N relationship given in the hardware manual) is as follows' +
+'             * and it must be between 128 and 256.' +
+'             * MDDR = ((divisor * 256) * (BRR + 1)) / PCLK */' +
+'            var temp_mddr = Math.floor(divisor * 256 * (temp_brr + 1) / peripheral_clock);' +
+'' +
+'            /* The maximum value that could result from the calculation above is 256, which is a valid MDDR' +
+'             * value, so only the lower bound is checked. */' +
+'            if (temp_mddr < 128)' +
+'            {' +
+'                break;' +
+'            }' +
+'' +
+'            /* The maximum for MDDR is 256 (MDDR unused). */' +
+'            if (temp_mddr > 256)' +
+'            {' +
+'                continue;' +
+'            }' +
+'' +
+'            var calculated_bitrate = peripheral_clock / (divisor_bitrate_multiple * (256 / temp_mddr) * (temp_brr + 1));' +
+'' +
+'            /** If the bit rate error is less than the previous lowest bit rate error, then store these settings as ' +
+'             * the best value. */' +
+'            if ((bitrate - calculated_bitrate) < delta_error)' +
+'            {' +
+'                actual_bitrate = calculated_bitrate;' +
+'                delta_error = bitrate - actual_bitrate;' +
+'                brr = temp_brr;' +
+'                mddr = temp_mddr;' +
+'            }' +
+'        }' +
+'    }' +
+'' +
+'    /* Set mddr to 0 if it is not used to comply with the r_sci_spi API. */' +
+'    if (mddr > 255)' +
+'    {' +
+'        mddr = 0;' +
+'    }' +
+'    ' +
+'    bitrate_setting = "/* Actual calculated bitrate: " + actual_bitrate.toFixed(0) + ". */" + ' +
+'                   " .cks = " + cks.toString() +' +
+'                   ", .brr = " + brr.toString() +' +
+'                   ", .mddr = " + mddr.toString();' +
+'    bitrate_setting' +
+'')
+]]>            </export>
+        </property>
+        <property default="module.driver.spi.bitrate_modulation.disabled" display="Bitrate Modulation" id="module.driver.spi.bitrate_modulation" description="Enabling bitrate modulation reduces the percent error of the actual bitrate with respect to the requested baud rate. It does this by modulating the number of cycles per clock output pulse, so the clock is no longer a square wave.">
+            <option display="Disabled" id="module.driver.spi.bitrate_modulation.disabled" value="false"/>
+            <option display="Enabled" id="module.driver.spi.bitrate_modulation.enabled" value="true"/>
+        </property>
+        <!-- Note RXD is MISO -->
+        <peripheral name="SCI${module.driver.spi.channel}" component="sci${module.driver.spi.channel}" pin="sci${module.driver.spi.channel}.rxd" />
+        <!-- Note TXD is MOSI -->
+        <peripheral name="SCI${module.driver.spi.channel}" component="sci${module.driver.spi.channel}" pin="sci${module.driver.spi.channel}.txd" />
+        <peripheral name="SCI${module.driver.spi.channel}" component="sci${module.driver.spi.channel}" pin="sci${module.driver.spi.channel}.sck" />
+        <peripheral name="SCI${module.driver.spi.channel}" component="sci${module.driver.spi.channel}" pin="sci${module.driver.spi.channel}.cts" />
+        <peripheral name="SCI${module.driver.spi.channel}" component="sci${module.driver.spi.channel}" pin="sci${module.driver.spi.channel}.ctsrts" />
+        <!-- For MCU's whose pinmapping files have been generated with MPC Designer Tool -->
+        <peripheral name="SCI${module.driver.spi.channel}" component="sci${module.driver.spi.channel}" pin="sci${module.driver.spi.channel}.rxd${module.driver.spi.channel}" />
+        <!-- Note TXD is MOSI -->
+        <peripheral name="SCI${module.driver.spi.channel}" component="sci${module.driver.spi.channel}" pin="sci${module.driver.spi.channel}.txd${module.driver.spi.channel}" />
+        <peripheral name="SCI${module.driver.spi.channel}" component="sci${module.driver.spi.channel}" pin="sci${module.driver.spi.channel}.sck${module.driver.spi.channel}" />
+        <peripheral name="SCI${module.driver.spi.channel}" component="sci${module.driver.spi.channel}" pin="sci${module.driver.spi.channel}.ss_cts_rts${module.driver.spi.channel}" />
+        <peripheral name="SCI${module.driver.spi.channel}" component="sci${module.driver.spi.channel}" pin="sci${module.driver.spi.channel}.cts_rts${module.driver.spi.channel}" />
+        <symbol id="symbol.driver.spi.name" value="${module.driver.spi.name}"/>
+        <symbol id="symbol.driver.spi.guard.open" value="${module.driver.spi.name}_open_guard"/>
+        <symbol id="symbol.driver.spi.guard.macro.open" value="FSP_GUARD_${module.driver.spi.name}_R_SCI_SPI_Open"/>
+        <symbol id="symbol.driver.spi.guard.read" value="${module.driver.spi.name}_read_guard"/>
+        <symbol id="symbol.driver.spi.guard.macro.read" value="FSP_GUARD_${module.driver.spi.name}_R_SCI_SPI_Read"/>
+        <symbol id="symbol.driver.spi.guard.write" value="${module.driver.spi.name}_write_guard"/>
+        <symbol id="symbol.driver.spi.guard.macro.write" value="FSP_GUARD_${module.driver.spi.name}_R_SCI_SPI_Write"/>
+        <symbol id="symbol.driver.spi.guard.write_read" value="${module.driver.spi.name}_write_read_guard"/>
+        <symbol id="symbol.driver.spi.guard.macro.write_read" value="FSP_GUARD_${module.driver.spi.name}_R_SCI_SPI_WriteRead"/>
+        <symbol id="symbol.driver.spi.guard.close" value="${module.driver.spi.name}_close_guard"/>
+        <symbol id="symbol.driver.spi.guard.macro.close" value="FSP_GUARD_${module.driver.spi.name}_R_SCI_SPI_Close"/>
+        <symbol id="symbol.driver.spi.guard.calculate_bitrate" value="${module.driver.spi.name}_calculate_bitrate_guard"/>
+        <symbol id="symbol.driver.spi.guard.macro.calculate_bitrate" value="FSP_GUARD_${module.driver.spi.name}_R_SCI_SPI_CalculateBitrate"/>
+        <symbol id="symbol.driver.spi.guard.callback_set" value="${module.driver.spi.name}_callback_set_guard"/>
+        <symbol id="symbol.driver.spi.guard.macro.callback_set" value="FSP_GUARD_${module.driver.spi.name}_R_SCI_SPI_CallbackSet"/>
+        <symbol id="symbol.driver.spi.nsc_api" value="${module.driver.spi.name}_nsc_api"/>
+        <symbol id="symbol.driver.spi.cfg" value="${module.driver.spi.name}_cfg"/>
+        <symbol id="symbol.driver.spi.cfg_extend" value="${module.driver.spi.name}_cfg_extend"/>
+        <symbol id="symbol.driver.spi.ctrl" value="${module.driver.spi.name}_ctrl"/>
+        <header>
+
+/** SPI on SCI Instance. */
+extern const spi_instance_t ${module.driver.spi.name};
+
+/** Access the SCI_SPI instance using these structures when calling API functions directly (::p_api is not used). */
+extern sci_spi_instance_ctrl_t ${module.driver.spi.name}_ctrl;
+extern const spi_cfg_t ${module.driver.spi.name}_cfg;
+
+/** Called by the driver when a transfer has completed or an error has occurred (Must be implemented by the user). */
+#ifndef ${module.driver.spi.p_callback}
+void ${module.driver.spi.p_callback}(spi_callback_args_t * p_args);
+#endif
+
+        </header>
+        <includes>
+#include &quot;r_sci_spi.h&quot;
+#include &quot;r_spi_api.h&quot;
+        </includes>
+        <declarations>
+
+sci_spi_instance_ctrl_t ${module.driver.spi.name}_ctrl;
+
+/** SPI extended configuration */
+const sci_spi_extended_cfg_t ${module.driver.spi.name}_cfg_extend =
+{
+    .clk_div = {
+        ${module.driver.spi.bitrate},
+    }
+};
+
+const spi_cfg_t ${module.driver.spi.name}_cfg =
+{
+    .channel         = ${module.driver.spi.channel},
+    .operating_mode  = ${module.driver.spi.operating_mode},
+    .clk_phase       = ${module.driver.spi.clk_phase},
+    .clk_polarity    = ${module.driver.spi.clk_polarity},
+    .mode_fault      = ${module.driver.spi.mode_fault},
+    .bit_order       = ${module.driver.spi.bit_order},
+#define RA_NOT_DEFINED (1)
+#if (RA_NOT_DEFINED == ${module.driver.spi_on_sci_spi.requires.transfer_tx::module.driver.transfer.name})
+    .p_transfer_tx   = NULL,
+#else
+    .p_transfer_tx   = &amp;${module.driver.spi_on_sci_spi.requires.transfer_tx::module.driver.transfer.name},
+#endif
+#if (RA_NOT_DEFINED == ${module.driver.spi_on_sci_spi.requires.transfer_rx::module.driver.transfer.name})
+    .p_transfer_rx   = NULL,
+#else
+    .p_transfer_rx   = &amp;${module.driver.spi_on_sci_spi.requires.transfer_rx::module.driver.transfer.name},
+#endif
+#undef RA_NOT_DEFINED
+    .p_callback      = ${module.driver.spi.p_callback},
+    .p_context       = NULL,
+    .rxi_irq         = VECTOR_NUMBER_SCI${module.driver.spi.channel}_RXI,
+    .txi_irq         = VECTOR_NUMBER_SCI${module.driver.spi.channel}_TXI,
+    .tei_irq         = VECTOR_NUMBER_SCI${module.driver.spi.channel}_TEI,
+    .eri_irq         = VECTOR_NUMBER_SCI${module.driver.spi.channel}_ERI,
+    .rxi_ipl         = ${module.driver.spi.rxi_ipl},
+    .txi_ipl         = ${module.driver.spi.txi_ipl},
+    .tei_ipl         = ${module.driver.spi.tei_ipl},
+    .eri_ipl         = ${module.driver.spi.eri_ipl},
+    .p_extend        = &amp;${module.driver.spi.name}_cfg_extend,
+};
+/* Instance structure to use this module. */
+const spi_instance_t ${module.driver.spi.name} =
+{
+    .p_ctrl          = &amp;${module.driver.spi.name}_ctrl,
+    .p_cfg           = &amp;${module.driver.spi.name}_cfg,
+    .p_api           = &amp;g_spi_on_sci
+};
+
+        </declarations>
+        <guard>
+            <header>
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.spi.name}_open_guard(spi_ctrl_t *p_api_ctrl, spi_cfg_t const *const p_cfg);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.spi.name}_read_guard(spi_ctrl_t *const p_api_ctrl, void *p_dest, uint32_t const length, spi_bit_width_t const bit_width);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.spi.name}_write_guard(spi_ctrl_t *const p_api_ctrl, void const *p_src, uint32_t const length, spi_bit_width_t const bit_width);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.spi.name}_write_read_guard_fanin(spi_ctrl_t *const p_api_ctrl, spi_write_read_guard_args_t *args);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.spi.name}_close_guard(spi_ctrl_t *const p_api_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.spi.name}_calculate_bitrate_guard(uint32_t bitrate, sci_spi_div_setting_t *sclk_div, bool use_mddr);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.spi.name}_callback_set_guard(spi_ctrl_t *const p_api_ctrl, void(*p_callback)(spi_callback_args_t *), void const *const p_context, spi_callback_args_t *const p_callback_memory);
+
+            </header>
+            <template name="${module.driver.spi.name}_guard.c">
+                <![CDATA[
+                    #include "guard.h"
+
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.spi.name}_open_guard (spi_ctrl_t *p_api_ctrl, spi_cfg_t const *const p_cfg)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+    FSP_PARAMETER_NOT_USED(p_cfg);
+
+    return R_SCI_SPI_Open(&${module.driver.spi.name}_ctrl, &${module.driver.spi.name}_cfg);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.spi.name}_read_guard (spi_ctrl_t *const p_api_ctrl, void *p_dest, uint32_t const length, spi_bit_width_t const bit_width)
+{
+    /* Verify all pointers are in non-secure memory. */
+    void * p_dest_checked = cmse_check_address_range((void *) p_dest, length, CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_dest_checked != NULL);
+
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+
+    return R_SCI_SPI_Read(&${module.driver.spi.name}_ctrl, p_dest_checked, length, bit_width);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.spi.name}_write_guard (spi_ctrl_t *const p_api_ctrl, void const *p_src, uint32_t const length, spi_bit_width_t const bit_width)
+{
+    /* Verify all pointers are in non-secure memory. */
+    void const * p_src_checked = cmse_check_address_range((void *) p_src, length, CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_src_checked != NULL);
+
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+
+    return R_SCI_SPI_Write(&${module.driver.spi.name}_ctrl, p_src_checked, length, bit_width);
+}
+
+/* This function has been modified to reduce the number of arguments. */
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.spi.name}_write_read_guard_fanin (spi_ctrl_t *const p_api_ctrl, spi_write_read_guard_args_t *args)
+{
+    /* Verify all pointers are in non-secure memory. */
+    spi_write_read_guard_args_t *args_checked = cmse_check_pointed_object (args, CMSE_AU_NONSECURE);
+    FSP_ASSERT (args_checked != NULL);
+
+    void const *p_src_checked = cmse_check_address_range ((void*) args_checked->p_src, args_checked->length, CMSE_AU_NONSECURE);
+    FSP_ASSERT (p_src_checked != NULL);
+    void *p_dest_checked = cmse_check_address_range (args_checked->p_dest, args_checked->length, CMSE_AU_NONSECURE);
+    FSP_ASSERT (p_dest_checked != NULL);
+
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+
+    return R_SCI_SPI_WriteRead(&${module.driver.spi.name}_ctrl, p_src_checked, p_dest_checked, args_checked->length, args_checked->bit_width);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.spi.name}_close_guard (spi_ctrl_t *const p_api_ctrl)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+
+    return R_SCI_SPI_Close(&${module.driver.spi.name}_ctrl);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.spi.name}_calculate_bitrate_guard (uint32_t bitrate, sci_spi_div_setting_t *sclk_div, bool use_mddr)
+{
+    /* Verify all pointers are in non-secure memory. */
+    sci_spi_div_setting_t * sclk_div_checked = cmse_check_pointed_object(sclk_div, CMSE_AU_NONSECURE);
+    FSP_ASSERT(sclk_div_checked != NULL);
+
+    /* TODO: add your own security checks here */
+
+    return R_SCI_SPI_CalculateBitrate(bitrate, sclk_div_checked, use_mddr);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.spi.name}_callback_set_guard (spi_ctrl_t *const p_api_ctrl, void(*p_callback)(spi_callback_args_t *), void const *const p_context, spi_callback_args_t *const p_callback_memory)
+{
+    /* Verify all pointers are in non-secure memory. */
+    void(*p_callback_checked)(spi_callback_args_t *) = (void(*)(spi_callback_args_t *)) cmse_check_address_range((void *) p_callback, sizeof(void *), CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_callback_checked != NULL);
+    spi_callback_args_t *const p_callback_memory_checked = cmse_check_pointed_object(p_callback_memory, CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_callback_memory_checked != NULL);
+
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+    FSP_PARAMETER_NOT_USED(p_context);
+
+    return R_SCI_SPI_CallbackSet(&${module.driver.spi.name}_ctrl, p_callback_checked, p_context, p_callback_memory_checked);
+}
+
+                ]]>
+            </template>
+        </guard>
+        <nsc>
+            <header>
+
+#define FSP_GUARD_${module.driver.spi.name}_R_SCI_SPI_Open() ${module.driver.spi.name}_open_guard(FSP_SECURE_ARGUMENT, FSP_SECURE_ARGUMENT)
+
+#define FSP_GUARD_${module.driver.spi.name}_R_SCI_SPI_Read(p_dest, length, bit_width) ${module.driver.spi.name}_read_guard(FSP_SECURE_ARGUMENT, p_dest, length, bit_width)
+
+#define FSP_GUARD_${module.driver.spi.name}_R_SCI_SPI_Write(p_src, length, bit_width) ${module.driver.spi.name}_write_guard(FSP_SECURE_ARGUMENT, p_src, length, bit_width)
+
+#define FSP_GUARD_${module.driver.spi.name}_R_SCI_SPI_WriteRead(p_src, p_dest, length, bit_width) ${module.driver.spi.name}_write_read_guard(FSP_SECURE_ARGUMENT, p_src, p_dest, length, bit_width)
+
+#define FSP_GUARD_${module.driver.spi.name}_R_SCI_SPI_Close() ${module.driver.spi.name}_close_guard(FSP_SECURE_ARGUMENT)
+
+#define FSP_GUARD_${module.driver.spi.name}_R_SCI_SPI_CalculateBitrate(bitrate, sclk_div, use_mddr) ${module.driver.spi.name}_calculate_bitrate_guard(bitrate, sclk_div, use_mddr)
+
+#define FSP_GUARD_${module.driver.spi.name}_R_SCI_SPI_CallbackSet(p_callback, p_context, p_callback_memory) ${module.driver.spi.name}_callback_set_guard(FSP_SECURE_ARGUMENT, p_callback, p_context, p_callback_memory)
+
+
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.spi.name}_open_guard(spi_ctrl_t *p_api_ctrl, spi_cfg_t const *const p_cfg);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.spi.name}_read_guard(spi_ctrl_t *const p_api_ctrl, void *p_dest, uint32_t const length, spi_bit_width_t const bit_width);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.spi.name}_write_guard(spi_ctrl_t *const p_api_ctrl, void const *p_src, uint32_t const length, spi_bit_width_t const bit_width);
+
+inline fsp_err_t ${module.driver.spi.name}_write_read_guard(spi_ctrl_t * const p_api_ctrl, void const * p_src, void * p_dest, uint32_t const length, spi_bit_width_t const bit_width);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.spi.name}_write_read_guard_fanin(spi_ctrl_t * const p_api_ctrl, spi_write_read_guard_args_t * const p_args);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.spi.name}_close_guard(spi_ctrl_t *const p_api_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.spi.name}_calculate_bitrate_guard(uint32_t bitrate, sci_spi_div_setting_t *sclk_div, bool use_mddr);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.spi.name}_callback_set_guard(spi_ctrl_t *const p_api_ctrl, void(*p_callback)(spi_callback_args_t *), void const *const p_context, spi_callback_args_t *const p_callback_memory);
+
+
+extern const spi_instance_t ${module.driver.spi.name};
+
+inline fsp_err_t ${module.driver.spi.name}_write_read_guard (spi_ctrl_t * const p_api_ctrl, void const * p_src, void * p_dest, uint32_t const length, spi_bit_width_t const bit_width)
+{
+    /* Pack arguments into a struct */
+    spi_write_read_guard_args_t args =
+    {
+        .p_src     = p_src,
+        .p_dest    = p_dest,
+        .length    = length,
+        .bit_width = bit_width
+    };
+
+    /* Pass the struct to the NSC fan-in guard function */
+    return ${module.driver.spi.name}_write_read_guard_fanin(p_api_ctrl, &amp;args);
+}
+            </header>
+            <declarations>
+                <![CDATA[
+static const spi_api_t ${module.driver.spi.name}_nsc_api =
+{
+    .open = ${module.driver.spi.name}_open_guard,
+    .read = ${module.driver.spi.name}_read_guard,
+    .write = ${module.driver.spi.name}_write_guard,
+    .writeRead = ${module.driver.spi.name}_write_read_guard,
+    .close = ${module.driver.spi.name}_close_guard,
+    .callbackSet = ${module.driver.spi.name}_callback_set_guard,
+};
+const spi_instance_t ${module.driver.spi.name} =
+{
+    .p_api = &${module.driver.spi.name}_nsc_api,
+    .p_ctrl = FSP_SECURE_ARGUMENT,
+    .p_cfg = FSP_SECURE_ARGUMENT,
+};
+                ]]>
+            </declarations>
+        </nsc>
+        <api configurable="true">
+            <file>ra/fsp/inc/instances/r_sci_spi.h</file>
+            <file>ra/fsp/inc/api/r_spi_api.h</file>
+            <file>ra/fsp/inc/api/r_transfer_api.h</file>
+        </api>
+    </module>
+</raModuleDescription>

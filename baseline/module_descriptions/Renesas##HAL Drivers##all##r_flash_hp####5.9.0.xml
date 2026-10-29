@@ -1,0 +1,540 @@
+﻿<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.driver.flash_hp" path="fsp_cfg/r_flash_hp_cfg.h" version="1">
+        <property default="config.flash_hp.param_checking_enable.bsp" display="Parameter Checking" id="config.driver.flash_hp.param_checking_enable" description="If selected code for parameter checking is included in the build.">
+            <option display="Default (BSP)" id="config.flash_hp.param_checking_enable.bsp" value="(BSP_CFG_PARAM_CHECKING_ENABLE)"/>
+            <option display="Enabled" id="config.driver.flash_hp.param_checking_enable.enabled" value="(1)"/>
+            <option display="Disabled" id="config.driver.flash_hp.param_checking_enable.disabled" value="(0)"/>
+        </property>
+        <property default="config.driver.flash_hp.param_code_flash_programming_enable.disabled" display="Code Flash Programming Enable" id="config.driver.flash_hp.param_code_flash_programming_enable" description="Controls whether or not code-flash programming is enabled. Disabling reduces the amount of ROM and RAM used by the API.">
+            <option display="Enabled" id="config.driver.flash_hp.param_code_flash_programming_enable.enabled" value="(1)"/>
+            <option display="Disabled" id="config.driver.flash_hp.param_code_flash_programming_enable.disabled" value="(0)"/>
+        </property>
+        <property default="config.driver.flash_hp.param_data_flash_programming_enable.enabled" display="Data Flash Programming Enable" id="config.driver.flash_hp.param_data_flash_programming_enable" description="Controls whether or not data-flash programming is enabled. Disabling reduces the amount of ROM used by the API.">
+            <option display="Enabled" id="config.driver.flash_hp.param_data_flash_programming_enable.enabled" value="(1)"/>
+            <option display="Disabled" id="config.driver.flash_hp.param_data_flash_programming_enable.disabled" value="(0)"/>
+        </property>
+        <content>
+         #ifdef __cplusplus
+         extern "C" {
+         #endif
+
+         #define FLASH_HP_CFG_PARAM_CHECKING_ENABLE ${config.driver.flash_hp.param_checking_enable}
+         #define FLASH_HP_CFG_CODE_FLASH_PROGRAMMING_ENABLE ${config.driver.flash_hp.param_code_flash_programming_enable}
+         #define FLASH_HP_CFG_DATA_FLASH_PROGRAMMING_ENABLE ${config.driver.flash_hp.param_data_flash_programming_enable}
+
+         #ifdef __cplusplus
+         }
+         #endif
+        </content>
+    </config>
+    <module config="config.driver.flash_hp" display="Storage|${module.driver.flash.name} Flash (r_flash_hp)" id="module.driver.flash_on_flash_hp" version="1" url="group___f_l_a_s_h___h_p.html">
+        <constraint display="Unique name required for each instance">
+            "${interface.driver.flash.${module.driver.flash.name}}" === "1"
+        </constraint>
+        <constraint display="Code Flash or Data Flash Programming must be enabled.">
+            "${config.driver.flash_hp.param_code_flash_programming_enable}" == "config.driver.flash_hp.param_code_flash_programming_enable.enabled" || "${config.driver.flash_hp.param_data_flash_programming_enable}" == "config.driver.flash_hp.param_data_flash_programming_enable.enabled"
+        </constraint>
+        <constraint display="Flash Interrupts must be enabled if Data Flash Background Operation is enabled.">
+            ("${module.driver.flash.data_flash_bgo}" != "module.driver.flash.data_flash_bgo.enabled") ||
+            (("${module.driver.flash.ipl}" != "_disabled") &amp;&amp;
+             ("${module.driver.flash.err_ipl}" != "_disabled"))
+        </constraint>
+        <constraint display="Callback must be provided if Data Flash Background Operation is enabled.">
+            ("${module.driver.flash.data_flash_bgo}" != "module.driver.flash.data_flash_bgo.enabled") ||
+            ("${module.driver.flash.p_callback}" != "NULL")
+        </constraint>
+        <constraint display="All flash interrupt priorities must be the same priority level.">
+            "${module.driver.flash.ipl}" == "_disabled" || "${module.driver.flash.err_ipl}" == "_disabled" || "${module.driver.flash.ipl}" == "${module.driver.flash.err_ipl}"
+        </constraint>
+        <constraint display="Requires Flash HP peripheral">
+          "${interface.mcu.flash_hp}" === "1"
+        </constraint>
+        <constraint display="Cannot be used in a non-secure project">
+            "${_project.nonsecure}" !== "1"
+        </constraint>
+        <requires id="interface.driver.flash_hp.requires.mcu" visible="false" interface="interface.mcu.flash_hp" display="Requires Flash HP peripheral"/>
+        <requires id="module.driver.flash.requires.not.nonsecure" interface="_project.not.nonsecure" display="The flash driver cannot be used in a non-secure project" />
+        <provides interface="interface.driver.flash" />
+        <provides interface="interface.peripheral.flash_hp" />
+        <provides interface="interface.driver.flash_on_flash_hp" />
+        <provides interface="interface.driver.flash.${module.driver.flash.name}" />
+        <property default="g_flash${_instance}" display="Name" id="module.driver.flash.name" description="Module name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.flash.name}")</constraint>
+        </property>
+        <property default="module.driver.flash.data_flash_bgo.enabled" display="Data Flash Background Operation" id="module.driver.flash.data_flash_bgo" description="Enabling allows Flash API calls that reference data-flash to return immediately, with the operation continuing in the background.">
+            <option display="Enabled" id="module.driver.flash.data_flash_bgo.enabled" value="true"/>
+            <option display="Disabled" id="module.driver.flash.data_flash_bgo.disabled" value="false"/>
+        </property>
+        <property default="NULL" display="Callback" id="module.driver.flash.p_callback" description="A user callback function can be specified. Callback function called when a Data Flash Background Operation completes or errors.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.flash.p_callback}")</constraint>
+        </property>
+        <property default="NULL" id="module.driver.flash.p_context" description="A user specified context that will be provided back to the user when a callback occurs.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.flash.p_context}")</constraint>
+        </property>
+        <property default="" display="Flash Ready Interrupt Priority" id="module.driver.flash.ipl" description="Select the flash ready interrupt priority.">
+            <select enum="enum.mcu.nvic.priorities.optional"/>
+            <interrupt event="event.fcu.frdyi" isr="fcu_frdyi_isr"/>
+        </property>
+        <property default="" display="Flash Error Interrupt Priority" id="module.driver.flash.err_ipl" description="Select the flash error interrupt priority.">
+            <select enum="enum.mcu.nvic.priorities.optional"/>
+            <interrupt event="event.fcu.fiferr" isr="fcu_fiferr_isr"/>
+        </property>
+        <symbol id="symbol.driver.flash.name" value="${module.driver.flash.name}"/>
+        <symbol id="symbol.driver.flash.guard.open" value="${module.driver.flash.name}_open_guard"/>
+        <symbol id="symbol.driver.flash.guard.macro.open" value="FSP_GUARD_${module.driver.flash.name}_R_FLASH_HP_Open"/>
+        <symbol id="symbol.driver.flash.guard.write" value="${module.driver.flash.name}_write_guard"/>
+        <symbol id="symbol.driver.flash.guard.macro.write" value="FSP_GUARD_${module.driver.flash.name}_R_FLASH_HP_Write"/>
+        <symbol id="symbol.driver.flash.guard.erase" value="${module.driver.flash.name}_erase_guard"/>
+        <symbol id="symbol.driver.flash.guard.macro.erase" value="FSP_GUARD_${module.driver.flash.name}_R_FLASH_HP_Erase"/>
+        <symbol id="symbol.driver.flash.guard.blank_check" value="${module.driver.flash.name}_blank_check_guard"/>
+        <symbol id="symbol.driver.flash.guard.macro.blank_check" value="FSP_GUARD_${module.driver.flash.name}_R_FLASH_HP_BlankCheck"/>
+        <symbol id="symbol.driver.flash.guard.close" value="${module.driver.flash.name}_close_guard"/>
+        <symbol id="symbol.driver.flash.guard.macro.close" value="FSP_GUARD_${module.driver.flash.name}_R_FLASH_HP_Close"/>
+        <symbol id="symbol.driver.flash.guard.status_get" value="${module.driver.flash.name}_status_get_guard"/>
+        <symbol id="symbol.driver.flash.guard.macro.status_get" value="FSP_GUARD_${module.driver.flash.name}_R_FLASH_HP_StatusGet"/>
+        <symbol id="symbol.driver.flash.guard.access_window_set" value="${module.driver.flash.name}_access_window_set_guard"/>
+        <symbol id="symbol.driver.flash.guard.macro.access_window_set" value="FSP_GUARD_${module.driver.flash.name}_R_FLASH_HP_AccessWindowSet"/>
+        <symbol id="symbol.driver.flash.guard.access_window_clear" value="${module.driver.flash.name}_access_window_clear_guard"/>
+        <symbol id="symbol.driver.flash.guard.macro.access_window_clear" value="FSP_GUARD_${module.driver.flash.name}_R_FLASH_HP_AccessWindowClear"/>
+        <symbol id="symbol.driver.flash.guard.id_code_set" value="${module.driver.flash.name}_id_code_set_guard"/>
+        <symbol id="symbol.driver.flash.guard.macro.id_code_set" value="FSP_GUARD_${module.driver.flash.name}_R_FLASH_HP_IdCodeSet"/>
+        <symbol id="symbol.driver.flash.guard.reset" value="${module.driver.flash.name}_reset_guard"/>
+        <symbol id="symbol.driver.flash.guard.macro.reset" value="FSP_GUARD_${module.driver.flash.name}_R_FLASH_HP_Reset"/>
+        <symbol id="symbol.driver.flash.guard.update_flash_clock_freq" value="${module.driver.flash.name}_update_flash_clock_freq_guard"/>
+        <symbol id="symbol.driver.flash.guard.macro.update_flash_clock_freq" value="FSP_GUARD_${module.driver.flash.name}_R_FLASH_HP_UpdateFlashClockFreq"/>
+        <symbol id="symbol.driver.flash.guard.start_up_area_select" value="${module.driver.flash.name}_start_up_area_select_guard"/>
+        <symbol id="symbol.driver.flash.guard.macro.start_up_area_select" value="FSP_GUARD_${module.driver.flash.name}_R_FLASH_HP_StartUpAreaSelect"/>
+        <symbol id="symbol.driver.flash.guard.callback_set" value="${module.driver.flash.name}_callback_set_guard"/>
+        <symbol id="symbol.driver.flash.guard.macro.callback_set" value="FSP_GUARD_${module.driver.flash.name}_R_FLASH_HP_CallbackSet"/>
+        <symbol id="symbol.driver.flash.guard.bank_swap" value="${module.driver.flash.name}_bank_swap_guard"/>
+        <symbol id="symbol.driver.flash.guard.macro.bank_swap" value="FSP_GUARD_${module.driver.flash.name}_R_FLASH_HP_BankSwap"/>
+        <symbol id="symbol.driver.flash.guard.info_get" value="${module.driver.flash.name}_info_get_guard"/>
+        <symbol id="symbol.driver.flash.guard.macro.info_get" value="FSP_GUARD_${module.driver.flash.name}_R_FLASH_HP_InfoGet"/>
+        <symbol id="symbol.driver.flash.guard.anti_rollback_counter_increment" value="${module.driver.flash.name}_anti_rollback_counter_increment_guard"/>
+        <symbol id="symbol.driver.flash.guard.macro.anti_rollback_counter_increment" value="FSP_GUARD_${module.driver.flash.name}_R_FLASH_HP_AntiRollbackCounterIncrement"/>
+        <symbol id="symbol.driver.flash.guard.anti_rollback_counter_refresh" value="${module.driver.flash.name}_anti_rollback_counter_refresh_guard"/>
+        <symbol id="symbol.driver.flash.guard.macro.anti_rollback_counter_refresh" value="FSP_GUARD_${module.driver.flash.name}_R_FLASH_HP_AntiRollbackCounterRefresh"/>
+        <symbol id="symbol.driver.flash.guard.anti_rollback_counter_read" value="${module.driver.flash.name}_anti_rollback_counter_read_guard"/>
+        <symbol id="symbol.driver.flash.guard.macro.anti_rollback_counter_read" value="FSP_GUARD_${module.driver.flash.name}_R_FLASH_HP_AntiRollbackCounterRead"/>
+        <symbol id="symbol.driver.flash.guard.user_lockable_area_write" value="${module.driver.flash.name}_user_lockable_area_write_guard"/>
+        <symbol id="symbol.driver.flash.guard.macro.user_lockable_area_write" value="FSP_GUARD_${module.driver.flash.name}_R_FLASH_HP_UserLockableAreaWrite"/>
+        <symbol id="symbol.driver.flash.nsc_api" value="${module.driver.flash.name}_nsc_api"/>
+        <symbol id="symbol.driver.flash.cfg" value="${module.driver.flash.name}_cfg"/>
+        <symbol id="symbol.driver.flash.ctrl" value="${module.driver.flash.name}_ctrl"/>
+        <header>
+/* Flash on Flash HP Instance */
+extern const flash_instance_t ${module.driver.flash.name};
+
+/** Access the Flash HP instance using these structures when calling API functions directly (::p_api is not used). */
+extern flash_hp_instance_ctrl_t ${module.driver.flash.name}_ctrl;
+extern const flash_cfg_t ${module.driver.flash.name}_cfg;
+
+#ifndef ${module.driver.flash.p_callback}
+void ${module.driver.flash.p_callback}(flash_callback_args_t * p_args);
+#endif
+        </header>
+
+        <includes>#include &quot;r_flash_hp.h&quot;
+#include &quot;r_flash_api.h&quot;</includes>
+        <declarations>
+flash_hp_instance_ctrl_t ${module.driver.flash.name}_ctrl;
+const flash_cfg_t ${module.driver.flash.name}_cfg =
+{
+    .data_flash_bgo      = ${module.driver.flash.data_flash_bgo},
+    .p_callback          = ${module.driver.flash.p_callback},
+    .p_context           = ${module.driver.flash.p_context},
+#if defined(VECTOR_NUMBER_FCU_FRDYI)
+    .irq                 = VECTOR_NUMBER_FCU_FRDYI,
+#else
+    .irq                 = FSP_INVALID_VECTOR,
+#endif
+#if defined(VECTOR_NUMBER_FCU_FIFERR)
+    .err_irq             = VECTOR_NUMBER_FCU_FIFERR,
+#else
+    .err_irq             = FSP_INVALID_VECTOR,
+#endif
+    .err_ipl             = ${module.driver.flash.err_ipl},
+    .ipl                 = ${module.driver.flash.ipl},
+};
+/* Instance structure to use this module. */
+const flash_instance_t ${module.driver.flash.name} =
+{
+    .p_ctrl        = &amp;${module.driver.flash.name}_ctrl,
+    .p_cfg         = &amp;${module.driver.flash.name}_cfg,
+    .p_api         = &amp;g_flash_on_flash_hp
+};
+        </declarations>
+        <guard>
+            <header>
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.flash.name}_open_guard(flash_ctrl_t *const p_api_ctrl, flash_cfg_t const *const p_cfg);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.flash.name}_write_guard(flash_ctrl_t *const p_api_ctrl, uint32_t const src_address, uint32_t flash_address, uint32_t const num_bytes);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.flash.name}_erase_guard(flash_ctrl_t *const p_api_ctrl, uint32_t const address, uint32_t const num_blocks);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.flash.name}_blank_check_guard(flash_ctrl_t *const p_api_ctrl, uint32_t const address, uint32_t num_bytes, flash_result_t *p_blank_check_result);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.flash.name}_close_guard(flash_ctrl_t *const p_api_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.flash.name}_status_get_guard(flash_ctrl_t *const p_api_ctrl, flash_status_t *const p_status);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.flash.name}_access_window_set_guard(flash_ctrl_t *const p_api_ctrl, uint32_t const start_addr, uint32_t const end_addr);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.flash.name}_access_window_clear_guard(flash_ctrl_t *const p_api_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.flash.name}_id_code_set_guard(flash_ctrl_t *const p_api_ctrl, uint8_t const *const p_id_code, flash_id_code_mode_t mode);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.flash.name}_reset_guard(flash_ctrl_t *const p_api_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.flash.name}_update_flash_clock_freq_guard(flash_ctrl_t *const p_api_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.flash.name}_start_up_area_select_guard(flash_ctrl_t *const p_api_ctrl, flash_startup_area_swap_t swap_type, bool is_temporary);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.flash.name}_callback_set_guard(flash_ctrl_t *const p_api_ctrl, void(*p_callback)(flash_callback_args_t *), void const *const p_context, flash_callback_args_t *const p_callback_memory);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.flash.name}_bank_swap_guard(flash_ctrl_t *const p_api_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.flash.name}_info_get_guard(flash_ctrl_t *const p_api_ctrl, flash_info_t *const p_info);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.flash.name}_anti_rollback_counter_increment_guard(flash_ctrl_t *const p_api_ctrl, flash_arc_t counter);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.flash.name}_anti_rollback_counter_refresh_guard(flash_ctrl_t *const p_api_ctrl, flash_arc_t counter);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.flash.name}_anti_rollback_counter_read_guard(flash_ctrl_t *const p_api_ctrl, flash_arc_t counter, uint32_t *const p_count);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.flash.name}_user_lockable_area_write_guard(flash_ctrl_t *const p_api_ctrl, uint32_t const src_address, uint32_t flash_address, uint32_t const num_bytes);
+
+            </header>
+            <template name="${module.driver.flash.name}_guard.c">
+                <![CDATA[
+                    #include "guard.h"
+
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.flash.name}_open_guard (flash_ctrl_t *const p_api_ctrl, flash_cfg_t const *const p_cfg)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+    FSP_PARAMETER_NOT_USED(p_cfg);
+
+    return R_FLASH_HP_Open(&${module.driver.flash.name}_ctrl, &${module.driver.flash.name}_cfg);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.flash.name}_write_guard (flash_ctrl_t *const p_api_ctrl, uint32_t const src_address, uint32_t flash_address, uint32_t const num_bytes)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+
+    return R_FLASH_HP_Write(&${module.driver.flash.name}_ctrl, src_address, flash_address, num_bytes);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.flash.name}_erase_guard (flash_ctrl_t *const p_api_ctrl, uint32_t const address, uint32_t const num_blocks)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+
+    return R_FLASH_HP_Erase(&${module.driver.flash.name}_ctrl, address, num_blocks);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.flash.name}_blank_check_guard (flash_ctrl_t *const p_api_ctrl, uint32_t const address, uint32_t num_bytes, flash_result_t *p_blank_check_result)
+{
+    /* Verify all pointers are in non-secure memory. */
+    flash_result_t * p_blank_check_result_checked = cmse_check_pointed_object(p_blank_check_result, CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_blank_check_result_checked != NULL);
+
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+
+    return R_FLASH_HP_BlankCheck(&${module.driver.flash.name}_ctrl, address, num_bytes, p_blank_check_result_checked);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.flash.name}_close_guard (flash_ctrl_t *const p_api_ctrl)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+
+    return R_FLASH_HP_Close(&${module.driver.flash.name}_ctrl);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.flash.name}_status_get_guard (flash_ctrl_t *const p_api_ctrl, flash_status_t *const p_status)
+{
+    /* Verify all pointers are in non-secure memory. */
+    flash_status_t *const p_status_checked = cmse_check_pointed_object(p_status, CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_status_checked != NULL);
+
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+
+    return R_FLASH_HP_StatusGet(&${module.driver.flash.name}_ctrl, p_status_checked);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.flash.name}_access_window_set_guard (flash_ctrl_t *const p_api_ctrl, uint32_t const start_addr, uint32_t const end_addr)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+
+    return R_FLASH_HP_AccessWindowSet(&${module.driver.flash.name}_ctrl, start_addr, end_addr);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.flash.name}_access_window_clear_guard (flash_ctrl_t *const p_api_ctrl)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+
+    return R_FLASH_HP_AccessWindowClear(&${module.driver.flash.name}_ctrl);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.flash.name}_id_code_set_guard (flash_ctrl_t *const p_api_ctrl, uint8_t const *const p_id_code, flash_id_code_mode_t mode)
+{
+    /* Verify all pointers are in non-secure memory. */
+    uint8_t const *const p_id_code_checked = cmse_check_address_range((void *) p_id_code, 16, CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_id_code_checked != NULL);
+
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+
+    return R_FLASH_HP_IdCodeSet(&${module.driver.flash.name}_ctrl, p_id_code_checked, mode);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.flash.name}_reset_guard (flash_ctrl_t *const p_api_ctrl)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+
+    return R_FLASH_HP_Reset(&${module.driver.flash.name}_ctrl);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.flash.name}_update_flash_clock_freq_guard (flash_ctrl_t *const p_api_ctrl)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+
+    return R_FLASH_HP_UpdateFlashClockFreq(&${module.driver.flash.name}_ctrl);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.flash.name}_start_up_area_select_guard (flash_ctrl_t *const p_api_ctrl, flash_startup_area_swap_t swap_type, bool is_temporary)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+
+    return R_FLASH_HP_StartUpAreaSelect(&${module.driver.flash.name}_ctrl, swap_type, is_temporary);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.flash.name}_callback_set_guard (flash_ctrl_t *const p_api_ctrl, void(*p_callback)(flash_callback_args_t *), void const *const p_context, flash_callback_args_t *const p_callback_memory)
+{
+    /* Verify all pointers are in non-secure memory. */
+    void(*p_callback_checked)(flash_callback_args_t *) = (void(*)(flash_callback_args_t *)) cmse_check_address_range((void *) p_callback, sizeof(void *), CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_callback_checked != NULL);
+    flash_callback_args_t *const p_callback_memory_checked = cmse_check_pointed_object(p_callback_memory, CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_callback_memory_checked != NULL);
+
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+    FSP_PARAMETER_NOT_USED(p_context);
+
+    return R_FLASH_HP_CallbackSet(&${module.driver.flash.name}_ctrl, p_callback_checked, p_context, p_callback_memory_checked);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.flash.name}_bank_swap_guard (flash_ctrl_t *const p_api_ctrl)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+
+    return R_FLASH_HP_BankSwap(&${module.driver.flash.name}_ctrl);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.flash.name}_info_get_guard (flash_ctrl_t *const p_api_ctrl, flash_info_t *const p_info)
+{
+    /* Verify all pointers are in non-secure memory. */
+    flash_info_t *const p_info_checked = cmse_check_pointed_object(p_info, CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_info_checked != NULL);
+
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+
+    return R_FLASH_HP_InfoGet(&${module.driver.flash.name}_ctrl, p_info_checked);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.flash.name}_anti_rollback_counter_increment_guard (flash_ctrl_t *const p_api_ctrl, flash_arc_t counter)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+
+    return R_FLASH_HP_AntiRollbackCounterIncrement(&${module.driver.flash.name}_ctrl, counter);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.flash.name}_anti_rollback_counter_refresh_guard (flash_ctrl_t *const p_api_ctrl, flash_arc_t counter)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+
+    return R_FLASH_HP_AntiRollbackCounterRefresh(&${module.driver.flash.name}_ctrl, counter);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.flash.name}_anti_rollback_counter_read_guard (flash_ctrl_t *const p_api_ctrl, flash_arc_t counter, uint32_t *const p_count)
+{
+    /* Verify all pointers are in non-secure memory. */
+    uint32_t *const p_count_checked = cmse_check_address_range((void *) p_count, sizeof(uint32_t), CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_count_checked != NULL);
+
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+
+    return R_FLASH_HP_AntiRollbackCounterRead(&${module.driver.flash.name}_ctrl, counter, p_count_checked);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.flash.name}_user_lockable_area_write_guard (flash_ctrl_t *const p_api_ctrl, uint32_t const src_address, uint32_t flash_address, uint32_t const num_bytes)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+
+    return R_FLASH_HP_UserLockableAreaWrite(&${module.driver.flash.name}_ctrl, src_address, flash_address, num_bytes);
+}
+
+                ]]>
+            </template>
+        </guard>
+        <nsc>
+            <header>
+
+#define FSP_GUARD_${module.driver.flash.name}_R_FLASH_HP_Open() ${module.driver.flash.name}_open_guard(FSP_SECURE_ARGUMENT, FSP_SECURE_ARGUMENT)
+
+#define FSP_GUARD_${module.driver.flash.name}_R_FLASH_HP_Write(src_address, flash_address, num_bytes) ${module.driver.flash.name}_write_guard(FSP_SECURE_ARGUMENT, src_address, flash_address, num_bytes)
+
+#define FSP_GUARD_${module.driver.flash.name}_R_FLASH_HP_Erase(address, num_blocks) ${module.driver.flash.name}_erase_guard(FSP_SECURE_ARGUMENT, address, num_blocks)
+
+#define FSP_GUARD_${module.driver.flash.name}_R_FLASH_HP_BlankCheck(address, num_bytes, p_blank_check_result) ${module.driver.flash.name}_blank_check_guard(FSP_SECURE_ARGUMENT, address, num_bytes, p_blank_check_result)
+
+#define FSP_GUARD_${module.driver.flash.name}_R_FLASH_HP_Close() ${module.driver.flash.name}_close_guard(FSP_SECURE_ARGUMENT)
+
+#define FSP_GUARD_${module.driver.flash.name}_R_FLASH_HP_StatusGet(p_status) ${module.driver.flash.name}_status_get_guard(FSP_SECURE_ARGUMENT, p_status)
+
+#define FSP_GUARD_${module.driver.flash.name}_R_FLASH_HP_AccessWindowSet(start_addr, end_addr) ${module.driver.flash.name}_access_window_set_guard(FSP_SECURE_ARGUMENT, start_addr, end_addr)
+
+#define FSP_GUARD_${module.driver.flash.name}_R_FLASH_HP_AccessWindowClear() ${module.driver.flash.name}_access_window_clear_guard(FSP_SECURE_ARGUMENT)
+
+#define FSP_GUARD_${module.driver.flash.name}_R_FLASH_HP_IdCodeSet(p_id_code, mode) ${module.driver.flash.name}_id_code_set_guard(FSP_SECURE_ARGUMENT, p_id_code, mode)
+
+#define FSP_GUARD_${module.driver.flash.name}_R_FLASH_HP_Reset() ${module.driver.flash.name}_reset_guard(FSP_SECURE_ARGUMENT)
+
+#define FSP_GUARD_${module.driver.flash.name}_R_FLASH_HP_UpdateFlashClockFreq() ${module.driver.flash.name}_update_flash_clock_freq_guard(FSP_SECURE_ARGUMENT)
+
+#define FSP_GUARD_${module.driver.flash.name}_R_FLASH_HP_StartUpAreaSelect(swap_type, is_temporary) ${module.driver.flash.name}_start_up_area_select_guard(FSP_SECURE_ARGUMENT, swap_type, is_temporary)
+
+#define FSP_GUARD_${module.driver.flash.name}_R_FLASH_HP_CallbackSet(p_callback, p_context, p_callback_memory) ${module.driver.flash.name}_callback_set_guard(FSP_SECURE_ARGUMENT, p_callback, p_context, p_callback_memory)
+
+#define FSP_GUARD_${module.driver.flash.name}_R_FLASH_HP_BankSwap() ${module.driver.flash.name}_bank_swap_guard(FSP_SECURE_ARGUMENT)
+
+#define FSP_GUARD_${module.driver.flash.name}_R_FLASH_HP_InfoGet(p_info) ${module.driver.flash.name}_info_get_guard(FSP_SECURE_ARGUMENT, p_info)
+
+#define FSP_GUARD_${module.driver.flash.name}_R_FLASH_HP_AntiRollbackCounterIncrement(counter) ${module.driver.flash.name}_anti_rollback_counter_increment_guard(FSP_SECURE_ARGUMENT, counter)
+
+#define FSP_GUARD_${module.driver.flash.name}_R_FLASH_HP_AntiRollbackCounterRefresh(counter) ${module.driver.flash.name}_anti_rollback_counter_refresh_guard(FSP_SECURE_ARGUMENT, counter)
+
+#define FSP_GUARD_${module.driver.flash.name}_R_FLASH_HP_AntiRollbackCounterRead(counter, p_count) ${module.driver.flash.name}_anti_rollback_counter_read_guard(FSP_SECURE_ARGUMENT, counter, p_count)
+
+#define FSP_GUARD_${module.driver.flash.name}_R_FLASH_HP_UserLockableAreaWrite(src_address, flash_address, num_bytes) ${module.driver.flash.name}_user_lockable_area_write_guard(FSP_SECURE_ARGUMENT, src_address, flash_address, num_bytes)
+
+
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.flash.name}_open_guard(flash_ctrl_t *const p_api_ctrl, flash_cfg_t const *const p_cfg);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.flash.name}_write_guard(flash_ctrl_t *const p_api_ctrl, uint32_t const src_address, uint32_t flash_address, uint32_t const num_bytes);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.flash.name}_erase_guard(flash_ctrl_t *const p_api_ctrl, uint32_t const address, uint32_t const num_blocks);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.flash.name}_blank_check_guard(flash_ctrl_t *const p_api_ctrl, uint32_t const address, uint32_t num_bytes, flash_result_t *p_blank_check_result);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.flash.name}_close_guard(flash_ctrl_t *const p_api_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.flash.name}_status_get_guard(flash_ctrl_t *const p_api_ctrl, flash_status_t *const p_status);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.flash.name}_access_window_set_guard(flash_ctrl_t *const p_api_ctrl, uint32_t const start_addr, uint32_t const end_addr);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.flash.name}_access_window_clear_guard(flash_ctrl_t *const p_api_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.flash.name}_id_code_set_guard(flash_ctrl_t *const p_api_ctrl, uint8_t const *const p_id_code, flash_id_code_mode_t mode);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.flash.name}_reset_guard(flash_ctrl_t *const p_api_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.flash.name}_update_flash_clock_freq_guard(flash_ctrl_t *const p_api_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.flash.name}_start_up_area_select_guard(flash_ctrl_t *const p_api_ctrl, flash_startup_area_swap_t swap_type, bool is_temporary);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.flash.name}_callback_set_guard(flash_ctrl_t *const p_api_ctrl, void(*p_callback)(flash_callback_args_t *), void const *const p_context, flash_callback_args_t *const p_callback_memory);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.flash.name}_bank_swap_guard(flash_ctrl_t *const p_api_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.flash.name}_info_get_guard(flash_ctrl_t *const p_api_ctrl, flash_info_t *const p_info);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.flash.name}_anti_rollback_counter_increment_guard(flash_ctrl_t *const p_api_ctrl, flash_arc_t counter);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.flash.name}_anti_rollback_counter_refresh_guard(flash_ctrl_t *const p_api_ctrl, flash_arc_t counter);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.flash.name}_anti_rollback_counter_read_guard(flash_ctrl_t *const p_api_ctrl, flash_arc_t counter, uint32_t *const p_count);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.flash.name}_user_lockable_area_write_guard(flash_ctrl_t *const p_api_ctrl, uint32_t const src_address, uint32_t flash_address, uint32_t const num_bytes);
+
+
+extern const flash_instance_t ${module.driver.flash.name};
+            </header>
+            <declarations>
+                <![CDATA[
+static const flash_api_t ${module.driver.flash.name}_nsc_api =
+{
+    .open = ${module.driver.flash.name}_open_guard,
+    .write = ${module.driver.flash.name}_write_guard,
+    .erase = ${module.driver.flash.name}_erase_guard,
+    .blankCheck = ${module.driver.flash.name}_blank_check_guard,
+    .close = ${module.driver.flash.name}_close_guard,
+    .statusGet = ${module.driver.flash.name}_status_get_guard,
+    .accessWindowSet = ${module.driver.flash.name}_access_window_set_guard,
+    .accessWindowClear = ${module.driver.flash.name}_access_window_clear_guard,
+    .idCodeSet = ${module.driver.flash.name}_id_code_set_guard,
+    .reset = ${module.driver.flash.name}_reset_guard,
+    .updateFlashClockFreq = ${module.driver.flash.name}_update_flash_clock_freq_guard,
+    .startupAreaSelect = ${module.driver.flash.name}_start_up_area_select_guard,
+    .callbackSet = ${module.driver.flash.name}_callback_set_guard,
+    .bankSwap = ${module.driver.flash.name}_bank_swap_guard,
+    .infoGet = ${module.driver.flash.name}_info_get_guard,
+    .antiRollbackCounterIncrement = ${module.driver.flash.name}_anti_rollback_counter_increment_guard,
+    .antiRollbackCounterRefresh = ${module.driver.flash.name}_anti_rollback_counter_refresh_guard,
+    .antiRollbackCounterRead = ${module.driver.flash.name}_anti_rollback_counter_read_guard,
+    .userLockableAreaWrite = ${module.driver.flash.name}_user_lockable_area_write_guard,
+};
+const flash_instance_t ${module.driver.flash.name} =
+{
+    .p_api = &${module.driver.flash.name}_nsc_api,
+    .p_ctrl = FSP_SECURE_ARGUMENT,
+    .p_cfg = FSP_SECURE_ARGUMENT,
+};
+                ]]>
+            </declarations>
+        </nsc>
+        <api configurable="true">
+            <file>ra/fsp/inc/instances/r_flash_hp.h</file>
+            <file>ra/fsp/inc/api/r_cgc_api.h</file>
+            <file>ra/fsp/inc/api/r_flash_api.h</file>
+        </api>
+    </module>
+</raModuleDescription>

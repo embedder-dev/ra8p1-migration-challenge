@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<raModuleDescription>
+    <bsp id="bsp.ra0e2.events" config="config.bsp.ra0e2.events" display="RA0E2 event data" version="0">
+        <scope id="scope.dtc" interruptOnly="true" />
+        <scope id="scope.snooze" />
+        <scope id="scope.sstby" />
+        <event id="event.adc0.scan.end" display="ADC|ADC0|ADC0 SCAN END (End of A/D scanning operation)" value="ADC0_SCAN_END" scope="interrupt,eventlink,scope.dtc,scope.snooze" irqSlot="31"></event>
+        <event id="event.dtc.complete" display="DTC|DTC COMPLETE (DTC transfer complete)" value="DTC_COMPLETE" scope="interrupt,scope.snooze" irqSlot="10"></event>
+        <event id="event.dtc.end" display="DTC|DTC END (DTC transfer end)" value="DTC_END" scope="eventlink"></event>
+        <event id="event.elc.software.event.0" display="ELC|ELC SOFTWARE EVENT 0 (Software event 0)" value="ELC_SOFTWARE_EVENT_0" scope="interrupt,eventlink,scope.dtc" irqSlot="15"></event>
+        <event id="event.elc.software.event.1" display="ELC|ELC SOFTWARE EVENT 1 (Software event 1)" value="ELC_SOFTWARE_EVENT_1" scope="interrupt,eventlink,scope.dtc" irqSlot="16"></event>
+        <event id="event.fcu.frdyi" display="FCU|FCU FRDYI (Flash ready interrupt)" value="FCU_FRDYI" scope="interrupt" irqSlot="11"></event>
+        <event id="event.icu.irq0" display="ICU|ICU IRQ0 (External pin interrupt 0)" value="ICU_IRQ0" scope="interrupt,eventlink,scope.dtc,scope.snooze,scope.sstby" irqSlot="2"></event>
+        <event id="event.icu.irq1" display="ICU|ICU IRQ1 (External pin interrupt 1)" value="ICU_IRQ1" scope="interrupt,eventlink,scope.dtc,scope.snooze,scope.sstby" irqSlot="3"></event>
+        <event id="event.icu.irq2" display="ICU|ICU IRQ2 (External pin interrupt 2)" value="ICU_IRQ2" scope="interrupt,eventlink,scope.dtc,scope.snooze,scope.sstby" irqSlot="4"></event>
+        <event id="event.icu.irq3" display="ICU|ICU IRQ3 (External pin interrupt 3)" value="ICU_IRQ3" scope="interrupt,eventlink,scope.dtc,scope.snooze,scope.sstby" irqSlot="5"></event>
+        <event id="event.icu.irq4" display="ICU|ICU IRQ4 (External pin interrupt 4)" value="ICU_IRQ4" scope="interrupt,eventlink,scope.dtc,scope.snooze,scope.sstby" irqSlot="6"></event>
+        <event id="event.icu.irq5" display="ICU|ICU IRQ5 (External pin interrupt 5)" value="ICU_IRQ5" scope="interrupt,eventlink,scope.dtc,scope.snooze,scope.sstby" irqSlot="7"></event>
+        <event id="event.icu.irq6" display="ICU|ICU IRQ6 (External pin interrupt 6)" value="ICU_IRQ6" scope="interrupt,eventlink,scope.dtc,scope.snooze,scope.sstby" irqSlot="8"></event>
+        <event id="event.icu.irq7" display="ICU|ICU IRQ7 (External pin interrupt 7)" value="ICU_IRQ7" scope="interrupt,eventlink,scope.dtc,scope.snooze,scope.sstby" irqSlot="9"></event>
+        <event id="event.iica0.txrxi" display="IICA|IICA0|IICA0 TXRXI (End of IICA0 communication)" value="IICA0_TXRXI" scope="interrupt,eventlink,scope.snooze,scope.sstby" irqSlot="26"></event>
+        <event id="event.iica1.txrxi" display="IICA|IICA1|IICA1 TXRXI (End of IICA1 communication)" value="IICA1_TXRXI" scope="interrupt,eventlink,scope.snooze,scope.sstby" irqSlot="42"></event>
+        <event id="event.iwdt.underflow" display="IWDT|IWDT UNDERFLOW (IWDT underflow)" value="IWDT_UNDERFLOW" scope="interrupt,scope.snooze,scope.sstby" irqSlot="0"></event>
+        <event id="event.lvd.lvd1" display="LVD|LVD LVD1 (Voltage monitor 1 interrupt)" value="LVD_LVD1" scope="interrupt,eventlink,scope.dtc,scope.snooze,scope.sstby" irqSlot="1"></event>
+        <event id="event.rtc.alarm.or.period" display="RTC|RTC ALARM OR PERIOD (Alarm or Periodic interrupt)" value="RTC_ALARM_OR_PERIOD" scope="interrupt,eventlink,scope.dtc,scope.snooze,scope.sstby" irqSlot="32"></event>
+        <event id="event.sau0.uart.erri0" display="SAU|SAU0|SAU0 UART ERRI0 (SAU UART Error)" value="SAU0_UART_ERRI0" scope="interrupt,scope.snooze" irqSlot="20"></event>
+        <event id="event.sau0.uart.erri1" display="SAU|SAU0|SAU0 UART ERRI1 (SAU UART Error)" value="SAU0_UART_ERRI1" scope="interrupt" irqSlot="24"></event>
+        <event id="event.sau0.uart.rxi0" display="SAU|SAU0|SAU0 UART RXI0 (SAU UART RX 0/I2C 01/SPI 01)" value="SAU0_UART_RXI0" scope="interrupt,eventlink,scope.dtc,scope.snooze" irqSlot="27"></event>
+        <event id="event.sau0.spi.txrxi01" display="SAU|SAU0|SAU0 SPI TXRXI01 (SAU UART RX 0/I2C 01/SPI 01)" value="SAU0_SPI_TXRXI01" scope="interrupt,eventlink,scope.dtc,scope.snooze" irqSlot="27"></event>
+        <event id="event.sau0.iic.txrxi01" display="SAU|SAU0|SAU0 IIC TXRXI01 (SAU UART RX 0/I2C 01/SPI 01)" value="SAU0_IIC_TXRXI01" scope="interrupt,eventlink,scope.dtc,scope.snooze" irqSlot="27"></event>
+        <event id="event.sau0.uart.rxi1" display="SAU|SAU0|SAU0 UART RXI1 (SAU UART RX 1/I2C 11/SPI 11)" value="SAU0_UART_RXI1" scope="interrupt,scope.dtc" irqSlot="23"></event>
+        <event id="event.sau0.spi.txrxi11" display="SAU|SAU0|SAU0 SPI TXRXI11 (SAU UART RX 1/I2C 11/SPI 11)" value="SAU0_SPI_TXRXI11" scope="interrupt,scope.dtc" irqSlot="23"></event>
+        <event id="event.sau0.iic.txrxi11" display="SAU|SAU0|SAU0 IIC TXRXI11 (SAU UART RX 1/I2C 11/SPI 11)" value="SAU0_IIC_TXRXI11" scope="interrupt,scope.dtc" irqSlot="23"></event>
+        <event id="event.sau0.uart.txi0" display="SAU|SAU0|SAU0 UART TXI0 (SAU UART TX 0/I2C 00/SPI 00)" value="SAU0_UART_TXI0" scope="interrupt,eventlink,scope.dtc,scope.snooze" irqSlot="18"></event>
+        <event id="event.sau0.spi.txrxi00" display="SAU|SAU0|SAU0 SPI TXRXI00 (SAU UART TX 0/I2C 00/SPI 00)" value="SAU0_SPI_TXRXI00" scope="interrupt,eventlink,scope.dtc,scope.snooze" irqSlot="18"></event>
+        <event id="event.sau0.iic.txrxi00" display="SAU|SAU0|SAU0 IIC TXRXI00 (SAU UART TX 0/I2C 00/SPI 00)" value="SAU0_IIC_TXRXI00" scope="interrupt,eventlink,scope.dtc,scope.snooze" irqSlot="18"></event>
+        <event id="event.sau0.uart.txi1" display="SAU|SAU0|SAU0 UART TXI1 (SAU UART TX 1/I2C 10/SPI 10)" value="SAU0_UART_TXI1" scope="interrupt,scope.dtc" irqSlot="22"></event>
+        <event id="event.sau0.spi.txrxi10" display="SAU|SAU0|SAU0 SPI TXRXI10 (SAU UART TX 1/I2C 10/SPI 10)" value="SAU0_SPI_TXRXI10" scope="interrupt,scope.dtc" irqSlot="22"></event>
+        <event id="event.sau0.iic.txrxi10" display="SAU|SAU0|SAU0 IIC TXRXI10 (SAU UART TX 1/I2C 10/SPI 10)" value="SAU0_IIC_TXRXI10" scope="interrupt,scope.dtc" irqSlot="22"></event>
+        <event id="event.sau1.uart.erri2" display="SAU|SAU1|SAU1 UART ERRI2 (SAU UART Error)" value="SAU1_UART_ERRI2" scope="interrupt" irqSlot="14"></event>
+        <event id="event.sau1.uart.rxi2" display="SAU|SAU1|SAU1 UART RXI2 (SAU UART RX 2/I2C 21/SPI 21)" value="SAU1_UART_RXI2" scope="interrupt,scope.dtc" irqSlot="13"></event>
+        <event id="event.sau1.spi.txrxi21" display="SAU|SAU1|SAU1 SPI TXRXI21 (SAU UART RX 2/I2C 21/SPI 21)" value="SAU1_SPI_TXRXI21" scope="interrupt,scope.dtc" irqSlot="13"></event>
+        <event id="event.sau1.iic.txrxi21" display="SAU|SAU1|SAU1 IIC TXRXI21 (SAU UART RX 2/I2C 21/SPI 21)" value="SAU1_IIC_TXRXI21" scope="interrupt,scope.dtc" irqSlot="13"></event>
+        <event id="event.sau1.uart.txi2" display="SAU|SAU1|SAU1 UART TXI2 (SAU UART TX 2/I2C 20/SPI 20)" value="SAU1_UART_TXI2" scope="interrupt,scope.dtc" irqSlot="12"></event>
+        <event id="event.sau1.spi.txrxi20" display="SAU|SAU1|SAU1 SPI TXRXI20 (SAU UART TX 2/I2C 20/SPI 20)" value="SAU1_SPI_TXRXI20" scope="interrupt,scope.dtc" irqSlot="12"></event>
+        <event id="event.sau1.iic.txrxi20" display="SAU|SAU1|SAU1 IIC TXRXI20 (SAU UART TX 2/I2C 20/SPI 20)" value="SAU1_IIC_TXRXI20" scope="interrupt,scope.dtc" irqSlot="12"></event>
+        <event id="event.tau0.tmi00" display="TAU|TAU0|TAU0 TMI00 (End of timer channel 00 count or capture)" value="TAU0_TMI00" scope="interrupt,eventlink,scope.dtc" irqSlot="19"></event>
+        <event id="event.tau0.tmi01" display="TAU|TAU0|TAU0 TMI01 (End of timer channel 01 count or capture)" value="TAU0_TMI01" scope="interrupt,eventlink,scope.dtc" irqSlot="28"></event>
+        <event id="event.tau0.tmi01h" display="TAU|TAU0|TAU0 TMI01H (End of timer channel 01 count or capture (higher operation))" value="TAU0_TMI01H" scope="interrupt" irqSlot="21"></event>
+        <event id="event.tau0.tmi02" display="TAU|TAU0|TAU0 TMI02 (End of timer channel 02 count or capture)" value="TAU0_TMI02" scope="interrupt,eventlink,scope.dtc" irqSlot="29"></event>
+        <event id="event.tau0.tmi03" display="TAU|TAU0|TAU0 TMI03 (End of timer channel 03 count or capture)" value="TAU0_TMI03" scope="interrupt,eventlink,scope.dtc" irqSlot="30"></event>
+        <event id="event.tau0.tmi03h" display="TAU|TAU0|TAU0 TMI03H (End of timer channel 03 count or capture (higher operation))" value="TAU0_TMI03H" scope="interrupt" irqSlot="25"></event>
+        <event id="event.tau0.tmi04" display="TAU|TAU0|TAU0 TMI04 (End of timer channel 04 count or capture)" value="TAU0_TMI04" scope="interrupt,scope.dtc" irqSlot="35"></event>
+        <event id="event.tau0.tmi05" display="TAU|TAU0|TAU0 TMI05 (End of timer channel 05 count or capture)" value="TAU0_TMI05" scope="interrupt,scope.dtc" irqSlot="36"></event>
+        <event id="event.tau0.tmi06" display="TAU|TAU0|TAU0 TMI06 (End of timer channel 06 count or capture)" value="TAU0_TMI06" scope="interrupt,scope.dtc" irqSlot="37"></event>
+        <event id="event.tau0.tmi07" display="TAU|TAU0|TAU0 TMI07 (End of timer channel 07 count or capture)" value="TAU0_TMI07" scope="interrupt,scope.dtc" irqSlot="38"></event>
+        <event id="event.tml0.itl0" display="TML|TML0|TML0 ITL0 (TML timer0 compare-match)" value="TML0_ITL0" scope="eventlink,scope.dtc" irqSlot="34"></event>
+        <event id="event.tml0.itl1" display="TML|TML0|TML0 ITL1 (TML timer1 compare-match)" value="TML0_ITL1" scope="eventlink"></event>
+        <event id="event.tml0.itl2" display="TML|TML0|TML0 ITL2 (TML timer2 compare-match)" value="TML0_ITL2" scope="eventlink"></event>
+        <event id="event.tml0.itl3" display="TML|TML0|TML0 ITL3 (TML timer3 compare-match)" value="TML0_ITL3" scope="eventlink"></event>
+        <event id="event.tml0.itl.or" display="TML|TML0|TML0 ITL OR (TML timer event)" value="TML0_ITL_OR" scope="interrupt,scope.dtc,scope.snooze,scope.sstby" irqSlot="33"></event>
+        <event id="event.trng.rdreq" display="TRNG|TRNG RDREQ (TRNG Read Request)" value="TRNG_RDREQ" scope="interrupt" irqSlot="17"></event>
+        <event id="event.uarta0.erri" display="UARTA|UARTA0|UARTA0 ERRI (UARTA0 reception communication error occurrence)" value="UARTA0_ERRI" scope="interrupt,eventlink,scope.snooze,scope.sstby" irqSlot="39"></event>
+        <event id="event.uarta0.rxi" display="UARTA|UARTA0|UARTA0 RXI (UARTA0 reception transfer end)" value="UARTA0_RXI" scope="interrupt,eventlink,scope.dtc,scope.snooze,scope.sstby" irqSlot="41"></event>
+        <event id="event.uarta0.txi" display="UARTA|UARTA0|UARTA0 TXI (UARTA0 transmission transfer end or buffer empty interrupt)" value="UARTA0_TXI" scope="interrupt,eventlink,scope.dtc,scope.snooze,scope.sstby" irqSlot="40"></event>
+        <event id="event.uarta1.erri" display="UARTA|UARTA1|UARTA1 ERRI (UARTA1 reception communication error occurrence)" value="UARTA1_ERRI" scope="interrupt,eventlink,scope.snooze,scope.sstby" irqSlot="43"></event>
+        <event id="event.uarta1.rxi" display="UARTA|UARTA1|UARTA1 RXI (UARTA1 reception transfer end)" value="UARTA1_RXI" scope="interrupt,eventlink,scope.dtc,scope.snooze,scope.sstby" irqSlot="45"></event>
+        <event id="event.uarta1.txi" display="UARTA|UARTA1|UARTA1 TXI (UARTA1 transmission transfer end or buffer empty interrupt)" value="UARTA1_TXI" scope="interrupt,eventlink,scope.dtc,scope.snooze,scope.sstby" irqSlot="44"></event>
+        <link id="link.ad" display="ADC12" value="AD" />
+        <link id="link.tau00" display="TAU00" value="TAU00" />
+        <link id="link.tau01" display="TAU01" value="TAU01" />
+        <link id="link.ioport1" display="PORT1" value="IOPORT1" />
+        <link id="link.ioport2" display="PORT2" value="IOPORT2" />
+        <link id="link.itlc" display="TML32" value="ITLC" />
+    </bsp>
+</raModuleDescription>

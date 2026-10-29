@@ -1,0 +1,172 @@
+<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.aws.cellular_interface" path="aws/cellular_interface/cellular_config.h" version="0">
+        <property default="3" display="Mobile Country Code Max Size" id="config.aws.cellular_interface.mcc_max_size" description="Mobile country code max size.">
+            <constraint display="Value must be a positive integer">testInteger("${config.aws.cellular_interface.mcc_max_size}") &amp;&amp; ("${config.aws.cellular_interface.mcc_max_size}" &gt; 0) </constraint>
+        </property>
+        <property default="3" display="Mobile Network Node Max Size" id="config.aws.cellular_interface.mnc_max_size" description="Mobile network code max size.">
+            <constraint display="Value must be a positive integer">testInteger("${config.aws.cellular_interface.mnc_max_size}") &amp;&amp; ("${config.aws.cellular_interface.mnc_max_size}" &gt; 0) </constraint>
+        </property>
+        <property default="20" display="Integrated Circuit Card Identity Max Size" id="config.aws.cellular_interface.iccid_max_size" description="Integrated circuit card identity max size.">
+            <constraint display="Value must be a positive integer">testInteger("${config.aws.cellular_interface.iccid_max_size}") &amp;&amp; ("${config.aws.cellular_interface.iccid_max_size}" &gt; 0) </constraint>
+        </property>
+        <property default="15" display="International Mobile Subscriber Identity Max Size" id="config.aws.cellular_interface.imsi_max_size" description="International Mobile Subscriber Identity max size.">
+            <constraint display="Value must be a positive integer">testInteger("${config.aws.cellular_interface.imsi_max_size}") &amp;&amp; ("${config.aws.cellular_interface.imsi_max_size}" &gt; 0) </constraint>
+        </property>
+        <property default="32" display="Firmware Version Max Size" id="config.aws.cellular_interface.fw_version_max_size" description="Cellular module firmware version max size.">
+            <constraint display="Value must be a positive integer">testInteger("${config.aws.cellular_interface.fw_version_max_size}") &amp;&amp; ("${config.aws.cellular_interface.fw_version_max_size}" &gt; 0) </constraint>
+        </property>
+        <property default="12" display="Hardware Version Max Size" id="config.aws.cellular_interface.hw_version_max_size" description="Cellular module hardware version max size.">
+            <constraint display="Value must be a positive integer">testInteger("${config.aws.cellular_interface.hw_version_max_size}") &amp;&amp; ("${config.aws.cellular_interface.hw_version_max_size}" &gt; 0) </constraint>
+        </property>
+        <property default="12" display="Serial Number Max Size" id="config.aws.cellular_interface.serial_num_max_size" description="Cellular module serial number max size.">
+            <constraint display="Value must be a positive integer">testInteger("${config.aws.cellular_interface.serial_num_max_size}") &amp;&amp; ("${config.aws.cellular_interface.serial_num_max_size}" &gt; 0) </constraint>
+        </property>
+        <property default="15" display="International Mobile Equipment Identity Max Size" id="config.aws.cellular_interface.imei_max_size" description="International Mobile Equipment Identity number max size.">
+            <constraint display="Value must be a positive integer">testInteger("${config.aws.cellular_interface.imei_max_size}") &amp;&amp; ("${config.aws.cellular_interface.imei_max_size}" &gt; 0) </constraint>
+        </property>
+        <property default="32" display="Registered Network operator Name Max Size" id="config.aws.cellular_interface.network_name_max_size" description="Registered network operator name max size.">
+            <constraint display="Value must be a positive integer">testInteger("${config.aws.cellular_interface.network_name_max_size}") &amp;&amp; ("${config.aws.cellular_interface.network_name_max_size}" &gt; 0) </constraint>
+        </property>
+        <property default="64" display="Access Point Name Max Size" id="config.aws.cellular_interface.apn_max_size" description="Access point name max size.">
+            <constraint display="Value must be a positive integer">testInteger("${config.aws.cellular_interface.apn_max_size}") &amp;&amp; ("${config.aws.cellular_interface.apn_max_size}" &gt; 0) </constraint>
+        </property>
+        <property default="32" display="Packet Data Network Username Max Size" id="config.aws.cellular_interface.pdn_username_max_size" description="Packet data network username max size.">
+            <constraint display="Value must be a positive integer">testInteger("${config.aws.cellular_interface.pdn_username_max_size}") &amp;&amp; ("${config.aws.cellular_interface.pdn_username_max_size}" &gt; 0) </constraint>
+        </property>
+        <property default="32" display="Packet Data Network Password Max Size" id="config.aws.cellular_interface.pdn_password_max_size" description="Packet data network password max size.">
+            <constraint display="Value must be a positive integer">testInteger("${config.aws.cellular_interface.pdn_password_max_size}") &amp;&amp; ("${config.aws.cellular_interface.pdn_password_max_size}" &gt; 0) </constraint>
+        </property>
+        <property default="40" display="Data Network IP Address Max Size" id="config.aws.cellular_interface.ip_addr_max_size" description="Cellular data network IP address max size.">
+            <constraint display="Value must be a positive integer">testInteger("${config.aws.cellular_interface.ip_addr_max_size}") &amp;&amp; ("${config.aws.cellular_interface.ip_addr_max_size}" &gt; 0) </constraint>
+        </property>
+        <property default="200" display="AT Command Max Size" id="config.aws.cellular_interface.at_cmd_max_size" description="Cellular AT command max size.">
+            <constraint display="Value must be a positive integer">testInteger("${config.aws.cellular_interface.at_cmd_max_size}") &amp;&amp; ("${config.aws.cellular_interface.at_cmd_max_size}" &gt; 0) </constraint>
+        </property>
+        <property default="6" display="Max Number of Sockets" id="config.aws.cellular_interface.num_sockets_max_size" description="Cellular module number of socket max size.">
+            <constraint display="Value must be a positive integer">testInteger("${config.aws.cellular_interface.num_sockets_max_size}") &amp;&amp; ("${config.aws.cellular_interface.num_sockets_max_size}" &gt; 0) </constraint>
+        </property>
+        <property default="20" display="Manufacturer ID Max Size" id="config.aws.cellular_interface.manufacture_id_max_size" description="Cellular module manufacturer ID max size.">
+            <constraint display="Value must be a positive integer">testInteger("${config.aws.cellular_interface.manufacture_id_max_size}") &amp;&amp; ("${config.aws.cellular_interface.manufacture_id_max_size}" &gt; 0) </constraint>
+        </property>
+        <property default="10" display="Model ID Max Size" id="config.aws.cellular_interface.model_id_max_size" description="Model ID max size.">
+            <constraint display="Value must be a positive integer">testInteger("${config.aws.cellular_interface.model_id_max_size}") &amp;&amp; ("${config.aws.cellular_interface.model_id_max_size}" &gt; 0) </constraint>
+        </property>
+        <property default="4" display="EDRX List Max Size" id="config.aws.cellular_interface.edrx_list_max_size" description="EDRX list max size.">
+            <constraint display="Value must be a positive integer">testInteger("${config.aws.cellular_interface.edrx_list_max_size}") &amp;&amp; ("${config.aws.cellular_interface.edrx_list_max_size}" &gt; 0) </constraint>
+        </property>
+        <property default="1" display="PDN Context ID Min Value" id="config.aws.cellular_interface.pdn_context_id_min" description="PDN context ID min value.">
+            <constraint display="Value must be a positive integer">testInteger("${config.aws.cellular_interface.pdn_context_id_min}") &amp;&amp; ("${config.aws.cellular_interface.pdn_context_id_min}" &gt; 0) </constraint>
+        </property>
+        <property default="16" display="PDN Context ID Max Value" id="config.aws.cellular_interface.pdn_context_id_max" description="PDN context ID max value.">
+            <constraint display="Value must be a positive integer">testInteger("${config.aws.cellular_interface.pdn_context_id_max}") &amp;&amp; ("${config.aws.cellular_interface.pdn_context_id_max}" &gt; 0) </constraint>
+        </property>
+        <property default="3" display="RAT Priority Count" id="config.aws.cellular_interface.max_rat_prority_count" description="RAT (radio access technology) priority count.">
+            <constraint display="Value must be a positive integer">testInteger("${config.aws.cellular_interface.max_rat_prority_count}") &amp;&amp; ("${config.aws.cellular_interface.max_rat_prority_count}" &gt; 0) </constraint>
+        </property>
+        <property default="1460" display="Socket Max Send Data Length (bytes)" id="config.aws.cellular_interface.max_send_data_len" description="Socket max send data length.">
+            <constraint display="Value must be in the range 1 - 1500">testInteger("${config.aws.cellular_interface.max_send_data_len}") &amp;&amp; ("${config.aws.cellular_interface.max_send_data_len}" &gt; 0) &amp;&amp; ("${config.aws.cellular_interface.max_send_data_len}" &lt;= 1500) </constraint>
+        </property>
+        <property default="1500" display="Socket Max Receive Data Length (bytes)" id="config.aws.cellular_interface.max_recv_data_len" description="Socket max receive data length.">
+            <constraint display="Value must be in the range 1 - 1500">testInteger("${config.aws.cellular_interface.max_recv_data_len}") &amp;&amp; ("${config.aws.cellular_interface.max_recv_data_len}" &gt; 0) &amp;&amp; ("${config.aws.cellular_interface.max_recv_data_len}" &lt;= 1500) </constraint>
+        </property>
+        <property default="config.aws.cellular_interface.support_get_host_by_name.enabled" id="config.aws.cellular_interface.support_get_host_by_name" display="GetHostByName Support" description="Enables/disable GetHostByName.">
+            <option id="config.aws.cellular_interface.support_get_host_by_name.enabled" display="Enabled (default)" value="1" />
+            <option id="config.aws.cellular_interface.support_get_host_by_name.disabled" display="Disabled" value="0" />
+        </property>
+        <property default="1000" display="Comm Interface Send Timeout (ms)" id="config.aws.cellular_interface.comm_if_send_timeout" description="Cellular comm interface receive timeout in ms.">
+            <constraint display="Value must be a positive integer">testInteger("${config.aws.cellular_interface.comm_if_send_timeout}") &amp;&amp; ("${config.aws.cellular_interface.comm_if_send_timeout}" &gt; 0) </constraint>
+        </property>
+        <property default="50" display="Comm Interface Receive Timeout (ms)" id="config.aws.cellular_interface.comm_if_recv_timeout" description="Cellular comm interface receive timeout in ms.">
+            <constraint display="Value must be a positive integer">testInteger("${config.aws.cellular_interface.comm_if_recv_timeout}") &amp;&amp; ("${config.aws.cellular_interface.comm_if_recv_timeout}" &gt; 0) </constraint>
+        </property>
+        <property default="config.aws.cellular_interface.static_allocation_context.disabled" id="config.aws.cellular_interface.static_allocation_context" display="Static Allocation Context" description="Use statically allocated context.">
+            <option id="config.aws.cellular_interface.static_allocation_context.enabled" display="Enabled" value="1" />
+            <option id="config.aws.cellular_interface.static_allocation_context.disabled" display="Disabled (default)" value="0" />
+        </property>
+        <property default="config.aws.cellular_interface.comm_static_allocation_context.disabled" id="config.aws.cellular_interface.comm_static_allocation_context" display="Comm Interface Static Allocation Context" description="Use statically allocated context for comm interface.">
+            <option id="config.aws.cellular_interface.comm_static_allocation_context.enabled" display="Enabled" value="1" />
+            <option id="config.aws.cellular_interface.comm_static_allocation_context.disabled" display="Disabled (default)" value="0" />
+        </property>
+        <property default="config.aws.cellular_interface.default_rat.catm1" id="config.aws.cellular_interface.default_rat" display="Default RAT" description="Default Radio Access Technology.">
+            <option id="config.aws.cellular_interface.default_rat.gsm" display="GSM" value="0" />
+            <option id="config.aws.cellular_interface.default_rat.wcdma" display="WCDMA" value="2" />
+            <option id="config.aws.cellular_interface.default_rat.edge" display="EDGE" value="3" />
+            <option id="config.aws.cellular_interface.default_rat.hsdpa" display="HSDPA" value="4" />
+            <option id="config.aws.cellular_interface.default_rat.hsupa" display="HSUPA" value="5" />
+            <option id="config.aws.cellular_interface.default_rat.hsdpahsupa" display="HSDPAHSUPA" value="6" />
+            <option id="config.aws.cellular_interface.default_rat.lte" display="LTE" value="7" />
+            <option id="config.aws.cellular_interface.default_rat.catm1" display="CATM1" value="8" />
+            <option id="config.aws.cellular_interface.default_rat.nbiot" display="NBIOT" value="9" />
+        </property>
+        <property default="config.aws.cellular_interface.gsm.disabled" id="config.aws.cellular_interface.gsm" display="GSM Support" description="This should be disabled when a modem doesn't support GSM or the AT+CGREG command.">
+            <option id="config.aws.cellular_interface.gsm.enabled" display="Enabled" value="" />
+            <option id="config.aws.cellular_interface.gsm.disabled" display="Disabled (default)" value="#define CELLULAR_MODEM_NO_GSM_NETWORK" />
+        </property>
+        <property default="config.aws.cellular_interface.static_socket_context.disabled" id="config.aws.cellular_interface.static_socket_context" display="Static Socket Context" description="Use statically allocated socket.">
+            <option id="config.aws.cellular_interface.static_socket_context.enabled" display="Enabled" value="1" />
+            <option id="config.aws.cellular_interface.static_socket_context.disabled" display="Disabled (default)" value="0" />
+        </property>
+
+        <property default="5000" display="AT Command Timeout (ms)" id="config.aws.cellular_interface.at_command_timeout_ms" description="Cellular common AT command timeout.">
+            <constraint display="Value must be a positive integer">testInteger("${config.aws.cellular_interface.at_command_timeout_ms}") &amp;&amp; ("${config.aws.cellular_interface.at_command_timeout_ms}" &gt; 0) </constraint>
+        </property>
+        <property default="5000" display="AT Command Raw Timeout (ms)" id="config.aws.cellular_interface.raw_timeout_ms" description="Cellular AT command raw timeout.">
+            <constraint display="Value must be a positive integer">testInteger("${config.aws.cellular_interface.raw_timeout_ms}") &amp;&amp; ("${config.aws.cellular_interface.raw_timeout_ms}" &gt; 0) </constraint>
+        </property>
+        <property default="5000" display="AT Command Response prefix length" id="config.aws.cellular_interface.max_prefix_string_length" description="Cellular AT command response prefix string length.">
+            <constraint display="Value must be a positive integer">testInteger("${config.aws.cellular_interface.max_prefix_string_length}") &amp;&amp; ("${config.aws.cellular_interface.max_prefix_string_length}" &gt; 0) </constraint>
+        </property>
+        <content>
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#define CELLULAR_MCC_MAX_SIZE                               (${config.aws.cellular_interface.mcc_max_size})
+#define CELLULAR_MNC_MAX_SIZE                               (${config.aws.cellular_interface.mnc_max_size})
+#define CELLULAR_ICCID_MAX_SIZE                             (${config.aws.cellular_interface.iccid_max_size})
+#define CELLULAR_IMSI_MAX_SIZE                              (${config.aws.cellular_interface.imsi_max_size})
+#define CELLULAR_FW_VERSION_MAX_SIZE                        (${config.aws.cellular_interface.fw_version_max_size})
+#define CELLULAR_HW_VERSION_MAX_SIZE                        (${config.aws.cellular_interface.hw_version_max_size})
+#define CELLULAR_SERIAL_NUM_MAX_SIZE                        (${config.aws.cellular_interface.serial_num_max_size})
+#define CELLULAR_IMEI_MAX_SIZE                              (${config.aws.cellular_interface.imei_max_size})
+#define CELLULAR_NETWORK_NAME_MAX_SIZE                      (${config.aws.cellular_interface.network_name_max_size})
+#define CELLULAR_APN_MAX_SIZE                               (${config.aws.cellular_interface.apn_max_size})
+#define CELLULAR_PDN_USERNAME_MAX_SIZE                      (${config.aws.cellular_interface.pdn_username_max_size})
+#define CELLULAR_PDN_PASSWORD_MAX_SIZE                      (${config.aws.cellular_interface.pdn_password_max_size})
+#define CELLULAR_IP_ADDRESS_MAX_SIZE                        (${config.aws.cellular_interface.ip_addr_max_size})
+#define CELLULAR_AT_CMD_MAX_SIZE                            (${config.aws.cellular_interface.at_cmd_max_size})
+#define CELLULAR_NUM_SOCKET_MAX                             (${config.aws.cellular_interface.num_sockets_max_size})
+#define CELLULAR_MANUFACTURE_ID_MAX_SIZE                    (${config.aws.cellular_interface.manufacture_id_max_size})
+#define CELLULAR_MODEL_ID_MAX_SIZE                          (${config.aws.cellular_interface.model_id_max_size})
+#define CELLULAR_EDRX_LIST_MAX_SIZE                         (${config.aws.cellular_interface.edrx_list_max_size})
+#define CELLULAR_PDN_CONTEXT_ID_MIN                         (${config.aws.cellular_interface.pdn_context_id_min})
+#define CELLULAR_PDN_CONTEXT_ID_MAX                         (${config.aws.cellular_interface.pdn_context_id_max})
+#define CELLULAR_MAX_RAT_PRIORITY_COUNT                     (${config.aws.cellular_interface.max_rat_prority_count})
+#define CELLULAR_MAX_SEND_DATA_LEN                          (${config.aws.cellular_interface.max_send_data_len})
+#define CELLULAR_MAX_RECV_DATA_LEN                          (${config.aws.cellular_interface.max_recv_data_len})
+#define CELLULAR_SUPPORT_GETHOSTBYNAME                      (${config.aws.cellular_interface.support_get_host_by_name})
+#define CELLULAR_COMM_IF_SEND_TIMEOUT_MS                    (${config.aws.cellular_interface.comm_if_send_timeout})
+#define CELLULAR_COMM_IF_RECV_TIMEOUT_MS                    (${config.aws.cellular_interface.comm_if_recv_timeout})
+#define CELLULAR_CONFIG_STATIC_ALLOCATION_CONTEXT           (${config.aws.cellular_interface.static_allocation_context})
+#define CELLULAR_CONFIG_STATIC_COMM_CONTEXT_ALLOCATION      (${config.aws.cellular_interface.comm_static_allocation_context})
+#define CELLULAR_CONFIG_DEFAULT_RAT                         (${config.aws.cellular_interface.default_rat})
+#define CELLULAR_CONFIG_STATIC_SOCKET_CONTEXT_ALLOCATION    (${config.aws.cellular_interface.static_socket_context})
+#define CELLULAR_COMMON_AT_COMMAND_TIMEOUT_MS               (${config.aws.cellular_interface.at_command_timeout_ms})
+#define CELLULAR_AT_COMMAND_RAW_TIMEOUT_MS                  (${config.aws.cellular_interface.raw_timeout_ms})
+#define CELLULAR_CONFIG_MAX_PREFIX_STRING_LENGTH            (${config.aws.cellular_interface.max_prefix_string_length})
+${config.aws.cellular_interface.gsm}
+
+#ifdef __cplusplus
+}
+#endif
+        </content>
+    </config>
+    <module config="config.aws.cellular_interface" id="module.aws.cellular_interface" display="Networking|AWS Cellular Interface Common" common="1" version="0" visible="false" url="https://www.freertos.org/Documentation/api-ref/cellular/index.html">
+        <requires id="module.aws.cellular_interface.requires.awsfreertos" interface="interface.rtos.awsfreertos" visible="false" display="Requires FreeRTOS"/>
+        <provides interface="interface.cellular_interface.cellular_common" />
+        <includes>
+#include "cellular_api.h"
+        </includes>
+    </module>
+</raModuleDescription>

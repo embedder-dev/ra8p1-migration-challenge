@@ -1,0 +1,358 @@
+<?xml version="1.0" encoding="utf-8"?>
+<raModuleDescription>
+    <bsp id="bsp.ra8d1.events" config="config.bsp.ra8d1.events" display="RA8D1 event data" version="0">
+        <scope id="scope.dtc" interruptOnly="true" />
+        <scope id="scope.dmac" />
+        <scope id="scope.dsleep" />
+        <scope id="scope.sstby" />
+        <scope id="scope.dsstby" />
+        <event id="event.acmphs0.int" display="ACMPHS|ACMPHS0|ACMPHS0 INT (High Speed Comparator channel 0 interrupt)" value="ACMPHS0_INT" scope="interrupt,eventlink,scope.dsleep,scope.sstby"></event>
+        <event id="event.acmphs1.int" display="ACMPHS|ACMPHS1|ACMPHS1 INT (High Speed Comparator channel 1 interrupt)" value="ACMPHS1_INT" scope="interrupt,eventlink"></event>
+        <event id="event.adc0.compare.match" display="ADC|ADC0|ADC0 COMPARE MATCH (Compare match)" value="ADC0_COMPARE_MATCH" scope="eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.adc0.compare.mismatch" display="ADC|ADC0|ADC0 COMPARE MISMATCH (Compare mismatch)" value="ADC0_COMPARE_MISMATCH" scope="eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.adc0.scan.end" display="ADC|ADC0|ADC0 SCAN END (End of A/D scanning operation)" value="ADC0_SCAN_END" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.adc0.scan.end.b" display="ADC|ADC0|ADC0 SCAN END B (A/D scan end interrupt for group B)" value="ADC0_SCAN_END_B" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.adc0.window.a" display="ADC|ADC0|ADC0 WINDOW A (Window A Compare match interrupt)" value="ADC0_WINDOW_A" scope="interrupt"></event>
+        <event id="event.adc0.window.b" display="ADC|ADC0|ADC0 WINDOW B (Window B Compare match interrupt)" value="ADC0_WINDOW_B" scope="interrupt"></event>
+        <event id="event.adc1.compare.match" display="ADC|ADC1|ADC1 COMPARE MATCH (Compare match)" value="ADC1_COMPARE_MATCH" scope="eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.adc1.compare.mismatch" display="ADC|ADC1|ADC1 COMPARE MISMATCH (Compare mismatch)" value="ADC1_COMPARE_MISMATCH" scope="eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.adc1.scan.end" display="ADC|ADC1|ADC1 SCAN END (End of A/D scanning operation)" value="ADC1_SCAN_END" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.adc1.scan.end.b" display="ADC|ADC1|ADC1 SCAN END B (A/D scan end interrupt for group B)" value="ADC1_SCAN_END_B" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.adc1.window.a" display="ADC|ADC1|ADC1 WINDOW A (Window A Compare match interrupt)" value="ADC1_WINDOW_A" scope="interrupt"></event>
+        <event id="event.adc1.window.b" display="ADC|ADC1|ADC1 WINDOW B (Window B Compare match interrupt)" value="ADC1_WINDOW_B" scope="interrupt"></event>
+        <event id="event.agt0.compare.a" display="AGT|AGT0|AGT0 COMPARE A (Compare match A)" value="AGT0_COMPARE_A" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.agt0.compare.b" display="AGT|AGT0|AGT0 COMPARE B (Compare match B)" value="AGT0_COMPARE_B" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.agt0.int" display="AGT|AGT0|AGT0 INT (AGT interrupt)" value="AGT0_INT" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.agt1.compare.a" display="AGT|AGT1|AGT1 COMPARE A (Compare match A)" value="AGT1_COMPARE_A" scope="interrupt,eventlink,scope.dtc,scope.dmac,scope.dsleep,scope.sstby"></event>
+        <event id="event.agt1.compare.b" display="AGT|AGT1|AGT1 COMPARE B (Compare match B)" value="AGT1_COMPARE_B" scope="interrupt,eventlink,scope.dtc,scope.dmac,scope.dsleep,scope.sstby"></event>
+        <event id="event.agt1.int" display="AGT|AGT1|AGT1 INT (AGT interrupt)" value="AGT1_INT" scope="interrupt,eventlink,scope.dtc,scope.dmac,scope.dsleep,scope.sstby"></event>
+        <event id="event.cac.frequency.error" display="CAC|CAC FREQUENCY ERROR (Frequency error interrupt)" value="CAC_FREQUENCY_ERROR" scope="interrupt"></event>
+        <event id="event.cac.measurement.end" display="CAC|CAC MEASUREMENT END (Measurement end interrupt)" value="CAC_MEASUREMENT_END" scope="interrupt"></event>
+        <event id="event.cac.overflow" display="CAC|CAC OVERFLOW (Overflow interrupt)" value="CAC_OVERFLOW" scope="interrupt"></event>
+        <event id="event.can0.cf.dmareq" display="CAN|CAN0|CAN0 CF DMAREQ (Channel  DMA request)" value="CAN0_CF_DMAREQ" scope="interrupt,scope.dtc,scope.dmac"></event>
+        <event id="event.can0.cherr" display="CAN|CAN0|CAN0 CHERR (Channel  error)" value="CAN0_CHERR" scope="interrupt"></event>
+        <event id="event.can0.comfrx" display="CAN|CAN0|CAN0 COMFRX (Common FIFO receive interrupt)" value="CAN0_COMFRX" scope="interrupt"></event>
+        <event id="event.can0.dmareq0" display="CAN|CAN0|CAN0 DMAREQ0 (RX fifo DMA request 0)" value="CAN0_DMAREQ0" scope="interrupt,scope.dtc,scope.dmac"></event>
+        <event id="event.can0.dmareq1" display="CAN|CAN0|CAN0 DMAREQ1 (RX fifo DMA request 1)" value="CAN0_DMAREQ1" scope="interrupt,scope.dtc,scope.dmac"></event>
+        <event id="event.can0.mram.eri" display="CAN|CAN0|CAN0 MRAM ERI (CANFD0 ECC error)" value="CAN0_MRAM_ERI" scope="interrupt"></event>
+        <event id="event.can0.rxmb" display="CAN|CAN0|CAN0 RXMB (Receive message buffer interrupt)" value="CAN0_RXMB" scope="interrupt"></event>
+        <event id="event.can0.tx" display="CAN|CAN0|CAN0 TX (Transmit interrupt)" value="CAN0_TX" scope="interrupt"></event>
+        <event id="event.can1.cf.dmareq" display="CAN|CAN1|CAN1 CF DMAREQ (Channel  DMA request)" value="CAN1_CF_DMAREQ" scope="interrupt,scope.dtc,scope.dmac"></event>
+        <event id="event.can1.cherr" display="CAN|CAN1|CAN1 CHERR (Channel  error)" value="CAN1_CHERR" scope="interrupt"></event>
+        <event id="event.can1.comfrx" display="CAN|CAN1|CAN1 COMFRX (Common FIFO receive interrupt)" value="CAN1_COMFRX" scope="interrupt"></event>
+        <event id="event.can1.dmareq0" display="CAN|CAN1|CAN1 DMAREQ0 (RX fifo DMA request 0)" value="CAN1_DMAREQ0" scope="interrupt,scope.dtc,scope.dmac"></event>
+        <event id="event.can1.dmareq1" display="CAN|CAN1|CAN1 DMAREQ1 (RX fifo DMA request 1)" value="CAN1_DMAREQ1" scope="interrupt,scope.dtc,scope.dmac"></event>
+        <event id="event.can1.mram.eri" display="CAN|CAN1|CAN1 MRAM ERI (CANFD1 ECC error)" value="CAN1_MRAM_ERI" scope="interrupt"></event>
+        <event id="event.can1.rxmb" display="CAN|CAN1|CAN1 RXMB (Receive message buffer interrupt)" value="CAN1_RXMB" scope="interrupt"></event>
+        <event id="event.can1.tx" display="CAN|CAN1|CAN1 TX (Transmit interrupt)" value="CAN1_TX" scope="interrupt"></event>
+        <event id="event.can.glerr" display="CAN|CAN GLERR (Global error)" value="CAN_GLERR" scope="interrupt"></event>
+        <event id="event.can.rxf" display="CAN|CAN RXF (Global receive FIFO interrupt)" value="CAN_RXF" scope="interrupt"></event>
+        <event id="event.ceu.ceui" display="CEU|CEU CEUI (CEU interrupt)" value="CEU_CEUI" scope="interrupt"></event>
+        <event id="event.cgc.mosc.stop" display="CGC|CGC MOSC STOP (Main Clock oscillation stop)" value="CGC_MOSC_STOP" scope="interrupt,eventlink"></event>
+        <event id="event.dbg.ctiirq0" display="DBG|DBG CTIIRQ0 (Coresight Crosstrigger Event)" value="DBG_CTIIRQ0" scope="interrupt"></event>
+        <event id="event.dbg.ctiirq1" display="DBG|DBG CTIIRQ1 (Coresight Crosstrigger Event)" value="DBG_CTIIRQ1" scope="interrupt"></event>
+        <event id="event.dbg.jbrxi" display="DBG|DBG JBRXI (JB RXI)" value="DBG_JBRXI" scope="interrupt"></event>
+        <event id="event.dma.transerr" display="DMA|DMA TRANSERR (DMA/DTC transfer error)" value="DMA_TRANSERR" scope="interrupt"></event>
+        <event id="event.dmac0.int" display="DMAC|DMAC0|DMAC0 INT (DMAC0 transfer end)" value="DMAC0_INT" scope="interrupt,eventlink,scope.dtc"></event>
+        <event id="event.dmac1.int" display="DMAC|DMAC1|DMAC1 INT (DMAC1 transfer end)" value="DMAC1_INT" scope="interrupt,eventlink,scope.dtc"></event>
+        <event id="event.dmac2.int" display="DMAC|DMAC2|DMAC2 INT (DMAC2 transfer end)" value="DMAC2_INT" scope="interrupt,eventlink,scope.dtc"></event>
+        <event id="event.dmac3.int" display="DMAC|DMAC3|DMAC3 INT (DMAC3 transfer end)" value="DMAC3_INT" scope="interrupt,eventlink,scope.dtc"></event>
+        <event id="event.dmac4.int" display="DMAC|DMAC4|DMAC4 INT (DMAC4 transfer end)" value="DMAC4_INT" scope="interrupt,eventlink,scope.dtc"></event>
+        <event id="event.dmac5.int" display="DMAC|DMAC5|DMAC5 INT (DMAC5 transfer end)" value="DMAC5_INT" scope="interrupt,eventlink,scope.dtc"></event>
+        <event id="event.dmac6.int" display="DMAC|DMAC6|DMAC6 INT (DMAC6 transfer end)" value="DMAC6_INT" scope="interrupt,eventlink,scope.dtc"></event>
+        <event id="event.dmac7.int" display="DMAC|DMAC7|DMAC7 INT (DMAC7 transfer end)" value="DMAC7_INT" scope="interrupt,eventlink,scope.dtc"></event>
+        <event id="event.doc.int" display="DOC|DOC INT (Data operation circuit interrupt)" value="DOC_INT" scope="interrupt,eventlink"></event>
+        <event id="event.drw.int" display="DRW|DRW INT (DRW interrupt)" value="DRW_INT" scope="interrupt"></event>
+        <event id="event.dtc.complete" display="DTC|DTC COMPLETE (DTC transfer complete)" value="DTC_COMPLETE" scope="interrupt"></event>
+        <event id="event.dtc.end" display="DTC|DTC END (DTC transfer end)" value="DTC_END" scope="eventlink"></event>
+        <event id="event.edmac0.eint" display="EDMAC|EDMAC0|EDMAC0 EINT (EDMAC 0 interrupt)" value="EDMAC0_EINT" scope="interrupt"></event>
+        <event id="event.elc.software.event.0" display="ELC|ELC SOFTWARE EVENT 0 (Software event 0)" value="ELC_SOFTWARE_EVENT_0" scope="interrupt,eventlink,scope.dtc"></event>
+        <event id="event.elc.software.event.1" display="ELC|ELC SOFTWARE EVENT 1 (Software event 1)" value="ELC_SOFTWARE_EVENT_1" scope="interrupt,eventlink,scope.dtc"></event>
+        <event id="event.fcu.fiferr" display="FCU|FCU FIFERR (Flash access error interrupt)" value="FCU_FIFERR" scope="interrupt"></event>
+        <event id="event.fcu.frdyi" display="FCU|FCU FRDYI (Flash ready interrupt)" value="FCU_FRDYI" scope="interrupt"></event>
+        <event id="event.glcdc.line.detect" display="GLCDC|GLCDC LINE DETECT (Specified line)" value="GLCDC_LINE_DETECT" scope="interrupt"></event>
+        <event id="event.glcdc.underflow.1" display="GLCDC|GLCDC UNDERFLOW 1 (Graphic 1 underflow)" value="GLCDC_UNDERFLOW_1" scope="interrupt"></event>
+        <event id="event.glcdc.underflow.2" display="GLCDC|GLCDC UNDERFLOW 2 (Graphic 2 underflow)" value="GLCDC_UNDERFLOW_2" scope="interrupt"></event>
+        <event id="event.gpt0.capture.compare.a" display="GPT|GPT0|GPT0 CAPTURE COMPARE A (Capture/Compare match A)" value="GPT0_CAPTURE_COMPARE_A" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.gpt0.capture.compare.b" display="GPT|GPT0|GPT0 CAPTURE COMPARE B (Capture/Compare match B)" value="GPT0_CAPTURE_COMPARE_B" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.gpt0.compare.c" display="GPT|GPT0|GPT0 COMPARE C (Compare match C)" value="GPT0_COMPARE_C" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.gpt0.compare.d" display="GPT|GPT0|GPT0 COMPARE D (Compare match D)" value="GPT0_COMPARE_D" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.gpt0.compare.e" display="GPT|GPT0|GPT0 COMPARE E (Compare match E)" value="GPT0_COMPARE_E" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.gpt0.compare.f" display="GPT|GPT0|GPT0 COMPARE F (Compare match F)" value="GPT0_COMPARE_F" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.gpt0.counter.overflow" display="GPT|GPT0|GPT0 COUNTER OVERFLOW (Overflow)" value="GPT0_COUNTER_OVERFLOW" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.gpt0.counter.underflow" display="GPT|GPT0|GPT0 COUNTER UNDERFLOW (Underflow)" value="GPT0_COUNTER_UNDERFLOW" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.gpt0.pc" display="GPT|GPT0|GPT0 PC (Period count function finish)" value="GPT0_PC" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.gpt10.capture.compare.a" display="GPT|GPT10|GPT10 CAPTURE COMPARE A (Capture/Compare match A)" value="GPT10_CAPTURE_COMPARE_A" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.gpt10.capture.compare.b" display="GPT|GPT10|GPT10 CAPTURE COMPARE B (Capture/Compare match B)" value="GPT10_CAPTURE_COMPARE_B" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.gpt10.compare.c" display="GPT|GPT10|GPT10 COMPARE C (Compare match C)" value="GPT10_COMPARE_C" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.gpt10.compare.d" display="GPT|GPT10|GPT10 COMPARE D (Compare match D)" value="GPT10_COMPARE_D" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.gpt10.compare.e" display="GPT|GPT10|GPT10 COMPARE E (Compare match E)" value="GPT10_COMPARE_E" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.gpt10.compare.f" display="GPT|GPT10|GPT10 COMPARE F (Compare match F)" value="GPT10_COMPARE_F" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.gpt10.counter.overflow" display="GPT|GPT10|GPT10 COUNTER OVERFLOW (Overflow)" value="GPT10_COUNTER_OVERFLOW" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.gpt10.counter.underflow" display="GPT|GPT10|GPT10 COUNTER UNDERFLOW (Underflow)" value="GPT10_COUNTER_UNDERFLOW" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.gpt10.pc" display="GPT|GPT10|GPT10 PC (Period count function finish)" value="GPT10_PC" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.gpt11.capture.compare.a" display="GPT|GPT11|GPT11 CAPTURE COMPARE A (Capture/Compare match A)" value="GPT11_CAPTURE_COMPARE_A" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.gpt11.capture.compare.b" display="GPT|GPT11|GPT11 CAPTURE COMPARE B (Capture/Compare match B)" value="GPT11_CAPTURE_COMPARE_B" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.gpt11.compare.c" display="GPT|GPT11|GPT11 COMPARE C (Compare match C)" value="GPT11_COMPARE_C" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.gpt11.compare.d" display="GPT|GPT11|GPT11 COMPARE D (Compare match D)" value="GPT11_COMPARE_D" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.gpt11.compare.e" display="GPT|GPT11|GPT11 COMPARE E (Compare match E)" value="GPT11_COMPARE_E" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.gpt11.compare.f" display="GPT|GPT11|GPT11 COMPARE F (Compare match F)" value="GPT11_COMPARE_F" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.gpt11.counter.overflow" display="GPT|GPT11|GPT11 COUNTER OVERFLOW (Overflow)" value="GPT11_COUNTER_OVERFLOW" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.gpt11.counter.underflow" display="GPT|GPT11|GPT11 COUNTER UNDERFLOW (Underflow)" value="GPT11_COUNTER_UNDERFLOW" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.gpt12.capture.compare.a" display="GPT|GPT12|GPT12 CAPTURE COMPARE A (Capture/Compare match A)" value="GPT12_CAPTURE_COMPARE_A" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.gpt12.capture.compare.b" display="GPT|GPT12|GPT12 CAPTURE COMPARE B (Capture/Compare match B)" value="GPT12_CAPTURE_COMPARE_B" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.gpt12.compare.c" display="GPT|GPT12|GPT12 COMPARE C (Compare match C)" value="GPT12_COMPARE_C" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.gpt12.compare.d" display="GPT|GPT12|GPT12 COMPARE D (Compare match D)" value="GPT12_COMPARE_D" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.gpt12.compare.e" display="GPT|GPT12|GPT12 COMPARE E (Compare match E)" value="GPT12_COMPARE_E" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.gpt12.compare.f" display="GPT|GPT12|GPT12 COMPARE F (Compare match F)" value="GPT12_COMPARE_F" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.gpt12.counter.overflow" display="GPT|GPT12|GPT12 COUNTER OVERFLOW (Overflow)" value="GPT12_COUNTER_OVERFLOW" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.gpt12.counter.underflow" display="GPT|GPT12|GPT12 COUNTER UNDERFLOW (Underflow)" value="GPT12_COUNTER_UNDERFLOW" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.gpt13.capture.compare.a" display="GPT|GPT13|GPT13 CAPTURE COMPARE A (Capture/Compare match A)" value="GPT13_CAPTURE_COMPARE_A" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.gpt13.capture.compare.b" display="GPT|GPT13|GPT13 CAPTURE COMPARE B (Capture/Compare match B)" value="GPT13_CAPTURE_COMPARE_B" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.gpt13.compare.c" display="GPT|GPT13|GPT13 COMPARE C (Compare match C)" value="GPT13_COMPARE_C" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.gpt13.compare.d" display="GPT|GPT13|GPT13 COMPARE D (Compare match D)" value="GPT13_COMPARE_D" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.gpt13.compare.e" display="GPT|GPT13|GPT13 COMPARE E (Compare match E)" value="GPT13_COMPARE_E" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.gpt13.compare.f" display="GPT|GPT13|GPT13 COMPARE F (Compare match F)" value="GPT13_COMPARE_F" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.gpt13.counter.overflow" display="GPT|GPT13|GPT13 COUNTER OVERFLOW (Overflow)" value="GPT13_COUNTER_OVERFLOW" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.gpt13.counter.underflow" display="GPT|GPT13|GPT13 COUNTER UNDERFLOW (Underflow)" value="GPT13_COUNTER_UNDERFLOW" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.gpt1.capture.compare.a" display="GPT|GPT1|GPT1 CAPTURE COMPARE A (Capture/Compare match A)" value="GPT1_CAPTURE_COMPARE_A" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.gpt1.capture.compare.b" display="GPT|GPT1|GPT1 CAPTURE COMPARE B (Capture/Compare match B)" value="GPT1_CAPTURE_COMPARE_B" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.gpt1.compare.c" display="GPT|GPT1|GPT1 COMPARE C (Compare match C)" value="GPT1_COMPARE_C" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.gpt1.compare.d" display="GPT|GPT1|GPT1 COMPARE D (Compare match D)" value="GPT1_COMPARE_D" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.gpt1.compare.e" display="GPT|GPT1|GPT1 COMPARE E (Compare match E)" value="GPT1_COMPARE_E" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.gpt1.compare.f" display="GPT|GPT1|GPT1 COMPARE F (Compare match F)" value="GPT1_COMPARE_F" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.gpt1.counter.overflow" display="GPT|GPT1|GPT1 COUNTER OVERFLOW (Overflow)" value="GPT1_COUNTER_OVERFLOW" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.gpt1.counter.underflow" display="GPT|GPT1|GPT1 COUNTER UNDERFLOW (Underflow)" value="GPT1_COUNTER_UNDERFLOW" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.gpt1.pc" display="GPT|GPT1|GPT1 PC (Period count function finish)" value="GPT1_PC" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.gpt2.capture.compare.a" display="GPT|GPT2|GPT2 CAPTURE COMPARE A (Capture/Compare match A)" value="GPT2_CAPTURE_COMPARE_A" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.gpt2.capture.compare.b" display="GPT|GPT2|GPT2 CAPTURE COMPARE B (Capture/Compare match B)" value="GPT2_CAPTURE_COMPARE_B" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.gpt2.compare.c" display="GPT|GPT2|GPT2 COMPARE C (Compare match C)" value="GPT2_COMPARE_C" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.gpt2.compare.d" display="GPT|GPT2|GPT2 COMPARE D (Compare match D)" value="GPT2_COMPARE_D" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.gpt2.compare.e" display="GPT|GPT2|GPT2 COMPARE E (Compare match E)" value="GPT2_COMPARE_E" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.gpt2.compare.f" display="GPT|GPT2|GPT2 COMPARE F (Compare match F)" value="GPT2_COMPARE_F" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.gpt2.counter.overflow" display="GPT|GPT2|GPT2 COUNTER OVERFLOW (Overflow)" value="GPT2_COUNTER_OVERFLOW" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.gpt2.counter.underflow" display="GPT|GPT2|GPT2 COUNTER UNDERFLOW (Underflow)" value="GPT2_COUNTER_UNDERFLOW" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.gpt2.pc" display="GPT|GPT2|GPT2 PC (Period count function finish)" value="GPT2_PC" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.gpt3.capture.compare.a" display="GPT|GPT3|GPT3 CAPTURE COMPARE A (Capture/Compare match A)" value="GPT3_CAPTURE_COMPARE_A" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.gpt3.capture.compare.b" display="GPT|GPT3|GPT3 CAPTURE COMPARE B (Capture/Compare match B)" value="GPT3_CAPTURE_COMPARE_B" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.gpt3.compare.c" display="GPT|GPT3|GPT3 COMPARE C (Compare match C)" value="GPT3_COMPARE_C" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.gpt3.compare.d" display="GPT|GPT3|GPT3 COMPARE D (Compare match D)" value="GPT3_COMPARE_D" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.gpt3.compare.e" display="GPT|GPT3|GPT3 COMPARE E (Compare match E)" value="GPT3_COMPARE_E" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.gpt3.compare.f" display="GPT|GPT3|GPT3 COMPARE F (Compare match F)" value="GPT3_COMPARE_F" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.gpt3.counter.overflow" display="GPT|GPT3|GPT3 COUNTER OVERFLOW (Overflow)" value="GPT3_COUNTER_OVERFLOW" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.gpt3.counter.underflow" display="GPT|GPT3|GPT3 COUNTER UNDERFLOW (Underflow)" value="GPT3_COUNTER_UNDERFLOW" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.gpt3.pc" display="GPT|GPT3|GPT3 PC (Period count function finish)" value="GPT3_PC" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.gpt4.capture.compare.a" display="GPT|GPT4|GPT4 CAPTURE COMPARE A (Capture/Compare match A)" value="GPT4_CAPTURE_COMPARE_A" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.gpt4.capture.compare.b" display="GPT|GPT4|GPT4 CAPTURE COMPARE B (Capture/Compare match B)" value="GPT4_CAPTURE_COMPARE_B" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.gpt4.compare.c" display="GPT|GPT4|GPT4 COMPARE C (Compare match C)" value="GPT4_COMPARE_C" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.gpt4.compare.d" display="GPT|GPT4|GPT4 COMPARE D (Compare match D)" value="GPT4_COMPARE_D" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.gpt4.compare.e" display="GPT|GPT4|GPT4 COMPARE E (Compare match E)" value="GPT4_COMPARE_E" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.gpt4.compare.f" display="GPT|GPT4|GPT4 COMPARE F (Compare match F)" value="GPT4_COMPARE_F" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.gpt4.counter.overflow" display="GPT|GPT4|GPT4 COUNTER OVERFLOW (Overflow)" value="GPT4_COUNTER_OVERFLOW" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.gpt4.counter.underflow" display="GPT|GPT4|GPT4 COUNTER UNDERFLOW (Underflow)" value="GPT4_COUNTER_UNDERFLOW" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.gpt5.capture.compare.a" display="GPT|GPT5|GPT5 CAPTURE COMPARE A (Capture/Compare match A)" value="GPT5_CAPTURE_COMPARE_A" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.gpt5.capture.compare.b" display="GPT|GPT5|GPT5 CAPTURE COMPARE B (Capture/Compare match B)" value="GPT5_CAPTURE_COMPARE_B" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.gpt5.compare.c" display="GPT|GPT5|GPT5 COMPARE C (Compare match C)" value="GPT5_COMPARE_C" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.gpt5.compare.d" display="GPT|GPT5|GPT5 COMPARE D (Compare match D)" value="GPT5_COMPARE_D" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.gpt5.compare.e" display="GPT|GPT5|GPT5 COMPARE E (Compare match E)" value="GPT5_COMPARE_E" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.gpt5.compare.f" display="GPT|GPT5|GPT5 COMPARE F (Compare match F)" value="GPT5_COMPARE_F" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.gpt5.counter.overflow" display="GPT|GPT5|GPT5 COUNTER OVERFLOW (Overflow)" value="GPT5_COUNTER_OVERFLOW" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.gpt5.counter.underflow" display="GPT|GPT5|GPT5 COUNTER UNDERFLOW (Underflow)" value="GPT5_COUNTER_UNDERFLOW" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.gpt6.capture.compare.a" display="GPT|GPT6|GPT6 CAPTURE COMPARE A (Capture/Compare match A)" value="GPT6_CAPTURE_COMPARE_A" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.gpt6.capture.compare.b" display="GPT|GPT6|GPT6 CAPTURE COMPARE B (Capture/Compare match B)" value="GPT6_CAPTURE_COMPARE_B" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.gpt6.compare.c" display="GPT|GPT6|GPT6 COMPARE C (Compare match C)" value="GPT6_COMPARE_C" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.gpt6.compare.d" display="GPT|GPT6|GPT6 COMPARE D (Compare match D)" value="GPT6_COMPARE_D" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.gpt6.compare.e" display="GPT|GPT6|GPT6 COMPARE E (Compare match E)" value="GPT6_COMPARE_E" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.gpt6.compare.f" display="GPT|GPT6|GPT6 COMPARE F (Compare match F)" value="GPT6_COMPARE_F" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.gpt6.counter.overflow" display="GPT|GPT6|GPT6 COUNTER OVERFLOW (Overflow)" value="GPT6_COUNTER_OVERFLOW" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.gpt6.counter.underflow" display="GPT|GPT6|GPT6 COUNTER UNDERFLOW (Underflow)" value="GPT6_COUNTER_UNDERFLOW" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.gpt7.capture.compare.a" display="GPT|GPT7|GPT7 CAPTURE COMPARE A (Capture/Compare match A)" value="GPT7_CAPTURE_COMPARE_A" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.gpt7.capture.compare.b" display="GPT|GPT7|GPT7 CAPTURE COMPARE B (Capture/Compare match B)" value="GPT7_CAPTURE_COMPARE_B" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.gpt7.compare.c" display="GPT|GPT7|GPT7 COMPARE C (Compare match C)" value="GPT7_COMPARE_C" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.gpt7.compare.d" display="GPT|GPT7|GPT7 COMPARE D (Compare match D)" value="GPT7_COMPARE_D" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.gpt7.compare.e" display="GPT|GPT7|GPT7 COMPARE E (Compare match E)" value="GPT7_COMPARE_E" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.gpt7.compare.f" display="GPT|GPT7|GPT7 COMPARE F (Compare match F)" value="GPT7_COMPARE_F" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.gpt7.counter.overflow" display="GPT|GPT7|GPT7 COUNTER OVERFLOW (Overflow)" value="GPT7_COUNTER_OVERFLOW" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.gpt7.counter.underflow" display="GPT|GPT7|GPT7 COUNTER UNDERFLOW (Underflow)" value="GPT7_COUNTER_UNDERFLOW" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.gpt8.capture.compare.a" display="GPT|GPT8|GPT8 CAPTURE COMPARE A (Capture/Compare match A)" value="GPT8_CAPTURE_COMPARE_A" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.gpt8.capture.compare.b" display="GPT|GPT8|GPT8 CAPTURE COMPARE B (Capture/Compare match B)" value="GPT8_CAPTURE_COMPARE_B" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.gpt8.compare.c" display="GPT|GPT8|GPT8 COMPARE C (Compare match C)" value="GPT8_COMPARE_C" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.gpt8.compare.d" display="GPT|GPT8|GPT8 COMPARE D (Compare match D)" value="GPT8_COMPARE_D" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.gpt8.compare.e" display="GPT|GPT8|GPT8 COMPARE E (Compare match E)" value="GPT8_COMPARE_E" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.gpt8.compare.f" display="GPT|GPT8|GPT8 COMPARE F (Compare match F)" value="GPT8_COMPARE_F" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.gpt8.counter.overflow" display="GPT|GPT8|GPT8 COUNTER OVERFLOW (Overflow)" value="GPT8_COUNTER_OVERFLOW" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.gpt8.counter.underflow" display="GPT|GPT8|GPT8 COUNTER UNDERFLOW (Underflow)" value="GPT8_COUNTER_UNDERFLOW" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.gpt8.pc" display="GPT|GPT8|GPT8 PC (Period count function finish)" value="GPT8_PC" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.gpt9.capture.compare.a" display="GPT|GPT9|GPT9 CAPTURE COMPARE A (Capture/Compare match A)" value="GPT9_CAPTURE_COMPARE_A" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.gpt9.capture.compare.b" display="GPT|GPT9|GPT9 CAPTURE COMPARE B (Capture/Compare match B)" value="GPT9_CAPTURE_COMPARE_B" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.gpt9.compare.c" display="GPT|GPT9|GPT9 COMPARE C (Compare match C)" value="GPT9_COMPARE_C" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.gpt9.compare.d" display="GPT|GPT9|GPT9 COMPARE D (Compare match D)" value="GPT9_COMPARE_D" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.gpt9.compare.e" display="GPT|GPT9|GPT9 COMPARE E (Compare match E)" value="GPT9_COMPARE_E" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.gpt9.compare.f" display="GPT|GPT9|GPT9 COMPARE F (Compare match F)" value="GPT9_COMPARE_F" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.gpt9.counter.overflow" display="GPT|GPT9|GPT9 COUNTER OVERFLOW (Overflow)" value="GPT9_COUNTER_OVERFLOW" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.gpt9.counter.underflow" display="GPT|GPT9|GPT9 COUNTER UNDERFLOW (Underflow)" value="GPT9_COUNTER_UNDERFLOW" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.gpt9.pc" display="GPT|GPT9|GPT9 PC (Period count function finish)" value="GPT9_PC" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.i3c0.amev" display="I3C|I3C0|I3C0 AMEV (Additional master-initiated bus event)" value="I3C0_AMEV" scope="interrupt,eventlink"></event>
+        <event id="event.i3c0.command" display="I3C|I3C0|I3C0 COMMAND (Command buffer empty)" value="I3C0_COMMAND" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.i3c0.eei" display="I3C|I3C0|I3C0 EEI (Error)" value="I3C0_EEI" scope="interrupt,eventlink"></event>
+        <event id="event.iicb0.eri" display="IICB|IICB0|IICB0 ERI (Error)" value="IICB0_ERI" scope="interrupt,eventlink"></event>
+        <event id="event.i3c0.hcmd" display="I3C|I3C0|I3C0 HCMD (High priority command queue empty)" value="I3C0_HCMD" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.i3c0.hresp" display="I3C|I3C0|I3C0 HRESP (High priority response queue full)" value="I3C0_HRESP" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.i3c0.hrx" display="I3C|I3C0|I3C0 HRX (High priority rx data buffer full)" value="I3C0_HRX" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.i3c0.htx" display="I3C|I3C0|I3C0 HTX (High priority tx data buffer empty)" value="I3C0_HTX" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.i3c0.ibi" display="I3C|I3C0|I3C0 IBI (IBI status buffer full)" value="I3C0_IBI" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.i3c0.mrefcpt" display="I3C|I3C0|I3C0 MREFCPT (MREF capture)" value="I3C0_MREFCPT" scope="interrupt,eventlink"></event>
+        <event id="event.i3c0.mrefovf" display="I3C|I3C0|I3C0 MREFOVF (MREF counter overflow)" value="I3C0_MREFOVF" scope="interrupt,eventlink"></event>
+        <event id="event.i3c0.rcv.status" display="I3C|I3C0|I3C0 RCV STATUS (Receive status buffer full)" value="I3C0_RCV_STATUS" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.i3c0.response" display="I3C|I3C0|I3C0 RESPONSE (Response status buffer full)" value="I3C0_RESPONSE" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.i3c0.rx" display="I3C|I3C0|I3C0 RX (Receive)" value="I3C0_RX" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.iicb0.rxi" display="IICB|IICB0|IICB0 RXI (Receive)" value="IICB0_RXI" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.i3c0.stev" display="I3C|I3C0|I3C0 STEV (Synchronous timing)" value="I3C0_STEV" scope="interrupt,eventlink"></event>
+        <event id="event.i3c0.tend" display="I3C|I3C0|I3C0 TEND (Transmit end)" value="I3C0_TEND" scope="interrupt,eventlink"></event>
+        <event id="event.iicb0.tei" display="IICB|IICB0|IICB0 TEI (Transmit end)" value="IICB0_TEI" scope="interrupt,eventlink"></event>
+        <event id="event.i3c0.tx" display="I3C|I3C0|I3C0 TX (Transmit)" value="I3C0_TX" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.iicb0.txi" display="IICB|IICB0|IICB0 TXI (Transmit)" value="IICB0_TXI" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.i3c0.wu" display="I3C|I3C0|I3C0 WU (Wake-up Condition Detection interrupt)" value="I3C0_WU" scope="interrupt,scope.dsleep,scope.sstby"></event>
+        <event id="event.icu.irq0" display="ICU|ICU IRQ0 (External pin interrupt 0)" value="ICU_IRQ0" scope="interrupt,eventlink,scope.dtc,scope.dmac,scope.dsleep,scope.sstby,scope.dsstby"></event>
+        <event id="event.icu.irq1" display="ICU|ICU IRQ1 (External pin interrupt 1)" value="ICU_IRQ1" scope="interrupt,eventlink,scope.dtc,scope.dmac,scope.dsleep,scope.sstby,scope.dsstby"></event>
+        <event id="event.icu.irq10" display="ICU|ICU IRQ10 (External pin interrupt 10)" value="ICU_IRQ10" scope="interrupt,eventlink,scope.dtc,scope.dmac,scope.dsleep,scope.sstby,scope.dsstby"></event>
+        <event id="event.icu.irq11" display="ICU|ICU IRQ11 (External pin interrupt 11)" value="ICU_IRQ11" scope="interrupt,eventlink,scope.dtc,scope.dmac,scope.dsleep,scope.sstby,scope.dsstby"></event>
+        <event id="event.icu.irq12" display="ICU|ICU IRQ12 (External pin interrupt 12)" value="ICU_IRQ12" scope="interrupt,eventlink,scope.dtc,scope.dmac,scope.dsleep,scope.sstby,scope.dsstby"></event>
+        <event id="event.icu.irq13" display="ICU|ICU IRQ13 (External pin interrupt 13)" value="ICU_IRQ13" scope="interrupt,eventlink,scope.dtc,scope.dmac,scope.dsleep,scope.sstby,scope.dsstby"></event>
+        <event id="event.icu.irq14" display="ICU|ICU IRQ14 (External pin interrupt 14)" value="ICU_IRQ14" scope="interrupt,eventlink,scope.dtc,scope.dmac,scope.dsleep,scope.sstby,scope.dsstby"></event>
+        <event id="event.icu.irq15" display="ICU|ICU IRQ15 (External pin interrupt 15)" value="ICU_IRQ15" scope="interrupt,eventlink,scope.dtc,scope.dmac,scope.dsleep,scope.sstby,scope.dsstby"></event>
+        <event id="event.icu.irq2" display="ICU|ICU IRQ2 (External pin interrupt 2)" value="ICU_IRQ2" scope="interrupt,eventlink,scope.dtc,scope.dmac,scope.dsleep,scope.sstby,scope.dsstby"></event>
+        <event id="event.icu.irq3" display="ICU|ICU IRQ3 (External pin interrupt 3)" value="ICU_IRQ3" scope="interrupt,eventlink,scope.dtc,scope.dmac,scope.dsleep,scope.sstby,scope.dsstby"></event>
+        <event id="event.icu.irq4" display="ICU|ICU IRQ4 (External pin interrupt 4)" value="ICU_IRQ4" scope="interrupt,eventlink,scope.dtc,scope.dmac,scope.dsleep,scope.sstby,scope.dsstby"></event>
+        <event id="event.icu.irq5" display="ICU|ICU IRQ5 (External pin interrupt 5)" value="ICU_IRQ5" scope="interrupt,eventlink,scope.dtc,scope.dmac,scope.dsleep,scope.sstby,scope.dsstby"></event>
+        <event id="event.icu.irq6" display="ICU|ICU IRQ6 (External pin interrupt 6)" value="ICU_IRQ6" scope="interrupt,eventlink,scope.dtc,scope.dmac,scope.dsleep,scope.sstby,scope.dsstby"></event>
+        <event id="event.icu.irq7" display="ICU|ICU IRQ7 (External pin interrupt 7)" value="ICU_IRQ7" scope="interrupt,eventlink,scope.dtc,scope.dmac,scope.dsleep,scope.sstby,scope.dsstby"></event>
+        <event id="event.icu.irq8" display="ICU|ICU IRQ8 (External pin interrupt 8)" value="ICU_IRQ8" scope="interrupt,eventlink,scope.dtc,scope.dmac,scope.dsleep,scope.sstby,scope.dsstby"></event>
+        <event id="event.icu.irq9" display="ICU|ICU IRQ9 (External pin interrupt 9)" value="ICU_IRQ9" scope="interrupt,eventlink,scope.dtc,scope.dmac,scope.dsleep,scope.sstby,scope.dsstby"></event>
+        <event id="event.iic0.eri" display="IIC|IIC0|IIC0 ERI (Transfer error)" value="IIC0_ERI" scope="interrupt,eventlink"></event>
+        <event id="event.iic0.rxi" display="IIC|IIC0|IIC0 RXI (Receive data full)" value="IIC0_RXI" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.iic0.tei" display="IIC|IIC0|IIC0 TEI (Transmit end)" value="IIC0_TEI" scope="interrupt,eventlink"></event>
+        <event id="event.iic0.txi" display="IIC|IIC0|IIC0 TXI (Transmit data empty)" value="IIC0_TXI" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.iic0.wui" display="IIC|IIC0|IIC0 WUI (Wakeup interrupt)" value="IIC0_WUI" scope="interrupt,scope.dsleep,scope.sstby"></event>
+        <event id="event.iic1.eri" display="IIC|IIC1|IIC1 ERI (Transfer error)" value="IIC1_ERI" scope="interrupt,eventlink"></event>
+        <event id="event.iic1.rxi" display="IIC|IIC1|IIC1 RXI (Receive data full)" value="IIC1_RXI" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.iic1.tei" display="IIC|IIC1|IIC1 TEI (Transmit end)" value="IIC1_TEI" scope="interrupt,eventlink"></event>
+        <event id="event.iic1.txi" display="IIC|IIC1|IIC1 TXI (Transmit data empty)" value="IIC1_TXI" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.ioport.event.1" display="IOPORT|IOPORT EVENT 1 (Port 1 event)" value="IOPORT_EVENT_1" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.ioport.event.2" display="IOPORT|IOPORT EVENT 2 (Port 2 event)" value="IOPORT_EVENT_2" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.ioport.event.3" display="IOPORT|IOPORT EVENT 3 (Port 3 event)" value="IOPORT_EVENT_3" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.ioport.event.4" display="IOPORT|IOPORT EVENT 4 (Port 4 event)" value="IOPORT_EVENT_4" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.iwdt.underflow" display="IWDT|IWDT UNDERFLOW (IWDT underflow)" value="IWDT_UNDERFLOW" scope="interrupt,eventlink,scope.dsleep,scope.sstby,scope.dsstby"></event>
+        <event id="event.lvd.lvd1" display="LVD|LVD LVD1 (Voltage monitor 1 interrupt)" value="LVD_LVD1" scope="interrupt,eventlink,scope.dsleep,scope.sstby,scope.dsstby"></event>
+        <event id="event.lvd.lvd2" display="LVD|LVD LVD2 (Voltage monitor 2 interrupt)" value="LVD_LVD2" scope="interrupt,eventlink,scope.dsleep,scope.sstby,scope.dsstby"></event>
+        <event id="event.mipidsi.ferr" display="MIPIDSI|MIPIDSI FERR (DSI fatal error interrupt)" value="MIPIDSI_FERR" scope="interrupt"></event>
+        <event id="event.mipidsi.ppi" display="MIPIDSI|MIPIDSI PPI (DSI D-PHY PPI interrupt)" value="MIPIDSI_PPI" scope="interrupt"></event>
+        <event id="event.mipidsi.rcv" display="MIPIDSI|MIPIDSI RCV (DSI packet receive interrupt)" value="MIPIDSI_RCV" scope="interrupt"></event>
+        <event id="event.mipidsi.seq0" display="MIPIDSI|MIPIDSI SEQ0 (Sequence operation channel 0 interrupt)" value="MIPIDSI_SEQ0" scope="interrupt"></event>
+        <event id="event.mipidsi.seq1" display="MIPIDSI|MIPIDSI SEQ1 (Sequence operation channel 1 interrupt)" value="MIPIDSI_SEQ1" scope="interrupt"></event>
+        <event id="event.mipidsi.vin1" display="MIPIDSI|MIPIDSI VIN1 (Video-Input operation channel1 interrupt)" value="MIPIDSI_VIN1" scope="interrupt"></event>
+        <event id="event.ops.uvw.edge" display="OPS|OPS UVW EDGE (UVW edge event)" value="OPS_UVW_EDGE" scope="interrupt,eventlink"></event>
+        <event id="event.poeg0.event" display="POEG|POEG0|POEG0 EVENT (Port Output disable 0 interrupt)" value="POEG0_EVENT" scope="interrupt"></event>
+        <event id="event.poeg1.event" display="POEG|POEG1|POEG1 EVENT (Port Output disable 1 interrupt)" value="POEG1_EVENT" scope="interrupt"></event>
+        <event id="event.poeg2.event" display="POEG|POEG2|POEG2 EVENT (Port Output disable 2 interrupt)" value="POEG2_EVENT" scope="interrupt"></event>
+        <event id="event.poeg3.event" display="POEG|POEG3|POEG3 EVENT (Port Output disable 3 interrupt)" value="POEG3_EVENT" scope="interrupt"></event>
+        <event id="event.rsip.tadi" display="RSIP|RSIP TADI (RSIP Tamper Detection)" value="RSIP_TADI" scope="interrupt"></event>
+        <event id="event.rtc.alarm" display="RTC|RTC ALARM (Alarm interrupt)" value="RTC_ALARM" scope="interrupt,scope.dsleep,scope.sstby,scope.dsstby"></event>
+        <event id="event.rtc.carry" display="RTC|RTC CARRY (Carry interrupt)" value="RTC_CARRY" scope="interrupt"></event>
+        <event id="event.rtc.period" display="RTC|RTC PERIOD (Periodic interrupt)" value="RTC_PERIOD" scope="interrupt,eventlink,scope.dsleep,scope.sstby,scope.dsstby"></event>
+        <event id="event.sci0.aed" display="SCI|SCI0|SCI0 AED (Active edge detection)" value="SCI0_AED" scope="interrupt,eventlink"></event>
+        <event id="event.sci0.am" display="SCI|SCI0|SCI0 AM (Address match event)" value="SCI0_AM" scope="interrupt,eventlink"></event>
+        <event id="event.sci0.bfd" display="SCI|SCI0|SCI0 BFD (Break field detection)" value="SCI0_BFD" scope="interrupt"></event>
+        <event id="event.sci0.eri" display="SCI|SCI0|SCI0 ERI (Receive error)" value="SCI0_ERI" scope="interrupt,eventlink"></event>
+        <event id="event.sci0.rxi" display="SCI|SCI0|SCI0 RXI (Receive data full)" value="SCI0_RXI" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.sci0.tei" display="SCI|SCI0|SCI0 TEI (Transmit end)" value="SCI0_TEI" scope="interrupt,eventlink"></event>
+        <event id="event.sci0.txi" display="SCI|SCI0|SCI0 TXI (Transmit data empty)" value="SCI0_TXI" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.sci1.aed" display="SCI|SCI1|SCI1 AED (Active edge detection)" value="SCI1_AED" scope="interrupt,eventlink"></event>
+        <event id="event.sci1.am" display="SCI|SCI1|SCI1 AM (Address match event)" value="SCI1_AM" scope="interrupt,eventlink"></event>
+        <event id="event.sci1.bfd" display="SCI|SCI1|SCI1 BFD (Break field detection)" value="SCI1_BFD" scope="interrupt"></event>
+        <event id="event.sci1.eri" display="SCI|SCI1|SCI1 ERI (Receive error)" value="SCI1_ERI" scope="interrupt,eventlink"></event>
+        <event id="event.sci1.rxi" display="SCI|SCI1|SCI1 RXI (Receive data full)" value="SCI1_RXI" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.sci1.tei" display="SCI|SCI1|SCI1 TEI (Transmit end)" value="SCI1_TEI" scope="interrupt,eventlink"></event>
+        <event id="event.sci1.txi" display="SCI|SCI1|SCI1 TXI (Transmit data empty)" value="SCI1_TXI" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.sci2.am" display="SCI|SCI2|SCI2 AM (Address match event)" value="SCI2_AM" scope="interrupt,eventlink"></event>
+        <event id="event.sci2.eri" display="SCI|SCI2|SCI2 ERI (Receive error)" value="SCI2_ERI" scope="interrupt,eventlink"></event>
+        <event id="event.sci2.rxi" display="SCI|SCI2|SCI2 RXI (Receive data full)" value="SCI2_RXI" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.sci2.tei" display="SCI|SCI2|SCI2 TEI (Transmit end)" value="SCI2_TEI" scope="interrupt,eventlink"></event>
+        <event id="event.sci2.txi" display="SCI|SCI2|SCI2 TXI (Transmit data empty)" value="SCI2_TXI" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.sci3.am" display="SCI|SCI3|SCI3 AM (Address match event)" value="SCI3_AM" scope="interrupt,eventlink"></event>
+        <event id="event.sci3.eri" display="SCI|SCI3|SCI3 ERI (Receive error)" value="SCI3_ERI" scope="interrupt,eventlink"></event>
+        <event id="event.sci3.rxi" display="SCI|SCI3|SCI3 RXI (Receive data full)" value="SCI3_RXI" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.sci3.tei" display="SCI|SCI3|SCI3 TEI (Transmit end)" value="SCI3_TEI" scope="interrupt,eventlink"></event>
+        <event id="event.sci3.txi" display="SCI|SCI3|SCI3 TXI (Transmit data empty)" value="SCI3_TXI" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.sci4.am" display="SCI|SCI4|SCI4 AM (Address match event)" value="SCI4_AM" scope="interrupt,eventlink"></event>
+        <event id="event.sci4.eri" display="SCI|SCI4|SCI4 ERI (Receive error)" value="SCI4_ERI" scope="interrupt,eventlink"></event>
+        <event id="event.sci4.rxi" display="SCI|SCI4|SCI4 RXI (Receive data full)" value="SCI4_RXI" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.sci4.tei" display="SCI|SCI4|SCI4 TEI (Transmit end)" value="SCI4_TEI" scope="interrupt,eventlink"></event>
+        <event id="event.sci4.txi" display="SCI|SCI4|SCI4 TXI (Transmit data empty)" value="SCI4_TXI" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.sci9.am" display="SCI|SCI9|SCI9 AM (Address match event)" value="SCI9_AM" scope="interrupt,eventlink"></event>
+        <event id="event.sci9.eri" display="SCI|SCI9|SCI9 ERI (Receive error)" value="SCI9_ERI" scope="interrupt,eventlink"></event>
+        <event id="event.sci9.rxi" display="SCI|SCI9|SCI9 RXI (Receive data full)" value="SCI9_RXI" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.sci9.tei" display="SCI|SCI9|SCI9 TEI (Transmit end)" value="SCI9_TEI" scope="interrupt,eventlink"></event>
+        <event id="event.sci9.txi" display="SCI|SCI9|SCI9 TXI (Transmit data empty)" value="SCI9_TXI" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.sdhimmc0.accs" display="SDHIMMC|SDHIMMC0|SDHIMMC0 ACCS (Card access)" value="SDHIMMC0_ACCS" scope="interrupt"></event>
+        <event id="event.sdhimmc0.card" display="SDHIMMC|SDHIMMC0|SDHIMMC0 CARD (Card detect)" value="SDHIMMC0_CARD" scope="interrupt"></event>
+        <event id="event.sdhimmc0.dma.req" display="SDHIMMC|SDHIMMC0|SDHIMMC0 DMA REQ (DMA transfer request)" value="SDHIMMC0_DMA_REQ" scope="scope.dtc,scope.dmac"></event>
+        <event id="event.sdhimmc0.sdio" display="SDHIMMC|SDHIMMC0|SDHIMMC0 SDIO (SDIO access)" value="SDHIMMC0_SDIO" scope="interrupt"></event>
+        <event id="event.sdhimmc1.accs" display="SDHIMMC|SDHIMMC1|SDHIMMC1 ACCS (Card access)" value="SDHIMMC1_ACCS" scope="interrupt"></event>
+        <event id="event.sdhimmc1.card" display="SDHIMMC|SDHIMMC1|SDHIMMC1 CARD (Card detect)" value="SDHIMMC1_CARD" scope="interrupt"></event>
+        <event id="event.sdhimmc1.dma.req" display="SDHIMMC|SDHIMMC1|SDHIMMC1 DMA REQ (DMA transfer request)" value="SDHIMMC1_DMA_REQ" scope="scope.dtc,scope.dmac"></event>
+        <event id="event.sdhimmc1.sdio" display="SDHIMMC|SDHIMMC1|SDHIMMC1 SDIO (SDIO access)" value="SDHIMMC1_SDIO" scope="interrupt"></event>
+        <event id="event.spi0.eri" display="SPI|SPI0|SPI0 ERI (Error)" value="SPI0_ERI" scope="interrupt,eventlink"></event>
+        <event id="event.spi0.idle" display="SPI|SPI0|SPI0 IDLE (Idle)" value="SPI0_IDLE" scope="interrupt,eventlink"></event>
+        <event id="event.spi0.rxi" display="SPI|SPI0|SPI0 RXI (Receive buffer full)" value="SPI0_RXI" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.spi0.tei" display="SPI|SPI0|SPI0 TEI (Transmission complete event)" value="SPI0_TEI" scope="interrupt,eventlink"></event>
+        <event id="event.spi0.txi" display="SPI|SPI0|SPI0 TXI (Transmit buffer empty)" value="SPI0_TXI" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.spi1.eri" display="SPI|SPI1|SPI1 ERI (Error)" value="SPI1_ERI" scope="interrupt,eventlink"></event>
+        <event id="event.spi1.idle" display="SPI|SPI1|SPI1 IDLE (Idle)" value="SPI1_IDLE" scope="interrupt,eventlink"></event>
+        <event id="event.spi1.rxi" display="SPI|SPI1|SPI1 RXI (Receive buffer full)" value="SPI1_RXI" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.spi1.tei" display="SPI|SPI1|SPI1 TEI (Transmission complete event)" value="SPI1_TEI" scope="interrupt,eventlink"></event>
+        <event id="event.spi1.txi" display="SPI|SPI1|SPI1 TXI (Transmit buffer empty)" value="SPI1_TXI" scope="interrupt,eventlink,scope.dtc,scope.dmac"></event>
+        <event id="event.ssi0.int" display="SSI|SSI0|SSI0 INT (Error interrupt)" value="SSI0_INT" scope="interrupt"></event>
+        <event id="event.ssi0.rxi" display="SSI|SSI0|SSI0 RXI (Receive data full)" value="SSI0_RXI" scope="interrupt,scope.dtc,scope.dmac"></event>
+        <event id="event.ssi0.txi" display="SSI|SSI0|SSI0 TXI (Transmit data empty)" value="SSI0_TXI" scope="interrupt,scope.dtc,scope.dmac"></event>
+        <event id="event.ssi1.int" display="SSI|SSI1|SSI1 INT (Error interrupt)" value="SSI1_INT" scope="interrupt"></event>
+        <event id="event.ssi1.txi" display="SSI|SSI1|SSI1 TXI (Receive data full/Transmit data empty)" value="SSI1_TXI" scope="interrupt,scope.dtc,scope.dmac"></event>
+        <event id="event.ssi1.rxi" display="SSI|SSI1|SSI1 RXI (Receive data full/Transmit data empty)" value="SSI1_RXI" scope="interrupt,scope.dtc,scope.dmac"></event>
+        <event id="event.ulpt0.compare.a" display="ULPT|ULPT0|ULPT0 COMPARE A (ULPT0 Compare match A)" value="ULPT0_COMPARE_A" scope="interrupt,eventlink,scope.dtc,scope.dmac,scope.dsleep,scope.sstby"></event>
+        <event id="event.ulpt0.compare.b" display="ULPT|ULPT0|ULPT0 COMPARE B (ULPT0 Compare match B)" value="ULPT0_COMPARE_B" scope="interrupt,eventlink,scope.dtc,scope.dmac,scope.dsleep,scope.sstby"></event>
+        <event id="event.ulpt0.int" display="ULPT|ULPT0|ULPT0 INT (ULPT0 Underflow)" value="ULPT0_INT" scope="interrupt,eventlink,scope.dtc,scope.dmac,scope.dsleep,scope.sstby,scope.dsstby"></event>
+        <event id="event.ulpt1.compare.a" display="ULPT|ULPT1|ULPT1 COMPARE A (ULPT1 Compare match A)" value="ULPT1_COMPARE_A" scope="interrupt,eventlink,scope.dtc,scope.dmac,scope.dsleep,scope.sstby"></event>
+        <event id="event.ulpt1.compare.b" display="ULPT|ULPT1|ULPT1 COMPARE B (ULPT1 Compare match B)" value="ULPT1_COMPARE_B" scope="interrupt,eventlink,scope.dtc,scope.dmac,scope.dsleep,scope.sstby"></event>
+        <event id="event.ulpt1.int" display="ULPT|ULPT1|ULPT1 INT (ULPT1 Underflow)" value="ULPT1_INT" scope="interrupt,eventlink,scope.dtc,scope.dmac,scope.dsleep,scope.sstby,scope.dsstby"></event>
+        <event id="event.usbfs.fifo.0" display="USBFS|USBFS FIFO 0 (DMA/DTC transfer request 0)" value="USBFS_FIFO_0" scope="interrupt,scope.dtc,scope.dmac"></event>
+        <event id="event.usbfs.fifo.1" display="USBFS|USBFS FIFO 1 (DMA/DTC transfer request 1)" value="USBFS_FIFO_1" scope="interrupt,scope.dtc,scope.dmac"></event>
+        <event id="event.usbfs.int" display="USBFS|USBFS INT (USBFS interrupt)" value="USBFS_INT" scope="interrupt"></event>
+        <event id="event.usbfs.resume" display="USBFS|USBFS RESUME (USBFS resume interrupt)" value="USBFS_RESUME" scope="interrupt,scope.dsleep,scope.sstby,scope.dsstby"></event>
+        <event id="event.usbhs.fifo.0" display="USBHS|USBHS FIFO 0 (DMA transfer request 0)" value="USBHS_FIFO_0" scope="interrupt,scope.dtc,scope.dmac"></event>
+        <event id="event.usbhs.fifo.1" display="USBHS|USBHS FIFO 1 (DMA transfer request 1)" value="USBHS_FIFO_1" scope="interrupt,scope.dtc,scope.dmac"></event>
+        <event id="event.usbhs.usb.int.resume" display="USBHS|USBHS USB INT RESUME (USBHS interrupt)" value="USBHS_USB_INT_RESUME" scope="interrupt,scope.dsleep,scope.sstby,scope.dsstby"></event>
+        <event id="event.vbatt.tadi" display="VBATT|VBATT TADI (VBATT Tamper Detection)" value="VBATT_TADI" scope="interrupt,scope.dsleep,scope.sstby,scope.dsstby"></event>
+        <event id="event.wdt0.underflow" display="WDT|WDT0|WDT0 UNDERFLOW (WDT0 underflow)" value="WDT0_UNDERFLOW" scope="interrupt,eventlink"></event>
+        <event id="event.xspi.cmp" display="XSPI|XSPI CMP (xSPI Complete)" value="XSPI_CMP" scope="interrupt"></event>
+        <event id="event.xspi.err" display="XSPI|XSPI ERR (xSPI Error)" value="XSPI_ERR" scope="interrupt"></event>
+        <link id="link.gpta" display="GPT (A)" value="GPT_A" />
+        <link id="link.gptb" display="GPT (B)" value="GPT_B" />
+        <link id="link.gptc" display="GPT (C)" value="GPT_C" />
+        <link id="link.gptd" display="GPT (D)" value="GPT_D" />
+        <link id="link.gpte" display="GPT (E)" value="GPT_E" />
+        <link id="link.gptf" display="GPT (F)" value="GPT_F" />
+        <link id="link.gptg" display="GPT (G)" value="GPT_G" />
+        <link id="link.gpth" display="GPT (H)" value="GPT_H" />
+        <link id="link.adc0" display="ADC12A0" value="ADC0" />
+        <link id="link.adc0b" display="ADC12B0" value="ADC0_B" />
+        <link id="link.adc1" display="ADC12A1" value="ADC1" />
+        <link id="link.adc1b" display="ADC12B1" value="ADC1_B" />
+        <link id="link.dac0" display="DAC12 channel 0" value="DAC0" />
+        <link id="link.dac1" display="DAC12 channel 1" value="DAC1" />
+        <link id="link.ioport1" display="PORT1" value="IOPORT1" />
+        <link id="link.ioport2" display="PORT2" value="IOPORT2" />
+        <link id="link.ioport3" display="PORT3" value="IOPORT3" />
+        <link id="link.ioport4" display="PORT4" value="IOPORT4" />
+        <link id="link.i3c" display="I3C" value="I3C" />
+    </bsp>
+</raModuleDescription>

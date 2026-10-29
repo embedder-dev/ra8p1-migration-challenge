@@ -1,0 +1,94 @@
+﻿<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.driver.kint" path="fsp_cfg/r_kint_cfg.h" version="0">
+        <property default="config.driver.kint.param_checking_enable.bsp" display="Parameter Checking" id="config.driver.kint.param_checking_enable" description="If selected code for parameter checking is included in the build.">
+            <option display="Default (BSP)" id="config.driver.kint.param_checking_enable.bsp" value="(BSP_CFG_PARAM_CHECKING_ENABLE)"/>
+            <option display="Enabled" id="config.driver.kint.param_checking_enable.enabled" value="(1)"/>
+            <option display="Disabled" id="config.driver.kint.param_checking_enable.disabled" value="(0)"/>
+        </property>
+        <content>
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#define KINT_CFG_PARAM_CHECKING_ENABLE ${config.driver.kint.param_checking_enable}
+
+#ifdef __cplusplus
+}
+#endif
+        </content>
+    </config>
+    <module config="config.driver.kint" display="Input|${module.driver.keymatrix.name} Key Matrix (r_kint)" id="module.driver.keymatrix_on_kint" version="1" url="group___k_i_n_t.html">
+        <constraint display="Unique name required for each instance">
+    "${interface.driver.kint.${module.driver.keymatrix.name}}" === "1"
+        </constraint>
+        <constraint display="Requires KINT Periperal">
+          "${interface.mcu.kint.external}" === "1"
+        </constraint>
+        <requires id="module.driver.keymatrix_on_kint.requires.kint" interface="interface.mcu.kint.external" visible="false" display="Requires KINT Periperal" />
+        <provides interface="interface.driver.kint" />
+        <provides interface="interface.driver.kint_on_key_matrix" />
+        <provides interface="interface.driver.kint.${module.driver.keymatrix.name}" />
+        <property default="g_kint${_instance}" display="General|Name" id="module.driver.keymatrix.name" description="Module name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.keymatrix.name}")</constraint>
+        </property>
+        <property bitmapPrefix="" default="" display="Input|Key Interrupt Flag Mask" id="module.driver.keymatrix.channels" description="Select channels to enable.">
+            <select enum="enum.mcu.keymatrix.channels" />
+        </property>
+        <property default="module.driver.keymatrix.hw_trigger.trig_rising" display="Interrupts|Trigger Type" id="module.driver.keymatrix.hw_trigger" description="Specifies if the enabled channels detect a rising edge or a falling edge. NOTE: either all channels detecting a rising edge or all channels detecting a falling edge.">
+            <option display="Falling Edge" id="module.driver.keymatrix.hw_trigger.trig_falling" value="KEYMATRIX_TRIG_FALLING"/>
+            <option display="Rising Edge" id="module.driver.keymatrix.hw_trigger.trig_rising" value="KEYMATRIX_TRIG_RISING"/>
+        </property>
+        <property default="kint_callback" display="Interrupts|Callback" id="module.driver.keymatrix.p_callback" description="A user callback function can be provided. If this callback function is provided, it will be called from the interrupt service routine (ISR) each time the IRQ triggers.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.keymatrix.p_callback}") &amp;&amp; "${module.driver.keymatrix.p_callback}" != "NULL"</constraint>
+        </property>
+        <property default="" display="Interrupts|Key Interrupt Priority" id="module.driver.keymatrix.ipl" description="Select the key interrupt priority.">
+            <select enum="enum.mcu.nvic.priorities.mandatory"/>
+            <interrupt event="event.key.int" isr="key_int_isr"/>
+        </property>
+        <peripheral name="KINT" component="kint0" />
+        <!-- For MCU's whose pinmapping files have been generated with MPC Designer Tool -->
+        <peripheral name="KINT" component="kint" />
+        <header>
+/** Key Matrix on KINT Instance. */
+extern const keymatrix_instance_t ${module.driver.keymatrix.name};
+
+/** Access the KINT instance using these structures when calling API functions directly (::p_api is not used). */
+extern kint_instance_ctrl_t ${module.driver.keymatrix.name}_ctrl;
+extern const keymatrix_cfg_t ${module.driver.keymatrix.name}_cfg;
+
+/** Key Matrix on KINT user callback. */
+#ifndef ${module.driver.keymatrix.p_callback}
+void ${module.driver.keymatrix.p_callback}(keymatrix_callback_args_t * p_args);
+#endif
+        </header>
+        <includes>
+#include &quot;r_kint.h&quot;
+#include &quot;r_keymatrix_api.h&quot;</includes>
+        <declarations>
+kint_instance_ctrl_t ${module.driver.keymatrix.name}_ctrl;
+const keymatrix_cfg_t ${module.driver.keymatrix.name}_cfg =
+{
+    .channel_mask = ${module.driver.keymatrix.channels} 0,
+    .trigger      = ${module.driver.keymatrix.hw_trigger},
+    .ipl          = ${module.driver.keymatrix.ipl},
+    .irq          = VECTOR_NUMBER_KEY_INT,
+    .p_callback   = ${module.driver.keymatrix.p_callback},
+    .p_context    = NULL,
+    .p_extend     = NULL
+};
+
+/* Instance structure to use this module. */
+const keymatrix_instance_t ${module.driver.keymatrix.name} =
+{
+    .p_ctrl       = &amp;${module.driver.keymatrix.name}_ctrl,
+    .p_cfg        = &amp;${module.driver.keymatrix.name}_cfg,
+    .p_api        = &amp;g_keymatrix_on_kint
+};
+        </declarations>
+        <api configurable="true">
+            <file>ra/fsp/inc/instances/r_kint.h</file>
+            <file>ra/fsp/inc/api/r_keymatrix_api.h</file>
+        </api>
+    </module>
+</raModuleDescription>

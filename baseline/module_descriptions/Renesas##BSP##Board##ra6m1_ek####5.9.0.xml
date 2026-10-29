@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<raModuleDescription>
+    <config id="config.board.ra6m1ek" path="fsp_cfg/bsp/board_cfg.h" version="0">
+        <content>
+            #include "../../../ra/board/ra6m1_ek/board.h"
+        </content>
+    </config>
+    <board id="board.ra6m1ek" display="RA6|RA6M1|EK-RA6M1" device="R7FA6M1AD3CFP" config="config.board.ra6m1ek" version="0" debugger="com.renesas.hardwaredebug.rz.jlink">
+        <description>Evaluation kit for RA6M1 MCU Group&#xA;Visit https://www.renesas.com/ra/ek-ra6m1 to get kit user’s manual, quick start guide, errata, design package, example projects, etc.</description>
+        <capability id="capability.led"/>
+    </board>
+</raModuleDescription>

@@ -1,0 +1,198 @@
+﻿<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.middleware.motor_sensorless" path="fsp_cfg/rm_motor_sensorless_cfg.h" version="0">
+        <property default="config.middleware.motor_sensorless.param_checking_enable.bsp" display="Parameter checking" id="config.middleware.motor_sensorless.param_checking_enable" description="If selected code for parameter checking is included in the build.">
+            <option display="Default (BSP)" id="config.middleware.motor_sensorless.param_checking_enable.bsp" value="(BSP_CFG_PARAM_CHECKING_ENABLE)"/>
+            <option display="Enabled" id="config.middleware.motor_sensorless.param_checking_enable.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.motor_sensorless.param_checking_enable.disabled" value="(0)"/>
+        </property>
+
+        <content>
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#define MOTOR_SENSORLESS_CFG_PARAM_CHECKING_ENABLE   ${config.middleware.motor_sensorless.param_checking_enable}
+
+#ifdef __cplusplus
+}
+#endif
+        </content>
+    </config>
+    <module config="config.middleware.motor_sensorless" display="Motor|Motor Sensorless Vector Control (rm_motor_sensorless)" id="module.middleware.motor_sensorless" version="1" url="group___m_o_t_o_r___s_e_n_s_o_r_l_e_s_s.html">
+        <constraint display="Unique name required for each instance">
+            ("${interface.middleware.motor_sensorless.${module.middleware.motor_sensorless.name}}" === "1")
+        </constraint>
+        <constraint display="Requires lower level memory implementation">
+            testExists("${module.middleware.motor_sensorless.requires.speed::module.middleware.motor_speed.name}")
+        </constraint>
+        <constraint display="Requires lower level memory implementation">
+            testExists("${module.middleware.motor_sensorless.requires.current::module.middleware.motor_current.name}")
+        </constraint>
+
+        <!-- Speed Module  -->
+        <requires id="module.middleware.motor_sensorless.requires.speed" interface="interface.middleware.motor_speed" find="true" display="Add motor speed module [Mandatory]">
+            <override property="module.middleware.motor_speed.control_type" value="module.middleware.motor_speed.control_type.sensorless"/>
+            <override property="module.middleware.motor_speed.sc_callback" value="rm_motor_sensorless_speed_callback"/>
+            <override property="module.middleware.motor_speed.sc_context" value="${module.middleware.motor_sensorless.name}"/>
+            <override property="module.middleware.motor_speed.st_input" value="(${module.middleware.motor_sensorless.name}_ctrl.st_speed_input)"/>
+            <override property="module.middleware.motor_speed.st_output" value="(${module.middleware.motor_sensorless.name}_ctrl.st_speed_output)"/>
+        </requires>
+
+        <!-- Current Module  -->
+        <requires id="module.middleware.motor_sensorless.requires.current" interface="interface.middleware.motor_current" find="true" display="Add motor current module [Mandatory]">
+            <override property="module.middleware.motor_current.ctrl_type" value="module.middleware.motor_current.ctrl_type.sensorless"/>
+            <override property="module.middleware.motor_current.cc_callback" value="rm_motor_sensorless_current_callback"/>
+            <override property="module.middleware.motor_current.cc_context" value="${module.middleware.motor_sensorless.name}"/>
+        </requires>
+
+        <provides interface="interface.middleware.motor_sensorless" />
+        <provides interface="interface.middleware.motor_sensorless.${module.middleware.motor_sensorless.name}" />
+
+        <!-- Module Name -->
+        <property default="g_motor_sensorless${_instance}" display="General|Name" id="module.middleware.motor_sensorless.name" description="Module name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.middleware.motor_sensorless.name}")</constraint>
+        </property>
+
+        <!-- General Settings -->
+        <property default="0.42F" display="General|Limit of over current (A)" id="module.middleware.motor_sensorless.f_over_current" description="Limit of over current.(Detection threshold)">
+            <constraint display="Must be a valid value">
+            eval('' +
+            'var input = "${module.middleware.motor_sensorless.f_over_current}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?$","i");' +
+            'var regex_float_with_suffix = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?F$","i");' +
+            ' ( regex_float.test(input) || regex_float_with_suffix.test(input))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${module.middleware.motor_sensorless.f_over_current}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)$","i");' +
+            'if (regex_float.test(output)){' +
+            'output = output + "F";' +
+            '}' +
+            'output')
+            </export>
+        </property>
+        <property default="28.0F" display="General|Limit of over voltage (V)" id="module.middleware.motor_sensorless.f_over_voltage" description="Limit of over voltage.(Detection threshold)">
+            <constraint display="Must be a valid value">
+            eval('' +
+            'var input = "${module.middleware.motor_sensorless.f_over_voltage}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?$","i");' +
+            'var regex_float_with_suffix = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?F$","i");' +
+            ' ( regex_float.test(input) || regex_float_with_suffix.test(input))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${module.middleware.motor_sensorless.f_over_voltage}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)$","i");' +
+            'if (regex_float.test(output)){' +
+            'output = output + "F";' +
+            '}' +
+            'output')
+            </export>
+        </property>
+        <property default="3000.0F" display="General|Limit of over speed (rpm)" id="module.middleware.motor_sensorless.f_over_speed" description="Limit of over speed.(Detection threshold)">
+            <constraint display="Must be a valid value">
+            eval('' +
+            'var input = "${module.middleware.motor_sensorless.f_over_speed}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?$","i");' +
+            'var regex_float_with_suffix = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?F$","i");' +
+            ' ( regex_float.test(input) || regex_float_with_suffix.test(input))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${module.middleware.motor_sensorless.f_over_speed}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)$","i");' +
+            'if (regex_float.test(output)){' +
+            'output = output + "F";' +
+            '}' +
+            'output')
+            </export>
+        </property>
+        <property default="14.0F" display="General|Limit of low voltage (V)" id="module.middleware.motor_sensorless.f_low_voltage" description="Limit of low voltage.(Detection threshold)">
+            <constraint display="Must be a valid value">
+            eval('' +
+            'var input = "${module.middleware.motor_sensorless.f_low_voltage}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?$","i");' +
+            'var regex_float_with_suffix = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?F$","i");' +
+            ' ( regex_float.test(input) || regex_float_with_suffix.test(input))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${module.middleware.motor_sensorless.f_low_voltage}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)$","i");' +
+            'if (regex_float.test(output)){' +
+            'output = output + "F";' +
+            '}' +
+            'output')
+            </export>
+        </property>
+
+        <!-- Callback Settings -->
+        <property default="NULL" display="Interrupts|Callback" id="module.middleware.motor_sensorless.callback" description="A user callback function. If this callback function is provided, it is called at speed control cyclic interrupt.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.middleware.motor_sensorless.callback}")
+            </constraint>
+        </property>
+        <property default="NULL" id="module.middleware.motor_sensorless.context">
+            <export>eval('' +
+            'var string = "${module.middleware.motor_sensorless.context}";' +
+            'if ("NULL" !== string){' +
+            'string = "&amp;" + string  ;' +
+            '}' +
+            'String(string)')
+            </export>
+        </property>
+
+        <!-- Contents -->
+        <header>
+/** Motor sensorless vector control instance. */
+extern const motor_instance_t ${module.middleware.motor_sensorless.name};
+
+/** Access the motor sensorless control instance using these structures
+    when calling API functions directly (::p_api is not used). */
+extern motor_sensorless_instance_ctrl_t ${module.middleware.motor_sensorless.name}_ctrl;
+extern const motor_sensorless_extended_cfg_t ${module.middleware.motor_sensorless.name}_extend;
+extern const motor_cfg_t ${module.middleware.motor_sensorless.name}_cfg;
+
+#ifndef ${module.middleware.motor_sensorless.callback}
+void ${module.middleware.motor_sensorless.callback}(motor_callback_args_t * p_args);
+#endif
+        </header>
+
+        <includes>
+#include &quot;rm_motor_sensorless.h&quot;
+        </includes>
+        <macros>
+        </macros>
+        <declarations>
+
+/* Motor sensorless control configuration */
+motor_sensorless_instance_ctrl_t ${module.middleware.motor_sensorless.name}_ctrl;
+
+const motor_sensorless_extended_cfg_t ${module.middleware.motor_sensorless.name}_extend =
+{
+  .f_overcurrent_limit = ${module.middleware.motor_sensorless.f_over_current} * 1.414213562F * 1.5F,
+  .f_overvoltage_limit = ${module.middleware.motor_sensorless.f_over_voltage},
+  .f_overspeed_limit = ${module.middleware.motor_sensorless.f_over_speed},
+  .f_lowvoltage_limit = ${module.middleware.motor_sensorless.f_low_voltage},
+};
+
+const motor_cfg_t ${module.middleware.motor_sensorless.name}_cfg =
+{
+  .p_callback = ${module.middleware.motor_sensorless.callback},
+  .p_context = ${module.middleware.motor_sensorless.context},
+  .p_motor_speed_instance = &amp;${module.middleware.motor_sensorless.requires.speed::module.middleware.motor_speed.name},
+  .p_motor_current_instance = &amp;${module.middleware.motor_sensorless.requires.current::module.middleware.motor_current.name},
+  .p_extend = &amp;${module.middleware.motor_sensorless.name}_extend,
+};
+
+/* Instance structure to use motor sensorless control module. */
+const motor_instance_t ${module.middleware.motor_sensorless.name} =
+{
+    .p_ctrl = &amp;${module.middleware.motor_sensorless.name}_ctrl,
+    .p_cfg  = &amp;${module.middleware.motor_sensorless.name}_cfg,
+    .p_api  = &amp;g_motor_on_sensorless,
+};
+        </declarations>
+    </module>
+</raModuleDescription>

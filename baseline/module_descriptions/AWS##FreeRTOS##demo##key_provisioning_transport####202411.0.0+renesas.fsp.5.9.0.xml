@@ -1,0 +1,9 @@
+<?xml version="1.0" ?>
+<raModuleDescription>
+    <module id="module.aws.freertos.dev_mode_key_provisioning_mbed_transport_interface" config="config.aws.freertos.dev_mode_key_provisioning_mbed_transport_interface" display="Networking|AWS Demo dev_mode_key_provisioning" common="1" visible="false" version="0" url="https://docs.aws.amazon.com/freertos/latest/userguide/dev-mode-key-provisioning.html">
+        <provides interface="interface.aws.freertos.dev_mode_key_provisioning_mbed_transport_interface" />
+        <includes>
+            #include &quot;aws_dev_mode_key_provisioning.h&quot;
+        </includes>
+    </module>
+</raModuleDescription>

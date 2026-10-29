@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<raModuleDescription>
+    <module config="config.azure.ewf" id="module.azure.ewf.adapter.ryz024a" display="Networking|Azure EWF Adapter on RYZ024A [Deprecated]" common="1" version="0" url="group___r_m___a_z_u_r_e___e_w_f___g_m.html">
+        <requires id="module.azure.ewf.adapter.ryz024a.requires.rtos" interface="interface.rtos.supports.ewf" visible="false" display="Requires ThreadX or Bare Metal"/>
+        <requires id="module.azure.ewf.adapter.ryz024a.requires.ewf_common" interface="interface.azure.ewf.common" find="true" display="Requires EWF Common"/>
+        <requires id="module.azure.ewf.adapter.ryz024a.requires.ewf_interface" interface="interface.azure.ewf.interface" find="true" display="Requires EWF Interface"/>
+        <requires id="module.azure.ewf.adapter.ryz024a.requires.ewf_platform" interface="interface.azure.ewf.platform" find="true" display="Requires EWF Platform"/>
+        <provides interface="interface.azure.ewf.adapter" />
+        <property default="renesas_ryz024" display="Name" id="module.azure.ewf.adapter.ryz024a.name" description="Adapter name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.azure.ewf.adapter.ryz024a.name}")</constraint>
+        </property>
+        <includes>
+#include &quot;ewf_adapter_renesas_ryz024a.h&quot;
+        </includes>
+    </module>
+</raModuleDescription>

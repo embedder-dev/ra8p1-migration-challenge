@@ -1,0 +1,6 @@
+<?xml version="1.0" ?>
+<raModuleDescription>
+    <module display="Bootloader|MCUboot ASN.1 Parser" id="module.middleware.mcuboot_asn1_parser" version="1" visible="false" url="https://github.com/mcu-tools/mcuboot">
+        <provides interface="interface.middleware.mcuboot.asn1_parser" />
+    </module>
+</raModuleDescription>

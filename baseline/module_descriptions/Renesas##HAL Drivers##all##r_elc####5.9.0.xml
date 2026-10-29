@@ -1,0 +1,227 @@
+﻿<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.driver.elc" path="fsp_cfg/r_elc_cfg.h" version="0">
+        <property default="config.driver.elc.checking.system" description="If selected code for parameter checking is included in the build." display="Parameter Checking" id="config.driver.elc.checking">
+            <option display="Default (BSP)" id="config.driver.elc.checking.system" value="(BSP_CFG_PARAM_CHECKING_ENABLE)"/>
+            <option display="Enabled" id="config.driver.elc.checking.enabled" value="(1)"/>
+            <option display="Disabled" id="config.driver.elc.checking.disabled" value="(0)"/>
+        </property>
+        <content>
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#define ELC_CFG_PARAM_CHECKING_ENABLE ${config.driver.elc.checking}
+
+#ifdef __cplusplus
+}
+#endif
+        </content>
+    </config>
+    <module common="1" config="config.driver.elc" display="System|${module.driver.elc.name} Event Link Controller (r_elc)" id="module.driver.elc_on_elc" version="1" url="group___e_l_c.html">
+        <constraint display="Only one ELC driver instance is allowed.">
+            "${interface.driver.elc}" === "1"
+        </constraint>
+        <provides interface="interface.driver.elc" />
+        <provides interface="interface.peripheral.elc" />
+        <property default="g_elc" display="Name" id="module.driver.elc.name" description="Module name. Fixed to g_elc.">
+            <constraint display="ELC instance name must be g_elc to match elc_cfg_t data structure created in elc_data.c">
+                "${module.driver.elc.name}" === "g_elc"
+            </constraint>
+            <signal event="event.elc.software.event.0" />
+            <signal event="event.elc.software.event.1" />
+        </property>
+        <symbol id="symbol.driver.elc.name" value="${module.driver.elc.name}"/>
+        <symbol id="symbol.driver.elc.guard.open" value="${module.driver.elc.name}_open_guard"/>
+        <symbol id="symbol.driver.elc.guard.macro.open" value="FSP_GUARD_${module.driver.elc.name}_R_ELC_Open"/>
+        <symbol id="symbol.driver.elc.guard.close" value="${module.driver.elc.name}_close_guard"/>
+        <symbol id="symbol.driver.elc.guard.macro.close" value="FSP_GUARD_${module.driver.elc.name}_R_ELC_Close"/>
+        <symbol id="symbol.driver.elc.guard.software_event_generate" value="${module.driver.elc.name}_software_event_generate_guard"/>
+        <symbol id="symbol.driver.elc.guard.macro.software_event_generate" value="FSP_GUARD_${module.driver.elc.name}_R_ELC_SoftwareEventGenerate"/>
+        <symbol id="symbol.driver.elc.guard.link_set" value="${module.driver.elc.name}_link_set_guard"/>
+        <symbol id="symbol.driver.elc.guard.macro.link_set" value="FSP_GUARD_${module.driver.elc.name}_R_ELC_LinkSet"/>
+        <symbol id="symbol.driver.elc.guard.link_break" value="${module.driver.elc.name}_link_break_guard"/>
+        <symbol id="symbol.driver.elc.guard.macro.link_break" value="FSP_GUARD_${module.driver.elc.name}_R_ELC_LinkBreak"/>
+        <symbol id="symbol.driver.elc.guard.enable" value="${module.driver.elc.name}_enable_guard"/>
+        <symbol id="symbol.driver.elc.guard.macro.enable" value="FSP_GUARD_${module.driver.elc.name}_R_ELC_Enable"/>
+        <symbol id="symbol.driver.elc.guard.disable" value="${module.driver.elc.name}_disable_guard"/>
+        <symbol id="symbol.driver.elc.guard.macro.disable" value="FSP_GUARD_${module.driver.elc.name}_R_ELC_Disable"/>
+        <symbol id="symbol.driver.elc.nsc_api" value="${module.driver.elc.name}_nsc_api"/>
+        <symbol id="symbol.driver.elc.cfg" value="${module.driver.elc.name}_cfg"/>
+        <symbol id="symbol.driver.elc.ctrl" value="${module.driver.elc.name}_ctrl"/>
+        <header>
+/** ELC Instance */
+extern const elc_instance_t ${module.driver.elc.name};
+
+/** Access the ELC instance using these structures when calling API functions directly (::p_api is not used). */
+extern elc_instance_ctrl_t ${module.driver.elc.name}_ctrl;
+extern const elc_cfg_t ${module.driver.elc.name}_cfg;
+
+        </header>
+        <includes>#include &quot;r_elc.h&quot;
+#include &quot;r_elc_api.h&quot;
+        </includes>
+        <declarations>
+elc_instance_ctrl_t ${module.driver.elc.name}_ctrl;
+
+extern const elc_cfg_t ${module.driver.elc.name}_cfg;
+
+const elc_instance_t ${module.driver.elc.name} = {
+    .p_ctrl = &amp;${module.driver.elc.name}_ctrl,
+    .p_api  = &amp;g_elc_on_elc,
+    .p_cfg  = &amp;${module.driver.elc.name}_cfg
+};
+        </declarations>
+        <guard>
+            <header>
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.elc.name}_open_guard(elc_ctrl_t *const p_ctrl, elc_cfg_t const *const p_cfg);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.elc.name}_close_guard(elc_ctrl_t *const p_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.elc.name}_software_event_generate_guard(elc_ctrl_t *const p_ctrl, elc_software_event_t event_number);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.elc.name}_link_set_guard(elc_ctrl_t *const p_ctrl, elc_peripheral_t peripheral, elc_event_t signal);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.elc.name}_link_break_guard(elc_ctrl_t *const p_ctrl, elc_peripheral_t peripheral);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.elc.name}_enable_guard(elc_ctrl_t *const p_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.elc.name}_disable_guard(elc_ctrl_t *const p_ctrl);
+
+            </header>
+            <template name="${module.driver.elc.name}_guard.c">
+                <![CDATA[
+                    #include "guard.h"
+
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.elc.name}_open_guard (elc_ctrl_t *const p_ctrl, elc_cfg_t const *const p_cfg)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+    FSP_PARAMETER_NOT_USED(p_cfg);
+
+    return R_ELC_Open(&${module.driver.elc.name}_ctrl, &${module.driver.elc.name}_cfg);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.elc.name}_close_guard (elc_ctrl_t *const p_ctrl)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+
+    return R_ELC_Close(&${module.driver.elc.name}_ctrl);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.elc.name}_software_event_generate_guard (elc_ctrl_t *const p_ctrl, elc_software_event_t event_number)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+
+    return R_ELC_SoftwareEventGenerate(&${module.driver.elc.name}_ctrl, event_number);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.elc.name}_link_set_guard (elc_ctrl_t *const p_ctrl, elc_peripheral_t peripheral, elc_event_t signal)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+
+    return R_ELC_LinkSet(&${module.driver.elc.name}_ctrl, peripheral, signal);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.elc.name}_link_break_guard (elc_ctrl_t *const p_ctrl, elc_peripheral_t peripheral)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+
+    return R_ELC_LinkBreak(&${module.driver.elc.name}_ctrl, peripheral);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.elc.name}_enable_guard (elc_ctrl_t *const p_ctrl)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+
+    return R_ELC_Enable(&${module.driver.elc.name}_ctrl);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.elc.name}_disable_guard (elc_ctrl_t *const p_ctrl)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+
+    return R_ELC_Disable(&${module.driver.elc.name}_ctrl);
+}
+
+                ]]>
+            </template>
+        </guard>
+        <nsc>
+            <header>
+
+#define FSP_GUARD_${module.driver.elc.name}_R_ELC_Open() ${module.driver.elc.name}_open_guard(FSP_SECURE_ARGUMENT, FSP_SECURE_ARGUMENT)
+
+#define FSP_GUARD_${module.driver.elc.name}_R_ELC_Close() ${module.driver.elc.name}_close_guard(FSP_SECURE_ARGUMENT)
+
+#define FSP_GUARD_${module.driver.elc.name}_R_ELC_SoftwareEventGenerate(event_number) ${module.driver.elc.name}_software_event_generate_guard(FSP_SECURE_ARGUMENT, event_number)
+
+#define FSP_GUARD_${module.driver.elc.name}_R_ELC_LinkSet(peripheral, signal) ${module.driver.elc.name}_link_set_guard(FSP_SECURE_ARGUMENT, peripheral, signal)
+
+#define FSP_GUARD_${module.driver.elc.name}_R_ELC_LinkBreak(peripheral) ${module.driver.elc.name}_link_break_guard(FSP_SECURE_ARGUMENT, peripheral)
+
+#define FSP_GUARD_${module.driver.elc.name}_R_ELC_Enable() ${module.driver.elc.name}_enable_guard(FSP_SECURE_ARGUMENT)
+
+#define FSP_GUARD_${module.driver.elc.name}_R_ELC_Disable() ${module.driver.elc.name}_disable_guard(FSP_SECURE_ARGUMENT)
+
+
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.elc.name}_open_guard(elc_ctrl_t *const p_ctrl, elc_cfg_t const *const p_cfg);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.elc.name}_close_guard(elc_ctrl_t *const p_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.elc.name}_software_event_generate_guard(elc_ctrl_t *const p_ctrl, elc_software_event_t event_number);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.elc.name}_link_set_guard(elc_ctrl_t *const p_ctrl, elc_peripheral_t peripheral, elc_event_t signal);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.elc.name}_link_break_guard(elc_ctrl_t *const p_ctrl, elc_peripheral_t peripheral);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.elc.name}_enable_guard(elc_ctrl_t *const p_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.elc.name}_disable_guard(elc_ctrl_t *const p_ctrl);
+
+
+extern const elc_instance_t ${module.driver.elc.name};
+            </header>
+            <declarations>
+                <![CDATA[
+static const elc_api_t ${module.driver.elc.name}_nsc_api =
+{
+    .open = ${module.driver.elc.name}_open_guard,
+    .close = ${module.driver.elc.name}_close_guard,
+    .softwareEventGenerate = ${module.driver.elc.name}_software_event_generate_guard,
+    .linkSet = ${module.driver.elc.name}_link_set_guard,
+    .linkBreak = ${module.driver.elc.name}_link_break_guard,
+    .enable = ${module.driver.elc.name}_enable_guard,
+    .disable = ${module.driver.elc.name}_disable_guard,
+};
+const elc_instance_t ${module.driver.elc.name} =
+{
+    .p_api = &${module.driver.elc.name}_nsc_api,
+    .p_ctrl = FSP_SECURE_ARGUMENT,
+    .p_cfg = FSP_SECURE_ARGUMENT,
+};
+                ]]>
+            </declarations>
+        </nsc>
+        <api configurable="true">
+            <file>ra/fsp/inc/instances/r_elc.h</file>
+            <file>ra/fsp/inc/api/r_elc_api.h</file>
+        </api>
+    </module>
+</raModuleDescription>

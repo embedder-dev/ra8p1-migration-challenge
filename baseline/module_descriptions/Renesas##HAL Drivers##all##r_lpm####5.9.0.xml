@@ -1,0 +1,321 @@
+﻿<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.driver.lpm" path="fsp_cfg/r_lpm_cfg.h" version="0">
+        <property default="config.driver.lpm.param_checking_enable.bsp" display="Parameter Checking" id="config.driver.lpm.param_checking_enable" description="If selected code for parameter checking is included in the build.">
+            <option display="Default (BSP)" id="config.driver.lpm.param_checking_enable.bsp" value="(BSP_CFG_PARAM_CHECKING_ENABLE)"/>
+            <option display="Enabled" id="config.driver.lpm.param_checking_enable.enabled" value="(1)"/>
+            <option display="Disabled" id="config.driver.lpm.param_checking_enable.disabled" value="(0)"/>
+        </property>
+        <property default="config.driver.lpm.standby_limit.disabled" display="Standby Limit" id="config.driver.lpm.standby_limit" description="If enabled, standby configuration only applies in R_LPM_LowPowerModeEnter. Otherwise, standby configuration applies to any WFI call.">
+            <option display="Enabled" id="config.driver.lpm.standby_limit.enabled" value="(1)"/>
+            <option display="Disabled" id="config.driver.lpm.standby_limit.disabled" value="(0)"/>
+        </property>
+        <content>
+        #ifdef __cplusplus
+        extern "C" {
+        #endif
+
+        #define LPM_CFG_PARAM_CHECKING_ENABLE ${config.driver.lpm.param_checking_enable}
+        #define LPM_CFG_STANDBY_LIMIT ${config.driver.lpm.standby_limit}
+
+        #ifdef __cplusplus
+        }
+        #endif
+        </content>
+    </config>
+    <module config="config.driver.lpm" display="Power|${module.driver.lpm.name} Low Power Modes (r_lpm)" id="module.driver.lpm" version="1" url="group___l_p_m.html">
+        <constraint display="Unique name required for each instance">
+            "${interface.driver.lpm.${module.driver.lpm.name}}" === "1"
+        </constraint>
+        <provides interface="interface.driver.lpm" />
+        <provides interface="interface.driver.lpm_on_lpm" />
+        <provides interface="interface.driver.lpm.${module.driver.lpm.name}" />
+        <provides interface="interface.peripheral.lpm" />
+        <property default="g_lpm${_instance}" display="General|Name" id="module.driver.lpm.name" description="Module name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.lpm.name}")</constraint>
+            <signal event="event.lpm.snooze.request" />
+        </property>
+        <property default="module.driver.lpm.mode.sleep" display="General|Low Power Mode" id="module.driver.lpm.mode" description="Power mode to be entered.">
+            <select enum="enum.mcu.lpm.mode" />
+        </property>
+        <!-- Output port state in standby and deep standby -->
+        <property default="module.driver.lpm.output_port_enable_standby.no_change" display="General|Output port state in standby and deep standby" id="module.driver.lpm.output_port_enable_standby" description="Select the state of output pins during standby. Applies to address output, data output, and other bus control output pins.">
+            <select enum="enum.mcu.lpm.output_port_enable_standby" />
+        </property>
+        <property default="" display="General|Supply of SOSC clock to peripheral function in standby" id="module.driver.lpm.supply_sosc_clock" description="If enabled, SOSC clock is provided to peripheral functions in Software Standby and Snooze modes.">
+            <select enum="enum.mcu.lpm.supply_sosc_clock" />
+        </property>
+        <property default="" display="General|Startup speed of the HOCO in Standby and Snooze modes" id="module.driver.lpm.start_hsoco" description="  If enabled, the HOCO enters high-speed startup mode, shortening standby release time, and snooze transition time.">
+            <select enum="enum.mcu.lpm.hsoco_speed" />
+        </property>
+        <property default="" display="General|Flash mode in sleep or snooze" id="module.driver.lpm.flash_mode" description="Select flash mode in sleep mode or in snooze mode.">
+            <select enum="enum.mcu.lpm.flash_mode" />
+        </property>
+        <property bitmapPrefix="LPM_STANDBY_WAKE_SOURCE_" default="" display="Deep Sleep and Standby Options|Wake Sources" id="module.driver.lpm.standby_wake_sources" description="Enable wake from deep sleep and standby from these Sources.">
+            <select enum="enum.mcu.lpm.standby_wake_sources"/>
+        </property>
+        <property bitmapPrefix="LPM_STANDBY_WAKE_SOURCE_" default="" display="Deep Sleep and Standby Options|Wake Sources 2" id="module.driver.lpm.standby_wake_sources_2" description="Enable wake from deep sleep and standby from these Sources.">
+            <select enum="enum.mcu.lpm.standby_wake_sources_2"/>
+        </property>
+        <property default="module.driver.lpm.snooze_request" display="Deep Sleep and Standby Options|Snooze Options (Not available on every MCU)|Snooze Request Source" id="module.driver.lpm.snooze_request" description="Select the event that will enter snooze.">
+            <select enum="enum.mcu.lpm.snooze_request" />
+        </property>
+        <property bitmapPrefix="LPM_SNOOZE_END_" default="" display="Deep Sleep and Standby Options|Snooze Options (Not available on every MCU)|Snooze End Sources" id="module.driver.lpm.snooze_end_sources" description="Enable wake from snooze from these sources.">
+            <select enum="enum.mcu.lpm.snooze_end_sources" />
+        </property>
+        <property default="" id="module.driver.lpm.snooze_dtc" display="Deep Sleep and Standby Options|Snooze Options (Not available on every MCU)|DTC state in Snooze Mode" description="Enable wake from snooze from this source.">
+            <select enum="enum.mcu.lpm.snooze_dtc" />
+        </property>
+        <property id="module.driver.lpm.snooze_cancel_source" default="" display="Deep Sleep and Standby Options|Snooze Options (Not available on every MCU)|Snooze Cancel Source" description="Select an interrupt source to cancel snooze.">
+            <select enum="enum.mcu.lpm.snooze_cancel_source" />
+        </property>
+        <property bitmapPrefix="" default="" display="RAM Retention Control (Not available on every MCU)|RAM retention in Standby mode" id="module.driver.lpm.ram_power_enable" description="Select the memory regions that are retained in standby mode.">
+            <select enum="enum.mcu.lpm.ram_power_enable" />
+        </property>
+        <property default="" display="RAM Retention Control (Not available on every MCU)|TCM retention in Deep Sleep and Standby modes" id="module.driver.lpm.tcm_power_enable" description="Select if Tightly Coupled Memory (TCM) is retained in deep sleep and standby modes.">
+            <select enum="enum.mcu.lpm.tcm_power_enable" />
+        </property>
+        <property default="" display="RAM Retention Control (Not available on every MCU)|Standby RAM retention in Standby and Deep Standby modes" id="module.driver.lpm.standby_ram_power_enable" description="Select if Standby RAM is retained in standby and deep standby modes.">
+            <select enum="enum.mcu.lpm.standby_ram_power_enable" />
+        </property>
+        <property default="" display="Oscillator LDO Control (Not available on every MCU)|PLL1 LDO State in standby mode" id="module.driver.lpm.oscillator_ldo_state.pll1" description="Select the state PLL1 LDO state in standby mode.">
+            <select enum="enum.mcu.lpm.oscillator_ldo_state.pll1" />
+        </property>
+        <property default="" display="Oscillator LDO Control (Not available on every MCU)|PLL2 LDO State in standby mode" id="module.driver.lpm.oscillator_ldo_state.pll2" description="Select the state PLL2 LDO state in standby mode.">
+            <select enum="enum.mcu.lpm.oscillator_ldo_state.pll2" />
+        </property>
+        <property default="" display="Oscillator LDO Control (Not available on every MCU)|HOCO LDO State in standby mode" id="module.driver.lpm.oscillator_ldo_state.hoco" description="Select the state HOCO LDO state in standby mode.">
+            <select enum="enum.mcu.lpm.oscillator_ldo_state.hoco" />
+        </property>
+        <!-- IO states on exit from Deep Standby -->
+        <property default="module.driver.lpm.io_port_deep_standby_exit.no_change" display="Deep Standby Options (Not available on every MCU)|I/O Port Retention" id="module.driver.lpm.io_port_deep_standby_exit" description="Select the state of the IO Pins after exiting deep standby mode.">
+            <select enum="enum.mcu.lpm.io_port_deep_standby_exit" />
+        </property>
+        <!-- Internal power supply state in deep standby (Deepcut, Deep Standby Mode 1, Deep Standby Mode 2, Deep Standby Mode 3) -->
+        <property default="" display="Deep Standby Options (Not available on every MCU)|Power-Supply Control" id="module.driver.lpm.power_supply_deep_standby" description="Select the state of the internal power supply in deep standby mode.">
+            <select enum="enum.mcu.lpm.power_supply_deep_standby" />
+        </property>
+        <property bitmapPrefix="LPM_DEEP_STANDBY_CANCEL_SOURCE_" default="" display="Deep Standby Options (Not available on every MCU)|Cancel Sources" id="module.driver.lpm.deep_standby_cancel_sources" description="Enable wake from deep standby using these sources.">
+            <select enum="enum.mcu.lpm.deep_standby_cancel_sources" />
+        </property>
+        <property bitmapPrefix="LPM_DEEP_STANDBY_CANCEL_SOURCE_" default="" display="Deep Standby Options (Not available on every MCU)|Cancel Edges" id="module.driver.lpm.deep_standby_cancel_edges" description="Falling edge trigger is default. Select sources to enable wake from deep standby with rising edge.">
+            <select enum="enum.mcu.lpm.deep_standby_cancel_edges" />
+        </property>
+
+        <symbol id="symbol.driver.lpm.name" value="${module.driver.lpm.name}"/>
+        <symbol id="symbol.driver.lpm.guard.open" value="${module.driver.lpm.name}_open_guard"/>
+        <symbol id="symbol.driver.lpm.guard.macro.open" value="FSP_GUARD_${module.driver.lpm.name}_R_LPM_Open"/>
+        <symbol id="symbol.driver.lpm.guard.close" value="${module.driver.lpm.name}_close_guard"/>
+        <symbol id="symbol.driver.lpm.guard.macro.close" value="FSP_GUARD_${module.driver.lpm.name}_R_LPM_Close"/>
+        <symbol id="symbol.driver.lpm.guard.low_power_reconfigure" value="${module.driver.lpm.name}_low_power_reconfigure_guard"/>
+        <symbol id="symbol.driver.lpm.guard.macro.low_power_reconfigure" value="FSP_GUARD_${module.driver.lpm.name}_R_LPM_LowPowerReconfigure"/>
+        <symbol id="symbol.driver.lpm.guard.low_power_mode_enter" value="${module.driver.lpm.name}_low_power_mode_enter_guard"/>
+        <symbol id="symbol.driver.lpm.guard.macro.low_power_mode_enter" value="FSP_GUARD_${module.driver.lpm.name}_R_LPM_LowPowerModeEnter"/>
+        <symbol id="symbol.driver.lpm.guard.io_keep_clear" value="${module.driver.lpm.name}_io_keep_clear_guard"/>
+        <symbol id="symbol.driver.lpm.guard.macro.io_keep_clear" value="FSP_GUARD_${module.driver.lpm.name}_R_LPM_IoKeepClear"/>
+        <symbol id="symbol.driver.lpm.nsc_api" value="${module.driver.lpm.name}_nsc_api"/>
+        <symbol id="symbol.driver.lpm.cfg" value="${module.driver.lpm.name}_cfg"/>
+        <symbol id="symbol.driver.lpm.ctrl" value="${module.driver.lpm.name}_ctrl"/>
+        <header>
+/** lpm Instance */
+extern const lpm_instance_t ${module.driver.lpm.name};
+
+/** Access the LPM instance using these structures when calling API functions directly (::p_api is not used). */
+extern lpm_instance_ctrl_t ${module.driver.lpm.name}_ctrl;
+extern const lpm_cfg_t ${module.driver.lpm.name}_cfg;
+        </header>
+        <includes>
+#include &quot;r_lpm.h&quot;
+#include &quot;r_lpm_api.h&quot;
+        </includes>
+        <declarations>
+
+#if BSP_TZ_NONSECURE_BUILD
+ #if defined(BSP_CFG_CLOCKS_SECURE) &amp;&amp; BSP_CFG_CLOCKS_SECURE
+  #error "The LPM module requires CGC registers to be non-secure when it is used in a TrustZone Non-secure project."
+ #endif
+#endif
+
+lpm_instance_ctrl_t ${module.driver.lpm.name}_ctrl;
+
+const lpm_cfg_t ${module.driver.lpm.name}_cfg =
+{
+    .low_power_mode     = ${module.driver.lpm.mode},
+    .standby_wake_sources       = ${module.driver.lpm.standby_wake_sources} (lpm_standby_wake_source_t) 0,
+#if BSP_FEATURE_ICU_HAS_WUPEN2
+    .standby_wake_sources_2     = ${module.driver.lpm.standby_wake_sources_2} (lpm_standby_wake_source_2_t) 0,
+#endif
+#if BSP_FEATURE_LPM_HAS_SNOOZE
+    .snooze_cancel_sources      = ${module.driver.lpm.snooze_cancel_source},
+    .snooze_request_source      = (lpm_snooze_request_t) ${module.driver.lpm.snooze_request},
+#if BSP_FEATURE_LPM_SNZEDCR_MASK > 0
+    .snooze_end_sources         = ${module.driver.lpm.snooze_end_sources} (lpm_snooze_end_t) 0,
+#endif
+    .dtc_state_in_snooze        = ${module.driver.lpm.snooze_dtc},
+#endif
+#if BSP_FEATURE_LPM_HAS_SBYCR_OPE
+    .output_port_enable         = ${module.driver.lpm.output_port_enable_standby},
+#endif
+#if BSP_FEATURE_LPM_HAS_DEEP_STANDBY
+    .io_port_state              = ${module.driver.lpm.io_port_deep_standby_exit},
+    .power_supply_state         = ${module.driver.lpm.power_supply_deep_standby},
+    .deep_standby_cancel_source = ${module.driver.lpm.deep_standby_cancel_sources} (lpm_deep_standby_cancel_source_t) 0,
+    .deep_standby_cancel_edge   = ${module.driver.lpm.deep_standby_cancel_edges} (lpm_deep_standby_cancel_edge_t) 0,
+#endif
+#if BSP_FEATURE_LPM_HAS_PDRAMSCR
+    .ram_retention_cfg.ram_retention = (uint16_t) (${module.driver.lpm.ram_power_enable} 0),
+    .ram_retention_cfg.tcm_retention = ${module.driver.lpm.tcm_power_enable},
+#endif
+#if BSP_FEATURE_LPM_HAS_DPSBYCR_SRKEEP
+    .ram_retention_cfg.standby_ram_retention = ${module.driver.lpm.standby_ram_power_enable},
+#endif
+#if BSP_FEATURE_LPM_HAS_LDO_SKEEP
+    .ldo_standby_cfg.pll1_ldo = ${module.driver.lpm.oscillator_ldo_state.pll1},
+    .ldo_standby_cfg.pll2_ldo = ${module.driver.lpm.oscillator_ldo_state.pll2},
+    .ldo_standby_cfg.hoco_ldo = ${module.driver.lpm.oscillator_ldo_state.hoco},
+#endif
+#if BSP_FEATURE_LPM_HAS_FLASH_MODE_SELECT
+    .lpm_flash_mode_select = ${module.driver.lpm.flash_mode},
+#endif
+#if BSP_FEATURE_LPM_HAS_HOCO_STARTUP_SPEED_MODE
+    .lpm_hoco_startup_speed = ${module.driver.lpm.start_hsoco},
+#endif
+#if BSP_FEATURE_LPM_HAS_STANDBY_SOSC_SELECT
+    .lpm_standby_sosc = ${module.driver.lpm.supply_sosc_clock},
+#endif
+    .p_extend           = NULL,
+};
+
+const lpm_instance_t ${module.driver.lpm.name} =
+{
+    .p_api = &amp;g_lpm_on_lpm,
+    .p_ctrl = &amp;${module.driver.lpm.name}_ctrl,
+    .p_cfg = &amp;${module.driver.lpm.name}_cfg
+};
+        </declarations>
+        <guard>
+            <header>
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.lpm.name}_open_guard(lpm_ctrl_t *const p_api_ctrl, lpm_cfg_t const *const p_cfg);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.lpm.name}_close_guard(lpm_ctrl_t *const p_api_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.lpm.name}_low_power_reconfigure_guard(lpm_ctrl_t *const p_api_ctrl, lpm_cfg_t const *const p_cfg);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.lpm.name}_low_power_mode_enter_guard(lpm_ctrl_t *const p_api_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.lpm.name}_io_keep_clear_guard(lpm_ctrl_t *const p_api_ctrl);
+
+            </header>
+            <template name="${module.driver.lpm.name}_guard.c">
+                <![CDATA[
+                    #include "guard.h"
+
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.lpm.name}_open_guard (lpm_ctrl_t *const p_api_ctrl, lpm_cfg_t const *const p_cfg)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+    FSP_PARAMETER_NOT_USED(p_cfg);
+
+    return R_LPM_Open(&${module.driver.lpm.name}_ctrl, &${module.driver.lpm.name}_cfg);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.lpm.name}_close_guard (lpm_ctrl_t *const p_api_ctrl)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+
+    return R_LPM_Close(&${module.driver.lpm.name}_ctrl);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.lpm.name}_low_power_reconfigure_guard (lpm_ctrl_t *const p_api_ctrl, lpm_cfg_t const *const p_cfg)
+{
+    /* Verify all pointers are in non-secure memory. */
+    lpm_cfg_t const *const p_cfg_checked = cmse_check_pointed_object((lpm_cfg_t *) p_cfg, CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_cfg_checked != NULL);
+
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+
+    return R_LPM_LowPowerReconfigure(&${module.driver.lpm.name}_ctrl, p_cfg_checked);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.lpm.name}_low_power_mode_enter_guard (lpm_ctrl_t *const p_api_ctrl)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+
+    return R_LPM_LowPowerModeEnter(&${module.driver.lpm.name}_ctrl);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.lpm.name}_io_keep_clear_guard (lpm_ctrl_t *const p_api_ctrl)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+
+    return R_LPM_IoKeepClear(&${module.driver.lpm.name}_ctrl);
+}
+
+                ]]>
+            </template>
+        </guard>
+        <nsc>
+            <header>
+
+#define FSP_GUARD_${module.driver.lpm.name}_R_LPM_Open() ${module.driver.lpm.name}_open_guard(FSP_SECURE_ARGUMENT, FSP_SECURE_ARGUMENT)
+
+#define FSP_GUARD_${module.driver.lpm.name}_R_LPM_Close() ${module.driver.lpm.name}_close_guard(FSP_SECURE_ARGUMENT)
+
+#define FSP_GUARD_${module.driver.lpm.name}_R_LPM_LowPowerReconfigure(p_cfg) ${module.driver.lpm.name}_low_power_reconfigure_guard(FSP_SECURE_ARGUMENT, p_cfg)
+
+#define FSP_GUARD_${module.driver.lpm.name}_R_LPM_LowPowerModeEnter() ${module.driver.lpm.name}_low_power_mode_enter_guard(FSP_SECURE_ARGUMENT)
+
+#define FSP_GUARD_${module.driver.lpm.name}_R_LPM_IoKeepClear() ${module.driver.lpm.name}_io_keep_clear_guard(FSP_SECURE_ARGUMENT)
+
+
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.lpm.name}_open_guard(lpm_ctrl_t *const p_api_ctrl, lpm_cfg_t const *const p_cfg);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.lpm.name}_close_guard(lpm_ctrl_t *const p_api_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.lpm.name}_low_power_reconfigure_guard(lpm_ctrl_t *const p_api_ctrl, lpm_cfg_t const *const p_cfg);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.lpm.name}_low_power_mode_enter_guard(lpm_ctrl_t *const p_api_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.lpm.name}_io_keep_clear_guard(lpm_ctrl_t *const p_api_ctrl);
+
+
+extern const lpm_instance_t ${module.driver.lpm.name};
+            </header>
+            <declarations>
+                <![CDATA[
+static const lpm_api_t ${module.driver.lpm.name}_nsc_api =
+{
+    .open = ${module.driver.lpm.name}_open_guard,
+    .close = ${module.driver.lpm.name}_close_guard,
+    .lowPowerReconfigure = ${module.driver.lpm.name}_low_power_reconfigure_guard,
+    .lowPowerModeEnter = ${module.driver.lpm.name}_low_power_mode_enter_guard,
+    .ioKeepClear = ${module.driver.lpm.name}_io_keep_clear_guard,
+};
+const lpm_instance_t ${module.driver.lpm.name} =
+{
+    .p_api = &${module.driver.lpm.name}_nsc_api,
+    .p_ctrl = FSP_SECURE_ARGUMENT,
+    .p_cfg = FSP_SECURE_ARGUMENT,
+};
+                ]]>
+            </declarations>
+        </nsc>
+        <api configurable="true">
+            <file>ra/fsp/inc/instances/r_lpm.h</file>
+            <file>ra/fsp/inc/api/r_lpm_api.h</file>
+        </api>
+    </module>
+
+</raModuleDescription>

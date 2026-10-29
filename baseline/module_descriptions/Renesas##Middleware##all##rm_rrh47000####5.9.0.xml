@@ -1,0 +1,238 @@
+<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.middleware.rrh47000" path="fsp_cfg/rm_rrh47000_cfg.h" version="0">
+        <property default="config.middleware.rrh47000.param_checking_enable.bsp" display="Parameter Checking" id="config.middleware.rrh47000.param_checking_enable" description="If selected code for parameter checking is included in the build.">
+            <option display="Default (BSP)" id="config.middleware.rrh47000.param_checking_enable.bsp" value="(BSP_CFG_PARAM_CHECKING_ENABLE)"/>
+            <option display="Enabled" id="config.middleware.rrh47000.param_checking_enable.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.rrh47000.param_checking_enable.disabled" value="(0)"/>
+        </property>
+        <content>
+            #ifdef __cplusplus
+            extern "C" {
+            #endif
+
+            #define RM_RRH47000_CFG_PARAM_CHECKING_ENABLE   ${config.middleware.rrh47000.param_checking_enable}
+
+            #ifdef __cplusplus
+            }
+            #endif
+        </content>
+    </config>
+    <module config="config.middleware.rrh47000" display="Sensor|${module.middleware.air_sensor.name} RRH47000 NDIR CO2 Sensor Module (rm_rrh47000)" id="module.middleware.air_sensor_on_rrh47000" version="1" url="group___r_m___r_r_h47000.html">
+        <constraint display="Unique name required for each instance">
+            "${interface.middleware.air_sensor.${module.middleware.air_sensor.name}}" === "1"
+        </constraint>
+        <constraint display="RRH47000 needs clock stretching, but is not supported by SAU I2C.">
+            "${interface.driver.i2c_on_sau_i2c}" != "1"
+        </constraint>
+        <requires id="module.middleware.air_sensor.requires.comms_i2c_device" interface="interface.driver.comms_i2c_device" visible="true" display="Requires I2C Communications Device">
+            <override property="module.driver.comms_i2c_device.slave_address" value="0x31"/>
+            <override property="module.driver.comms_i2c_device.address_mode" value="I2C_MASTER_ADDR_MODE_7BIT"/>
+            <override property="module.driver.comms_i2c_device.p_context" value="${module.middleware.air_sensor.name}_ctrl"/>
+            <override property="module.driver.comms_i2c_device.p_callback" value="rm_rrh47000_comms_i2c_callback"/>
+        </requires>
+
+        <provides interface="interface.middleware.air_sensor" />
+        <provides interface="interface.middleware.air_sensor_on_rrh47000" />
+        <provides interface="interface.middleware.air_sensor.${module.middleware.air_sensor.name}" />
+        <property default="g_rrh47000_sensor${_instance}" display="Name" id="module.middleware.air_sensor.name" description="Module name.">
+            <constraint display="Name must be a valid C symbol">
+                testSymbol("${module.middleware.air_sensor.name}")
+            </constraint>
+        </property>
+        <property default="NULL" id="module.middleware.air_sensor.p_context" />
+        <property default="module.middleware.rrh47000.abc.enable_all" display="Automatic Baseline Correction (ABC)" id="module.middleware.rrh47000.abc" description="Set Automatic Baseline Correction (ABC).">
+            <option display="Enable all" id="module.middleware.rrh47000.abc.enable_all" value="RM_RRH47000_ABC_ENABLE_ALL"/>
+            <option display="Enable only ABC" id="module.middleware.rrh47000.abc.enable_only_abc" value="RM_RRH47000_ABC_ENABLE_ONLY_ABC"/>
+            <option display="Enable only fast ABC" id="module.middleware.rrh47000.abc.enable_only_fast_abc" value="RM_RRH47000_ABC_ENABLE_ONLY_FAST_ABC"/>
+            <option display="Disable all" id="module.middleware.rrh47000.abc.disable_all" value="RM_RRH47000_ABC_DISABLE_ALL"/>
+        </property>
+        <property default="7" display="Correction cycle period [days]" id="module.middleware.rrh47000.correction_cycle_period" description="Set correction cycle period. Min = 1 and Max = 30.">
+            <constraint display="Value must be 1 or more">("${module.middleware.rrh47000.correction_cycle_period}" &gt;= 1)</constraint>
+            <constraint display="Value must be 30 or less">("${module.middleware.rrh47000.correction_cycle_period}" &lt;= 30)</constraint>
+        </property>
+        <property default="400" display="CO2 baseline value [ppm]" id="module.middleware.rrh47000.co2_baseline_value" description="Set CO2 baseline value. Min = 400 and Max = 1500.">
+            <constraint display="Value must be 400 or more">("${module.middleware.rrh47000.co2_baseline_value}" &gt;= 400)</constraint>
+            <constraint display="Value must be 1500 or less">("${module.middleware.rrh47000.co2_baseline_value}" &lt;= 1500)</constraint>
+        </property>
+        <property default="rrh47000_comms_i2c_callback" display="Comms I2C Callback" id="module.middleware.air_sensor.p_callback" description="A user COMMS I2C callback function can be provided.">
+            <constraint display="Name must be a valid C symbol">
+                testSymbol("${module.middleware.air_sensor.p_callback}")
+            </constraint>
+        </property>
+        <property default="" id="module.middleware.air_sensor.name_upper">
+            <export>"${module.middleware.air_sensor.name}".toUpperCase()</export>
+        </property>
+
+        <header>
+/* AIR Sensor on RRH47000 Module Instance. */
+/** Access the RRH47000 Module instance using these structures when calling API functions directly (::p_api is not used). */
+extern rm_rrh47000_instance_ctrl_t ${module.middleware.air_sensor.name}_ctrl;
+extern const rm_air_sensor_cfg_t ${module.middleware.air_sensor.name}_cfg;
+#ifndef ${module.middleware.air_sensor.p_callback}
+void ${module.middleware.air_sensor.p_callback}(rm_air_sensor_callback_args_t * p_args);
+#endif
+        </header>
+
+        <includes>
+#include &quot;rm_rrh47000.h&quot;
+#include &quot;rm_air_sensor_api.h&quot;
+        </includes>
+
+        <declarations>
+rm_rrh47000_instance_ctrl_t ${module.middleware.air_sensor.name}_ctrl;
+rm_rrh47000_extended_cfg_t ${module.middleware.air_sensor.name}_extended_cfg =
+{
+    .abc                     = ${module.middleware.rrh47000.abc},
+    .correction_cycle_period = ${module.middleware.rrh47000.correction_cycle_period},
+    .co2_baseline_value      = ${module.middleware.rrh47000.co2_baseline_value},
+};
+const rm_air_sensor_cfg_t ${module.middleware.air_sensor.name}_cfg =
+{
+    .p_comms_instance = &amp;${module.middleware.air_sensor.requires.comms_i2c_device::module.driver.comms_i2c_device.name},
+    .p_comms_callback = ${module.middleware.air_sensor.p_callback},
+#if defined(${module.middleware.air_sensor.p_context})
+    .p_context           = ${module.middleware.air_sensor.p_context},
+#else
+    .p_context           = &amp;${module.middleware.air_sensor.p_context},
+#endif
+    .p_extend            = (void *)&amp;${module.middleware.air_sensor.name}_extended_cfg,
+};
+
+const rm_air_sensor_instance_t ${module.middleware.air_sensor.name} =
+{
+    .p_ctrl = &amp;${module.middleware.air_sensor.name}_ctrl,
+    .p_cfg  = &amp;${module.middleware.air_sensor.name}_cfg,
+    .p_api  = &amp;g_air_sensor_on_rrh47000,
+};
+        </declarations>
+    </module>
+
+    <!-- Developer Assistance -->
+    <developerSupport>
+        <api version="1">
+            <platform id="fsp" max="" min="1.1.0"/>
+            <moduleRef id="module.middleware.air_sensor_on_rrh47000"/>
+            <description><![CDATA[<form><p><span color="header" font="header">Overview</span></p><p>RRH47000 provides snippets of code for operating the RRH47000 Middleware.</p></form>]]></description>
+            <function display="Quick Setup" id="rrh47000_quick_setup">
+                <description><![CDATA[<form><p>This function provides quick setup for RRH47000 using the properties from the RA configurator.</p></form>]]></description>
+            </function>
+            <function display="Quick Getting Data" id="rrh47000_quick_getting_data">
+                <description><![CDATA[<form><p>This function provides quick getting values for RRH47000 using the properties from the RA configurator.</p></form>]]></description>
+            </function>
+        </api>
+        <template category="function_call" display="Call Quick Setup" id="module.middleware.air_sensor_on_rrh47000.quick_setup" version="1">
+            <platform id="fsp" max="" min="1.1.0"/>
+            <moduleRef id="module.middleware.air_sensor_on_rrh47000">
+                <function id="rrh47000_quick_setup"/>
+            </moduleRef>
+            <content>
+/* TODO: Enable if you want to open RRH47000 */
+#define ${rrh47000_name_upper:raProperty(module.middleware.air_sensor.name_upper)}_NON_BLOCKING (0)
+
+#if ${rrh47000_name_upper}_NON_BLOCKING
+volatile bool g_rrh47000_i2c_completed = false;
+#endif
+
+/* TODO: Enable if you want to use a I2C callback */
+#define ${rrh47000_name_upper}_I2C_CALLBACK_ENABLE (0)
+#if ${rrh47000_name_upper}_I2C_CALLBACK_ENABLE
+void ${rrh47000_callback:raProperty(module.middleware.air_sensor.p_callback)}(rm_air_sensor_callback_args_t * p_args)
+{
+#if ${rrh47000_name_upper}_NON_BLOCKING
+    if (RM_AIR_SENSOR_EVENT_ERROR != p_args->event)
+    {
+        g_rrh47000_i2c_completed = true;
+    }
+#else
+    FSP_PARAMETER_NOT_USED(p_args);
+#endif
+}
+#endif
+
+/* Delay */
+#define ${rrh47000_name_upper}_DELAY_1000     (1000)
+
+/* Quick setup for ${rrh47000_name:raProperty(module.middleware.air_sensor.name)}.
+ * - ${i2c_bus_name:raProperty(module.driver.comms_i2c_bus.name)} must be setup before calling this function
+ *     (See Developer Assistance -> ${rrh47000_name} -> ${i2c_device_name:raProperty(module.driver.comms_i2c_device.name)} -> ${i2c_bus_name} -> Quick Setup).
+ */
+void ${rrh47000_name}_quick_setup(void);
+
+/* Quick setup for ${rrh47000_name}. */
+void ${rrh47000_name}_quick_setup(void)
+{
+    fsp_err_t err;
+
+    /* Open RRH47000 sensor instance, this must be done before calling any RRH47000 API */
+    err = RM_RRH47000_Open(&amp;${rrh47000_name}_ctrl, &amp;${rrh47000_name}_cfg);
+    assert(FSP_SUCCESS == err);
+}
+            </content>
+        </template>
+        <template category="function_call" display="Quick Getting Data" id="module.middleware.air_sensor_on_rrh47000.quick_getting_data" version="1">
+            <platform id="fsp" max="" min="1.1.0"/>
+            <moduleRef id="module.middleware.air_sensor_on_rrh47000">
+                <function id="rrh47000_quick_getting_data"/>
+            </moduleRef>
+            <content>
+/* Quick getting values for ${rrh47000_name:raProperty(module.middleware.air_sensor.name)}.
+ * - ${rrh47000_name} must be setup before calling this function.
+ */
+void ${rrh47000_name}_quick_getting_data(rm_air_sensor_data_t * p_data);
+
+/* Quick getting gas data for ${rrh47000_name}. */
+void ${rrh47000_name}_quick_getting_data(rm_air_sensor_data_t * p_data)
+{
+    fsp_err_t            err;
+    rm_air_sensor_raw_data_t rrh47000_raw_data;
+    bool is_valid_data = false;
+
+    /* Clear the callback flag */
+#if ${rrh47000_name_upper:raProperty(module.middleware.air_sensor.name_upper)}_NON_BLOCKING
+    g_rrh47000_i2c_completed = false;
+#endif
+
+    do
+    {
+        /* Read measurement data from RRh47000 sensor module */
+        err = RM_RRH47000_Read(&amp;${rrh47000_name}_ctrl, &amp;rrh47000_raw_data);
+        assert(FSP_SUCCESS == err);
+#if ${rrh47000_name_upper}_NON_BLOCKING
+        while (!g_rrh47000_i2c_completed)
+        {
+            ;
+        }
+        g_rrh47000_i2c_completed = false;
+#endif
+
+        /* Calculate values from RRH47000 measurement data */
+        err = RM_RRH47000_DataCalculate(&amp;${rrh47000_name}_ctrl, &amp;rrh47000_raw_data, p_data);
+        if (FSP_SUCCESS == err)
+        {
+            is_valid_data = true;
+        }
+        else if (FSP_ERR_SENSOR_INVALID_DATA == err)
+        {
+            is_valid_data = false;
+        }
+        else
+        {
+            assert(false);
+        }
+    }
+    while (false == is_valid_data);
+
+    /* Sampling Interval */
+#if BSP_CFG_RTOS == 1 // AzureOS
+    tx_thread_sleep(${rrh47000_name_upper}_DELAY_1000 * TX_TIMER_TICKS_PER_SECOND / ${rrh47000_name_upper}_DELAY_MS);
+#elif BSP_CFG_RTOS == 2 // FreeRTOS
+    vTaskDelay(${rrh47000_name_upper}_DELAY_1000 * configTICK_RATE_HZ / ${rrh47000_name_upper}_DELAY_MS);
+#else // Bare Metal
+    R_BSP_SoftwareDelay(${rrh47000_name_upper}_DELAY_1000, BSP_DELAY_UNITS_MILLISECONDS);
+#endif
+}
+            </content>
+        </template>
+    </developerSupport>
+</raModuleDescription>

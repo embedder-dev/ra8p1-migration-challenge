@@ -1,0 +1,462 @@
+<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.middleware.rm_mesh_bearer_platform" path="fsp_cfg/rm_mesh_bearer_platform_cfg.h" version="0">
+        <property id="config.middleware.rm_mesh_bearer_platform.rf_debug_public_address" display="Debug Public Address" default="FF:FF:FF:50:90:74" description="Public Address of firmware initial value.">
+            <constraint display="Must be a valid device address">eval('' +
+            'var input = "${config.middleware.rm_mesh_bearer_platform.rf_debug_public_address}";' +
+            'var regex_mac = RegExp("^[0-9A-F]\{2\}\(:[0-9A-F]\{2\}\)\{5\}$","i");' +
+            'var regex_old = RegExp("^{(0x[0-9A-F]\{2\})\(\,0x[0-9A-F]\{2\}\)\{5\}}$","i");' +
+            ' ((regex_mac.test(input) &amp;&amp; ( 17 === input.length)) || (regex_old.test(input)  &amp;&amp; ( 31 === input.length)))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${config.middleware.rm_mesh_bearer_platform.rf_debug_public_address}";' +
+            'var regex_mac = RegExp("^[0-9A-F]\{2\}\(:[0-9A-F]\{2\}\)\{5\}$","i");' +
+            'if (regex_mac.test(output)){' +
+            'output = "0x" + output.replace(/\:/g,",0x");' +
+            '}else{' +
+            'output = output.slice(1,-1)' +
+            '}' +
+            'output'
+            )</export>            <!-- replace all colons with commas on export and add 0x to mark as hex -->
+        </property>
+        <property id="config.middleware.rm_mesh_bearer_platform.rf_debug_random_address" display="Debug Random Address" default="FF:FF:FF:FF:FF:FF" description="Random Address of firmware initial value.">
+            <constraint display="Must be a valid device address">eval('' +
+            'var input = "${config.middleware.rm_mesh_bearer_platform.rf_debug_random_address}";' +
+            'var regex_mac = RegExp("^[0-9A-F]\{2\}\(:[0-9A-F]\{2\}\)\{5\}$","i");' +
+            'var regex_old = RegExp("^{(0x[0-9A-F]\{2\})\(\,0x[0-9A-F]\{2\}\)\{5\}}$","i");' +
+            ' ((regex_mac.test(input) &amp;&amp; ( 17 === input.length)) || (regex_old.test(input)  &amp;&amp; ( 31 === input.length)))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${config.middleware.rm_mesh_bearer_platform.rf_debug_random_address}";' +
+            'var regex_mac = RegExp("^[0-9A-F]\{2\}\(:[0-9A-F]\{2\}\)\{5\}$","i");' +
+            'if (regex_mac.test(output)){' +
+            'output = "0x" + output.replace(/\:/g,",0x");' +
+            '}else{' +
+            'output = output.slice(1,-1)' +
+            '}' +
+            'output'
+            )</export>            <!-- replace all colons with commas on export and add 0x to mark as hex -->
+        </property>
+        <property id="config.middleware.rm_mesh_bearer_platform.rf_connection_maximum" display="Maximum number of connections" default="7" description="Maximum number of connections.">
+            <constraint display="Value must be an integer between 1 and 7, and lower than the value defined in ble module.">testInteger("${config.middleware.rm_mesh_bearer_platform.rf_connection_maximum}") &amp;&amp; ("${config.middleware.rm_mesh_bearer_platform.rf_connection_maximum}" &gt;=1)  &amp;&amp; ("${config.middleware.rm_mesh_bearer_platform.rf_connection_maximum}" &lt;=7)</constraint>
+        </property>
+        <property id="config.middleware.rm_mesh_bearer_platform.rf_connection_data_maximum" display="Maximum connection data length" default="251" description="Maximum connection data length.">
+            <constraint display="Value must be an integer between 27 and 251, and lower than the value defined in ble module.">testInteger("${config.middleware.rm_mesh_bearer_platform.rf_connection_data_maximum}") &amp;&amp; ("${config.middleware.rm_mesh_bearer_platform.rf_connection_data_maximum}" &gt;=27) &amp;&amp; ("${config.middleware.rm_mesh_bearer_platform.rf_connection_data_maximum}" &lt;=251)</constraint>
+        </property>
+        <property id="config.middleware.rm_mesh_bearer_platform.rf_advertising_data_maximum" display="Maximum advertising data length" default="1650" description="Maximum advertising data length.">
+            <constraint display="Value must be an integer between 31 and 1650, and lower than the value defined in ble module.">testInteger("${config.middleware.rm_mesh_bearer_platform.rf_advertising_data_maximum}") &amp;&amp; ("${config.middleware.rm_mesh_bearer_platform.rf_advertising_data_maximum}" &gt;=31) &amp;&amp; ("${config.middleware.rm_mesh_bearer_platform.rf_advertising_data_maximum}" &lt;=1650)</constraint>
+        </property>
+        <property id="config.middleware.rm_mesh_bearer_platform.rf_advertising_set_maximum" display="Maximum advertising set number" default="4" description="Maximum advertising set number.">
+            <constraint display="Value must be an integer between 1 and 4, and lower than the value defined in ble module.">testInteger("${config.middleware.rm_mesh_bearer_platform.rf_advertising_set_maximum}") &amp;&amp; ("${config.middleware.rm_mesh_bearer_platform.rf_advertising_set_maximum}" &gt;=1) &amp;&amp; ("${config.middleware.rm_mesh_bearer_platform.rf_advertising_set_maximum}" &lt;=4)</constraint>
+        </property>
+        <property id="config.middleware.rm_mesh_bearer_platform.rf_periodic_sync_set_maximum" display="Maximum periodic sync set number." default="2" description="Maximum periodic sync set number.">
+            <constraint display="Value must be an integer between 1 and 2, and lower than the value defined in ble module.">testInteger("${config.middleware.rm_mesh_bearer_platform.rf_periodic_sync_set_maximum}") &amp;&amp; ("${config.middleware.rm_mesh_bearer_platform.rf_periodic_sync_set_maximum}" &gt;=1) &amp;&amp; ("${config.middleware.rm_mesh_bearer_platform.rf_periodic_sync_set_maximum}" &lt;=2)</constraint>
+        </property>
+        <property id="config.middleware.rm_mesh_bearer_platform.enable_secure_data" display="Store Security Data" default="config.middleware.rm_mesh_bearer_platform.enable_secure_data.0" description="Store Security Data in DataFlash.">
+            <option id="config.middleware.rm_mesh_bearer_platform.enable_secure_data.0" display="Disable" value="0" />
+            <option id="config.middleware.rm_mesh_bearer_platform.enable_secure_data.1" display="Enable" value="1" />
+        </property>
+        <property id="config.middleware.rm_mesh_bearer_platform.secure_data_dataflash_block" display="Data Flash Block for Security Data" default="0" description="Data Flash Block for Security Data Management.">
+            <constraint display="Value must be an integer between 0 and 7, and lower than the value defined in ble module.">testInteger("${config.middleware.rm_mesh_bearer_platform.secure_data_dataflash_block}") &amp;&amp; ("${config.middleware.rm_mesh_bearer_platform.secure_data_dataflash_block}" &gt;=0) &amp;&amp; ("${config.middleware.rm_mesh_bearer_platform.secure_data_dataflash_block}" &lt;=7)</constraint>
+        </property>
+        <property id="config.middleware.rm_mesh_bearer_platform.remote_device_bonding_number" display="Remote Device Bonding Number" default="7" description="Number of remote device bonding information.">
+            <constraint display="Value must be an integer between 1 and 7, and lower than the value defined in ble module.">testInteger("${config.middleware.rm_mesh_bearer_platform.remote_device_bonding_number}") &amp;&amp; ("${config.middleware.rm_mesh_bearer_platform.remote_device_bonding_number}" &gt;=1) &amp;&amp; ("${config.middleware.rm_mesh_bearer_platform.remote_device_bonding_number}" &lt;=7)</constraint>
+        </property>
+        <property id="config.middleware.rm_mesh_bearer_platform.event_notify_connection_start" display="Connection Event Start Notify" default="config.middleware.rm_mesh_bearer_platform.event_notify_connection_start.0" description="Set Connection event start notify enable/disable.">
+            <option id="config.middleware.rm_mesh_bearer_platform.event_notify_connection_start.0" display="Disable" value="0" />
+            <option id="config.middleware.rm_mesh_bearer_platform.event_notify_connection_start.1" display="Enable" value="1" />
+        </property>
+        <property id="config.middleware.rm_mesh_bearer_platform.event_notify_connection_close" display="Connection Event Close Notify" default="config.middleware.rm_mesh_bearer_platform.event_notify_connection_close.0" description="Set Connection event close notify enable/disable.">
+            <option id="config.middleware.rm_mesh_bearer_platform.event_notify_connection_close.0" display="Disable" value="0" />
+            <option id="config.middleware.rm_mesh_bearer_platform.event_notify_connection_close.1" display="Enable" value="1" />
+        </property>
+        <property id="config.middleware.rm_mesh_bearer_platform.event_notify_advertising_start" display="Advertising Event Start Notify" default="config.middleware.rm_mesh_bearer_platform.event_notify_advertising_start.0" description="Set Advertising event start notify enable/disable.">
+            <option id="config.middleware.rm_mesh_bearer_platform.event_notify_advertising_start.0" display="Disable" value="0" />
+            <option id="config.middleware.rm_mesh_bearer_platform.event_notify_advertising_start.1" display="Enable" value="1" />
+        </property>
+        <property id="config.middleware.rm_mesh_bearer_platform.event_notify_advertising_close" display="Advertising Event Close Notify" default="config.middleware.rm_mesh_bearer_platform.event_notify_advertising_close.0" description="Set Advertising event close notify enable/disable.">
+            <option id="config.middleware.rm_mesh_bearer_platform.event_notify_advertising_close.0" display="Disable" value="0" />
+            <option id="config.middleware.rm_mesh_bearer_platform.event_notify_advertising_close.1" display="Enable" value="1" />
+        </property>
+        <property id="config.middleware.rm_mesh_bearer_platform.event_notify_scanning_start" display="Scanning Event Start Notify" default="config.middleware.rm_mesh_bearer_platform.event_notify_scanning_start.0" description="Set Scanning event start notify enable/disable.">
+            <option id="config.middleware.rm_mesh_bearer_platform.event_notify_scanning_start.0" display="Disable" value="0" />
+            <option id="config.middleware.rm_mesh_bearer_platform.event_notify_scanning_start.1" display="Enable" value="1" />
+        </property>
+        <property id="config.middleware.rm_mesh_bearer_platform.event_notify_scanning_close" display="Scanning Event Close Notify" default="config.middleware.rm_mesh_bearer_platform.event_notify_scanning_close.0" description="Set Scanning event close notify enable/disable.">
+            <option id="config.middleware.rm_mesh_bearer_platform.event_notify_scanning_close.0" display="Disable" value="0" />
+            <option id="config.middleware.rm_mesh_bearer_platform.event_notify_scanning_close.1" display="Enable" value="1" />
+        </property>
+        <property id="config.middleware.rm_mesh_bearer_platform.event_notify_initiating_start" display="Initiating Event Start Notify" default="config.middleware.rm_mesh_bearer_platform.event_notify_initiating_start.0" description="Set Initiating event start notify enable/disable.">
+            <option id="config.middleware.rm_mesh_bearer_platform.event_notify_initiating_start.0" display="Disable" value="0" />
+            <option id="config.middleware.rm_mesh_bearer_platform.event_notify_initiating_start.1" display="Enable" value="1" />
+        </property>
+        <property id="config.middleware.rm_mesh_bearer_platform.event_notify_initiating_close" display="Initiating Event Close Notify" default="config.middleware.rm_mesh_bearer_platform.event_notify_initiating_close.0" description="Set Initiating event close notify enable/disable.">
+            <option id="config.middleware.rm_mesh_bearer_platform.event_notify_initiating_close.0" display="Disable" value="0" />
+            <option id="config.middleware.rm_mesh_bearer_platform.event_notify_initiating_close.1" display="Enable" value="1" />
+        </property>
+        <property id="config.middleware.rm_mesh_bearer_platform.event_notify_deep_sleep_start" display="RF Deep Sleep Start Notify" default="config.middleware.rm_mesh_bearer_platform.event_notify_deep_sleep_start.0" description="Set RF_DEEP_SLEEP start notify enable/disable.">
+            <option id="config.middleware.rm_mesh_bearer_platform.event_notify_deep_sleep_start.0" display="Disable" value="0" />
+            <option id="config.middleware.rm_mesh_bearer_platform.event_notify_deep_sleep_start.1" display="Enable" value="1" />
+        </property>
+        <property id="config.middleware.rm_mesh_bearer_platform.event_notify_deep_sleep_wakeup" display="RF Deep Sleep Wakeup Notify" default="config.middleware.rm_mesh_bearer_platform.event_notify_deep_sleep_wakeup.0" description="Set RF_DEEP_SLEEP wakeup notify enable/disable.">
+            <option id="config.middleware.rm_mesh_bearer_platform.event_notify_deep_sleep_wakeup.0" display="Disable" value="0" />
+            <option id="config.middleware.rm_mesh_bearer_platform.event_notify_deep_sleep_wakeup.1" display="Enable" value="1" />
+        </property>
+        <property id="config.middleware.rm_mesh_bearer_platform.rf_clval" display="Bluetooth dedicated clock" default="6" description="Load capacitance adjustment.">
+            <constraint display="Value must be an integer between 0 and 15, and lower than the value defined in ble module.">testInteger("${config.middleware.rm_mesh_bearer_platform.rf_clval}") &amp;&amp; ("${config.middleware.rm_mesh_bearer_platform.rf_clval}" &gt;=0)  &amp;&amp; ("${config.middleware.rm_mesh_bearer_platform.rf_clval}" &lt;=15)</constraint>
+        </property>
+        <property id="config.middleware.rm_mesh_bearer_platform.rf_dcdc_converter_enabele" display="DC-DC converter" default="config.middleware.rm_mesh_bearer_platform.rf_dcdc_converter_enabele.0" description="Set DC-DC converter for RF part.">
+            <option id="config.middleware.rm_mesh_bearer_platform.rf_dcdc_converter_enabele.0" display="Disable" value="0" />
+            <option id="config.middleware.rm_mesh_bearer_platform.rf_dcdc_converter_enabele.1" display="Enable" value="1" />
+        </property>
+        <property id="config.middleware.rm_mesh_bearer_platform.rf_external_32k_enable" display="Slow Clock Source" default="config.middleware.rm_mesh_bearer_platform.rf_external_32k_enable.0" description="Set slow clock source for RF part.">
+            <option id="config.middleware.rm_mesh_bearer_platform.rf_external_32k_enable.0" display="Use RF_LOCO" value="0" />
+            <option id="config.middleware.rm_mesh_bearer_platform.rf_external_32k_enable.1" display="Use External 32.768kHz" value="1" />
+        </property>
+        <property id="config.middleware.rm_mesh_bearer_platform.rf_mcu_clkout_port" display="MCU CLKOUT Port" default="config.middleware.rm_mesh_bearer_platform.rf_mcu_clkout_port.0" description="When MESH_BEARER_PLATFORM_CFG_RF_EXTERNAL_32K_ENABLE = 1, Set port of MCU CLKOUT.">
+            <option id="config.middleware.rm_mesh_bearer_platform.rf_mcu_clkout_port.0" display="P109" value="0" />
+            <option id="config.middleware.rm_mesh_bearer_platform.rf_mcu_clkout_port.1" display="P205" value="1" />
+        </property>
+        <property id="config.middleware.rm_mesh_bearer_platform.rf_mcu_clkout_frequency" display="MCU CLKOUT Frequency Output" default="config.middleware.rm_mesh_bearer_platform.rf_mcu_clkout_frequency.0" description="When MESH_BEARER_PLATFORM_CFG_RF_EXTERNAL_32K_ENABLE = 1, set frequency output from CLKOUT of MCU part.">
+            <option id="config.middleware.rm_mesh_bearer_platform.rf_mcu_clkout_frequency.0" display="MCU CLKOUT frequency 32.768kHz" value="0" />
+            <option id="config.middleware.rm_mesh_bearer_platform.rf_mcu_clkout_frequency.1" display="MCU CLKOUT frequency 16.384kHz" value="1" />
+        </property>
+        <property id="config.middleware.rm_mesh_bearer_platform.rf_sleep_clock_accuracy" display="Sleep Clock Accuracy(SCA)" default="250" description="When MESH_BEARER_PLATFORM_CFG_RF_EXTERNAL_32K_ENABLE = 1, set Sleep Clock Accuracy(SCA) for RF slow clock.">
+            <constraint display="Value must be an integer between 0 and 500, and lower than the value defined in ble module.">testInteger("${config.middleware.rm_mesh_bearer_platform.rf_sleep_clock_accuracy}") &amp;&amp; ("${config.middleware.rm_mesh_bearer_platform.rf_sleep_clock_accuracy}" &gt;=0) &amp;&amp; ("${config.middleware.rm_mesh_bearer_platform.rf_sleep_clock_accuracy}" &lt;=500)</constraint>
+        </property>
+        <property id="config.middleware.rm_mesh_bearer_platform.rf_maximum_tx_power" display="Transmission Power Maximum Value" default="config.middleware.rm_mesh_bearer_platform.rf_maximum_tx_power.1" description="Set transmission power maximum value.">
+            <option id="config.middleware.rm_mesh_bearer_platform.rf_maximum_tx_power.0" display="max +0dBm" value="0" />
+            <option id="config.middleware.rm_mesh_bearer_platform.rf_maximum_tx_power.1" display="max +4dBm" value="1" />
+        </property>
+        <property id="config.middleware.rm_mesh_bearer_platform.rf_default_tx_power" display="Transmission Power Default Value" default="config.middleware.rm_mesh_bearer_platform.rf_default_tx_power.0" description="Set default transmit power. Default transmit power is dependent on the configuration of Maximum transmission power(MESH_BEARER_PLATFORM_CFG_RF_MAX_TX_POW).">
+            <option id="config.middleware.rm_mesh_bearer_platform.rf_default_tx_power.0" display="High  0dBm(Transmission Power Maximum Value = +0dBm)  /  +4dBm(Transmission Power Maximum Value = +4dBm)" value="0"/>
+            <option id="config.middleware.rm_mesh_bearer_platform.rf_default_tx_power.1" display="Mid   0dBm(Transmission Power Maximum Value = +0dBm)  /   0dBm(Transmission Power Maximum Value = +4dBm)" value="1"/>
+            <option id="config.middleware.rm_mesh_bearer_platform.rf_default_tx_power.2" display="Low -18dBm(Transmission Power Maximum Value = +0dBm)  / -20dBm(Transmission Power Maximum Value = +4dBm)" value="2"/>
+        </property>
+        <property id="config.middleware.rm_mesh_bearer_platform.rf_clkout_enable" display="CLKOUT_RF Output" default="config.middleware.rm_mesh_bearer_platform.rf_clkout_enable.0" description="Set CLKOUT_RF output setting.">
+            <option id="config.middleware.rm_mesh_bearer_platform.rf_clkout_enable.0" display="No output" value="0"/>
+            <option id="config.middleware.rm_mesh_bearer_platform.rf_clkout_enable.5" display="4MHz output" value="5"/>
+            <option id="config.middleware.rm_mesh_bearer_platform.rf_clkout_enable.6" display="2MHz output" value="6"/>
+            <option id="config.middleware.rm_mesh_bearer_platform.rf_clkout_enable.7" display="1MHz output" value="7"/>
+        </property>
+        <property id="config.middleware.rm_mesh_bearer_platform.rf_deep_sleep_enable" display="RF_DEEP_SLEEP Transition" default="config.middleware.rm_mesh_bearer_platform.rf_deep_sleep_enable.1" description="Set RF_DEEP_SLEEP transition.">
+            <option id="config.middleware.rm_mesh_bearer_platform.rf_deep_sleep_enable.0" display="Disable" value="0" />
+            <option id="config.middleware.rm_mesh_bearer_platform.rf_deep_sleep_enable.1" display="Enable" value="1" />
+        </property>
+        <property id="config.middleware.rm_mesh_bearer_platform.mcu_main_clock_khz" display="MCU Main Clock Frequency" default="8000" description="Set MCU Main Clock Frequency (kHz). Set clock source according to your board environment. HOCO: don't care. / Main Clock: 1000 to 20000 kHz / PLL Circuit: 4000 to 12500 kHz ">
+            <constraint display="Value must be an integer between 1000 and 20000, and lower than the value defined in ble module.">testInteger("${config.middleware.rm_mesh_bearer_platform.mcu_main_clock_khz}") &amp;&amp; ("${config.middleware.rm_mesh_bearer_platform.mcu_main_clock_khz}" &gt;=1000) &amp;&amp; ("${config.middleware.rm_mesh_bearer_platform.mcu_main_clock_khz}" &lt;=20000)</constraint>
+        </property>
+        <property id="config.middleware.rm_mesh_bearer_platform.device_data_code_flash_block" display="Code Flash(ROM) Device Data Block" default="255" description="Device specific data block on Code Flash (ROM).">
+            <constraint display="Value must be an integer between -1 and 255, and lower than the value defined in ble module.">testInteger("${config.middleware.rm_mesh_bearer_platform.device_data_code_flash_block}") &amp;&amp; ("${config.middleware.rm_mesh_bearer_platform.device_data_code_flash_block}" &gt;=-1) &amp;&amp; ("${config.middleware.rm_mesh_bearer_platform.device_data_code_flash_block}" &lt;=255)</constraint>
+        </property>
+        <property id="config.middleware.rm_mesh_bearer_platform.device_data_data_flash_block" display="Device Specific Data Flash Block" default="-1" description="Device specific data block on E2 Data Flash.">
+            <constraint display="Value must be an integer between -1 and 7, and lower than the value defined in ble module.">testInteger("${config.middleware.rm_mesh_bearer_platform.device_data_data_flash_block}") &amp;&amp; ("${config.middleware.rm_mesh_bearer_platform.device_data_data_flash_block}" &gt;=-1) &amp;&amp; ("${config.middleware.rm_mesh_bearer_platform.device_data_data_flash_block}" &lt;=7)</constraint>
+        </property>
+        <property id="config.middleware.rm_mesh_bearer_platform.gatt_mtu_size" display="MTU Size Configured" default="247" description="MTU Size configured by GATT MTU exchange procedure.">
+            <constraint display="Value must be an integer between 23 and 247, and lower than the value defined in ble module.">testInteger("${config.middleware.rm_mesh_bearer_platform.gatt_mtu_size}") &amp;&amp; ("${config.middleware.rm_mesh_bearer_platform.gatt_mtu_size}" &gt;=23)  &amp;&amp; ("${config.middleware.rm_mesh_bearer_platform.gatt_mtu_size}" &lt;=247)</constraint>
+        </property>
+        <property id="config.middleware.rm_mesh_bearer_platform.timer_number_of_slot" display="Timer Slot Maximum Number" default="10" description="The maximum number of timer slot.">
+            <constraint display="Value must be an integer between 1 and 10, and lower than the value defined in ble module.">testInteger("${config.middleware.rm_mesh_bearer_platform.timer_number_of_slot}") &amp;&amp; ("${config.middleware.rm_mesh_bearer_platform.timer_number_of_slot}" &gt;=1)  &amp;&amp; ("${config.middleware.rm_mesh_bearer_platform.timer_number_of_slot}" &lt;=10)</constraint>
+        </property>
+        <content>
+            #ifdef __cplusplus
+            extern "C" {
+            #endif
+
+            #define MESH_BEARER_PLATFORM_CFG_RF_DEBUG_PUBLIC_ADDRESS BLE_CFG_RF_DEBUG_PUBLIC_ADDRESS
+            #define MESH_BEARER_PLATFORM_CFG_RF_DEBUG_RANDOM_ADDRESS BLE_CFG_RF_DEBUG_RANDOM_ADDRESS
+            #define MESH_BEARER_PLATFORM_CFG_RF_CONNECTION_MAXIMUM (${config.middleware.rm_mesh_bearer_platform.rf_connection_maximum})
+            #define MESH_BEARER_PLATFORM_CFG_RF_CONNECTION_DATA_MAXIMUM (${config.middleware.rm_mesh_bearer_platform.rf_connection_data_maximum})
+            #define MESH_BEARER_PLATFORM_CFG_RF_ADVERTISING_DATA_MAXIMUM (${config.middleware.rm_mesh_bearer_platform.rf_advertising_data_maximum})
+            #define MESH_BEARER_PLATFORM_CFG_RF_ADVERTISING_SET_MAXIMUM (${config.middleware.rm_mesh_bearer_platform.rf_advertising_set_maximum})
+            #define MESH_BEARER_PLATFORM_CFG_RF_SYNC_SET_MAXIMUM (${config.middleware.rm_mesh_bearer_platform.rf_periodic_sync_set_maximum})
+            #define MESH_BEARER_PLATFORM_CFG_ENABLE_SECURE_DATA BLE_CFG_ENABLE_SECURE_DATA
+            #define MESH_BEARER_PLATFORM_CFG_SECURE_DATA_DATAFLASH_BLOCK (${config.middleware.rm_mesh_bearer_platform.secure_data_dataflash_block})
+            #define MESH_BEARER_PLATFORM_CFG_NUMBER_BONDING (${config.middleware.rm_mesh_bearer_platform.remote_device_bonding_number})
+            #define MESH_BEARER_PLATFORM_CFG_EVENT_NOTIFY_CONNECTION_START BLE_CFG_EVENT_NOTIFY_CONNECTION_START
+            #define MESH_BEARER_PLATFORM_CFG_EVENT_NOTIFY_CONNECTION_CLOSE BLE_CFG_EVENT_NOTIFY_CONNECTION_CLOSE
+            #define MESH_BEARER_PLATFORM_CFG_EVENT_NOTIFY_ADVERTISING_START BLE_CFG_EVENT_NOTIFY_ADVERTISING_START
+            #define MESH_BEARER_PLATFORM_CFG_EVENT_NOTIFY_ADVERTISING_CLOSE BLE_CFG_EVENT_NOTIFY_ADVERTISING_CLOSE
+            #define MESH_BEARER_PLATFORM_CFG_EVENT_NOTIFY_SCANNING_START BLE_CFG_EVENT_NOTIFY_SCANNING_START
+            #define MESH_BEARER_PLATFORM_CFG_EVENT_NOTIFY_SCANNING_CLOSE BLE_CFG_EVENT_NOTIFY_SCANNING_CLOSE
+            #define MESH_BEARER_PLATFORM_CFG_EVENT_NOTIFY_INITIATING_START BLE_CFG_EVENT_NOTIFY_INITIATING_START
+            #define MESH_BEARER_PLATFORM_CFG_EVENT_NOTIFY_INITIATING_CLOSE BLE_CFG_EVENT_NOTIFY_INITIATING_CLOSE
+            #define MESH_BEARER_PLATFORM_CFG_EVENT_NOTIFY_DEEP_SLEEP_START BLE_CFG_EVENT_NOTIFY_DEEP_SLEEP_START
+            #define MESH_BEARER_PLATFORM_CFG_EVENT_NOTIFY_DEEP_SLEEP_WAKEUP BLE_CFG_EVENT_NOTIFY_DEEP_SLEEP_WAKEUP
+            #define MESH_BEARER_PLATFORM_CFG_RF_CLVAL (${config.middleware.rm_mesh_bearer_platform.rf_clval})
+            #define MESH_BEARER_PLATFORM_CFG_RF_DCDC_CONVERTER_ENABLE BLE_CFG_RF_DCDC_CONVERTER_ENABLE
+            #define MESH_BEARER_PLATFORM_CFG_RF_EXT32K_EN (BLE_CFG_RF_EXT32K_EN)
+            #define MESH_BEARER_PLATFORM_CFG_RF_MCU_CLKOUT_PORT BLE_CFG_RF_MCU_CLKOUT_PORT
+            #define MESH_BEARER_PLATFORM_CFG_RF_MCU_CLKOUT_FREQ BLE_CFG_RF_MCU_CLKOUT_FREQ
+            #define MESH_BEARER_PLATFORM_CFG_RF_SCA (${config.middleware.rm_mesh_bearer_platform.rf_sleep_clock_accuracy})
+            #define MESH_BEARER_PLATFORM_CFG_RF_MAX_TX_POW BLE_CFG_RF_MAX_TX_POW
+            #define MESH_BEARER_PLATFORM_CFG_RF_DEF_TX_POW BLE_CFG_RF_DEF_TX_POW
+            #define MESH_BEARER_PLATFORM_CFG_RF_CLKOUT_EN BLE_CFG_RF_CLKOUT_EN
+            #define MESH_BEARER_PLATFORM_CFG_RF_DEEP_SLEEP_EN BLE_CFG_RF_DEEP_SLEEP_EN
+            #define MESH_BEARER_PLATFORM_CFG_MCU_MAIN_CLK_KHZ (${config.middleware.rm_mesh_bearer_platform.mcu_main_clock_khz})
+            #define MESH_BEARER_PLATFORM_CFG_DEV_DATA_CF_BLOCK (${config.middleware.rm_mesh_bearer_platform.device_data_code_flash_block})
+            #define MESH_BEARER_PLATFORM_CFG_DEV_DATA_DF_BLOCK (${config.middleware.rm_mesh_bearer_platform.device_data_data_flash_block})
+            #define MESH_BEARER_PLATFORM_CFG_GATT_MTU_SIZE (${config.middleware.rm_mesh_bearer_platform.gatt_mtu_size})
+            #define MESH_BEARER_PLATFORM_CFG_TIMER_NUMBER_OF_SLOT (${config.middleware.rm_mesh_bearer_platform.timer_number_of_slot})
+
+            #ifdef __cplusplus
+            }
+            #endif
+        </content>
+    </config>
+    <module id="module.middleware.rm_mesh_bearer_platform_on_rm_mesh_bearer_platform" display="Networking|BLE Mesh Network modules|BLE Mesh Bearer Platform (rm_mesh_bearer_platform)" config="config.middleware.rm_mesh_bearer_platform" common="1" version="0" visible="true" url="group___r_m___m_e_s_h___b_e_a_r_e_r___p_l_a_t_f_o_r_m.html">
+        <constraint display="Requires Low Level Library Implementation">
+            "${interface.middleware.rm_mesh_bearer_platform_on_rm_mesh_bearer_platform}" === "1"
+        </constraint>
+        <constraint display="Number of connections must be the value defined in ble module or lower.">
+            testExists("${interface.driver.ble_on_extended}") &amp;&amp; (${config.middleware.rm_mesh_bearer_platform.rf_connection_maximum} &lt;= ${config.driver.ble_a.rf_connection_maximum}) ||
+            testExists("${interface.driver.ble_on_balance}") &amp;&amp; (${config.middleware.rm_mesh_bearer_platform.rf_connection_maximum} &lt;= ${config.driver.ble_b.rf_connection_maximum}) ||
+            testExists("${interface.driver.ble_on_compact}") &amp;&amp; (${config.middleware.rm_mesh_bearer_platform.rf_connection_maximum} &lt;= ${config.driver.ble_c.rf_connection_maximum}) ||
+            testExists("${interface.driver.ble_on_extended_freertos}") &amp;&amp; (${config.middleware.rm_mesh_bearer_platform.rf_connection_maximum} &lt;= ${config.driver.ble_a_freertos.rf_connection_maximum}) ||
+            testExists("${interface.driver.ble_on_balance_freertos}") &amp;&amp; (${config.middleware.rm_mesh_bearer_platform.rf_connection_maximum} &lt;= ${config.driver.ble_b_freertos.rf_connection_maximum}) ||
+            testExists("${interface.driver.ble_on_compact_freertos}") &amp;&amp; (${config.middleware.rm_mesh_bearer_platform.rf_connection_maximum} &lt;= ${config.driver.ble_c_freertos.rf_connection_maximum}) ||
+            testExists("${interface.driver.ble_on_extended_threadx}") &amp;&amp; (${config.middleware.rm_mesh_bearer_platform.rf_connection_maximum} &lt;= ${config.driver.ble_a_threadx.rf_connection_maximum}) ||
+            testExists("${interface.driver.ble_on_balance_threadx}") &amp;&amp; (${config.middleware.rm_mesh_bearer_platform.rf_connection_maximum} &lt;= ${config.driver.ble_b_threadx.rf_connection_maximum}) ||
+            testExists("${interface.driver.ble_on_compact_threadx}") &amp;&amp; (${config.middleware.rm_mesh_bearer_platform.rf_connection_maximum} &lt;= ${config.driver.ble_c_threadx.rf_connection_maximum})
+        </constraint>
+        <constraint display="Connection data length must be the value defined in ble module or lower.">
+            testExists("${interface.driver.ble_on_extended}") &amp;&amp; (${config.middleware.rm_mesh_bearer_platform.rf_connection_data_maximum} &lt;= ${config.driver.ble_a.rf_connection_data_maximum}) ||
+            testExists("${interface.driver.ble_on_balance}") &amp;&amp; (${config.middleware.rm_mesh_bearer_platform.rf_connection_data_maximum} &lt;= ${config.driver.ble_b.rf_connection_data_maximum}) ||
+            testExists("${interface.driver.ble_on_compact}") &amp;&amp; (${config.middleware.rm_mesh_bearer_platform.rf_connection_data_maximum} &lt;= ${config.driver.ble_c.rf_connection_data_maximum}) ||
+            testExists("${interface.driver.ble_on_extended_freertos}") &amp;&amp; (${config.middleware.rm_mesh_bearer_platform.rf_connection_data_maximum} &lt;= ${config.driver.ble_a_freertos.rf_connection_data_maximum}) ||
+            testExists("${interface.driver.ble_on_balance_freertos}") &amp;&amp; (${config.middleware.rm_mesh_bearer_platform.rf_connection_data_maximum} &lt;= ${config.driver.ble_b_freertos.rf_connection_data_maximum}) ||
+            testExists("${interface.driver.ble_on_compact_freertos}") &amp;&amp; (${config.middleware.rm_mesh_bearer_platform.rf_connection_data_maximum} &lt;= ${config.driver.ble_c_freertos.rf_connection_data_maximum}) ||
+            testExists("${interface.driver.ble_on_extended_threadx}") &amp;&amp; (${config.middleware.rm_mesh_bearer_platform.rf_connection_data_maximum} &lt;= ${config.driver.ble_a_threadx.rf_connection_data_maximum}) ||
+            testExists("${interface.driver.ble_on_balance_threadx}") &amp;&amp; (${config.middleware.rm_mesh_bearer_platform.rf_connection_data_maximum} &lt;= ${config.driver.ble_b_threadx.rf_connection_data_maximum}) ||
+            testExists("${interface.driver.ble_on_compact_threadx}") &amp;&amp; (${config.middleware.rm_mesh_bearer_platform.rf_connection_data_maximum} &lt;= ${config.driver.ble_c_threadx.rf_connection_data_maximum})
+        </constraint>
+        <constraint display="Advertising data length must be the value defined in ble module or lower.">
+            testExists("${interface.driver.ble_on_extended}") &amp;&amp; (${config.middleware.rm_mesh_bearer_platform.rf_advertising_data_maximum} &lt;= ${config.driver.ble_a.rf_advertising_data_maximum}) ||
+            testExists("${interface.driver.ble_on_balance}") &amp;&amp; (${config.middleware.rm_mesh_bearer_platform.rf_advertising_data_maximum} &lt;= ${config.driver.ble_b.rf_advertising_data_maximum}) ||
+            testExists("${interface.driver.ble_on_compact}") &amp;&amp; (${config.middleware.rm_mesh_bearer_platform.rf_advertising_data_maximum} &lt;= ${config.driver.ble_c.rf_advertising_data_maximum}) ||
+            testExists("${interface.driver.ble_on_extended_freertos}") &amp;&amp; (${config.middleware.rm_mesh_bearer_platform.rf_advertising_data_maximum} &lt;= ${config.driver.ble_a_freertos.rf_advertising_data_maximum}) ||
+            testExists("${interface.driver.ble_on_balance_freertos}") &amp;&amp; (${config.middleware.rm_mesh_bearer_platform.rf_advertising_data_maximum} &lt;= ${config.driver.ble_b_freertos.rf_advertising_data_maximum}) ||
+            testExists("${interface.driver.ble_on_compact_freertos}") &amp;&amp; (${config.middleware.rm_mesh_bearer_platform.rf_advertising_data_maximum} &lt;= ${config.driver.ble_c_freertos.rf_advertising_data_maximum}) ||
+            testExists("${interface.driver.ble_on_extended_threadx}") &amp;&amp; (${config.middleware.rm_mesh_bearer_platform.rf_advertising_data_maximum} &lt;= ${config.driver.ble_a_threadx.rf_advertising_data_maximum}) ||
+            testExists("${interface.driver.ble_on_balance_threadx}") &amp;&amp; (${config.middleware.rm_mesh_bearer_platform.rf_advertising_data_maximum} &lt;= ${config.driver.ble_b_threadx.rf_advertising_data_maximum}) ||
+            testExists("${interface.driver.ble_on_compact_threadx}") &amp;&amp; (${config.middleware.rm_mesh_bearer_platform.rf_advertising_data_maximum} &lt;= ${config.driver.ble_c_threadx.rf_advertising_data_maximum})
+        </constraint>
+        <constraint display="Advertising set number must be the value defined in ble module or lower.">
+            testExists("${interface.driver.ble_on_extended}") &amp;&amp; (${config.middleware.rm_mesh_bearer_platform.rf_advertising_set_maximum} &lt;= ${config.driver.ble_a.rf_advertising_set_maximum}) ||
+            testExists("${interface.driver.ble_on_balance}") &amp;&amp; (${config.middleware.rm_mesh_bearer_platform.rf_advertising_set_maximum} &lt;= ${config.driver.ble_b.rf_advertising_set_maximum}) ||
+            testExists("${interface.driver.ble_on_compact}") &amp;&amp; (${config.middleware.rm_mesh_bearer_platform.rf_advertising_set_maximum} &lt;= ${config.driver.ble_c.rf_advertising_set_maximum}) ||
+            testExists("${interface.driver.ble_on_extended_freertos}") &amp;&amp; (${config.middleware.rm_mesh_bearer_platform.rf_advertising_set_maximum} &lt;= ${config.driver.ble_a_freertos.rf_advertising_set_maximum}) ||
+            testExists("${interface.driver.ble_on_balance_freertos}") &amp;&amp; (${config.middleware.rm_mesh_bearer_platform.rf_advertising_set_maximum} &lt;= ${config.driver.ble_b_freertos.rf_advertising_set_maximum}) ||
+            testExists("${interface.driver.ble_on_compact_freertos}") &amp;&amp; (${config.middleware.rm_mesh_bearer_platform.rf_advertising_set_maximum} &lt;= ${config.driver.ble_c_freertos.rf_advertising_set_maximum}) ||
+            testExists("${interface.driver.ble_on_extended_threadx}") &amp;&amp; (${config.middleware.rm_mesh_bearer_platform.rf_advertising_set_maximum} &lt;= ${config.driver.ble_a_threadx.rf_advertising_set_maximum}) ||
+            testExists("${interface.driver.ble_on_balance_threadx}") &amp;&amp; (${config.middleware.rm_mesh_bearer_platform.rf_advertising_set_maximum} &lt;= ${config.driver.ble_b_threadx.rf_advertising_set_maximum}) ||
+            testExists("${interface.driver.ble_on_compact_threadx}") &amp;&amp; (${config.middleware.rm_mesh_bearer_platform.rf_advertising_set_maximum} &lt;= ${config.driver.ble_c_threadx.rf_advertising_set_maximum})
+        </constraint>
+        <constraint display="Periodic sync set number must be the value defined in ble module or lower.">
+            testExists("${interface.driver.ble_on_extended}") &amp;&amp; (${config.middleware.rm_mesh_bearer_platform.rf_periodic_sync_set_maximum} &lt;= ${config.driver.ble_a.rf_periodic_sync_set_maximum}) ||
+            testExists("${interface.driver.ble_on_balance}") &amp;&amp; (${config.middleware.rm_mesh_bearer_platform.rf_periodic_sync_set_maximum} &lt;= ${config.driver.ble_b.rf_periodic_sync_set_maximum}) ||
+            testExists("${interface.driver.ble_on_compact}") &amp;&amp; (${config.middleware.rm_mesh_bearer_platform.rf_periodic_sync_set_maximum} &lt;= ${config.driver.ble_c.rf_periodic_sync_set_maximum}) ||
+            testExists("${interface.driver.ble_on_extended_freertos}") &amp;&amp; (${config.middleware.rm_mesh_bearer_platform.rf_periodic_sync_set_maximum} &lt;= ${config.driver.ble_a_freertos.rf_periodic_sync_set_maximum}) ||
+            testExists("${interface.driver.ble_on_balance_freertos}") &amp;&amp; (${config.middleware.rm_mesh_bearer_platform.rf_periodic_sync_set_maximum} &lt;= ${config.driver.ble_b_freertos.rf_periodic_sync_set_maximum}) ||
+            testExists("${interface.driver.ble_on_compact_freertos}") &amp;&amp; (${config.middleware.rm_mesh_bearer_platform.rf_periodic_sync_set_maximum} &lt;= ${config.driver.ble_c_freertos.rf_periodic_sync_set_maximum}) ||
+            testExists("${interface.driver.ble_on_extended_threadx}") &amp;&amp; (${config.middleware.rm_mesh_bearer_platform.rf_periodic_sync_set_maximum} &lt;= ${config.driver.ble_a_threadx.rf_periodic_sync_set_maximum}) ||
+            testExists("${interface.driver.ble_on_balance_threadx}") &amp;&amp; (${config.middleware.rm_mesh_bearer_platform.rf_periodic_sync_set_maximum} &lt;= ${config.driver.ble_b_threadx.rf_periodic_sync_set_maximum}) ||
+            testExists("${interface.driver.ble_on_compact_threadx}") &amp;&amp; (${config.middleware.rm_mesh_bearer_platform.rf_periodic_sync_set_maximum} &lt;= ${config.driver.ble_c_threadx.rf_periodic_sync_set_maximum})
+        </constraint>
+        <constraint display="Data flash block for security data must be the value defined in ble module or lower.">
+            testExists("${interface.driver.ble_on_extended}") &amp;&amp; (${config.middleware.rm_mesh_bearer_platform.secure_data_dataflash_block} &lt;= ${config.driver.ble_a.secure_data_dataflash_block}) ||
+            testExists("${interface.driver.ble_on_balance}") &amp;&amp; (${config.middleware.rm_mesh_bearer_platform.secure_data_dataflash_block} &lt;= ${config.driver.ble_b.secure_data_dataflash_block}) ||
+            testExists("${interface.driver.ble_on_compact}") &amp;&amp; (${config.middleware.rm_mesh_bearer_platform.secure_data_dataflash_block} &lt;= ${config.driver.ble_c.secure_data_dataflash_block}) ||
+            testExists("${interface.driver.ble_on_extended_freertos}") &amp;&amp; (${config.middleware.rm_mesh_bearer_platform.secure_data_dataflash_block} &lt;= ${config.driver.ble_a_freertos.secure_data_dataflash_block}) ||
+            testExists("${interface.driver.ble_on_balance_freertos}") &amp;&amp; (${config.middleware.rm_mesh_bearer_platform.secure_data_dataflash_block} &lt;= ${config.driver.ble_b_freertos.secure_data_dataflash_block}) ||
+            testExists("${interface.driver.ble_on_compact_freertos}") &amp;&amp; (${config.middleware.rm_mesh_bearer_platform.secure_data_dataflash_block} &lt;= ${config.driver.ble_c_freertos.secure_data_dataflash_block}) ||
+            testExists("${interface.driver.ble_on_extended_threadx}") &amp;&amp; (${config.middleware.rm_mesh_bearer_platform.secure_data_dataflash_block} &lt;= ${config.driver.ble_a_threadx.secure_data_dataflash_block}) ||
+            testExists("${interface.driver.ble_on_balance_threadx}") &amp;&amp; (${config.middleware.rm_mesh_bearer_platform.secure_data_dataflash_block} &lt;= ${config.driver.ble_b_threadx.secure_data_dataflash_block}) ||
+            testExists("${interface.driver.ble_on_compact_threadx}") &amp;&amp; (${config.middleware.rm_mesh_bearer_platform.secure_data_dataflash_block} &lt;= ${config.driver.ble_c_threadx.secure_data_dataflash_block})
+        </constraint>
+        <constraint display="Remote device bonding number must be the value defined in ble module or lower.">
+            testExists("${interface.driver.ble_on_extended}") &amp;&amp; (${config.middleware.rm_mesh_bearer_platform.remote_device_bonding_number} &lt;= ${config.driver.ble_a.remote_device_bonding_number}) ||
+            testExists("${interface.driver.ble_on_balance}") &amp;&amp; (${config.middleware.rm_mesh_bearer_platform.remote_device_bonding_number} &lt;= ${config.driver.ble_b.remote_device_bonding_number}) ||
+            testExists("${interface.driver.ble_on_compact}") &amp;&amp; (${config.middleware.rm_mesh_bearer_platform.remote_device_bonding_number} &lt;= ${config.driver.ble_c.remote_device_bonding_number}) ||
+            testExists("${interface.driver.ble_on_extended_freertos}") &amp;&amp; (${config.middleware.rm_mesh_bearer_platform.remote_device_bonding_number} &lt;= ${config.driver.ble_a_freertos.remote_device_bonding_number}) ||
+            testExists("${interface.driver.ble_on_balance_freertos}") &amp;&amp; (${config.middleware.rm_mesh_bearer_platform.remote_device_bonding_number} &lt;= ${config.driver.ble_b_freertos.remote_device_bonding_number}) ||
+            testExists("${interface.driver.ble_on_compact_freertos}") &amp;&amp; (${config.middleware.rm_mesh_bearer_platform.remote_device_bonding_number} &lt;= ${config.driver.ble_c_freertos.remote_device_bonding_number}) ||
+            testExists("${interface.driver.ble_on_extended_threadx}") &amp;&amp; (${config.middleware.rm_mesh_bearer_platform.remote_device_bonding_number} &lt;= ${config.driver.ble_a_threadx.remote_device_bonding_number}) ||
+            testExists("${interface.driver.ble_on_balance_threadx}") &amp;&amp; (${config.middleware.rm_mesh_bearer_platform.remote_device_bonding_number} &lt;= ${config.driver.ble_b_threadx.remote_device_bonding_number}) ||
+            testExists("${interface.driver.ble_on_compact_threadx}") &amp;&amp; (${config.middleware.rm_mesh_bearer_platform.remote_device_bonding_number} &lt;= ${config.driver.ble_c_threadx.remote_device_bonding_number})
+        </constraint>
+        <constraint display="Bluetooth dedicated clock must be the value defined in ble module or lower.">
+            testExists("${interface.driver.ble_on_extended}") &amp;&amp; (${config.middleware.rm_mesh_bearer_platform.rf_clval} &lt;= ${config.driver.ble_a.rf_clval}) ||
+            testExists("${interface.driver.ble_on_balance}") &amp;&amp; (${config.middleware.rm_mesh_bearer_platform.rf_clval} &lt;= ${config.driver.ble_b.rf_clval}) ||
+            testExists("${interface.driver.ble_on_compact}") &amp;&amp; (${config.middleware.rm_mesh_bearer_platform.rf_clval} &lt;= ${config.driver.ble_c.rf_clval}) ||
+            testExists("${interface.driver.ble_on_extended_freertos}") &amp;&amp; (${config.middleware.rm_mesh_bearer_platform.rf_clval} &lt;= ${config.driver.ble_a_freertos.rf_clval}) ||
+            testExists("${interface.driver.ble_on_balance_freertos}") &amp;&amp; (${config.middleware.rm_mesh_bearer_platform.rf_clval} &lt;= ${config.driver.ble_b_freertos.rf_clval}) ||
+            testExists("${interface.driver.ble_on_compact_freertos}") &amp;&amp; (${config.middleware.rm_mesh_bearer_platform.rf_clval} &lt;= ${config.driver.ble_c_freertos.rf_clval}) ||
+            testExists("${interface.driver.ble_on_extended_threadx}") &amp;&amp; (${config.middleware.rm_mesh_bearer_platform.rf_clval} &lt;= ${config.driver.ble_a_threadx.rf_clval}) ||
+            testExists("${interface.driver.ble_on_balance_threadx}") &amp;&amp; (${config.middleware.rm_mesh_bearer_platform.rf_clval} &lt;= ${config.driver.ble_b_threadx.rf_clval}) ||
+            testExists("${interface.driver.ble_on_compact_threadx}") &amp;&amp; (${config.middleware.rm_mesh_bearer_platform.rf_clval} &lt;= ${config.driver.ble_c_threadx.rf_clval})
+        </constraint>
+        <constraint display="Sleep clock accuracy(SCA) must be the value defined in ble module or lower.">
+            testExists("${interface.driver.ble_on_extended}") &amp;&amp; (${config.middleware.rm_mesh_bearer_platform.rf_sleep_clock_accuracy} &lt;= ${config.driver.ble_a.rf_sleep_clock_accuracy}) ||
+            testExists("${interface.driver.ble_on_balance}") &amp;&amp; (${config.middleware.rm_mesh_bearer_platform.rf_sleep_clock_accuracy} &lt;= ${config.driver.ble_b.rf_sleep_clock_accuracy}) ||
+            testExists("${interface.driver.ble_on_compact}") &amp;&amp; (${config.middleware.rm_mesh_bearer_platform.rf_sleep_clock_accuracy} &lt;= ${config.driver.ble_c.rf_sleep_clock_accuracy}) ||
+            testExists("${interface.driver.ble_on_extended_freertos}") &amp;&amp; (${config.middleware.rm_mesh_bearer_platform.rf_sleep_clock_accuracy} &lt;= ${config.driver.ble_a_freertos.rf_sleep_clock_accuracy}) ||
+            testExists("${interface.driver.ble_on_balance_freertos}") &amp;&amp; (${config.middleware.rm_mesh_bearer_platform.rf_sleep_clock_accuracy} &lt;= ${config.driver.ble_b_freertos.rf_sleep_clock_accuracy}) ||
+            testExists("${interface.driver.ble_on_compact_freertos}") &amp;&amp; (${config.middleware.rm_mesh_bearer_platform.rf_sleep_clock_accuracy} &lt;= ${config.driver.ble_c_freertos.rf_sleep_clock_accuracy}) ||
+            testExists("${interface.driver.ble_on_extended_threadx}") &amp;&amp; (${config.middleware.rm_mesh_bearer_platform.rf_sleep_clock_accuracy} &lt;= ${config.driver.ble_a_threadx.rf_sleep_clock_accuracy}) ||
+            testExists("${interface.driver.ble_on_balance_threadx}") &amp;&amp; (${config.middleware.rm_mesh_bearer_platform.rf_sleep_clock_accuracy} &lt;= ${config.driver.ble_b_threadx.rf_sleep_clock_accuracy}) ||
+            testExists("${interface.driver.ble_on_compact_threadx}") &amp;&amp; (${config.middleware.rm_mesh_bearer_platform.rf_sleep_clock_accuracy} &lt;= ${config.driver.ble_c_threadx.rf_sleep_clock_accuracy})
+        </constraint>
+        <constraint display="MCU main clock frequency must be the value defined in ble module or lower.">
+            testExists("${interface.driver.ble_on_extended}") &amp;&amp; (${config.middleware.rm_mesh_bearer_platform.mcu_main_clock_khz} &lt;= ${config.driver.ble_a.mcu_main_clock_khz}) ||
+            testExists("${interface.driver.ble_on_balance}") &amp;&amp; (${config.middleware.rm_mesh_bearer_platform.mcu_main_clock_khz} &lt;= ${config.driver.ble_b.mcu_main_clock_khz}) ||
+            testExists("${interface.driver.ble_on_compact}") &amp;&amp; (${config.middleware.rm_mesh_bearer_platform.mcu_main_clock_khz} &lt;= ${config.driver.ble_c.mcu_main_clock_khz}) ||
+            testExists("${interface.driver.ble_on_extended_freertos}") &amp;&amp; (${config.middleware.rm_mesh_bearer_platform.mcu_main_clock_khz} &lt;= ${config.driver.ble_a_freertos.mcu_main_clock_khz}) ||
+            testExists("${interface.driver.ble_on_balance_freertos}") &amp;&amp; (${config.middleware.rm_mesh_bearer_platform.mcu_main_clock_khz} &lt;= ${config.driver.ble_b_freertos.mcu_main_clock_khz}) ||
+            testExists("${interface.driver.ble_on_compact_freertos}") &amp;&amp; (${config.middleware.rm_mesh_bearer_platform.mcu_main_clock_khz} &lt;= ${config.driver.ble_c_freertos.mcu_main_clock_khz}) ||
+            testExists("${interface.driver.ble_on_extended_threadx}") &amp;&amp; (${config.middleware.rm_mesh_bearer_platform.mcu_main_clock_khz} &lt;= ${config.driver.ble_a_threadx.mcu_main_clock_khz}) ||
+            testExists("${interface.driver.ble_on_balance_threadx}") &amp;&amp; (${config.middleware.rm_mesh_bearer_platform.mcu_main_clock_khz} &lt;= ${config.driver.ble_b_threadx.mcu_main_clock_khz}) ||
+            testExists("${interface.driver.ble_on_compact_threadx}") &amp;&amp; (${config.middleware.rm_mesh_bearer_platform.mcu_main_clock_khz} &lt;= ${config.driver.ble_c_threadx.mcu_main_clock_khz})
+        </constraint>
+        <constraint display="Code flash(ROM) device data block must be the value defined in ble module or lower.">
+            testExists("${interface.driver.ble_on_extended}") &amp;&amp; (${config.middleware.rm_mesh_bearer_platform.device_data_code_flash_block} &lt;= ${config.driver.ble_a.device_data_code_flash_block}) ||
+            testExists("${interface.driver.ble_on_balance}") &amp;&amp; (${config.middleware.rm_mesh_bearer_platform.device_data_code_flash_block} &lt;= ${config.driver.ble_b.device_data_code_flash_block}) ||
+            testExists("${interface.driver.ble_on_compact}") &amp;&amp; (${config.middleware.rm_mesh_bearer_platform.device_data_code_flash_block} &lt;= ${config.driver.ble_c.device_data_code_flash_block}) ||
+            testExists("${interface.driver.ble_on_extended_freertos}") &amp;&amp; (${config.middleware.rm_mesh_bearer_platform.device_data_code_flash_block} &lt;= ${config.driver.ble_a_freertos.device_data_code_flash_block}) ||
+            testExists("${interface.driver.ble_on_balance_freertos}") &amp;&amp; (${config.middleware.rm_mesh_bearer_platform.device_data_code_flash_block} &lt;= ${config.driver.ble_b_freertos.device_data_code_flash_block}) ||
+            testExists("${interface.driver.ble_on_compact_freertos}") &amp;&amp; (${config.middleware.rm_mesh_bearer_platform.device_data_code_flash_block} &lt;= ${config.driver.ble_c_freertos.device_data_code_flash_block}) ||
+            testExists("${interface.driver.ble_on_extended_threadx}") &amp;&amp; (${config.middleware.rm_mesh_bearer_platform.device_data_code_flash_block} &lt;= ${config.driver.ble_a_threadx.device_data_code_flash_block}) ||
+            testExists("${interface.driver.ble_on_balance_threadx}") &amp;&amp; (${config.middleware.rm_mesh_bearer_platform.device_data_code_flash_block} &lt;= ${config.driver.ble_b_threadx.device_data_code_flash_block}) ||
+            testExists("${interface.driver.ble_on_compact_threadx}") &amp;&amp; (${config.middleware.rm_mesh_bearer_platform.device_data_code_flash_block} &lt;= ${config.driver.ble_c_threadx.device_data_code_flash_block})
+        </constraint>
+        <constraint display="Device specific data flash block must be the value defined in ble module or lower.">
+            testExists("${interface.driver.ble_on_extended}") &amp;&amp; (${config.middleware.rm_mesh_bearer_platform.device_data_data_flash_block} &lt;= ${config.driver.ble_a.device_data_data_flash_block}) ||
+            testExists("${interface.driver.ble_on_balance}") &amp;&amp; (${config.middleware.rm_mesh_bearer_platform.device_data_data_flash_block} &lt;= ${config.driver.ble_b.device_data_data_flash_block}) ||
+            testExists("${interface.driver.ble_on_compact}") &amp;&amp; (${config.middleware.rm_mesh_bearer_platform.device_data_data_flash_block} &lt;= ${config.driver.ble_c.device_data_data_flash_block}) ||
+            testExists("${interface.driver.ble_on_extended_freertos}") &amp;&amp; (${config.middleware.rm_mesh_bearer_platform.device_data_data_flash_block} &lt;= ${config.driver.ble_a_freertos.device_data_data_flash_block}) ||
+            testExists("${interface.driver.ble_on_balance_freertos}") &amp;&amp; (${config.middleware.rm_mesh_bearer_platform.device_data_data_flash_block} &lt;= ${config.driver.ble_b_freertos.device_data_data_flash_block}) ||
+            testExists("${interface.driver.ble_on_compact_freertos}") &amp;&amp; (${config.middleware.rm_mesh_bearer_platform.device_data_data_flash_block} &lt;= ${config.driver.ble_c_freertos.device_data_data_flash_block}) ||
+            testExists("${interface.driver.ble_on_extended_threadx}") &amp;&amp; (${config.middleware.rm_mesh_bearer_platform.device_data_data_flash_block} &lt;= ${config.driver.ble_a_threadx.device_data_data_flash_block}) ||
+            testExists("${interface.driver.ble_on_balance_threadx}") &amp;&amp; (${config.middleware.rm_mesh_bearer_platform.device_data_data_flash_block} &lt;= ${config.driver.ble_b_threadx.device_data_data_flash_block}) ||
+            testExists("${interface.driver.ble_on_compact_threadx}") &amp;&amp; (${config.middleware.rm_mesh_bearer_platform.device_data_data_flash_block} &lt;= ${config.driver.ble_c_threadx.device_data_data_flash_block})
+        </constraint>
+        <constraint display="MTU size configured must be the value defined in ble module or lower.">
+            testExists("${interface.driver.ble_on_extended}") &amp;&amp; (${config.middleware.rm_mesh_bearer_platform.gatt_mtu_size} &lt;= ${config.driver.ble_a.gatt_mtu_size}) ||
+            testExists("${interface.driver.ble_on_balance}") &amp;&amp; (${config.middleware.rm_mesh_bearer_platform.gatt_mtu_size} &lt;= ${config.driver.ble_b.gatt_mtu_size}) ||
+            testExists("${interface.driver.ble_on_compact}") &amp;&amp; (${config.middleware.rm_mesh_bearer_platform.gatt_mtu_size} &lt;= ${config.driver.ble_c.gatt_mtu_size}) ||
+            testExists("${interface.driver.ble_on_extended_freertos}") &amp;&amp; (${config.middleware.rm_mesh_bearer_platform.gatt_mtu_size} &lt;= ${config.driver.ble_a_freertos.gatt_mtu_size}) ||
+            testExists("${interface.driver.ble_on_balance_freertos}") &amp;&amp; (${config.middleware.rm_mesh_bearer_platform.gatt_mtu_size} &lt;= ${config.driver.ble_b_freertos.gatt_mtu_size}) ||
+            testExists("${interface.driver.ble_on_compact_freertos}") &amp;&amp; (${config.middleware.rm_mesh_bearer_platform.gatt_mtu_size} &lt;= ${config.driver.ble_c_freertos.gatt_mtu_size}) ||
+            testExists("${interface.driver.ble_on_extended_threadx}") &amp;&amp; (${config.middleware.rm_mesh_bearer_platform.gatt_mtu_size} &lt;= ${config.driver.ble_a_threadx.gatt_mtu_size}) ||
+            testExists("${interface.driver.ble_on_balance_threadx}") &amp;&amp; (${config.middleware.rm_mesh_bearer_platform.gatt_mtu_size} &lt;= ${config.driver.ble_b_threadx.gatt_mtu_size}) ||
+            testExists("${interface.driver.ble_on_compact_threadx}") &amp;&amp; (${config.middleware.rm_mesh_bearer_platform.gatt_mtu_size} &lt;= ${config.driver.ble_c_threadx.gatt_mtu_size})
+        </constraint>
+        <constraint display="Timer slot maximum number must be the value defined in ble module or lower.">
+            testExists("${interface.driver.ble_on_extended}") &amp;&amp; (${config.middleware.rm_mesh_bearer_platform.timer_number_of_slot} &lt;= ${config.driver.ble_a.timer_number_of_slot}) ||
+            testExists("${interface.driver.ble_on_balance}") &amp;&amp; (${config.middleware.rm_mesh_bearer_platform.timer_number_of_slot} &lt;= ${config.driver.ble_b.timer_number_of_slot}) ||
+            testExists("${interface.driver.ble_on_compact}") &amp;&amp; (${config.middleware.rm_mesh_bearer_platform.timer_number_of_slot} &lt;= ${config.driver.ble_c.timer_number_of_slot}) ||
+            testExists("${interface.driver.ble_on_extended_freertos}") &amp;&amp; (${config.middleware.rm_mesh_bearer_platform.timer_number_of_slot} &lt;= ${config.driver.ble_a_freertos.timer_number_of_slot}) ||
+            testExists("${interface.driver.ble_on_balance_freertos}") &amp;&amp; (${config.middleware.rm_mesh_bearer_platform.timer_number_of_slot} &lt;= ${config.driver.ble_b_freertos.timer_number_of_slot}) ||
+            testExists("${interface.driver.ble_on_compact_freertos}") &amp;&amp; (${config.middleware.rm_mesh_bearer_platform.timer_number_of_slot} &lt;= ${config.driver.ble_c_freertos.timer_number_of_slot}) ||
+            testExists("${interface.driver.ble_on_extended_threadx}") &amp;&amp; (${config.middleware.rm_mesh_bearer_platform.timer_number_of_slot} &lt;= ${config.driver.ble_a_threadx.timer_number_of_slot}) ||
+            testExists("${interface.driver.ble_on_balance_threadx}") &amp;&amp; (${config.middleware.rm_mesh_bearer_platform.timer_number_of_slot} &lt;= ${config.driver.ble_b_threadx.timer_number_of_slot}) ||
+            testExists("${interface.driver.ble_on_compact_threadx}") &amp;&amp; (${config.middleware.rm_mesh_bearer_platform.timer_number_of_slot} &lt;= ${config.driver.ble_c_threadx.timer_number_of_slot})
+        </constraint>
+        <constraint display="BLE Mesh Bearer Platform middleware not support R_BLE_SPP module">
+            "${interface.mcu.radio}" === "1"
+        </constraint>
+        <requires id="module.middleware.rm_mesh_bearer_platform.requires.rm_ble_mesh_bearer" interface="interface.middleware.rm_ble_mesh_bearer_on_rm_ble_mesh_bearer" visible="true" display="Add BLE Mesh Bearer Module" find="true"/>
+        <requires id="module.middleware.rm_mesh_bearer_platform.requires.ble" interface="interface.driver.network_on_ble" display="Add BLE Network Driver" visible="true" find="true" />
+
+        <provides interface="interface.middleware.rm_mesh_bearer_platform"/>
+        <provides interface="interface.middleware.rm_mesh_bearer_platform_on_rm_mesh_bearer_platform"/>
+        <provides interface="interface.middleware.rm_mesh_bearer_platform.${module.middleware.rm_mesh_bearer_platform.name}"/>
+
+        <property display="General|Name" id="module.middleware.rm_mesh_bearer_platform.name" default="g_rm_mesh_bearer_platform${_instance}" description="Module name.">
+            <constraint display="Name Must Be a Valid C Symbol">testSymbol("${module.middleware.rm_mesh_bearer_platform.name}")</constraint>
+        </property>
+
+        <property display="Channel Number" id="module.middleware.rm_mesh_bearer_platform.channel" default="0" description="Select channel corresponding to the channel number of the hardware.">
+            <constraint display="Invalid Channel Number">testInteger("${module.middleware.rm_mesh_bearer_platform.channel}") &amp;&amp; ("${module.middleware.rm_mesh_bearer_platform.channel}" &gt;= 0) &amp;&amp; ("${module.middleware.rm_mesh_bearer_platform.channel}" &lt;= 4294967295)</constraint>
+        </property>
+
+        <property display="Device Address Type" id="module.middleware.rm_mesh_bearer_platform.add_type" default="0" description="Select device address type ( public : 0, random : 1).">
+            <constraint display="Invalid Device Address Type">testInteger("${module.middleware.rm_mesh_bearer_platform.add_type}") &amp;&amp; ("${module.middleware.rm_mesh_bearer_platform.add_type}" &gt;= 0) &amp;&amp; ("${module.middleware.rm_mesh_bearer_platform.add_type}" &lt;= 1)</constraint>
+        </property>
+
+
+        <property display="GATT Server Callback Number" id="module.middleware.rm_mesh_bearer_platform.gatt_server_callback_num" default="1" description="Number of GATT server callback.">
+            <constraint display="Invalid Callback Number">testInteger("${module.middleware.rm_mesh_bearer_platform.gatt_server_callback_num}") &amp;&amp; ("${module.middleware.rm_mesh_bearer_platform.gatt_server_callback_num}" &gt;= 0) &amp;&amp; ("${module.middleware.rm_mesh_bearer_platform.gatt_server_callback_num}" &lt;= 255)</constraint>
+        </property>
+
+        <property display="GATT Client Callback Number" id="module.middleware.rm_mesh_bearer_platform.gatt_client_callback_num" default="1" description="Number of GATT client callback.">
+            <constraint display="Invalid Callback Number">testInteger("${module.middleware.rm_mesh_bearer_platform.gatt_client_callback_num}") &amp;&amp; ("${module.middleware.rm_mesh_bearer_platform.gatt_client_callback_num}" &gt;= 0) &amp;&amp; ("${module.middleware.rm_mesh_bearer_platform.gatt_client_callback_num}" &lt;= 255)</constraint>
+        </property>
+
+        <property display="Vender Specific Callback" id="module.middleware.rm_mesh_bearer_platform.vender_specific_callback" default="NULL" description="Vendor specific callback function name.">
+            <constraint display="Name Must Be a Valid C Symbol.">testSymbol("${module.middleware.rm_mesh_bearer_platform.vender_specific_callback}")</constraint>
+        </property>
+
+        <property id="module.middleware.rm_mesh_bearer_platform.p_context" default="NULL">
+            <constraint display="Name Must Be a Valid C Symbol">testSymbol("${module.middleware.rm_mesh_bearer_platform.p_context}")</constraint>
+            <export>eval('' +
+                'var output = "${module.middleware.rm_mesh_bearer_platform.p_context}";' +
+                'if ("NULL" !== output) {' +
+                'output = "&amp;" + output;' +
+                '}' +
+                'output')
+            </export>
+        </property>
+
+        <header>
+/** Mesh Bearer Platform on Mesh Bearer Platform Instance. */
+extern rm_mesh_bearer_platform_instance_ctrl_t ${module.middleware.rm_mesh_bearer_platform.name}_ctrl;
+
+/** Access the Mesh Bearer Platform instance using these structures when calling API functions directly (::p_api is not used). */
+extern const rm_mesh_bearer_platform_extended_cfg_t ${module.middleware.rm_mesh_bearer_platform.name}_extend;
+extern const rm_mesh_bearer_platform_cfg_t ${module.middleware.rm_mesh_bearer_platform.name}_cfg;
+extern const rm_mesh_bearer_platform_instance_t ${module.middleware.rm_mesh_bearer_platform.name};
+
+#ifndef ${module.middleware.rm_mesh_bearer_platform.vender_specific_callback}
+void ${module.middleware.rm_mesh_bearer_platform.vender_specific_callback}(uint16_t type, ble_status_t result, st_ble_vs_evt_data_t *p_data);
+#endif
+
+        </header>
+        <includes>
+#include "rm_mesh_bearer_platform.h"
+#include "rm_mesh_bearer_platform_api.h"
+#include "r_ble_api.h"
+        </includes>
+        <declarations>
+rm_mesh_bearer_platform_instance_ctrl_t ${module.middleware.rm_mesh_bearer_platform.name}_ctrl;
+
+const rm_mesh_bearer_platform_extended_cfg_t ${module.middleware.rm_mesh_bearer_platform.name}_extend =
+{
+    .gatt_server_callback_num = ${module.middleware.rm_mesh_bearer_platform.gatt_server_callback_num},
+    .gatt_client_callback_num = ${module.middleware.rm_mesh_bearer_platform.gatt_client_callback_num},
+    .vender_specific_callback = ${module.middleware.rm_mesh_bearer_platform.vender_specific_callback},
+};
+
+/** MESH BEARER PLATFORM configuration parameters. */
+const rm_mesh_bearer_platform_cfg_t ${module.middleware.rm_mesh_bearer_platform.name}_cfg =
+{
+    /** the parameters for initialization. */
+    .channel             = ${module.middleware.rm_mesh_bearer_platform.channel},
+    .device_address_type = (rm_mesh_bearer_platform_device_address_type_t) ${module.middleware.rm_mesh_bearer_platform.add_type},
+    .p_bearer_instance   = &amp;${module.middleware.rm_mesh_bearer_platform.requires.rm_ble_mesh_bearer::module.middleware.rm_ble_mesh_bearer.name},
+    .p_context           = ${module.middleware.rm_mesh_bearer_platform.p_context},
+    .p_extend            = &amp;${module.middleware.rm_mesh_bearer_platform.name}_extend
+};
+
+/** This structure encompasses everything that is needed to use an instance of this interface. */
+const rm_mesh_bearer_platform_instance_t ${module.middleware.rm_mesh_bearer_platform.name} =
+{
+    .p_ctrl = &amp;${module.middleware.rm_mesh_bearer_platform.name}_ctrl,
+    .p_cfg  = &amp;${module.middleware.rm_mesh_bearer_platform.name}_cfg,
+    .p_api  = &amp;g_rm_mesh_bearer_platform_on_rm_mesh_bearer_platform
+};
+        </declarations>
+    </module>
+</raModuleDescription>

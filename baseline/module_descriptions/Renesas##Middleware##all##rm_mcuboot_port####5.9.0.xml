@@ -1,0 +1,55 @@
+<?xml version="1.0" ?>
+<raModuleDescription>
+  <config id="config.middleware.mcuboot_port" path="fsp_cfg/rm_mcuboot_port_cfg.h" version="0">
+    <content>
+    </content>
+  </config>
+  <module config="config.middleware.mcuboot_port" display="Bootloader|MCUboot Port for RA (rm_mcuboot_port)" id="module.driver.rm_mcuboot_port" visible="false" version="1" url="group___r_m___m_c_u_b_o_o_t___p_o_r_t.html">
+    <constraint display="Only one MCUboot port instance can be used at a time.">
+          "${interface.middleware.mcuboot_port}" === "1"
+    </constraint>
+    <constraint display="Requires MbedCrypto, Ocrypto or TinyCrypt">
+              "${interface.driver.mcuboot_crypto}" === "1"
+    </constraint>
+    <constraint display="Requires Flash Driver">
+            testExists("${module.driver.rm_mcuboot_port.requires.flash::module.driver.flash.name}")
+    </constraint>
+    <constraint display="MBEDTLS_THREADING_C in MbedTLS (Crypto Only) must not be defined under MbedTLS (Crypto Only)|Common|General|MBEDTLS_THREADING_C.">
+              (testExists ("${interface.driver.mcuboot_crypto_sce9_protected}")) || (testExists ("${interface.driver.tinycrypt}")) || (testExists ("${interface.driver.mcuboot_tinycrypt}")) || (testExists ("${interface.driver.ocrypto}")) || ("${config.driver.psa_crypto.mbedtls_threading_c}" === "config.driver.psa_crypto.mbedtls_threading_c.disabled")
+    </constraint>
+    <constraint display="MBEDTLS_THREADING_ALT in MbedTLS (Crypto Only) must not be defined under MbedTLS (Crypto Only)|Common|General|MBEDTLS_THREADING_ALT.">
+              (testExists ("${interface.driver.mcuboot_crypto_sce9_protected}")) || (testExists ("${interface.driver.tinycrypt}")) || (testExists ("${interface.driver.mcuboot_tinycrypt}")) || (testExists ("${interface.driver.ocrypto}")) || ("${config.driver.psa_crypto.mbedtls_threading_alt}" === "config.driver.psa_crypto.mbedtls_threading_alt.disabled")
+    </constraint>
+    <constraint display="MBEDTLS_PLATFORM_MEMORY in MbedTLS (Crypto Only) must be defined under MbedTLS (Crypto Only)|Common|Platform|MBEDTLS_PLATFORM_MEMORY.">
+              (testExists ("${interface.driver.mcuboot_crypto_sce9_protected}")) || (testExists ("${interface.driver.tinycrypt}")) || (testExists ("${interface.driver.ocrypto}")) || ("${config.driver.psa_crypto.mbedtls_platform_memory}" === "config.driver.psa_crypto.mbedtls_platform_memory.enabled")
+    </constraint>
+    <constraint display="MBEDTLS_MEMORY_BUFFER_ALLOC_C in MbedTLS (Crypto Only) must be defined under MbedTLS (Crypto Only)|Common|General|MBEDTLS_MEMORY_BUFFER_ALLOC_C.">
+              (testExists ("${interface.driver.mcuboot_crypto_sce9_protected}")) || (testExists ("${interface.driver.tinycrypt}")) || (testExists ("${interface.driver.mcuboot_tinycrypt}")) || (testExists ("${interface.driver.ocrypto}")) || ("${config.driver.psa_crypto.mbedtls_memory_buffer_alloc_c}" === "config.driver.psa_crypto.mbedtls_memory_buffer_alloc_c.enabled")
+    </constraint>
+    <constraint display="Code Flash Programming must be Enabled under Flash|Common|Code Flash Programming Enable">
+              ("${config.driver.flash_hp.param_code_flash_programming_enable}" === "config.driver.flash_hp.param_code_flash_programming_enable.enabled") ||
+              ("${config.driver.flash_lp.param_code_flash_programming_enable}" === "config.driver.flash_lp.param_code_flash_programming_enable.enabled")
+    </constraint>
+    <constraint display="Data flash bgo must be disabled under Flash|Module|Data Flash Background Operation">
+              "${module.driver.rm_mcuboot_port.requires.flash::module.driver.flash.data_flash_bgo}" === "module.driver.flash.data_flash_bgo.disabled"
+    </constraint>
+
+    <requires id="module.driver.rm_mcuboot_port.requires.crypto" interface="interface.driver.mcuboot_crypto" visible="true" display="Requires a crypto stack" />
+    <requires id="module.driver.rm_mcuboot_port.requires.flash" interface="interface.driver.flash" visible="true" find="false" display="Requires Flash"/>
+    <requires id="module.driver.rm_mcuboot_port.requires.external_memory_interface" interface="interface.driver.rm_mcuboot_external_memory_interface" visible="true" display="External Memory Implementation (Optional)" find="false" optional="true"/>
+
+    <!-- <requires id="module.driver.rm_mcuboot_port.requires.uart_on_sci_uart" interface="interface.driver.uart_on_sci_uart" display="Add SCI UART Driver for Debugging [Optional]" find="false">
+            <override property="module.driver.uart.name" value="g_mcuboot_uart"/>
+        </requires> -->
+    <provides interface="interface.middleware.mcuboot_port" />
+    <includes>
+
+    </includes>
+    <declarations>
+void * const gp_mcuboot_flash_ctrl = &amp;${module.driver.rm_mcuboot_port.requires.flash::module.driver.flash.name}_ctrl;
+flash_cfg_t const * const gp_mcuboot_flash_cfg = &amp;${module.driver.rm_mcuboot_port.requires.flash::module.driver.flash.name}_cfg;
+flash_instance_t const * const gp_mcuboot_flash_instance = &amp;${module.driver.rm_mcuboot_port.requires.flash::module.driver.flash.name};
+    </declarations>
+
+  </module>
+</raModuleDescription>

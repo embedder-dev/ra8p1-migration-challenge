@@ -1,0 +1,162 @@
+﻿<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.driver.usb_pmsc" path="fsp_cfg/r_usb_pmsc_cfg.h" version="0">
+        <property id="config.driver.usb_pmsc.bulk_in" display="Bulk Input Transfer Pipe" default="config.driver.usb_pmsc.bulk_in.pipe4" description="Select the USB pipe to use for bulk input transfers.">
+            <option id="config.driver.usb_pmsc.bulk_in.pipe1" display="USB PIPE1" value="USB_PIPE1"/>
+            <option id="config.driver.usb_pmsc.bulk_in.pipe2" display="USB PIPE2" value="USB_PIPE2"/>
+            <option id="config.driver.usb_pmsc.bulk_in.pipe3" display="USB PIPE3" value="USB_PIPE3"/>
+            <option id="config.driver.usb_pmsc.bulk_in.pipe4" display="USB PIPE4" value="USB_PIPE4"/>
+            <option id="config.driver.usb_pmsc.bulk_in.pipe5" display="USB PIPE5" value="USB_PIPE5"/>
+        </property>
+        <property id="config.driver.usb_pmsc.bulk_out" display="Bulk Output Transfer Pipe" default="config.driver.usb_pmsc.bulk_out.pipe5" description="Select the USB pipe to use for bulk output transfers.">
+            <option id="config.driver.usb_pmsc.bulk_out.pipe1" display="USB PIPE1" value="USB_PIPE1"/>
+            <option id="config.driver.usb_pmsc.bulk_out.pipe2" display="USB PIPE2" value="USB_PIPE2"/>
+            <option id="config.driver.usb_pmsc.bulk_out.pipe3" display="USB PIPE3" value="USB_PIPE3"/>
+            <option id="config.driver.usb_pmsc.bulk_out.pipe4" display="USB PIPE4" value="USB_PIPE4"/>
+            <option id="config.driver.usb_pmsc.bulk_out.pipe5" display="USB PIPE5" value="USB_PIPE5"/>
+        </property>
+        <property id="config.driver.usb_pmsc.vendor" display="Vendor Information" default="Vendor  " description="Specify the vendor information field (part of the Inquiry command response).">
+            <constraint display="Vendor Information must be 8 bytes long; pad with spaces if shorter.">eval('' +
+            'var input = "${config.driver.usb_pmsc.vendor}";' +
+            '( 8 === input.length )')
+            </constraint>
+        </property>
+        <property id="config.driver.usb_pmsc.product" display="Product Information" default="Mass Storage    " description="Specify the product information field (part of the Inquiry command response).">
+            <constraint display="Product Information must be 16 bytes long; pad with spaces if shorter.">eval('' +
+            'var input = "${config.driver.usb_pmsc.product}";' +
+            '( 16 === input.length )')
+            </constraint>
+        </property>
+        <property id="config.driver.usb_pmsc.revision" display="Product Revision Level" default="1.00" description="Specify the product revision level field (part of the Inquiry command response).">
+            <constraint display="Product Revision Level must be 4 bytes long; pad with spaces if shorter.">eval('' +
+            'var input = "${config.driver.usb_pmsc.revision}";' +
+            '( 4 === input.length )')
+            </constraint>
+        </property>
+        <property id="config.driver.usb_pmsc.sectorsize" display="Sector size" default="config.driver.usb_pmsc.sectorsize.512" description="Specifies the sector size.">
+            <option id="config.driver.usb_pmsc.sectorsize.512" display="512" value="512"/>
+            <option id="config.driver.usb_pmsc.sectorsize.4096" display="4096" value="4096"/>
+        </property>
+        <property id="config.driver.usb_pmsc.transCount" display="Number of Transfer Sectors" default="8" description="Specify the maximum sector size to request with one data transfer.">
+            <constraint display="Please enter a number between 1 and 255.">
+            testInteger("${config.driver.usb_pmsc.transCount}") &amp;&amp;
+            ("${config.driver.usb_pmsc.transCount}" &gt;= 1)  &amp;&amp;
+            ("${config.driver.usb_pmsc.transCount}" &lt;= 255)
+            </constraint>
+        </property>
+        <content>
+            #ifdef __cplusplus
+            extern "C" {
+            #endif
+
+            #define USB_CFG_PMSC_BULK_IN (${config.driver.usb_pmsc.bulk_in})
+            #define USB_CFG_PMSC_BULK_OUT (${config.driver.usb_pmsc.bulk_out})
+            #define USB_CFG_PMSC_VENDOR "${config.driver.usb_pmsc.vendor}"
+            #define USB_CFG_PMSC_PRODUCT "${config.driver.usb_pmsc.product}"
+            #define USB_CFG_PMSC_REVISION "${config.driver.usb_pmsc.revision}"
+            #define USB_CFG_PMSC_ATAPI_BLOCK_UNIT (${config.driver.usb_pmsc.sectorsize})
+            #define USB_CFG_PMSC_TRANS_COUNT (${config.driver.usb_pmsc.transCount})
+
+            #ifdef __cplusplus
+            }
+            #endif
+        </content>
+    </config>
+    <config id="config.driver.usb_pmsc_class" path="fsp_cfg/r_usb_class_cfg.h" version="0">
+        <content>
+        </content>
+    </config>
+    <module config="config.driver.usb_pmsc" display="Connectivity|${module.driver.pmsc.name} USB PMSC (r_usb_pmsc)" id="module.driver.pmsc_on_usb" version="1" url="group___u_s_b___p_m_s_c.html">
+        <constraint display="Unique name required for each instance">
+            "${interface.driver.pmsc.${module.driver.pmsc.name}}" === "1"
+        </constraint>
+        <constraint display="Requires USB Peripheral">
+          "${interface.mcu.usb_fs.external}" === "1"
+        </constraint>
+        <constraint display="Requires higher level memory implementation">
+            testExists("${module.driver.pmsc_on_usb.requires.rm_block_media::module.driver.rm_block_media.name}")
+        </constraint>
+        <constraint display="Requires USB PIPE4 or PIPE5 for Bulk In transfer when using this MCU.">
+            !(("${interface.mcu.usb.pipes.0.4.5.6.7}" === "1") &amp;&amp;
+            ("${config.driver.usb_pmsc.bulk_in}" === "config.driver.usb_pmsc.bulk_in.pipe1"))
+        </constraint>
+        <constraint display="Requires USB PIPE4 or PIPE5 for Bulk In transfer when using this MCU.">
+            !(("${interface.mcu.usb.pipes.0.4.5.6.7}" === "1") &amp;&amp;
+            ("${config.driver.usb_pmsc.bulk_in}" === "config.driver.usb_pmsc.bulk_in.pipe2"))
+        </constraint>
+        <constraint display="Requires USB PIPE4 or PIPE5 for Bulk In transfer when using this MCU.">
+            !(("${interface.mcu.usb.pipes.0.4.5.6.7}" === "1") &amp;&amp;
+            ("${config.driver.usb_pmsc.bulk_in}" === "config.driver.usb_pmsc.bulk_in.pipe3"))
+        </constraint>
+        <constraint display="Requires USB PIPE4 or PIPE5 for Bulk Out transfer when using this MCU.">
+            !(("${interface.mcu.usb.pipes.0.4.5.6.7}" === "1") &amp;&amp;
+            ("${config.driver.usb_pmsc.bulk_out}" === "config.driver.usb_pmsc.bulk_out.pipe1"))
+        </constraint>
+        <constraint display="Requires USB PIPE4 or PIPE5 for Bulk Out transfer when using this MCU.">
+            !(("${interface.mcu.usb.pipes.0.4.5.6.7}" === "1") &amp;&amp;
+            ("${config.driver.usb_pmsc.bulk_out}" === "config.driver.usb_pmsc.bulk_out.pipe2"))
+        </constraint>
+        <constraint display="Requires USB PIPE4 or PIPE5 for Bulk Out transfer when using this MCU.">
+            !(("${interface.mcu.usb.pipes.0.4.5.6.7}" === "1") &amp;&amp;
+            ("${config.driver.usb_pmsc.bulk_out}" === "config.driver.usb_pmsc.bulk_out.pipe3"))
+        </constraint>
+        <constraint display="The USB pipe number for Bulk Input and Bulk Output must be different.">
+            !(("${config.driver.usb_pmsc.bulk_in}" === "config.driver.usb_pmsc.bulk_in.pipe1") &amp;&amp;
+            ("${config.driver.usb_pmsc.bulk_out}" === "config.driver.usb_pmsc.bulk_out.pipe1"))
+        </constraint>
+        <constraint display="The USB pipe number for Bulk Input and Bulk Output must be different.">
+            !(("${config.driver.usb_pmsc.bulk_in}" === "config.driver.usb_pmsc.bulk_in.pipe2") &amp;&amp;
+            ("${config.driver.usb_pmsc.bulk_out}" === "config.driver.usb_pmsc.bulk_out.pipe2"))
+        </constraint>
+        <constraint display="The USB pipe number for Bulk Input and Bulk Output must be different.">
+            !(("${config.driver.usb_pmsc.bulk_in}" === "config.driver.usb_pmsc.bulk_in.pipe3") &amp;&amp;
+            ("${config.driver.usb_pmsc.bulk_out}" === "config.driver.usb_pmsc.bulk_out.pipe3"))
+        </constraint>
+        <constraint display="The USB pipe number for Bulk Input and Bulk Output must be different.">
+            !(("${config.driver.usb_pmsc.bulk_in}" === "config.driver.usb_pmsc.bulk_in.pipe4") &amp;&amp;
+            ("${config.driver.usb_pmsc.bulk_out}" === "config.driver.usb_pmsc.bulk_out.pipe4"))
+        </constraint>
+        <constraint display="The USB pipe number for Bulk Input and Bulk Output must be different.">
+            !(("${config.driver.usb_pmsc.bulk_in}" === "config.driver.usb_pmsc.bulk_in.pipe5") &amp;&amp;
+            ("${config.driver.usb_pmsc.bulk_out}" === "config.driver.usb_pmsc.bulk_out.pipe5"))
+        </constraint>
+        <constraint display="Use USBX instead in Azure RTOS projects.">
+            !testExists("${interface.rtos.tx}")
+        </constraint>
+        <requires id="module.driver.pmsc_on_usb.requires.pmsc" interface="interface.mcu.usb_fs.external" visible="false" display="Requires USB Peripheral" />
+        <requires id="module.driver.pmsc_on_usb.requires.rm_block_media" interface="interface.driver.rm_block_media_pmsc" display="Add Memory Implementation [Required]" find="false">
+            <override property="module.driver.rm_block_media.callback" value="r_usb_pmsc_block_media_event_callback"/>
+        </requires>
+        <requires id="module.driver.basic_on_usb.requires.basic" interface="interface.driver.basic_on_usb" display="Add USB Driver">
+            <override property="module.driver.usb_basic.usb_mode" value="module.driver.usb_basic.usb_mode.peri"/>
+            <override property="module.driver.usb_basic.usb_classtype" value="module.driver.usb_basic.usb_classtype.pmsc"/>
+            <override property="module.driver.usb_basic.other_context" value="${module.driver.pmsc_on_usb.requires.rm_block_media::module.driver.rm_block_media.name}"/>
+        </requires>
+        <requires id="module.driver.pmsc_on_usb.ignore.azure_projects" interface="interface.rtos.supports.renesas_usb" visible="false" display="Use Azure USBX for Azure RTOS projects."/>
+        <provides interface="interface.driver.usb" />
+        <provides interface="interface.driver.pmsc.${module.driver.pmsc.name}" />
+        <provides interface="interface.driver.pmsc" />
+        <property default="pmsc" id="module.driver.pmsc.pmsc_interface" description=""/>
+        <property default="g_pmsc${_instance}" display="Name" id="module.driver.pmsc.name" description="Module name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.pmsc.name}")</constraint>
+        </property>
+        <property default="NULL" id="module.driver.pmsc.usb_basic_name">
+            <export>eval('"${module.driver.basic_on_usb.requires.basic::module.driver.basic.name}"')
+            </export>
+        </property>
+        <header>
+        </header>
+        <includes>
+#include "r_usb_pmsc_api.h"
+        </includes>
+        <declarations>
+        </declarations>
+        <functions>
+        </functions>
+    </module>
+    <module config="config.driver.usb_pmsc_class" display="Connectivity|${module.driver.pmsc_class.name} USB PMSC (r_usb_pmsc_class)" id="module.driver.pmsc_class_on_usb" visible="false" version="1" url="group___u_s_b___p_m_s_c.html">
+        <property default="g_pmsc_class${_instance}" display="Name" id="module.driver.pmsc_class.name" description="Class Module name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.pmsc_class.name}")</constraint>
+        </property>
+    </module>
+</raModuleDescription>

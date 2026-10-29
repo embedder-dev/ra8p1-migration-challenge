@@ -1,0 +1,7 @@
+<?xml version="1.0" ?>
+<raModuleDescription>
+    <module id="module.arm.tfm_freertos" display="Security|Trusted Firmware-M FreeRTOS Integration" common="1" visible="false" version="0" url="https://tf-m-user-guide.trustedfirmware.org/">
+        <requires id="module.arm.tfm_freertos.requires.freertos" interface="interface.rtos.awsfreertos" visible="false" display="Requires FreeRTOS"/>
+        <provides interface="interface.arm.tfm_freertos" />
+    </module>
+</raModuleDescription>

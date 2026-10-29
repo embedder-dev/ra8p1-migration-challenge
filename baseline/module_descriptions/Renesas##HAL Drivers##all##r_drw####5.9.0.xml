@@ -1,0 +1,98 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<raModuleDescription>
+    <config id="config.driver.drw" path="fsp_cfg/r_drw_cfg.h" version="0">
+        <!--         <property default="32768" display="Work memory size for display lists in bytes" id="module.driver.drw.work_memory_size" description="Specify the work memory size for display lists in bytes.">
+            <constraint display="Value must be a non-negative integer">testInteger("${module.driver.drw.work_memory_size}")</constraint>
+        </property> -->
+        <property default="config.driver.drw.indirect.on" display="Allow Indirect Mode" id="config.driver.drw.indirect" description="Enable indirect mode to allow no-copy mode for d2_adddlist (see the TES Dave2D Driver Documentation for details).">
+            <option display="Enabled" id="config.driver.drw.indirect.on" value="(1)"/>
+            <option display="Disabled" id="config.driver.drw.indirect.off" value="(0)"/>
+        </property>
+        <property default="config.driver.drw.malloc.default" display="Memory Allocation" id="config.driver.drw.malloc" description=" Set Memory Allocation to Default to use built-in dynamic memory allocation for the D2 heap.  This will use an RTOS heap if configured; otherwise, standard C malloc and free will be used.\nSet to Custom to define your own allocation scheme for the D2 heap.  In this case, the developer will need to define the following functions:\n\n    void * d1_malloc(size_t size)\n    void d1_free(void * ptr)">
+            <option display="Default" id="config.driver.drw.malloc.default" value="(0)"/>
+            <option display="Custom" id="config.driver.drw.malloc.custom" value="(1)"/>
+        </property>
+        <content>
+            #ifdef __cplusplus
+            extern "C" {
+            #endif
+
+            #define DRW_CFG_USE_DLIST_INDIRECT   (${config.driver.drw.indirect})
+            #ifdef VECTOR_NUMBER_DRW_INT
+            #define DRW_CFG_INT_IRQ              (VECTOR_NUMBER_DRW_INT)
+            #endif
+            #define DRW_CFG_CUSTOM_MALLOC        (${config.driver.drw.malloc})
+
+            #ifdef __cplusplus
+            }
+            #endif
+        </content>
+    </config>
+    <module config="config.driver.drw" display="Graphics|D/AVE 2D Port Interface (r_drw)" id="module.driver.drw" common="1" version="1" url="group___d_r_w.html">
+        <constraint display="Requires DRW peripheral">
+          "${interface.mcu.drw}" === "1"
+        </constraint>
+        <constraint display="For BareMetal application, BSP heap is required under ‘BSP | RA COMMON | HEAP SIZE’.">eval('' +
+        'var output = false;' +
+        '  if (("${interface.rtos.bare_metal}" == "1") &amp;&amp; ("${config.bsp.common.heap}" &gt; 0)) {' +
+        '    output = true;' +
+        '  }' +
+        '  else if ( ("${interface.rtos.awsfreertos}" &gt;= "1") || ("${interface.rtos.tx}" &gt;= "1")){' +
+        '    output = true;' +
+        '  }' +
+        'output')
+        </constraint>
+
+        <constraint display="For AzureRTOS application, BSP heap is required under ‘BSP | RA COMMON | HEAP SIZE’.">eval('' +
+            'var output = false;' +
+            '  if (("${interface.rtos.tx}" &gt;= "1") &amp;&amp; ("${config.bsp.common.heap}" &gt; 0 || "${interface.azure.gx}" == "1")) {' +
+            '    output = true;' +
+            '  }' +
+            '  else if ("${interface.rtos.bare_metal}" &gt;= "1" || "${interface.rtos.awsfreertos}" &gt;= "1"){' +
+            '    output = true;' +
+            '  }' +
+            'output')
+        </constraint>
+
+        <constraint display="For FreeRTOS application, either BSP heap or thread heap is required.&#xA;To use thread heap, enable property 'Support Dynamic Allocation' and set 'Total Heap Size' under ‘New Thread | Common | Memory Allocation’.&#xA;To use BSP heap, disable property 'Support Dynamic Allocation' and set BSP heap under ‘BSP | RA COMMON | HEAP SIZE.">
+        eval('' + 'var output = false;' +
+        '  if ("${interface.rtos.awsfreertos}" &gt;= "1") {' +
+        '  if (("${config.awsfreertos.thread.configsupport_dynamic_allocation}" == "config.awsfreertos.thread.configsupport_dynamic_allocation.enabled") &amp;&amp; ("${config.awsfreertos.thread.configtotal_heap_size}" &gt; 0)){' +
+        '    output = true;' +
+        '  }' +
+        '  else if (("${config.awsfreertos.thread.configsupport_dynamic_allocation}" == "config.awsfreertos.thread.configsupport_dynamic_allocation.disabled") &amp;&amp; ("${config.bsp.common.heap}" &gt; 0)){' +
+        '    output = true;' +
+        '  }' +
+        '  }' +
+        '  else if ( ("${interface.rtos.tx}" &gt;= "1") || ("${interface.rtos.bare_metal}" == "1")){' +
+        '    output = true;' +
+        '  }' +
+        'output')
+        </constraint>
+        <requires id="module.driver.drw.requires.drw" interface="interface.mcu.drw" visible="false" display="Requires DRW peripheral" />
+        <requires id="module.driver.drw.requires.dave2d_driver" interface="interface.driver.tes.dave2d" visible="true" display="TES D/AVE 2D Driver" />
+        <provides interface="interface.driver.drw" />
+        <provides interface="interface.driver.dave2d_port" />
+        <provides interface="interface.driver.drw.${module.driver.drw.handle_name}" />
+        <property default="d2_handle${_instance}" display="D2 Device Handle Name" id="module.driver.drw.handle_name" description="Set the name for the d2_device handle used when calling D2 layer functions.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.drw.handle_name}")</constraint>
+        </property>
+        <property default="board.icu.common.irq.priority2" display="DRW Interrupt Priority" id="module.driver.drw.int_ipl" description="Select the DRW_INT (display list completion) interrupt priority.">
+            <select enum="enum.mcu.nvic.priorities.mandatory"/>
+            <interrupt event="event.drw.int" isr="drw_int_isr"/>
+        </property>
+        <header>
+            #if DRW_CFG_CUSTOM_MALLOC
+            void * d1_malloc(size_t size);
+            void   d1_free(void * ptr);
+            #endif
+        </header>
+        <includes>
+            #include &quot;dave_driver.h&quot;
+        </includes>
+        <declarations>
+            const uint8_t DRW_INT_IPL = ${module.driver.drw.int_ipl};
+            d2_device *   ${module.driver.drw.handle_name};
+        </declarations>
+    </module>
+</raModuleDescription>

@@ -1,0 +1,110 @@
+<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.driver.ioport" path="fsp_cfg/r_ioport_cfg.h" version="0">
+        <property id="config.driver.ioport.checking" display="Parameter Checking" default="config.driver.ioport.checking.system" description="If selected code for parameter checking is included in the build.">
+            <option id="config.driver.ioport.checking.system" display="Default (BSP)" value="(BSP_CFG_PARAM_CHECKING_ENABLE)" />
+            <option id="config.driver.ioport.checking.enabled" display="Enabled" value="(1)" />
+            <option id="config.driver.ioport.checking.disabled" display="Disabled" value="(0)" />
+        </property>
+        <content>
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#define IOPORT_CFG_PARAM_CHECKING_ENABLE ${config.driver.ioport.checking}
+
+#ifdef __cplusplus
+}
+#endif
+        </content>
+    </config>
+    <module config="config.driver.ioport" display="System|${module.driver.ioport.name} I/O Port (r_ioport)" id="module.driver.ioport_on_ioport" common="1" version="1" url="group___i_o_p_o_r_t.html">
+        <constraint display="Only one IOPORT driver instance is allowed">
+            "${interface.driver.ioport}" === "1"
+        </constraint>
+        <constraint display="ELC signal source selection requires an ELC Driver">
+            (
+                (!"${module.driver.ioport.elc_trigger_ioport1}".startsWith("_signal.")) &amp;&amp;
+                (!"${module.driver.ioport.elc_trigger_ioport2}".startsWith("_signal.")) &amp;&amp;
+                (!"${module.driver.ioport.elc_trigger_ioport3}".startsWith("_signal.")) &amp;&amp;
+                (!"${module.driver.ioport.elc_trigger_ioport4}".startsWith("_signal."))
+            ) || ("1" === "${interface.driver.elc}")
+        </constraint>
+        <requires id="module.driver.ioport_on_ioport.requires.port" interface="interface.mcu.port" visible="false" display="Requires Ioport Peripheral" />
+        <provides interface="interface.driver.ioport" />
+        <property default="g_ioport" display="Name" id="module.driver.ioport.name" description="Module name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.ioport.name}")</constraint>
+            <signal event="event.ioport.event.1" />
+            <signal event="event.ioport.event.2" />
+            <signal event="event.ioport.event.3" />
+            <signal event="event.ioport.event.4" />
+        </property>
+        <property default="" display="1st Port ELC Trigger Source" id="module.driver.ioport.elc_trigger_ioport1" description="ELC source that will trigger the 1st port">
+            <select enum="enum.disabled" />
+            <select enum="_signal" />
+            <linkConstraint display="Requires an ELC peripheral function for the 1st IOPORT">
+                "${_link}" === "link.ioport1"
+            </linkConstraint>
+        </property>
+        <property default="" display="2nd Port ELC Trigger Source" id="module.driver.ioport.elc_trigger_ioport2" description="ELC source that will trigger the 2nd port">
+            <select enum="enum.disabled" />
+            <select enum="_signal" />
+            <linkConstraint display="Requires an ELC peripheral function for the 2nd IOPORT">
+                "${_link}" === "link.ioport2"
+            </linkConstraint>
+        </property>
+        <property default="" display="3rd Port ELC Trigger Source" id="module.driver.ioport.elc_trigger_ioport3" description="ELC source that will trigger the 3rd port">
+            <select enum="enum.disabled" />
+            <select enum="_signal" />
+            <linkConstraint display="Requires an ELC peripheral function for the 3rd IOPORT or ELC Peripheral function for the 3rd IOPORT is unsupported">
+                "${_link}" === "link.ioport3"
+            </linkConstraint>
+        </property>
+        <property default="" display="4th Port ELC Trigger Source" id="module.driver.ioport.elc_trigger_ioport4" description="ELC source that will trigger the 4th port">
+            <select enum="enum.disabled" />
+            <select enum="_signal" />
+            <linkConstraint display="Requires an ELC peripheral function for the 4th IOPORT or ELC Peripheral function for the 4th IOPORT is unsupported">
+                "${_link}" === "link.ioport4"
+            </linkConstraint>
+        </property>
+        <property default="g_bsp_pin_cfg" display="Pin Configuration Name" id="module.driver.ioport.pincfg" description="Name for pin configuration structure">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.ioport.pincfg}")</constraint>
+        </property>
+
+        <!-- Suppress pin configurator warning about adding debug and trace modules in stacks tab (No module exists for these peripherals). -->
+        <peripheral name="" component="debug0" />
+        <peripheral name="" component="trace0" />
+
+        <!-- Clock pins do not need a stack because they can be configured in the clocks tab. Added it to ioport because it is included in every project. -->
+        <peripheral name="" component="cgc0" />
+
+        <header>
+#define IOPORT_CFG_NAME ${module.driver.ioport.pincfg}
+#define IOPORT_CFG_OPEN R_IOPORT_Open
+#define IOPORT_CFG_CTRL ${module.driver.ioport.name}_ctrl
+
+/* IOPORT Instance */
+extern const ioport_instance_t ${module.driver.ioport.name};
+
+/* IOPORT control structure. */
+extern ioport_instance_ctrl_t ${module.driver.ioport.name}_ctrl;
+        </header>
+        <includes>
+#include &quot;r_ioport.h&quot;
+#include &quot;bsp_pin_cfg.h&quot;
+        </includes>
+        <declarations>
+ioport_instance_ctrl_t ${module.driver.ioport.name}_ctrl;
+const ioport_instance_t ${module.driver.ioport.name} =
+        {
+            .p_api = &amp;g_ioport_on_ioport,
+            .p_ctrl = &amp;${module.driver.ioport.name}_ctrl,
+            .p_cfg = &amp;${module.driver.ioport.pincfg},
+        };
+        </declarations>
+        <api configurable="true">
+            <file>ra/fsp/inc/instances/r_ioport.h</file>
+            <file>ra/fsp/inc/api/r_ioport_api.h</file>
+        </api>
+    </module>
+</raModuleDescription>

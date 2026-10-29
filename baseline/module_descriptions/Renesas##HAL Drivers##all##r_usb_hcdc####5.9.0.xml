@@ -1,0 +1,121 @@
+﻿<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.driver.usb_hcdc" path="fsp_cfg/r_usb_hcdc_cfg.h" version="0">
+        <property id="config.driver.usb_hcdc.multiple_connection_setting" default="config.driver.usb_hcdc.multiple_connection_setting.not_supported">
+            <option id="config.driver.usb_hcdc.multiple_connection_setting.not_supported" display="Disabled" value="USB_CFG_DISABLE" />
+            <option id="config.driver.usb_hcdc.multiple_connection_setting.supported" display="Enabled" value="USB_CFG_ENABLE" />
+        </property>
+        <property id="config.driver.usb_hcdc.cdc_device_class_setting" display="Target Peripheral Device Class ID" default="config.driver.usb_hcdc.cdc_device_class_setting.cdc_device" description="Specify the device class ID of the CDC device to be connected.">
+            <option id="config.driver.usb_hcdc.cdc_device_class_setting.cdc_device" display="CDC class supported device" value="USB_CFG_CDC" />
+            <option id="config.driver.usb_hcdc.cdc_device_class_setting.vendor" display="Vendor class device" value="USB_CFG_VEN" />
+        </property>
+        <property id="config.driver.usb_hcdc.bulk_in" display="Bulk Input Transfer Pipe" default="config.driver.usb_hcdc.bulk_in.pipe4" description="Select the USB pipe to use for bulk input transfers.">
+            <option id="config.driver.usb_hcdc.bulk_in.pipe1" display="USB PIPE1" value="USB_PIPE1"/>
+            <option id="config.driver.usb_hcdc.bulk_in.pipe2" display="USB PIPE2" value="USB_PIPE2"/>
+            <option id="config.driver.usb_hcdc.bulk_in.pipe3" display="USB PIPE3" value="USB_PIPE3"/>
+            <option id="config.driver.usb_hcdc.bulk_in.pipe4" display="USB PIPE4" value="USB_PIPE4"/>
+            <option id="config.driver.usb_hcdc.bulk_in.pipe5" display="USB PIPE5" value="USB_PIPE5"/>
+        </property>
+        <property id="config.driver.usb_hcdc.bulk_out" display="Bulk Output Transfer Pipe" default="config.driver.usb_hcdc.bulk_out.pipe5" description="Select the USB pipe to use for bulk output transfers.">
+            <option id="config.driver.usb_hcdc.bulk_out.pipe1" display="USB PIPE1" value="USB_PIPE1"/>
+            <option id="config.driver.usb_hcdc.bulk_out.pipe2" display="USB PIPE2" value="USB_PIPE2"/>
+            <option id="config.driver.usb_hcdc.bulk_out.pipe3" display="USB PIPE3" value="USB_PIPE3"/>
+            <option id="config.driver.usb_hcdc.bulk_out.pipe4" display="USB PIPE4" value="USB_PIPE4"/>
+            <option id="config.driver.usb_hcdc.bulk_out.pipe5" display="USB PIPE5" value="USB_PIPE5"/>
+        </property>
+        <property id="config.driver.usb_hcdc.int_in" display="Interrupt In Pipe" default="config.driver.usb_hcdc.int_in.pipe6" description="Select the USB pipe to use for interrupts.">
+            <option id="config.driver.usb_hcdc.int_in.pipe6" display="USB PIPE6" value="USB_PIPE6"/>
+            <option id="config.driver.usb_hcdc.int_in.pipe7" display="USB PIPE7" value="USB_PIPE7"/>
+            <option id="config.driver.usb_hcdc.int_in.pipe8" display="USB PIPE8" value="USB_PIPE8"/>
+            <option id="config.driver.usb_hcdc.int_in.pipe9" display="USB PIPE9" value="USB_PIPE9"/>
+        </property>
+        <content>
+            #ifdef __cplusplus
+            extern "C" {
+            #endif
+
+            #define USB_CFG_HCDC_MULTI (USB_CFG_DISABLE)
+            #define USB_CFG_HCDC_IFCLS (${config.driver.usb_hcdc.cdc_device_class_setting})
+            #define USB_CFG_HCDC_BULK_IN (${config.driver.usb_hcdc.bulk_in})
+            #define USB_CFG_HCDC_BULK_OUT (${config.driver.usb_hcdc.bulk_out})
+            #define USB_CFG_HCDC_INT_IN (${config.driver.usb_hcdc.int_in})
+            #define USB_CFG_HCDC_BULK_IN2 (0xFU)
+            #define USB_CFG_HCDC_BULK_OUT2 (0x1FU)
+            #define USB_CFG_HCDC_INT_IN2 (0x2FU)
+
+            #ifdef __cplusplus
+            }
+            #endif
+        </content>
+    </config>
+    <config id="config.driver.usb_hcdc_class" path="fsp_cfg/r_usb_class_cfg.h" version="0">
+        <content>
+        </content>
+    </config>
+    <module config="config.driver.usb_hcdc" display="Connectivity|${module.driver.hcdc.name} USB HCDC (r_usb_hcdc)" id="module.driver.hcdc_on_usb" version="1" url="group___u_s_b___h_c_d_c.html">
+        <constraint display="Unique name required for each instance">
+            "${interface.driver.hcdc.${module.driver.hcdc.name}}" === "1"
+        </constraint>
+        <constraint display="Requires USB Peripheral">
+          "${interface.mcu.usb_fs.external}" === "1"
+        </constraint>
+        <constraint display="The USB pipe numbers for Bulk Input and Bulk Output must be different.">
+            !(("${config.driver.usb_hcdc.bulk_in}" === "config.driver.usb_hcdc.bulk_in.pipe1") &amp;&amp;
+            ("${config.driver.usb_hcdc.bulk_out}" === "config.driver.usb_hcdc.bulk_out.pipe1"))
+        </constraint>
+        <constraint display="The USB pipe numbers for Bulk Input and Bulk Output must be different.">
+            !(("${config.driver.usb_hcdc.bulk_in}" === "config.driver.usb_hcdc.bulk_in.pipe2") &amp;&amp;
+            ("${config.driver.usb_hcdc.bulk_out}" === "config.driver.usb_hcdc.bulk_out.pipe2"))
+        </constraint>
+        <constraint display="The USB pipe numbers for Bulk Input and Bulk Output must be different.">
+            !(("${config.driver.usb_hcdc.bulk_in}" === "config.driver.usb_hcdc.bulk_in.pipe3") &amp;&amp;
+            ("${config.driver.usb_hcdc.bulk_out}" === "config.driver.usb_hcdc.bulk_out.pipe3"))
+        </constraint>
+        <constraint display="The USB pipe numbers for Bulk Input and Bulk Output must be different.">
+            !(("${config.driver.usb_hcdc.bulk_in}" === "config.driver.usb_hcdc.bulk_in.pipe4") &amp;&amp;
+            ("${config.driver.usb_hcdc.bulk_out}" === "config.driver.usb_hcdc.bulk_out.pipe4"))
+        </constraint>
+        <constraint display="The USB pipe numbers for Bulk Input and Bulk Output must be different.">
+            !(("${config.driver.usb_hcdc.bulk_in}" === "config.driver.usb_hcdc.bulk_in.pipe5") &amp;&amp;
+            ("${config.driver.usb_hcdc.bulk_out}" === "config.driver.usb_hcdc.bulk_out.pipe5"))
+        </constraint>
+        <constraint display="Use USBX instead in Azure RTOS projects.">
+            !testExists("${interface.rtos.tx}")
+        </constraint>
+        <requires id="module.driver.hcdc_on_usb.requires.hcdc" interface="interface.mcu.usb_fs.external" visible="false" display="Requires USB Peripheral" />
+        <requires id="module.driver.basic_on_usb.requires.full_module" interface="interface.mcu.usb.pipes.0.1.2.3.4.5.6.7.8.9" visible="false" display="Requires USB Full Module" />
+        <requires id="module.driver.basic_on_usb.requires.basic" interface="interface.driver.basic_on_usb" display="Add USB Driver">
+            <override property="module.driver.usb_basic.usb_mode" value="module.driver.usb_basic.usb_mode.host"/>
+            <override property="module.driver.usb_basic.usb_classtype" value="module.driver.usb_basic.usb_classtype.hcdc"/>
+            <override property="module.driver.usb_basic.p_usb_reg" value="NULL"/>
+        </requires>
+        <requires id="module.driver.hcdc_on_usb.ignore.azure_projects" interface="interface.rtos.supports.renesas_usb" visible="false" display="Use Azure USBX for Azure RTOS projects."/>
+        <provides interface="interface.driver.hcdc.${module.driver.hcdc.name}" />
+        <provides interface="interface.driver.hcdc" />
+        <property default="hcdc" id="module.driver.hcdc.hcdc_interface" description=""/>
+        <property default="g_hcdc${_instance}" display="Name" id="module.driver.hcdc.name" description="Module name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.hcdc.name}")</constraint>
+        </property>
+        <header>
+        /** CDC Driver on USB Instance. */
+        </header>
+        <includes>
+#include "r_usb_hcdc_api.h"
+        </includes>
+        <declarations>
+        </declarations>
+        <functions>
+        </functions>
+        <api configurable="true">
+            <file>ra/fsp/inc/api/r_usb_hcdc_api.h</file>
+        </api>
+    </module>
+    <module config="config.driver.usb_hcdc_class" display="Connectivity|${module.driver.hcdc_class.name} USB HCDC (r_usb_hcdc)" id="module.driver.hcdc_class_on_usb" visible="false" version="1" url="group___u_s_b___h_c_d_c.html">
+        <property default="g_hcdc_class${_instance}" display="Name" id="module.driver.hcdc_class.name" description="Class Module name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.hcdc_class.name}")</constraint>
+        </property>
+        <api configurable="true">
+            <file>ra/fsp/inc/api/r_usb_hcdc_api.h</file>
+        </api>
+    </module>
+</raModuleDescription>

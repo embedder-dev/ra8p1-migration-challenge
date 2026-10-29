@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<raModuleDescription>
+  <config id="config.driver.tfm_ns_app" path="arm/tfm/tfm_common_config.h" version="0">
+    <content>
+        /*-----------------------------------------------------------
+         * TFM Configuration file.
+         *----------------------------------------------------------*/
+
+        /* No TFM configurations on NS */
+
+    </content>
+  </config>
+  <module config="config.driver.tfm_ns_app" display="Security|Trusted Firmware-M Non-Secure" id="module.driver.tfm_ns_app" common="1" version="1" url="https://tf-m-user-guide.trustedfirmware.org/">
+    <constraint display="Requires TF-M FreeRTOS Integration">
+          "${interface.arm.tfm_freertos}" === "1"
+    </constraint>
+    <constraint display="Cannot be used in a secure project">
+            "${_project.nonsecure}" === "1"
+    </constraint>
+    <requires id="module.arm.tfm_freertos" interface="interface.arm.tfm_freertos" visible="true" display="Security|Trusted Firmware-M FreeRTOS Integration" />
+    <requires id="module.driver.tfm_ns_app.requires._project.secure" interface="_project.nonsecure" visible="false" display="Requires non-secure project" />
+    <provides interface="interface.driver.tfm_ns_app" />
+    <includes>
+
+    </includes>
+    <declarations>
+    </declarations>
+  </module>
+</raModuleDescription>

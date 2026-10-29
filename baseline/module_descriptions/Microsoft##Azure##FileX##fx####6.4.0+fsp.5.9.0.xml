@@ -1,0 +1,859 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<raModuleDescription>
+    <config id="config.azure.fx" path="fsp_cfg/azure/fx/fx_user.h" version="0">
+        <property id="config.azure.fx.error_checking" display="Error Checking" default="config.azure.fx.error_checking.enabled">
+            <option id="config.azure.fx.error_checking.enabled" display="Enabled (default)" value="" />
+            <option id="config.azure.fx.error_checking.disabled" display="Disabled" value="#define FX_DISABLE_ERROR_CHECKING" />
+        </property>
+        <property default="" display="Common|Max Long Name Len" id="config.azure.fx.max_long_name_len" description="Specifies the maximum file name size for FileX. If left blank the default value is 256. Legal values range between 13 and 256.">
+            <constraint display="Value must be an integer greater than or equal to 13 and less than or equal to 256, or empty">("${config.azure.fx.max_long_name_len}".length === 0) || ((testInteger("${config.azure.fx.max_long_name_len}")) &amp;&amp; ("${config.azure.fx.max_long_name_len}" &gt;= 13) &amp;&amp; ("${config.azure.fx.max_long_name_len}" &lt;= 256)) </constraint>
+        </property>
+        <property default="" display="Common|Max Last Name Len" id="config.azure.fx.max_last_name_len" description="This value defines the maximum file name length, which includes full path name. If left blank the default value is 256. Legal values range between 13 and 256.">
+            <constraint display="Value must be an integer greater than or equal to 13 and less than or equal to 256, or empty">("${config.azure.fx.max_last_name_len}".length === 0) || ((testInteger("${config.azure.fx.max_last_name_len}")) &amp;&amp; ("${config.azure.fx.max_last_name_len}" &gt;= 13) &amp;&amp; ("${config.azure.fx.max_last_name_len}" &lt;= 256)) </constraint>
+        </property>
+        <property default="" display="Common|Max Sector Cache" id="config.azure.fx.max_sector_cache" description="Specifies the maximum number of logical sectors that can be cached by FileX. The actual number of sectors that can be cached is lesser of this constant and how many sectors can fit in the amount of memory supplied at fx_media_open. The default value if left blank is 256. All values must be a power of 2.">
+            <constraint display="Value must be an integer greater than 0 and power of 2 or empty">("${config.azure.fx.max_sector_cache}".length === 0) || ((testInteger("${config.azure.fx.max_sector_cache}")) &amp;&amp; ("${config.azure.fx.max_sector_cache}" &gt; 0) &amp;&amp; (("${config.azure.fx.max_sector_cache}" &amp; ("${config.azure.fx.max_sector_cache}" - 1)) === 0))</constraint>
+        </property>
+        <property default="" display="Common|Fat Map Size" id="config.azure.fx.fat_map_size" description="Specifies the number of sectors that can be represented in the FAT update map. The default value if left blank is 256. Larger values help reduce unneeded updates of secondary FAT sectors.">
+            <constraint display="Value must be an integer greater than 0 or empty">("${config.azure.fx.fat_map_size}".length === 0) || ((testInteger("${config.azure.fx.fat_map_size}")) &amp;&amp; ("${config.azure.fx.fat_map_size}" &gt; 0))</constraint>
+        </property>
+        <property default="" display="Common|Max Fat Cache" id="config.azure.fx.max_fat_cache" description="Specifies the number of entries in the internal FAT cache. The default value if left blank is 16. All values must be a power of 2.">
+            <constraint display="Value must be an integer greater than 0 and power of 2 or empty">("${config.azure.fx.max_fat_cache}".length === 0) || ((testInteger("${config.azure.fx.max_fat_cache}")) &amp;&amp; ("${config.azure.fx.max_fat_cache}" &gt; 0)  &amp;&amp; (("${config.azure.fx.max_fat_cache}" &amp; ("${config.azure.fx.max_fat_cache}" - 1)) === 0))</constraint>
+        </property>
+        <property default="" display="Threading|Update Rate (Seconds)" id="config.azure.fx.update_rate_in_seconds" description="Specifies rate at which system time in FileX is adjusted. Default value if left blank is 10, specifying that the FileX system time is updated every 10 seconds.">
+            <constraint display="Value must be an integer greater than 0 or empty">("${config.azure.fx.update_rate_in_seconds}".length === 0) || ((testInteger("${config.azure.fx.update_rate_in_seconds}")) &amp;&amp; ("${config.azure.fx.update_rate_in_seconds}" &gt; 0))</constraint>
+        </property>
+        <property id="config.azure.fx.no_timer" display="Threading|No Timer" default="config.azure.fx.no_timer.disabled" description="Eliminates the ThreadX timer setup to update the FileX system time and date. Doing so causes default time and date to be placed on all file operations.">
+            <option id="config.azure.fx.no_timer.enabled" display="Enabled" value="#define FX_NO_TIMER" />
+            <option id="config.azure.fx.no_timer.disabled" display="Disabled (default)" value="" />
+        </property>
+        <property id="config.azure.fx.single_thread" display="Threading|Single Thread" default="config.azure.fx.single_thread.disabled" description="Eliminates ThreadX protection logic from the FileX source. It should be used if FileX is being used only from one thread.">
+            <option id="config.azure.fx.single_thread.enabled" display="Enabled" value="#define FX_SINGLE_THREAD" />
+            <option id="config.azure.fx.single_thread.disabled" display="Disabled (default)" value="" />
+        </property>
+        <property id="config.azure.fx.standalone" display="Threading|Standalone" default="config.azure.fx.standalone.disabled" description="Enables FileX to be used in standalone mode (without Azure RTOS).">
+            <option id="config.azure.fx.standalone.enabled" display="Enabled" value="#define FX_STANDALONE_ENABLE" />
+            <option id="config.azure.fx.standalone.disabled" display="Disabled (default)" value="" />
+        </property>
+        <property id="config.azure.fx.dont_update_open_files" display="Extra Features|Don't Update Open Files" default="config.azure.fx.dont_update_open_files.disabled" description="When enabled, FileX does not update already opened files.">
+            <option id="config.azure.fx.dont_update_open_files.enabled" display="Enabled" value="#define FX_DONT_UPDATE_OPEN_FILES" />
+            <option id="config.azure.fx.dont_update_open_files.disabled" display="Disabled (default)" value="" />
+        </property>
+        <property id="config.azure.fx.media_search_cache" display="Extra Features|Media Search Cache" default="config.azure.fx.media_search_cache.enabled" description="When disabled, the file search cache optimization is disabled.">
+            <option id="config.azure.fx.media_search_cache.enabled" display="Enabled (default)" value="" />
+            <option id="config.azure.fx.media_search_cache.disabled" display="Disabled" value="#define FX_MEDIA_DISABLE_SEARCH_CACHE" />
+        </property>
+        <property id="config.azure.fx.direct_data_read_cache_fill" display="Extra Features|Direct Data Read Cache Fill" default="config.azure.fx.direct_data_read_cache_fill.enabled" description="When disabled, the direct read sector update of cache is disabled.">
+            <option id="config.azure.fx.direct_data_read_cache_fill.enabled" display="Enabled (default)" value="" />
+            <option id="config.azure.fx.direct_data_read_cache_fill.disabled" display="Disabled" value="#define FX_DISABLE_DIRECT_DATA_READ_CACHE_FILL" />
+        </property>
+        <property id="config.azure.fx.media_statistics" display="Extra Features|Media Statistics" default="config.azure.fx.media_statistics.enabled" description="When disabled, gathering of media statistics is disabled.">
+            <option id="config.azure.fx.media_statistics.enabled" display="Enabled (default)" value="" />
+            <option id="config.azure.fx.media_statistics.disabled" display="Disabled" value="#define FX_MEDIA_STATISTICS_DISABLE" />
+        </property>
+        <property id="config.azure.fx.single_open_legacy" display="Extra Features|Single Open Legacy" default="config.azure.fx.single_open_legacy.disabled" description="When enabled, legacy single open logic for the same file is enabled.">
+            <option id="config.azure.fx.single_open_legacy.enabled" display="Enabled" value="#define FX_SINGLE_OPEN_LEGACY" />
+            <option id="config.azure.fx.single_open_legacy.disabled" display="Disabled (default)" value="" />
+        </property>
+        <property id="config.azure.fx.rename_path_inherit" display="Extra Features|Rename Path Inherit" default="config.azure.fx.rename_path_inherit.disabled" description="When enabled, renaming inherits path information.">
+            <option id="config.azure.fx.rename_path_inherit.enabled" display="Enabled" value="#define FX_RENAME_PATH_INHERIT" />
+            <option id="config.azure.fx.rename_path_inherit.disabled" display="Disabled (default)" value="" />
+        </property>
+        <property id="config.azure.fx.no_local_path" display="Extra Features|No Local Path" default="config.azure.fx.no_local_path.disabled" description="When enabled, removes local path logic from FileX, resulting in smaller code size.">
+            <option id="config.azure.fx.no_local_path.enabled" display="Enabled" value="#define FX_NO_LOCAL_PATH" />
+            <option id="config.azure.fx.no_local_path.disabled" display="Disabled (default)" value="" />
+        </property>
+        <property id="config.azure.fx.lba_64bit" display="Extra Features|64-bit LBA" default="config.azure.fx.lba_64bit.disabled" description="When enabled, 64-bits sector addresses are used in I/O driver.">
+            <option id="config.azure.fx.lba_64bit.enabled" display="Enabled" value="#define FX_DRIVER_USE_64BIT_LBA" />
+            <option id="config.azure.fx.lba_64bit.disabled" display="Disabled (default)" value="" />
+        </property>
+        <property default="config.azure.fx.cache.enabled" id="config.azure.fx.cache" display="Extra Features|Cache" description="Enables or disables the cache, default is enabled.">
+            <option id="config.azure.fx.cache.enabled" display="Enabled (default)" value="" />
+            <option id="config.azure.fx.cache.disabled" display="Disabled" value="#define FX_DISABLE_CACHE" />
+        </property>
+        <property default="config.azure.fx.file_close.enabled" id="config.azure.fx.file_close" display="Extra Features|File Close" description="Enables or disables file close, default is enabled.">
+            <option id="config.azure.fx.file_close.enabled" display="Enabled (default)" value="" />
+            <option id="config.azure.fx.file_close.disabled" display="Disabled" value="#define FX_DISABLE_FILE_CLOSE" />
+        </property>
+        <property default="config.azure.fx.fast_close.enabled" id="config.azure.fx.fast_close" display="Extra Features|Fast Close" description="Enables or disables fast open, default is enabled.">
+            <option id="config.azure.fx.fast_close.enabled" display="Enabled (default)" value="" />
+            <option id="config.azure.fx.fast_close.disabled" display="Disabled" value="#define FX_DISABLE_FAST_OPEN" />
+        </property>
+        <property default="config.azure.fx.force_memory_operation.enabled" id="config.azure.fx.force_memory_operation" display="Extra Features|Force Memory Operation" description="Enables or disables force memory operation, default is enabled.">
+            <option id="config.azure.fx.force_memory_operation.enabled" display="Enabled (default)" value="" />
+            <option id="config.azure.fx.force_memory_operation.disabled" display="Disabled" value="#define FX_DISABLE_FORCE_MEMORY_OPERATION" />
+        </property>
+        <property default="config.azure.fx.build_options.enabled" id="config.azure.fx.build_options" display="Extra Features|Build Options" description="Enables or disables build options, default is enabled.">
+            <option id="config.azure.fx.build_options.enabled" display="Enabled (default)" value="" />
+            <option id="config.azure.fx.build_options.disabled" display="Disabled" value="#define FX_DISABLE_BUILD_OPTIONS" />
+        </property>
+        <property default="config.azure.fx.one_line_function.enabled" id="config.azure.fx.one_line_function" display="Extra Features|One Line Function" description="Enables or disables one line function, default is enabled.">
+            <option id="config.azure.fx.one_line_function.enabled" display="Enabled (default)" value="" />
+            <option id="config.azure.fx.one_line_function.disabled" display="Disabled" value="#define FX_DISABLE_ONE_LINE_FUNCTION" />
+        </property>
+        <property default="config.azure.fx.fat_entry_refresh.enabled" id="config.azure.fx.fat_entry_refresh" display="Extra Features|FAT Entry Refresh" description="Enables or disables FAT entry refresh, default is enabled.">
+            <option id="config.azure.fx.fat_entry_refresh.enabled" display="Enabled (default)" value="" />
+            <option id="config.azure.fx.fat_entry_refresh.disabled" display="Disabled" value="#define FX_DISABLE_FAT_ENTRY_REFRESH" />
+        </property>
+        <property default="config.azure.fx.consecutive_detect.enabled" id="config.azure.fx.consecutive_detect" display="Extra Features|Consecutive Detect" description="Enables or disables consecutive detect, default is enabled.">
+            <option id="config.azure.fx.consecutive_detect.enabled" display="Enabled (default)" value="" />
+            <option id="config.azure.fx.consecutive_detect.disabled" display="Disabled" value="#define FX_DISABLE_CONSECUTIVE_DETECT" />
+        </property>
+        <property id="config.azure.fx.fault_tolerant_service" display="Fault Tolerant|Fault Tolerant Service" default="config.azure.fx.fault_tolerant_service.disabled" description="When enabled, enables the FileX Fault Tolerant Module. Enabling Fault Tolerant automatically defines the symbol FX_FAULT_TOLERANT and FX_FAULT_TOLERANT_DATA.">
+            <option id="config.azure.fx.fault_tolerant_service.enabled" display="Enabled" value="#define FX_ENABLE_FAULT_TOLERANT" />
+            <option id="config.azure.fx.fault_tolerant_service.disabled" display="Disabled (default)" value="" />
+        </property>
+        <property id="config.azure.fx.fault_tolerant_data" display="Fault Tolerant|Fault Tolerant Data" default="config.azure.fx.fault_tolerant_data.disabled" description="When enabled, FileX immediately passes all file data write requests to the media's driver. This potentially decreases performance, but helps limit lost file data. Note that enabling this feature does not automatically enable FileX Fault Tolerant Module, which should be enabled separately.">
+            <option id="config.azure.fx.fault_tolerant_data.enabled" display="Enabled" value="#define FX_FAULT_TOLERANT_DATA" />
+            <option id="config.azure.fx.fault_tolerant_data.disabled" display="Disabled (default)" value="" />
+        </property>
+        <property id="config.azure.fx.fault_tolerant" display="Fault Tolerant|Fault Tolerant" default="config.azure.fx.fault_tolerant.disabled" description="When enabled, FileX immediately passes write requests of all system sectors (boot, FAT, and directory sectors) to the media's driver. This potentially decreases performance, but helps limit corruption to lost clusters. Note that enabling this feature does not automatically enable FileX Fault Tolerant Module, which should be enabled separately.">
+            <option id="config.azure.fx.fault_tolerant.enabled" display="Enabled" value="#define FX_FAULT_TOLERANT" />
+            <option id="config.azure.fx.fault_tolerant.disabled" display="Disabled (default)" value="" />
+        </property>
+        <property default="" id="config.azure.fx.fault_tolerant_boot_index" display="Fault Tolerant|Fault Tolerant Boot Index" description="Defines byte offset in the boot sector where the cluster for the fault tolerant log is. By default if left blank this value is 116. This field takes 4 bytes. Bytes 116 through 119 are chosen because they are marked as reserved by FAT 12/16/32/exFAT specification.">
+            <constraint display="Value must be an integer greater than or equal to 116 and less than or equal to 119">("${config.azure.fx.fault_tolerant_boot_index}".length === 0) || ((testInteger("${config.azure.fx.fault_tolerant_boot_index}")) &amp;&amp; ("${config.azure.fx.fault_tolerant_boot_index}" &gt;= 116) &amp;&amp; ("${config.azure.fx.fault_tolerant_boot_index}" &lt;= 119)) </constraint>
+        </property>
+        <property id="config.azure.fx.ex_fat" display="Extra Features|Enable exFAT" default="config.azure.fx.ex_fat.disabled" description="Enables exFAT support in FileX.">
+            <option id="config.azure.fx.ex_fat.enabled" display="Enabled" value="#define FX_ENABLE_EXFAT" />
+            <option id="config.azure.fx.ex_fat.disabled" display="Disabled (default)" value="" />
+        </property>
+        <content>
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+${config.azure.fx.error_checking}
+#if (${config.azure.fx.max_long_name_len}+0)
+#define FX_MAX_LONG_NAME_LEN (${config.azure.fx.max_long_name_len})
+#endif
+#if (${config.azure.fx.max_last_name_len}+0)
+#define FX_MAX_LAST_NAME_LEN (${config.azure.fx.max_last_name_len})
+#endif
+#if (${config.azure.fx.max_sector_cache}+0)
+#define FX_MAX_SECTOR_CACHE (${config.azure.fx.max_sector_cache})
+#endif
+#if (${config.azure.fx.fat_map_size}+0)
+#define FX_FAT_MAP_SIZE (${config.azure.fx.fat_map_size})
+#endif
+#if (${config.azure.fx.max_fat_cache}+0)
+#define FX_MAX_FAT_CACHE (${config.azure.fx.max_fat_cache})
+#endif
+#if (${config.azure.fx.update_rate_in_seconds}+0)
+#define FX_UPDATE_RATE_IN_SECONDS (${config.azure.fx.update_rate_in_seconds})
+#define FX_UPDATE_RATE_IN_TICKS (FX_UPDATE_RATE_IN_SECONDS * TX_TIMER_TICKS_PER_SECOND)
+#endif
+#if (${config.azure.fx.fault_tolerant_boot_index}+0)
+#define FX_FAULT_TOLERANT_BOOT_INDEX (${config.azure.fx.fault_tolerant_boot_index})
+#endif
+${config.azure.fx.no_timer}
+${config.azure.fx.single_thread}
+${config.azure.fx.dont_update_open_files}
+${config.azure.fx.media_search_cache}
+${config.azure.fx.direct_data_read_cache_fill}
+${config.azure.fx.media_statistics}
+${config.azure.fx.single_open_legacy}
+${config.azure.fx.rename_path_inherit}
+${config.azure.fx.no_local_path}
+${config.azure.fx.fault_tolerant_data}
+${config.azure.fx.fault_tolerant}
+${config.azure.fx.lba_64bit}
+${config.azure.fx.fault_tolerant_service}
+${config.azure.fx.cache}
+${config.azure.fx.file_close}
+${config.azure.fx.fast_close}
+${config.azure.fx.force_memory_operation}
+${config.azure.fx.build_options}
+${config.azure.fx.one_line_function}
+${config.azure.fx.fat_entry_refresh}
+${config.azure.fx.consecutive_detect}
+${config.azure.fx.standalone}
+${config.azure.fx.ex_fat}
+
+#ifdef __cplusplus
+}
+#endif
+        </content>
+    </config>
+    <module config="config.azure.fx" id="module.azure.fx.block_media" display="Storage|${module.azure.fx.name} Azure RTOS FileX on Block Media" common="100" version="0" url="https://github.com/eclipse-threadx/rtos-docs/blob/main/rtos-docs/filex/index.md">
+        <constraint display="Media size cannot be less than sector size">
+            ( parseInt("${module.azure.fx.media_size}") &gt;= parseInt("${module.azure.fx.sector_size}") )
+        </constraint>
+        <constraint display="ExFAT cannot be used with SPI Block Media.">
+            !(testExists("${interface.driver.rm_block_media_spi_on_rm_block_media}") &amp;&amp; ("${config.azure.fx.ex_fat}" === "config.azure.fx.ex_fat.enabled"))
+        </constraint>
+        <constraint display="FileX standalone must be enabled under Threading|Standalone in Common properties for Bare Metal projects.">
+            ("${config.azure.fx.standalone}" === "config.azure.fx.standalone.enabled") || (testExists("${interface.rtos.tx}"))
+        </constraint>
+        <constraint display="Requires ThreadX or Bare Metal project">
+            (testExists("${interface.rtos.supports.filex}"))
+        </constraint>
+        <requires id="module.azure.fx.requires.threadx" interface="interface.rtos.supports.filex" visible="false" display="Requires ThreadX or Bare Metal project"/>
+        <requires id="module.azure.fx.requires.rm_filex_block_media" interface="interface.middleware.rm_filex_block_media" display="Add FileX I/O Layer" />
+        <provides interface="interface.azure.fx.block_media" />
+        <provides interface="interface.azure.fx" />
+        <property default="g_fx_media${_instance}" display="Name" id="module.azure.fx.name" description="Symbol used for media_ptr parameter in FileX APIs">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.azure.fx.name}")</constraint>
+        </property>
+        <property default="Volume 1" display="Volume Name" id="module.azure.fx.volume_name" description="Volume name string, which is a maximum of 11 characters.">
+            <constraint display="Name must be a maximum of 11 characters">"${module.azure.fx.volume_name}".length &lt; 12</constraint>
+        </property>
+        <property default="1" display="Number of FATs" id="module.azure.fx.fat_count" description="Number of FATs in the media. The minimal value is 1 for the primary FAT. Values greater than 1 result in additional FAT copies being maintained at run-time.">
+            <constraint display="Number of FATs must be an integer greater than 0">testInteger("${module.azure.fx.fat_count}")  &amp;&amp; ("${module.azure.fx.fat_count}" &gt; 0)</constraint>
+        </property>
+        <property default="256" display="Directory Entries" id="module.azure.fx.dir_count" description="Number of directory entries in the root directory.">
+            <constraint display="Number of Directory Entries must be an integer greater than 0">testInteger("${module.azure.fx.dir_count}")  &amp;&amp; ("${module.azure.fx.dir_count}" &gt; 0)</constraint>
+        </property>
+        <property default="0" display="Hidden Sectors" id="module.azure.fx.hidden_sectors" description="Number of sectors hidden before this media’s boot sector. If using media formatted with multiple partitions this number should correspond to the starting block number for the desired partition.">
+            <constraint display="Number of Hidden Sectors must be an integer">testInteger("${module.azure.fx.hidden_sectors}")  &amp;&amp; ("${module.azure.fx.hidden_sectors}" &gt; -1)</constraint>
+        </property>
+        <property default="65536" display="Total Sectors" id="module.azure.fx.total_sectors" description="Total number of sectors in the media. When using a Renesas provided block media implementation, total sectors can be fetched by the infoGet from the block media API. Any removable media must be inserted and initialized first to retrieve this info.">
+            <constraint display="Total Sectors must be an integer greater than 0">testInteger("${module.azure.fx.total_sectors}")  &amp;&amp; ("${module.azure.fx.total_sectors}" &gt; 0)</constraint>
+        </property>
+        <property default="512" display="Bytes per Sector" id="module.azure.fx.sector_size" description="Number of bytes per sector, which is typically 512. FileX requires this to be a multiple of 32. When using a Renesas provided block media implementation, bytes per sector can be fetched by the infoGet from the block media API. Any removable media must be inserted and initialized first to retrieve this info.">
+            <constraint display="Bytes per Sector must be multiple of 32">testInteger("${module.azure.fx.sector_size}")  &amp;&amp; ((("${module.azure.fx.sector_size}" &#37; 32) === 0))</constraint>
+        </property>
+        <property default="1" display="Sectors per Cluster" id="module.azure.fx.cluster_size" description="Number of sectors in each cluster. The cluster is the minimum allocation unit in a FAT file system.">
+            <constraint display="Sectors per Cluster must be an integer greater than 0">testInteger("${module.azure.fx.cluster_size}")  &amp;&amp; ("${module.azure.fx.cluster_size}" &gt; 0)</constraint>
+        </property>
+        <property default="12345" display="Volume Serial Number (exFAT only)" id="module.azure.fx.volume_serial_number" description="Serial number to be used for this volume. exFAT only.">
+            <constraint display="Volume Serial Number must be an integer greater than 0">testInteger("${module.azure.fx.volume_serial_number}")  &amp;&amp; ("${module.azure.fx.volume_serial_number}" &gt; 0)</constraint>
+        </property>
+        <property default="128" display="Boundary Unit (exFAT only)" id="module.azure.fx.boundary_unit" description="Physical data area alignment size, in number of sectors. exFAT only.">
+            <constraint display="Boundary unit must be an integer greater than 0">testInteger("${module.azure.fx.boundary_unit}")  &amp;&amp; ("${module.azure.fx.boundary_unit}" &gt; 0)</constraint>
+        </property>
+        <property default="512" display="Working media memory size" id="module.azure.fx.media_size" description="Memory allocated for file system. Memory size must be an integer greater than or equal to the size of one sector.">
+            <constraint display="Memory size must be an integer greater than or equal to the size of one sector">testInteger("${module.azure.fx.media_size}")  &amp;&amp; ("${module.azure.fx.media_size}" &gt; 0)</constraint>
+        </property>
+        <property default="" id="module.azure.fx.name_upper">
+            <export>"${module.azure.fx.name}".toUpperCase()</export>
+        </property>
+        <header>
+#define ${module.azure.fx.name_upper}_MEDIA_MEMORY_SIZE (${module.azure.fx.media_size})
+#define ${module.azure.fx.name_upper}_VOLUME_NAME ("${module.azure.fx.volume_name}")
+#define ${module.azure.fx.name_upper}_NUMBER_OF_FATS (${module.azure.fx.fat_count})
+#define ${module.azure.fx.name_upper}_DIRECTORY_ENTRIES (${module.azure.fx.dir_count})
+#define ${module.azure.fx.name_upper}_HIDDEN_SECTORS (${module.azure.fx.hidden_sectors})
+#define ${module.azure.fx.name_upper}_TOTAL_SECTORS (${module.azure.fx.total_sectors})
+#define ${module.azure.fx.name_upper}_BYTES_PER_SECTOR (${module.azure.fx.sector_size})
+#define ${module.azure.fx.name_upper}_SECTORS_PER_CLUSTER (${module.azure.fx.cluster_size})
+#define ${module.azure.fx.name_upper}_VOLUME_SERIAL_NUMBER (${module.azure.fx.volume_serial_number})
+#define ${module.azure.fx.name_upper}_BOUNDARY_UNIT (${module.azure.fx.boundary_unit})
+        </header>
+        <includes>
+#include "fx_api.h"
+        </includes>
+    </module>
+    <module config="config.azure.fx" id="module.azure.fx.levelx_nor" display="Storage|${module.azure.fx.name} Azure RTOS FileX on LevelX NOR" common="100" version="0" url="https://github.com/eclipse-threadx/rtos-docs/blob/main/rtos-docs/filex/index.md">
+        <constraint display="Media size cannot be less than sector size">
+            parseInt("${module.azure.fx.media_size}") &gt;= 512
+        </constraint>
+        <constraint display="FileX standalone must be enabled under Threading|Standalone in Common properties for Bare Metal projects.">
+            ("${config.azure.fx.standalone}" === "config.azure.fx.standalone.enabled") || (testExists("${interface.rtos.tx}"))
+        </constraint>
+        <constraint display="Requires ThreadX or Bare Metal project">
+            (testExists("${interface.rtos.supports.filex}"))
+        </constraint>
+        <requires id="module.azure.fx.requires.threadx" interface="interface.rtos.supports.filex" visible="false" display="Requires ThreadX or Bare Metal project"/>
+        <requires id="module.azure.fx.requires.rm_filex_levelx_nor" interface="interface.middleware.rm_filex_levelx_nor" display="Add FileX I/O Layer" />
+        <provides interface="interface.azure.fx.levelx_nor" />
+        <provides interface="interface.azure.fx" />
+        <property default="g_fx_media${_instance}" display="Name" id="module.azure.fx.name" description="Symbol used for media_ptr parameter in FileX APIs">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.azure.fx.name}")</constraint>
+        </property>
+        <property default="Volume 1" display="Volume Name" id="module.azure.fx.volume_name" description="Volume name string, which is a maximum of 11 characters.">
+            <constraint display="Name must be a maximum of 11 characters">"${module.azure.fx.volume_name}".length &lt; 12</constraint>
+        </property>
+        <property default="1" display="Number of FATs" id="module.azure.fx.fat_count" description="Number of FATs in the media. The minimal value is 1 for the primary FAT. Values greater than 1 result in additional FAT copies being maintained at run-time.">
+            <constraint display="Number of FATs must be an integer greater than 0">testInteger("${module.azure.fx.fat_count}")  &amp;&amp; ("${module.azure.fx.fat_count}" &gt; 0)</constraint>
+        </property>
+        <property default="256" display="Directory Entries" id="module.azure.fx.dir_count" description="Number of directory entries in the root directory.">
+            <constraint display="Number of Directory Entries must be an integer greater than 0">testInteger("${module.azure.fx.dir_count}")  &amp;&amp; ("${module.azure.fx.dir_count}" &gt; 0)</constraint>
+        </property>
+        <property default="0" display="Hidden Sectors" id="module.azure.fx.hidden_sectors" description="Number of sectors hidden before this media’s boot sector. If using media formatted with multiple partitions this number should correspond to the starting block number for the desired partition.">
+            <constraint display="Number of Hidden Sectors must be an integer">testInteger("${module.azure.fx.hidden_sectors}")  &amp;&amp; ("${module.azure.fx.hidden_sectors}" &gt; -1)</constraint>
+        </property>
+        <property default="57337" display="Total Sectors" id="module.azure.fx.total_sectors" description="Total number of sectors in the media. When using a Renesas provided block media implementation, total sectors can be fetched by the infoGet from the block media API. Any removable media must be inserted and initialized first to retrieve this info.">
+            <constraint display="Total Sectors must be an integer greater than 0">testInteger("${module.azure.fx.total_sectors}")  &amp;&amp; ("${module.azure.fx.total_sectors}" &gt; 0)</constraint>
+        </property>
+        <property default="1" display="Sectors per Cluster" id="module.azure.fx.cluster_size" description="Number of sectors in each cluster. The cluster is the minimum allocation unit in a FAT file system.">
+            <constraint display="Sectors per Cluster must be an integer greater than 0">testInteger("${module.azure.fx.cluster_size}")  &amp;&amp; ("${module.azure.fx.cluster_size}" &gt; 0)</constraint>
+        </property>
+        <property default="12345" display="Volume Serial Number (exFAT only)" id="module.azure.fx.volume_serial_number" description="Serial number to be used for this volume. exFAT only.">
+            <constraint display="Volume Serial Number must be an integer greater than 0">testInteger("${module.azure.fx.volume_serial_number}")  &amp;&amp; ("${module.azure.fx.volume_serial_number}" &gt; 0)</constraint>
+        </property>
+        <property default="128" display="Boundary Unit (exFAT only)" id="module.azure.fx.boundary_unit" description="Physical data area alignment size, in number of sectors. exFAT only.">
+            <constraint display="Boundary unit must be an integer greater than 0">testInteger("${module.azure.fx.boundary_unit}")  &amp;&amp; ("${module.azure.fx.boundary_unit}" &gt; 0)</constraint>
+        </property>
+        <property default="512" display="Working media memory size" id="module.azure.fx.media_size" description="Memory allocated for file system. Memory size must be an integer greater than or equal to the size of one sector.">
+            <constraint display="Memory size must be an integer greater than or equal to the size of one sector">testInteger("${module.azure.fx.media_size}")  &amp;&amp; ("${module.azure.fx.media_size}" &gt;= 512)</constraint>
+        </property>
+        <property default="" id="module.azure.fx.name_upper">
+            <export>"${module.azure.fx.name}".toUpperCase()</export>
+        </property>
+        <header>
+#define ${module.azure.fx.name_upper}_MEDIA_MEMORY_SIZE (${module.azure.fx.media_size})
+#define ${module.azure.fx.name_upper}_VOLUME_NAME ("${module.azure.fx.volume_name}")
+#define ${module.azure.fx.name_upper}_NUMBER_OF_FATS (${module.azure.fx.fat_count})
+#define ${module.azure.fx.name_upper}_DIRECTORY_ENTRIES (${module.azure.fx.dir_count})
+#define ${module.azure.fx.name_upper}_HIDDEN_SECTORS (${module.azure.fx.hidden_sectors})
+#define ${module.azure.fx.name_upper}_TOTAL_SECTORS (${module.azure.fx.total_sectors})
+#define ${module.azure.fx.name_upper}_BYTES_PER_SECTOR (512)
+#define ${module.azure.fx.name_upper}_SECTORS_PER_CLUSTER (${module.azure.fx.cluster_size})
+#define ${module.azure.fx.name_upper}_VOLUME_SERIAL_NUMBER (${module.azure.fx.volume_serial_number})
+#define ${module.azure.fx.name_upper}_BOUNDARY_UNIT (${module.azure.fx.boundary_unit})
+        </header>
+        <includes>
+#include "fx_api.h"
+        </includes>
+    </module>
+    <module config="config.azure.fx_usbx" id="module.azure.fx" display="Storage|${module.azure.fx.name} Azure RTOS FileX on USBX" version="0" url="https://github.com/eclipse-threadx/rtos-docs/blob/main/rtos-docs/filex/index.md">
+        <requires id="module.azure.fx.requires.threadx" interface="interface.rtos.tx" visible="false" display="Requires ThreadX"/>
+        <requires id="module.azure.fx.requires.usbx_hmsc" interface="interface.driver.usbx_hmsc" display="Add USBX Porting Layer" />
+        <provides interface="interface.azure.fx.usbx" />
+        <provides interface="interface.azure.fx" />
+        <property default="g_fx_media${_instance}" display="Name" id="module.azure.fx.name" description="Symbol used for media_ptr parameter in FileX APIs">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.azure.fx.name}")</constraint>
+        </property>
+        <includes>
+#include "fx_api.h"
+        </includes>
+    </module>
+    <config id="config.azure.fx.stub" path="ra_gen/filex_stub.h" version="0">
+        <content>
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/* This is a stub routine for FileX, for NetX applications that do not have FileX to rely on.  */
+
+#include "tx_api.h"
+
+/* First, define basic data types.  */
+
+typedef struct FX_MEDIA_STRUCT
+{
+
+    /* This structure must be mapped to match application's file system.  */
+    ULONG   tbd;
+} FX_MEDIA;
+
+typedef struct FX_FILE_STRUCT
+{
+
+    /* This structure must be mapped to match application's file system.  */
+    ULONG   tbd;
+    ULONG   fx_file_current_file_size;
+} FX_FILE;
+
+typedef struct FX_LOCAL_PATH_STRUCT
+{
+
+    /* This structure must be mapped to match application's file system.  */
+    ULONG   tbd;
+} FX_LOCAL_PATH;
+
+
+/* Define basic constants.  */
+
+#define FX_OPEN_FOR_READ            0
+#define FX_OPEN_FOR_WRITE           1
+
+#define FX_MAX_LONG_NAME_LEN        256
+
+#define FX_SUCCESS                  0x00
+#define FX_NULL                     0
+#define FX_ACCESS_ERROR             0x06
+#define FX_END_OF_FILE              0x09
+#define FX_NOT_A_FILE               0x05
+#define FX_NO_MORE_ENTRIES          0x0F
+#define FX_DIRECTORY                0x10
+#define FX_READ_ONLY                0x01
+
+/* These need to be defined for the fx_ram_driver or other filex driver. */
+#define FX_DRIVER_READ                  0
+#define FX_DRIVER_WRITE                 1
+#define FX_DRIVER_FLUSH                 2
+#define FX_DRIVER_ABORT                 3
+#define FX_DRIVER_INIT                  4
+#define FX_DRIVER_BOOT_READ             5
+#define FX_DRIVER_RELEASE_SECTORS       6
+#define FX_DRIVER_BOOT_WRITE            7
+#define FX_DRIVER_UNINIT                8
+
+/* Next define the FileX prototypes used in some network server applications.
+ * Note: These functions need to be defined by the user. */
+
+UINT        fx_directory_attributes_read(FX_MEDIA *media_ptr, CHAR *directory_name, UINT *attributes_ptr);
+UINT        fx_directory_attributes_set(FX_MEDIA *media_ptr, CHAR *directory_name, UINT attributes);
+UINT        fx_directory_create(FX_MEDIA *media_ptr, CHAR *directory_name);
+UINT        fx_directory_delete(FX_MEDIA *media_ptr, CHAR *directory_name);
+UINT        fx_directory_rename(FX_MEDIA *media_ptr, CHAR *old_directory_name, CHAR *new_directory_name);
+UINT        fx_directory_first_entry_find(FX_MEDIA *media_ptr, CHAR *directory_name);
+UINT        fx_directory_first_full_entry_find(FX_MEDIA *media_ptr, CHAR *directory_name, UINT *attributes,
+                ULONG *size, UINT *year, UINT *month, UINT *day, UINT *hour, UINT *minute, UINT *second);
+UINT        fx_directory_next_entry_find(FX_MEDIA *media_ptr, CHAR *directory_name);
+UINT        fx_directory_next_full_entry_find(FX_MEDIA *media_ptr, CHAR *directory_name, UINT *attributes,
+                ULONG *size, UINT *year, UINT *month, UINT *day, UINT *hour, UINT *minute, UINT *second);
+UINT        fx_directory_name_test(FX_MEDIA *media_ptr, CHAR *directory_name);
+UINT        fx_directory_information_get(FX_MEDIA *media_ptr, CHAR *directory_name, UINT *attributes, ULONG *size,
+                                        UINT *year, UINT *month, UINT *day, UINT *hour, UINT *minute, UINT *second);
+UINT        fx_directory_default_set(FX_MEDIA *media_ptr, CHAR *new_path_name);
+UINT        fx_directory_default_get(FX_MEDIA *media_ptr, CHAR **return_path_name);
+
+UINT        fx_file_best_effort_allocate(FX_FILE *file_ptr, ULONG size, ULONG *actual_size_allocated);
+UINT        fx_file_create(FX_MEDIA *media_ptr, CHAR *file_name);
+UINT        fx_file_delete(FX_MEDIA *media_ptr, CHAR *file_name);
+UINT        fx_file_rename(FX_MEDIA *media_ptr, CHAR *old_file_name, CHAR *new_file_name);
+UINT        fx_file_attributes_set(FX_MEDIA *media_ptr, CHAR *file_name, UINT attributes);
+UINT        fx_file_attributes_read(FX_MEDIA *media_ptr, CHAR *file_name, UINT *attributes_ptr);
+UINT        fx_file_open(FX_MEDIA *media_ptr, FX_FILE *file_ptr, CHAR *file_name,
+                UINT open_type);
+UINT        fx_file_close(FX_FILE *file_ptr);
+UINT        fx_file_read(FX_FILE *file_ptr, VOID *buffer_ptr, ULONG request_size, ULONG *actual_size);
+UINT        fx_file_write(FX_FILE *file_ptr, VOID *buffer_ptr, ULONG size);
+UINT        fx_file_allocate(FX_FILE *file_ptr, ULONG size);
+UINT        fx_file_relative_seek(FX_FILE *file_ptr, ULONG byte_offset, UINT seek_from);
+UINT        fx_file_seek(FX_FILE *file_ptr, ULONG byte_offset);
+UINT        fx_file_truncate(FX_FILE *file_ptr, ULONG size);
+UINT        fx_file_truncate_release(FX_FILE *file_ptr, ULONG size);
+UINT        fx_media_format(FX_MEDIA *media_ptr, VOID (*driver)(FX_MEDIA *media), VOID *driver_info_ptr, UCHAR *memory_ptr, UINT memory_size,
+                CHAR *volume_name, UINT number_of_fats, UINT directory_entries, UINT hidden_sectors,
+                ULONG total_sectors, UINT bytes_per_sector, UINT sectors_per_cluster,
+                UINT heads, UINT sectors_per_track);
+UINT        fx_media_open(FX_MEDIA *media_ptr, CHAR *media_name,
+                VOID (*media_driver)(FX_MEDIA *), VOID *driver_info_ptr,
+                VOID *memory_ptr, ULONG memory_size);
+
+#ifdef __cplusplus
+}
+#endif
+        </content>
+    </config>
+    <module config="config.azure.fx.stub" id="module.azure.fx.stub" display="Storage|${module.azure.fx.name} Azure RTOS FileX Stub for NetX Duo" common="100" version="0" visible="false" url="https://github.com/eclipse-threadx/rtos-docs/blob/main/rtos-docs/filex/index.md">
+        <requires id="module.azure.fx.requires.threadx" interface="interface.rtos.tx" visible="false" display="Requires ThreadX"/>
+        <provides interface="interface.azure.fx.stub" />
+        <provides interface="interface.azure.fx" />
+        <property default="g_fx_media${_instance}" display="Name" id="module.azure.fx.name" description="Symbol used for media_ptr parameter in FileX APIs">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.azure.fx.name}")</constraint>
+        </property>
+        <includes>
+#include "filex_stub.h"
+        </includes>
+    </module>
+    <developerSupport>
+        <api version="1">
+            <platform id="fsp" max="" min="1.1.0"/>
+            <moduleRef id="module.azure.fx.block_media"/>
+            <description><![CDATA[<form><p><span color="header" font="header">Overview</span></p><p>The FileX Block Media module provides snippets of code for configuring FileX to run on a block media device.</p></form>]]></description>
+            <function display="Quick Setup" id="fx_block_media_quick_setup">
+                <description><![CDATA[<form><p>This function provides quick setup for the FileX Block Media instance using the properties from the RA configurator.</p></form>]]></description>
+            </function>
+        </api>
+        <api version="1">
+            <platform id="fsp" max="" min="1.1.0"/>
+            <moduleRef id="module.azure.fx.levelx_nor"/>
+            <description><![CDATA[<form><p><span color="header" font="header">Overview</span></p><p>The FileX LevelX NOR module provides snippets of code for configuring FileX to run on a LevelX NOR managed memory device.</p></form>]]></description>
+            <function display="Quick Setup" id="fx_levelx_nor_quick_setup">
+                <description><![CDATA[<form><p>This function provides quick setup for the FFileX LevelX NOR instance using the properties from the RA configurator.</p></form>]]></description>
+            </function>
+        </api>
+        <api version="1">
+            <platform id="fsp" max="" min="1.1.0"/>
+            <moduleRef id="module.azure.fx.stub"/>
+            <description><![CDATA[<form><p><span color="header" font="header">Overview</span></p><p>The FileX Stub module provides snippets of code for providing a stub of FileX to run certain NetX modules without FileX.</p></form>]]></description>
+            <function display="Quick Setup" id="fx_stub_quick_setup">
+                <description><![CDATA[<form><p>This function provides quick setup for the FileX Stub instance using the properties from the RA configurator.</p></form>]]></description>
+            </function>
+        </api>
+        <template category="function_call" display="Call Quick Setup" id="module.azure.fx.block_media.quick_setup" version="1">
+            <platform id="fsp" max="" min="1.1.0"/>
+            <moduleRef id="module.azure.fx.block_media">
+                <function id="fx_block_media_quick_setup"/>
+            </moduleRef>
+            <content>
+/* FileX Media Instance */
+FX_MEDIA ${fx_name:raProperty(module.azure.fx.name)};
+
+uint8_t ${fx_name}_media_memory[${fx_name_upper:raProperty(module.azure.fx.name_upper)}_MEDIA_MEMORY_SIZE];
+
+/* TODO: Enable if you want to format the media as FAT */
+#define ${fx_name_upper}_FORMAT_MEDIA  (0)
+
+/* TODO: Enable if you want to format the media as exFAT (exFAT support must be enabled in FileX common) */
+#define ${fx_name_upper}_FORMAT_MEDIA_EXFAT  (0)
+
+void ${fx_name}_quick_setup();
+
+/* Quick setup for ${fx_name}.
+ * - ${block_media_name:raProperty(module.middleware.rm_filex_block_media.name)} must be setup before calling this function
+ *     (See Developer Assistance -> ${fx_name} -> ${block_media_name} -> Quick Setup).
+ * - fx_system_initialize() must be called before calling this function.
+ */
+void ${fx_name}_quick_setup()
+{
+    UINT fx_ret_val;
+
+#if ${fx_name_upper}_FORMAT_MEDIA
+    fx_ret_val = fx_media_format(&amp;${fx_name},                   // Pointer to FileX media control block.
+                        RM_FILEX_BLOCK_MEDIA_BlockDriver,           // Driver entry
+                        (void *) &amp;${block_media_name}_instance, // Pointer to Block Media Driver
+                        ${fx_name}_media_memory,                    // Media buffer pointer
+                        ${fx_name_upper}_MEDIA_MEMORY_SIZE,         // Media buffer size
+                        (char *) ${fx_name_upper}_VOLUME_NAME,      // Volume Name
+                        ${fx_name_upper}_NUMBER_OF_FATS,            // Number of FATs
+                        ${fx_name_upper}_DIRECTORY_ENTRIES,         // Directory Entries
+                        ${fx_name_upper}_HIDDEN_SECTORS,            // Hidden sectors
+                        ${fx_name_upper}_TOTAL_SECTORS,             // Total sectors
+                        ${fx_name_upper}_BYTES_PER_SECTOR,          // Sector size
+                        ${fx_name_upper}_SECTORS_PER_CLUSTER,       // Sectors per cluster
+                        1,                                          // Heads (disk media)
+                        1);                                         // Sectors per track (disk media)
+#elif ${fx_name_upper}_FORMAT_MEDIA_EXFAT
+    fx_ret_val = fx_media_exFAT_format(&amp;${fx_name},             // Pointer to FileX media control block.
+                        RM_FILEX_BLOCK_MEDIA_BlockDriver,           // Driver entry
+                        (void *) &amp;${block_media_name}_instance, // Pointer to Block Media Driver
+                        ${fx_name}_media_memory,                    // Media buffer pointer
+                        ${fx_name_upper}_MEDIA_MEMORY_SIZE,         // Media buffer size
+                        (char *) ${fx_name_upper}_VOLUME_NAME,      // Volume Name
+                        ${fx_name_upper}_NUMBER_OF_FATS,            // Number of FATs
+                        ${fx_name_upper}_HIDDEN_SECTORS,            // Hidden sectors
+                        ${fx_name_upper}_TOTAL_SECTORS,             // Total sectors
+                        ${fx_name_upper}_BYTES_PER_SECTOR,          // Sector size
+                        ${fx_name_upper}_SECTORS_PER_CLUSTER,       // Sectors per cluster
+                        ${fx_name_upper}_VOLUME_SERIAL_NUMBER,      // Volume serial number
+                        ${fx_name_upper}_BOUNDARY_UNIT);            // Boundary unit
+    assert(FX_SUCCESS == fx_ret_val);
+#endif
+
+    /* Open the media */
+    fx_ret_val = fx_media_open(&amp;${fx_name},
+                               "&amp;${fx_name}",
+                               RM_FILEX_BLOCK_MEDIA_BlockDriver,
+                               (void *) &amp;${block_media_name}_instance,
+                               ${fx_name}_media_memory,
+                               ${fx_name_upper}_MEDIA_MEMORY_SIZE);
+    assert(FX_SUCCESS == fx_ret_val);
+}
+            </content>
+        </template>
+        <template category="function_call" display="Call Quick Setup" id="module.azure.fx.levelx_nor.quick_setup" version="1">
+            <platform id="fsp" max="" min="1.1.0"/>
+            <moduleRef id="module.azure.fx.levelx_nor">
+                <function id="fx_levelx_nor_quick_setup"/>
+            </moduleRef>
+            <content>
+/* FileX Media Instance */
+FX_MEDIA ${fx_name:raProperty(module.azure.fx.name)};
+
+uint8_t ${fx_name}_media_memory[${fx_name_upper:raProperty(module.azure.fx.name_upper)}_MEDIA_MEMORY_SIZE];
+
+/* TODO: Enable if you want to format the media as FAT */
+#define ${fx_name_upper}_FORMAT_MEDIA  (0)
+
+/* TODO: Enable if you want to format the media as exFAT (exFAT support must be enabled in FileX common) */
+#define ${fx_name_upper}_FORMAT_MEDIA_EXFAT  (0)
+
+void ${fx_name}_quick_setup();
+
+/* Quick setup for ${fx_name}.
+ * - fx_system_initialize() must be called before calling this function.
+ */
+void ${fx_name}_quick_setup()
+{
+    UINT fx_ret_val;
+
+#if ${fx_name_upper}_FORMAT_MEDIA
+    fx_ret_val = fx_media_format(&amp;${fx_name},                   // Pointer to FileX media control block.
+                        RM_FILEX_LEVELX_NOR_DeviceDriver,            // Driver entry
+                        (void *) &amp;${levelx_nor_name:raProperty(module.middleware.rm_filex_levelx_nor.name)}_instance, // Pointer to LevelX NOR Driver
+                        ${fx_name}_media_memory,                    // Media buffer pointer
+                        ${fx_name_upper}_MEDIA_MEMORY_SIZE,         // Media buffer size
+                        (char *) ${fx_name_upper}_VOLUME_NAME,      // Volume Name
+                        ${fx_name_upper}_NUMBER_OF_FATS,            // Number of FATs
+                        ${fx_name_upper}_DIRECTORY_ENTRIES,         // Directory Entries
+                        ${fx_name_upper}_HIDDEN_SECTORS,            // Hidden sectors
+                        ${fx_name_upper}_TOTAL_SECTORS,             // Total sectors
+                        ${fx_name_upper}_BYTES_PER_SECTOR,          // Sector size
+                        ${fx_name_upper}_SECTORS_PER_CLUSTER,       // Sectors per cluster
+                        1,                                          // Heads (disk media)
+                        1);                                         // Sectors per track (disk media)
+#elif ${fx_name_upper}_FORMAT_MEDIA_EXFAT
+    fx_ret_val = fx_media_exFAT_format(&amp;${fx_name},             // Pointer to FileX media control block.
+                        RM_FILEX_LEVELX_NOR_DeviceDriver,           // Driver entry
+                        (void *) &amp;${levelx_nor_name:raProperty(module.middleware.rm_filex_levelx_nor.name)}_instance, // Pointer to LevelX NOR Driver
+                        ${fx_name}_media_memory,                    // Media buffer pointer
+                        ${fx_name_upper}_MEDIA_MEMORY_SIZE,         // Media buffer size
+                        (char *) ${fx_name_upper}_VOLUME_NAME,      // Volume Name
+                        ${fx_name_upper}_NUMBER_OF_FATS,            // Number of FATs
+                        ${fx_name_upper}_HIDDEN_SECTORS,            // Hidden sectors
+                        ${fx_name_upper}_TOTAL_SECTORS,             // Total sectors
+                        ${fx_name_upper}_BYTES_PER_SECTOR,          // Sector size
+                        ${fx_name_upper}_SECTORS_PER_CLUSTER,       // Sectors per cluster
+                        ${fx_name_upper}_VOLUME_SERIAL_NUMBER,      // Volume serial number
+                        ${fx_name_upper}_BOUNDARY_UNIT);            // Boundary unit
+    assert(FX_SUCCESS == fx_ret_val);
+#endif
+
+    /* Open the media */
+    fx_ret_val = fx_media_open(&amp;${fx_name},
+                               "&amp;${fx_name}",
+                               RM_FILEX_LEVELX_NOR_DeviceDriver,
+                               (void *) &amp;${levelx_nor_name}_instance,
+                               ${fx_name}_media_memory,
+                               ${fx_name_upper}_MEDIA_MEMORY_SIZE);
+    assert(FX_SUCCESS == fx_ret_val);
+}
+            </content>
+        </template>
+        <template category="function_call" display="Call Quick Setup" id="module.azure.fx.stub.quick_setup" version="1">
+            <platform id="fsp" max="" min="1.1.0"/>
+            <moduleRef id="module.azure.fx.stub">
+                <function id="fx_stub_quick_setup"/>
+            </moduleRef>
+            <content>
+/* FileX Media Instance */
+FX_MEDIA ${fx_name:raProperty(module.azure.fx.name)};
+
+/* Stub Functions - user can define elsewhere if desired */
+
+UINT fx_directory_attributes_read(FX_MEDIA *media_ptr, CHAR *directory_name, UINT *attributes_ptr)
+{
+  FSP_PARAMETER_NOT_USED(media_ptr);
+  FSP_PARAMETER_NOT_USED(directory_name);
+  FSP_PARAMETER_NOT_USED(attributes_ptr);
+  return 0;
+}
+
+UINT fx_directory_attributes_set(FX_MEDIA *media_ptr, CHAR *directory_name, UINT attributes)
+{
+  FSP_PARAMETER_NOT_USED(media_ptr);
+  FSP_PARAMETER_NOT_USED(directory_name);
+  FSP_PARAMETER_NOT_USED(attributes);
+  return 0;
+}
+
+UINT fx_directory_create(FX_MEDIA *media_ptr, CHAR *directory_name)
+{
+  FSP_PARAMETER_NOT_USED(media_ptr);
+  FSP_PARAMETER_NOT_USED(directory_name);
+  return 0;
+}
+
+UINT fx_directory_delete(FX_MEDIA *media_ptr, CHAR *directory_name)
+{
+  FSP_PARAMETER_NOT_USED(media_ptr);
+  FSP_PARAMETER_NOT_USED(directory_name);
+  return 0;
+}
+
+UINT fx_directory_rename(FX_MEDIA *media_ptr, CHAR *old_directory_name, CHAR *new_directory_name)
+{
+  FSP_PARAMETER_NOT_USED(media_ptr);
+  FSP_PARAMETER_NOT_USED(old_directory_name);
+  FSP_PARAMETER_NOT_USED(new_directory_name);
+  return 0;
+}
+
+UINT fx_directory_first_entry_find(FX_MEDIA *media_ptr, CHAR *directory_name)
+{
+  FSP_PARAMETER_NOT_USED(media_ptr);
+  FSP_PARAMETER_NOT_USED(directory_name);
+  return 0;
+}
+
+UINT fx_directory_first_full_entry_find(FX_MEDIA *media_ptr, CHAR *directory_name, UINT *attributes,
+                ULONG *size, UINT *year, UINT *month, UINT *day, UINT *hour, UINT *minute, UINT *second)
+{
+  FSP_PARAMETER_NOT_USED(media_ptr);
+  FSP_PARAMETER_NOT_USED(directory_name);
+  FSP_PARAMETER_NOT_USED(attributes);
+  FSP_PARAMETER_NOT_USED(size);
+  FSP_PARAMETER_NOT_USED(year);
+  FSP_PARAMETER_NOT_USED(month);
+  FSP_PARAMETER_NOT_USED(day);
+  FSP_PARAMETER_NOT_USED(hour);
+  FSP_PARAMETER_NOT_USED(minute);
+  FSP_PARAMETER_NOT_USED(second);
+  return 0;
+}
+
+UINT fx_directory_next_entry_find(FX_MEDIA *media_ptr, CHAR *directory_name)
+{
+  FSP_PARAMETER_NOT_USED(media_ptr);
+  FSP_PARAMETER_NOT_USED(directory_name);
+  return 0;
+}
+
+UINT fx_directory_next_full_entry_find(FX_MEDIA *media_ptr, CHAR *directory_name, UINT *attributes,
+                ULONG *size, UINT *year, UINT *month, UINT *day, UINT *hour, UINT *minute, UINT *second)
+{
+  FSP_PARAMETER_NOT_USED(media_ptr);
+  FSP_PARAMETER_NOT_USED(directory_name);
+  FSP_PARAMETER_NOT_USED(attributes);
+  FSP_PARAMETER_NOT_USED(size);
+  FSP_PARAMETER_NOT_USED(year);
+  FSP_PARAMETER_NOT_USED(month);
+  FSP_PARAMETER_NOT_USED(day);
+  FSP_PARAMETER_NOT_USED(hour);
+  FSP_PARAMETER_NOT_USED(minute);
+  FSP_PARAMETER_NOT_USED(second);
+  return 0;
+}
+
+UINT fx_directory_name_test(FX_MEDIA *media_ptr, CHAR *directory_name)
+{
+  FSP_PARAMETER_NOT_USED(media_ptr);
+  FSP_PARAMETER_NOT_USED(directory_name);
+  return 0;
+}
+
+UINT fx_directory_information_get(FX_MEDIA *media_ptr, CHAR *directory_name, UINT *attributes, ULONG *size,
+                                        UINT *year, UINT *month, UINT *day, UINT *hour, UINT *minute, UINT *second)
+{
+  FSP_PARAMETER_NOT_USED(media_ptr);
+  FSP_PARAMETER_NOT_USED(directory_name);
+  FSP_PARAMETER_NOT_USED(attributes);
+  FSP_PARAMETER_NOT_USED(size);
+  FSP_PARAMETER_NOT_USED(year);
+  FSP_PARAMETER_NOT_USED(month);
+  FSP_PARAMETER_NOT_USED(day);
+  FSP_PARAMETER_NOT_USED(hour);
+  FSP_PARAMETER_NOT_USED(minute);
+  FSP_PARAMETER_NOT_USED(second);
+  return 0;
+}
+
+UINT fx_directory_default_set(FX_MEDIA *media_ptr, CHAR *new_path_name)
+{
+  FSP_PARAMETER_NOT_USED(media_ptr);
+  FSP_PARAMETER_NOT_USED(new_path_name);
+  return 0;
+}
+
+UINT fx_directory_default_get(FX_MEDIA *media_ptr, CHAR **return_path_name)
+{
+  FSP_PARAMETER_NOT_USED(media_ptr);
+  FSP_PARAMETER_NOT_USED(return_path_name);
+  return 0;
+}
+
+
+UINT fx_file_best_effort_allocate(FX_FILE *file_ptr, ULONG size, ULONG *actual_size_allocated)
+{
+  FSP_PARAMETER_NOT_USED(file_ptr);
+  FSP_PARAMETER_NOT_USED(size);
+  FSP_PARAMETER_NOT_USED(actual_size_allocated);
+  return 0;
+}
+
+UINT fx_file_create(FX_MEDIA *media_ptr, CHAR *file_name)
+{
+  FSP_PARAMETER_NOT_USED(media_ptr);
+  FSP_PARAMETER_NOT_USED(file_name);
+  return 0;
+}
+
+UINT fx_file_delete(FX_MEDIA *media_ptr, CHAR *file_name)
+{
+  FSP_PARAMETER_NOT_USED(media_ptr);
+  FSP_PARAMETER_NOT_USED(file_name);
+  return 0;
+}
+
+UINT fx_file_rename(FX_MEDIA *media_ptr, CHAR *old_file_name, CHAR *new_file_name)
+{
+  FSP_PARAMETER_NOT_USED(media_ptr);
+  FSP_PARAMETER_NOT_USED(old_file_name);
+  FSP_PARAMETER_NOT_USED(new_file_name);
+  return 0;
+}
+
+UINT fx_file_attributes_set(FX_MEDIA *media_ptr, CHAR *file_name, UINT attributes)
+{
+  FSP_PARAMETER_NOT_USED(media_ptr);
+  FSP_PARAMETER_NOT_USED(file_name);
+  FSP_PARAMETER_NOT_USED(attributes);
+  return 0;
+}
+
+UINT fx_file_attributes_read(FX_MEDIA *media_ptr, CHAR *file_name, UINT *attributes_ptr)
+{
+  FSP_PARAMETER_NOT_USED(media_ptr);
+  FSP_PARAMETER_NOT_USED(file_name);
+  FSP_PARAMETER_NOT_USED(attributes_ptr);
+  return 0;
+}
+
+UINT fx_file_open(FX_MEDIA *media_ptr, FX_FILE *file_ptr, CHAR *file_name,
+                UINT open_type)
+{
+  FSP_PARAMETER_NOT_USED(media_ptr);
+  FSP_PARAMETER_NOT_USED(file_ptr);
+  FSP_PARAMETER_NOT_USED(file_name);
+  FSP_PARAMETER_NOT_USED(open_type);
+  return 0;
+}
+
+UINT fx_file_close(FX_FILE *file_ptr)
+{
+  FSP_PARAMETER_NOT_USED(file_ptr);
+  return 0;
+}
+
+UINT fx_file_read(FX_FILE *file_ptr, VOID *buffer_ptr, ULONG request_size, ULONG *actual_size)
+{
+  FSP_PARAMETER_NOT_USED(file_ptr);
+  FSP_PARAMETER_NOT_USED(buffer_ptr);
+  FSP_PARAMETER_NOT_USED(request_size);
+  FSP_PARAMETER_NOT_USED(actual_size);
+  return 0;
+}
+
+UINT fx_file_write(FX_FILE *file_ptr, VOID *buffer_ptr, ULONG size)
+{
+  FSP_PARAMETER_NOT_USED(file_ptr);
+  FSP_PARAMETER_NOT_USED(buffer_ptr);
+  FSP_PARAMETER_NOT_USED(size);
+  return 0;
+}
+
+UINT fx_file_allocate(FX_FILE *file_ptr, ULONG size)
+{
+  FSP_PARAMETER_NOT_USED(file_ptr);
+  FSP_PARAMETER_NOT_USED(size);
+  return 0;
+}
+
+UINT fx_file_relative_seek(FX_FILE *file_ptr, ULONG byte_offset, UINT seek_from)
+{
+  FSP_PARAMETER_NOT_USED(file_ptr);
+  FSP_PARAMETER_NOT_USED(byte_offset);
+  FSP_PARAMETER_NOT_USED(seek_from);
+  return 0;
+}
+
+UINT fx_file_seek(FX_FILE *file_ptr, ULONG byte_offset)
+{
+  FSP_PARAMETER_NOT_USED(file_ptr);
+  FSP_PARAMETER_NOT_USED(byte_offset);
+  return 0;
+}
+
+UINT fx_file_truncate(FX_FILE *file_ptr, ULONG size)
+{
+  FSP_PARAMETER_NOT_USED(file_ptr);
+  FSP_PARAMETER_NOT_USED(size);
+  return 0;
+}
+
+UINT fx_file_truncate_release(FX_FILE *file_ptr, ULONG size)
+{
+  FSP_PARAMETER_NOT_USED(file_ptr);
+  FSP_PARAMETER_NOT_USED(size);
+  return 0;
+}
+            </content>
+        </template>
+    </developerSupport>
+</raModuleDescription>

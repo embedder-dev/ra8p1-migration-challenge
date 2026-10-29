@@ -1,0 +1,31 @@
+<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.middleware.rm_ble_mesh_os_baremetal" path="fsp_cfg/rm_ble_mesh_os_baremetal_cfg.h" version="0" >
+        <content>
+            #ifdef __cplusplus
+            extern "C" {
+            #endif
+
+            #ifdef __cplusplus
+            }
+            #endif
+        </content>
+    </config>
+    <module config="config.middleware.rm_ble_mesh_os_baremetal" display="Networking|BLE Mesh OS on Baremetal (rm_mesh_os_baremetal)" id="module.middleware.rm_ble_mesh_os_on_rm_ble_mesh_os_baremetal" common="1" visible="false" version="0" url="group___m_e_s_h___o_s___b_a_r_e_m_e_t_a_l.html">
+        <constraint display="Only supports Baremetal project.">
+            !testExists("${interface.rtos.rtos}")
+        </constraint>
+
+        <provides interface="interface.middleware.rm_ble_mesh_os" />
+        <provides interface="interface.middleware.rm_ble_mesh_os_on_rm_ble_mesh_os_baremetal" />
+
+        <header>
+        </header>
+        <includes>
+        </includes>
+        <declarations>
+
+        </declarations>
+    </module>
+</raModuleDescription>
+

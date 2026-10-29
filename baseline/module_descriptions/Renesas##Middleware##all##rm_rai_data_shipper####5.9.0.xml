@@ -1,0 +1,130 @@
+<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.middleware.rai_data_shipper" path="fsp_cfg/rm_rai_data_shipper_cfg.h" version="0">
+        <property default="config.middleware.rai_data_shipper.param_checking_enable.bsp" display="Parameter Checking" id="config.middleware.rai_data_shipper.param_checking_enable" description="If selected code for parameter checking is included in the build.">
+            <option display="Default (BSP)" id="config.middleware.rai_data_shipper.param_checking_enable.bsp" value="(BSP_CFG_PARAM_CHECKING_ENABLE)"/>
+            <option display="Enabled" id="config.middleware.rai_data_shipper.param_checking_enable.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.rai_data_shipper.param_checking_enable.disabled" value="(0)"/>
+        </property>
+        <property default="8" display="Max Number Of DC Instances" id="config.middleware.rai_data_shipper.max_dc_instances" description="Max number of DC instances to be sent.">
+            <constraint display="Value must be  a positive integer between 1 and 8">testInteger("${config.middleware.rai_data_shipper.max_dc_instances}") &amp;&amp; ("${config.middleware.rai_data_shipper.max_dc_instances}" &gt; 0) &amp;&amp; ("${config.middleware.rai_data_shipper.max_dc_instances}" &lt;= 8)</constraint>
+        </property>
+        <content>
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+
+#define RM_RAI_DATA_SHIPPER_CFG_PARAM_CHECKING_ENABLE          ${config.middleware.rai_data_shipper.param_checking_enable}
+#define RM_RAI_DATA_SHIPPER_MAX_NUMBER_OF_DC_INSTANCES         ${config.middleware.rai_data_shipper.max_dc_instances}
+
+#ifdef __cplusplus
+}
+#endif
+        </content>
+    </config>
+
+    <module config="config.middleware.rai_data_shipper" display="AI|${module.middleware.rai_data_shipper.name} Data Shipper (rm_rai_data_shipper)" id="module.middleware.rai_data_shipper_on_rai_data_shipper" version="1" url="group___r_m___r_a_i___d_a_t_a___s_h_i_p_p_e_r.html" common="1">
+        <constraint display="Requires a COMMS Device">
+          testExists("${interface.driver.rm_comms}")
+        </constraint>
+        <constraint display="Requires a Reality AI Data Collector Stack">
+          testExists("${interface.middleware.rai_data_collector}")
+        </constraint>
+        <constraint display="Polynomial must be CRC-8 or CRC-CCITT">
+            (!testExists("${module.middleware.rai_data_shipper.requires.crc::module.driver.crc.name}")) ||
+            (("${module.middleware.rai_data_shipper.requires.crc::module.driver.crc.crc_polynomial}" === "module.driver.crc.crc_polynomial.gps_crc_8") ||
+            ("${module.middleware.rai_data_shipper.requires.crc::module.driver.crc.crc_polynomial}" === "module.driver.crc.crc_polynomial.gps_crc_ccitt"))
+        </constraint>
+        <constraint display="Bit order must be LSB for CRC-CCITT, and MSB for CRC-8">
+            (!testExists("${module.middleware.rai_data_shipper.requires.crc::module.driver.crc.name}")) ||
+            ((("${module.middleware.rai_data_shipper.requires.crc::module.driver.crc.crc_polynomial}" === "module.driver.crc.crc_polynomial.gps_crc_ccitt") &amp;&amp;
+            ("${module.middleware.rai_data_shipper.requires.crc::module.driver.crc.crc_bit_order}" !== "module.driver.crc.crc_bit_order.lms_msb")) ||
+            (("${module.middleware.rai_data_shipper.requires.crc::module.driver.crc.crc_polynomial}" === "module.driver.crc.crc_polynomial.gps_crc_8") &amp;&amp;
+            ("${module.middleware.rai_data_shipper.requires.crc::module.driver.crc.crc_bit_order}" !== "module.driver.crc.crc_bit_order.lms_lsb")))
+        </constraint>
+        <requires id="module.middleware.rai_data_shipper.requires.rm_comms" interface="interface.driver.rm_comms_on_rm_rai_ds" display="Add COMMS Driver" find="false">
+            <override property="module.driver.comms_uart.p_callback" value="NULL"/>
+            <override property="module.driver.comms_uart.tx_semaphore" value="module.driver.comms_uart.tx_semaphore.unuse"/>
+            <override property="module.driver.comms_uart.rx_semaphore" value="module.driver.comms_uart.rx_semaphore.unuse"/>
+            <override property="module.driver.comms_uart.tx_mutex" value="module.driver.comms_uart.tx_mutex.unuse"/>
+            <override property="module.driver.comms_uart.rx_mutex" value="module.driver.comms_uart.rx_mutex.unuse"/>
+            <override property="module.driver.comms_usb_pcdc.p_callback" value="NULL"/>
+            <override property="module.driver.comms_usb_pcdc.tx_semaphore" value="module.driver.comms_usb_pcdc.tx_semaphore.unuse"/>
+            <override property="module.driver.comms_usb_pcdc.rx_semaphore" value="module.driver.comms_usb_pcdc.rx_semaphore.unuse"/>
+            <override property="module.driver.comms_usb_pcdc.tx_mutex" value="module.driver.comms_usb_pcdc.tx_mutex.unuse"/>
+            <override property="module.driver.comms_usb_pcdc.rx_mutex" value="module.driver.comms_usb_pcdc.rx_mutex.unuse"/>
+            <override property="module.driver.comms_usb_pcdc.connect_detection" value="module.driver.comms_usb_pcdc.connect_detection.ctrl_line_state"/>
+        </requires>
+        <requires id="module.middleware.rai_data_shipper.requires.crc" interface="interface.driver.crc_on_crc" display="Add CRC Driver [Optional]" find="false" optional="true">
+        </requires>
+        <requires id="module.middleware.rai_data_shipper.requires.data_collector" interface="interface.middleware.rai_data_collector.rai_data_collector_on_rai_data_collector" display="Add Data Collector" find="true">
+        </requires>
+        <provides interface="interface.middleware.rai_data_shipper" />
+        <provides interface="interface.middleware.rai_data_shipper.rai_data_shipper_on_rai_data_shipper" />
+        <provides interface="interface.middleware.rai_data_shipper.${module.middleware.rai_data_shipper.name}" />
+        <property display="Name" id="module.middleware.rai_data_shipper.name" default="g_rai_data_shipper${_instance}" description="Module name">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.middleware.rai_data_shipper.name}")</constraint>
+        </property>
+        <property display="Frame Rate Divider" id="module.middleware.rai_data_shipper.frame_rate_divider" default="0" description="Skip write requests">
+            <constraint display=" Value must be non-negative">testInteger("${module.middleware.rai_data_shipper.frame_rate_divider}") &amp;&amp; (${module.middleware.rai_data_shipper.frame_rate_divider} &gt;=0)</constraint>
+        </property>
+        <property display="Callback" id="module.middleware.rai_data_shipper.p_callback" default="rai_data_shipper${_instance}_callback" description="A user callback function on data sent or error.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.middleware.rai_data_shipper.p_callback}")</constraint>
+        </property>
+        <property id="module.middleware.rai_data_shipper.p_context" default="NULL" />
+        <header>
+/* Data Shipper Interface */
+extern const rai_data_shipper_instance_t ${module.middleware.rai_data_shipper.name};
+
+/** Access the Data Shipper instance using these structures
+    when calling API functions directly (::p_api is not used). */
+extern rai_data_shipper_instance_ctrl_t ${module.middleware.rai_data_shipper.name}_ctrl;
+
+extern const rai_data_shipper_cfg_t ${module.middleware.rai_data_shipper.name}_cfg;
+
+#ifndef ${module.middleware.rai_data_shipper.p_callback}
+void ${module.middleware.rai_data_shipper.p_callback}(rai_data_shipper_callback_args_t * p_args);
+#endif
+        </header>
+
+        <includes>
+#include &quot;rm_rai_data_shipper.h&quot;
+        </includes>
+
+        <declarations>
+const rai_data_shipper_cfg_t ${module.middleware.rai_data_shipper.name}_cfg =
+{
+
+#define RA_NOT_DEFINED 1
+#if (RA_NOT_DEFINED == ${module.middleware.rai_data_shipper.requires.crc::module.driver.crc.name})
+    .p_crc = NULL,
+#else
+    .p_crc = &amp;${module.middleware.rai_data_shipper.requires.crc::module.driver.crc.name},
+#endif
+#undef RA_NOT_DEFINED
+
+    .p_comms = &amp;${module.middleware.rai_data_shipper.requires.rm_comms::module.driver.rm_comms.name},
+    .divider = ${module.middleware.rai_data_shipper.frame_rate_divider},
+    .p_callback = ${module.middleware.rai_data_shipper.p_callback},
+/* If NULL then do not add &amp; */
+#if defined(${module.middleware.rai_data_shipper.p_context})
+    .p_context = ${module.middleware.rai_data_shipper.p_context},
+#else
+    .p_context = &amp;${module.middleware.rai_data_shipper.p_context},
+#endif
+};
+
+rai_data_shipper_instance_ctrl_t ${module.middleware.rai_data_shipper.name}_ctrl;
+
+/* Instance structure to use Data Shipper module. */
+const rai_data_shipper_instance_t ${module.middleware.rai_data_shipper.name} =
+{
+  .p_ctrl   = &amp;${module.middleware.rai_data_shipper.name}_ctrl,
+  .p_cfg    = &amp;${module.middleware.rai_data_shipper.name}_cfg,
+  .p_api    = &amp;g_ds_on_rai_data_shipper,
+};
+        </declarations>
+    </module>
+
+</raModuleDescription>

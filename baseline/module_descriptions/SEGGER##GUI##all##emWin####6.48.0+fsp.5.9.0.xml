@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<raModuleDescription>
+    <module config="config.segger.emwin" display="Graphics|SEGGER emWin" id="module.segger.emwin" common="1" version="1" url="https://www.segger.com/products/user-interface/emwin/">
+        <constraint display="Use GUIX instead in Azure RTOS projects.">
+            !testExists("${interface.rtos.tx}")
+        </constraint>
+        <requires id="module.segger.emwin.requires.emwin_port" interface="interface.middleware.emwin_port" visible="true" display="Add SEGGER emWin RA Port" />
+        <provides interface="interface.middleware.emwin"/>
+    </module>
+</raModuleDescription>

@@ -1,0 +1,699 @@
+﻿<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.driver.mipi_dsi" path="fsp_cfg/r_mipi_dsi_cfg.h" version="0">
+        <property default="config.driver.mipi_dsi.param_checking_enable.bsp" display="Parameter Checking" id="config.driver.mipi_dsi.param_checking_enable" description="If selected code for parameter checking is included in the build.">
+            <option display="Default (BSP)" id="config.driver.mipi_dsi.param_checking_enable.bsp" value="(BSP_CFG_PARAM_CHECKING_ENABLE)"/>
+            <option display="Enabled" id="config.driver.mipi_dsi.param_checking_enable.enabled" value="(1)"/>
+            <option display="Disabled" id="config.driver.mipi_dsi.param_checking_enable.disabled" value="(0)"/>
+        </property>
+
+        <content>
+            #ifdef __cplusplus
+            extern "C" {
+            #endif
+
+            #define MIPI_DSI_CFG_PARAM_CHECKING_ENABLE   (${config.driver.mipi_dsi.param_checking_enable})
+
+            #ifdef __cplusplus
+            }
+            #endif
+        </content>
+    </config>
+    <module config="config.driver.mipi_dsi" display="Graphics|${module.driver.mipi_dsi.name} MIPI Display (r_mipi_dsi)" id="module.driver.mipi_dsi" visible="false" version="1" common="1" url="group___m_i_p_i___d_s_i.html">
+        <constraint display="Only one instance of MIPI DSI is permitted">
+            "${interface.driver.mipi_dsi}" === "1"
+        </constraint>
+
+        <constraint display="Requires MIPI DSI peripheral">
+            ("${interface.mcu.mipi_dsi.external}" === "1") &amp;&amp; ("${interface.mcu.feature_set.b}" === "1")
+        </constraint>
+        <constraint display="LCD External Clock Hz should be non-zero only when display clock source is not Internal.">
+            (("${module.driver.mipi_dsi.display.clksrc}" == "GLCDC_CLK_SRC_INTERNAL") &amp;&amp; ("${module.driver.mipi_dsi.display.ext_clk_freq}" == 0)) ||
+            (("${module.driver.mipi_dsi.display.clksrc}" == "GLCDC_CLK_SRC_EXTERNAL") &amp;&amp; ("${module.driver.mipi_dsi.display.ext_clk_freq}" &gt; 0))
+        </constraint>
+
+        <constraint id="module.driver.mipi_dsi.constraint.ulps_wakeup_period">
+            eval('\n' +
+                 'var ulps_temp = "${module.driver.mipi_dsi.ulps_wakeup_period}"; \n' +
+                 'var pll_mhz = "${module.driver.mipi_dsi.requires.mipi_phy::module.driver.mipi_phy.pll_mhz}"; \n' +
+                 'var lp_divisor = "${module.driver.mipi_dsi.requires.mipi_phy::module.driver.mipi_phy.lp_divisor}"; \n' +
+                 'var lp_mhz = (pll_mhz / 16) / lp_divisor; // DSI HS Clock Line Rate is (\'configured\' / 2) \n' +
+                 'var max_val = parseInt(255 * 128 / lp_mhz) \n' +
+                 'output = null; \n' +
+                 'if(ulps_temp &gt; max_val){\n' +
+                 '  output = "Low Power|Ultra Low Power State Wakeup Period is " + ulps_temp + "(us) but should be " + max_val + "(us) or less when MIPI PHY PLL MHz is " + pll_mhz + " and MIPI PHY LP Divisor is "+ lp_divisor +" and is recommended to be greater than 1000 (us)."; \n' +
+                 '} \n' +
+                 'output')
+        </constraint>
+
+        <constraint id="module.driver.mipi_dsi.constraint.timeout_us_settings">
+            eval('\n' +
+                 '                //    id,                                         max,            message modifier \n' +
+                 'var property_list = [[${module.driver.mipi_dsi.lrxhto}, 		    0xFFFFFFFF,     "LP-RX Host Processor Timeout (us)"     ],  \n' +
+                 '                     [${module.driver.mipi_dsi.tato},  	        0xFFFFFFFF,     "Turnaround Acknowledge Timeout (us)"   ],  \n' +
+                 '                     [${module.driver.mipi_dsi.bta_timeout}, 	    0xFFFFFFFF,     "Turnaround Acknowledge Timeout (us)"   ],  \n' +
+                 '                     [${module.driver.mipi_dsi.lpwrite_timeout},  0xFFFF,         "LP Write Response Timeout (us)"        ],  \n' +
+                 '                     [${module.driver.mipi_dsi.lpread_timeout}, 	0xFFFF,         "LP Read Response Timeout (us)"         ],  \n' +
+                 '                     [${module.driver.mipi_dsi.hswrite_timeout},  0xFFFF,         "HS Write Response Timeout (us)"        ],  \n' +
+                 '                     [${module.driver.mipi_dsi.hsread_timeout}, 	0xFFFF,         "HS Read Response Timeout (us)"         ]]; \n' +
+                 '\n' +
+                 'var error_cnt = 0; \n' +
+                 'var output = null; \n' +
+                 'var pll_mhz = "${module.driver.mipi_dsi.requires.mipi_phy::module.driver.mipi_phy.pll_mhz}"; // This is approximate, but should be close. We don\'t currently have access to \'export\' output. \n' +
+                 'var lp_div  = "${module.driver.mipi_dsi.requires.mipi_phy::module.driver.mipi_phy.lp_divisor}"; \n ' +
+                 'var lp_mhz = (pll_mhz / 16) / lp_div; // DSI HS Clock Line Rate is (\'configured\' / 2) \n' +
+                 'for(var i = 0; i &lt; property_list.length; i++){ \n' +
+                 '  var temp = property_list[i][0]; \n' +
+                 '  var max = property_list[i][1] / lp_mhz; \n' +
+                 '  var error = (temp > max); \n' +
+                 '  if(error &amp;&amp; output == null){\n' +
+                 '      var output = "Options|" + property_list[i][2] + " is " + temp + " us but must be less than " + max.toFixed(3) + " when MIPI PHY PLL is " + pll_mhz + " and MIPI PHY LP Divisior is " + lp_div + "."; \n' +
+                 '  }\n' +
+                 '  error_cnt = error_cnt + error; \n' +
+                 '}   \n' +
+                 'if(error_cnt > 1){ \n' +
+                 ' output = "(1 of " + error_cnt + ") " + output; \n' +
+                 '}\n' +
+                 'output')
+        </constraint>
+
+        <constraint id="module.driver.mipi_dsi.constraint.hstxto">
+            eval('\n' +
+                 'var output = null; \n' +
+                 'var pll_mhz = "${module.driver.mipi_dsi.requires.mipi_phy::module.driver.mipi_phy.pll_mhz}"; // This is approximate, but should be close. We don\'t currently have access to \'export\' output. \n' +
+                 'var dsi_clk_ns    = 1000 / pll_mhz; // This is approximate, but should be close. We don\'t currently have access to \'export\' output.                                                        \n' +
+                 'var dsi_ui_ns     = dsi_clk_ns * 2;                                                                                                                                                           \n' +
+                 'var temp = ${module.driver.mipi_dsi.hstxto};                                                                                                                                                  \n' +
+                 'var max = 0xFFFFFFFF * 32 * dsi_ui_ns / 1000;                                                                                                                                                 \n' +
+                 'if((temp > max)){                                                                                                                                                                             \n' +
+                 '    var output = "Options|HS-TX Timeout Cound (us) is " + temp + " us but must be less than " + max.toFixed(3) + " when MIPI PHY PLL is " + pll_mhz + ".";                                    \n' +
+                 '}                                                                                                                                                                                             \n' +
+                 'output')
+        </constraint>
+        <requires id="module.driver.mipi_dsi.requires.mipi_phy" interface="interface.driver.mipi_phy" visible="true" display="MIPI physical layer"/>
+        <requires id="module.driver.mipi_dsi.requires.mipi_phy_hw" interface="interface.mcu.mipi_dsi.external" visible="false" display="MIPI DSI capable MCU"/>
+        <requires id="module.driver.mipi_dsi.requires.mipi_feature_set_hw" interface="interface.mcu.feature_set.b" visible="false" display="MIPI DSI capable MCU"/>
+        <provides interface="interface.driver.mipi_dsi" />
+
+        <!-- Name and Channel -->
+        <provides interface="interface.peripheral.mipi_dsi" />
+        <property default="g_mipi_dsi${_instance}" display="General|Name" id="module.driver.mipi_dsi.name" description="Module name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.mipi_dsi.name}")</constraint>
+        </property>
+
+        <!-- Properties set by GLCDC -->
+        <property default="" id="module.driver.mipi_dsi.display.vertical_active_lines" description="Hidden Property - Vertical Active Lines"></property>
+        <property default="" id="module.driver.mipi_dsi.display.vertical_sync_polarity" description="Hidden Property - Vertical Sync Polarity"></property>
+        <property default="" id="module.driver.mipi_dsi.display.vertical_sync_lines" description="Hidden Property - Vertical Sync Lines"></property>
+        <property default="" id="module.driver.mipi_dsi.display.vtiming.back_porch" description="Hidden Property - Vertical Back Porch"></property>
+        <property default="" id="module.driver.mipi_dsi.display.vtiming.total_cyc" description="Hidden Property - Vertical Front Porch"></property>
+        <property default="" id="module.driver.mipi_dsi.display.vtiming.display_cyc" description="Hidden Property - Vertical Front Porch"></property>
+
+        <property default="" id="module.driver.mipi_dsi.display.horizontal_active_lines" description="Hidden Property - Horizontal Active Lines"></property>
+        <property default="" id="module.driver.mipi_dsi.display.horizontal_sync_polarity" description="Hidden Property - Horizontal Sync Polarity"></property>
+        <property default="" id="module.driver.mipi_dsi.display.horizontal_sync_lines" description="Hidden Property - Horizontal Sync Lines"></property>
+        <property default="" id="module.driver.mipi_dsi.display.htiming.back_porch" description="Hidden Property - Horizontal Back Porch"></property>
+        <property default="" id="module.driver.mipi_dsi.display.htiming.total_cyc" description="Hidden Property - Horizontal Front Porch"></property>
+        <property default="" id="module.driver.mipi_dsi.display.htiming.display_cyc" description="Hidden Property - Horizontal Front Porch"></property>
+
+        <property default="" id="module.driver.mipi_dsi.display.clksrc" description="Hidden Property - Clock Source"></property>
+        <property default="" id="module.driver.mipi_dsi.display.clock_div_ratio" description="Hidden Property - Clock Division Ratio"></property>
+        <property default="" id="module.driver.mipi_dsi.display.output.format" description="Hidden Property - Output Format"></property>
+
+        <property display="Options|LCD External Clock Hz" default="0" id="module.driver.mipi_dsi.display.ext_clk_freq" description="Specify the GLCDC external clock frequency in Hz (Set to 0 when GLCDC clock source is set to Internal).">
+            <constraint display="Value must be an integer.">testInteger("${module.driver.mipi_dsi.display.ext_clk_freq}")</constraint>
+            <constraint display="Value must be greater than or equal to zero.">("${module.driver.mipi_dsi.display.ext_clk_freq}" &gt;= 0)</constraint>
+        </property>
+
+        <!-- Low Power State -->
+        <property display="Low Power|Ultra Low Power State Wakeup Period (us)" default="1000" id="module.driver.mipi_dsi.ulps_wakeup_period" description="Set ultra low power state wakeup period (us).">
+            <constraint display="Value must be a positive integer or zero.">testInteger("${module.driver.mipi_dsi.ulps_wakeup_period}") &amp;&amp; "${module.driver.mipi_dsi.ulps_wakeup_period}" &gt;= 0</constraint>
+            <export><![CDATA[eval('\n' +
+                    'var ulps_temp = ${module.driver.mipi_dsi.ulps_wakeup_period}; \n' +
+                    'var lp_mhz = (${module.driver.mipi_dsi.requires.mipi_phy::module.driver.mipi_phy.pll_mhz} / 16) / ${module.driver.mipi_dsi.requires.mipi_phy::module.driver.mipi_phy.lp_divisor}; // DSI HS Clock Line Rate is (\'configured\' / 2) \n' +
+                    'var ulps_calculated = ulps_temp * lp_mhz / 128; \n' +
+                    'output = parseInt(ulps_calculated); \n' +
+                    'if(ulps_calculated > 255){ \n' +
+                    '   output = 255 + " /* Calculated value of " + output + " for configuration has been limited to maximum configurable. See project problems for more information. */"    \n' +
+                    '} \n' +
+                    'output')]]>
+            </export>
+        </property>
+
+        <!-- Clock Lane -->
+        <property display="Clock Lane|Continuous Mode" default="module.driver.mipi_dsi.continuous_clock.enable" id="module.driver.mipi_dsi.continuous_clock" description="Enable or disable continuous clock mode.">
+            <option display="Disable" id="module.driver.mipi_dsi.continuous_clock.disable" value="(0)"/>
+            <option display="Enable" id="module.driver.mipi_dsi.continuous_clock.enable" value="(1)"/>
+        </property>
+
+        <property display="Data Lane|Number of Data Lanes" default="2" id="module.driver.mipi_dsi.num_lanes" description="Specify the number of data lanes. Note: not all data lanes are capable of HS operation. See Usage Notes for additional information.">
+            <constraint display="Value must be an integer.">testInteger("${module.driver.mipi_dsi.num_lanes}")</constraint>
+            <constraint display="Value must be 1 or 2.">
+                ("${module.driver.mipi_dsi.num_lanes}" &gt; 0) &amp;&amp;
+                ("${module.driver.mipi_dsi.num_lanes}" &lt;= 2)
+            </constraint>
+        </property>
+
+        <!-- Video Input -->
+        <property display="Video Mode|Pixel Packet|Sync Pulse" default="module.driver.mipi_dsi.txesync.disable" id="module.driver.mipi_dsi.txesync" description="Select if HSE and VSE are transmitted. Disable for Burst Mode sequence or Non-Burst Mode with Sync Events.">
+            <option display="HSE and VSE are not transmitted" id="module.driver.mipi_dsi.txesync.disable" value="(0)"/>
+            <option display="HSE and VSE are transmitted" id="module.driver.mipi_dsi.txesync.enable" value="(1)"/>
+        </property>
+
+        <property default="" id="module.driver.mipi_dsi.data_type">
+            <export><![CDATA[eval('' +
+                    'var glcdc_output_format = "${module.driver.mipi_dsi.display.output.format}"; \n' +
+                    'if(glcdc_output_format == "DISPLAY_OUT_FORMAT_24BITS_RGB888"){ \n' +
+                    '   output = "MIPI_DSI_VIDEO_DATA_24RGB_PIXEL_STREAM";\n' +
+                    '} else if (glcdc_output_format == "DISPLAY_OUT_FORMAT_18BITS_RGB666") { \n' +
+                    '   output = "MIPI_DSI_VIDEO_DATA_18RGB_PIXEL_STREAM"; \n' +
+                    '} else if (glcdc_output_format == "DISPLAY_OUT_FORMAT_16BITS_RGB565") { \n' +
+                    '   output = "MIPI_DSI_VIDEO_DATA_16RGB_PIXEL_STREAM"; \n' +
+                    '} else { \n' +
+                    '   output = "INVALID_GLCDC_FORMAT_CONFIGURED"; \n' +
+                    '} \n' +
+                    'output')]]>
+            </export>
+        </property>
+
+        <property display="Video Mode|Pixel Packet|Virtual Channel ID" default="0" id="module.driver.mipi_dsi.vc" description="Select the video mode virtual channel ID.">
+            <constraint display="Value must be an integer.">testInteger("${module.driver.mipi_dsi.vc}")</constraint>
+            <constraint display="Value must be between 0 and 3.">
+                ("${module.driver.mipi_dsi.vc}" &gt;= 0) &amp;&amp;
+                ("${module.driver.mipi_dsi.vc}" &lt;= 3)
+            </constraint>
+        </property>
+
+        <property default="161" id="module.driver.mipi_dsi.dly" description="Set the delay value inside DSI Host until the transfer begins. (Unit: 32xUI).">
+            <export>
+                <![CDATA[eval('' +
+                'var dsi_clk_ns    = 1000 / ${module.driver.mipi_dsi.requires.mipi_phy::module.driver.mipi_phy.pll_mhz}; // This is approximate, but should be close. We don\'t currently have access to \'export\' output. \n' +
+                'var dsi_ui_ns     = dsi_clk_ns / 2;                                                                                                                                                                        \n' +
+                'var t_hs_trail    = ${module.driver.mipi_dsi.requires.mipi_phy::module.driver.mipi_phy.t_hs_trail_ns} + ${module.driver.mipi_dsi.requires.mipi_phy::module.driver.mipi_phy.t_hs_trail_ui} * dsi_ui_ns;     \n' +
+                'var t_clk_post    = ${module.driver.mipi_dsi.requires.mipi_phy::module.driver.mipi_phy.t_clk_post_ns} + ${module.driver.mipi_dsi.requires.mipi_phy::module.driver.mipi_phy.t_clk_post_ui} * dsi_ui_ns;     \n' +
+                'var t_clk_trail   = ${module.driver.mipi_dsi.requires.mipi_phy::module.driver.mipi_phy.t_clk_trail_ns} + ${module.driver.mipi_dsi.requires.mipi_phy::module.driver.mipi_phy.t_clk_trail_ui} * dsi_ui_ns;   \n' +
+                'var t_hs_exit     = ${module.driver.mipi_dsi.requires.mipi_phy::module.driver.mipi_phy.t_hs_exit_ns} + ${module.driver.mipi_dsi.requires.mipi_phy::module.driver.mipi_phy.t_hs_exit_ui} * dsi_ui_ns;       \n' +
+                'var t_lp_exit     = ${module.driver.mipi_dsi.requires.mipi_phy::module.driver.mipi_phy.t_lp_exit_ns} + ${module.driver.mipi_dsi.requires.mipi_phy::module.driver.mipi_phy.t_lp_exit_ui} * dsi_ui_ns;       \n' +
+                'var t_clk_prep    = ${module.driver.mipi_dsi.requires.mipi_phy::module.driver.mipi_phy.t_clk_prep_ns} + ${module.driver.mipi_dsi.requires.mipi_phy::module.driver.mipi_phy.t_clk_prep_ui} * dsi_ui_ns;     \n' +
+                'var t_clk_zero    = ${module.driver.mipi_dsi.requires.mipi_phy::module.driver.mipi_phy.t_clk_zero_ns} + ${module.driver.mipi_dsi.requires.mipi_phy::module.driver.mipi_phy.t_clk_zero_ui} * dsi_ui_ns;     \n' +
+                'var t_clk_pre     = ${module.driver.mipi_dsi.requires.mipi_phy::module.driver.mipi_phy.t_clk_pre_ns} + ${module.driver.mipi_dsi.requires.mipi_phy::module.driver.mipi_phy.t_clk_pre_ui} * dsi_ui_ns;       \n' +
+                'var t_hs_prep     = ${module.driver.mipi_dsi.requires.mipi_phy::module.driver.mipi_phy.t_hs_prep_ns} + ${module.driver.mipi_dsi.requires.mipi_phy::module.driver.mipi_phy.t_hs_prep_ui} * dsi_ui_ns;       \n' +
+                'var t_hs_zero     = ${module.driver.mipi_dsi.requires.mipi_phy::module.driver.mipi_phy.t_hs_zero_ns} + ${module.driver.mipi_dsi.requires.mipi_phy::module.driver.mipi_phy.t_hs_zero_ui} * dsi_ui_ns;       \n' +
+                '                                                                                                                                                                                                           \n' +
+                ' // Line rate is PLL MHz div 2 - See RA8 UM 57.2.3 (R01UH0995EJ0060)                                                                                                                                       \n' +
+                'var line_rate_mhz = (${module.driver.mipi_dsi.requires.mipi_phy::module.driver.mipi_phy.pll_mhz} / 2); // This is approximate, but should be close. We can\'t currently access to \'export\' output.       \n' +
+                '                                                                                                                                                                                                           \n' +
+                'var clkstpt_ns = (t_hs_trail + t_clk_post + t_clk_trail + t_hs_exit + (4 * t_lp_exit) + t_clk_prep + t_clk_zero + t_clk_pre + t_hs_prep + t_hs_zero + (8*dsi_ui_ns));                                      \n' +
+                'var t_clkstpt = Math.ceil(clkstpt_ns * line_rate_mhz / 32000);                                                                                                         \n' +
+                '                                                                                                                                                                       \n' +
+                ' // golpbkt units of 8, and result += 3 - See RA8 UM 58.2.39 (R01UH0995EJ0060)                                                                                         \n' +
+                'var golpbkt_units = 8 * dsi_ui_ns;                                                                                                                                     \n' +
+                'var golpbkt_ns = t_hs_trail + t_hs_exit + 3 * t_lp_exit + t_hs_prep + t_hs_zero + (8*dsi_ui_ns);                                                                       \n' +
+                'golpbkt_ns = golpbkt_ns + (golpbkt_ns % golpbkt_units) * golpbkt_units;                                                                                                \n' +
+                'var t_golpbkt =  Math.ceil(golpbkt_ns * line_rate_mhz / 8000);                                                                                                         \n' +
+                '                                                                                                                                                                       \n' +
+                '// Used to calculate C2                                                                                                                                                \n' +
+                'var lcdclk = ${board.clock.peripheral.lcdclk};                                                                                                                         \n' +
+                'if("${module.driver.mipi_dsi.display.clksrc}" != "GLCDC_CLK_SRC_INTERNAL"){                                                                                            \n' +
+                '    var lcdclk = ${module.driver.mipi_dsi.display.ext_clk_freq};                                                                                                       \n' +
+                '}                                                                                                                                                                      \n' +
+                'var glcdc_clk_div_string = "${module.driver.mipi_dsi.display.clock_div_ratio}";                                                                                        \n' +
+                'var glcdc_clk_div_array = glcdc_clk_div_string.split("_");                                                                                                             \n' +
+                'var glcdc_clk_div = glcdc_clk_div_array[glcdc_clk_div_array.length - 1];                                                                                               \n' +
+                 '                                                                                                                                                                      \n' +
+                '// Used to calculate C12                                                                                                                                               \n' +
+                'var bpp_array = "${module.driver.mipi_dsi.display.output.format}".split("_");                                                                                          \n' +
+                '                                                                                                                                                                       \n' +
+                'var vclkmhz = lcdclk / glcdc_clk_div / 1000000;                                                                                            // C2                       \n' +
+                'var hsclkmhz = ${module.driver.mipi_dsi.requires.mipi_phy::module.driver.mipi_phy.pll_mhz} / 16;                                           // C3                       \n' +
+                'var lanenum = ${module.driver.mipi_dsi.num_lanes};                                                                                         // C4                       \n' +
+                'var hfpnolp = (-1 != "${module.driver.mipi_dsi.no_lp} 0x0".indexOf("R_DSILINK_VMSET0R_HFPNOLP_Msk"));                                      // C5                       \n' +
+                'var hbpnolp = (-1 != "${module.driver.mipi_dsi.no_lp} 0x0".indexOf("R_DSILINK_VMSET0R_HBPNOLP_Msk"));                                      // C6                       \n' +
+                'var hsanolp = (-1 != "${module.driver.mipi_dsi.no_lp} 0x0".indexOf("R_DSILINK_VMSET0R_HSANOLP_Msk"));                                      // C7                       \n' +
+                'var hactive = ${module.driver.mipi_dsi.display.horizontal_active_lines};                                                                   // C8                       \n' +
+                'var hsa = ${module.driver.mipi_dsi.display.horizontal_sync_lines};                                                                         // C9                       \n' +
+                'var hbp = ${module.driver.mipi_dsi.display.htiming.back_porch} - hsa;                                                                      // C11                      \n' +
+                'var hfp = ${module.driver.mipi_dsi.display.htiming.total_cyc} - ${module.driver.mipi_dsi.display.htiming.display_cyc} - hbp - hsa;         // C10                      \n' +
+                'var r = /\\d+/;                                                                                                                                                        \n' +
+                'var bpp = bpp_array[bpp_array.length - 2].match(r);                                                                                        // C12                      \n' +
+                'var pxdivsz = 0;                                                                                                                           // C13                      \n' +
+                'var txesync = ${module.driver.mipi_dsi.txesync};                                                                                           // C14                      \n' +
+                'var clkstpt = t_clkstpt;                                                                                                                   // C15                      \n' +
+                'var golpbkt = t_golpbkt;                                                                                                                   // C16                      \n' +
+                'var qtnum = 32;                                                                                                                            // C17                      \n' +
+                'var viramsz = 4096;                                                                                                                        // C18                      \n' +
+                'var hsclkmod = (0 != ${module.driver.mipi_dsi.continuous_clock});                                                                          // C19                      \n' +
+                'var vclkprd = 1000/vclkmhz; 							                                                                                    // C27                      \n' +
+                'var hsclkprd = 1000/hsclkmhz; 							                                                                                    // C28                      \n' +
+                'var vclkbw = vclkmhz * bpp; 							                                                                                    // C29                      \n' +
+                'var hsclkbw = 8 * lanenum * hsclkmhz;					                                                                                    // C30                      \n' +
+                'var htotal = hactive + hsa + hfp + hbp; 				                                                                                    // C31                      \n' +
+                'var async = Math.ceil(8 * vclkprd / hsclkprd)/4 + 8/4;                                                                                     // C32                      \n' +
+                'var dlymax = 4095; 										                                                                                // C33                      \n' +
+                'var dlymargin = 32; 									                                                                                    // C34                      \n' +
+                'var dlyalpha = 2; 										                                                                                    // C35                      \n' +
+                'var rambitw = 128; 										                                                                                // C36                      \n' +
+                '                                                                                                                                                                       \n' +
+                'var min_udf = Math.ceil((((hactive - (hactive * vclkbw / hsclkbw)) * vclkprd) + (dlymargin * 8 / bpp * vclkprd))/(4 * hsclkprd)) + async;  // C71                      \n' +
+                'var min_lp = clkstpt;                                                                                                                      // C140                     \n' +
+                'if(hsclkmod != 0){                                                                                                                                                     \n' +
+                '	min_lp = Math.ceil(golpbkt / 4) + dlyalpha;                                                                                             // C140                     \n' +
+                '}                                                                                                                                                                      \n' +
+                'var min_hsa = 0;                                                                                                                           // C160                     \n' +
+                'if(hsanolp && txesync){                                                                                                                                                \n' +
+                '	min_hsa = Math.ceil(hsa*vclkprd/(4*hsclkprd) + dlyalpha);                                                                               // C160                     \n' +
+                '}                                                                                                                                                                      \n' +
+                '                                                                                                                                                                       \n' +
+                'var min_hbp_txesync_0 = 0;                                                                                                                 // C170                     \n' +
+                'if(hbpnolp){                                                                                                                                                           \n' +
+                '	min_hbp_txesync_0 = Math.ceil((hsa+hbp)*vclkprd/(4*hsclkprd) + dlyalpha);                                                               // C170                     \n' +
+                '}                                                                                                                                                                      \n' +
+                '                                                                                                                                                                       \n' +
+                'var min_hbp_txesync_1 = 0;                                                                                                                 // C180                     \n' +
+                'if(hbpnolp){                                                                                                                                                           \n' +
+                '	min_hbp_txesync_1 = Math.ceil(hbp*vclkprd / (4*hsclkprd) + dlyalpha);                                                                   // C180                     \n' +
+                '}                                                                                                                                                                      \n' +
+                '                                                                                                                                                                       \n' +
+                'var min_hfp = 0;                                                                                                                           // C190                     \n' +
+                'if(hfpnolp){                                                                                                                                                           \n' +
+                '	min_hfp = Math.ceil(hfp * vclkprd / (4*hsclkprd) + dlyalpha);                                                                           // C190                     \n' +
+                '}                                                                                                                                                                      \n' +
+                '                                                                                                                                                                       \n' +
+                'var max_htot = Math.floor(htotal * vclkprd / (4*hsclkprd));                                                                                // C129                     \n' +
+                '                                                                                                                                                                       \n' +
+                'var dly_min_calc = Math.floor(((viramsz - dlymargin) * 8 / bpp) * vclkprd / (4 * hsclkprd));                                               // D94                      \n' +
+                '                                                                                                                                                                       \n' +
+                'var max_ovf = dlymax;                                                                                                                      // D102                     \n' +
+                'if( (hactive * bpp) > (8 * viramsz) ){                                                                                                                                 \n' +
+                '	max_ovf = dly_min_calc;                                                                                                                 // D102                     \n' +
+                '}                                                                                                                                                                      \n' +
+                '                                                                                                                                                                       \n' +
+                'var min_hbp = min_hbp_txesync_0;                                                                                                           // E49                      \n' +
+                'if(txesync == 1){                                                                                                                                                      \n' +
+                '   min_hbp = min_hbp_txesync_1;                                                                                                                                        \n' +
+                '}                                                                                                                                                                      \n' +
+                'var result_dly_min = Math.max(min_udf, min_lp, min_hsa, min_hbp, min_hfp);                                                                 // E46                      \n' +
+                'var result_dly_max = Math.min(dlymax, dly_min_calc, max_htot);                                                                             // F46                      \n' +
+                '                                                                                                                                                                       \n' +
+                'output = parseInt((result_dly_min + result_dly_max) / 2) + " /* This value was calculated by FSP. An override is available but not recommended for most users */";     \n' +
+                'if(${module.driver.mipi_dsi.dly_override} > 0){                                                                                                                        \n' +
+                '   output = ${module.driver.mipi_dsi.dly_override} + " /* Using Override Value (not recommended for most users) */";                                                   \n' +
+                '}                                                                                                                                                                      \n' +
+                '                                                                                                                                                                       \n' +
+                'output')]]>
+            </export>
+        </property>
+
+        <property display="Video Mode|Delay Override (0 to disable)" default="0" id="module.driver.mipi_dsi.dly_override" description="Override FSP calculated delay value (not recommended for most users). Delay for DSI Host between first data reception from display module until DSI output begins. (Unit: 32xUI). Set to 0 to use FSP calculated value (recommended).">
+            <constraint display="Value must be an integer.">testInteger("${module.driver.mipi_dsi.dly_override}")</constraint>
+            <constraint display="Value must be greater than or equal to 0.">"${module.driver.mipi_dsi.dly_override}" &gt;= 0</constraint>
+            <constraint display="Value must be less than 4096.">"${module.driver.mipi_dsi.dly_override}" &lt; 4096</constraint>
+        </property>
+
+        <property display="Video Mode|Prevent LP Transition" id="module.driver.mipi_dsi.no_lp" default="" description="Prevent LP transition during specified periods." bitmapPrefix="">
+            <option display="No LP during the HSA period" id="module.driver.mipi_dsi.no_lp.hsa" value="R_DSILINK_VMSET0R_HSANOLP_Msk"/>
+            <option display="No LP during the HBP period" id="module.driver.mipi_dsi.no_lp.hbp" value="R_DSILINK_VMSET0R_HBPNOLP_Msk"/>
+            <option display="No LP during the HFP period" id="module.driver.mipi_dsi.no_lp.hfp" value="R_DSILINK_VMSET0R_HFPNOLP_Msk"/>
+        </property>
+
+        <!-- Interrupts -->
+        <property display="Interrupts|dsi_seq0 Interrupt Priority" default="" id="module.driver.mipi_dsi.ipl_seq0" description="Select the Low-Power Sequence command operation interrupt priority.">
+            <select enum="enum.mcu.nvic.priorities.mandatory"/>
+            <interrupt event="event.mipidsi.seq0" isr="mipi_dsi_seq0_isr"/>
+        </property>
+
+        <property display="Interrupts|dsi_seq1 Interrupt Priority" default="" id="module.driver.mipi_dsi.ipl_seq1" description="Select the High-Speed Sequence command operation interrupt priority.">
+            <select enum="enum.mcu.nvic.priorities.mandatory"/>
+            <interrupt event="event.mipidsi.seq1" isr="mipi_dsi_seq1_isr"/>
+        </property>
+
+        <property display="Interrupts|dsi_vin1 Interrupt Priority" default="" id="module.driver.mipi_dsi.ipl_vin1" description="Select the Video Input interrupt priority.">
+            <select enum="enum.mcu.nvic.priorities.mandatory"/>
+            <interrupt event="event.mipidsi.vin1" isr="mipi_dsi_vin1_isr"/>
+        </property>
+
+        <property display="Interrupts|dsi_rcv Interrupt Priority" default="" id="module.driver.mipi_dsi.ipl_rcv" description="Select the Receive interrupt priority.">
+            <select enum="enum.mcu.nvic.priorities.mandatory"/>
+            <interrupt event="event.mipidsi.rcv" isr="mipi_dsi_rcv_isr"/>
+        </property>
+
+        <property display="Interrupts|dsi_ferr Interrupt Priority" default="" id="module.driver.mipi_dsi.ipl_ferr" description="Select the Fatal Error interrupt priority.">
+            <select enum="enum.mcu.nvic.priorities.mandatory"/>
+            <interrupt event="event.mipidsi.ferr" isr="mipi_dsi_ferr_isr"/>
+        </property>
+
+        <property display="Interrupts|dsi_ppi Interrupt Priority" default="" id="module.driver.mipi_dsi.ipl_ppi" description="Select the PHY-Protocol Interface interrupt priority.">
+            <select enum="enum.mcu.nvic.priorities.mandatory"/>
+            <interrupt event="event.mipidsi.ppi" isr="mipi_dsi_ppi_isr"/>
+        </property>
+
+        <property display="Interrupts|Receive Interrupt Enable" default="module.driver.mipi_dsi.rxie.btarend,module.driver.mipi_dsi.rxie.lrxhto,module.driver.mipi_dsi.rxie.tato,module.driver.mipi_dsi.rxie.rxresp,module.driver.mipi_dsi.rxie.rxeotp_msk,module.driver.mipi_dsi.rxie.rxte,module.driver.mipi_dsi.rxie.rxack,module.driver.mipi_dsi.rxie.extedet,module.driver.mipi_dsi.rxie.mlferr,module.driver.mipi_dsi.rxie.eccerrm,module.driver.mipi_dsi.rxie.unexerr,module.driver.mipi_dsi.rxie.wcerr,module.driver.mipi_dsi.rxie.crcerr,module.driver.mipi_dsi.rxie.iberr,module.driver.mipi_dsi.rxie.rxovferr,module.driver.mipi_dsi.rxie.prtoerr,module.driver.mipi_dsi.rxie.noreserr,module.driver.mipi_dsi.rxie.rsizeerr,module.driver.mipi_dsi.rxie.eccerrs,module.driver.mipi_dsi.rxie.rxake" id="module.driver.mipi_dsi.rxie" description="Enable receive interrupts." bitmapPrefix="">
+            <option display="BTA Request End" id="module.driver.mipi_dsi.rxie.btarend" value="R_DSILINK_RXIER_BTAREND_Msk"/>
+            <option display="LP-RX Host Processor Timeout" id="module.driver.mipi_dsi.rxie.lrxhto" value="R_DSILINK_RXIER_LRXHTO_Msk"/>
+            <option display="Turnaround Acknowledge Timeout" id="module.driver.mipi_dsi.rxie.tato" value="R_DSILINK_RXIER_TATO_Msk"/>
+            <option display="Response Packet Receive" id="module.driver.mipi_dsi.rxie.rxresp" value="R_DSILINK_RXIER_RXRESP_Msk"/>
+            <option display="EoTp Receive" id="module.driver.mipi_dsi.rxie.rxeotp_msk" value="R_DSILINK_RXIER_RXEOTP_Msk"/>
+            <option display="Tearing Effect Trigger Receive" id="module.driver.mipi_dsi.rxie.rxte" value="R_DSILINK_RXIER_RXTE_Msk"/>
+            <option display="ACK Trigger Receive" id="module.driver.mipi_dsi.rxie.rxack" value="R_DSILINK_RXIER_RXACK_Msk"/>
+            <option display="External Tearing Effect Detect" id="module.driver.mipi_dsi.rxie.extedet" value="R_DSILINK_RXIER_EXTEDET_Msk"/>
+            <option display="Malform Error" id="module.driver.mipi_dsi.rxie.mlferr" value="R_DSILINK_RXIER_MLFERR_Msk"/>
+            <option display="Multi Bit ECC Error" id="module.driver.mipi_dsi.rxie.eccerrm" value="R_DSILINK_RXIER_ECCERRM_Msk"/>
+            <option display="Unexpected Packet Error" id="module.driver.mipi_dsi.rxie.unexerr" value="R_DSILINK_RXIER_UNEXERR_Msk"/>
+            <option display="Word Count Error" id="module.driver.mipi_dsi.rxie.wcerr" value="R_DSILINK_RXIER_WCERR_Msk"/>
+            <option display="CRC Error" id="module.driver.mipi_dsi.rxie.crcerr" value="R_DSILINK_RXIER_CRCERR_Msk"/>
+            <option display="Internal Bus Error" id="module.driver.mipi_dsi.rxie.iberr" value="R_DSILINK_RXIER_IBERR_Msk"/>
+            <option display="Receive Buffer Overflow Error" id="module.driver.mipi_dsi.rxie.rxovferr" value="R_DSILINK_RXIER_RXOVFERR_Msk"/>
+            <option display="Peripheral Response Timeout Error" id="module.driver.mipi_dsi.rxie.prtoerr" value="R_DSILINK_RXIER_PRTOERR_Msk"/>
+            <option display="No Response Error" id="module.driver.mipi_dsi.rxie.noreserr" value="R_DSILINK_RXIER_NORESERR_Msk"/>
+            <option display="Retrun Packet Size Error" id="module.driver.mipi_dsi.rxie.rsizeerr" value="R_DSILINK_RXIER_RSIZEERR_Msk"/>
+            <option display="Single Bit ECC Error" id="module.driver.mipi_dsi.rxie.eccerrs" value="R_DSILINK_RXIER_ECCERRS_Msk"/>
+            <option display="Acknowledge and Error Report Receive" id="module.driver.mipi_dsi.rxie.rxake" value="R_DSILINK_RXIER_RXAKE_Msk"/>
+        </property>
+
+        <property display="Interrupts|Fatal Error Interrupt Enable" default="module.driver.mipi_dsi.ferrie.htxto,module.driver.mipi_dsi.ferrie.lrxhto,module.driver.mipi_dsi.ferrie.tato,module.driver.mipi_dsi.ferrie.escent,module.driver.mipi_dsi.ferrie.syncesc,module.driver.mipi_dsi.ferrie.ctrl,module.driver.mipi_dsi.ferrie.clp0,module.driver.mipi_dsi.ferrie.clp1" id="module.driver.mipi_dsi.ferrie" description="Enable Fatal Error interrupts." bitmapPrefix="">
+            <option display="HS TX Timeout" id="module.driver.mipi_dsi.ferrie.htxto" value="R_DSILINK_FERRIER_HTXTO_Msk"/>
+            <option display="LP-RX Host Processor Timeout" id="module.driver.mipi_dsi.ferrie.lrxhto" value="R_DSILINK_FERRIER_LRXHTO_Msk"/>
+            <option display="Turnaround Acknowledge Timeout" id="module.driver.mipi_dsi.ferrie.tato" value="R_DSILINK_FERRIER_TATO_Msk"/>
+            <option display="Escape mode Entry Error" id="module.driver.mipi_dsi.ferrie.escent" value="R_DSILINK_FERRIER_ESCENT_Msk"/>
+            <option display="LPDT Sync Error" id="module.driver.mipi_dsi.ferrie.syncesc" value="R_DSILINK_FERRIER_SYNCESC_Msk"/>
+            <option display="Control Error" id="module.driver.mipi_dsi.ferrie.ctrl" value="R_DSILINK_FERRIER_CTRL_Msk"/>
+            <option display="LP0 Contention Error" id="module.driver.mipi_dsi.ferrie.clp0" value="R_DSILINK_FERRIER_CLP0_Msk"/>
+            <option display="LP1 Contention Error" id="module.driver.mipi_dsi.ferrie.clp1" value="R_DSILINK_FERRIER_CLP1_Msk"/>
+        </property>
+
+        <property display="Interrupts|Physical Lane Interrupt Enable" default="" id="module.driver.mipi_dsi.plie" description="Enable Physical Lane interrupts." bitmapPrefix="">
+            <option display="Data Lane-0 Rx to Tx Transition" id="module.driver.mipi_dsi.plie.dl0rx2tx" value="R_DSILINK_PLIER_DL0RX2TX_Msk"/>
+            <option display="Data Lane-0 Tx to Rx Transition" id="module.driver.mipi_dsi.plie.dl0tx2rx" value="R_DSILINK_PLIER_DL0TX2RX_Msk"/>
+            <option display="Clock Lane ULPS Enter" id="module.driver.mipi_dsi.plie.clulpent" value="R_DSILINK_PLIER_CLULPENT_Msk"/>
+            <option display="Clock Lane ULPS Exit" id="module.driver.mipi_dsi.plie.clulpext" value="R_DSILINK_PLIER_CLULPEXT_Msk"/>
+            <option display="Clock Lane LP to HS Transition" id="module.driver.mipi_dsi.plie.cllp2hs" value="R_DSILINK_PLIER_CLLP2HS_Msk"/>
+            <option display="Clock Lane HS to LP Transition" id="module.driver.mipi_dsi.plie.clh2lp" value="R_DSILINK_PLIER_CLHS2LP_Msk"/>
+            <option display="Data Lane ULPS Enter" id="module.driver.mipi_dsi.plie.dlulpent" value="R_DSILINK_PLIER_DLULPENT_Msk"/>
+            <option display="Data Lane ULPS Exit" id="module.driver.mipi_dsi.plie.dlulpext" value="R_DSILINK_PLIER_DLULPEXT_Msk"/>
+        </property>
+
+        <property display="Interrupts|Video Mode Interrupt Enable" default="module.driver.mipi_dsi.vmie.vbufudf,module.driver.mipi_dsi.vmie.vbufovf" id="module.driver.mipi_dsi.vmie" description="Enable Video Mode interrupts." bitmapPrefix="">
+            <option display="Video Mode Operation Start" id="module.driver.mipi_dsi.vmie.start" value="R_DSILINK_VMIER_START_Msk"/>
+            <option display="Video Mode Operation Stop" id="module.driver.mipi_dsi.vmie.stop" value="R_DSILINK_VMIER_STOP_Msk"/>
+            <option display="Video Mode Operation Ready" id="module.driver.mipi_dsi.vmie.virdy" value="R_DSILINK_VMIER_VIRDY_Msk"/>
+            <option display="Timing Error" id="module.driver.mipi_dsi.vmie.timerr" value="R_DSILINK_VMIER_TIMERR_Msk"/>
+            <option display="Video Buffer Underflow Error" id="module.driver.mipi_dsi.vmie.vbufudf" value="R_DSILINK_VMIER_VBUFUDF_Msk"/>
+            <option display="Video Buffer Overflow Error" id="module.driver.mipi_dsi.vmie.vbufovf" value="R_DSILINK_VMIER_VBUFOVF_Msk"/>
+        </property>
+
+        <property display="Interrupts|Sequence Channel 0 Interrupt Enable" default="module.driver.mipi_dsi.sqch0ie.aactfin,module.driver.mipi_dsi.sqch0ie.adesfin,module.driver.mipi_dsi.sqch0ie.txiberr,module.driver.mipi_dsi.sqch0ie.rxferr,module.driver.mipi_dsi.sqch0ie.rxfail,module.driver.mipi_dsi.sqch0ie.rxpfail,module.driver.mipi_dsi.sqch0ie.rxcorerr,module.driver.mipi_dsi.sqch0ie.rxake" id="module.driver.mipi_dsi.sqch0ie" description="Enable Sequence Channel 0 interrupts." bitmapPrefix="">
+            <option display="All Actions Finish" id="module.driver.mipi_dsi.sqch0ie.aactfin" value="R_DSILINK_SQCH0IER_AACTFIN_Msk"/>
+            <option display="All Descriptors Finish" id="module.driver.mipi_dsi.sqch0ie.adesfin" value="R_DSILINK_SQCH0IER_ADESFIN_Msk"/>
+            <option display="Tx Internal Bus Error" id="module.driver.mipi_dsi.sqch0ie.txiberr" value="R_DSILINK_SQCH0IER_TXIBERR_Msk"/>
+            <option display="Receive Fatal Error" id="module.driver.mipi_dsi.sqch0ie.rxferr" value="R_DSILINK_SQCH0IER_RXFERR_Msk"/>
+            <option display="Receive Fail" id="module.driver.mipi_dsi.sqch0ie.rxfail" value="R_DSILINK_SQCH0IER_RXFAIL_Msk"/>
+            <option display="Receive Packet Data Fail" id="module.driver.mipi_dsi.sqch0ie.rxpfail" value="R_DSILINK_SQCH0IER_RXPFAIL_Msk"/>
+            <option display="Receive Correctable Error Interrupt" id="module.driver.mipi_dsi.sqch0ie.rxcorerr" value="R_DSILINK_SQCH0IER_RXCORERR_Msk"/>
+            <option display="Receive Acknowledge and Error Report Packet" id="module.driver.mipi_dsi.sqch0ie.rxake" value="R_DSILINK_SQCH0IER_RXAKE_Msk"/>
+        </property>
+
+        <property display="Interrupts|Sequence Channel 1 Interrupt Enable" default="module.driver.mipi_dsi.sqch1ie.aactfin,module.driver.mipi_dsi.sqch1ie.adesfin,module.driver.mipi_dsi.sqch1ie.sizeerr,module.driver.mipi_dsi.sqch1ie.txiberr,module.driver.mipi_dsi.sqch1ie.rxferr,module.driver.mipi_dsi.sqch1ie.rxfail,module.driver.mipi_dsi.sqch1ie.rxpfail,module.driver.mipi_dsi.sqch1ie.rxcorerr,module.driver.mipi_dsi.sqch1ie.rxake" id="module.driver.mipi_dsi.sqch1ie" description="Enable Sequence Channel 1 interrupts." bitmapPrefix="">
+            <option display="All Actions Finish" id="module.driver.mipi_dsi.sqch1ie.aactfin" value="R_DSILINK_SQCH1IER_AACTFIN_Msk"/>
+            <option display="All Descriptors Finish" id="module.driver.mipi_dsi.sqch1ie.adesfin" value="R_DSILINK_SQCH1IER_ADESFIN_Msk"/>
+            <option display="Packet Size Error" id="module.driver.mipi_dsi.sqch1ie.sizeerr" value="R_DSILINK_SQCH1IER_SIZEERR_Msk"/>
+            <option display="Tx Internal Bus Error" id="module.driver.mipi_dsi.sqch1ie.txiberr" value="R_DSILINK_SQCH1IER_TXIBERR_Msk"/>
+            <option display="Receive Fatal Error" id="module.driver.mipi_dsi.sqch1ie.rxferr" value="R_DSILINK_SQCH1IER_RXFERR_Msk"/>
+            <option display="Receive Fail" id="module.driver.mipi_dsi.sqch1ie.rxfail" value="R_DSILINK_SQCH1IER_RXFAIL_Msk"/>
+            <option display="Receive Packet Data Fail" id="module.driver.mipi_dsi.sqch1ie.rxpfail" value="R_DSILINK_SQCH1IER_RXPFAIL_Msk"/>
+            <option display="Receive Correctable Error Interrupt" id="module.driver.mipi_dsi.sqch1ie.rxcorerr" value="R_DSILINK_SQCH1IER_RXCORERR_Msk"/>
+            <option display="Receive Acknowledge and Error Report Packet" id="module.driver.mipi_dsi.sqch1ie.rxake" value="R_DSILINK_SQCH1IER_RXAKE_Msk"/>
+        </property>
+
+        <!-- Callback -->
+        <property default="mipi_dsi${_instance}_callback" display="Interrupts|Callback" id="module.driver.mipi_dsi.p_callback" description="A user callback function. If this callback function is provided it is called from the interrupt service routine (ISR) each time any interrupt occurs.">
+            <constraint display="Name must be a valid C symbol">
+                testSymbol("${module.driver.mipi_dsi.p_callback}")
+            </constraint>
+            <constraint display="Callback must not be NULL.">
+                "${module.driver.mipi_dsi.p_callback}" != "NULL"
+            </constraint>
+        </property>
+
+        <property default="NULL" display="Interrupts|Callback Context" id="module.driver.mipi_dsi.p_context" description="Pointer to the context structure to be passed through the callback argument.">
+            <constraint display="Name must be a valid C symbol">
+                testSymbol("${module.driver.mipi_dsi.p_context}")
+            </constraint>
+        </property>
+
+        <!-- Processing Options -->
+        <property display="Options|Data Scramble Enable" default="module.driver.mipi_dsi.scramble.disable" id="module.driver.mipi_dsi.scramble" description="Data Scramble Enable. Do not enable unless peripheral has data scramble function.">
+            <option display="Disable" id="module.driver.mipi_dsi.scramble.disable" value="(0)"/>
+            <option display="Enable" id="module.driver.mipi_dsi.scramble.enable" value="(1)"/>
+        </property>
+
+        <property display="Options|EoTP Enable" default="module.driver.mipi_dsi.dsisetr_b.eotpen.enable" id="module.driver.mipi_dsi.dsisetr_b.eotpen" description="Disable to support devices that do not support EoTP transmission.">
+            <option display="Disable" id="module.driver.mipi_dsi.dsisetr_b.eotpen.disable" value="(0)"/>
+            <option display="Enable" id="module.driver.mipi_dsi.dsisetr_b.eotpen.enable" value="(1)"/>
+        </property>
+
+        <property display="Options|ECC Check Enable" default="module.driver.mipi_dsi.ecc_enable.enable" id="module.driver.mipi_dsi.ecc_enable" description="ECC Check support enable.">
+            <option display="Disable" id="module.driver.mipi_dsi.ecc_enable.disable" value="(0)"/>
+            <option display="Enable" id="module.driver.mipi_dsi.ecc_enable.enable" value="(1)"/>
+        </property>
+
+        <property display="Options|CRC Enable" id="module.driver.mipi_dsi.crc_enable_mask" default="" description="" bitmapPrefix="">
+            <option display="Virtual Channel 0" id="module.driver.mipi_dsi.crc_enable_mask.vc0" value="MIPI_DSI_VC_0"/>
+            <option display="Virtual Channel 1" id="module.driver.mipi_dsi.crc_enable_mask.vc1" value="MIPI_DSI_VC_1"/>
+            <option display="Virtual Channel 2" id="module.driver.mipi_dsi.crc_enable_mask.vc2" value="MIPI_DSI_VC_2"/>
+            <option display="Virtual Channel 3" id="module.driver.mipi_dsi.crc_enable_mask.vc3" value="MIPI_DSI_VC_3"/>
+        </property>
+
+        <property display="Options|Maximum Return Packet Size" default="1" id="module.driver.mipi_dsi.mrpsz" description=" Specify the maximum return packet size to be received in LP-RX mode.">
+            <constraint display="Value must be an integer.">testInteger("${module.driver.mipi_dsi.mrpsz}")</constraint>
+            <constraint display="Value must be greater than or equal to 1.">(${module.driver.mipi_dsi.mrpsz} &gt;= 1)</constraint>
+            <constraint display="Value must be less than or equal to 65,535.">(${module.driver.mipi_dsi.mrpsz} &lt;= 65535)</constraint>
+        </property>
+
+        <property display="Options|External Tearing Effect Detection Sense Select" default="1" id="module.driver.mipi_dsi.extemd" description=" Specify the maximum return packet size to be received in LP-RX mode.">
+            <option display="Rising Edge" id="module.driver.mipi_dsi.extemd.rising" value="(0)"/>
+            <option display="Falling Edge" id="module.driver.mipi_dsi.extemd.falling" value="(1)"/>
+        </property>
+
+        <property display="Options|HS-TX Timeout Count (us)" default="0" id="module.driver.mipi_dsi.hstxto" description="Set LP-RX Timeout (LRX-H_TO) value. (0 is disabled)">
+            <constraint display="Value must be an integer.">testInteger("${module.driver.mipi_dsi.hstxto}")</constraint>
+            <constraint display="Value must be greater than or equal to 0.">("${module.driver.mipi_dsi.hstxto}" &gt;= 0)</constraint>
+            <export><![CDATA[eval('\n' +
+                    'var dsi_clk_ns    = 1000 / ${module.driver.mipi_dsi.requires.mipi_phy::module.driver.mipi_phy.pll_mhz}; // This is approximate, but should be close. We don\'t currently have access to \'export\' output. \n' +
+                    'var dsi_ui_ns     = dsi_clk_ns * 2;                                                                                                                                                                        \n' +
+                    'var temp = 1000 * ${module.driver.mipi_dsi.hstxto} / 32; \n' +
+                    'output = parseInt(temp / dsi_ui_ns); \n' +
+                    'output')]]>
+            </export>
+        </property>
+
+        <property display="Options|LP-RX Host Processor Timeout (us)" default="0" id="module.driver.mipi_dsi.lrxhto" description="Set LP-RX Timeout (LRX-H_TO) value. (0 is disabled)">
+            <constraint display="Value must be an integer.">testInteger("${module.driver.mipi_dsi.lrxhto}")</constraint>
+            <constraint display="Value must be greater than or equal to 0.">("${module.driver.mipi_dsi.lrxhto}" &gt;= 0)</constraint>
+            <export><![CDATA[eval('\n' +
+                    'var pll_mhz = ${module.driver.mipi_dsi.requires.mipi_phy::module.driver.mipi_phy.pll_mhz}; // This is approximate, but should be close. We don\'t currently have access to \'export\' output. \n' +
+                    'var lp_div  = ${module.driver.mipi_dsi.requires.mipi_phy::module.driver.mipi_phy.lp_divisor}; \n ' +
+                    'var lp_mhz = (pll_mhz / 16) / lp_div; // DSI HS Clock Line Rate is (\'configured\' / 2) \n' +
+                    'var temp = ${module.driver.mipi_dsi.lrxhto}; \n' +
+                    'output = parseInt(temp * lp_mhz); \n' +
+                    'output')]]>
+            </export>
+        </property>
+
+        <property display="Options|Turnaround Acknowledge Timeout (us)" default="0" id="module.driver.mipi_dsi.tato" description="Set Turnaround Acknowledge Timeout value. (0 is disabled)">
+            <constraint display="Value must be an integer.">testInteger("${module.driver.mipi_dsi.tato}")</constraint>
+            <constraint display="Value must be greater than or equal to 0.">("${module.driver.mipi_dsi.tato}") &gt;= 0</constraint>
+            <export><![CDATA[eval('\n' +
+                    'var pll_mhz = ${module.driver.mipi_dsi.requires.mipi_phy::module.driver.mipi_phy.pll_mhz}; // This is approximate, but should be close. We don\'t currently have access to \'export\' output. \n' +
+                    'var lp_div  = ${module.driver.mipi_dsi.requires.mipi_phy::module.driver.mipi_phy.lp_divisor}; \n ' +
+                    'var lp_mhz = (pll_mhz / 16) / lp_div; // DSI HS Clock Line Rate is (\'configured\' / 2) \n' +
+                    'var temp = ${module.driver.mipi_dsi.tato}; \n' +
+                    'output = parseInt(temp * lp_mhz); \n' +
+                    'output')]]>
+            </export>
+        </property>
+
+        <property display="Options|Peripheral Response Timeout (us)" default="0" id="module.driver.mipi_dsi.bta_timeout" description="Set Peripheral Response Timeout BTA value. (0 is disabled)">
+            <constraint display="Value must be an integer.">testInteger("${module.driver.mipi_dsi.bta_timeout}")</constraint>
+            <constraint display="Value must be greater than or equal to 0.">("${module.driver.mipi_dsi.bta_timeout}" &gt;= 0)</constraint>
+            <export><![CDATA[eval('\n' +
+                    'var pll_mhz = ${module.driver.mipi_dsi.requires.mipi_phy::module.driver.mipi_phy.pll_mhz}; // This is approximate, but should be close. We don\'t currently have access to \'export\' output. \n' +
+                    'var lp_div  = ${module.driver.mipi_dsi.requires.mipi_phy::module.driver.mipi_phy.lp_divisor}; \n ' +
+                    'var lp_mhz = (pll_mhz / 16) / lp_div; // DSI HS Clock Line Rate is (\'configured\' / 2) \n' +
+                    'var temp = ${module.driver.mipi_dsi.bta_timeout}; \n' +
+                    'output = parseInt(temp * lp_mhz); \n' +
+                    'output')]]>
+            </export>
+        </property>
+
+        <property display="Options|LP Write Response Timeout (us)" default="0" id="module.driver.mipi_dsi.lpwrite_timeout" description="Set Low Power Write Acknowledge Timeout value. (0 is disabled)">
+            <constraint display="Value must be an integer.">testInteger("${module.driver.mipi_dsi.lpwrite_timeout}")</constraint>
+            <constraint display="Value must be greater than or equal to 0.">("${module.driver.mipi_dsi.lpwrite_timeout}" &gt;= 0)</constraint>
+            <export><![CDATA[eval('\n' +
+                    'var pll_mhz = ${module.driver.mipi_dsi.requires.mipi_phy::module.driver.mipi_phy.pll_mhz}; // This is approximate, but should be close. We don\'t currently have access to \'export\' output. \n' +
+                    'var lp_div  = ${module.driver.mipi_dsi.requires.mipi_phy::module.driver.mipi_phy.lp_divisor}; \n ' +
+                    'var lp_mhz = (pll_mhz / 16) / lp_div; // DSI HS Clock Line Rate is (\'configured\' / 2) \n' +
+                    'var temp = ${module.driver.mipi_dsi.lpwrite_timeout}; \n' +
+                    'output = parseInt(temp * lp_mhz); \n' +
+                    'output')]]>
+            </export>
+        </property>
+
+        <property display="Options|LP Read Response Timeout (us)" default="0" id="module.driver.mipi_dsi.lpread_timeout" description="Set Low Power Read Acknowledge Timeout value. (0 is disabled)">
+            <constraint display="Value must be an integer.">testInteger("${module.driver.mipi_dsi.lpread_timeout}")</constraint>
+            <constraint display="Value must be greater than or equal to 0.">("${module.driver.mipi_dsi.lpread_timeout}" &gt;= 0)</constraint>
+            <export><![CDATA[eval('\n' +
+                    'var pll_mhz = ${module.driver.mipi_dsi.requires.mipi_phy::module.driver.mipi_phy.pll_mhz}; // This is approximate, but should be close. We don\'t currently have access to \'export\' output. \n' +
+                    'var lp_div  = ${module.driver.mipi_dsi.requires.mipi_phy::module.driver.mipi_phy.lp_divisor}; \n ' +
+                    'var lp_mhz = (pll_mhz / 16) / lp_div; // DSI HS Clock Line Rate is (\'configured\' / 2) \n' +
+                    'var temp = ${module.driver.mipi_dsi.lpread_timeout}; \n' +
+                    'output = parseInt(temp * lp_mhz); \n' +
+                    'output')]]>
+            </export>
+        </property>
+
+        <property display="Options|HS Write Response Timeout (us)" default="0" id="module.driver.mipi_dsi.hswrite_timeout" description="Set High Speed Write Acknowledge Timeout value. (0 is disabled)">
+            <constraint display="Value must be an integer.">testInteger("${module.driver.mipi_dsi.hswrite_timeout}")</constraint>
+            <constraint display="Value must be greater than or equal to 0.">("${module.driver.mipi_dsi.hswrite_timeout}" &gt;= 0)</constraint>
+            <export><![CDATA[eval('\n' +
+                    'var pll_mhz = ${module.driver.mipi_dsi.requires.mipi_phy::module.driver.mipi_phy.pll_mhz}; // This is approximate, but should be close. We don\'t currently have access to \'export\' output. \n' +
+                    'var lp_div  = ${module.driver.mipi_dsi.requires.mipi_phy::module.driver.mipi_phy.lp_divisor}; \n ' +
+                    'var lp_mhz = (pll_mhz / 16) / lp_div; // DSI HS Clock Line Rate is (\'configured\' / 2) \n' +
+                    'var temp = ${module.driver.mipi_dsi.hswrite_timeout}; \n' +
+                    'output = parseInt(temp * lp_mhz); \n' +
+                    'output')]]>
+            </export>
+        </property>
+
+        <property display="Options|HS Read Response Timeout (us)" default="0" id="module.driver.mipi_dsi.hsread_timeout" description="Set High Speed Read Acknowledge Timeout value. (0 is disabled)">
+            <constraint display="Value must be an integer.">testInteger("${module.driver.mipi_dsi.hsread_timeout}")</constraint>
+            <constraint display="Value must be greater than or equal to 0.">("${module.driver.mipi_dsi.hsread_timeout}" &gt;= 0)</constraint>
+            <export><![CDATA[eval('\n' +
+                    'var pll_mhz = ${module.driver.mipi_dsi.requires.mipi_phy::module.driver.mipi_phy.pll_mhz}; // This is approximate, but should be close. We don\'t currently have access to \'export\' output. \n' +
+                    'var lp_div  = ${module.driver.mipi_dsi.requires.mipi_phy::module.driver.mipi_phy.lp_divisor}; \n ' +
+                    'var lp_mhz = (pll_mhz / 16) / lp_div; // DSI HS Clock Line Rate is (\'configured\' / 2) \n' +
+                    'var temp = ${module.driver.mipi_dsi.hsread_timeout}; \n' +
+                    'output = parseInt(temp * lp_mhz); \n' +
+                    'output')]]>
+            </export>
+        </property>
+        <header>
+            /* MIPI DSI on MIPI DSI Instance. */
+
+            /* Access the MIPI DSI instance using these structures when calling API functions directly (::p_api is not used). */
+            extern mipi_dsi_instance_ctrl_t ${module.driver.mipi_dsi.name}_ctrl;
+            extern const mipi_dsi_cfg_t ${module.driver.mipi_dsi.name}_cfg;
+
+            #ifndef ${module.driver.mipi_dsi.p_callback}
+              void ${module.driver.mipi_dsi.p_callback}(mipi_dsi_callback_args_t * p_args);
+            #endif
+        </header>
+        <includes>
+            #include &quot;r_mipi_dsi.h&quot;
+            #include &quot;r_mipi_dsi_api.h&quot;
+        </includes>
+
+        <declarations>
+
+        mipi_dsi_instance_ctrl_t ${module.driver.mipi_dsi.name}_ctrl;
+
+        const mipi_dsi_timing_t ${module.driver.mipi_dsi.name}_timing =
+        {
+        .clock_stop_time       = MIPI_PHY_CLKSTPT,
+        .clock_beforehand_time = MIPI_PHY_CLKBFHT,
+        .clock_keep_time       = MIPI_PHY_CLKKPT,
+        .go_lp_and_back        = MIPI_PHY_GOLPBKT,
+        };
+
+
+        const mipi_dsi_extended_cfg_t ${module.driver.mipi_dsi.name}_extended_cfg =
+        {
+            .dsi_seq0.ipl           = ${module.driver.mipi_dsi.ipl_seq0},
+            .dsi_seq0.irq           = VECTOR_NUMBER_MIPIDSI_SEQ0,
+
+            .dsi_seq1.ipl           = ${module.driver.mipi_dsi.ipl_seq1},
+            .dsi_seq1.irq           = VECTOR_NUMBER_MIPIDSI_SEQ1,
+
+            .dsi_vin1.ipl           = ${module.driver.mipi_dsi.ipl_vin1},
+            .dsi_vin1.irq           = VECTOR_NUMBER_MIPIDSI_VIN1,
+
+            .dsi_rcv.ipl            = ${module.driver.mipi_dsi.ipl_rcv},
+            .dsi_rcv.irq            = VECTOR_NUMBER_MIPIDSI_RCV,
+
+            .dsi_ferr.ipl           = ${module.driver.mipi_dsi.ipl_ferr},
+            .dsi_ferr.irq           = VECTOR_NUMBER_MIPIDSI_FERR,
+
+            .dsi_ppi.ipl            = ${module.driver.mipi_dsi.ipl_ppi},
+            .dsi_ppi.irq            = VECTOR_NUMBER_MIPIDSI_PPI,
+
+            .dsi_rxie               = ${module.driver.mipi_dsi.rxie} 0x0,
+            .dsi_ferrie             = ${module.driver.mipi_dsi.ferrie} 0x0,
+            .dsi_plie               = ${module.driver.mipi_dsi.plie} 0x0,
+            .dsi_vmie               = ${module.driver.mipi_dsi.vmie} 0x0,
+            .dsi_sqch0ie            = ${module.driver.mipi_dsi.sqch0ie} 0x0,
+            .dsi_sqch1ie            = ${module.driver.mipi_dsi.sqch1ie} 0x0,
+        };
+
+        const mipi_dsi_cfg_t ${module.driver.mipi_dsi.name}_cfg =
+        {
+            .p_mipi_phy_instance      = &amp;${module.driver.mipi_dsi.requires.mipi_phy::module.driver.mipi_phy.name},
+
+            .p_timing                 = &amp;${module.driver.mipi_dsi.name}_timing,
+
+            .sync_pulse               = ${module.driver.mipi_dsi.txesync},
+            .data_type                = ${module.driver.mipi_dsi.data_type},
+            .virtual_channel_id       = ${module.driver.mipi_dsi.vc},
+
+            .vertical_active_lines    = ${module.driver.mipi_dsi.display.vertical_active_lines},
+            .vertical_sync_lines      = ${module.driver.mipi_dsi.display.vertical_sync_lines},
+            .vertical_back_porch      = (${module.driver.mipi_dsi.display.vtiming.back_porch} - ${module.driver.mipi_dsi.display.vertical_sync_lines}),
+            .vertical_front_porch     = (${module.driver.mipi_dsi.display.vtiming.total_cyc} - ${module.driver.mipi_dsi.display.vtiming.display_cyc} - ${module.driver.mipi_dsi.display.vtiming.back_porch} - ${module.driver.mipi_dsi.display.vertical_sync_lines}),
+            .vertical_sync_polarity   = ${module.driver.mipi_dsi.display.vertical_sync_polarity},
+
+
+            .horizontal_active_lines  = ${module.driver.mipi_dsi.display.horizontal_active_lines},
+            .horizontal_sync_lines    = ${module.driver.mipi_dsi.display.horizontal_sync_lines},
+            .horizontal_back_porch    = (${module.driver.mipi_dsi.display.htiming.back_porch} - ${module.driver.mipi_dsi.display.horizontal_sync_lines}),
+            .horizontal_front_porch   = (${module.driver.mipi_dsi.display.htiming.total_cyc} - ${module.driver.mipi_dsi.display.htiming.display_cyc} - ${module.driver.mipi_dsi.display.htiming.back_porch} - ${module.driver.mipi_dsi.display.horizontal_sync_lines}),
+            .horizontal_sync_polarity = ${module.driver.mipi_dsi.display.horizontal_sync_polarity},
+
+            .video_mode_delay         = ${module.driver.mipi_dsi.dly},
+
+            .hsa_no_lp                = ((${module.driver.mipi_dsi.no_lp} 0x0) &amp; R_DSILINK_VMSET0R_HSANOLP_Msk),
+            .hbp_no_lp                = ((${module.driver.mipi_dsi.no_lp} 0x0) &amp; R_DSILINK_VMSET0R_HBPNOLP_Msk),
+            .hfp_no_lp                = ((${module.driver.mipi_dsi.no_lp} 0x0) &amp; R_DSILINK_VMSET0R_HFPNOLP_Msk),
+
+            .num_lanes                = ${module.driver.mipi_dsi.num_lanes},
+            .ulps_wakeup_period       = ${module.driver.mipi_dsi.ulps_wakeup_period},
+            .continuous_clock         = ${module.driver.mipi_dsi.continuous_clock},
+
+
+            .hs_tx_timeout            = ${module.driver.mipi_dsi.hstxto},
+            .lp_rx_timeout            = ${module.driver.mipi_dsi.lrxhto},
+            .turnaround_timeout       = ${module.driver.mipi_dsi.tato},
+            .bta_timeout              = ${module.driver.mipi_dsi.bta_timeout},
+            .lprw_timeout             = (${module.driver.mipi_dsi.lpread_timeout} &lt;&lt; R_DSILINK_PRESPTOLPSETR_LPRTO_Pos) | ${module.driver.mipi_dsi.lpwrite_timeout},
+            .hsrw_timeout             = (${module.driver.mipi_dsi.hsread_timeout} &lt;&lt; R_DSILINK_PRESPTOHSSETR_HSRTO_Pos) | ${module.driver.mipi_dsi.hswrite_timeout},
+
+            .max_return_packet_size   = ${module.driver.mipi_dsi.mrpsz},
+            .ecc_enable               = ${module.driver.mipi_dsi.ecc_enable},
+            .crc_check_mask           = (mipi_dsi_vc_t)(${module.driver.mipi_dsi.crc_enable_mask} 0x0),
+            .scramble_enable          = ${module.driver.mipi_dsi.scramble},
+            .tearing_detect           = ${module.driver.mipi_dsi.extemd},
+            .eotp_enable              = ${module.driver.mipi_dsi.dsisetr_b.eotpen},
+
+            .p_extend                 = &amp;${module.driver.mipi_dsi.name}_extended_cfg,
+            .p_callback               = ${module.driver.mipi_dsi.p_callback},
+            .p_context                = ${module.driver.mipi_dsi.p_context},
+        };
+
+        /* Instance structure to use this module. */
+        const mipi_dsi_instance_t ${module.driver.mipi_dsi.name} =
+        {
+            .p_ctrl        = &amp;${module.driver.mipi_dsi.name}_ctrl,
+            .p_cfg         = &amp;${module.driver.mipi_dsi.name}_cfg,
+            .p_api         = &amp;g_mipi_dsi
+        };
+
+        </declarations>
+    </module>
+</raModuleDescription>

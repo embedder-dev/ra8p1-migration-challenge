@@ -1,0 +1,1243 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<raModuleDescription>
+    <config id="config.awsfreertos.thread" path="aws/FreeRTOSConfig.h" version="0">
+        <property default="" description="Add a path to your custom FreeRTOSConfig.h file. It can be used to override some or all of the configurations defined here, and to define additional configurations." display="General|Custom FreeRTOSConfig.h" id="config.awsfreertos.custom_freertosconfig">
+            <export>eval('' +
+'var input = "${config.awsfreertos.custom_freertosconfig}";' +
+'if (input != "")' +
+'{' +
+'    input = \'#include "\' + input + \'"\';' +
+'}' +
+'    input' +
+                '')</export>
+        </property>
+        <property default="config.awsfreertos.thread.configuse_preemption.enabled" description="Set to Enabled to use the preemptive RTOS scheduler, or Disabled to use the cooperative RTOS scheduler." display="General|Use Preemption" id="config.awsfreertos.thread.configuse_preemption">
+            <option display="Enabled" id="config.awsfreertos.thread.configuse_preemption.enabled" value="1" />
+            <option display="Disabled" id="config.awsfreertos.thread.configuse_preemption.disabled" value="0" />
+        </property>
+        <property default="config.awsfreertos.thread.configuse_port_optimised_task_selection.disabled" description="Some FreeRTOS ports have two methods of selecting the next task to execute - a generic method, and a method that is specific to that port.\n\nThe Generic method:\nIs used when Use Port Optimized Task Selection is set to 0, or when a port specific method is not implemented.\nCan be used with all FreeRTOS ports.\nIs completely written in C, making it less efficient than a port specific method.\nDoes not impose a limit on the maximum number of available priorities.\n\nA port specific method:\nIs not available for all ports.\nIs used when Use Port Optimized Task Selection is Enabled.\nRelies on one or more architecture specific assembly instructions (typically a Count Leading Zeros [CLZ] or equivalent instruction) so can only be used with the architecture for which it was specifically written.\nIs more efficient than the generic method.\nTypically imposes a limit of 32 on the maximum number of available priorities." display="General|Use Port Optimised Task Selection" id="config.awsfreertos.thread.configuse_port_optimised_task_selection">
+            <option display="Enabled" id="config.awsfreertos.thread.configuse_port_optimised_task_selection.enabled" value="1" />
+            <option display="Disabled" id="config.awsfreertos.thread.configuse_port_optimised_task_selection.disabled" value="0" />
+        </property>
+        <property default="config.awsfreertos.thread.configuse_tickless_idle.disabled" description="Set Use Tickless Idle to Enabled to use the low power tickless mode, or Disabled to keep the tick interrupt running at all times. Low power tickless implementations are not provided for all FreeRTOS ports." display="General|Use Tickless Idle" id="config.awsfreertos.thread.configuse_tickless_idle">
+            <option display="Enabled" id="config.awsfreertos.thread.configuse_tickless_idle.enabled" value="1" />
+            <option display="Disabled" id="config.awsfreertos.thread.configuse_tickless_idle.disabled" value="0" />
+        </property>
+        <property default="config.awsfreertos.thread.configuse_idle_hook.enabled" description="Set to Enabled if you wish to use an idle hook, or Disabled to omit an idle hook." display="Hooks|Use Idle Hook" id="config.awsfreertos.thread.configuse_idle_hook">
+            <option display="Enabled" id="config.awsfreertos.thread.configuse_idle_hook.enabled" value="1" />
+            <option display="Disabled" id="config.awsfreertos.thread.configuse_idle_hook.disabled" value="0" />
+        </property>
+        <property default="config.awsfreertos.thread.configuse_malloc_failed_hook.disabled" description="The kernel uses a call to pvPortMalloc() to allocate memory from the heap each time a task, queue or semaphore is created. The official FreeRTOS download includes four sample memory allocation schemes for this purpose. The schemes are implemented in the heap_1.c, heap_2.c, heap_3.c, heap_4.c and heap_5.c source files respectively. Use Malloc Failed Hook is only relevant when one of these three sample schemes is being used.\nThe malloc() failed hook function is a hook (or callback) function that, if defined and configured, will be called if pvPortMalloc() ever returns NULL. NULL will be returned only if there is insufficient FreeRTOS heap memory remaining for the requested allocation to succeed.\n\nIf Use Malloc Failed Hook is Enabled then the application must define a malloc() failed hook function. If Use Malloc Failed Hook is set to Dosab;ed then the malloc() failed hook function will not be called, even if one is defined. Malloc() failed hook functions must have the name and prototype shown below.\n\nvoid vApplicationMallocFailedHook( void );" display="Hooks|Use Malloc Failed Hook" id="config.awsfreertos.thread.configuse_malloc_failed_hook">
+            <option display="Enabled" id="config.awsfreertos.thread.configuse_malloc_failed_hook.enabled" value="1" />
+            <option display="Disabled" id="config.awsfreertos.thread.configuse_malloc_failed_hook.disabled" value="0" />
+        </property>
+        <property default="config.awsfreertos.thread.configuse_daemon_task_startup_hook.disabled" description="If Use Timers and Use Daemon Task Startup Hook are both Enabled then the application must define a hook function that has the exact name and prototype as shown below. The hook function will be called exactly once when the RTOS daemon task (also known as the timer service task) executes for the first time. Any application initialisation code that needs the RTOS to be running can be placed in the hook function.\nvoid void vApplicationDaemonTaskStartupHook( void );" display="Hooks|Use Daemon Task Startup Hook" id="config.awsfreertos.thread.configuse_daemon_task_startup_hook">
+            <option display="Enabled" id="config.awsfreertos.thread.configuse_daemon_task_startup_hook.enabled" value="1" />
+            <option display="Disabled" id="config.awsfreertos.thread.configuse_daemon_task_startup_hook.disabled" value="0" />
+        </property>
+        <property default="config.awsfreertos.thread.configuse_tick_hook.disabled" description="Set to Enabled if you wish to use an tick hook, or Disabled to omit an tick hook." display="Hooks|Use Tick Hook" id="config.awsfreertos.thread.configuse_tick_hook">
+            <option display="Enabled" id="config.awsfreertos.thread.configuse_tick_hook.enabled" value="1" />
+            <option display="Disabled" id="config.awsfreertos.thread.configuse_tick_hook.disabled" value="0" />
+        </property>
+        <property default="SystemCoreClock" description="Enter the frequency in Hz at which the internal clock that drives the peripheral used to generate the tick interrupt will be executing - this is normally the same clock that drives the internal CPU clock. This value is required in order to correctly configure timer peripherals." display="General|Cpu Clock Hz" id="config.awsfreertos.thread.configcpu_clock_hz" />
+        <property default="1000" description="The frequency of the RTOS tick interrupt.\nThe tick interrupt is used to measure time. Therefore a higher tick frequency means time can be measured to a higher resolution. However, a high tick frequency also means that the RTOS kernel will use more CPU time so be less efficient. The RTOS demo applications all use a tick rate of 1000Hz. This is used to test the RTOS kernel and is higher than would normally be required.\n\nMore than one task can share the same priority. The RTOS scheduler will share processor time between tasks of the same priority by switching between the tasks during each RTOS tick. A high tick rate frequency will therefore also have the effect of reducing the 'time slice' given to each task." display="General|Tick Rate Hz" id="config.awsfreertos.thread.configtick_rate_hz">
+            <constraint display="Value must be greater than 0">testInteger("${config.awsfreertos.thread.configtick_rate_hz}") &amp;&amp; ("${config.awsfreertos.thread.configtick_rate_hz}" &gt; 0)</constraint>
+        </property>
+        <property default="5" description="The number of priorities available to the application tasks. Any number of tasks can share the same priority.\nEach available priority consumes RAM within the RTOS kernel so this value should not be set any higher than actually required by your application." display="General|Max Priorities" id="config.awsfreertos.thread.configmax_priorities">
+            <constraint display="Must be an integer and greater than 0">testInteger("${config.awsfreertos.thread.configmax_priorities}") &amp;&amp; ("${config.awsfreertos.thread.configmax_priorities}" &gt; 0)</constraint>
+        </property>
+        <property default="128" description="The size of the stack used by the idle task. Generally this should not be reduced from the value set in the FreeRTOSConfig.h file provided with the demo application for the port you are using.\nLike the stack size parameter to the xTaskCreate() and xTaskCreateStatic() functions, the stack size is specified in words, not bytes. If each item placed on the stack is 32-bits, then a stack size of 100 means 400 bytes (each 32-bit stack item consuming 4 bytes)." display="General|Minimal Stack Size" id="config.awsfreertos.thread.configminimal_stack_size">
+            <constraint display="Must be an integer and greater than 0">testInteger("${config.awsfreertos.thread.configminimal_stack_size}") &amp;&amp; ("${config.awsfreertos.thread.configminimal_stack_size}" &gt; 0)</constraint>
+        </property>
+        <property default="16" description="The maximum permissible length of the descriptive name given to a task when the task is created. The length is specified in the number of characters including the NULL termination byte." display="General|Max Task Name Len" id="config.awsfreertos.thread.configmax_task_name_len">
+            <constraint display="Must be an integer and greater than 0">testInteger("${config.awsfreertos.thread.configmax_task_name_len}") &amp;&amp; ("${config.awsfreertos.thread.configmax_task_name_len}" &gt; 0)</constraint>
+        </property>
+        <property default="config.awsfreertos.thread.configuse_trace_facility.disabled" description="Set to Enabled if you wish to include additional structure members and functions to assist with execution visualisation and tracing." display="Stats|Use Trace Facility" id="config.awsfreertos.thread.configuse_trace_facility">
+            <option display="Enabled" id="config.awsfreertos.thread.configuse_trace_facility.enabled" value="1" />
+            <option display="Disabled" id="config.awsfreertos.thread.configuse_trace_facility.disabled" value="0" />
+        </property>
+        <property default="config.awsfreertos.thread.configuse_stats_formatting_functions.disabled" description="Set Use Trace Facility and Use Stats Formatting Functions to Enabled to include the vTaskList() and vTaskGetRunTimeStats() functions in the build. Setting either to Disabled will omit vTaskList() and vTaskGetRunTimeStates() from the build." display="Stats|Use Stats Formatting Functions" id="config.awsfreertos.thread.configuse_stats_formatting_functions">
+            <option display="Enabled" id="config.awsfreertos.thread.configuse_stats_formatting_functions.enabled" value="1" />
+            <option display="Disabled" id="config.awsfreertos.thread.configuse_stats_formatting_functions.disabled" value="0" />
+        </property>
+        <property default="config.awsfreertos.thread.configuse_16_bit_ticks.disabled" description="Time is measured in 'ticks' - which is the number of times the tick interrupt has executed since the RTOS kernel was started. The tick count is held in a variable of type TickType_t.\nDefining configUSE_16_BIT_TICKS as 1 causes TickType_t to be defined (typedef'ed) as an unsigned 16bit type. Defining configUSE_16_BIT_TICKS as 0 causes TickType_t to be defined (typedef'ed) as an unsigned 32bit type.\n\nUsing a 16-bit type will greatly improve performance on 8- and 16-bit architectures, but limits the maximum specifiable time period to 65535 'ticks'. Therefore, assuming a tick frequency of 250Hz, the maximum time a task can delay or block when a 16bit counter is used is 262 seconds, compared to 17179869 seconds when using a 32-bit counter." display="General|Use 16-bit Ticks" id="config.awsfreertos.thread.configuse_16_bit_ticks">
+            <option display="Disabled" id="config.awsfreertos.thread.configuse_16_bit_ticks.disabled" value="0" />
+        </property>
+        <property default="config.awsfreertos.thread.configidle_should_yield.enabled" description="This parameter controls the behaviour of tasks at the idle priority. It only has an effect if:\nThe preemptive scheduler is being used.\nThe application creates tasks that run at the idle priority.\nIf Use Time Slicing is Enabled then tasks that share the same priority will time slice. If none of the tasks get preempted then it might be assumed that each task at a given priority will be allocated an equal amount of processing time - and if the priority is above the idle priority then this is indeed the case.\nWhen tasks share the idle priority the behaviour can be slightly different. If Idle Should Yield is Enabled then the idle task will yield immediately if any other task at the idle priority is ready to run. This ensures the minimum amount of time is spent in the idle task when application tasks are available for scheduling. This behaviour can however have undesirable effects (depending on the needs of your application) as depicted below:\n\n\nThe diagram above shows the execution pattern of four tasks that are all running at the idle priority. Tasks A, B and C are application tasks. Task I is the idle task. A context switch occurs with regular period at times T0, T1, ..., T6. When the idle task yields task A starts to execute - but the idle task has already consumed some of the current time slice. This results in task I and task A effectively sharing the same time slice. The application tasks B and C therefore get more processing time than the application task A.\n\nThis situation can be avoided by:\n\nIf appropriate, using an idle hook in place of separate tasks at the idle priority.\nCreating all application tasks at a priority greater than the idle priority.\nSetting Idle Should Yield to Disabled.\nSetting Idle Should Yield to Disabled prevents the idle task from yielding processing time until the end of its time slice. This ensure all tasks at the idle priority are allocated an equal amount of processing time (if none of the tasks get pre-empted) - but at the cost of a greater proportion of the total processing time being allocated to the idle task." display="General|Idle Should Yield" id="config.awsfreertos.thread.configidle_should_yield">
+            <option display="Enabled" id="config.awsfreertos.thread.configidle_should_yield.enabled" value="1" />
+            <option display="Disabled" id="config.awsfreertos.thread.configidle_should_yield.disabled" value="0" />
+        </property>
+        <property default="config.awsfreertos.thread.configuse_task_notifications.enabled" description="Setting Use Task Notifications to Enabled will include direct to task notification functionality and its associated API in the build.\nSetting Use Task Notifications to Disabled will exclude direct to task notification functionality and its associated API from the build.\n\nEach task consumes 8 additional bytes of RAM when direct to task notifications are included in the build." display="General|Use Task Notifications" id="config.awsfreertos.thread.configuse_task_notifications">
+            <option display="Enabled" id="config.awsfreertos.thread.configuse_task_notifications.enabled" value="1" />
+            <option display="Disabled" id="config.awsfreertos.thread.configuse_task_notifications.disabled" value="0" />
+        </property>
+        <property default="1" description="Set the Task Notifications Array Entries to enter the size of array needed" display="General|Task Notification Array Entries" id="config.awsfreertos.thread.configtask_notifications_array_enteries">
+            <constraint display="Must be an integer and greater than 0">testInteger("${config.awsfreertos.thread.configtask_notifications_array_enteries}") &amp;&amp; ("${config.awsfreertos.thread.configtask_notifications_array_enteries}" &gt; 0)</constraint>
+        </property>
+        <property default="config.awsfreertos.thread.configuse_mutexes.disabled" description="Set to Enabled to include mutex functionality in the build, or Disabled to omit mutex functionality from the build. Readers should familiarise themselves with the differences between mutexes and binary semaphores in relation to the FreeRTOS functionality." display="General|Use Mutexes" id="config.awsfreertos.thread.configuse_mutexes">
+            <option display="Enabled" id="config.awsfreertos.thread.configuse_mutexes.enabled" value="1" />
+            <option display="Disabled" id="config.awsfreertos.thread.configuse_mutexes.disabled" value="0" />
+        </property>
+        <property default="config.awsfreertos.thread.configuse_recursive_mutexes.disabled" description="Set to Enabled to include recursive mutex functionality in the build, or Disabled to omit recursive mutex functionality from the build." display="General|Use Recursive Mutexes" id="config.awsfreertos.thread.configuse_recursive_mutexes">
+            <option display="Enabled" id="config.awsfreertos.thread.configuse_recursive_mutexes.enabled" value="1" />
+            <option display="Disabled" id="config.awsfreertos.thread.configuse_recursive_mutexes.disabled" value="0" />
+        </property>
+        <property default="config.awsfreertos.thread.configuse_counting_semaphores.enabled" description="Set to Enabled to include counting semaphore functionality in the build, or Disabled to omit counting semaphore functionality from the build." display="General|Use Counting Semaphores" id="config.awsfreertos.thread.configuse_counting_semaphores">
+            <option display="Enabled" id="config.awsfreertos.thread.configuse_counting_semaphores.enabled" value="1" />
+            <option display="Disabled" id="config.awsfreertos.thread.configuse_counting_semaphores.disabled" value="0" />
+        </property>
+        <property default="config.awsfreertos.thread.configcheck_for_stack_overflow.disabled" description="The stack overflow detection page describes the use of this parameter. This is not recommended for RA MCUs with hardware stack monitor support. RA MCU designs should enable the RA hardware stack monitor instead." display="Hooks|Check For Stack Overflow" id="config.awsfreertos.thread.configcheck_for_stack_overflow">
+            <option display="Enabled" id="config.awsfreertos.thread.configcheck_for_stack_overflow.enabled" value="1" />
+            <option display="Disabled" id="config.awsfreertos.thread.configcheck_for_stack_overflow.disabled" value="0" />
+        </property>
+        <property default="10" description="The queue registry has two purposes, both of which are associated with RTOS kernel aware debugging:\nIt allows a textual name to be associated with a queue for easy queue identification within a debugging GUI.\nIt contains the information required by a debugger to locate each registered queue and semaphore.\nThe queue registry has no purpose unless you are using a RTOS kernel aware debugger.\Queue Registry Size defines the maximum number of queues and semaphores that can be registered. Only those queues and semaphores that you want to view using a RTOS kernel aware debugger need be registered. See the API reference documentation for vQueueAddToRegistry() and vQueueUnregisterQueue() for more information." display="General|Queue Registry Size" id="config.awsfreertos.thread.configqueue_registry_size">
+            <constraint display="Value must be positive integer greater than or equal to 0">testInteger("${config.awsfreertos.thread.configqueue_registry_size}") &amp;&amp; ("${config.awsfreertos.thread.configqueue_registry_size}" &gt;= 0)</constraint>
+        </property>
+        <property default="config.awsfreertos.thread.configuse_queue_sets.disabled" description="Set to Enabled to include queue set functionality (the ability to block, or pend, on multiple queues and semaphores), or Disabled to omit queue set functionality." display="General|Use Queue Sets" id="config.awsfreertos.thread.configuse_queue_sets">
+            <option display="Enabled" id="config.awsfreertos.thread.configuse_queue_sets.enabled" value="1" />
+            <option display="Disabled" id="config.awsfreertos.thread.configuse_queue_sets.disabled" value="0" />
+        </property>
+        <property default="config.awsfreertos.thread.configuse_time_slicing.disabled" description="If Use Time Slicing is Enabled, FreeRTOS uses prioritised preemptive scheduling with time slicing. That means the RTOS scheduler will always run the highest priority task that is in the Ready state, and will switch between tasks of equal priority on every RTOS tick interrupt. If Use Time Slicing is Disabled then the RTOS scheduler will still run the highest priority task that is in the Ready state, but will not switch between tasks of equal priority just because a tick interrupt has occurred." display="General|Use Time Slicing" id="config.awsfreertos.thread.configuse_time_slicing">
+            <option display="Enabled" id="config.awsfreertos.thread.configuse_time_slicing.enabled" value="1" />
+            <option display="Disabled" id="config.awsfreertos.thread.configuse_time_slicing.disabled" value="0" />
+        </property>
+        <property default="config.awsfreertos.thread.configuse_newlib_reentrant.disabled" description="If Use Newlib Reentrant is Enabled then a newlib reent structure will be allocated for each created task.\nNote Newlib support has been included by popular demand, but is not used by the FreeRTOS maintainers themselves. FreeRTOS is not responsible for resulting newlib operation. User must be familiar with newlib and must provide system-wide implementations of the necessary stubs. Be warned that (at the time of writing) the current newlib design implements a system-wide malloc() that must be provided with locks." display="General|Use Newlib Reentrant" id="config.awsfreertos.thread.configuse_newlib_reentrant">
+            <option display="Enabled" id="config.awsfreertos.thread.configuse_newlib_reentrant.enabled" value="1" />
+            <option display="Disabled" id="config.awsfreertos.thread.configuse_newlib_reentrant.disabled" value="0" />
+        </property>
+        <property default="config.awsfreertos.thread.configenable_backward_compatibility.disabled" description="The FreeRTOS.h header file includes a set of #define macros that map the names of data types used in versions of FreeRTOS prior to version 8.0.0 to the names used in FreeRTOS version 8.0.0. The macros allow application code to update the version of FreeRTOS they are built against from a pre 8.0.0 version to a post 8.0.0 version without modification. Setting Enable Backward Compatibility to Disabled in FreeRTOSConfig.h excludes the macros from the build, and in so doing allowing validation that no pre version 8.0.0 names are being used." display="General|Enable Backward Compatibility" id="config.awsfreertos.thread.configenable_backward_compatibility">
+            <option display="Enabled" id="config.awsfreertos.thread.configenable_backward_compatibility.enabled" value="1" />
+            <option display="Disabled" id="config.awsfreertos.thread.configenable_backward_compatibility.disabled" value="0" />
+        </property>
+        <property default="5" description="Sets the number of indexes in each task's thread local storage array." display="General|Num Thread Local Storage Pointers" id="config.awsfreertos.thread.confignum_thread_local_storage_pointers">
+            <constraint display="Value must be positive integer greater than or equal to 0">testInteger("${config.awsfreertos.thread.confignum_thread_local_storage_pointers}") &amp;&amp; ("${config.awsfreertos.thread.confignum_thread_local_storage_pointers}" &gt;= 0)</constraint>
+        </property>
+        <property default="uint32_t" description="Sets the type used to specify the stack depth in calls to xTaskCreate(), and various other places stack sizes are used (for example, when returning the stack high water mark).\nOlder versions of FreeRTOS specified stack sizes using variables of type UBaseType_t, but that was found to be too restrictive on 8-bit microcontrollers. Stack Depth Type removes that restriction by enabling application developers to specify the type to use." display="General|Stack Depth Type" id="config.awsfreertos.thread.configstack_depth_type" />
+        <property default="size_t" description="FreeRTOS Message buffers use variables of type Message Buffer Length Type to store the length of each message. If Message Buffer Length Type is not defined then it will default to size_t. If the messages stored in a message buffer will never be larger than 255 bytes then defining Message Buffer Length Type to uint8_t will save 3 bytes per message on a 32-bit microcontroller. Likewise if the messages stored in a message buffer will never be larger than 65535 bytes then defining Message Buffer Length Type to uint16_t will save 2 bytes per message on a 32-bit microcontroller." display="General|Message Buffer Length Type" id="config.awsfreertos.thread.configmessage_buffer_length_type" />
+        <property default="config.awsfreertos.thread.configheap_clear_memory_on_free.disabled" description="If set to 1, then blocks of memory allocated using pvPortMalloc() will be cleared when freed using vPortFree()" display="Memory Allocation|Clear Memory on Free" id="config.awsfreertos.thread.configheap_clear_memory_on_free">
+            <option display="Enabled" id="config.awsfreertos.thread.configheap_clear_memory_on_free.enabled" value="1" />
+            <option display="Disabled" id="config.awsfreertos.thread.configheap_clear_memory_on_free.disabled" value="0" />
+        </property>
+        <property default="config.awsfreertos.thread.configsupport_static_allocation.enabled" description="If Support Static Allocation is Enabled then RTOS objects can be created using RAM provided by the application writer.\nIf Support Static Allocation is Disabled then RTOS objects can only be created using RAM allocated from the FreeRTOS heap.\n\nIf Support Static Allocation is left undefined it will default to 0.\n\nIf Support Static Allocation is Enabled then the application writer must also provide two callback functions: vApplicationGetIdleTaskMemory() to provide the memory for use by the RTOS Idle task, and (if Use Timers is Enabled) vApplicationGetTimerTaskMemory() to provide memory for use by the RTOS Daemon/Timer Service task. Examples are provided below.\n\n\n/* Support Static Allocation is Enabled, so the application must provide an\nimplementation of vApplicationGetIdleTaskMemory() to provide the memory that is\nused by the Idle task. */\nvoid vApplicationGetIdleTaskMemory( StaticTask_t **ppxIdleTaskTCBBuffer,\n                                    StackType_t **ppxIdleTaskStackBuffer,\n                                    uint32_t *pulIdleTaskStackSize )\n{\n/* If the buffers to be provided to the Idle task are declared inside this\nfunction then they must be declared static - otherwise they will be allocated on\nthe stack and so not exists after this function exits. */\nstatic StaticTask_t xIdleTaskTCB;\nstatic StackType_t uxIdleTaskStack[ configMINIMAL_STACK_SIZE ];\n\n    /* Pass out a pointer to the StaticTask_t structure in which the Idle task's\n    state will be stored. */\n    *ppxIdleTaskTCBBuffer = &amp;xIdleTaskTCB;\n\n    /* Pass out the array that will be used as the Idle task's stack. */\n    *ppxIdleTaskStackBuffer = uxIdleTaskStack;\n\n    /* Pass out the size of the array pointed to by *ppxIdleTaskStackBuffer.\n    Note that, as the array is necessarily of type StackType_t,\n    configMINIMAL_STACK_SIZE is specified in words, not bytes. */\n    *pulIdleTaskStackSize = configMINIMAL_STACK_SIZE;\n}\n/*-----------------------------------------------------------*/\n\n/* Support Static Allocation and Use Timers are both Enabled, so the\napplication must provide an implementation of vApplicationGetTimerTaskMemory()\nto provide the memory that is used by the Timer service task. */\nvoid vApplicationGetTimerTaskMemory( StaticTask_t **ppxTimerTaskTCBBuffer,\n                                     StackType_t **ppxTimerTaskStackBuffer,\n                                     uint32_t *pulTimerTaskStackSize )\n{\n/* If the buffers to be provided to the Timer task are declared inside this\nfunction then they must be declared static - otherwise they will be allocated on\nthe stack and so not exists after this function exits. */\nstatic StaticTask_t xTimerTaskTCB;\nstatic StackType_t uxTimerTaskStack[ configTIMER_TASK_STACK_DEPTH ];\n\n    /* Pass out a pointer to the StaticTask_t structure in which the Timer\n    task's state will be stored. */\n    *ppxTimerTaskTCBBuffer = &amp;xTimerTaskTCB;\n\n    /* Pass out the array that will be used as the Timer task's stack. */\n    *ppxTimerTaskStackBuffer = uxTimerTaskStack;\n\n    /* Pass out the size of the array pointed to by *ppxTimerTaskStackBuffer.\n    Note that, as the array is necessarily of type StackType_t,\n    configTIMER_TASK_STACK_DEPTH is specified in words, not bytes. */\n    *pulTimerTaskStackSize = configTIMER_TASK_STACK_DEPTH;\n}\n\nExamples of the callback functions that must be provided by the application to\nsupply the RAM used by the Idle and Timer Service tasks if Support Static Allocation\nis Enabled.\n\nSee the Static Vs Dynamic Memory Allocation page for more information." display="Memory Allocation|Support Static Allocation" id="config.awsfreertos.thread.configsupport_static_allocation">
+            <option display="Enabled" id="config.awsfreertos.thread.configsupport_static_allocation.enabled" value="1" />
+            <option display="Disabled" id="config.awsfreertos.thread.configsupport_static_allocation.disabled" value="0" />
+        </property>
+        <property default="config.awsfreertos.thread.configsupport_dynamic_allocation.disabled" description="If Support Dynamic Allocation is Enabled then RTOS objects can be created using RAM that is automatically allocated from the FreeRTOS heap.\nIf Support Dynamic Allocation is set to 0 then RTOS objects can only be created using RAM provided by the application writer.\n\nSee the Static Vs Dynamic Memory Allocation page for more information." display="Memory Allocation|Support Dynamic Allocation" id="config.awsfreertos.thread.configsupport_dynamic_allocation">
+            <option display="Enabled" id="config.awsfreertos.thread.configsupport_dynamic_allocation.enabled" value="1" />
+            <option display="Disabled" id="config.awsfreertos.thread.configsupport_dynamic_allocation.disabled" value="0" />
+        </property>
+        <property default="1024" description="The total amount of RAM available in the FreeRTOS heap.\nThis value will only be used if Support Dynamic Allocation is Enabled and the application makes use of one of the sample memory allocation schemes provided in the FreeRTOS source code download. See the memory configuration section for further details." display="Memory Allocation|Total Heap Size" id="config.awsfreertos.thread.configtotal_heap_size">
+            <constraint display="Value must be positive integer greater than or equal to 0">testInteger("${config.awsfreertos.thread.configtotal_heap_size}") &amp;&amp; ("${config.awsfreertos.thread.configtotal_heap_size}" &gt;= 0)</constraint>
+        </property>
+        <property default="config.awsfreertos.thread.configapplication_allocated_heap.disabled" description="By default the FreeRTOS heap is declared by FreeRTOS and placed in memory by the linker. Setting Application Allocated Heap to Enabled allows the heap to instead be declared by the application writer, which allows the application writer to place the heap wherever they like in memory.\nIf heap_1.c, heap_2.c or heap_4.c is used, and Application Allocated Heap is Enabled, then the application writer must provide a uint8_t array with the exact name and dimension as shown below. The array will be used as the FreeRTOS heap. How the array is placed at a specific memory location is dependent on the compiler being used - refer to your compiler's documentation.\n\nuint8_t ucHeap[ configTOTAL_HEAP_SIZE ];" display="Memory Allocation|Application Allocated Heap" id="config.awsfreertos.thread.configapplication_allocated_heap">
+            <option display="Enabled" id="config.awsfreertos.thread.configapplication_allocated_heap.enabled" value="1" />
+            <option display="Disabled" id="config.awsfreertos.thread.configapplication_allocated_heap.disabled" value="0" />
+        </property>
+        <property default="config.awsfreertos.thread.configgenerate_run_time_stats.disabled" description="The Run Time Stats page describes the use of this parameter." display="Stats|Generate Run Time Stats" id="config.awsfreertos.thread.configgenerate_run_time_stats">
+            <option display="Enabled" id="config.awsfreertos.thread.configgenerate_run_time_stats.enabled" value="1" />
+            <option display="Disabled" id="config.awsfreertos.thread.configgenerate_run_time_stats.disabled" value="0" />
+        </property>
+        <property default="config.awsfreertos.thread.configuse_timers.enabled" description="Set to Enabled to include software timer functionality, or Disabled to omit software timer functionality. See the FreeRTOS software timers page for a full description." display="Timers|Use Timers" id="config.awsfreertos.thread.configuse_timers">
+            <option display="Enabled" id="config.awsfreertos.thread.configuse_timers.enabled" value="1" />
+            <option display="Disabled" id="config.awsfreertos.thread.configuse_timers.disabled" value="0" />
+        </property>
+        <property default="3" description="Sets the priority of the software timer service/daemon task. See the FreeRTOS software timers page for a full description." display="Timers|Timer Task Priority" id="config.awsfreertos.thread.configtimer_task_priority">
+            <constraint display="Value must be positive integer greater than or equal to 0">testInteger("${config.awsfreertos.thread.configtimer_task_priority}") &amp;&amp; ("${config.awsfreertos.thread.configtimer_task_priority}" &gt;= 0)</constraint>
+        </property>
+        <property default="10" description="Sets the length of the software timer command queue. See the FreeRTOS software timers page for a full description." display="Timers|Timer Queue Length" id="config.awsfreertos.thread.configtimer_queue_length">
+            <constraint display="Value must be a non-negative integer">testInteger("${config.awsfreertos.thread.configtimer_queue_length}") &amp;&amp; ("${config.awsfreertos.thread.configtimer_queue_length}" &gt;= 0)</constraint>
+        </property>
+        <property default="128" description="Sets the stack depth allocated to the software timer service/daemon task. See the FreeRTOS software timers page for a full description." display="Timers|Timer Task Stack Depth" id="config.awsfreertos.thread.configtimer_task_stack_depth">
+            <constraint display="Value must be a non-negative integer">testInteger("${config.awsfreertos.thread.configtimer_task_stack_depth}") &amp;&amp; ("${config.awsfreertos.thread.configtimer_task_stack_depth}" &gt;= 0)</constraint>
+        </property>
+        <property default="(1 &lt;&lt; __NVIC_PRIO_BITS) - 1" id="config.awsfreertos.thread.configlibrary_lowest_interrupt_priority" />
+        <property default="board.icu.common.irq.priority1" description="The highest interrupt priority that can be used by any interrupt service routine that makes calls to interrupt safe FreeRTOS API functions.  DO NOT CALL INTERRUPT SAFE FREERTOS API FUNCTIONS FROM ANY INTERRUPT THAT HAS A HIGHER PRIORITY THAN THIS! (higher priorities are lower numeric values)\n\nBelow is explanation for macros that are set based on this value from FreeRTOS website.\n\nIn the RA port, configKERNEL_INTERRUPT_PRIORITY is not used and the kernel runs at the lowest priority.\n\nNote in the following discussion that only API functions that end in &quot;FromISR&quot; can be called from within an interrupt service routine.\n\nconfigMAX_SYSCALL_INTERRUPT_PRIORITY sets the highest interrupt priority from which interrupt safe FreeRTOS API functions can be called.\n\nA full interrupt nesting model is achieved by setting configMAX_SYSCALL_INTERRUPT_PRIORITY above (that is, at a higher priority level) than configKERNEL_INTERRUPT_PRIORITY. This means the FreeRTOS kernel does not completely disable interrupts, even inside critical sections. Further, this is achieved without the disadvantages of a segmented kernel architecture.\n\nInterrupts that do not call API functions can execute at priorities above configMAX_SYSCALL_INTERRUPT_PRIORITY and therefore never be delayed by the RTOS kernel execution.\n\nA special note for Arm Cortex-M users: Please read the page dedicated to interrupt priority settings on Arm Cortex-M devices. As a minimum, remember that Arm Cortex-M cores use numerically low priority numbers to represent HIGH priority interrupts, which can seem counter-intuitive and is easy to forget! If you wish to assign an interrupt a low priority do NOT assign it a priority of 0 (or other low numeric value) as this can result in the interrupt actually having the highest priority in the system - and therefore potentially make your system crash if this priority is above configMAX_SYSCALL_INTERRUPT_PRIORITY.\n\nThe lowest priority on a Arm Cortex-M core is in fact 255 - however different Arm Cortex-M vendors implement a different number of priority bits and supply library functions that expect priorities to be specified in different ways. For example, on the RA6M3 the lowest priority you can specify is 15 - and the highest priority you can specify is 0." display="General|Library Max Syscall Interrupt Priority" id="config.awsfreertos.thread.configlibrary_max_syscall_interrupt_priority">
+            <select enum="enum.mcu.nvic.priorities.mandatory"/>
+        </property>
+        <property default="configLIBRARY_MAX_SYSCALL_INTERRUPT_PRIORITY &lt;&lt; (8 - __NVIC_PRIO_BITS)" id="config.awsfreertos.thread.configmax_syscall_interrupt_priority" />
+        <property default="configMAX_SYSCALL_INTERRUPT_PRIORITY" id="config.awsfreertos.thread.configmax_api_call_interrupt_priority" />
+        <property default="assert(x)" description="The semantics of the configASSERT() macro are the same as the standard C assert() macro. An assertion is triggered if the parameter passed into configASSERT() is zero.\nconfigASSERT() is called throughout the FreeRTOS source files to check how the application is using FreeRTOS. It is highly recommended to develop FreeRTOS applications with configASSERT() defined.\n\nThe example definition (shown at the top of the file and replicated below) calls vAssertCalled(), passing in the file name and line number of the triggering configASSERT() call (__FILE__ and __LINE__ are standard macros provided by most compilers). This is just for demonstration as vAssertCalled() is not a FreeRTOS function, configASSERT() can be defined to take whatever action the application writer deems appropriate.\n\nIt is normal to define configASSERT() in such a way that it will prevent the application from executing any further. This if for two reasons; stopping the application at the point of the assertion allows the cause of the assertion to be debugged, and executing past a triggered assertion will probably result in a crash anyway.\n\nNote defining configASSERT() will increase both the application code size and execution time. When the application is stable the additional overhead can be removed by simply commenting out the configASSERT() definition in FreeRTOSConfig.h.\n\n/* Define configASSERT() to call vAssertCalled() if the assertion fails.  The assertion\nhas failed if the value of the parameter passed into configASSERT() equals zero. */\n#define configASSERT( ( x ) )     if( ( x ) == 0 ) vAssertCalled( __FILE__, __LINE__ )\nIf running FreeRTOS under the control of a debugger, then configASSERT() can be defined to just disable interrupts and sit in a loop, as demonstrated below. That will have the effect of stopping the code on the line that failed the assert test - pausing the debugger will then immediately take you to the offending line so you can see why it failed.\n\n/* Define configASSERT() to disable interrupts and sit in a loop. */\n#define configASSERT( ( x ) )     if( ( x ) == 0 ) { taskDISABLE_INTERRUPTS(); for( ;; ); }" display="General|Assert" id="config.awsfreertos.thread.configassert" />
+        <property default="config.awsfreertos.thread.configinclude_application_defined_privileged_functions.disabled" description="Include Application Defined Privileged Functions is only used by FreeRTOS MPU.\nIf Include Application Defined Privileged Functions is Enabled then the application writer must provide a header file called &quot;application_defined_privileged_functions.h&quot;, in which functions the application writer needs to execute in privileged mode can be implemented. Note that, despite having a .h extension, the header file should contain the implementation of the C functions, not just the functions' prototypes.\n\nFunctions implemented in &quot;application_defined_privileged_functions.h&quot; must save and restore the processor's privilege state using the prvRaisePrivilege() function and portRESET_PRIVILEGE() macro respectively. For example, if a library provided print function accesses RAM that is outside of the control of the application writer, and therefore cannot be allocated to a memory protected user mode task, then the print function can be encapsulated in a privileged function using the following code:\n\nvoid MPU_debug_printf( const char *pcMessage )\n{\n/* State the privilege level of the processor when the function was called. */\nBaseType_t xRunningPrivileged = prvRaisePrivilege();\n\n    /* Call the library function, which now has access to all RAM. */\n    debug_printf( pcMessage );\n\n    /* Reset the processor privilege level to its original value. */\n    portRESET_PRIVILEGE( xRunningPrivileged );\n}\nThis technique should only be use during development, and not deployment, as it circumvents the memory protection." display="General|Include Application Defined Privileged Functions" id="config.awsfreertos.thread.configinclude_application_defined_privileged_functions">
+            <option display="Enabled" id="config.awsfreertos.thread.configinclude_application_defined_privileged_functions.enabled" value="1" />
+            <option display="Disabled" id="config.awsfreertos.thread.configinclude_application_defined_privileged_functions.disabled" value="0" />
+        </property>
+        <property default="config.awsfreertos.thread.include_vtaskpriorityset.enabled" description="Include vTaskPrioritySet() function in build" display="Optional Functions|vTaskPrioritySet() Function" id="config.awsfreertos.thread.include_vtaskpriorityset">
+            <option display="Enabled" id="config.awsfreertos.thread.include_vtaskpriorityset.enabled" value="1" />
+            <option display="Disabled" id="config.awsfreertos.thread.include_vtaskpriorityset.disabled" value="0" />
+        </property>
+        <property default="config.awsfreertos.thread.include_uxtaskpriorityget.enabled" description="Include uxTaskPriorityGet() function in build" display="Optional Functions|uxTaskPriorityGet() Function" id="config.awsfreertos.thread.include_uxtaskpriorityget">
+            <option display="Enabled" id="config.awsfreertos.thread.include_uxtaskpriorityget.enabled" value="1" />
+            <option display="Disabled" id="config.awsfreertos.thread.include_uxtaskpriorityget.disabled" value="0" />
+        </property>
+        <property default="config.awsfreertos.thread.include_vtaskdelete.enabled" description="Include vTaskDelete() function in build" display="Optional Functions|vTaskDelete() Function" id="config.awsfreertos.thread.include_vtaskdelete">
+            <option display="Enabled" id="config.awsfreertos.thread.include_vtaskdelete.enabled" value="1" />
+            <option display="Disabled" id="config.awsfreertos.thread.include_vtaskdelete.disabled" value="0" />
+        </property>
+        <property default="config.awsfreertos.thread.include_vtasksuspend.enabled" description="Include vTaskSuspend() function in build" display="Optional Functions|vTaskSuspend() Function" id="config.awsfreertos.thread.include_vtasksuspend">
+            <option display="Enabled" id="config.awsfreertos.thread.include_vtasksuspend.enabled" value="1" />
+            <option display="Disabled" id="config.awsfreertos.thread.include_vtasksuspend.disabled" value="0" />
+        </property>
+        <property default="config.awsfreertos.thread.include_xresumefromisr.enabled" description="Include xResumeFromISR() function in build" display="Optional Functions|xResumeFromISR() Function" id="config.awsfreertos.thread.include_xresumefromisr">
+            <option display="Enabled" id="config.awsfreertos.thread.include_xresumefromisr.enabled" value="1" />
+            <option display="Disabled" id="config.awsfreertos.thread.include_xresumefromisr.disabled" value="0" />
+        </property>
+        <property default="config.awsfreertos.thread.include_vtaskdelayuntil.enabled" description="Include vTaskDelayUntil() function in build" display="Optional Functions|vTaskDelayUntil() Function" id="config.awsfreertos.thread.include_vtaskdelayuntil">
+            <option display="Enabled" id="config.awsfreertos.thread.include_vtaskdelayuntil.enabled" value="1" />
+            <option display="Disabled" id="config.awsfreertos.thread.include_vtaskdelayuntil.disabled" value="0" />
+        </property>
+        <property default="config.awsfreertos.thread.include_vtaskdelay.enabled" description="Include vTaskDelay() function in build" display="Optional Functions|vTaskDelay() Function" id="config.awsfreertos.thread.include_vtaskdelay">
+            <option display="Enabled" id="config.awsfreertos.thread.include_vtaskdelay.enabled" value="1" />
+            <option display="Disabled" id="config.awsfreertos.thread.include_vtaskdelay.disabled" value="0" />
+        </property>
+        <property default="config.awsfreertos.thread.include_xtaskgetschedulerstate.enabled" description="Include xTaskGetSchedulerState() function in build" display="Optional Functions|xTaskGetSchedulerState() Function" id="config.awsfreertos.thread.include_xtaskgetschedulerstate">
+            <option display="Enabled" id="config.awsfreertos.thread.include_xtaskgetschedulerstate.enabled" value="1" />
+            <option display="Disabled" id="config.awsfreertos.thread.include_xtaskgetschedulerstate.disabled" value="0" />
+        </property>
+        <property default="config.awsfreertos.thread.include_xtaskgetcurrenttaskhandle.enabled" description="Include xTaskGetCurrentTaskHandle() function in build" display="Optional Functions|xTaskGetCurrentTaskHandle() Function" id="config.awsfreertos.thread.include_xtaskgetcurrenttaskhandle">
+            <option display="Enabled" id="config.awsfreertos.thread.include_xtaskgetcurrenttaskhandle.enabled" value="1" />
+            <option display="Disabled" id="config.awsfreertos.thread.include_xtaskgetcurrenttaskhandle.disabled" value="0" />
+        </property>
+        <property default="config.awsfreertos.thread.include_uxtaskgetstackhighwatermark.disabled" description="Include uxTaskGetStackHighWaterMark() function in build" display="Optional Functions|uxTaskGetStackHighWaterMark() Function" id="config.awsfreertos.thread.include_uxtaskgetstackhighwatermark">
+            <option display="Enabled" id="config.awsfreertos.thread.include_uxtaskgetstackhighwatermark.enabled" value="1" />
+            <option display="Disabled" id="config.awsfreertos.thread.include_uxtaskgetstackhighwatermark.disabled" value="0" />
+        </property>
+        <property default="config.awsfreertos.thread.include_xtaskgetidletaskhandle.disabled" description="Include xTaskGetIdleTaskHandle() function in build" display="Optional Functions|xTaskGetIdleTaskHandle() Function" id="config.awsfreertos.thread.include_xtaskgetidletaskhandle">
+            <option display="Enabled" id="config.awsfreertos.thread.include_xtaskgetidletaskhandle.enabled" value="1" />
+            <option display="Disabled" id="config.awsfreertos.thread.include_xtaskgetidletaskhandle.disabled" value="0" />
+        </property>
+        <property default="config.awsfreertos.thread.include_etaskgetstate.disabled" description="Include eTaskGetState() function in build" display="Optional Functions|eTaskGetState() Function" id="config.awsfreertos.thread.include_etaskgetstate">
+            <option display="Enabled" id="config.awsfreertos.thread.include_etaskgetstate.enabled" value="1" />
+            <option display="Disabled" id="config.awsfreertos.thread.include_etaskgetstate.disabled" value="0" />
+        </property>
+        <property default="config.awsfreertos.thread.include_xeventgroupsetbitfromisr.enabled" description="Include xEventGroupSetBitFromISR() function in build" display="Optional Functions|xEventGroupSetBitFromISR() Function" id="config.awsfreertos.thread.include_xeventgroupsetbitfromisr">
+            <option display="Enabled" id="config.awsfreertos.thread.include_xeventgroupsetbitfromisr.enabled" value="1" />
+            <option display="Disabled" id="config.awsfreertos.thread.include_xeventgroupsetbitfromisr.disabled" value="0" />
+        </property>
+        <property default="config.awsfreertos.thread.include_xtimerpendfunctioncall.disabled" description="Include xTimerPendFunctionCall() function in build" display="Optional Functions|xTimerPendFunctionCall() Function" id="config.awsfreertos.thread.include_xtimerpendfunctioncall">
+            <option display="Enabled" id="config.awsfreertos.thread.include_xtimerpendfunctioncall.enabled" value="1" />
+            <option display="Disabled" id="config.awsfreertos.thread.include_xtimerpendfunctioncall.disabled" value="0" />
+        </property>
+        <property default="config.awsfreertos.thread.include_xtaskabortdelay.disabled" description="Include xTaskAbortDelay() function in build" display="Optional Functions|xTaskAbortDelay() Function" id="config.awsfreertos.thread.include_xtaskabortdelay">
+            <option display="Enabled" id="config.awsfreertos.thread.include_xtaskabortdelay.enabled" value="1" />
+            <option display="Disabled" id="config.awsfreertos.thread.include_xtaskabortdelay.disabled" value="0" />
+        </property>
+        <property default="config.awsfreertos.thread.include_xtaskgethandle.disabled" description="Include xTaskGetHandle() function in build" display="Optional Functions|xTaskGetHandle() Function" id="config.awsfreertos.thread.include_xtaskgethandle">
+            <option display="Enabled" id="config.awsfreertos.thread.include_xtaskgethandle.enabled" value="1" />
+            <option display="Disabled" id="config.awsfreertos.thread.include_xtaskgethandle.disabled" value="0" />
+        </property>
+        <property default="config.awsfreertos.thread.include_xtaskresumefromisr.enabled" description="Include xTaskResumeFromISR() function in build" display="Optional Functions|xTaskResumeFromISR() Function" id="config.awsfreertos.thread.include_xtaskresumefromisr">
+            <option display="Enabled" id="config.awsfreertos.thread.include_xtaskresumefromisr.enabled" value="1" />
+            <option display="Disabled" id="config.awsfreertos.thread.include_xtaskresumefromisr.disabled" value="0" />
+        </property>
+        <property default="config.awsfreertos.thread.include_hw_stack_monitor.disabled" description="Include RA stack monitor" display="RA|Hardware Stack Monitor" id="config.awsfreertos.thread.include_hw_stack_monitor">
+            <option display="Enabled" id="config.awsfreertos.thread.include_hw_stack_monitor.enabled" value="1" />
+            <option display="Disabled" id="config.awsfreertos.thread.include_hw_stack_monitor.disabled" value="0" />
+        </property>
+        <property default="vLoggingPrint(x)" display="Logging|Print String Function" id="config.awsfreertos.thread.print_function"/>
+        <property default="config.awsfreertos.thread.include_time_and_task.disabled" display="Logging|Logging Include Time and Task Name" id="config.awsfreertos.thread.include_time_and_task">
+            <option id="config.awsfreertos.thread.include_time_and_task.disabled" display="Disabled" value="0" />
+            <option id="config.awsfreertos.thread.include_time_and_task.enabled" display="Enabled" value="1" />
+        </property>
+        <property default="Log Name" display="Logging|Debug Logging Name" id="config.awsfreertos.thread.debug_logging_name"/>
+        <property default="config.awsfreertos.thread.logging_level.log_none" description="Set the logging level" display="Logging|Logging Level" id="config.awsfreertos.thread.logging_level">
+            <option display="LOG_NONE" id="config.awsfreertos.thread.logging_level.log_none" value="LOG_NONE" />
+            <option display="LOG_ERROR" id="config.awsfreertos.thread.logging_level.log_error" value="LOG_ERROR" />
+            <option display="LOG_WARN" id="config.awsfreertos.thread.logging_level.log_warn" value="LOG_WARN" />
+            <option display="LOG_INFO" id="config.awsfreertos.thread.logging_level.log_info" value="LOG_INFO" />
+            <option display="LOG_DEBUG" id="config.awsfreertos.thread.logging_level.log_debug" value="LOG_DEBUG" />
+        </property>
+        <content>/*-----------------------------------------------------------
+            * Application specific definitions.
+            *
+            * These definitions should be adjusted for your particular hardware and
+            * application requirements.
+            *
+            * THESE PARAMETERS ARE DESCRIBED WITHIN THE 'CONFIGURATION' SECTION OF THE
+            * FreeRTOS API DOCUMENTATION AVAILABLE ON THE FreeRTOS.org WEB SITE.
+            *
+            * See http://www.freertos.org/a00110.html
+            *----------------------------------------------------------*/
+            #ifndef FREERTOS_CONFIG_H
+            #define FREERTOS_CONFIG_H
+
+            #include &quot;bsp_api.h&quot;
+
+            ${config.awsfreertos.custom_freertosconfig}
+
+            /* Common macro for FSP header files. There is also a corresponding FSP_FOOTER macro at the end of this file. */
+            FSP_HEADER
+
+            #ifndef configUSE_PREEMPTION
+            #define configUSE_PREEMPTION (${config.awsfreertos.thread.configuse_preemption})
+            #endif
+            #ifndef configUSE_PORT_OPTIMISED_TASK_SELECTION
+            #define configUSE_PORT_OPTIMISED_TASK_SELECTION (${config.awsfreertos.thread.configuse_port_optimised_task_selection})
+            #endif
+            #ifndef configUSE_TICKLESS_IDLE
+            #define configUSE_TICKLESS_IDLE (${config.awsfreertos.thread.configuse_tickless_idle})
+            #endif
+            #ifndef configUSE_IDLE_HOOK
+            #define configUSE_IDLE_HOOK (${config.awsfreertos.thread.configuse_idle_hook})
+            #endif
+            #ifndef configUSE_MALLOC_FAILED_HOOK
+            #define configUSE_MALLOC_FAILED_HOOK (${config.awsfreertos.thread.configuse_malloc_failed_hook})
+            #endif
+            #ifndef configUSE_DAEMON_TASK_STARTUP_HOOK
+            #define configUSE_DAEMON_TASK_STARTUP_HOOK (${config.awsfreertos.thread.configuse_daemon_task_startup_hook})
+            #endif
+            #ifndef configUSE_TICK_HOOK
+            #define configUSE_TICK_HOOK (${config.awsfreertos.thread.configuse_tick_hook})
+            #endif
+            #ifndef configCPU_CLOCK_HZ
+            #define configCPU_CLOCK_HZ (${config.awsfreertos.thread.configcpu_clock_hz})
+            #endif
+            #ifndef configTICK_RATE_HZ
+            #define configTICK_RATE_HZ (${config.awsfreertos.thread.configtick_rate_hz})
+            #endif
+            #ifndef configMAX_PRIORITIES
+            #define configMAX_PRIORITIES (${config.awsfreertos.thread.configmax_priorities})
+            #endif
+            #ifndef configMINIMAL_STACK_SIZE
+            #define configMINIMAL_STACK_SIZE (${config.awsfreertos.thread.configminimal_stack_size})
+            #endif
+            #ifndef configMINIMAL_SECURE_STACK_SIZE
+            #define configMINIMAL_SECURE_STACK_SIZE (256U)  /* Unused in RA port. */
+            #endif
+            #ifndef configMAX_TASK_NAME_LEN
+            #define configMAX_TASK_NAME_LEN (${config.awsfreertos.thread.configmax_task_name_len})
+            #endif
+            #ifndef configUSE_TRACE_FACILITY
+            #define configUSE_TRACE_FACILITY (${config.awsfreertos.thread.configuse_trace_facility})
+            #endif
+            #ifndef configUSE_STATS_FORMATTING_FUNCTIONS
+            #define configUSE_STATS_FORMATTING_FUNCTIONS (${config.awsfreertos.thread.configuse_stats_formatting_functions})
+            #endif
+            #ifndef configUSE_16_BIT_TICKS
+            #define configUSE_16_BIT_TICKS (${config.awsfreertos.thread.configuse_16_bit_ticks})
+            #endif
+            #ifndef configIDLE_SHOULD_YIELD
+            #define configIDLE_SHOULD_YIELD (${config.awsfreertos.thread.configidle_should_yield})
+            #endif
+            #ifndef configUSE_TASK_NOTIFICATIONS
+            #define configUSE_TASK_NOTIFICATIONS (${config.awsfreertos.thread.configuse_task_notifications})
+            #endif
+            #ifndef configTASK_NOTIFICATION_ARRAY_ENTRIES
+            #define configTASK_NOTIFICATION_ARRAY_ENTRIES (${config.awsfreertos.thread.configtask_notifications_array_enteries})
+            #endif
+            #ifndef configUSE_MUTEXES
+            #define configUSE_MUTEXES (${config.awsfreertos.thread.configuse_mutexes})
+            #endif
+            #ifndef configUSE_RECURSIVE_MUTEXES
+            #define configUSE_RECURSIVE_MUTEXES (${config.awsfreertos.thread.configuse_recursive_mutexes})
+            #endif
+            #ifndef configUSE_COUNTING_SEMAPHORES
+            #define configUSE_COUNTING_SEMAPHORES (${config.awsfreertos.thread.configuse_counting_semaphores})
+            #endif
+            #ifndef configUSE_ALTERNATIVE_API
+            #define configUSE_ALTERNATIVE_API (0U)
+            #endif
+            #ifndef configCHECK_FOR_STACK_OVERFLOW
+            #define configCHECK_FOR_STACK_OVERFLOW (${config.awsfreertos.thread.configcheck_for_stack_overflow})
+            #endif
+            #ifndef configQUEUE_REGISTRY_SIZE
+            #define configQUEUE_REGISTRY_SIZE (${config.awsfreertos.thread.configqueue_registry_size})
+            #endif
+            #ifndef configUSE_QUEUE_SETS
+            #define configUSE_QUEUE_SETS (${config.awsfreertos.thread.configuse_queue_sets})
+            #endif
+            #ifndef configUSE_TIME_SLICING
+            #define configUSE_TIME_SLICING (${config.awsfreertos.thread.configuse_time_slicing})
+            #endif
+            #ifndef configUSE_NEWLIB_REENTRANT
+            #define configUSE_NEWLIB_REENTRANT (${config.awsfreertos.thread.configuse_newlib_reentrant})
+            #endif
+            #ifndef configENABLE_BACKWARD_COMPATIBILITY
+            #define configENABLE_BACKWARD_COMPATIBILITY (${config.awsfreertos.thread.configenable_backward_compatibility})
+            #endif
+            #ifndef configNUM_THREAD_LOCAL_STORAGE_POINTERS
+            #define configNUM_THREAD_LOCAL_STORAGE_POINTERS (${config.awsfreertos.thread.confignum_thread_local_storage_pointers})
+            #endif
+            #ifndef configSTACK_DEPTH_TYPE
+            #define configSTACK_DEPTH_TYPE ${config.awsfreertos.thread.configstack_depth_type}
+            #endif
+            #ifndef configMESSAGE_BUFFER_LENGTH_TYPE
+            #define configMESSAGE_BUFFER_LENGTH_TYPE ${config.awsfreertos.thread.configmessage_buffer_length_type}
+            #endif
+            #ifndef configHEAP_CLEAR_MEMORY_ON_FREE
+            #define configHEAP_CLEAR_MEMORY_ON_FREE  ${config.awsfreertos.thread.configheap_clear_memory_on_free}
+            #endif
+            #ifndef configSUPPORT_STATIC_ALLOCATION
+            #define configSUPPORT_STATIC_ALLOCATION (${config.awsfreertos.thread.configsupport_static_allocation})
+            #endif
+            #ifndef configSUPPORT_DYNAMIC_ALLOCATION
+            #define configSUPPORT_DYNAMIC_ALLOCATION (${config.awsfreertos.thread.configsupport_dynamic_allocation})
+            #endif
+            #ifndef configTOTAL_HEAP_SIZE
+            #define configTOTAL_HEAP_SIZE (${config.awsfreertos.thread.configtotal_heap_size})
+            #endif
+            #ifndef configAPPLICATION_ALLOCATED_HEAP
+            #define configAPPLICATION_ALLOCATED_HEAP (${config.awsfreertos.thread.configapplication_allocated_heap})
+            #endif
+            #ifndef configGENERATE_RUN_TIME_STATS
+            #define configGENERATE_RUN_TIME_STATS (${config.awsfreertos.thread.configgenerate_run_time_stats})
+            #endif
+            #ifndef configUSE_CO_ROUTINES
+            #define configUSE_CO_ROUTINES (0)
+            #endif
+            #ifndef configMAX_CO_ROUTINE_PRIORITIES
+            #define configMAX_CO_ROUTINE_PRIORITIES  (2)
+            #endif
+            #ifndef configUSE_TIMERS
+            #define configUSE_TIMERS (${config.awsfreertos.thread.configuse_timers})
+            #endif
+            #ifndef configTIMER_TASK_PRIORITY
+            #define configTIMER_TASK_PRIORITY (${config.awsfreertos.thread.configtimer_task_priority})
+            #endif
+            #ifndef configTIMER_QUEUE_LENGTH
+            #define configTIMER_QUEUE_LENGTH (${config.awsfreertos.thread.configtimer_queue_length})
+            #endif
+            #ifndef configTIMER_TASK_STACK_DEPTH
+            #define configTIMER_TASK_STACK_DEPTH (${config.awsfreertos.thread.configtimer_task_stack_depth})
+            #endif
+            #ifndef configLIBRARY_LOWEST_INTERRUPT_PRIORITY
+            #define configLIBRARY_LOWEST_INTERRUPT_PRIORITY (${config.awsfreertos.thread.configlibrary_lowest_interrupt_priority})
+            #endif
+            #ifndef configLIBRARY_MAX_SYSCALL_INTERRUPT_PRIORITY
+            #define configLIBRARY_MAX_SYSCALL_INTERRUPT_PRIORITY (${config.awsfreertos.thread.configlibrary_max_syscall_interrupt_priority})
+            #endif
+            #ifndef configMAX_SYSCALL_INTERRUPT_PRIORITY
+            #define configMAX_SYSCALL_INTERRUPT_PRIORITY (${config.awsfreertos.thread.configmax_syscall_interrupt_priority})
+            #endif
+            #ifndef configMAX_API_CALL_INTERRUPT_PRIORITY
+            #define configMAX_API_CALL_INTERRUPT_PRIORITY (${config.awsfreertos.thread.configmax_api_call_interrupt_priority})
+            #endif
+            #ifndef configASSERT
+            #define configASSERT( x ) ${config.awsfreertos.thread.configassert}
+            #endif
+            #ifndef configINCLUDE_APPLICATION_DEFINED_PRIVILEGED_FUNCTIONS
+            #define configINCLUDE_APPLICATION_DEFINED_PRIVILEGED_FUNCTIONS (${config.awsfreertos.thread.configinclude_application_defined_privileged_functions})
+            #endif
+            #ifndef INCLUDE_vTaskPrioritySet
+            #define INCLUDE_vTaskPrioritySet (${config.awsfreertos.thread.include_vtaskpriorityset})
+            #endif
+            #ifndef INCLUDE_uxTaskPriorityGet
+            #define INCLUDE_uxTaskPriorityGet (${config.awsfreertos.thread.include_uxtaskpriorityget})
+            #endif
+            #ifndef INCLUDE_vTaskDelete
+            #define INCLUDE_vTaskDelete (${config.awsfreertos.thread.include_vtaskdelete})
+            #endif
+            #ifndef INCLUDE_vTaskSuspend
+            #define INCLUDE_vTaskSuspend (${config.awsfreertos.thread.include_vtasksuspend})
+            #endif
+            #ifndef INCLUDE_xResumeFromISR
+            #define INCLUDE_xResumeFromISR (${config.awsfreertos.thread.include_xresumefromisr})
+            #endif
+            #ifndef INCLUDE_vTaskDelayUntil
+            #define INCLUDE_vTaskDelayUntil (${config.awsfreertos.thread.include_vtaskdelayuntil})
+            #endif
+            #ifndef INCLUDE_vTaskDelay
+            #define INCLUDE_vTaskDelay (${config.awsfreertos.thread.include_vtaskdelay})
+            #endif
+            #ifndef INCLUDE_xTaskGetSchedulerState
+            #define INCLUDE_xTaskGetSchedulerState (${config.awsfreertos.thread.include_xtaskgetschedulerstate})
+            #endif
+            #ifndef INCLUDE_xTaskGetCurrentTaskHandle
+            #define INCLUDE_xTaskGetCurrentTaskHandle (${config.awsfreertos.thread.include_xtaskgetcurrenttaskhandle})
+            #endif
+            #ifndef INCLUDE_uxTaskGetStackHighWaterMark
+            #define INCLUDE_uxTaskGetStackHighWaterMark (${config.awsfreertos.thread.include_uxtaskgetstackhighwatermark})
+            #endif
+            #ifndef INCLUDE_xTaskGetIdleTaskHandle
+            #define INCLUDE_xTaskGetIdleTaskHandle (${config.awsfreertos.thread.include_xtaskgetidletaskhandle})
+            #endif
+            #ifndef INCLUDE_eTaskGetState
+            #define INCLUDE_eTaskGetState (${config.awsfreertos.thread.include_etaskgetstate})
+            #endif
+            #ifndef INCLUDE_xEventGroupSetBitFromISR
+            #define INCLUDE_xEventGroupSetBitFromISR (${config.awsfreertos.thread.include_xeventgroupsetbitfromisr})
+            #endif
+            #ifndef INCLUDE_xTimerPendFunctionCall
+            #define INCLUDE_xTimerPendFunctionCall (${config.awsfreertos.thread.include_xtimerpendfunctioncall})
+            #endif
+            #ifndef INCLUDE_xTaskAbortDelay
+            #define INCLUDE_xTaskAbortDelay (${config.awsfreertos.thread.include_xtaskabortdelay})
+            #endif
+            #ifndef INCLUDE_xTaskGetHandle
+            #define INCLUDE_xTaskGetHandle (${config.awsfreertos.thread.include_xtaskgethandle})
+            #endif
+            #ifndef INCLUDE_xTaskResumeFromISR
+            #define INCLUDE_xTaskResumeFromISR (${config.awsfreertos.thread.include_xtaskresumefromisr})
+            #endif
+            #ifndef RM_FREERTOS_PORT_CFG_HW_STACK_MONITOR_ENABLE
+            #define RM_FREERTOS_PORT_CFG_HW_STACK_MONITOR_ENABLE  (${config.awsfreertos.thread.include_hw_stack_monitor})
+            #endif
+            #ifndef configPRINT_STRING
+            #define configPRINT_STRING(x)                      (${config.awsfreertos.thread.print_function})
+            #endif
+            #ifndef configLOGGING_INCLUDE_TIME_AND_TASK_NAME
+            #define configLOGGING_INCLUDE_TIME_AND_TASK_NAME   (${config.awsfreertos.thread.include_time_and_task})
+            #endif
+            #ifndef LIBRARY_LOG_NAME
+            #define LIBRARY_LOG_NAME                           "${config.awsfreertos.thread.debug_logging_name}"
+            #endif
+            #ifndef LIBRARY_LOG_LEVEL
+            #define LIBRARY_LOG_LEVEL                          (${config.awsfreertos.thread.logging_level})
+            #endif
+
+            /* Common macro for FSP header files. There is also a corresponding FSP_HEADER macro at the top of this file. */
+            FSP_FOOTER
+
+            #endif /* FREERTOS_CONFIG_H */
+        </content>
+    </config>
+    <rtos id="rtos.awsfreertos" display="FreeRTOS">
+        <thread id="rtos.awsfreertos.thread" config="config.awsfreertos.thread" display="${rtos.awsfreertos.thread.name}" version="0">
+            <constraint display="If dyanmic allocation is used then one, and only one, heap implementation must be added to the project.">
+                (&quot;${config.awsfreertos.thread.configsupport_dynamic_allocation}&quot; == &quot;config.awsfreertos.thread.configsupport_dynamic_allocation.disabled&quot;) || (&quot;${interface.freertos.heap}&quot; === &quot;1&quot;)
+            </constraint>
+            <constraint display="configTOTAL_HEAP_SIZE must be an integer and greater than 0. Set in FreeRTOS Common properties.">
+                (&quot;${config.awsfreertos.thread.configsupport_dynamic_allocation}&quot; == &quot;config.awsfreertos.thread.configsupport_dynamic_allocation.disabled&quot;) || (&quot;${config.awsfreertos.thread.configtotal_heap_size}&quot; &gt; 0)
+            </constraint>
+            <constraint display="configSUPPORT_STATIC_ALLOCATION must be Enabled to use Static Allocation. Set in FreeRTOS Memory Allocation properties.">
+                (&quot;${rtos.awsfreertos.thread.allocation}&quot; != &quot;rtos.awsfreertos.thread.allocation.static&quot;) || (&quot;${config.awsfreertos.thread.configsupport_static_allocation}&quot; == &quot;config.awsfreertos.thread.configsupport_static_allocation.enabled&quot;)
+            </constraint>
+            <constraint display="configSUPPORT_DYNAMIC_ALLOCATION must be Enabled to use Dynamic Allocation. Set in FreeRTOS Memory Allocation properties.">
+                (&quot;${rtos.awsfreertos.thread.allocation}&quot; != &quot;rtos.awsfreertos.thread.allocation.dynamic&quot;) || (&quot;${config.awsfreertos.thread.configsupport_dynamic_allocation}&quot; == &quot;config.awsfreertos.thread.configsupport_dynamic_allocation.enabled&quot;)
+            </constraint>
+            <constraint display="Use Mutexes must be Enabled to set Use Recursive Mutexes to Enabled.">
+              &quot;${config.awsfreertos.thread.configuse_recursive_mutexes}&quot; === &quot;config.awsfreertos.thread.configuse_recursive_mutexes.disabled&quot; ||
+                (&quot;${config.awsfreertos.thread.configuse_mutexes}&quot; === &quot;config.awsfreertos.thread.configuse_mutexes.enabled&quot;)
+            </constraint>
+            <constraint display="Stack size must be larger than configured Minimal Stack Size.">
+              ${rtos.awsfreertos.thread.stack} &gt;= ${config.awsfreertos.thread.configminimal_stack_size}
+            </constraint>
+            <constraint display="Task name length must be less than the max task name length.">
+                ("${rtos.awsfreertos.thread.name}".length) &lt;= (${config.awsfreertos.thread.configmax_task_name_len} - 1)
+            </constraint>
+            <provides interface="interface.rtos.rtos" />
+            <provides interface="interface.rtos.awsfreertos" />
+            <provides interface="interface.rtos.supports.renesas_usb" />
+            <!-- No RTOS and FreeRTOS can use emWin. -->
+            <provides interface="interface.rtos.supports.emwin" />
+            <provides interface="interface.rtos.supports.freertos_plus_fat" />
+            <provides interface="interface.rtos.supports.mbedtls" />
+            <!-- source file names derived from _symbol property - do not change ID -->
+            <property id="_symbol" display="Symbol" default="new_thread${_instance}" description="Symbol used for generated function and file naming">
+                <constraint display="Value must be a valid C language symbol">testSymbol("${_symbol}")</constraint>
+            </property>
+            <property id="rtos.awsfreertos.thread.name" display="Name" default="New Thread" description="A descriptive name for the task. This is mainly used to facilitate debugging, but can also be used to obtain a task handle.\n\nThe maximum length of a task's name is set using the Max Task Name Len configuration." />
+            <property id="rtos.awsfreertos.thread.stack" display="Stack size (bytes)" default="1024" description="Number bytes in the stack memory area. The thread's stack area must be large enough to handle its worst-case function call nesting and local variable usage. Size must be an integer multiple of 8.">
+                <constraint display="Value must be an integer multiple of 8 and greater than 0">testInteger("${rtos.awsfreertos.thread.stack}") &amp;&amp; ("${rtos.awsfreertos.thread.stack}" % 8 == 0) &amp;&amp; ("${rtos.awsfreertos.thread.stack}" &gt; 0)</constraint>
+            </property>
+            <property id="rtos.awsfreertos.thread.priority" display="Priority" default="1" description="The priority at which the created task will execute. Legal values range from 0 through (Max Priorities - 1), where a value of 0 represents the lowest priority.">
+                 <constraint display="Must be an integer">testInteger("${rtos.awsfreertos.thread.priority}") &amp;&amp; ("${rtos.awsfreertos.thread.priority}" &gt;= 0)
+                 </constraint>
+            </property>
+            <property id="rtos.awsfreertos.thread.context" display="Thread Context" default="NULL" description="Pointer to user data that is passed to the thread via rm_freertos_port_parameters_t::p_context. Symbols can be externed in the Custom FreeRTOSConfig.h defined in the Common configurations." />
+            <property default="rtos.awsfreertos.thread.allocation.static" description="Select static allocation to allocate memory for this object in a global variable (Support Static Allocation must be Enabled). Select dynamic allocation to allocate memory for this object from a FreeRTOS heap (Support Dynamic Allocation must be Enabled)." display="Memory Allocation" id="rtos.awsfreertos.thread.allocation">
+                <option display="Dynamic" id="rtos.awsfreertos.thread.allocation.dynamic" value="0" />
+                <option display="Static" id="rtos.awsfreertos.thread.allocation.static" value="1" />
+            </property>
+            <property default="rtos.awsfreertos.thread.secure_context.enable" description="If this thread is going to call a Secure API using a NSC function then a secure context is required so this thread will have a stack on the Secure side." display="Allocate Secure Context" id="rtos.awsfreertos.thread.secure_context">
+                <option display="Disable" id="rtos.awsfreertos.thread.secure_context.disable" value="0" />
+                <option display="Enable" id="rtos.awsfreertos.thread.secure_context.enable" value="1" />
+            </property>
+            <header>
+                extern void ${_symbol}_create(void);
+                extern TaskHandle_t ${_symbol};
+            </header>
+            <includes>
+                #include "bsp_api.h"
+                #include "FreeRTOS.h"
+                #include "task.h"
+                #include "semphr.h"
+                #include "hal_data.h"
+                #ifdef __cplusplus
+                extern "C" void ${_symbol}_entry(void * pvParameters);
+                #else
+                extern void ${_symbol}_entry(void * pvParameters);
+                #endif
+            </includes>
+            <macros>
+            </macros>
+            <declarations>
+                #if ${rtos.awsfreertos.thread.allocation}
+                static StaticTask_t ${_symbol}_memory;
+                #if defined(__ARMCC_VERSION)           /* AC6 compiler */
+                static uint8_t ${_symbol}_stack[${rtos.awsfreertos.thread.stack}] BSP_PLACE_IN_SECTION(BSP_UNINIT_SECTION_PREFIX ".stack.thread") BSP_ALIGN_VARIABLE(BSP_STACK_ALIGNMENT);
+                #else
+                static uint8_t ${_symbol}_stack[${rtos.awsfreertos.thread.stack}] BSP_PLACE_IN_SECTION(BSP_UNINIT_SECTION_PREFIX ".stack.${_symbol}") BSP_ALIGN_VARIABLE(BSP_STACK_ALIGNMENT);
+                #endif
+                #endif
+                TaskHandle_t ${_symbol};
+                void ${_symbol}_create(void);
+                static void ${_symbol}_func(void * pvParameters);
+                void rtos_startup_err_callback(void * p_instance, void * p_data);
+                void rtos_startup_common_init(void);
+            </declarations>
+            <functions>
+                extern uint32_t g_fsp_common_thread_count;
+
+                const rm_freertos_port_parameters_t ${_symbol}_parameters =
+                {
+                    .p_context = (void *) ${rtos.awsfreertos.thread.context},
+                };
+
+                void ${_symbol}_create (void)
+                {
+                    /* Increment count so we will know the number of threads created in the RA Configuration editor. */
+                    g_fsp_common_thread_count++;
+
+                    /* Initialize each kernel object. */
+                    ${_object_init}
+
+                    #if ${rtos.awsfreertos.thread.allocation}
+                    ${_symbol} = xTaskCreateStatic(
+                    #else
+                    BaseType_t ${_symbol}_create_err = xTaskCreate(
+                    #endif
+                        ${_symbol}_func,
+                        (const char *)"${rtos.awsfreertos.thread.name}",
+                        ${rtos.awsfreertos.thread.stack}/4, // In words, not bytes
+                        (void *) &amp;${_symbol}_parameters, //pvParameters
+                        ${rtos.awsfreertos.thread.priority},
+                        #if ${rtos.awsfreertos.thread.allocation}
+                        (StackType_t *)&amp;${_symbol}_stack,
+                        (StaticTask_t *)&amp;${_symbol}_memory
+                        #else
+                        &amp; ${_symbol}
+                        #endif
+                    );
+
+                    #if ${rtos.awsfreertos.thread.allocation}
+                    if (NULL == ${_symbol})
+                    {
+                        rtos_startup_err_callback(${_symbol}, 0);
+                    }
+                    #else
+                    if (pdPASS != ${_symbol}_create_err)
+                    {
+                        rtos_startup_err_callback(${_symbol}, 0);
+                    }
+                    #endif
+                }
+                static void ${_symbol}_func (void * pvParameters)
+                {
+                    /* Initialize common components */
+                    rtos_startup_common_init();
+
+                    /* Initialize each module instance. */
+                    ${_module_init}
+
+                    #if (1 == BSP_TZ_NONSECURE_BUILD) &amp;&amp; (1 == ${rtos.awsfreertos.thread.secure_context})
+                    /* When FreeRTOS is used in a non-secure TrustZone application, portALLOCATE_SECURE_CONTEXT must be called prior
+                     * to calling any non-secure callable function in a thread. The parameter is unused in the FSP implementation.
+                     * If no slots are available then configASSERT() will be called from vPortSVCHandler_C(). If this occurs, the
+                     * application will need to either increase the value of the "Process Stack Slots" Property in the rm_tz_context
+                     * module in the secure project or decrease the number of threads in the non-secure project that are allocating
+                     * a secure context. Users can control which threads allocate a secure context via the Properties tab when
+                     * selecting each thread. Note that the idle thread in FreeRTOS requires a secure context so the application
+                     * will need at least 1 secure context even if no user threads make secure calls. */
+                     portALLOCATE_SECURE_CONTEXT(0);
+                    #endif
+
+                    /* Enter user code for this thread. Pass task handle. */
+                    ${_symbol}_entry(pvParameters);
+                }
+            </functions>
+            <entry>
+                #include "${_symbol}.h"
+                /* ${rtos.awsfreertos.thread.name} entry function */
+                /* pvParameters contains TaskHandle_t */
+                void ${_symbol}_entry(void * pvParameters)
+                {
+                    FSP_PARAMETER_NOT_USED(pvParameters);
+
+                    /* TODO: add your own code here */
+                    while(1)
+                    {
+                        vTaskDelay(1);
+                    }
+                }
+            </entry>
+            <init>
+                ${_symbol}_create();
+            </init>
+            <start>
+                #include "bsp_api.h"
+                #include "FreeRTOS.h"
+                #include "task.h"
+                #include "semphr.h"
+                ${_include}
+                uint32_t g_fsp_common_thread_count;
+                bool g_fsp_common_initialized;
+                SemaphoreHandle_t g_fsp_common_initialized_semaphore;
+                #if configSUPPORT_STATIC_ALLOCATION
+                StaticSemaphore_t g_fsp_common_initialized_semaphore_memory;
+                #endif
+                void g_hal_init(void);
+                /** Weak reference for tx_err_callback */
+                #if defined(__ICCARM__)
+                #define rtos_startup_err_callback_WEAK_ATTRIBUTE
+                #pragma weak rtos_startup_err_callback = rtos_startup_err_callback_internal
+                #elif defined(__GNUC__)
+                #define rtos_startup_err_callback_WEAK_ATTRIBUTE __attribute__ ((weak, alias("rtos_startup_err_callback_internal")))
+                #endif
+                void rtos_startup_err_callback_internal(void * p_instance, void * p_data);
+                void rtos_startup_err_callback(void * p_instance, void * p_data) rtos_startup_err_callback_WEAK_ATTRIBUTE;
+                /*********************************************************************************************************************
+                * @brief This is a weak example initialization error function. It should be overridden by defining a user function
+                * with the prototype below.
+                * - void rtos_startup_err_callback(void * p_instance, void * p_data)
+                *
+                * @param[in] p_instance arguments used to identify which instance caused the error and p_data Callback arguments used to identify what error caused the callback.
+                **********************************************************************************************************************/
+                void rtos_startup_err_callback_internal(void * p_instance, void * p_data);
+                void rtos_startup_err_callback_internal(void * p_instance, void * p_data)
+                {
+                    /** Suppress compiler warning for not using parameters. */
+                    FSP_PARAMETER_NOT_USED(p_instance);
+                    FSP_PARAMETER_NOT_USED(p_data);
+
+                    /** An error has occurred. Please check function arguments for more information. */
+                    BSP_CFG_HANDLE_UNRECOVERABLE_ERROR(0);
+                }
+
+                void rtos_startup_common_init(void);
+                void rtos_startup_common_init(void)
+                {
+                    /* First thread will take care of common initialization. */
+                    BaseType_t err;
+                    err = xSemaphoreTake(g_fsp_common_initialized_semaphore, portMAX_DELAY);
+                    if (pdPASS != err)
+                    {
+                        /* Check err, problem occurred. */
+                        rtos_startup_err_callback(g_fsp_common_initialized_semaphore, 0);
+                    }
+
+                    /* Only perform common initialization if this is the first thread to execute. */
+                    if (false == g_fsp_common_initialized)
+                    {
+                        /* Later threads will not run this code. */
+                        g_fsp_common_initialized = true;
+
+                        /* Perform common module initialization. */
+                        g_hal_init();
+
+                        /* Now that common initialization is done, let other threads through. */
+                        /* First decrement by 1 since 1 thread has already come through. */
+                        g_fsp_common_thread_count--;
+                        while (g_fsp_common_thread_count > 0)
+                        {
+                            err = xSemaphoreGive(g_fsp_common_initialized_semaphore);
+                            if (pdPASS != err)
+                            {
+                                /* Check err, problem occurred. */
+                                rtos_startup_err_callback(g_fsp_common_initialized_semaphore, 0);
+                            }
+                            g_fsp_common_thread_count--;
+                        }
+                    }
+                }
+
+                int main(void)
+                {
+                    g_fsp_common_thread_count = 0;
+                    g_fsp_common_initialized = false;
+
+                    /* Create semaphore to make sure common init is done before threads start running. */
+                    g_fsp_common_initialized_semaphore =
+                    #if configSUPPORT_STATIC_ALLOCATION
+                    xSemaphoreCreateCountingStatic(
+                    #else
+                    xSemaphoreCreateCounting(
+                    #endif
+                        256,
+                        1
+                        #if configSUPPORT_STATIC_ALLOCATION
+                        , &amp;g_fsp_common_initialized_semaphore_memory
+                        #endif
+                    );
+
+                    if (NULL == g_fsp_common_initialized_semaphore) {
+                        rtos_startup_err_callback(g_fsp_common_initialized_semaphore, 0);
+                    }
+
+                    /* Init RTOS tasks. */
+                    ${_init}
+
+                    /* Start the scheduler. */
+                    vTaskStartScheduler();
+                    return 0;
+                }
+
+                #if configSUPPORT_STATIC_ALLOCATION
+                void vApplicationGetIdleTaskMemory(StaticTask_t **ppxIdleTaskTCBBuffer, StackType_t **ppxIdleTaskStackBuffer,
+                uint32_t *pulIdleTaskStackSize) BSP_WEAK_REFERENCE;
+                void vApplicationGetTimerTaskMemory(StaticTask_t **ppxTimerTaskTCBBuffer, StackType_t **ppxTimerTaskStackBuffer,
+                uint32_t *pulTimerTaskStackSize) BSP_WEAK_REFERENCE;
+
+                /* If configSUPPORT_STATIC_ALLOCATION is set to 1, the application must provide an
+                * implementation of vApplicationGetIdleTaskMemory() to provide the memory that is
+                * used by the Idle task. */
+                void vApplicationGetIdleTaskMemory( StaticTask_t ** ppxIdleTaskTCBBuffer,
+                                                    StackType_t **  ppxIdleTaskStackBuffer,
+                                                    uint32_t * pulIdleTaskStackSize )
+                {
+                    /* If the buffers to be provided to the Idle task are declared inside this
+                    * function then they must be declared static - otherwise they will be allocated on
+                    * the stack and so not exists after this function exits. */
+                    static StaticTask_t xIdleTaskTCB;
+                    static StackType_t uxIdleTaskStack[ configMINIMAL_STACK_SIZE ];
+
+                    /* Pass out a pointer to the StaticTask_t structure in which the Idle
+                    * task's state will be stored. */
+                    *ppxIdleTaskTCBBuffer = &amp;xIdleTaskTCB;
+
+                    /* Pass out the array that will be used as the Idle task's stack. */
+                    *ppxIdleTaskStackBuffer = uxIdleTaskStack;
+
+                    /* Pass out the size of the array pointed to by *ppxIdleTaskStackBuffer.
+                    * Note that, as the array is necessarily of type StackType_t,
+                    * configMINIMAL_STACK_SIZE is specified in words, not bytes. */
+                    *pulIdleTaskStackSize = configMINIMAL_STACK_SIZE;
+                }
+
+                /* If configSUPPORT_STATIC_ALLOCATION is set to 1, the application must provide an
+                * implementation of vApplicationGetTimerTaskMemory() to provide the memory that is
+                * used by the RTOS daemon/time task. */
+                void vApplicationGetTimerTaskMemory( StaticTask_t ** ppxTimerTaskTCBBuffer,
+                                                     StackType_t **  ppxTimerTaskStackBuffer,
+                                                     uint32_t *      pulTimerTaskStackSize )
+                {
+                    /* If the buffers to be provided to the Timer task are declared inside this
+                    * function then they must be declared static - otherwise they will be allocated on
+                    * the stack and so not exists after this function exits. */
+                    static StaticTask_t xTimerTaskTCB;
+                    static StackType_t uxTimerTaskStack[ configMINIMAL_STACK_SIZE ];
+
+                    /* Pass out a pointer to the StaticTask_t structure in which the Idle
+                    * task's state will be stored. */
+                    *ppxTimerTaskTCBBuffer = &amp;xTimerTaskTCB;
+
+                    /* Pass out the array that will be used as the Timer task's stack. */
+                    *ppxTimerTaskStackBuffer = uxTimerTaskStack;
+
+                    /* Pass out the size of the array pointed to by *ppxTimerTaskStackBuffer.
+                    * Note that, as the array is necessarily of type StackType_t,
+                    * configMINIMAL_STACK_SIZE is specified in words, not bytes. */
+                    *pulTimerTaskStackSize = configMINIMAL_STACK_SIZE;
+                }
+                #endif
+            </start>
+        </thread>
+        <object id="rtos.awsfreertos.object.flags" display="${rtos.awsfreertos.object.flags.symbol} Event Group" version="0">
+            <constraint display="configSUPPORT_STATIC_ALLOCATION must be Enabled to use Static Allocation. Set in FreeRTOS Memory Allocation properties.">
+                (&quot;${rtos.awsfreertos.object.flags.allocation}&quot; != &quot;rtos.awsfreertos.object.flags.allocation.static&quot;) || (&quot;${config.awsfreertos.thread.configsupport_static_allocation}&quot; == &quot;config.awsfreertos.thread.configsupport_static_allocation.enabled&quot;)
+            </constraint>
+            <constraint display="configSUPPORT_DYNAMIC_ALLOCATION must be Enabled to use Dynamic Allocation. Set in FreeRTOS Memory Allocation properties.">
+                (&quot;${rtos.awsfreertos.object.flags.allocation}&quot; != &quot;rtos.awsfreertos.object.flags.allocation.dynamic&quot;) || (&quot;${config.awsfreertos.thread.configsupport_dynamic_allocation}&quot; == &quot;config.awsfreertos.thread.configsupport_dynamic_allocation.enabled&quot;)
+            </constraint>
+            <constraint display="xTimerPendFunctionCall must be enabled to use Event Groups. Set in thread->common->optional functions properties.">
+                (&quot;${config.awsfreertos.thread.include_xtimerpendfunctioncall}&quot; === &quot;config.awsfreertos.thread.include_xtimerpendfunctioncall.enabled&quot;)
+            </constraint>
+            <provides interface="object.flags" />
+            <property id="rtos.awsfreertos.object.flags.symbol" display="Symbol" default="g_new_event_group${_instance}" description="Name of event group handle." />
+            <property default="rtos.awsfreertos.object.flags.allocation.static" description="Select static allocation to allocate memory for this object in a global variable (Support Static Allocation must be Enabled). Select dynamic allocation to allocate memory for this object from a FreeRTOS heap (Support Dynamic Allocation must be Enabled)." display="Memory Allocation" id="rtos.awsfreertos.object.flags.allocation">
+                <option display="Dynamic" id="rtos.awsfreertos.object.flags.allocation.dynamic" value="0" />
+                <option display="Static" id="rtos.awsfreertos.object.flags.allocation.static" value="1" />
+            </property>
+            <header>
+                extern EventGroupHandle_t ${rtos.awsfreertos.object.flags.symbol};
+            </header>
+            <includes>
+                #include "FreeRTOS.h"
+                #include "event_groups.h"
+            </includes>
+            <declarations>
+                EventGroupHandle_t ${rtos.awsfreertos.object.flags.symbol};
+                #if ${rtos.awsfreertos.object.flags.allocation}
+                StaticEventGroup_t ${rtos.awsfreertos.object.flags.symbol}_memory;
+                #endif
+                void rtos_startup_err_callback(void * p_instance, void * p_data);
+            </declarations>
+            <init>
+                ${rtos.awsfreertos.object.flags.symbol} =
+                #if ${rtos.awsfreertos.object.flags.allocation}
+                xEventGroupCreateStatic(&amp;${rtos.awsfreertos.object.flags.symbol}_memory);
+                #else
+                xEventGroupCreate();
+                #endif
+                if (NULL == ${rtos.awsfreertos.object.flags.symbol}) {
+                    rtos_startup_err_callback(${rtos.awsfreertos.object.flags.symbol}, 0);
+                }
+            </init>
+        </object>
+        <object id="rtos.awsfreertos.object.mutex" display="${rtos.awsfreertos.object.mutex.symbol} Mutex" version="0">
+            <constraint display="configSUPPORT_STATIC_ALLOCATION must be Enabled to use Static Allocation. Set in FreeRTOS Memory Allocation properties.">
+                (&quot;${rtos.awsfreertos.object.mutex.allocation}&quot; != &quot;rtos.awsfreertos.object.mutex.allocation.static&quot;) || (&quot;${config.awsfreertos.thread.configsupport_static_allocation}&quot; == &quot;config.awsfreertos.thread.configsupport_static_allocation.enabled&quot;)
+            </constraint>
+            <constraint display="configSUPPORT_DYNAMIC_ALLOCATION must be Enabled to use Dynamic Allocation. Set in FreeRTOS Memory Allocation properties.">
+                (&quot;${rtos.awsfreertos.object.mutex.allocation}&quot; != &quot;rtos.awsfreertos.object.mutex.allocation.dynamic&quot;) || (&quot;${config.awsfreertos.thread.configsupport_dynamic_allocation}&quot; == &quot;config.awsfreertos.thread.configsupport_dynamic_allocation.enabled&quot;)
+            </constraint>
+            <constraint display="configUSE_MUTEXES must be Enabled to use Mutexes. Set in FreeRTOS General properties.">
+                (&quot;${config.awsfreertos.thread.configuse_mutexes}&quot; === &quot;config.awsfreertos.thread.configuse_mutexes.enabled&quot;)
+            </constraint>
+            <constraint display="configUSE_RECURSIVE_MUTEXES must be Enabled to use Recursive Mutexes. Set in FreeRTOS General properties.">
+                (&quot;${config.awsfreertos.thread.configuse_recursive_mutexes}&quot; === &quot;config.awsfreertos.thread.configuse_recursive_mutexes.enabled&quot;) || (&quot;${rtos.awsfreertos.object.mutex.type}&quot; != &quot;rtos.awsfreertos.object.mutex.type.recursive_mutex&quot;)
+            </constraint>
+            <provides interface="object.mutex" />
+            <property id="rtos.awsfreertos.object.mutex.symbol" display="Symbol" default="g_new_mutex${_instance}" description="Name of mutex handle." />
+            <property default="rtos.awsfreertos.object.mutex.type.mutex" description="Select recursive mutex to allow the mutex to be taken repeatedly by the owner (Use Recursive Mutexes must be Enabled)." display="Type" id="rtos.awsfreertos.object.mutex.type">
+                <option display="Mutex" id="rtos.awsfreertos.object.mutex.type.mutex" value="0" />
+                <option display="Recursive Mutex" id="rtos.awsfreertos.object.mutex.type.recursive_mutex" value="1" />
+            </property>
+            <property default="rtos.awsfreertos.object.mutex.allocation.static" description="Select static allocation to allocate memory for this object in a global variable (Support Static Allocation must be Enabled). Select dynamic allocation to allocate memory for this object from a FreeRTOS heap (Support Dynamic Allocation must be Enabled)." display="Memory Allocation" id="rtos.awsfreertos.object.mutex.allocation">
+                <option display="Dynamic" id="rtos.awsfreertos.object.mutex.allocation.dynamic" value="0" />
+                <option display="Static" id="rtos.awsfreertos.object.mutex.allocation.static" value="1" />
+            </property>
+            <header>
+                extern SemaphoreHandle_t ${rtos.awsfreertos.object.mutex.symbol};
+            </header>
+            <includes>
+                #include "FreeRTOS.h"
+                #include "semphr.h"
+            </includes>
+            <declarations>
+                SemaphoreHandle_t ${rtos.awsfreertos.object.mutex.symbol};
+                #if ${rtos.awsfreertos.object.mutex.allocation}
+                StaticSemaphore_t ${rtos.awsfreertos.object.mutex.symbol}_memory;
+                #endif
+                void rtos_startup_err_callback(void * p_instance, void * p_data);
+            </declarations>
+            <init>
+                ${rtos.awsfreertos.object.mutex.symbol} =
+                #if ${rtos.awsfreertos.object.mutex.type}
+                #if ${rtos.awsfreertos.object.mutex.allocation}
+                xSemaphoreCreateRecursiveMutexStatic(&amp;${rtos.awsfreertos.object.mutex.symbol}_memory);
+                #else
+                xSemaphoreCreateRecursiveMutex();
+                #endif
+                #else
+                #if ${rtos.awsfreertos.object.mutex.allocation}
+                xSemaphoreCreateMutexStatic(&amp;${rtos.awsfreertos.object.mutex.symbol}_memory);
+                #else
+                xSemaphoreCreateMutex();
+                #endif
+                #endif
+                if (NULL == ${rtos.awsfreertos.object.mutex.symbol}) {
+                rtos_startup_err_callback(${rtos.awsfreertos.object.mutex.symbol}, 0);
+                }
+            </init>
+        </object>
+        <object id="rtos.awsfreertos.object.semaphore" display="${rtos.awsfreertos.object.semaphore.symbol} Counting Semaphore" version="0">
+            <constraint display="configSUPPORT_STATIC_ALLOCATION must be Enabled to use Static Allocation. Set in FreeRTOS Memory Allocation properties.">
+                (&quot;${rtos.awsfreertos.object.semaphore.allocation}&quot; != &quot;rtos.awsfreertos.object.semaphore.allocation.static&quot;) || (&quot;${config.awsfreertos.thread.configsupport_static_allocation}&quot; == &quot;config.awsfreertos.thread.configsupport_static_allocation.enabled&quot;)
+            </constraint>
+            <constraint display="configSUPPORT_DYNAMIC_ALLOCATION must be Enabled to use Dynamic Allocation. Set in FreeRTOS Memory Allocation properties.">
+                (&quot;${rtos.awsfreertos.object.semaphore.allocation}&quot; != &quot;rtos.awsfreertos.object.semaphore.allocation.dynamic&quot;) || (&quot;${config.awsfreertos.thread.configsupport_dynamic_allocation}&quot; == &quot;config.awsfreertos.thread.configsupport_dynamic_allocation.enabled&quot;)
+            </constraint>
+            <constraint display="configUSE_COUNTING_SEMAPHORES must be Enabled to use Counting Semaphores. Set in FreeRTOS General properties.">
+                (&quot;${config.awsfreertos.thread.configuse_counting_semaphores}&quot; === &quot;config.awsfreertos.thread.configuse_counting_semaphores.enabled&quot;)
+            </constraint>
+            <provides interface="object.semaphore" />
+            <property id="rtos.awsfreertos.object.semaphore.symbol" display="Symbol" default="g_new_counting_semaphore${_instance}" description="Name of counting semaphore handle." />
+            <property id="rtos.awsfreertos.object.semaphore.count" display="Initial count" description="The count value assigned to the semaphore when it is created." default="0" />
+            <property id="rtos.awsfreertos.object.semaphore.count_max" display="Maximum count" description="The maximum count value that can be reached. When the semaphore reaches this value it can no longer be 'given'." default="256" />
+            <property default="rtos.awsfreertos.object.semaphore.allocation.static" description="Select static allocation to allocate memory for this object in a global variable (Support Static Allocation must be Enabled). Select dynamic allocation to allocate memory for this object from a FreeRTOS heap (Support Dynamic Allocation must be Enabled)." display="Memory Allocation" id="rtos.awsfreertos.object.semaphore.allocation">
+                <option display="Dynamic" id="rtos.awsfreertos.object.semaphore.allocation.dynamic" value="0" />
+                <option display="Static" id="rtos.awsfreertos.object.semaphore.allocation.static" value="1" />
+            </property>
+            <header>
+                extern SemaphoreHandle_t ${rtos.awsfreertos.object.semaphore.symbol};
+            </header>
+            <includes>
+                #include "FreeRTOS.h"
+                #include "semphr.h"
+            </includes>
+            <declarations>
+                SemaphoreHandle_t ${rtos.awsfreertos.object.semaphore.symbol};
+                #if ${rtos.awsfreertos.object.semaphore.allocation}
+                StaticSemaphore_t ${rtos.awsfreertos.object.semaphore.symbol}_memory;
+                #endif
+                void rtos_startup_err_callback(void * p_instance, void * p_data);
+            </declarations>
+            <init>
+                ${rtos.awsfreertos.object.semaphore.symbol} =
+                #if ${rtos.awsfreertos.object.semaphore.allocation}
+                xSemaphoreCreateCountingStatic(
+                #else
+                xSemaphoreCreateCounting(
+                #endif
+                ${rtos.awsfreertos.object.semaphore.count_max},
+                ${rtos.awsfreertos.object.semaphore.count}
+                #if ${rtos.awsfreertos.object.semaphore.allocation}
+                , &amp;${rtos.awsfreertos.object.semaphore.symbol}_memory
+                #endif
+                );
+                if (NULL == ${rtos.awsfreertos.object.semaphore.symbol}) {
+                rtos_startup_err_callback(${rtos.awsfreertos.object.semaphore.symbol}, 0);
+                }
+            </init>
+        </object>
+        <object id="rtos.awsfreertos.object.binary_semaphore" display="${rtos.awsfreertos.object.binary_semaphore.symbol} Binary Semaphore" version="0">
+            <constraint display="configSUPPORT_STATIC_ALLOCATION must be Enabled to use Static Allocation. Set in FreeRTOS Memory Allocation properties.">
+                (&quot;${rtos.awsfreertos.object.binary_semaphore.allocation}&quot; != &quot;rtos.awsfreertos.object.binary_semaphore.allocation.static&quot;) || (&quot;${config.awsfreertos.thread.configsupport_static_allocation}&quot; == &quot;config.awsfreertos.thread.configsupport_static_allocation.enabled&quot;)
+            </constraint>
+            <constraint display="configSUPPORT_DYNAMIC_ALLOCATION must be Enabled to use Dynamic Allocation. Set in FreeRTOS Memory Allocation properties.">
+                (&quot;${rtos.awsfreertos.object.binary_semaphore.allocation}&quot; != &quot;rtos.awsfreertos.object.binary_semaphore.allocation.dynamic&quot;) || (&quot;${config.awsfreertos.thread.configsupport_dynamic_allocation}&quot; == &quot;config.awsfreertos.thread.configsupport_dynamic_allocation.enabled&quot;)
+            </constraint>
+            <provides interface="object.binary_semaphore" />
+            <property id="rtos.awsfreertos.object.binary_semaphore.symbol" display="Symbol" default="g_new_binary_semaphore${_instance}" description="Name of binary semaphore handle." />
+            <property default="rtos.awsfreertos.object.binary_semaphore.allocation.static" description="Select static allocation to allocate memory for this object in a global variable (Support Static Allocation must be Enabled). Select dynamic allocation to allocate memory for this object from a FreeRTOS heap (Support Dynamic Allocation must be Enabled)." display="Memory Allocation" id="rtos.awsfreertos.object.binary_semaphore.allocation">
+                <option display="Dynamic" id="rtos.awsfreertos.object.binary_semaphore.allocation.dynamic" value="0" />
+                <option display="Static" id="rtos.awsfreertos.object.binary_semaphore.allocation.static" value="1" />
+            </property>
+            <header>
+                extern SemaphoreHandle_t ${rtos.awsfreertos.object.binary_semaphore.symbol};
+            </header>
+            <includes>
+                #include "FreeRTOS.h"
+                #include "semphr.h"
+            </includes>
+            <declarations>
+                SemaphoreHandle_t ${rtos.awsfreertos.object.binary_semaphore.symbol};
+                #if ${rtos.awsfreertos.object.binary_semaphore.allocation}
+                StaticSemaphore_t ${rtos.awsfreertos.object.binary_semaphore.symbol}_memory;
+                #endif
+                void rtos_startup_err_callback(void * p_instance, void * p_data);
+            </declarations>
+            <init>
+                ${rtos.awsfreertos.object.binary_semaphore.symbol} =
+                #if ${rtos.awsfreertos.object.binary_semaphore.allocation}
+                xSemaphoreCreateBinaryStatic(&amp;${rtos.awsfreertos.object.binary_semaphore.symbol}_memory);
+                #else
+                xSemaphoreCreateBinary();
+                #endif
+                if (NULL == ${rtos.awsfreertos.object.binary_semaphore.symbol}) {
+                rtos_startup_err_callback(${rtos.awsfreertos.object.binary_semaphore.symbol}, 0);
+                }
+            </init>
+        </object>
+        <object id="rtos.awsfreertos.object.queue" display="${rtos.awsfreertos.object.queue.symbol} Queue" version="0">
+            <constraint display="configSUPPORT_STATIC_ALLOCATION must be Enabled to use Static Allocation. Set in FreeRTOS Memory Allocation properties.">
+                (&quot;${rtos.awsfreertos.object.queue.allocation}&quot; != &quot;rtos.awsfreertos.object.queue.allocation.static&quot;) || (&quot;${config.awsfreertos.thread.configsupport_static_allocation}&quot; == &quot;config.awsfreertos.thread.configsupport_static_allocation.enabled&quot;)
+            </constraint>
+            <constraint display="configSUPPORT_DYNAMIC_ALLOCATION must be Enabled to use Dynamic Allocation. Set in FreeRTOS Memory Allocation properties.">
+                (&quot;${rtos.awsfreertos.object.queue.allocation}&quot; != &quot;rtos.awsfreertos.object.queue.allocation.dynamic&quot;) || (&quot;${config.awsfreertos.thread.configsupport_dynamic_allocation}&quot; == &quot;config.awsfreertos.thread.configsupport_dynamic_allocation.enabled&quot;)
+            </constraint>
+            <provides interface="object.queue" />
+            <property id="rtos.awsfreertos.object.queue.symbol" display="Symbol" default="g_new_queue${_instance}" description="Name of queue handle." />
+            <property id="rtos.awsfreertos.object.queue.item_size" display="Item Size (Bytes)" default="4" description="The size, in bytes, required to hold each item in the queue.\n\nItems are queued by copy, not by reference, so this is the number of bytes that will be copied for each queued item. Each item in the queue must be the same size.">
+                <constraint display="Item size must be an integer greater than or equal to 0">testInteger("${rtos.awsfreertos.object.queue.item_size}") &amp;&amp; ("${rtos.awsfreertos.object.queue.item_size}" &gt;= 0)</constraint>
+            </property>
+            <property id="rtos.awsfreertos.object.queue.queue_length" display="Queue Length (Items)" default="20" description="The maximum number of items the queue can hold at any one time.">
+                <constraint display="Queue length must be an integer greater than or equal to 0">testInteger("${rtos.awsfreertos.object.queue.queue_length}") &amp;&amp; ("${rtos.awsfreertos.object.queue.queue_length}" &gt;= 0)</constraint>
+            </property>
+            <property default="rtos.awsfreertos.object.queue.allocation.static" description="Select static allocation to allocate memory for this object in a global variable (Support Static Allocation must be Enabled). Select dynamic allocation to allocate memory for this object from a FreeRTOS heap (Support Dynamic Allocation must be Enabled)." display="Memory Allocation" id="rtos.awsfreertos.object.queue.allocation">
+                <option display="Dynamic" id="rtos.awsfreertos.object.queue.allocation.dynamic" value="0" />
+                <option display="Static" id="rtos.awsfreertos.object.queue.allocation.static" value="1" />
+            </property>
+            <header>
+                extern QueueHandle_t ${rtos.awsfreertos.object.queue.symbol};
+            </header>
+            <includes>
+                #include "FreeRTOS.h"
+                #include "queue.h"
+            </includes>
+            <declarations>
+                QueueHandle_t ${rtos.awsfreertos.object.queue.symbol};
+                #if ${rtos.awsfreertos.object.queue.allocation}
+                StaticQueue_t ${rtos.awsfreertos.object.queue.symbol}_memory;
+                uint8_t ${rtos.awsfreertos.object.queue.symbol}_queue_memory[${rtos.awsfreertos.object.queue.item_size} * ${rtos.awsfreertos.object.queue.queue_length}];
+                #endif
+                void rtos_startup_err_callback(void * p_instance, void * p_data);
+            </declarations>
+            <init>
+                ${rtos.awsfreertos.object.queue.symbol} =
+                #if ${rtos.awsfreertos.object.queue.allocation}
+                xQueueCreateStatic(
+                #else
+                xQueueCreate(
+                #endif
+                ${rtos.awsfreertos.object.queue.queue_length},
+                ${rtos.awsfreertos.object.queue.item_size}
+                #if ${rtos.awsfreertos.object.queue.allocation}
+                , &amp;${rtos.awsfreertos.object.queue.symbol}_queue_memory[0],
+                &amp;${rtos.awsfreertos.object.queue.symbol}_memory
+                #endif
+                );
+                if (NULL == ${rtos.awsfreertos.object.queue.symbol}) {
+                rtos_startup_err_callback(${rtos.awsfreertos.object.queue.symbol}, 0);
+                }
+            </init>
+        </object>
+        <object id="rtos.awsfreertos.object.stream_buffer" display="${rtos.awsfreertos.object.stream_buffer.symbol} Stream Buffer" version="0">
+            <constraint display="configSUPPORT_STATIC_ALLOCATION must be Enabled to use Static Allocation. Set in FreeRTOS Memory Allocation properties.">
+                (&quot;${rtos.awsfreertos.object.stream_buffer.allocation}&quot; != &quot;rtos.awsfreertos.object.stream_buffer.allocation.static&quot;) || (&quot;${config.awsfreertos.thread.configsupport_static_allocation}&quot; == &quot;config.awsfreertos.thread.configsupport_static_allocation.enabled&quot;)
+            </constraint>
+            <constraint display="configSUPPORT_DYNAMIC_ALLOCATION must be Enabled to use Dynamic Allocation. Set in FreeRTOS Memory Allocation properties.">
+                (&quot;${rtos.awsfreertos.object.stream_buffer.allocation}&quot; != &quot;rtos.awsfreertos.object.stream_buffer.allocation.dynamic&quot;) || (&quot;${config.awsfreertos.thread.configsupport_dynamic_allocation}&quot; == &quot;config.awsfreertos.thread.configsupport_dynamic_allocation.enabled&quot;)
+            </constraint>
+            <provides interface="object.stream_buffer" />
+            <property id="rtos.awsfreertos.object.stream_buffer.symbol" display="Symbol" default="g_new_stream_buffer${_instance}" description="Name of stream uffer handle." />
+            <property id="rtos.awsfreertos.object.stream_buffer.size_bytes" display="Stream Buffer Size (Bytes)" default="64" description="The total number of bytes the stream buffer will be able to hold at any one time.">
+                <constraint display="Stream buffer size must be an integer greater than or equal to 0">testInteger("${rtos.awsfreertos.object.stream_buffer.size_bytes}") &amp;&amp; ("${rtos.awsfreertos.object.stream_buffer.size_bytes}" &gt;= 0)</constraint>
+            </property>
+            <property id="rtos.awsfreertos.object.stream_buffer.trigger_level" display="Trigger Level (Bytes)" default="1" description="The number of bytes that must be in the stream buffer before a task that is blocked on the stream buffer to wait for data is moved out of the blocked state. For example, if a task is blocked on a read of an empty stream buffer that has a trigger level of 1 then the task will be unblocked when a single byte is written to the buffer or the task's block time expires. As another example, if a task is blocked on a read of an empty stream buffer that has a trigger level of 10 then the task will not be unblocked until the stream buffer contains at least 10 bytes or the task's block time expires. If a reading task's block time expires before the trigger level is reached then the task will still receive however many bytes are actually available. Setting a trigger level of 0 will result in a trigger level of 1 being used. It is not valid to specify a trigger level that is greater than the buffer size.">
+                <constraint display="Trigger Level must be an integer greater than or equal to 0">testInteger("${rtos.awsfreertos.object.stream_buffer.trigger_level}") &amp;&amp; ("${rtos.awsfreertos.object.stream_buffer.trigger_level}" &gt;= 0)</constraint>
+            </property>
+            <property default="rtos.awsfreertos.object.stream_buffer.allocation.static" description="Select static allocation to allocate memory for this object in a global variable (Support Static Allocation must be Enabled). Select dynamic allocation to allocate memory for this object from a FreeRTOS heap (Support Dynamic Allocation must be Enabled)." display="Memory Allocation" id="rtos.awsfreertos.object.stream_buffer.allocation">
+                <option display="Dynamic" id="rtos.awsfreertos.object.stream_buffer.allocation.dynamic" value="0" />
+                <option display="Static" id="rtos.awsfreertos.object.stream_buffer.allocation.static" value="1" />
+            </property>
+            <header>
+                extern StreamBufferHandle_t ${rtos.awsfreertos.object.stream_buffer.symbol};
+            </header>
+            <includes>
+                #include "FreeRTOS.h"
+                #include "stream_buffer.h"
+            </includes>
+            <declarations>
+                StreamBufferHandle_t ${rtos.awsfreertos.object.stream_buffer.symbol};
+                #if ${rtos.awsfreertos.object.stream_buffer.allocation}
+                StaticStreamBuffer_t ${rtos.awsfreertos.object.stream_buffer.symbol}_memory;
+                uint8_t ${rtos.awsfreertos.object.stream_buffer.symbol}_buffer_memory[${rtos.awsfreertos.object.stream_buffer.size_bytes} + 1];
+                #endif
+                void rtos_startup_err_callback(void * p_instance, void * p_data);
+            </declarations>
+            <init>
+                ${rtos.awsfreertos.object.stream_buffer.symbol} =
+                #if ${rtos.awsfreertos.object.stream_buffer.allocation}
+                xStreamBufferCreateStatic(
+                #else
+                xStreamBufferCreate(
+                #endif
+                ${rtos.awsfreertos.object.stream_buffer.size_bytes},
+                ${rtos.awsfreertos.object.stream_buffer.trigger_level}
+                #if ${rtos.awsfreertos.object.stream_buffer.allocation}
+                , &amp;${rtos.awsfreertos.object.stream_buffer.symbol}_buffer_memory[0],
+                &amp;${rtos.awsfreertos.object.stream_buffer.symbol}_memory
+                #endif
+                );
+                if (NULL == ${rtos.awsfreertos.object.stream_buffer.symbol}) {
+                rtos_startup_err_callback(${rtos.awsfreertos.object.stream_buffer.symbol}, 0);
+                }
+            </init>
+        </object>
+        <object id="rtos.awsfreertos.object.message_buffer" display="${rtos.awsfreertos.object.message_buffer.symbol} Message Buffer" version="0">
+            <constraint display="configSUPPORT_STATIC_ALLOCATION must be Enabled to use Static Allocation. Set in FreeRTOS Memory Allocation properties.">
+                (&quot;${rtos.awsfreertos.object.message_buffer.allocation}&quot; != &quot;rtos.awsfreertos.object.message_buffer.allocation.static&quot;) || (&quot;${config.awsfreertos.thread.configsupport_static_allocation}&quot; == &quot;config.awsfreertos.thread.configsupport_static_allocation.enabled&quot;)
+            </constraint>
+            <constraint display="configSUPPORT_DYNAMIC_ALLOCATION must be Enabled to use Dynamic Allocation. Set in FreeRTOS Memory Allocation properties.">
+                (&quot;${rtos.awsfreertos.object.message_buffer.allocation}&quot; != &quot;rtos.awsfreertos.object.message_buffer.allocation.dynamic&quot;) || (&quot;${config.awsfreertos.thread.configsupport_dynamic_allocation}&quot; == &quot;config.awsfreertos.thread.configsupport_dynamic_allocation.enabled&quot;)
+            </constraint>
+            <provides interface="object.message_buffer" />
+            <property id="rtos.awsfreertos.object.message_buffer.symbol" display="Symbol" default="g_new_message_buffer${_instance}" description="Name of stream buffer handle." />
+            <property id="rtos.awsfreertos.object.message_buffer.size_bytes" display="Message Buffer Size (Bytes)" default="512" description="The total number of bytes (not messages) the message buffer will be able to hold at any one time. When a message is written to the message buffer an additional sizeof( size_t ) bytes are also written to store the message's length. sizeof( size_t ) is typically 4 bytes on a 32-bit architecture, so on most 32-bit architectures a 10 byte message will take up 14 bytes of message buffer space.">
+                <constraint display="Message buffer size must be an integer greater than or equal to 0">testInteger("${rtos.awsfreertos.object.message_buffer.size_bytes}") &amp;&amp; ("${rtos.awsfreertos.object.message_buffer.size_bytes}" &gt;= 0)</constraint>
+            </property>
+            <property default="rtos.awsfreertos.object.message_buffer.allocation.static" description="Select static allocation to allocate memory for this object in a global variable (Support Static Allocation must be Enabled). Select dynamic allocation to allocate memory for this object from a FreeRTOS heap (Support Dynamic Allocation must be Enabled)." display="Memory Allocation" id="rtos.awsfreertos.object.message_buffer.allocation">
+                <option display="Dynamic" id="rtos.awsfreertos.object.message_buffer.allocation.dynamic" value="0" />
+                <option display="Static" id="rtos.awsfreertos.object.message_buffer.allocation.static" value="1" />
+            </property>
+            <header>
+                extern MessageBufferHandle_t ${rtos.awsfreertos.object.message_buffer.symbol};
+            </header>
+            <includes>
+                #include "FreeRTOS.h"
+                #include "message_buffer.h"
+            </includes>
+            <declarations>
+                MessageBufferHandle_t ${rtos.awsfreertos.object.message_buffer.symbol};
+                #if ${rtos.awsfreertos.object.message_buffer.allocation}
+                StaticMessageBuffer_t ${rtos.awsfreertos.object.message_buffer.symbol}_memory;
+                uint8_t ${rtos.awsfreertos.object.message_buffer.symbol}_buffer_memory[${rtos.awsfreertos.object.message_buffer.size_bytes} + 1];
+                #endif
+                void rtos_startup_err_callback(void * p_instance, void * p_data);
+            </declarations>
+            <init>
+                ${rtos.awsfreertos.object.message_buffer.symbol} =
+                #if ${rtos.awsfreertos.object.message_buffer.allocation}
+                xMessageBufferCreateStatic(
+                #else
+                xMessageBufferCreate(
+                #endif
+                ${rtos.awsfreertos.object.message_buffer.size_bytes}
+                #if ${rtos.awsfreertos.object.message_buffer.allocation}
+                , &amp;${rtos.awsfreertos.object.message_buffer.symbol}_buffer_memory[0],
+                &amp;${rtos.awsfreertos.object.message_buffer.symbol}_memory
+                #endif
+                );
+                if (NULL == ${rtos.awsfreertos.object.message_buffer.symbol}) {
+                rtos_startup_err_callback(${rtos.awsfreertos.object.message_buffer.symbol}, 0);
+                }
+            </init>
+        </object>
+        <object id="rtos.awsfreertos.object.timer" display="${rtos.awsfreertos.object.timer.symbol} Timer" version="0">
+            <constraint display="configSUPPORT_STATIC_ALLOCATION must be Enabled to use Static Allocation. Set in FreeRTOS Memory Allocation properties.">
+                (&quot;${rtos.awsfreertos.object.timer.allocation}&quot; != &quot;rtos.awsfreertos.object.timer.allocation.static&quot;) || (&quot;${config.awsfreertos.thread.configsupport_static_allocation}&quot; == &quot;config.awsfreertos.thread.configsupport_static_allocation.enabled&quot;)
+            </constraint>
+            <constraint display="configSUPPORT_DYNAMIC_ALLOCATION must be Enabled to use Dynamic Allocation. Set in FreeRTOS Memory Allocation properties.">
+                (&quot;${rtos.awsfreertos.object.timer.allocation}&quot; != &quot;rtos.awsfreertos.object.timer.allocation.dynamic&quot;) || (&quot;${config.awsfreertos.thread.configsupport_dynamic_allocation}&quot; == &quot;config.awsfreertos.thread.configsupport_dynamic_allocation.enabled&quot;)
+            </constraint>
+            <provides interface="object.timer" />
+            <property id="rtos.awsfreertos.object.timer.name" display="Name" default="New Timer ${_instance}" description="A human readable text name that is assigned to the timer. This is done purely to assist debugging. The RTOS kernel itself only references a timer by its handle, never by its name." />
+            <property id="rtos.awsfreertos.object.timer.symbol" display="Symbol" default="g_new_timer${_instance}" description="Name of timer handle.">
+                <constraint display="Value must be a valid C language symbol">testSymbol("${rtos.awsfreertos.object.timer.symbol}")</constraint>
+            </property>
+            <property id="rtos.awsfreertos.object.timer.period" display="Period (Ticks)" default="100" description="The period of the timer. The period is specified in ticks, and the macro pdMS_TO_TICKS() can be used to convert a time specified in milliseconds to a time specified in ticks. For example, if the timer must expire after 100 ticks, then simply set xTimerPeriod to 100. Alternatively, if the timer must expire after 500ms, then set xTimerPeriod to pdMS_TO_TICKS( 500 ). pdMS_TO_TICKS() can only be used if Tick Rate Hz is less than or equal to 1000.">
+                <constraint display="Period must be an integer greater than 0 and less than or equal to 0xFFFFFFFF">testInteger("${rtos.awsfreertos.object.timer.period}") &amp;&amp; ("${rtos.awsfreertos.object.timer.period}" &gt; 0) &amp;&amp; ("${rtos.awsfreertos.object.timer.period}" &lt;= 0xFFFFFFFF)</constraint>
+            </property>
+            <property id="rtos.awsfreertos.object.timer.autoreload" display="Auto Reload" default="rtos.awsfreertos.object.timer.autoreload.disabled" description="If uxAutoReload is set to pdTRUE, then the timer will expire repeatedly with a frequency set by the xTimerPeriod parameter. If uxAutoReload is set to pdFALSE, then the timer will be a one-shot and enter the dormant state after it expires.">
+                <option display="False" id="rtos.awsfreertos.object.timer.autoreload.disabled" value="pdFALSE" />
+                <option display="True" id="rtos.awsfreertos.object.timer.autoreload.enabled" value="pdTRUE" />
+            </property>
+            <property id="rtos.awsfreertos.object.timer.timerid" display="Timer ID" default="NULL" description="An identifier that is assigned to the timer being created. Typically this would be used in the timer callback function to identify which timer expired when the same callback function is assigned to more than one timer, or together with the vTimerSetTimerID() and pvTimerGetTimerID() API functions to save a value between calls to the timer's callback function. Symbols can be externed in the Custom FreeRTOSConfig.h defined in the Common configurations.">
+                <constraint display="Value must be a valid C language symbol">testSymbol("${rtos.awsfreertos.object.timer.timerid}")</constraint>
+            </property>
+            <property id="rtos.awsfreertos.object.timer.p_callback" display="Callback" default="g_new_timer${_instance}_callback" description="The function to call when the timer expires. Callback functions must have the prototype defined by TimerCallbackFunction_t, which is:\n\nvoid vCallbackFunction( TimerHandle_t xTimer );">
+                <constraint display="Value must be a valid C language symbol">testSymbol("${rtos.awsfreertos.object.timer.p_callback}")</constraint>
+            </property>
+            <property default="rtos.awsfreertos.object.timer.allocation.static" description="Select static allocation to allocate memory for this object in a global variable (Support Static Allocation must be Enabled). Select dynamic allocation to allocate memory for this object from a FreeRTOS heap (Support Dynamic Allocation must be Enabled)." display="Memory Allocation" id="rtos.awsfreertos.object.timer.allocation">
+                <option display="Dynamic" id="rtos.awsfreertos.object.timer.allocation.dynamic" value="0" />
+                <option display="Static" id="rtos.awsfreertos.object.timer.allocation.static" value="1" />
+            </property>
+            <header>
+                extern TimerHandle_t ${rtos.awsfreertos.object.timer.symbol};
+                void ${rtos.awsfreertos.object.timer.p_callback}( TimerHandle_t xTimer );
+            </header>
+            <includes>
+                #include "FreeRTOS.h"
+                #include "timers.h"
+            </includes>
+            <declarations>
+                TimerHandle_t ${rtos.awsfreertos.object.timer.symbol};
+                #if ${rtos.awsfreertos.object.timer.allocation}
+                StaticTimer_t  ${rtos.awsfreertos.object.timer.symbol}_memory;
+                #endif
+                void rtos_startup_err_callback(void * p_instance, void * p_data);
+            </declarations>
+            <init>
+                ${rtos.awsfreertos.object.timer.symbol} =
+                #if ${rtos.awsfreertos.object.timer.allocation}
+                xTimerCreateStatic(
+                #else
+                xTimerCreate(
+                #endif
+                &quot;${rtos.awsfreertos.object.timer.name}&quot;,
+                ${rtos.awsfreertos.object.timer.period},
+                ${rtos.awsfreertos.object.timer.autoreload},
+                ${rtos.awsfreertos.object.timer.timerid},
+                ${rtos.awsfreertos.object.timer.p_callback}
+                #if ${rtos.awsfreertos.object.timer.allocation}
+                , &amp;${rtos.awsfreertos.object.timer.symbol}_memory
+                #endif
+                );
+                if (NULL == ${rtos.awsfreertos.object.timer.symbol}) {
+                rtos_startup_err_callback(${rtos.awsfreertos.object.timer.symbol}, 0);
+                }
+            </init>
+        </object>
+    </rtos>
+</raModuleDescription>

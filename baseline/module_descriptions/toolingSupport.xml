@@ -1,0 +1,423 @@
+<toolingSupport family="ra" platform="platform.rafsp">
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Common##all##fsp_common####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##r_acmphs####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##r_acmplp####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##r_adc####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##r_adc_b####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##r_adc_d####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##r_agt####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##r_ble_all####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##r_ble_all_freertos####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##r_ble_extended_threadx####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##r_ble_balance####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##r_ble_balance_freertos####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##r_ble_balance_threadx####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##r_ble_compact####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##r_ble_compact_freertos####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##r_ble_compact_threadx####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##r_cac####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##r_can####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##r_canfd####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##r_canfdlite####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##r_cec####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##r_ceu####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##r_cgc####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##r_crc####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##r_ctsu####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##r_dac####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##r_dac8####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##r_doc####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##r_dmac####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##r_doc####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##r_drw####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##r_dtc####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##r_elc####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##r_ether_phy####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##r_ether####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##r_flash_hp####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##r_flash_lp####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##r_glcdc####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##r_gpt####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##r_gpt_three_phase####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##r_i3c####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##r_icu####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##r_iic_master####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##r_iic_b_master####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##r_iic_b_slave####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##r_iic_slave####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##r_iica_master####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##r_iica_slave####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##r_iirfa####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##r_ioport####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##r_iwdt####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##r_jpeg####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##r_kint####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##r_lpm####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##r_lvd####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##r_mipi_dsi####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##r_mipi_phy####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##r_opamp####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##r_ospi####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##r_ospi_b####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##r_pdc####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##r_poeg####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##r_edmac####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##r_ptp####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##r_qspi####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##r_rsip7_key_injection####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##r_rsip_e31a_key_injection####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##r_rsip_e11a_key_injection####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##r_rsip_e50d_key_injection####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##r_rsip_e11a_protected####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##r_rsip_e51a_protected####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##r_rtc####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##r_sau_uart####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##r_rtc_c####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##r_sau_i2c####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##r_sau_lin####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##r_sau_spi####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##r_sce_trng####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##r_sce_ra2####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##r_sce_aes2####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##r_sce5_ra4####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##r_sce7_ra6####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##r_sce5b_ra6####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##r_sce9_ra6_plaintext####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##r_rsip7_ra8_plaintext####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##r_rsip_e11a####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##r_rsip_e50d_ra8_plaintext####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##r_rsip_e31a####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##r_sce9_ra6_protected####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##r_sce5_ra4_key_injection####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##r_sce5b_ra6_key_injection####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##r_sce7_ra6_key_injection####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##r_sce9_ra6_key_injection####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##r_sci_b_lin####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##r_sci_b_uart####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##r_sci_b_spi####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##r_sci_i2c####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##r_sci_b_i2c####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##r_sci_lin####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##r_sci_smci####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##r_sci_spi####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##r_sci_uart####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##r_sdadc####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##r_sdadc_b####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##r_sdhi####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##r_slcdc####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##r_spi####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##r_spi_b####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##r_ssi####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##r_tau####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##r_tau_pwm####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##r_tml####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##r_uarta####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##r_ulpt####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##r_usb_basic####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##r_usb_hmsc####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##r_usb_pcdc####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##r_usb_pcdc_2ch####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##r_usb_hcdc####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##r_usb_hcdc_ecm####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##r_usb_pmsc####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##r_usb_hhid####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##r_usb_phid####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##r_usb_phid_2ch####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##r_usb_composite####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##r_usb_hvnd####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##r_usb_pvnd####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##r_usb_pprn####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##r_usb_typec####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##r_wdt####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_adpcm_decoder####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_audio_playback_pwm####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_aws_ota_pal_mcuboot####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_aws_pkcs11_pal_littlefs####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_aws_sockets_wrapper_silex####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_aws_sockets_wrapper_da16xxx####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_rai_data_collector####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_rai_data_shipper####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_emwin_port####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_filex_block_media####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_freertos_plus_tcp####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_freertos_plus_fat####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_freertos_port####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_guix_port####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_ble_abs_gtl####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_ble_abs_gtl_transport####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_ble_abs_spp####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_ble_abs_spp_transport####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_ble_abs####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_ble_mesh####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_mesh_os_baremetal####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_mesh_os_freertos####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_mesh_timer_baremetal####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_mesh_timer_freertos####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_mesh_bearer_platform####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_ble_mesh_bearer####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_ble_mesh_provision####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_ble_mesh_network####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_ble_mesh_lower_trans####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_ble_mesh_upper_trans####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_ble_mesh_access####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_mesh_generic_admin_prop_srv####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_mesh_generic_battery_clt####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_mesh_generic_battery_srv####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_mesh_generic_client_prop_srv####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_mesh_generic_dtt_clt####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_mesh_generic_dtt_srv####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_mesh_generic_level_clt####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_mesh_generic_level_srv####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_mesh_generic_loc_clt####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_mesh_generic_loc_srv####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_mesh_generic_mfr_prop_srv####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_mesh_generic_on_off_clt####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_mesh_generic_on_off_srv####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_mesh_generic_pl_clt####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_mesh_generic_pl_srv####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_mesh_generic_poo_clt####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_mesh_generic_poo_srv####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_mesh_generic_prop_clt####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_mesh_generic_user_prop_srv####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_mesh_health_clt####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_mesh_health_srv####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_mesh_light_ctl_clt####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_mesh_light_ctl_srv####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_mesh_light_hsl_clt####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_mesh_light_hsl_srv####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_mesh_light_lc_clt####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_mesh_light_lc_srv####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_mesh_light_lightness_clt####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_mesh_light_lightness_srv####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_mesh_light_xyl_clt####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_mesh_light_xyl_srv####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_mesh_scene_clt####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_mesh_scene_srv####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_mesh_scheduler_clt####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_mesh_scheduler_srv####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_mesh_sensor_clt####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_mesh_sensor_srv####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_mesh_time_clt####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_mesh_time_srv####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_mesh_config_clt####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_mesh_config_srv####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_block_media_sdmmc####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_block_media_spi####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_block_media_usb####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_block_media_user####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_block_media_ram####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_cellular_platform_aws####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_cellular_comm_uart_aws####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_cellular_ryz_aws####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_cellular_gm_aws####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_cmsis_dsp####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_littlefs_flash####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_littlefs_spi_flash####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_mbedtls####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_mcuboot_port####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_mcuboot_protected_mode####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_mcuboot_external_memory_qspi####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_mcuboot_ext_memory_ospi_b####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_motor_current####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_motor_driver####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_motor_encoder####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_motor_estimate####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_motor_induction####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_motor_hall####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_motor_sense_encoder####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_motor_sense_induction####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_motor_sense_hall####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_motor_sensorless####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_motor_speed####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_motor_position####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_motor_120_degree####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_motor_120_control_sensorless####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_motor_120_control_hall####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_motor_120_driver####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_motor_inertia_estimate####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_motor_return_origin####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_netxduo_ether####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_netxduo_wifi####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_netx_secure_crypto####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##rm_psa_crypto####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_tinycrypt_port####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_tinycrypt_port_aes2####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_mcuboot_tinycrypt_port####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_mcuboot_tinycrypt_port_aes2####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_tinycrypt_trng_port####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_touch####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##rm_tfm_port####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##rm_bl2_port####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_threadx_port####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_tz_context####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_vee_flash####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##rm_wifi_onchip_silex####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_wifi_api####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##rm_wifi_da16xxx####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##rm_at_transport_da16xxx_uart####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##rm_mqtt_onchip_da16xxx####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##rm_http_onchip_da16xxx####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_nfc_reader_ptx####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##HAL Drivers##all##rm_usbx_port####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_comms_uart####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_comms_smbus####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_comms_i2c####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_comms_usb_pcdc####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_comms_spi####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_hs300x####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_hs400x####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_fs3000####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_fs1015####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_fs2012####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_ob1203####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_ob1203_light####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_ob1203_proximity####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_ob1203_ppg####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_ob1203_light_proximity####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_zmod4xxx####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_zmod4410_iaq_1st####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_zmod4410_iaq_2nd####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_zmod4410_iaq_2nd_ulp####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_zmod4410_odor####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_zmod4410_sulfur####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_zmod4510_oaq_1st####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_zmod4510_oaq_2nd####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_zmod4450_raq####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_zmod4410_rel_iaq####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_zmod4410_rel_iaq_ulp####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_zmod4410_pbaq####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_zmod4510_no2_o3####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_zmod4510_compensation####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_zmod4510_compensation_ulp####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_rrh46410####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_rrh62000####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_rrh47000####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_levelx_nor_spi####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_filex_levelx_nor####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_lwip_ether####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_lwip_sys_baremetal####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_lwip_sys_freertos####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_ocrypto_port####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##Middleware##all##rm_ocrypto_trng_port####5.9.0.xml</file>
+  <file supportType="ProjectTemplate" version="5.9.0">.templates/baremetal_blinky/baremetal_blinky.pdpt</file>
+  <file supportType="ProjectTemplate" version="5.9.0">.templates/baremetal_blinky/configuration.xml</file>
+  <file supportType="ProjectTemplate" version="5.9.0">.templates/baremetal_blinky/src/hal_entry.c</file>
+  <file supportType="ProjectTemplate" version="5.9.0">.templates/baremetal_minimal/baremetal_minimal.pdpt</file>
+  <file supportType="ProjectTemplate" version="5.9.0">.templates/baremetal_minimal/configuration.xml</file>
+  <file supportType="ProjectTemplate" version="5.9.0">.templates/freertos_blinky/configuration.xml</file>
+  <file supportType="ProjectTemplate" version="5.9.0">.templates/freertos_blinky/freertos_blinky.pdpt</file>
+  <file supportType="ProjectTemplate" version="5.9.0">.templates/freertos_blinky/src/blinky_thread_entry.c</file>
+  <file supportType="ProjectTemplate" version="5.9.0">.templates/freertos_blinky/src/hal_entry.c</file>
+  <file supportType="ProjectTemplate" version="5.9.0">.templates/freertos_minimal/configuration.xml</file>
+  <file supportType="ProjectTemplate" version="5.9.0">.templates/freertos_minimal/freertos_minimal.pdpt</file>
+  <file supportType="ProjectTemplate" version="5.9.0">.templates/freertos_minimal/src/hal_entry.c</file>
+  <file supportType="ProjectTemplate" version="5.9.0">.templates/threadx_blinky/configuration.xml</file>
+  <file supportType="ProjectTemplate" version="5.9.0">.templates/threadx_blinky/threadx_blinky.pdpt</file>
+  <file supportType="ProjectTemplate" version="5.9.0">.templates/threadx_blinky/src/blinky_thread_entry.c</file>
+  <file supportType="ProjectTemplate" version="5.9.0">.templates/threadx_blinky/src/hal_entry.c</file>
+  <file supportType="ProjectTemplate" version="5.9.0">.templates/threadx_minimal/configuration.xml</file>
+  <file supportType="ProjectTemplate" version="5.9.0">.templates/threadx_minimal/threadx_minimal.pdpt</file>
+  <file supportType="ProjectTemplate" version="5.9.0">.templates/threadx_minimal/src/hal_entry.c</file>
+  <file supportType="ProjectTemplate" version="5.9.0">.templates/trustzone_rtos/configuration.xml</file>
+  <file supportType="ProjectTemplate" version="5.9.0">.templates/trustzone_rtos/trustzone_rtos.pdpt</file>
+  <platformCompanions>
+    <component type="platform.rafsp_companion" id="Arm##CMSIS##CMSIS5##CoreM####6.1.0+fsp.5.9.0"/>
+    <component type="platform.rafsp_companion" id="Arm##CMSIS##CMSIS5##DSP####1.16.2+fsp.5.9.0"/>
+    <component type="platform.rafsp_companion" id="Arm##CMSIS##CMSIS5##NN####6.0.0+fsp.5.9.0"/>
+    <component type="platform.rafsp_companion" id="Arm##PSA##Crypto##mbedCrypto####3.6.2+renesas.1.fsp.5.9.0"/>
+    <component type="platform.rafsp_companion" id="Arm##mbed##Security##mbedTLS####3.6.2+renesas.1.fsp.5.9.0"/>
+    <component type="platform.rafsp_companion" id="Arm##Mbed##Library##LittleFS####2.2.1+renesas.1.fsp.5.9.0"/>
+    <component type="platform.rafsp_companion" id="Arm##PSA##TF-M##BL2####2.1.0+renesas.1.fsp.5.9.0"/>
+    <component type="platform.rafsp_companion" id="Arm##PSA##TF-M##Core####2.1.0+renesas.1.fsp.5.9.0"/>
+    <component type="platform.rafsp_companion" id="Arm##PSA##TF-M##NonSecure####2.1.0+renesas.1.fsp.5.9.0"/>
+    <component type="platform.rafsp_companion" id="Arm##Abstractions##TFM##tfm_freertos####2.1.0+renesas.1.fsp.5.9.0"/>
+    <component type="platform.rafsp_companion" id="AWS##c_sdk##standard##logging####202411.0.0+renesas.fsp.5.9.0"/>
+    <component type="platform.rafsp_companion" id="AWS##FreeRTOS_Plus##utilities##mbedtls####202411.0.0+renesas.fsp.5.9.0"/>
+    <component type="platform.rafsp_companion" id="AWS##Libraries##FreeRTOS_Plus##MbedTLS_PKCS11_Transport####202411.0.0+renesas.fsp.5.9.0"/>
+    <component type="platform.rafsp_companion" id="AWS##Libraries##FreeRTOS_Plus##TCP_Sockets_Wrapper####202411.0.0+renesas.fsp.5.9.0"/>
+    <component type="platform.rafsp_companion" id="AWS##Libraries##FreeRTOS_Plus##Cellular_Sockets_Wrapper####202411.0.0+renesas.fsp.5.9.0"/>
+    <component type="platform.rafsp_companion" id="AWS##Libraries##FreeRTOS_Plus##Plus_TCP_MbedTLS_Bio####202411.0.0+renesas.fsp.5.9.0"/>
+    <component type="platform.rafsp_companion" id="AWS##FreeRTOS##demo##key_provisioning_transport####202411.0.0+renesas.fsp.5.9.0"/>
+    <component type="platform.rafsp_companion" id="AWS##Libraries##coreHTTP##source####3.1.1+renesas.0.fsp.5.9.0"/>
+    <component type="platform.rafsp_companion" id="AWS##RTOS##FreeRTOS##all####11.1.0+fsp.5.9.0"/>
+    <component type="platform.rafsp_companion" id="AWS##Heaps##FreeRTOS##heap_1####11.1.0+fsp.5.9.0"/>
+    <component type="platform.rafsp_companion" id="AWS##Heaps##FreeRTOS##heap_2####11.1.0+fsp.5.9.0"/>
+    <component type="platform.rafsp_companion" id="AWS##Heaps##FreeRTOS##heap_3####11.1.0+fsp.5.9.0"/>
+    <component type="platform.rafsp_companion" id="AWS##Heaps##FreeRTOS##heap_4####11.1.0+fsp.5.9.0"/>
+    <component type="platform.rafsp_companion" id="AWS##Heaps##FreeRTOS##heap_5####11.1.0+fsp.5.9.0"/>
+    <component type="platform.rafsp_companion" id="AWS##Libraries##coreMQTT##source####2.3.1+fsp.5.9.0"/>
+    <component type="platform.rafsp_companion" id="AWS##Libraries##FreeRTOS##BufferAllocation2####4.2.2+fsp.5.9.0"/>
+    <component type="platform.rafsp_companion" id="AWS##Libraries##FreeRTOS_Plus##FreeRTOS_Plus_TCP####4.2.2+fsp.5.9.0"/>
+    <component type="platform.rafsp_companion" id="AWS##Abstractions##PKCS11##mbedtls####3.6.2+fsp.5.9.0"/>
+    <component type="platform.rafsp_companion" id="AWS##FreeRTOS##Cellular_Interface##source####1.3.0+fsp.5.9.0"/>
+    <component type="platform.rafsp_companion" id="AWS##Libraries##ota##source####3.4.0+fsp.5.9.0"/>
+    <component type="platform.rafsp_companion" id="AWS##Libraries##coreJSON##source####3.3.0+fsp.5.9.0"/>
+    <component type="platform.rafsp_companion" id="Intel##Libraries##all##tinycbor####0.6.0+fsp.5.9.0"/>
+    <component type="platform.rafsp_companion" id="AWS##Libraries##FreeRTOS_Plus##FreeRTOS_Plus_FAT####5.9.0"/>
+    <component type="platform.rafsp_companion" id="Microsoft##Azure##FileX##fx####6.4.0+fsp.5.9.0"/>
+    <component type="platform.rafsp_companion" id="Microsoft##Azure##GUIX##gx####6.4.0+fsp.5.9.0"/>
+    <component type="platform.rafsp_companion" id="Microsoft##Azure##NetX Duo##nxd####6.4.0+renesas.0.fsp.5.9.0"/>
+    <component type="platform.rafsp_companion" id="Microsoft##Azure##NetX Duo##azure_iot####6.4.0+renesas.0.fsp.5.9.0"/>
+    <component type="platform.rafsp_companion" id="Microsoft##Azure##NetX Duo##nx_crypto####6.4.0+renesas.0.fsp.5.9.0"/>
+    <component type="platform.rafsp_companion" id="Renesas##Middleware##all##rm_netx_secure_crypto_sw_port####6.4.0+renesas.0.fsp.5.9.0"/>
+    <component type="platform.rafsp_companion" id="Microsoft##Azure##NetX Duo##nx_secure####6.4.0+renesas.0.fsp.5.9.0"/>
+    <component type="platform.rafsp_companion" id="Microsoft##Azure##NetX Duo##nxd_servers####6.4.0+renesas.0.fsp.5.9.0"/>
+    <component type="platform.rafsp_companion" id="Microsoft##Azure##NetX Duo##nxd_bsd####6.4.0+renesas.0.fsp.5.9.0"/>
+    <component type="platform.rafsp_companion" id="Microsoft##RTOS##Azure##ThreadX####6.4.0+fsp.5.9.0"/>
+    <component type="platform.rafsp_companion" id="Microsoft##Azure##USBX##pcdc####6.4.0+fsp.5.9.0"/>
+    <component type="platform.rafsp_companion" id="Microsoft##Azure##USBX##hcdc####6.4.0+fsp.5.9.0"/>
+    <component type="platform.rafsp_companion" id="Microsoft##Azure##USBX##pprn####6.4.0+fsp.5.9.0"/>
+    <component type="platform.rafsp_companion" id="Microsoft##Azure##USBX##hprn####6.4.0+fsp.5.9.0"/>
+    <component type="platform.rafsp_companion" id="Microsoft##Azure##USBX##huvc####6.4.0+fsp.5.9.0"/>
+    <component type="platform.rafsp_companion" id="Microsoft##Azure##USBX##haud####6.4.0+fsp.5.9.0"/>
+    <component type="platform.rafsp_companion" id="Microsoft##Azure##USBX##pmsc####6.4.0+fsp.5.9.0"/>
+    <component type="platform.rafsp_companion" id="Microsoft##Azure##USBX##hmsc####6.4.0+fsp.5.9.0"/>
+    <component type="platform.rafsp_companion" id="Microsoft##Azure##USBX##phid####6.4.0+fsp.5.9.0"/>
+    <component type="platform.rafsp_companion" id="Microsoft##Azure##USBX##hhid####6.4.0+fsp.5.9.0"/>
+    <component type="platform.rafsp_companion" id="Microsoft##Azure##USBX##paud####6.4.0+fsp.5.9.0"/>
+    <component type="platform.rafsp_companion" id="Microsoft##Azure##USBX##dfu####6.4.0+fsp.5.9.0"/>
+    <component type="platform.rafsp_companion" id="Microsoft##Azure##USBX##otgcdc####6.4.0+fsp.5.9.0"/>
+    <component type="platform.rafsp_companion" id="Microsoft##Azure##USBX##otgmsc####6.4.0+fsp.5.9.0"/>
+    <component type="platform.rafsp_companion" id="Microsoft##Azure##USBX##otghid####6.4.0+fsp.5.9.0"/>
+    <component type="platform.rafsp_companion" id="Microsoft##Azure##LevelX##lx####6.4.0+fsp.5.9.0"/>
+    <component type="platform.rafsp_companion" id="Microsoft##Azure##EWF##NetX_Duo_Middleware####1.0.0-preview.2+renesas.4.fsp.5.9.0"/>
+    <component type="platform.rafsp_companion" id="Microsoft##Azure##EWF##Adapter_GM01Q####1.0.0-preview.2+renesas.4.fsp.5.9.0"/>
+    <component type="platform.rafsp_companion" id="Microsoft##Azure##EWF##Adapter_GM02S####1.0.0-preview.2+renesas.4.fsp.5.9.0"/>
+    <component type="platform.rafsp_companion" id="Microsoft##Azure##EWF##Adapter_RYZ####1.0.0-preview.2+renesas.4.fsp.5.9.0"/>
+    <component type="platform.rafsp_companion" id="Microsoft##Azure##EWF##Adapter_RYZ024A####1.0.0-preview.2+renesas.4.fsp.5.9.0"/>
+    <component type="platform.rafsp_companion" id="Microsoft##Azure##EWF##Common####1.0.0-preview.2+renesas.4.fsp.5.9.0"/>
+    <component type="platform.rafsp_companion" id="Microsoft##Azure##EWF##Interface_UART####1.0.0-preview.2+renesas.4.fsp.5.9.0"/>
+    <component type="platform.rafsp_companion" id="Microsoft##Azure##EWF##Platform_Threadx####1.0.0-preview.2+renesas.4.fsp.5.9.0"/>
+    <component type="platform.rafsp_companion" id="Microsoft##Azure##EWF##Allocator_Threadx####1.0.0-preview.2+renesas.4.fsp.5.9.0"/>
+    <component type="platform.rafsp_companion" id="Microsoft##Azure##EWF##Platform_Bare_Metal####1.0.0-preview.2+renesas.4.fsp.5.9.0"/>
+    <component type="platform.rafsp_companion" id="Microsoft##Azure##EWF##Allocator_Heap####1.0.0-preview.2+renesas.4.fsp.5.9.0"/>
+    <component type="platform.rafsp_companion" id="Microsoft##Azure##EWF##Allocator_Memory_Pool####1.0.0-preview.2+renesas.4.fsp.5.9.0"/>
+    <component type="platform.rafsp_companion" id="Renesas##TES##all##dave2d####3.8.0+fsp.5.9.0"/>
+    <component type="platform.rafsp_companion" id="SEGGER##GUI##all##emWin####6.48.0+fsp.5.9.0"/>
+    <component type="platform.rafsp_companion" id="Linaro##boot##all##MCUboot####2.1.0+renesas.3.fsp.5.9.0"/>
+    <component type="platform.rafsp_companion" id="Linaro##boot##all##keys####2.1.0+renesas.3.fsp.5.9.0"/>
+    <component type="platform.rafsp_companion" id="Linaro##boot##all##asn1parser####2.1.0+renesas.3.fsp.5.9.0"/>
+    <component type="platform.rafsp_companion" id="Linaro##boot##all##MCUboot_Image_Utilities####2.1.0+renesas.3.fsp.5.9.0"/>
+    <component type="platform.rafsp_companion" id="Oberon##Ocrypto##all##Lib####3.6.0+fsp.5.9.0"/>
+    <component type="platform.rafsp_companion" id="Oberon##Ocrypto##all##Acceleration####3.6.0+fsp.5.9.0"/>
+    <component type="platform.rafsp_companion" id="Intel##Cryptography##all##TinyCrypt####0.2.8+renesas.2.fsp.5.9.0"/>
+    <component type="platform.rafsp_companion" id="Intel##Cryptography##all##TinyCrypt_Acceleration####0.2.8+renesas.2.fsp.5.9.0"/>
+    <component type="platform.rafsp_companion" id="Intel##Cryptography##all##TinyCrypt_Acceleration_AES2####0.2.8+renesas.2.fsp.5.9.0"/>
+    <component type="platform.rafsp_companion" id="Intel##Cryptography##all##MCUboot_TinyCrypt####0.2.8+renesas.2.fsp.5.9.0"/>
+    <component type="platform.rafsp_companion" id="Intel##Cryptography##all##MCUboot_TinyCrypt_Acceleration####0.2.8+renesas.2.fsp.5.9.0"/>
+    <component type="platform.rafsp_companion" id="Intel##Cryptography##all##MCUboot_TinyCrypt_Accel_AES2####0.2.8+renesas.2.fsp.5.9.0"/>
+    <component type="platform.rafsp_companion" id="LwIP_TCPIP##LwIP##Common##Source####2.2.0+fsp.5.9.0"/>
+    <component type="platform.rafsp_companion" id="LwIP_TCPIP##LwIP##MQTTClient##source####2.2.0+fsp.5.9.0"/>
+    <component type="platform.rafsp_companion" id="LwIP_TCPIP##LwIP##HTTPServer##Source####2.2.0+fsp.5.9.0"/>
+    <component type="platform.rafsp_companion" id="LwIP_TCPIP##LwIP##HTTPServer##fsdata####2.2.0+fsp.5.9.0"/>
+    <component type="platform.rafsp_companion" id="LwIP_TCPIP##LwIP##Port##FreeRTOS####2.2.0+fsp.5.9.0"/>
+    <component type="platform.rafsp_companion" id="Renesas##Middleware##all##r_ble_gtl####0.0.1+fsp.5.9.0"/>
+    <component type="platform.rafsp_companion" id="Renesas##Middleware##all##r_ble_spp####3.0.0+fsp.5.9.0"/>
+    <component type="platform.rafsp_companion" id="Renesas##Middleware##all##rm_nfc_reader_ptx_sdk####3.0.0+fsp.5.9.0"/>
+    <component type="platform.rafsp_companion" id="Renesas##HAL Drivers##all##r_rsip_e51a_protected_cavp####1.5.0+fsp.5.9.0"/>
+    <component type="platform.rafsp_companion" id="Renesas##HAL Drivers##all##r_sce9_ra6_protected_cavp####1.1.0+fsp.5.9.0"/>
+  </platformCompanions>
+  <platformRestrictions>
+    <toolchain id="gcc-arm-a-profile-aarch64"/>
+  </platformRestrictions>
+</toolingSupport>

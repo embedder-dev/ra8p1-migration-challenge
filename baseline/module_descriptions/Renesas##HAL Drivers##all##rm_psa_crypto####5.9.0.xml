@@ -1,0 +1,10 @@
+<?xml version="1.0" ?>
+<raModuleDescription>
+  <module display="Security|Mbed Crypto H/W Acceleration (rm_psa_crypto)" id="module.driver.rm_psa_crypto" visible="false" version="1" url="group___r_m___p_s_a___c_r_y_p_t_o.html">
+    <constraint display="Requires SCE Driver">
+          "${interface.driver.sce}" === "1"
+    </constraint>
+    <requires id="module.driver.rm_psa_crypto.requires.sce" interface="interface.driver.sce" visible="true" display="Requires SCE Driver" />
+    <provides interface="interface.driver.rm_psa_crypto" />
+  </module>
+</raModuleDescription>

@@ -1,0 +1,231 @@
+﻿<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.driver.crc" path="fsp_cfg/r_crc_cfg.h" version="0">
+        <property id="config.driver.crc.checking" display="Parameter Checking" default="config.driver.crc.checking.system" description="If selected code for parameter checking is included in the build.">
+            <option id="config.driver.crc.checking.system" display="Default (BSP)" value="(BSP_CFG_PARAM_CHECKING_ENABLE)" />
+            <option id="config.driver.crc.checking.enabled" display="Enabled" value="(1)" />
+            <option id="config.driver.crc.checking.disabled" display="Disabled" value="(0)" />
+        </property>
+        <content>
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#define CRC_CFG_PARAM_CHECKING_ENABLE ${config.driver.crc.checking}
+
+#ifdef __cplusplus
+}
+#endif
+        </content>
+    </config>
+    <module config="config.driver.crc" display="Monitoring|${module.driver.crc.name} CRC (r_crc)" id="module.driver.crc_on_crc" version="1" url="group___c_r_c.html">
+        <constraint display="Unique name required for each instance">
+            "${interface.driver.crc.${module.driver.crc.name}}" === "1"
+        </constraint>
+        <constraint display="Requires CRC peripheral">
+          "${interface.mcu.crc}" === "1"
+        </constraint>
+        <requires id="module.driver.crc_on_crc.requires.crc" interface="interface.mcu.crc" visible="false" display="Requires CRC peripheral" />
+        <provides interface="interface.driver.crc" />
+        <provides interface="interface.driver.crc_on_crc" />
+        <provides interface="interface.driver.crc.${module.driver.crc.name}" />
+        <provides interface="interface.peripheral.crc" />
+        <property default="g_crc${_instance}" display="Name" id="module.driver.crc.name" description="Module name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.crc.name}")</constraint>
+        </property>
+        <property default="-1" display="CRC Polynomial" id="module.driver.crc.crc_polynomial" description="Select the CRC polynomial.">
+	        <select enum="enum.mcu.crc.crc_polynomial" />
+        </property>
+        <property default="-1" display="Bit Order" id="module.driver.crc.crc_bit_order" description="Select the CRC bit order.">
+	        <select enum="enum.mcu.crc.crc_bit_order" />
+        </property>
+        <property default="-1" display="Snoop Address" id="module.driver.crc.snoop_address" description="Select the SCI register address CRC snoop">
+            <select enum="enum.mcu.crc.snoop_address" />
+        </property>
+        <symbol id="symbol.driver.crc.name" value="${module.driver.crc.name}"/>
+        <symbol id="symbol.driver.crc.guard.open" value="${module.driver.crc.name}_open_guard"/>
+        <symbol id="symbol.driver.crc.guard.macro.open" value="FSP_GUARD_${module.driver.crc.name}_R_CRC_Open"/>
+        <symbol id="symbol.driver.crc.guard.close" value="${module.driver.crc.name}_close_guard"/>
+        <symbol id="symbol.driver.crc.guard.macro.close" value="FSP_GUARD_${module.driver.crc.name}_R_CRC_Close"/>
+        <symbol id="symbol.driver.crc.guard.calculate" value="${module.driver.crc.name}_calculate_guard"/>
+        <symbol id="symbol.driver.crc.guard.macro.calculate" value="FSP_GUARD_${module.driver.crc.name}_R_CRC_Calculate"/>
+        <symbol id="symbol.driver.crc.guard.calculated_value_get" value="${module.driver.crc.name}_calculated_value_get_guard"/>
+        <symbol id="symbol.driver.crc.guard.macro.calculated_value_get" value="FSP_GUARD_${module.driver.crc.name}_R_CRC_CalculatedValueGet"/>
+        <symbol id="symbol.driver.crc.guard.snoop_enable" value="${module.driver.crc.name}_snoop_enable_guard"/>
+        <symbol id="symbol.driver.crc.guard.macro.snoop_enable" value="FSP_GUARD_${module.driver.crc.name}_R_CRC_SnoopEnable"/>
+        <symbol id="symbol.driver.crc.guard.snoop_disable" value="${module.driver.crc.name}_snoop_disable_guard"/>
+        <symbol id="symbol.driver.crc.guard.macro.snoop_disable" value="FSP_GUARD_${module.driver.crc.name}_R_CRC_SnoopDisable"/>
+        <symbol id="symbol.driver.crc.nsc_api" value="${module.driver.crc.name}_nsc_api"/>
+        <symbol id="symbol.driver.crc.cfg" value="${module.driver.crc.name}_cfg"/>
+        <symbol id="symbol.driver.crc.ctrl" value="${module.driver.crc.name}_ctrl"/>
+        <header>
+extern const crc_instance_t ${module.driver.crc.name};
+extern crc_instance_ctrl_t ${module.driver.crc.name}_ctrl;
+extern const crc_cfg_t ${module.driver.crc.name}_cfg;
+        </header>
+        <includes>#include &quot;r_crc.h&quot;
+#include &quot;r_crc_api.h&quot;</includes>
+        <declarations>crc_instance_ctrl_t ${module.driver.crc.name}_ctrl;
+const crc_cfg_t ${module.driver.crc.name}_cfg =
+{
+    .polynomial      = ${module.driver.crc.crc_polynomial},
+    .bit_order       = ${module.driver.crc.crc_bit_order},
+    .snoop_address   = ${module.driver.crc.snoop_address},
+    .p_extend        = NULL,
+};
+
+/* Instance structure to use this module. */
+const crc_instance_t ${module.driver.crc.name} =
+{
+    .p_ctrl        = &amp;${module.driver.crc.name}_ctrl,
+    .p_cfg         = &amp;${module.driver.crc.name}_cfg,
+    .p_api         = &amp;g_crc_on_crc
+};
+        </declarations>
+        <guard>
+            <header>
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.crc.name}_open_guard(crc_ctrl_t *const p_ctrl, crc_cfg_t const *const p_cfg);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.crc.name}_close_guard(crc_ctrl_t *const p_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.crc.name}_calculate_guard(crc_ctrl_t *const p_ctrl, crc_input_t *const p_crc_input, uint32_t *calculatedValue);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.crc.name}_calculated_value_get_guard(crc_ctrl_t *const p_ctrl, uint32_t *calculatedValue);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.crc.name}_snoop_enable_guard(crc_ctrl_t *const p_ctrl, uint32_t crc_seed);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.crc.name}_snoop_disable_guard(crc_ctrl_t *const p_ctrl);
+
+            </header>
+            <template name="${module.driver.crc.name}_guard.c">
+                <![CDATA[
+                    #include "guard.h"
+
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.crc.name}_open_guard (crc_ctrl_t *const p_ctrl, crc_cfg_t const *const p_cfg)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+    FSP_PARAMETER_NOT_USED(p_cfg);
+
+    return R_CRC_Open(&${module.driver.crc.name}_ctrl, &${module.driver.crc.name}_cfg);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.crc.name}_close_guard (crc_ctrl_t *const p_ctrl)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+
+    return R_CRC_Close(&${module.driver.crc.name}_ctrl);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.crc.name}_calculate_guard (crc_ctrl_t *const p_ctrl, crc_input_t *const p_crc_input, uint32_t *calculatedValue)
+{
+    /* Verify all pointers are in non-secure memory. */
+    crc_input_t *const p_crc_input_checked = cmse_check_pointed_object(p_crc_input, CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_crc_input_checked != NULL);
+    uint32_t * calculatedValue_checked = cmse_check_address_range((void *) calculatedValue, 4, CMSE_AU_NONSECURE);
+    FSP_ASSERT(calculatedValue_checked != NULL);
+
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+
+    return R_CRC_Calculate(&${module.driver.crc.name}_ctrl, p_crc_input_checked, calculatedValue_checked);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.crc.name}_calculated_value_get_guard (crc_ctrl_t *const p_ctrl, uint32_t *calculatedValue)
+{
+    /* Verify all pointers are in non-secure memory. */
+    uint32_t * calculatedValue_checked = cmse_check_address_range((void *) calculatedValue, 4, CMSE_AU_NONSECURE);
+    FSP_ASSERT(calculatedValue_checked != NULL);
+
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+
+    return R_CRC_CalculatedValueGet(&${module.driver.crc.name}_ctrl, calculatedValue_checked);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.crc.name}_snoop_enable_guard (crc_ctrl_t *const p_ctrl, uint32_t crc_seed)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+
+    return R_CRC_SnoopEnable(&${module.driver.crc.name}_ctrl, crc_seed);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.crc.name}_snoop_disable_guard (crc_ctrl_t *const p_ctrl)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+
+    return R_CRC_SnoopDisable(&${module.driver.crc.name}_ctrl);
+}
+
+                ]]>
+            </template>
+        </guard>
+        <nsc>
+            <header>
+
+#define FSP_GUARD_${module.driver.crc.name}_R_CRC_Open() ${module.driver.crc.name}_open_guard(FSP_SECURE_ARGUMENT, FSP_SECURE_ARGUMENT)
+
+#define FSP_GUARD_${module.driver.crc.name}_R_CRC_Close() ${module.driver.crc.name}_close_guard(FSP_SECURE_ARGUMENT)
+
+#define FSP_GUARD_${module.driver.crc.name}_R_CRC_Calculate(p_crc_input, calculatedValue) ${module.driver.crc.name}_calculate_guard(FSP_SECURE_ARGUMENT, p_crc_input, calculatedValue)
+
+#define FSP_GUARD_${module.driver.crc.name}_R_CRC_CalculatedValueGet(calculatedValue) ${module.driver.crc.name}_calculated_value_get_guard(FSP_SECURE_ARGUMENT, calculatedValue)
+
+#define FSP_GUARD_${module.driver.crc.name}_R_CRC_SnoopEnable(crc_seed) ${module.driver.crc.name}_snoop_enable_guard(FSP_SECURE_ARGUMENT, crc_seed)
+
+#define FSP_GUARD_${module.driver.crc.name}_R_CRC_SnoopDisable() ${module.driver.crc.name}_snoop_disable_guard(FSP_SECURE_ARGUMENT)
+
+
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.crc.name}_open_guard(crc_ctrl_t *const p_ctrl, crc_cfg_t const *const p_cfg);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.crc.name}_close_guard(crc_ctrl_t *const p_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.crc.name}_calculate_guard(crc_ctrl_t *const p_ctrl, crc_input_t *const p_crc_input, uint32_t *calculatedValue);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.crc.name}_calculated_value_get_guard(crc_ctrl_t *const p_ctrl, uint32_t *calculatedValue);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.crc.name}_snoop_enable_guard(crc_ctrl_t *const p_ctrl, uint32_t crc_seed);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.crc.name}_snoop_disable_guard(crc_ctrl_t *const p_ctrl);
+
+
+extern const crc_instance_t ${module.driver.crc.name};
+            </header>
+            <declarations>
+                <![CDATA[
+static const crc_api_t ${module.driver.crc.name}_nsc_api =
+{
+    .open = ${module.driver.crc.name}_open_guard,
+    .close = ${module.driver.crc.name}_close_guard,
+    .calculate = ${module.driver.crc.name}_calculate_guard,
+    .crcResultGet = ${module.driver.crc.name}_calculated_value_get_guard,
+    .snoopEnable = ${module.driver.crc.name}_snoop_enable_guard,
+    .snoopDisable = ${module.driver.crc.name}_snoop_disable_guard,
+};
+const crc_instance_t ${module.driver.crc.name} =
+{
+    .p_api = &${module.driver.crc.name}_nsc_api,
+    .p_ctrl = FSP_SECURE_ARGUMENT,
+    .p_cfg = FSP_SECURE_ARGUMENT,
+};
+                ]]>
+            </declarations>
+        </nsc>
+        <api configurable="true">
+            <file>ra/fsp/inc/instances/r_crc.h</file>
+            <file>ra/fsp/inc/api/r_crc_api.h</file>
+        </api>
+    </module>
+</raModuleDescription>

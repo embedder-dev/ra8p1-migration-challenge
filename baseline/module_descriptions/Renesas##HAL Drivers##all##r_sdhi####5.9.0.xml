@@ -1,0 +1,635 @@
+﻿<?xml version="1.0" ?>
+<raModuleDescription>
+
+    <!-- Sd/MMC XML START here-->
+
+    <config id="config.driver.sdmmc" path="fsp_cfg/r_sdhi_cfg.h" version="0">
+        <property default="config.driver.sdmmc.param_checking_enable.bsp" display="Parameter Checking" id="config.driver.sdmmc.param_checking_enable" description="If selected code for parameter checking is included in the build.">
+            <option display="Default (BSP)" id="config.driver.sdmmc.param_checking_enable.bsp" value="(BSP_CFG_PARAM_CHECKING_ENABLE)"/>
+            <option display="Enabled" id="config.driver.sdmmc.param_checking_enable.enabled" value="(1)"/>
+            <option display="Disabled" id="config.driver.sdmmc.param_checking_enable.disabled" value="(0)"/>
+        </property>
+        <property default="config.driver.sdmmc.unaligned_support_enable.enabled" display="Unaligned Access Support" id="config.driver.sdmmc.unaligned_support_enable" description="If enabled, code for supporting buffers that are not aligned on a 4-byte boundary is included in the build.  Only disable this if all buffers passed to the driver are 4-byte aligned.">
+            <option display="Disabled" id="config.driver.sdmmc.unaligned_support_enable.disabled" value="(0)"/>
+            <option display="Enabled" id="config.driver.sdmmc.unaligned_support_enable.enabled" value="(1)"/>
+        </property>
+        <property default="config.driver.sdmmc.sd_support_enable.enabled" display="SD Support" id="config.driver.sdmmc.sd_support_enable" description="If selected code for SD card support is included in the build.">
+            <option display="Disabled" id="config.driver.sdmmc.sd_support_enable.disabled" value="(0)"/>
+            <option display="Enabled" id="config.driver.sdmmc.sd_support_enable.enabled" value="(1)"/>
+        </property>
+        <property default="config.driver.sdmmc.emmc_support_enable.disabled" display="eMMC Support" id="config.driver.sdmmc.emmc_support_enable" description="If selected code for eMMC device support is included in the build.">
+            <option display="Disabled" id="config.driver.sdmmc.emmc_support_enable.disabled" value="(0)"/>
+            <option display="Enabled" id="config.driver.sdmmc.emmc_support_enable.enabled" value="(1)"/>
+        </property>
+        <content>
+        #ifdef __cplusplus
+        extern "C" {
+        #endif
+
+        #define SDHI_CFG_PARAM_CHECKING_ENABLE ${config.driver.sdmmc.param_checking_enable}
+        #define SDMMC_CFG_UNALIGNED_ACCESS_ENABLE ${config.driver.sdmmc.unaligned_support_enable}
+        #ifndef SDHI_CFG_SD_SUPPORT_ENABLE
+        #define SDHI_CFG_SD_SUPPORT_ENABLE (${config.driver.sdmmc.sd_support_enable})
+        #endif
+        #ifndef SDHI_CFG_EMMC_SUPPORT_ENABLE
+        #define SDHI_CFG_EMMC_SUPPORT_ENABLE (${config.driver.sdmmc.emmc_support_enable})
+        #endif
+
+        #ifdef __cplusplus
+        }
+        #endif
+        </content>
+    </config>
+    <module config="config.driver.sdmmc" display="Storage|${module.driver.sdmmc.name} SD/MMC (r_sdhi)" id="module.driver.sdmmc_on_sdmmc" version="1" url="group___s_d_h_i.html">
+        <constraint display="Channel not available on selected MCU">
+          "${interface.mcu.sdhi.${module.driver.sdmmc.channel}}" === "1"
+        </constraint>
+        <constraint display="Driver instances must have unique names">
+            "${interface.driver.sdmmc.${module.driver.sdmmc.name}}" === "1"
+        </constraint>
+        <constraint display="At least one device type must be enabled (SD and/or eMMC)">
+            ("${config.driver.sdmmc.sd_support_enable}" === "config.driver.sdmmc.sd_support_enable.enabled") ||
+            ("${config.driver.sdmmc.emmc_support_enable}" === "config.driver.sdmmc.emmc_support_enable.enabled")
+        </constraint>
+        <constraint display="Requires lower level transfer driver">
+            testExists("${module.driver.sdmmc_on_sdmmc.requires.transfer::module.driver.transfer.name}")
+        </constraint>
+        <constraint display="When DMAC is used, Transfer End Interrupt must be enabled in the Transfer (r_dmac) module">
+            ("${interface.driver.transfer_on_dtc.${module.driver.sdmmc_on_sdmmc.requires.transfer::module.driver.transfer.name}}" === "1") ||
+            ("${module.driver.sdmmc_on_sdmmc.requires.transfer::module.driver.transfer.ipl}" != "_disabled")
+        </constraint>
+        <constraint display="When DMAC is used, DTC interrupt must be disabled">
+            ("${interface.driver.transfer_on_dmac.${module.driver.sdmmc_on_sdmmc.requires.transfer::module.driver.transfer.name}}" !== "1") ||
+            ("${module.driver.sdmmc.dma_req_ipl}" == "_disabled")
+        </constraint>
+        <constraint display="When DTC is used, DTC interrupt must not be disabled">
+            ("${interface.driver.transfer_on_dtc.${module.driver.sdmmc_on_sdmmc.requires.transfer::module.driver.transfer.name}}" !== "1") ||
+            ("${module.driver.sdmmc.dma_req_ipl}" != "_disabled")
+        </constraint>
+        <constraint display="Requires SDMMC Peripheral">
+          "${interface.mcu.sdhi.external}" === "1"
+        </constraint>
+        <requires id="module.driver.sdmmc_on_sdmmc.requires.sdhi" interface="interface.mcu.sdhi.external" visible="false" display="Requires SDMMC Peripheral" />
+        <requires id="module.driver.sdmmc_on_sdmmc.requires.transfer" interface="interface.driver.transfer" display="Add Transfer Driver (DMAC or DTC) [Required]">
+            <override property="module.driver.transfer.size" value="module.driver.transfer.size.size_4_byte"/>
+            <override property="module.driver.transfer.mode" value="module.driver.transfer.mode.mode_normal"/>
+            <override property="module.driver.transfer.dest_addr_mode" value="module.driver.transfer.dest_addr_mode.addr_mode_fixed"/>
+            <override property="module.driver.transfer.src_addr_mode" value="module.driver.transfer.src_addr_mode.addr_mode_incremented"/>
+            <override property="module.driver.transfer.repeat_area" value="module.driver.transfer.repeat_area.repeat_area_source"/>
+            <override property="module.driver.transfer.p_dest" value="NULL"/>
+            <override property="module.driver.transfer.p_src" value="NULL"/>
+            <override property="module.driver.transfer.length" value="128"/>
+            <override property="module.driver.transfer.interrupt" value="module.driver.transfer.interrupt.interrupt_end"/>
+            <override property="module.driver.transfer.num_blocks" value="0"/>
+            <override property="module.driver.transfer.auto_enable" value="module.driver.transfer.auto_enable.false"/>
+            <override property="module.driver.transfer.p_callback" value="${module.driver.sdmmc.name}_dmac_callback"/>
+            <override property="module.driver.transfer.p_context" value="&amp;${module.driver.sdmmc.name}_ctrl"/>
+            <override property="module.driver.transfer.activation_source" value="_signal.event.sdhimmc${module.driver.sdmmc.channel}.dma.req"/>
+            <override property="module.driver.transfer.activation_event" value="_signal.event.sdhimmc${module.driver.sdmmc.channel}.dma.req"/>
+        </requires>
+        <provides interface="interface.driver.sdmmc" />
+        <provides interface="interface.driver.sdmmc_on_sdmmc" />
+        <provides interface="interface.driver.sdmmc.${module.driver.sdmmc.name}" />
+        <provides interface="interface.peripheral.sdhi${module.driver.sdmmc.channel}" />
+        <property default="g_sdmmc${_instance}" display="Name" id="module.driver.sdmmc.name" description="Module name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.sdmmc.name}")</constraint>
+        </property>
+        <property default="0" display="Channel" id="module.driver.sdmmc.channel" description="Select the channel.">
+            <constraint display="Value must be a non-negative integer">testInteger("${module.driver.sdmmc.channel}")  &amp;&amp; ("${module.driver.sdmmc.channel}" &gt;= 0)</constraint>
+            <signal event="event.sdhimmc${module.driver.sdmmc.channel}.dma.req" />
+        </property>
+        <property default="" display="Bus Width" id="module.driver.sdmmc.bus_width" description="Select the bus width.">
+            <select enum="enum.mcu.sdhi.bus_width" />
+        </property>
+        <property default="module.driver.sdmmc.card_detect.card_detect_cd" display="Card Detection" id="module.driver.sdmmc.card_detect" description="Select the card detection method.">
+            <option display="Not Used" id="module.driver.sdmmc.card_detect.card_detect_none" value="SDMMC_CARD_DETECT_NONE"/>
+            <option display="CD Pin" id="module.driver.sdmmc.card_detect.card_detect_cd" value="SDMMC_CARD_DETECT_CD"/>
+        </property>
+        <property default="module.driver.sdmmc.write_protect.write_protect_wp" display="Write Protection" id="module.driver.sdmmc.write_protect" description="Select whether or not to use the write protect pin. Select Not Used if the MCU or device does not have a write protect pin.">
+            <option display="Not Used" id="module.driver.sdmmc.write_protect.write_protect_none" value="SDMMC_WRITE_PROTECT_NONE"/>
+            <option display="WP Pin" id="module.driver.sdmmc.write_protect.write_protect_wp" value="SDMMC_WRITE_PROTECT_WP"/>
+        </property>
+        <property default="NULL" display="Callback" id="module.driver.sdmmc.p_callback" description="A user callback function can be provided. If this callback function is provided, it will be called from the interrupt service routine (ISR).">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.sdmmc.p_callback}")</constraint>
+        </property>
+        <property default="NULL" id="module.driver.sdmmc.p_context" />
+        <property default="" display="Access Interrupt Priority" id="module.driver.sdmmc.access_ipl" description="Select the access interrupt priority.">
+            <select enum="enum.mcu.nvic.priorities.mandatory"/>
+            <interrupt event="event.sdhimmc${module.driver.sdmmc.channel}.accs" isr="sdhimmc_accs_isr"/>
+        </property>
+        <property default="" display="Card Interrupt Priority" id="module.driver.sdmmc.card_ipl" description="Select the card interrupt priority.">
+            <select enum="enum.mcu.nvic.priorities.optional"/>
+            <interrupt event="event.sdhimmc${module.driver.sdmmc.channel}.card" isr="sdhimmc_card_isr"/>
+        </property>
+        <property default="" display="DTC Interrupt Priority" id="module.driver.sdmmc.dma_req_ipl" description="Select the DTC interrupt priority.">
+            <select enum="enum.mcu.nvic.priorities.optional"/>
+            <interrupt event="event.sdhimmc${module.driver.sdmmc.channel}.dma.req" isr="sdhimmc_dma_req_isr"/>
+        </property>
+        <peripheral name="SDHI${module.driver.sdmmc.channel}" component="sdhi${module.driver.sdmmc.channel}" />
+        <symbol id="symbol.driver.sdmmc.name" value="${module.driver.sdmmc.name}"/>
+        <symbol id="symbol.driver.sdmmc.guard.open" value="${module.driver.sdmmc.name}_open_guard"/>
+        <symbol id="symbol.driver.sdmmc.guard.macro.open" value="FSP_GUARD_${module.driver.sdmmc.name}_R_SDHI_Open"/>
+        <symbol id="symbol.driver.sdmmc.guard.media_init" value="${module.driver.sdmmc.name}_media_init_guard"/>
+        <symbol id="symbol.driver.sdmmc.guard.macro.media_init" value="FSP_GUARD_${module.driver.sdmmc.name}_R_SDHI_MediaInit"/>
+        <symbol id="symbol.driver.sdmmc.guard.read" value="${module.driver.sdmmc.name}_read_guard"/>
+        <symbol id="symbol.driver.sdmmc.guard.macro.read" value="FSP_GUARD_${module.driver.sdmmc.name}_R_SDHI_Read"/>
+        <symbol id="symbol.driver.sdmmc.guard.write" value="${module.driver.sdmmc.name}_write_guard"/>
+        <symbol id="symbol.driver.sdmmc.guard.macro.write" value="FSP_GUARD_${module.driver.sdmmc.name}_R_SDHI_Write"/>
+        <symbol id="symbol.driver.sdmmc.guard.read_io" value="${module.driver.sdmmc.name}_read_io_guard"/>
+        <symbol id="symbol.driver.sdmmc.guard.macro.read_io" value="FSP_GUARD_${module.driver.sdmmc.name}_R_SDHI_ReadIo"/>
+        <symbol id="symbol.driver.sdmmc.guard.write_io" value="${module.driver.sdmmc.name}_write_io_guard"/>
+        <symbol id="symbol.driver.sdmmc.guard.macro.write_io" value="FSP_GUARD_${module.driver.sdmmc.name}_R_SDHI_WriteIo"/>
+        <symbol id="symbol.driver.sdmmc.guard.read_io_ext" value="${module.driver.sdmmc.name}_read_io_ext_guard"/>
+        <symbol id="symbol.driver.sdmmc.guard.macro.read_io_ext" value="FSP_GUARD_${module.driver.sdmmc.name}_R_SDHI_ReadIoExt"/>
+        <symbol id="symbol.driver.sdmmc.guard.write_io_ext" value="${module.driver.sdmmc.name}_write_io_ext_guard"/>
+        <symbol id="symbol.driver.sdmmc.guard.macro.write_io_ext" value="FSP_GUARD_${module.driver.sdmmc.name}_R_SDHI_WriteIoExt"/>
+        <symbol id="symbol.driver.sdmmc.guard.io_int_enable" value="${module.driver.sdmmc.name}_io_int_enable_guard"/>
+        <symbol id="symbol.driver.sdmmc.guard.macro.io_int_enable" value="FSP_GUARD_${module.driver.sdmmc.name}_R_SDHI_IoIntEnable"/>
+        <symbol id="symbol.driver.sdmmc.guard.status_get" value="${module.driver.sdmmc.name}_status_get_guard"/>
+        <symbol id="symbol.driver.sdmmc.guard.macro.status_get" value="FSP_GUARD_${module.driver.sdmmc.name}_R_SDHI_StatusGet"/>
+        <symbol id="symbol.driver.sdmmc.guard.erase" value="${module.driver.sdmmc.name}_erase_guard"/>
+        <symbol id="symbol.driver.sdmmc.guard.macro.erase" value="FSP_GUARD_${module.driver.sdmmc.name}_R_SDHI_Erase"/>
+        <symbol id="symbol.driver.sdmmc.guard.callback_set" value="${module.driver.sdmmc.name}_callback_set_guard"/>
+        <symbol id="symbol.driver.sdmmc.guard.macro.callback_set" value="FSP_GUARD_${module.driver.sdmmc.name}_R_SDHI_CallbackSet"/>
+        <symbol id="symbol.driver.sdmmc.guard.close" value="${module.driver.sdmmc.name}_close_guard"/>
+        <symbol id="symbol.driver.sdmmc.guard.macro.close" value="FSP_GUARD_${module.driver.sdmmc.name}_R_SDHI_Close"/>
+        <symbol id="symbol.driver.sdmmc.nsc_api" value="${module.driver.sdmmc.name}_nsc_api"/>
+        <symbol id="symbol.driver.sdmmc.cfg" value="${module.driver.sdmmc.name}_cfg"/>
+        <symbol id="symbol.driver.sdmmc.ctrl" value="${module.driver.sdmmc.name}_ctrl"/>
+        <symbol id="symbol.driver.sdmmc.dmac_callback" value="${module.driver.sdmmc.name}_dmac_callback"/>
+        <header>
+/** SDMMC on SDMMC Instance. */
+extern const sdmmc_instance_t ${module.driver.sdmmc.name};
+
+
+/** Access the SDMMC instance using these structures when calling API functions directly (::p_api is not used). */
+extern sdhi_instance_ctrl_t ${module.driver.sdmmc.name}_ctrl;
+extern sdmmc_cfg_t ${module.driver.sdmmc.name}_cfg;
+
+#ifndef ${module.driver.sdmmc.p_callback}
+void ${module.driver.sdmmc.p_callback}(sdmmc_callback_args_t * p_args);
+#endif
+        </header>
+        <includes>#include &quot;r_sdhi.h&quot;
+#include &quot;r_sdmmc_api.h&quot;</includes>
+        <declarations>
+#define RA_NOT_DEFINED (UINT32_MAX)
+#if (RA_NOT_DEFINED) != (${module.driver.sdmmc_on_sdmmc.requires.transfer::module.driver.transfer.offset})
+
+/* If the transfer module is DMAC, define a DMAC transfer callback. */
+#include "r_dmac.h"
+extern void r_sdhi_transfer_callback(sdhi_instance_ctrl_t * p_ctrl);
+
+void ${module.driver.sdmmc.name}_dmac_callback (dmac_callback_args_t * p_args)
+{
+    r_sdhi_transfer_callback((sdhi_instance_ctrl_t *) p_args->p_context);
+}
+#endif
+#undef RA_NOT_DEFINED
+
+sdhi_instance_ctrl_t ${module.driver.sdmmc.name}_ctrl;
+sdmmc_cfg_t ${module.driver.sdmmc.name}_cfg =
+{
+    .bus_width              = ${module.driver.sdmmc.bus_width},
+    .channel                = ${module.driver.sdmmc.channel},
+    .p_callback             = ${module.driver.sdmmc.p_callback},
+    .p_context              = ${module.driver.sdmmc.p_context},
+    .block_size             = 512,
+    .card_detect            = ${module.driver.sdmmc.card_detect},
+    .write_protect          = ${module.driver.sdmmc.write_protect},
+
+    .p_extend               = NULL,
+    .p_lower_lvl_transfer   = &amp;${module.driver.sdmmc_on_sdmmc.requires.transfer::module.driver.transfer.name},
+
+    .access_ipl             = ${module.driver.sdmmc.access_ipl},
+    .sdio_ipl               = BSP_IRQ_DISABLED,
+    .card_ipl               = ${module.driver.sdmmc.card_ipl},
+    .dma_req_ipl            = ${module.driver.sdmmc.dma_req_ipl},
+#if defined(VECTOR_NUMBER_SDHIMMC${module.driver.sdmmc.channel}_ACCS)
+    .access_irq             = VECTOR_NUMBER_SDHIMMC${module.driver.sdmmc.channel}_ACCS,
+#else
+    .access_irq             = FSP_INVALID_VECTOR,
+#endif
+#if defined(VECTOR_NUMBER_SDHIMMC${module.driver.sdmmc.channel}_CARD)
+    .card_irq               = VECTOR_NUMBER_SDHIMMC${module.driver.sdmmc.channel}_CARD,
+#else
+    .card_irq               = FSP_INVALID_VECTOR,
+#endif
+    .sdio_irq               = FSP_INVALID_VECTOR,
+#if defined(VECTOR_NUMBER_SDHIMMC${module.driver.sdmmc.channel}_DMA_REQ)
+    .dma_req_irq            = VECTOR_NUMBER_SDHIMMC${module.driver.sdmmc.channel}_DMA_REQ,
+#else
+    .dma_req_irq            = FSP_INVALID_VECTOR,
+#endif
+};
+/* Instance structure to use this module. */
+const sdmmc_instance_t ${module.driver.sdmmc.name} =
+{
+    .p_ctrl        = &amp;${module.driver.sdmmc.name}_ctrl,
+    .p_cfg         = &amp;${module.driver.sdmmc.name}_cfg,
+    .p_api         = &amp;g_sdmmc_on_sdhi
+};
+
+
+
+
+        </declarations>
+        <guard>
+            <header>
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.sdmmc.name}_open_guard(sdmmc_ctrl_t *const p_api_ctrl, sdmmc_cfg_t const *const p_cfg);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.sdmmc.name}_media_init_guard(sdmmc_ctrl_t *const p_api_ctrl, sdmmc_device_t *const p_device);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.sdmmc.name}_read_guard(sdmmc_ctrl_t *const p_api_ctrl, uint8_t *const p_dest, uint32_t const start_sector, uint32_t const sector_count);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.sdmmc.name}_write_guard(sdmmc_ctrl_t *const p_api_ctrl, uint8_t const *const p_source, uint32_t const start_sector, uint32_t const sector_count);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.sdmmc.name}_read_io_guard(sdmmc_ctrl_t *const p_api_ctrl, uint8_t *const p_data, uint32_t const function, uint32_t const address);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.sdmmc.name}_write_io_guard_fanin(sdmmc_ctrl_t *const p_api_ctrl, sdmmc_write_io_args_t const * const p_args);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.sdmmc.name}_read_io_ext_guard_fanin(sdmmc_ctrl_t *const p_api_ctrl, sdmmc_read_io_ext_args_t const * const p_args);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.sdmmc.name}_write_io_ext_guard_fanin(sdmmc_ctrl_t *const p_api_ctrl, sdmmc_write_io_ext_args_t const * const p_args);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.sdmmc.name}_io_int_enable_guard(sdmmc_ctrl_t *const p_api_ctrl, bool enable);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.sdmmc.name}_status_get_guard(sdmmc_ctrl_t *const p_api_ctrl, sdmmc_status_t *const p_status);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.sdmmc.name}_erase_guard(sdmmc_ctrl_t *const p_api_ctrl, uint32_t const start_sector, uint32_t const sector_count);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.sdmmc.name}_callback_set_guard(sdmmc_ctrl_t *const p_api_ctrl, void(*p_callback)(sdmmc_callback_args_t *), void const *const p_context, sdmmc_callback_args_t *const p_callback_memory);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.sdmmc.name}_close_guard(sdmmc_ctrl_t *const p_api_ctrl);
+
+            </header>
+            <template name="${module.driver.sdmmc.name}_guard.c">
+                <![CDATA[
+                    #include "guard.h"
+
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.sdmmc.name}_open_guard (sdmmc_ctrl_t *const p_api_ctrl, sdmmc_cfg_t const *const p_cfg)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+    FSP_PARAMETER_NOT_USED(p_cfg);
+
+    return R_SDHI_Open(&${module.driver.sdmmc.name}_ctrl, &${module.driver.sdmmc.name}_cfg);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.sdmmc.name}_media_init_guard (sdmmc_ctrl_t *const p_api_ctrl, sdmmc_device_t *const p_device)
+{
+    /* Verify all pointers are in non-secure memory. */
+    sdmmc_device_t *const p_device_checked = cmse_check_pointed_object(p_device, CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_device_checked != NULL);
+
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+
+    return R_SDHI_MediaInit(&${module.driver.sdmmc.name}_ctrl, p_device_checked);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.sdmmc.name}_read_guard (sdmmc_ctrl_t *const p_api_ctrl, uint8_t *const p_dest, uint32_t const start_sector, uint32_t const sector_count)
+{
+    /* Verify all pointers are in non-secure memory. */
+    uint8_t *const p_dest_checked = cmse_check_address_range((void *) p_dest, (sector_count * ${module.driver.sdmmc.name}_ctrl.p_cfg->block_size), CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_dest_checked != NULL);
+
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+
+    return R_SDHI_Read(&${module.driver.sdmmc.name}_ctrl, p_dest_checked, start_sector, sector_count);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.sdmmc.name}_write_guard (sdmmc_ctrl_t *const p_api_ctrl, uint8_t const *const p_source, uint32_t const start_sector, uint32_t const sector_count)
+{
+    /* Verify all pointers are in non-secure memory. */
+    uint8_t const *const p_source_checked = cmse_check_address_range((void *) p_source, (sector_count * ${module.driver.sdmmc.name}_ctrl.p_cfg->block_size), CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_source_checked != NULL);
+
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+
+    return R_SDHI_Write(&${module.driver.sdmmc.name}_ctrl, p_source_checked, start_sector, sector_count);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.sdmmc.name}_read_io_guard (sdmmc_ctrl_t *const p_api_ctrl, uint8_t *const p_data, uint32_t const function, uint32_t const address)
+{
+    /* Verify all pointers are in non-secure memory. */
+    uint8_t *const p_data_checked = cmse_check_address_range((void *) p_data, sizeof(uint8_t), CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_data_checked != NULL);
+
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+
+    return R_SDHI_ReadIo(&${module.driver.sdmmc.name}_ctrl, p_data_checked, function, address);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.sdmmc.name}_write_io_guard_fanin (sdmmc_ctrl_t *const p_api_ctrl, sdmmc_write_io_args_t const * const p_args)
+{
+    sdmmc_write_io_args_t const * const p_args_checked = cmse_check_pointed_object((void*) p_args, CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_args_checked != NULL);
+
+    /* Verify all pointers are in non-secure memory. */
+    uint8_t *const p_data_checked = cmse_check_address_range((void *) p_args_checked->p_data, sizeof(uint8_t), CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_data_checked != NULL);
+
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+
+    return R_SDHI_WriteIo(&${module.driver.sdmmc.name}_ctrl, p_data_checked, p_args_checked->function, p_args_checked->address, p_args_checked->read_after_write);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.sdmmc.name}_read_io_ext_guard_fanin (sdmmc_ctrl_t *const p_api_ctrl, sdmmc_read_io_ext_args_t const * const p_args)
+{
+    sdmmc_read_io_ext_args_t const * const p_args_checked = cmse_check_pointed_object((void*) p_args, CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_args_checked != NULL);
+
+    /* Verify all pointers are in non-secure memory. */
+    uint32_t *const count_checked = cmse_check_address_range((void *) p_args_checked->count, sizeof(uint32_t), CMSE_AU_NONSECURE);
+    FSP_ASSERT(count_checked != NULL);
+
+    uint32_t byte_count = *count_checked;
+    if (SDMMC_IO_MODE_TRANSFER_BLOCK)
+    {
+        byte_count *= ${module.driver.sdmmc.name}_ctrl.p_cfg->block_size;
+    }
+    uint8_t *const p_dest_checked = cmse_check_address_range((void *) p_args->p_dest, byte_count, CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_dest_checked != NULL);
+
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+
+    return R_SDHI_ReadIoExt(&${module.driver.sdmmc.name}_ctrl, p_dest_checked, p_args->function, p_args->address, count_checked, p_args->transfer_mode, p_args->address_mode);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.sdmmc.name}_write_io_ext_guard_fanin (sdmmc_ctrl_t *const p_api_ctrl, sdmmc_write_io_ext_args_t const * const p_args)
+{
+    sdmmc_write_io_ext_args_t const * const p_args_checked = cmse_check_pointed_object((void*) p_args, CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_args_checked != NULL);
+
+    /* Verify all pointers are in non-secure memory. */
+    uint32_t byte_count = p_args->count;
+    if (SDMMC_IO_MODE_TRANSFER_BLOCK)
+    {
+        byte_count *= ${module.driver.sdmmc.name}_ctrl.p_cfg->block_size;
+    }
+    uint8_t const *const p_source_checked = cmse_check_address_range((void *) p_args->p_source, byte_count, CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_source_checked != NULL);
+
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+
+    return R_SDHI_WriteIoExt(&${module.driver.sdmmc.name}_ctrl, p_source_checked, p_args->function, p_args->address, p_args->count, p_args->transfer_mode, p_args->address_mode);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.sdmmc.name}_io_int_enable_guard (sdmmc_ctrl_t *const p_api_ctrl, bool enable)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+
+    return R_SDHI_IoIntEnable(&${module.driver.sdmmc.name}_ctrl, enable);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.sdmmc.name}_status_get_guard (sdmmc_ctrl_t *const p_api_ctrl, sdmmc_status_t *const p_status)
+{
+    /* Verify all pointers are in non-secure memory. */
+    sdmmc_status_t *const p_status_checked = cmse_check_pointed_object(p_status, CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_status_checked != NULL);
+
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+
+    return R_SDHI_StatusGet(&${module.driver.sdmmc.name}_ctrl, p_status_checked);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.sdmmc.name}_erase_guard (sdmmc_ctrl_t *const p_api_ctrl, uint32_t const start_sector, uint32_t const sector_count)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+
+    return R_SDHI_Erase(&${module.driver.sdmmc.name}_ctrl, start_sector, sector_count);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.sdmmc.name}_callback_set_guard (sdmmc_ctrl_t *const p_api_ctrl, void(*p_callback)(sdmmc_callback_args_t *), void const *const p_context, sdmmc_callback_args_t *const p_callback_memory)
+{
+    /* Verify all pointers are in non-secure memory. */
+    void(*p_callback_checked)(sdmmc_callback_args_t *) = (void(*)(sdmmc_callback_args_t *)) cmse_check_address_range((void *) p_callback, sizeof(void *), CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_callback_checked != NULL);
+    sdmmc_callback_args_t *const p_callback_memory_checked = cmse_check_pointed_object(p_callback_memory, CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_callback_memory_checked != NULL);
+
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+    FSP_PARAMETER_NOT_USED(p_context);
+
+    return R_SDHI_CallbackSet(&${module.driver.sdmmc.name}_ctrl, p_callback_checked, p_context, p_callback_memory_checked);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.sdmmc.name}_close_guard (sdmmc_ctrl_t *const p_api_ctrl)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+
+    return R_SDHI_Close(&${module.driver.sdmmc.name}_ctrl);
+}
+
+                ]]>
+            </template>
+        </guard>
+        <nsc>
+            <header>
+
+#define FSP_GUARD_${module.driver.sdmmc.name}_R_SDHI_Open() ${module.driver.sdmmc.name}_open_guard(FSP_SECURE_ARGUMENT, FSP_SECURE_ARGUMENT)
+
+#define FSP_GUARD_${module.driver.sdmmc.name}_R_SDHI_MediaInit(p_device) ${module.driver.sdmmc.name}_media_init_guard(FSP_SECURE_ARGUMENT, p_device)
+
+#define FSP_GUARD_${module.driver.sdmmc.name}_R_SDHI_Read(p_dest, start_sector, sector_count) ${module.driver.sdmmc.name}_read_guard(FSP_SECURE_ARGUMENT, p_dest, start_sector, sector_count)
+
+#define FSP_GUARD_${module.driver.sdmmc.name}_R_SDHI_Write(p_source, start_sector, sector_count) ${module.driver.sdmmc.name}_write_guard(FSP_SECURE_ARGUMENT, p_source, start_sector, sector_count)
+
+#define FSP_GUARD_${module.driver.sdmmc.name}_R_SDHI_ReadIo(p_data, function, address) ${module.driver.sdmmc.name}_read_io_guard(FSP_SECURE_ARGUMENT, p_data, function, address)
+
+#define FSP_GUARD_${module.driver.sdmmc.name}_R_SDHI_WriteIo(p_args) ${module.driver.sdmmc.name}_write_io_guard(FSP_SECURE_ARGUMENT, p_args)
+
+#define FSP_GUARD_${module.driver.sdmmc.name}_R_SDHI_ReadIoExt(p_args) ${module.driver.sdmmc.name}_read_io_ext_guard(FSP_SECURE_ARGUMENT, p_args)
+
+#define FSP_GUARD_${module.driver.sdmmc.name}_R_SDHI_WriteIoExt(p_args) ${module.driver.sdmmc.name}_write_io_ext_guard(FSP_SECURE_ARGUMENT, p_args)
+
+#define FSP_GUARD_${module.driver.sdmmc.name}_R_SDHI_IoIntEnable(enable) ${module.driver.sdmmc.name}_io_int_enable_guard(FSP_SECURE_ARGUMENT, enable)
+
+#define FSP_GUARD_${module.driver.sdmmc.name}_R_SDHI_StatusGet(p_status) ${module.driver.sdmmc.name}_status_get_guard(FSP_SECURE_ARGUMENT, p_status)
+
+#define FSP_GUARD_${module.driver.sdmmc.name}_R_SDHI_Erase(start_sector, sector_count) ${module.driver.sdmmc.name}_erase_guard(FSP_SECURE_ARGUMENT, start_sector, sector_count)
+
+#define FSP_GUARD_${module.driver.sdmmc.name}_R_SDHI_CallbackSet(p_callback, p_context, p_callback_memory) ${module.driver.sdmmc.name}_callback_set_guard(FSP_SECURE_ARGUMENT, p_callback, p_context, p_callback_memory)
+
+#define FSP_GUARD_${module.driver.sdmmc.name}_R_SDHI_Close() ${module.driver.sdmmc.name}_close_guard(FSP_SECURE_ARGUMENT)
+
+
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.sdmmc.name}_open_guard(sdmmc_ctrl_t *const p_api_ctrl, sdmmc_cfg_t const *const p_cfg);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.sdmmc.name}_media_init_guard(sdmmc_ctrl_t *const p_api_ctrl, sdmmc_device_t *const p_device);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.sdmmc.name}_read_guard(sdmmc_ctrl_t *const p_api_ctrl, uint8_t *const p_dest, uint32_t const start_sector, uint32_t const sector_count);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.sdmmc.name}_write_guard(sdmmc_ctrl_t *const p_api_ctrl, uint8_t const *const p_source, uint32_t const start_sector, uint32_t const sector_count);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.sdmmc.name}_read_io_guard(sdmmc_ctrl_t *const p_api_ctrl, uint8_t *const p_data, uint32_t const function, uint32_t const address);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.sdmmc.name}_write_io_guard_fanin(sdmmc_ctrl_t *const p_api_ctrl, sdmmc_write_io_args_t const * const p_args);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.sdmmc.name}_read_io_ext_guard_fanin(sdmmc_ctrl_t *const p_api_ctrl, sdmmc_read_io_ext_args_t const * const p_args);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.sdmmc.name}_write_io_ext_guard_fanin(sdmmc_ctrl_t *const p_api_ctrl, sdmmc_write_io_ext_args_t const * const p_args);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.sdmmc.name}_io_int_enable_guard(sdmmc_ctrl_t *const p_api_ctrl, bool enable);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.sdmmc.name}_status_get_guard(sdmmc_ctrl_t *const p_api_ctrl, sdmmc_status_t *const p_status);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.sdmmc.name}_erase_guard(sdmmc_ctrl_t *const p_api_ctrl, uint32_t const start_sector, uint32_t const sector_count);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.sdmmc.name}_callback_set_guard(sdmmc_ctrl_t *const p_api_ctrl, void(*p_callback)(sdmmc_callback_args_t *), void const *const p_context, sdmmc_callback_args_t *const p_callback_memory);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.sdmmc.name}_close_guard(sdmmc_ctrl_t *const p_api_ctrl);
+
+
+extern const sdmmc_instance_t ${module.driver.sdmmc.name};
+
+fsp_err_t ${module.driver.sdmmc.name}_write_io_guard (sdmmc_ctrl_t * const      p_api_ctrl,
+                                                      uint8_t * const             p_data,
+                                                      uint32_t const              function,
+                                                      uint32_t const              address,
+                                                      sdmmc_io_write_mode_t const read_after_write);
+
+fsp_err_t ${module.driver.sdmmc.name}_read_io_ext_guard (sdmmc_ctrl_t * const     p_api_ctrl,
+                                                         uint8_t * const          p_dest,
+                                                         uint32_t const           function,
+                                                         uint32_t const           address,
+                                                         uint32_t * const         count,
+                                                         sdmmc_io_transfer_mode_t transfer_mode,
+                                                         sdmmc_io_address_mode_t  address_mode);
+
+fsp_err_t ${module.driver.sdmmc.name}_write_io_ext_guard (sdmmc_ctrl_t * const     p_api_ctrl,
+                                                          uint8_t const * const    p_source,
+                                                          uint32_t const           function,
+                                                          uint32_t const           address,
+                                                          uint32_t const           count,
+                                                          sdmmc_io_transfer_mode_t transfer_mode,
+                                                          sdmmc_io_address_mode_t  address_mode);
+            </header>
+            <declarations>
+                <![CDATA[
+fsp_err_t ${module.driver.sdmmc.name}_write_io_guard (sdmmc_ctrl_t * const      p_api_ctrl,
+                                                      uint8_t * const             p_data,
+                                                      uint32_t const              function,
+                                                      uint32_t const              address,
+                                                      sdmmc_io_write_mode_t const read_after_write)
+{
+    /* Pack arguments into a struct */
+    sdmmc_write_io_args_t args =
+    {
+        .p_data           = p_data,
+        .function         = function,
+        .address          = address,
+        .read_after_write = read_after_write
+    };
+
+    /* Pass the struct to the NSC fan-in guard function */
+    return ${module.driver.sdmmc.name}_write_io_guard_fanin(p_api_ctrl, &args);
+}
+
+fsp_err_t ${module.driver.sdmmc.name}_read_io_ext_guard (sdmmc_ctrl_t * const     p_api_ctrl,
+                                                         uint8_t * const          p_dest,
+                                                         uint32_t const           function,
+                                                         uint32_t const           address,
+                                                         uint32_t * const         count,
+                                                         sdmmc_io_transfer_mode_t transfer_mode,
+                                                         sdmmc_io_address_mode_t  address_mode)
+{
+    /* Pack arguments into a struct */
+    sdmmc_read_io_ext_args_t args =
+    {
+        .p_dest        = p_dest,
+        .function      = function,
+        .address       = address,
+        .count         = count,
+        .transfer_mode = transfer_mode,
+        .address_mode  = address_mode
+    };
+
+    /* Pass the struct to the NSC fan-in guard function */
+    return ${module.driver.sdmmc.name}_read_io_ext_guard_fanin(p_api_ctrl, &args);
+}
+
+fsp_err_t ${module.driver.sdmmc.name}_write_io_ext_guard (sdmmc_ctrl_t * const     p_api_ctrl,
+                                                          uint8_t const * const    p_source,
+                                                          uint32_t const           function,
+                                                          uint32_t const           address,
+                                                          uint32_t const           count,
+                                                          sdmmc_io_transfer_mode_t transfer_mode,
+                                                          sdmmc_io_address_mode_t  address_mode)
+{
+    /* Pack arguments into a struct */
+    sdmmc_write_io_ext_args_t args =
+    {
+        .p_source      = p_source,
+        .function      = function,
+        .address       = address,
+        .count         = count,
+        .transfer_mode = transfer_mode,
+        .address_mode  = address_mode
+    };
+
+    /* Pass the struct to the NSC fan-in guard function */
+    return ${module.driver.sdmmc.name}_write_io_ext_guard_fanin(p_api_ctrl, &args);
+}
+
+static const sdmmc_api_t ${module.driver.sdmmc.name}_nsc_api =
+{
+    .open = ${module.driver.sdmmc.name}_open_guard,
+    .mediaInit = ${module.driver.sdmmc.name}_media_init_guard,
+    .read = ${module.driver.sdmmc.name}_read_guard,
+    .write = ${module.driver.sdmmc.name}_write_guard,
+    .readIo = ${module.driver.sdmmc.name}_read_io_guard,
+    .writeIo = ${module.driver.sdmmc.name}_write_io_guard,
+    .readIoExt = ${module.driver.sdmmc.name}_read_io_ext_guard,
+    .writeIoExt = ${module.driver.sdmmc.name}_write_io_ext_guard,
+    .ioIntEnable = ${module.driver.sdmmc.name}_io_int_enable_guard,
+    .statusGet = ${module.driver.sdmmc.name}_status_get_guard,
+    .erase = ${module.driver.sdmmc.name}_erase_guard,
+    .callbackSet = ${module.driver.sdmmc.name}_callback_set_guard,
+    .close = ${module.driver.sdmmc.name}_close_guard,
+};
+const sdmmc_instance_t ${module.driver.sdmmc.name} =
+{
+    .p_api = &${module.driver.sdmmc.name}_nsc_api,
+    .p_ctrl = FSP_SECURE_ARGUMENT,
+    .p_cfg = FSP_SECURE_ARGUMENT,
+};
+                ]]>
+            </declarations>
+        </nsc>
+        <api configurable="true">
+            <file>ra/fsp/inc/instances/r_sdhi.h</file>
+            <file>ra/fsp/inc/api/r_elc_api.h</file>
+            <file>ra/fsp/inc/api/r_sdmmc_api.h</file>
+            <file>ra/fsp/inc/api/r_transfer_api.h</file>
+        </api>
+    </module>
+</raModuleDescription>

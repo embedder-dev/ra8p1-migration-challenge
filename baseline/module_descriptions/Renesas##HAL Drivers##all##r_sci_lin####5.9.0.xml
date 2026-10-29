@@ -1,0 +1,736 @@
+﻿<?xml version="1.0"?>
+<raModuleDescription>
+    <config id="config.driver.sci_lin" path="fsp_cfg/r_sci_lin_cfg.h" version="0">
+        <property default="config.driver.sci_lin.param_checking_enable.bsp" display="Parameter Checking" id="config.driver.sci_lin.param_checking_enable" description="If selected code for parameter checking is included in the build.">
+            <option display="Default (BSP)" id="config.driver.sci_lin.param_checking_enable.bsp" value="(BSP_CFG_PARAM_CHECKING_ENABLE)" />
+            <option display="Enabled" id="config.driver.sci_lin.param_checking_enable.enable" value="(1)" />
+            <option display="Disabled" id="config.driver.sci_lin.param_checking_enable.disable" value="(0)" />
+        </property>
+        <property default="config.driver.sci_lin.checksum_support.enable" display="Checksum Support" id="config.driver.sci_lin.checksum_support" description="When set to 'Disabled', code for checksum generation and validation is excluded from the build. This setting is applied globally to the project. Disable only when checksum generation and validation is not required for any LIN instance.">
+            <option display="Enabled" id="config.driver.sci_lin.checksum_support.enable" value="(1)" />
+            <option display="Disabled" id="config.driver.sci_lin.checksum_support.disable" value="(0)" />
+        </property>
+        <property default="config.driver.sci_lin.bus_conflict_detection_support.disable" display="Bus Conflict Detection Support" id="config.driver.sci_lin.bus_conflict_detection_support" description="When set to 'Disabled', code for bus conflict detection is excluded from the build. This setting is applied globally to the project. Enable when at least one LIN instance is using bus conflict detection.">
+            <option display="Enabled" id="config.driver.sci_lin.bus_conflict_detection_support.enable" value="(1)" />
+            <option display="Disabled" id="config.driver.sci_lin.bus_conflict_detection_support.disable" value="(0)" />
+        </property>
+        <content>
+            #ifdef __cplusplus
+            extern "C" {
+            #endif
+
+            #define SCI_LIN_CFG_PARAM_CHECKING_ENABLE ${config.driver.sci_lin.param_checking_enable}
+            #define SCI_LIN_CHECKSUM_SUPPORT_ENABLE ${config.driver.sci_lin.checksum_support}
+            #define SCI_LIN_BUS_CONFLICT_DETECTION_SUPPORT_ENABLE ${config.driver.sci_lin.bus_conflict_detection_support}
+
+            #ifdef __cplusplus
+            }
+            #endif
+        </content>
+    </config>
+    <module config="config.driver.sci_lin" display="Connectivity|${module.driver.sci_lin.name} LIN (r_sci_lin)" id="module.driver.lin_on_sci_lin" version="1" url="group___s_c_i___l_i_n.html">
+        <constraint display="Requires callback to be a C function name (not NULL).">
+          (testSymbol("${module.driver.sci_lin.callback}") &amp;&amp; "${module.driver.sci_lin.callback}" != "NULL")
+        </constraint>
+        <constraint display="Specified 'Baud Rate' is not available on selected MCU.">
+            testInteger("${module.driver.sci_lin.baud}") &amp;&amp; ("${module.driver.sci_lin.baud}" &gt; 0) &amp;&amp; ("${module.driver.sci_lin.baud}" &lt;= (Number("${config.bsp.fsp.mcu.sci_lin.max_baud}")))
+        </constraint>
+        <constraint display="Unique name required for each instance">
+            ("${interface.driver.lin.${module.driver.sci_lin.name}}" === "1")
+        </constraint>
+        <constraint display="Requires SCI Peripheral">
+            "${interface.mcu.sci.external}" === "1"
+        </constraint>
+        <constraint display="Bus Conflict Detection Support must be enabled to use Bus Collision Detection Interrupt.">
+            (("${config.driver.sci_lin.bus_conflict_detection_support}" === "config.driver.sci_lin.bus_conflict_detection_support.enable") ||
+            ("${module.driver.sci_lin.scix2_ipl}" === "_disabled"))
+        </constraint>
+        <constraint display="Control Field 0/1 Match Interrupt must be disabled in master mode.">
+            "${module.driver.sci_lin.mode}" === "module.driver.sci_lin.mode.mode_slave" || ("${module.driver.sci_lin.scix1_ipl}" === "_disabled")
+        </constraint>
+        <constraint display="Control Field 0/1 Match Interrupt must be enabled in slave mode.">
+            "${module.driver.sci_lin.mode}" === "module.driver.sci_lin.mode.mode_master" || ("${module.driver.sci_lin.scix1_ipl}" != "_disabled")
+        </constraint>
+        <constraint display="Break field length in master mode must be at least 13 bits.">
+           "${module.driver.sci_lin.mode}" === "module.driver.sci_lin.mode.mode_slave" || ${module.driver.sci_lin.break_field_bits} &gt; 12
+        </constraint>
+            <constraint display="Break field detection threshold in slave mode must be at least 11 bits.">
+           "${module.driver.sci_lin.mode}" === "module.driver.sci_lin.mode.mode_master" || ${module.driver.sci_lin.break_field_bits} &gt; 10
+        </constraint>
+        <!-- Check that selected settings for break field length/threshold are achievable in the HW -->
+        <constraint id="module.driver.sci_lin.constraint.lin_timer">
+            eval('\n' +
+                 ' var break_field_bits = ${module.driver.sci_lin.break_field_bits}; \n' +
+                 ' var delimiter_bits = ${module.driver.sci_lin.delimiter_bits}; \n' +
+                 ' var baud = ${module.driver.sci_lin.baud};  \n' +
+                 ' freq_hz = ${board.clock.peripheral.sci}; \n' +
+                 ' var timer_div = "${module.driver.sci_lin.timer_div}"; \n' +
+                 ' var lin_divider = 1; \n' +
+                 ' if ("module.driver.sci_lin.timer_div.div_2" === timer_div) { \n' +
+                 '    lin_divider = 2; \n' +
+                 ' } \n' +
+                 ' else if ("module.driver.sci_lin.timer_div.div_4" === timer_div) { \n' +
+                 '    lin_divider = 4; \n' +
+                 ' } \n' +
+                 ' else if ("module.driver.sci_lin.timer_div.div_8" === timer_div) { \n' +
+                 '    lin_divider = 8; \n' +
+                 ' } \n' +
+                 ' else if ("module.driver.sci_lin.timer_div.div_16" === timer_div) { \n' +
+                 '    lin_divider = 16; \n' +
+                 ' } \n' +
+                 ' else if ("module.driver.sci_lin.timer_div.div_32" === timer_div) { \n' +
+                 '    lin_divider = 32; \n' +
+                 ' } \n' +
+                 ' else if ("module.driver.sci_lin.timer_div.div_64" === timer_div) { \n' +
+                 '    lin_divider = 64; \n' +
+                 ' } \n' +
+                 ' else if ("module.driver.sci_lin.timer_div.div_128" === timer_div) { \n' +
+                 '    lin_divider = 128; \n' +
+                 ' } \n' +
+                 'var lin_timer_hz = freq_hz / lin_divider; \n' +
+                 'var output = null; \n' +
+                 'var break_field_setting = Math.floor( (lin_timer_hz * break_field_bits) / ( baud ) );  \n' +
+                 'var break_delimiter_setting = Math.floor( (lin_timer_hz * delimiter_bits) / ( baud ) );  \n' +
+                 'var max = 0xffff; \n' +
+                 'if (break_field_setting > max) { \n' +
+                    'output = " LIN timer break field width/threshold setting exceeds maximum (65535).\\n Break Field Length = ( ( PCLK / (LIN Timer Divider) * (Break Field Bits) ) / (Baud Rate) ) \\n = ( ( (" + freq_hz + "/" + lin_divider + ") *" + break_field_bits + ") / (" + baud + ") ) = " + break_field_setting + "\\n Adjust LIN source clock, divider, break field bits, or baud rate."; \n' +
+                 '} \n' +
+                 'if (break_delimiter_setting > max) { \n' +
+                    'output = " LIN timer break delimiter setting exceeds maximum (65535).\\n Break Delimiter Length = ( ( PCLK / (LIN Timer Divider) * (Break Delimiter Bits) ) / (Baud Rate) ) \\n = ( ( (" + freq_hz + "/" + lin_divider + ") *" + delimiter_bits + ") / (" + baud + ") ) = " + break_delimiter_setting + "\\n Adjust LIN source clock, divider, break delimiter bits, or baud rate."; \n' +
+                 '} \n' +
+                 'output')
+        </constraint>
+        <requires id="module.driver.lin_on_sci_lin.requires.sci" interface="interface.mcu.sci.external.lin" visible="false" display="Requires SCI LIN Peripheral" />
+        <provides interface="interface.driver.lin" />
+        <provides interface="interface.driver.lin_on_sci_lin" />
+        <provides interface="interface.driver.lin.${module.driver.sci_lin.name}" />
+        <provides interface="interface.peripheral.sci${module.driver.sci_lin.channel}" />
+
+        <!-- LIN General Configuration -->
+        <property default="g_lin${_instance}" display="General|Name" id="module.driver.sci_lin.name" description="Module name.">
+            <constraint display="Name must be a valid C symbol">
+                testSymbol("${module.driver.sci_lin.name}")
+            </constraint>
+        </property>
+        <property default="" display="General|SCI Channel" id="module.driver.sci_lin.channel" description="Select the Serial Communications Interface channel.">
+            <select enum="enum.driver.sci.lin.channel" />
+            <signal event="event.sci${module.driver.sci_lin.channel}.rxi" />
+            <signal event="event.sci${module.driver.sci_lin.channel}.txi" />
+            <signal event="event.sci${module.driver.sci_lin.channel}.tei" />
+            <signal event="event.sci${module.driver.sci_lin.channel}.eri" />
+            <signal event="event.sci${module.driver.sci_lin.channel}.scix0" />
+            <signal event="event.sci${module.driver.sci_lin.channel}.scix1" />
+            <signal event="event.sci${module.driver.sci_lin.channel}.scix2" />
+        </property>
+        <property default="module.driver.sci_lin.mode.mode_master" display="General|Mode" id="module.driver.sci_lin.mode" description="Select the LIN operating mode (master or slave).">
+            <option display="Master" id="module.driver.sci_lin.mode.mode_master" value="LIN_MODE_MASTER" />
+            <option display="Slave" id="module.driver.sci_lin.mode.mode_slave" value="LIN_MODE_SLAVE" />
+        </property>
+
+        <!-- LIN Extended Configuration -->
+        <property default="module.driver.sci_lin.digital_filer_clock.disable" display="Extra|Digital Filter Clock Select" id="module.driver.sci_lin.digital_filer_clock" description="Enable the digital filter on RXDXn pin. The digital filter block in SCI consists of three-stage flipflop circuits.">
+            <option display="Disabled" id="module.driver.sci_lin.digital_filer_clock.disable" value="SCI_LIN_DIGITAL_FILTER_CLOCK_DISABLED" />
+            <option display="SCI Base Clock" id="module.driver.sci_lin.digital_filer_clock.baseclock" value="SCI_LIN_DIGITAL_FILTER_CLOCK_SCI_BASE_CLK" />
+            <option display="PCLK/8" id="module.driver.sci_lin.digital_filer_clock.div_8" value="SCI_LIN_DIGITAL_FILTER_CLOCK_PCLK_DIV_8" />
+            <option display="PCLK/16" id="module.driver.sci_lin.digital_filer_clock.div_16" value="SCI_LIN_DIGITAL_FILTER_CLOCK_PCLK_DIV_16" />
+            <option display="PCLK/32" id="module.driver.sci_lin.digital_filer_clock.div_32" value="SCI_LIN_DIGITAL_FILTER_CLOCK_PCLK_DIV_32" />
+            <option display="PCLK/64" id="module.driver.sci_lin.digital_filer_clock.div_64" value="SCI_LIN_DIGITAL_FILTER_CLOCK_PCLK_DIV_64" />
+            <option display="PCLK/128" id="module.driver.sci_lin.digital_filer_clock.div_128" value="SCI_LIN_DIGITAL_FILTER_CLOCK_PCLK_DIV_128" />
+        </property>
+        <property default="module.driver.sci_lin.bus_conflict_clock.div_2" display="Extra|Bus Conflict Clock Divider" id="module.driver.sci_lin.bus_conflict_clock" description="Select the base clock divider for the sampling clock of the bus conflict detection circuit.">
+            <option display="1" id="module.driver.sci_lin.bus_conflict_clock.div_1" value="SCI_LIN_BUS_CONFLICT_CLOCK_DIV_1" />
+            <option display="2" id="module.driver.sci_lin.bus_conflict_clock.div_2" value="SCI_LIN_BUS_CONFLICT_CLOCK_DIV_2" />
+            <option display="4" id="module.driver.sci_lin.bus_conflict_clock.div_4" value="SCI_LIN_BUS_CONFLICT_CLOCK_DIV_4" />
+        </property>
+
+        <!-- LIN Baud Configuration -->
+        <property default="19200" display="Baud|Baud Rate" id="module.driver.sci_lin.baud" description="Enter the desired baud rate.\n\nIf the requested baud rate cannot be achieved, the settings with the smallest percent error are used. The theoretical calculated baud rate and percent error are printed in a comment in the generated sci_lin_extended_cfg_t structure.">
+            <constraint display="Value must be an integer greater than 0">testInteger("${module.driver.sci_lin.baud}") &amp;&amp; ("${module.driver.sci_lin.baud}" &gt; 0)</constraint>
+            <export><![CDATA[eval('' +
+' /* INPUTS BAUDRATE */' +
+'    var freq_hz = ${board.clock.peripheral.sci};' +
+'    var baudrate = ${module.driver.sci_lin.baud};' +
+'    var baseclock = ("SCI_LIN_BASE_CLOCK_8" === "${module.driver.sci_lin.base_clock_select}") ? 1 : 0;' +
+' /* BRR Max */' +
+'    var SCI_LIN_BRR_MAX = 255;' +
+' /* CKS Max */' +
+'    var SCI_LIN_CKS_MAX = 3;' +
+' /* Baud divisor shift Min */' +
+'    var SCI_LIN_MIN_BAUD_DIVISOR_SHIFT = 5;' +
+'/*******************************************************************************************************************//**\n' +
+' * Calculates baud rate register settings based on internal clock frequency. Evaluates and determines the best possible\n' +
+' * settings set to the baud rate related registers. Ported from R_SCI_LIN_BaudCalculate.\n' +
+' *' +
+' * @param[in]  freq_hz          The source clock frequency for the SCI internal clock\n' +
+' * @param[in]  baudrate         Baud rate [bps] e.g. 19200, 57600, 115200, etc.\n' +
+' *' +
+' * @return  {brr,               Value for the BRR\n' +
+' *           baud_setting,      Baud settings: {bgdm, abcs, abcse, cks}\n' +
+' *           brr_error,         % bit rate error\n' +
+' *           actual_baud_rate,  Value of actual baudrate\n' +
+' **********************************************************************************************************************/' +
+'function r_sci_lin_brr_calculate(freq_hz, baudrate){\n' +
+'    var divisor = 0;\n' +
+'    var brr = 0;\n' +
+'    var cks = -1;\n' +
+'    /* BGDM is helpful for achieving high bitrates, but LIN is very low speed, it is able to easily achieve all required bitrates without using BGDM.' +
+'    * BGDM should be set to 0. */\n' +
+'    var bgdm = 0;\n' +
+'    var divisor_shift;\n' +
+'    var result = {brr: 0, baud_setting: {bgdm:0, abcs:0, abcse:0, cks:0}, brr_error: 100, actual_baud_rate: 0};\n' +
+'    /* BRR is calculated by testing whether each divisor (combination of BGDM, ABCS, CKS, and N) produces a valid BRR setting.' +
+'    * The divisors are checked in order, from smallest to largest. The smallest divisor always produces the lowest error for a given theoretical rate. */\n' +
+'    for (var i = 0; i <= SCI_LIN_CKS_MAX; i++)' +
+'    {' +
+'        cks++;' +
+'        divisor_shift = SCI_LIN_MIN_BAUD_DIVISOR_SHIFT + (cks << 1) - (bgdm + baseclock);' +
+'        divisor = (1 << divisor_shift) * baudrate;' +
+'        brr     = Math.floor((freq_hz / divisor) - 1);' +
+'        /* If calculation succeeded */' +
+'        if (brr <= SCI_LIN_BRR_MAX)' +
+'        {' +
+'            /* Calculate the error at this baud rate */' +
+'            var err_divider = (divisor * (brr + 1));' +
+'            var bit_err = Math.abs((((freq_hz * 100) / err_divider) - 100));' +
+'            /* Save the best settings*/' +
+'            result.baud_setting = { bgdm: bgdm, abcs: baseclock, abcse: 0 , cks: cks };' +
+'            result.brr = brr;' +
+'            result.brr_error = bit_err;' +
+'            result.actual_baud_rate = freq_hz / ((1 << divisor_shift) * (brr + 1));' +
+'            return result; // Exit function when first valid result is found\n' +
+'        }' +
+'    }\n' +
+'    return result;\n' +
+'}\n' +
+'' +
+'/* INPUTS Break Field Length */' +
+'/* Calculate "lin_timer_hz" and "break_bits" */' +
+'    var break_bits = ${module.driver.sci_lin.break_field_bits};' +
+'    var timer_div = "${module.driver.sci_lin.timer_div}";' +
+'    var lin_divider_settings = [' +
+'       { value: 1,   name: "SCI_LIN_TIMER_DIV_1"  },' +
+'       { value: 2,   name: "SCI_LIN_TIMER_DIV_2"  },' +
+'       { value: 4,   name: "SCI_LIN_TIMER_DIV_4"  },' +
+'       { value: 8,   name: "SCI_LIN_TIMER_DIV_8"  },' +
+'       { value: 16,  name: "SCI_LIN_TIMER_DIV_16" },' +
+'       { value: 32,  name: "SCI_LIN_TIMER_DIV_32" },' +
+'       { value: 64,  name: "SCI_LIN_TIMER_DIV_64" },' +
+'       { value: 128, name: "SCI_LIN_TIMER_DIV_128"},' +
+'    ];\n' +
+'    var lin_divider = 1;\n'+ // Initialize lin_divider to a default value
+'    for (var i = 0, len = lin_divider_settings.length; i < len; i++){\n ' +
+'       if (lin_divider_settings[i].name === timer_div) {\n' +
+'           lin_divider = lin_divider_settings[i].value;\n' + // Assign only when condition matches
+'           break;' +
+'        }' +
+'    }' +
+'    var lin_timer_hz = freq_hz / lin_divider; \n' +
+'    var break_delimiter_bits = ${module.driver.sci_lin.delimiter_bits};' +
+'' +
+'/**************************************************************************************************************************//**' +
+' * Calculates LIN break field width register setting based on internal clock frequency and desired break field length in bits. ' +
+' * The LIN timer is used for break field detection and generation.' +
+' *' +
+' * @param[in]  baudrate                            Baud rate[bps] e.g. 9600, 19200, etc.' +
+' * @param[in]  break_bits                          Number of dominant break field bits (e.g., 9, 13, 18)' +
+' * @param[in]  break_delimiter_bits                Number of dominant break delimiter bits (e.g., 1, 2)' +
+' *' +
+' * @return     break_field_tpre                    Value for the TPRE counter of Break Field setting' +
+' * @return     break_field_tcnt                    Value for the TNCT counter of Field setting' +
+' * @return     delimiter_tpre                      Value for the TPRE counter of Break Delimiter setting' +
+' * @return     delimiter_tcnt                      Value for the TNCT counter of Break Delimiter setting' +
+' *****************************************************************************************************************************/' +
+'function r_sci_lin_break_field_calculate(baudrate, break_bits, break_delimiter_bits) {\n' +
+'  var break_field_setting = Math.floor((lin_timer_hz * break_bits) / baudrate);\n' +  // Calculate Break Field Length setting
+'  var break_delimiter_setting = Math.floor((lin_timer_hz * break_delimiter_bits) / baudrate);\n' +  // Calculate Break delimiter setting
+'  var break_field_tcnt = (break_field_setting >> 8) & 0xFF;' +
+'  var break_field_tpre = Math.floor(((break_field_setting + break_field_tcnt) / (break_field_tcnt + 1)) - 1);' +
+'  var delimiter_tcnt = (break_delimiter_setting >> 8) & 0xFF;' +
+'  var delimiter_tpre = Math.floor(((break_delimiter_setting + delimiter_tcnt)/ (delimiter_tcnt + 1)) - 1);' +
+'  return {' +
+'      break_field_tcnt: break_field_tcnt,' +
+'      break_field_tpre: break_field_tpre,' +
+'      delimiter_tcnt: delimiter_tcnt,' +
+'      delimiter_tpre: delimiter_tpre,' +
+'  };\n' +
+'}' +
+'' +
+'/* Calculate baud rate register settings */\n' +
+'var baud_result = r_sci_lin_brr_calculate(freq_hz, baudrate);\n' +
+'' +
+'/* Compute Break Field and Break Delimiter settings at this baud rate */' +
+'  var break_field_result = r_sci_lin_break_field_calculate(baudrate, break_bits, break_delimiter_bits);' +
+'' +
+'/* RESULT */\n' +
+'var c_baud_setting = "/* Actual calculated baud rate: " + baud_result.actual_baud_rate.toFixed(0) + " (" + baud_result.brr_error.toFixed(3) + "% error) */" +\n' +
+'                     " .semr_baudrate_bits_b = { .abcse = " + baud_result.baud_setting.abcse.toString() +\n' +
+'                     ", .abcs = " + baud_result.baud_setting.abcs.toString() +\n' +
+'                     ", .bgdm = " + baud_result.baud_setting.bgdm.toString() +\n' +
+'                     "}, .cks = " + baud_result.baud_setting.cks.toString() +' +
+'                     ", .brr = " + baud_result.brr.toString() +' +
+'                     ", .timer_setting = { .tcss = " + "${module.driver.sci_lin.timer_div}" +' +
+'                     ", .break_field_tpre = " + break_field_result.break_field_tpre.toString() +' +
+'                     ", .break_field_tcnt = " + break_field_result.break_field_tcnt.toString() +' +
+'                     ", .delimiter_tpre = " + break_field_result.delimiter_tpre +' +
+'                     ", .delimiter_tcnt = " + break_field_result.delimiter_tcnt + "}";' +
+'/* Output the C baud setting structure */\n' +
+'c_baud_setting;' +
+
+'')]]>
+    </export>
+</property>
+        <property default="module.driver.sci_lin.base_clock_select.16" display="Baud|Base Clock Cycles Per Bit Period" id="module.driver.sci_lin.base_clock_select" description="Select number of SCI base clock cycles per single bit period at the configured baud rate. When 16 base clock cycles is selected, the period of the SCI base clock is 1/16 of a single bit period. When 8 base clock cycles is selected, the period of the SCI base clock is 1/8 of a single bit period.">
+            <option display="8" id="module.driver.sci_lin.base_clock_select.8" value="SCI_LIN_BASE_CLOCK_8" />
+            <option display="16" id="module.driver.sci_lin.base_clock_select.16" value="SCI_LIN_BASE_CLOCK_16" />
+        </property>
+        <!-- LIN Framing Configuration -->
+        <property default="13" display="Framing|Break Field Bits/Break Detection Threshold (bits)"
+            id="module.driver.sci_lin.break_field_bits"
+            description="For master break field transmission, this configures the dominant period of the break field (in bits). For slave break field reception, this configures the break detection threshold in bits. Must be 13 bits or greater for master mode and 11 bits or greater for slave mode.">
+            <constraint display="Value must be an integer.">
+                testInteger("${module.driver.sci_lin.break_field_bits}")
+            </constraint>
+        </property>
+        <property default="1" display="Framing|Break Delimiter Bits"
+            id="module.driver.sci_lin.delimiter_bits"
+            description="This configures the period of the break delimiter (in bits).The break delimiter shall be at least one nominal bit time long.">
+            <constraint display="Value must be an integer between 1 and 255.">
+                (testInteger("${module.driver.sci_lin.delimiter_bits}") &amp;&amp; ("${module.driver.sci_lin.delimiter_bits}" &gt;= 1) &amp;&amp; ("${module.driver.sci_lin.delimiter_bits}" &lt;= 255))
+            </constraint>
+        </property>
+        <property default="module.driver.sci_lin.timer_div.div_1" display="Framing|LIN Timer Divider"
+            id="module.driver.sci_lin.timer_div"
+            description="Set the LIN timer divider. The LIN timer is used for break field transmission and detection. Higher dividers make possible transmission/detection of more break field bits, but are less precise.">
+                <option display="1" id="module.driver.sci_lin.timer_div.div_1" value="SCI_LIN_TIMER_DIV_1" />
+                <option display="2" id="module.driver.sci_lin.timer_div.div_2" value="SCI_LIN_TIMER_DIV_2" />
+                <option display="4" id="module.driver.sci_lin.timer_div.div_4" value="SCI_LIN_TIMER_DIV_4" />
+                <option display="8" id="module.driver.sci_lin.timer_div.div_8" value="SCI_LIN_TIMER_DIV_8" />
+                <option display="16" id="module.driver.sci_lin.timer_div.div_16" value="SCI_LIN_TIMER_DIV_16" />
+                <option display="32" id="module.driver.sci_lin.timer_div.div_32" value="SCI_LIN_TIMER_DIV_32" />
+                <option display="64" id="module.driver.sci_lin.timer_div.div_64" value="SCI_LIN_TIMER_DIV_64" />
+                <option display="128" id="module.driver.sci_lin.timer_div.div_128" value="SCI_LIN_TIMER_DIV_128" />
+        </property>
+        <property default="0" display="Framing|ID Filter (Slave Mode)|Compare Data Mask" id="module.driver.sci_lin.compare_data_mask" description="Select the bit mask to be applied before comparing the received PID to the selected compare data. This setting specifies which bits of the selected compare data must match. Set to 0 to disable the filter (allow all frame identifiers). ">
+            <constraint display="Value must be an integer between 0 and 255.">
+                (testInteger("${module.driver.sci_lin.compare_data_mask}") &amp;&amp; ("${module.driver.sci_lin.compare_data_mask}" &gt;= 0) &amp;&amp; ("${module.driver.sci_lin.compare_data_mask}" &lt;= 255))
+            </constraint>
+        </property>
+        <property default="0" display="Framing|ID Filter (Slave Mode)|Priority Compare Data" id="module.driver.sci_lin.primary_compare_data" description="Select the priority compare filter data.">
+            <constraint display="Value must be an integer between 0 and 255.">
+                (testInteger("${module.driver.sci_lin.primary_compare_data}") &amp;&amp; ("${module.driver.sci_lin.primary_compare_data}" &gt;= 0) &amp;&amp; ("${module.driver.sci_lin.primary_compare_data}" &lt;= 255))
+            </constraint>
+        </property>
+        <property default="0" display="Framing|ID Filter (Slave Mode)|Secondary Compare Data" id="module.driver.sci_lin.secondary_compare_data" description="Select the secondary compare filter data.">
+            <constraint display="Value must be an integer between 0 and 255.">
+                (testInteger("${module.driver.sci_lin.secondary_compare_data}") &amp;&amp; ("${module.driver.sci_lin.secondary_compare_data}" &gt;= 0) &amp;&amp; ("${module.driver.sci_lin.secondary_compare_data}" &lt;= 255))
+            </constraint>
+        </property>
+        <property default="module.driver.sci_lin.compare_data_select.priority" display="Framing|ID Filter (Slave Mode)|Compare Data Select" id="module.driver.sci_lin.compare_data_select" description="Select the compare data to use. If 'both' is selected, the priority compare data is checked before the secondary compare data.">
+                <option display="Priority" id="module.driver.sci_lin.compare_data_select.priority" value="SCI_LIN_COMPARE_DATA_SELECT_PRIORITY" />
+                <option display="Secondary" id="module.driver.sci_lin.compare_data_select.secondary" value="SCI_LIN_COMPARE_DATA_SELECT_SECONDARY" />
+                <option display="Both" id="module.driver.sci_lin.compare_data_select.both" value="SCI_LIN_COMPARE_DATA_SELECT_BOTH" />
+        </property>
+        <property default="module.driver.sci_lin.priority_interrupt_enable.disable" display="Framing|ID Filter (Slave Mode)|Priority Interrupt Bit Enable" id="module.driver.sci_lin.priority_interrupt_enable" description="Select whether to enable the Priority Interrupt Bit filter. When enabled, regardless of the Filter Data Select setting value, the bit specified by the Priority Interrupt Bit setting is compared with the corresponding bit in the Priority Compare Data Filter and if it matches, the identifier is allowed through the filter.">
+            <option display="Enabled" id="module.driver.sci_lin.priority_interrupt_enable.enable" value="SCI_LIN_PRIORITY_INTERRUPT_BIT_ENABLE" />
+            <option display="Disabled" id="module.driver.sci_lin.priority_interrupt_enable.disable" value="SCI_LIN_PRIORITY_INTERRUPT_BIT_DISABLE" />
+        </property>
+        <property default="0" display="Framing|ID Filter (Slave Mode)|Priority Interrupt Bit" id="module.driver.sci_lin.priority_interrupt_bit_select" description="Select the priority interrupt bit (0-7) of the received PID to compare with the corresponding bit in the Priority Compare Data Filter.  ">
+            <constraint display="Value must be an integer between bit 0 (LSb) and bit 7 (MSb).">
+                (testInteger("${module.driver.sci_lin.priority_interrupt_bit_select}") &amp;&amp; ("${module.driver.sci_lin.priority_interrupt_bit_select}" &gt;= 0) &amp;&amp; ("${module.driver.sci_lin.priority_interrupt_bit_select}" &lt;= 7))
+            </constraint>
+        </property>
+        <!-- LIN Interrupts Configuration -->
+        <property default="sci_lin${_instance}_callback" display="Interrupts|Callback" id="module.driver.sci_lin.callback" description="A user callback function must be provided. It will be called from the interrupt service routine (ISR).">
+            <constraint display="Name must be a valid C symbol">
+                testSymbol("${module.driver.sci_lin.callback}")
+            </constraint>
+        </property>
+        <property default="" display="Interrupts|Receive Interrupt Priority" id="module.driver.sci_lin.rxi_ipl" description="Select the receive interrupt priority.">
+            <select enum="enum.mcu.nvic.priorities.mandatory" />
+            <interrupt event="event.sci${module.driver.sci_lin.channel}.rxi" isr="sci_lin_rxi_isr" />
+        </property>
+        <property default="" display="Interrupts|Transmit Data Empty Interrupt Priority" id="module.driver.sci_lin.txi_ipl" description="Select the transmit interrupt priority.">
+            <select enum="enum.mcu.nvic.priorities.mandatory" />
+            <interrupt event="event.sci${module.driver.sci_lin.channel}.txi" isr="sci_lin_txi_isr" />
+        </property>
+        <property default="" display="Interrupts|Transmit End Interrupt Priority" id="module.driver.sci_lin.tei_ipl" description="Select the transmit end interrupt priority.">
+            <select enum="enum.mcu.nvic.priorities.mandatory" />
+            <interrupt event="event.sci${module.driver.sci_lin.channel}.tei" isr="sci_lin_tei_isr" />
+        </property>
+        <property default="" display="Interrupts|Receive Error Interrupt Priority" id="module.driver.sci_lin.eri_ipl" description="Select the receive error interrupt priority.">
+            <select enum="enum.mcu.nvic.priorities.mandatory" />
+            <interrupt event="event.sci${module.driver.sci_lin.channel}.eri" isr="sci_lin_eri_isr" />
+        </property>
+        <property default="" display="Interrupts|Break Field Low Width Interrupt Priority (SCIX0)" id="module.driver.sci_lin.scix0_ipl" description="Select the break field low width interrupt priority.">
+            <select enum="enum.mcu.nvic.priorities.mandatory" />
+            <interrupt event="event.sci${module.driver.sci_lin.channel}.scix0" isr="sci_lin_scix0_isr" />
+        </property>
+        <property default="" display="Interrupts|Control Field 0/1 Match Interrupt Priority (SCIX1)" id="module.driver.sci_lin.scix1_ipl" description="Select the Control field 0,1 and Priority bit detection interrupt priority.">
+            <select enum="enum.mcu.nvic.priorities.optional" />
+            <interrupt event="event.sci${module.driver.sci_lin.channel}.scix1" isr="sci_lin_scix1_isr" />
+        </property>
+        <property default="" display="Interrupts|Bus Collision Detection Interrupt Priority (SCIX2)" id="module.driver.sci_lin.scix2_ipl" description="Select the bus collision detection interrupt priority, or set to 'Disabled' to disable bus collision detection.">
+            <select enum="enum.mcu.nvic.priorities.optional" />
+            <interrupt event="event.sci${module.driver.sci_lin.channel}.scix2" isr="sci_lin_scix2_isr" />
+        </property>
+
+        <!-- LIN Pin Configurations -->
+        <peripheral name="SCI${module.driver.sci_lin.channel}" component="sci${module.driver.sci_lin.channel}" pin="sci${module.driver.sci_lin.channel}.rxd${module.driver.sci_lin.channel}" />
+        <peripheral name="SCI${module.driver.sci_lin.channel}" component="sci${module.driver.sci_lin.channel}" pin="sci${module.driver.sci_lin.channel}.txd${module.driver.sci_lin.channel}" />
+
+        <symbol id="symbol.driver.sci_lin.name" value="${module.driver.sci_lin.name}"/>
+        <symbol id="symbol.driver.sci_lin.guard.open" value="${module.driver.sci_lin.name}_open_guard"/>
+        <symbol id="symbol.driver.sci_lin.guard.macro.open" value="FSP_GUARD_${module.driver.sci_lin.name}_R_SCI_LIN_Open"/>
+        <symbol id="symbol.driver.sci_lin.guard.start_frame_write" value="${module.driver.sci_lin.name}_start_frame_write_guard"/>
+        <symbol id="symbol.driver.sci_lin.guard.macro.start_frame_write" value="FSP_GUARD_${module.driver.sci_lin.name}_R_SCI_LIN_StartFrameWrite"/>
+        <symbol id="symbol.driver.sci_lin.guard.information_frame_write" value="${module.driver.sci_lin.name}_information_frame_write_guard"/>
+        <symbol id="symbol.driver.sci_lin.guard.macro.information_frame_write" value="FSP_GUARD_${module.driver.sci_lin.name}_R_SCI_LIN_InformationFrameWrite"/>
+        <symbol id="symbol.driver.sci_lin.guard.information_frame_read" value="${module.driver.sci_lin.name}_information_frame_read_guard"/>
+        <symbol id="symbol.driver.sci_lin.guard.macro.information_frame_read" value="FSP_GUARD_${module.driver.sci_lin.name}_R_SCI_LIN_InformationFrameRead"/>
+        <symbol id="symbol.driver.sci_lin.guard.communication_abort" value="${module.driver.sci_lin.name}_communication_abort_guard"/>
+        <symbol id="symbol.driver.sci_lin.guard.macro.communication_abort" value="FSP_GUARD_${module.driver.sci_lin.name}_R_SCI_LIN_CommunicationAbort"/>
+        <symbol id="symbol.driver.sci_lin.guard.callback_set" value="${module.driver.sci_lin.name}_callback_set_guard"/>
+        <symbol id="symbol.driver.sci_lin.guard.macro.callback_set" value="FSP_GUARD_${module.driver.sci_lin.name}_R_SCI_LIN_CallbackSet"/>
+        <symbol id="symbol.driver.sci_lin.guard.id_filter_set" value="${module.driver.sci_lin.name}_id_filter_set_guard"/>
+        <symbol id="symbol.driver.sci_lin.guard.macro.id_filter_set" value="FSP_GUARD_${module.driver.sci_lin.name}_R_SCI_LIN_IdFilterSet"/>
+        <symbol id="symbol.driver.sci_lin.guard.id_filter_get" value="${module.driver.sci_lin.name}_id_filter_get_guard"/>
+        <symbol id="symbol.driver.sci_lin.guard.macro.id_filter_get" value="FSP_GUARD_${module.driver.sci_lin.name}_R_SCI_LIN_IdFilterGet"/>
+        <symbol id="symbol.driver.sci_lin.guard.close" value="${module.driver.sci_lin.name}_close_guard"/>
+        <symbol id="symbol.driver.sci_lin.guard.macro.close" value="FSP_GUARD_${module.driver.sci_lin.name}_R_SCI_LIN_Close"/>
+        <symbol id="symbol.driver.sci_lin.guard.baud_calculate" value="${module.driver.sci_lin.name}_baud_calculate_guard"/>
+        <symbol id="symbol.driver.sci_lin.guard.macro.baud_calculate" value="FSP_GUARD_${module.driver.sci_lin.name}_R_SCI_LIN_BaudCalculate"/>
+        <symbol id="symbol.driver.sci_lin.nsc_api" value="${module.driver.sci_lin.name}_nsc_api"/>
+        <symbol id="symbol.driver.sci_lin.cfg" value="${module.driver.sci_lin.name}_cfg"/>
+        <symbol id="symbol.driver.sci_lin.cfg_extend" value="${module.driver.sci_lin.name}_cfg_extend"/>
+        <symbol id="symbol.driver.sci_lin.ctrl" value="${module.driver.sci_lin.name}_ctrl"/>
+        <header>
+            /** LIN on SCI Instance. */
+            extern const lin_instance_t ${module.driver.sci_lin.name};
+
+            /** Access the LIN instance using these structures when calling API functions directly
+            (::p_api is not used). */
+            extern sci_lin_instance_ctrl_t ${module.driver.sci_lin.name}_ctrl;
+            extern const lin_cfg_t ${module.driver.sci_lin.name}_cfg;
+            extern const sci_lin_extended_cfg_t ${module.driver.sci_lin.name}_cfg_extend;
+
+#ifndef ${module.driver.sci_lin.callback}
+            void ${module.driver.sci_lin.callback}(lin_callback_args_t * p_args);
+#endif
+        </header>
+        <includes>
+            #include &quot;r_sci_lin.h&quot;
+            #include &quot;r_lin_api.h&quot;
+        </includes>
+        <declarations>
+            sci_lin_instance_ctrl_t ${module.driver.sci_lin.name}_ctrl;
+
+            /** LIN extended configuration for LIN on SCI HAL driver */
+            const sci_lin_extended_cfg_t ${module.driver.sci_lin.name}_cfg_extend =
+            {
+                .digital_filter_clock = ${module.driver.sci_lin.digital_filer_clock},
+                .bus_conflict_clock = ${module.driver.sci_lin.bus_conflict_clock},
+                .break_bits = ${module.driver.sci_lin.break_field_bits},
+                .delimiter_bits = ${module.driver.sci_lin.delimiter_bits},
+
+                /* Baud-rate setting */
+                .baud_setting = {
+                   ${module.driver.sci_lin.baud},
+                },
+
+                /* ID filter setting */
+                .filter_setting = {
+                    .compare_data_mask = ${module.driver.sci_lin.compare_data_mask},
+                    .primary_compare_data = ${module.driver.sci_lin.primary_compare_data},
+                    .secondary_compare_data = ${module.driver.sci_lin.secondary_compare_data},
+                    .priority_interrupt_bit_select = ${module.driver.sci_lin.priority_interrupt_bit_select},
+                    .priority_interrupt_enable = ${module.driver.sci_lin.priority_interrupt_enable},
+                    .compare_data_select = ${module.driver.sci_lin.compare_data_select},
+                },
+                /* Interrupt settings */
+                .scix0_ipl = ${module.driver.sci_lin.scix0_ipl},
+                .scix1_ipl = ${module.driver.sci_lin.scix1_ipl},
+                .scix2_ipl = ${module.driver.sci_lin.scix2_ipl},
+                .rxi_ipl = ${module.driver.sci_lin.rxi_ipl},
+                .txi_ipl = ${module.driver.sci_lin.txi_ipl},
+                .tei_ipl = ${module.driver.sci_lin.tei_ipl},
+                .eri_ipl = ${module.driver.sci_lin.eri_ipl},
+#if defined(VECTOR_NUMBER_SCI${module.driver.sci_lin.channel}_SCIX0)
+                .scix0_irq = VECTOR_NUMBER_SCI${module.driver.sci_lin.channel}_SCIX0,
+#else
+                .scix0_irq = FSP_INVALID_VECTOR,
+#endif
+#if defined(VECTOR_NUMBER_SCI${module.driver.sci_lin.channel}_SCIX1)
+                .scix1_irq = VECTOR_NUMBER_SCI${module.driver.sci_lin.channel}_SCIX1,
+#else
+                .scix1_irq = FSP_INVALID_VECTOR,
+#endif
+#if defined(VECTOR_NUMBER_SCI${module.driver.sci_lin.channel}_SCIX2)
+                .scix2_irq = VECTOR_NUMBER_SCI${module.driver.sci_lin.channel}_SCIX2,
+#else
+                .scix2_irq = FSP_INVALID_VECTOR,
+#endif
+#if defined(VECTOR_NUMBER_SCI${module.driver.sci_lin.channel}_RXI)
+                .rxi_irq = VECTOR_NUMBER_SCI${module.driver.sci_lin.channel}_RXI,
+#else
+                .rxi_irq = FSP_INVALID_VECTOR,
+#endif
+#if defined(VECTOR_NUMBER_SCI${module.driver.sci_lin.channel}_TXI)
+                .txi_irq = VECTOR_NUMBER_SCI${module.driver.sci_lin.channel}_TXI,
+#else
+                .txi_irq = FSP_INVALID_VECTOR,
+#endif
+#if defined(VECTOR_NUMBER_SCI${module.driver.sci_lin.channel}_TEI)
+                .tei_irq = VECTOR_NUMBER_SCI${module.driver.sci_lin.channel}_TEI,
+#else
+                .tei_irq = FSP_INVALID_VECTOR,
+#endif
+#if defined(VECTOR_NUMBER_SCI${module.driver.sci_lin.channel}_ERI)
+                .eri_irq = VECTOR_NUMBER_SCI${module.driver.sci_lin.channel}_ERI
+#else
+                .eri_irq = FSP_INVALID_VECTOR
+#endif
+            };
+
+            /** LIN interface configuration */
+            const lin_cfg_t ${module.driver.sci_lin.name}_cfg =
+            {
+                .channel = ${module.driver.sci_lin.channel},
+                .mode = ${module.driver.sci_lin.mode},
+                .p_callback = ${module.driver.sci_lin.callback},
+                .p_context = NULL,
+                .p_extend = &amp;${module.driver.sci_lin.name}_cfg_extend,
+            };
+
+            /* Instance structure to use this module. */
+            const lin_instance_t ${module.driver.sci_lin.name} =
+            {
+                .p_ctrl = &amp;${module.driver.sci_lin.name}_ctrl,
+                .p_cfg = &amp;${module.driver.sci_lin.name}_cfg,
+                .p_api = &amp;g_lin_on_sci
+            };
+        </declarations>
+        <guard>
+            <header>
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.sci_lin.name}_open_guard(lin_ctrl_t *const p_api_ctrl, lin_cfg_t const *const p_cfg);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.sci_lin.name}_start_frame_write_guard(lin_ctrl_t *const p_api_ctrl, uint8_t const id);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.sci_lin.name}_information_frame_write_guard(lin_ctrl_t *const p_api_ctrl, const lin_transfer_params_t *const p_transfer_params);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.sci_lin.name}_information_frame_read_guard(lin_ctrl_t *const p_api_ctrl, lin_transfer_params_t *const p_transfer_params);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.sci_lin.name}_communication_abort_guard(lin_ctrl_t *const p_api_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.sci_lin.name}_callback_set_guard(lin_ctrl_t *const p_api_ctrl, void(*p_callback)(lin_callback_args_t *), void const *const p_context, lin_callback_args_t *const p_callback_memory);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.sci_lin.name}_id_filter_set_guard(lin_ctrl_t *const p_api_ctrl, sci_lin_id_filter_setting_t const *const p_config);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.sci_lin.name}_id_filter_get_guard(lin_ctrl_t *const p_api_ctrl, sci_lin_id_filter_setting_t *const p_config);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.sci_lin.name}_close_guard(lin_ctrl_t *const p_api_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.sci_lin.name}_baud_calculate_guard(sci_lin_baud_params_t const *const p_baud_params, sci_lin_baud_setting_t *const p_baud_setting);
+
+            </header>
+            <template name="${module.driver.sci_lin.name}_guard.c">
+                <![CDATA[
+                    #include "guard.h"
+
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.sci_lin.name}_open_guard (lin_ctrl_t *const p_api_ctrl, lin_cfg_t const *const p_cfg)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+    FSP_PARAMETER_NOT_USED(p_cfg);
+
+    return R_SCI_LIN_Open(&${module.driver.sci_lin.name}_ctrl, &${module.driver.sci_lin.name}_cfg);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.sci_lin.name}_start_frame_write_guard (lin_ctrl_t *const p_api_ctrl, uint8_t const id)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+
+    return R_SCI_LIN_StartFrameWrite(&${module.driver.sci_lin.name}_ctrl, id);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.sci_lin.name}_information_frame_write_guard (lin_ctrl_t *const p_api_ctrl, const lin_transfer_params_t *const p_transfer_params)
+{
+    /* Verify all pointers are in non-secure memory. */
+    const lin_transfer_params_t *const p_transfer_params_checked = cmse_check_pointed_object(( lin_transfer_params_t *) p_transfer_params, CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_transfer_params_checked != NULL);
+
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+
+    return R_SCI_LIN_InformationFrameWrite(&${module.driver.sci_lin.name}_ctrl, p_transfer_params_checked);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.sci_lin.name}_information_frame_read_guard (lin_ctrl_t *const p_api_ctrl, lin_transfer_params_t *const p_transfer_params)
+{
+    /* Verify all pointers are in non-secure memory. */
+    lin_transfer_params_t *const p_transfer_params_checked = cmse_check_pointed_object(p_transfer_params, CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_transfer_params_checked != NULL);
+
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+
+    return R_SCI_LIN_InformationFrameRead(&${module.driver.sci_lin.name}_ctrl, p_transfer_params_checked);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.sci_lin.name}_communication_abort_guard (lin_ctrl_t *const p_api_ctrl)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+
+    return R_SCI_LIN_CommunicationAbort(&${module.driver.sci_lin.name}_ctrl);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.sci_lin.name}_callback_set_guard (lin_ctrl_t *const p_api_ctrl, void(*p_callback)(lin_callback_args_t *), void const *const p_context, lin_callback_args_t *const p_callback_memory)
+{
+    /* Verify all pointers are in non-secure memory. */
+    void(*p_callback_checked)(lin_callback_args_t *) = (void(*)(lin_callback_args_t *)) cmse_check_address_range((void *) p_callback, sizeof(void *), CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_callback_checked != NULL);
+    lin_callback_args_t *const p_callback_memory_checked = cmse_check_pointed_object(p_callback_memory, CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_callback_memory_checked != NULL);
+
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+    FSP_PARAMETER_NOT_USED(p_context);
+
+    return R_SCI_LIN_CallbackSet(&${module.driver.sci_lin.name}_ctrl, p_callback_checked, p_context, p_callback_memory_checked);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.sci_lin.name}_id_filter_set_guard (lin_ctrl_t *const p_api_ctrl, sci_lin_id_filter_setting_t const *const p_config)
+{
+    /* Verify all pointers are in non-secure memory. */
+    sci_lin_id_filter_setting_t const *const p_config_checked = cmse_check_pointed_object((sci_lin_id_filter_setting_t *) p_config, CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_config_checked != NULL);
+
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+
+    return R_SCI_LIN_IdFilterSet(&${module.driver.sci_lin.name}_ctrl, p_config_checked);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.sci_lin.name}_id_filter_get_guard (lin_ctrl_t *const p_api_ctrl, sci_lin_id_filter_setting_t *const p_config)
+{
+    /* Verify all pointers are in non-secure memory. */
+    sci_lin_id_filter_setting_t *const p_config_checked = cmse_check_pointed_object(p_config, CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_config_checked != NULL);
+
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+
+    return R_SCI_LIN_IdFilterGet(&${module.driver.sci_lin.name}_ctrl, p_config_checked);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.sci_lin.name}_close_guard (lin_ctrl_t *const p_api_ctrl)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+
+    return R_SCI_LIN_Close(&${module.driver.sci_lin.name}_ctrl);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.sci_lin.name}_baud_calculate_guard (sci_lin_baud_params_t const *const p_baud_params, sci_lin_baud_setting_t *const p_baud_setting)
+{
+    /* Verify all pointers are in non-secure memory. */
+    sci_lin_baud_params_t const *const p_baud_params_checked = cmse_check_pointed_object((sci_lin_baud_params_t *) p_baud_params, CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_baud_params_checked != NULL);
+    sci_lin_baud_setting_t *const p_baud_setting_checked = cmse_check_pointed_object(p_baud_setting, CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_baud_setting_checked != NULL);
+
+    /* TODO: add your own security checks here */
+
+    return R_SCI_LIN_BaudCalculate(p_baud_params_checked, p_baud_setting_checked);
+}
+
+                ]]>
+            </template>
+        </guard>
+        <nsc>
+            <header>
+
+#define FSP_GUARD_${module.driver.sci_lin.name}_R_SCI_LIN_Open() ${module.driver.sci_lin.name}_open_guard(FSP_SECURE_ARGUMENT, FSP_SECURE_ARGUMENT)
+
+#define FSP_GUARD_${module.driver.sci_lin.name}_R_SCI_LIN_StartFrameWrite(id) ${module.driver.sci_lin.name}_start_frame_write_guard(FSP_SECURE_ARGUMENT, id)
+
+#define FSP_GUARD_${module.driver.sci_lin.name}_R_SCI_LIN_InformationFrameWrite(p_transfer_params) ${module.driver.sci_lin.name}_information_frame_write_guard(FSP_SECURE_ARGUMENT, p_transfer_params)
+
+#define FSP_GUARD_${module.driver.sci_lin.name}_R_SCI_LIN_InformationFrameRead(p_transfer_params) ${module.driver.sci_lin.name}_information_frame_read_guard(FSP_SECURE_ARGUMENT, p_transfer_params)
+
+#define FSP_GUARD_${module.driver.sci_lin.name}_R_SCI_LIN_CommunicationAbort() ${module.driver.sci_lin.name}_communication_abort_guard(FSP_SECURE_ARGUMENT)
+
+#define FSP_GUARD_${module.driver.sci_lin.name}_R_SCI_LIN_CallbackSet(p_callback, p_context, p_callback_memory) ${module.driver.sci_lin.name}_callback_set_guard(FSP_SECURE_ARGUMENT, p_callback, p_context, p_callback_memory)
+
+#define FSP_GUARD_${module.driver.sci_lin.name}_R_SCI_LIN_IdFilterSet(p_config) ${module.driver.sci_lin.name}_id_filter_set_guard(FSP_SECURE_ARGUMENT, p_config)
+
+#define FSP_GUARD_${module.driver.sci_lin.name}_R_SCI_LIN_IdFilterGet(p_config) ${module.driver.sci_lin.name}_id_filter_get_guard(FSP_SECURE_ARGUMENT, p_config)
+
+#define FSP_GUARD_${module.driver.sci_lin.name}_R_SCI_LIN_Close() ${module.driver.sci_lin.name}_close_guard(FSP_SECURE_ARGUMENT)
+
+#define FSP_GUARD_${module.driver.sci_lin.name}_R_SCI_LIN_BaudCalculate(p_baud_params, p_baud_setting) ${module.driver.sci_lin.name}_baud_calculate_guard(p_baud_params, p_baud_setting)
+
+
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.sci_lin.name}_open_guard(lin_ctrl_t *const p_api_ctrl, lin_cfg_t const *const p_cfg);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.sci_lin.name}_start_frame_write_guard(lin_ctrl_t *const p_api_ctrl, uint8_t const id);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.sci_lin.name}_information_frame_write_guard(lin_ctrl_t *const p_api_ctrl, const lin_transfer_params_t *const p_transfer_params);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.sci_lin.name}_information_frame_read_guard(lin_ctrl_t *const p_api_ctrl, lin_transfer_params_t *const p_transfer_params);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.sci_lin.name}_communication_abort_guard(lin_ctrl_t *const p_api_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.sci_lin.name}_callback_set_guard(lin_ctrl_t *const p_api_ctrl, void(*p_callback)(lin_callback_args_t *), void const *const p_context, lin_callback_args_t *const p_callback_memory);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.sci_lin.name}_id_filter_set_guard(lin_ctrl_t *const p_api_ctrl, sci_lin_id_filter_setting_t const *const p_config);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.sci_lin.name}_id_filter_get_guard(lin_ctrl_t *const p_api_ctrl, sci_lin_id_filter_setting_t *const p_config);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.sci_lin.name}_close_guard(lin_ctrl_t *const p_api_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.sci_lin.name}_baud_calculate_guard(sci_lin_baud_params_t const *const p_baud_params, sci_lin_baud_setting_t *const p_baud_setting);
+
+
+extern const lin_instance_t ${module.driver.sci_lin.name};
+            </header>
+            <declarations>
+                <![CDATA[
+static const lin_api_t ${module.driver.sci_lin.name}_nsc_api =
+{
+    .open = ${module.driver.sci_lin.name}_open_guard,
+    .startFrameWrite = ${module.driver.sci_lin.name}_start_frame_write_guard,
+    .informationFrameWrite = ${module.driver.sci_lin.name}_information_frame_write_guard,
+    .informationFrameRead = ${module.driver.sci_lin.name}_information_frame_read_guard,
+    .communicationAbort = ${module.driver.sci_lin.name}_communication_abort_guard,
+    .callbackSet = ${module.driver.sci_lin.name}_callback_set_guard,
+    .close = ${module.driver.sci_lin.name}_close_guard,
+};
+const lin_instance_t ${module.driver.sci_lin.name} =
+{
+    .p_api = &${module.driver.sci_lin.name}_nsc_api,
+    .p_ctrl = FSP_SECURE_ARGUMENT,
+    .p_cfg = FSP_SECURE_ARGUMENT,
+};
+                ]]>
+            </declarations>
+        </nsc>
+        <api configurable="true">
+            <file>ra/fsp/inc/instances/r_sci_lin.h</file>
+            <file>ra/fsp/inc/api/r_lin_api.h</file>
+        </api>
+    </module>
+</raModuleDescription>

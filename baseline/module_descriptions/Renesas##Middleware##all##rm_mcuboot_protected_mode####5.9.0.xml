@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<raModuleDescription>
+
+  <module display="Bootloader|MCUboot Custom Crypto (Protected Mode)" config="config.middleware.mcuboot_protected_mode" id="module.middleware.mcuboot_protected_mode" common="1" version="1" url="group___r_m___m_c_u_b_o_o_t___p_o_r_t.html" visible="false">
+    <constraint display="Requires Custom Crypto Protected Mode Driver">
+          "${interface.driver.sce_on_sce_protected}" === "1"
+    </constraint>
+    <constraint display="A minimum stack of 2K (0x800) is required. If used in an RTOS thread, the thread stack should instead be at least 0x800.">(("${config.bsp.common.main}" &gt;= 0x800)) || (testExists("${interface.rtos.rtos}") )
+    </constraint>
+
+    <requires id="module.middleware.mcuboot_protected_mode.requires.sce_on_sce_protected" interface="interface.driver.sce_on_sce_protected" visible="false" find="true" display="SCE9 Protected Mode" />
+    <provides interface="interface.driver.mcuboot_crypto" />
+    <provides interface="interface.driver.mcuboot_crypto_sce9_protected" />
+    <includes>
+        #include "sce9_sha256.h"
+        #include "sce9_ecdsa_p256.h"
+    </includes>
+    <declarations>
+    </declarations>
+  </module>
+</raModuleDescription>

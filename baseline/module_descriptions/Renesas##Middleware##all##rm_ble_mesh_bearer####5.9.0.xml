@@ -1,0 +1,79 @@
+<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.middleware.rm_ble_mesh_bearer" path="fsp_cfg/rm_ble_mesh_bearer_cfg.h" version="0">
+        <content>
+            #ifdef __cplusplus
+            extern "C" {
+            #endif
+
+            #ifdef __cplusplus
+            }
+            #endif
+        </content>
+    </config>
+    <module id="module.middleware.rm_ble_mesh_bearer_on_rm_ble_mesh_bearer" display="Networking|BLE Mesh Network modules|BLE Mesh Bearer (rm_ble_mesh_bearer)" config="config.middleware.rm_ble_mesh_bearer" common="1" version="0" visible="true" url="group___r_m___b_l_e___m_e_s_h___b_e_a_r_e_r.html">
+
+        <constraint display="Requires low level Library Implementation">
+            "${interface.middleware.rm_ble_mesh_bearer}" === "1"
+        </constraint>
+        <constraint display="BLE Mesh Bearer middleware not support R_BLE_SPP module">
+            "${interface.mcu.radio}" === "1"
+        </constraint>
+        <requires id="module.middleware.rm_ble_mesh_bearer.requires.rm_ble_mesh" interface="interface.middleware.rm_ble_mesh.${module.middleware.rm_ble_mesh.name}" display="Add BLE Mesh Middleware" find="true"/>
+
+        <provides interface="interface.middleware.rm_ble_mesh_bearer"/>
+        <provides interface="interface.middleware.rm_ble_mesh_bearer_on_rm_ble_mesh_bearer"/>
+        <provides interface="interface.middleware.rm_ble_mesh_bearer.${module.middleware.rm_ble_mesh_bearer.name}"/>
+
+        <property display="General|Name" id="module.middleware.rm_ble_mesh_bearer.name" default="g_rm_ble_mesh_bearer${_instance}" description="Module name.">
+            <constraint display="Name Must Be a Valid C Symbol">testSymbol("${module.middleware.rm_ble_mesh_bearer.name}")</constraint>
+        </property>
+
+        <property display="Channel Number" id="module.middleware.rm_ble_mesh_bearer.channel" default="0" description="Select channel corresponding to the channel number of the hardware.">
+            <constraint display="Invalid Channel Number">testInteger("${module.middleware.rm_ble_mesh_bearer.channel}") &amp;&amp; ("${module.middleware.rm_ble_mesh_bearer.channel}" &gt;= 0) &amp;&amp; ("${module.middleware.rm_ble_mesh_bearer.channel}" &lt;= 4294967295)</constraint>
+        </property>
+
+        <property id="module.middleware.rm_ble_mesh_bearer.p_context" default="NULL">
+            <constraint display="Name Must Be a Valid C Symbol">testSymbol("${module.middleware.rm_ble_mesh_bearer.p_context}")</constraint>
+            <export>eval('' +
+                'var output = "${module.middleware.rm_ble_mesh_bearer.p_context}";' +
+                'if ("NULL" !== output) {' +
+                'output = "&amp;" + output;' +
+                '}' +
+                'output')
+            </export>
+        </property>
+
+        <header>
+/** BLE Mesh Bearer on BLE Mesh Bearer Server Instance. */
+extern const rm_ble_mesh_bearer_instance_t ${module.middleware.rm_ble_mesh_bearer.name};
+
+/** Access the BLE Mesh bearer instance using these structures when calling API functions directly (::p_api is not used). */
+extern rm_ble_mesh_bearer_instance_ctrl_t ${module.middleware.rm_ble_mesh_bearer.name}_ctrl;
+extern const rm_ble_mesh_bearer_cfg_t ${module.middleware.rm_ble_mesh_bearer.name}_cfg;
+        </header>
+        <includes>
+#include "rm_ble_mesh_bearer.h"
+#include "rm_ble_mesh_bearer_api.h"
+#include "rm_ble_mesh_api.h"
+        </includes>
+        <declarations>
+rm_ble_mesh_bearer_instance_ctrl_t ${module.middleware.rm_ble_mesh_bearer.name}_ctrl;
+
+const rm_ble_mesh_bearer_cfg_t ${module.middleware.rm_ble_mesh_bearer.name}_cfg =
+{
+	.channel                     = ${module.middleware.rm_ble_mesh_bearer.channel},          //  Select a channel corresponding to the channel number of the hardware.
+    .p_mesh_instance             = &amp;${module.middleware.rm_ble_mesh_bearer.requires.rm_ble_mesh::module.middleware.rm_ble_mesh.name},
+    .p_context                   = ${module.middleware.rm_ble_mesh_bearer.p_context},   //  Placeholder for user data.  Passed to the user callback in rm_ble_mesh_bearer_callback_args_t.
+    .p_extend                    = NULL
+};
+
+const rm_ble_mesh_bearer_instance_t ${module.middleware.rm_ble_mesh_bearer.name} =
+{
+    .p_ctrl = &amp;${module.middleware.rm_ble_mesh_bearer.name}_ctrl,
+    .p_cfg  = &amp;${module.middleware.rm_ble_mesh_bearer.name}_cfg,
+    .p_api  = &amp;g_rm_ble_mesh_bearer_on_rm_ble_mesh_bearer
+};
+        </declarations>
+    </module>
+</raModuleDescription>

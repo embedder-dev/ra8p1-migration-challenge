@@ -1,0 +1,220 @@
+﻿<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.middleware.motor_sense_induction" path="fsp_cfg/rm_motor_sense_induction_cfg.h" version="0">
+        <property default="config.middleware.motor_sense_induction.param_checking_enable.bsp" display="Parameter Checking" id="config.middleware.motor_sense_induction.param_checking_enable" description="If selected code for parameter checking is included in the build.">
+            <option display="Default (BSP)" id="config.middleware.motor_sense_induction.param_checking_enable.bsp" value="(BSP_CFG_PARAM_CHECKING_ENABLE)"/>
+            <option display="Enabled" id="config.middleware.motor_sense_induction.param_checking_enable.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.motor_sense_induction.param_checking_enable.disabled" value="(0)"/>
+        </property>
+
+        <content>
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#define MOTOR_SENSE_INDUCTION_CFG_PARAM_CHECKING_ENABLE   ${config.middleware.motor_sense_induction.param_checking_enable}
+
+#ifdef __cplusplus
+}
+#endif
+        </content>
+    </config>
+    <module config="config.middleware.motor_sense_induction" display="Motor|${module.middleware.motor_angle.name} Motor Angle and Speed Calculation with induction sensor (rm_motor_sense_induction)" id="module.middleware.motor_angle_on_motor_induction" version="1" url="group___m_o_t_o_r___s_e_n_s_e___i_n_d_u_c_t_i_o_n.html">
+        <constraint display="Unique name required for each instance">("${interface.middleware.motor_angle.${module.middleware.motor_angle.name}}" === "1")</constraint>
+        <!-- motor_sense_induction configuration -->
+        <provides interface="interface.middleware.motor_angle" />
+        <provides interface="interface.middleware.motor_angle.motor_angle_on_motor_induction" />
+        <provides interface="interface.middleware.motor_angle.${module.middleware.motor_angle.name}" />
+
+        <!-- Module Name -->
+        <property default="g_motor_angle${_instance}" display="General|Name" id="module.middleware.motor_angle.name" description="Module name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.middleware.motor_angle.name}")</constraint>
+        </property>
+
+        <property display="Control type" id="module.middleware.motor_angle.loop_mode" default="module.middleware.motor_angle.loop_mode.1" description="Select control Type">
+            <option id="module.middleware.motor_angle.loop_mode.0" display="Speed" value="MOTOR_SENSE_INDUCTION_LOOP_SPEED" />
+            <option id="module.middleware.motor_angle.loop_mode.1" display="Position" value="MOTOR_SENSE_INDUCTION_LOOP_POSITION" />
+        </property>
+
+        <property display="Frequency of current control (kHz)" id="module.middleware.motor_angle.c_ctrl_freq" default="20.0" description="Frequency of current control">
+            <constraint display="Must be a valid non-negative value.">
+            eval('' +
+            'var input = "${module.middleware.motor_angle.c_ctrl_freq}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?$","i");' +
+            'var regex_float_with_suffix = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?F$","i");' +
+            ' ( regex_float.test(input) || regex_float_with_suffix.test(input))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${module.middleware.motor_angle.c_ctrl_freq}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)$","i");' +
+            'if (regex_float.test(output)){' +
+            'output = output + "F";' +
+            '}' +
+            'output')
+            </export>
+        </property>
+        <property display="Decimation of Interrupt" id="module.middleware.motor_angle.intr_decimation" default="1" description="Decimation of Interrupt">
+            <constraint display="Must be a valid integer.">testInteger("${module.middleware.motor_angle.intr_decimation}") &amp;&amp; ("${module.middleware.motor_angle.intr_decimation}" &gt;= 0)</constraint>
+        </property>
+        <property display="Counts to get signal" id="module.middleware.motor_angle.get_timing_count" default="10" description="Counts to get analog input signal">
+            <constraint display="Must be a valid integer.">testInteger("${module.middleware.motor_angle.get_timing_count}") &amp;&amp; ("${module.middleware.motor_angle.get_timing_count}" &gt;= 0)</constraint>
+        </property>
+        <property display="Limit of signal error" id="module.middleware.motor_angle.error_limit" default="100" description="Limit of signal error">
+            <constraint display="Must be a valid integer.">testInteger("${module.middleware.motor_angle.error_limit}") &amp;&amp; ("${module.middleware.motor_angle.error_limit}" &gt;= 0)</constraint>
+        </property>
+        <property display="Coefficent of speed LPF" id="module.middleware.motor_angle.speed_lpf" default="0.07" description="Coefficient of speed LPF">
+            <constraint display="Must be a valid value">
+            eval('' +
+            'var input = "${module.middleware.motor_angle.speed_lpf}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?$","i");' +
+            'var regex_float_with_suffix = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?F$","i");' +
+            ' ( regex_float.test(input) || regex_float_with_suffix.test(input))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${module.middleware.motor_angle.speed_lpf}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)$","i");' +
+            'if (regex_float.test(output)){' +
+            'output = output + "F";' +
+            '}' +
+            'output')
+            </export>
+        </property>
+        <property display="A/D reference voltage" id="module.middleware.motor_angle.ref_vol" default="3.3" description="Reference voltage of A/D converter">
+            <constraint display="Must be a valid non-negative value.">
+            eval('' +
+            'var input = "${module.middleware.motor_angle.ref_vol}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?$","i");' +
+            'var regex_float_with_suffix = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?F$","i");' +
+            ' ( regex_float.test(input) || regex_float_with_suffix.test(input))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${module.middleware.motor_angle.ref_vol}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)$","i");' +
+            'if (regex_float.test(output)){' +
+            'output = output + "F";' +
+            '}' +
+            'output')
+            </export>
+        </property>
+        <property display="A/D conversion scale" id="module.middleware.motor_angle.ad_conv" default="4095.0" description="Conversion scale of A/D converter">
+            <constraint display="Must be a valid non-negative value.">
+            eval('' +
+            'var input = "${module.middleware.motor_angle.ad_conv}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?$","i");' +
+            'var regex_float_with_suffix = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?F$","i");' +
+            ' ( regex_float.test(input) || regex_float_with_suffix.test(input))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${module.middleware.motor_angle.ad_conv}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)$","i");' +
+            'if (regex_float.test(output)){' +
+            'output = output + "F";' +
+            '}' +
+            'output')
+            </export>
+        </property>
+        <property display="Openloop speed (rpm)" id="module.middleware.motor_angle.ol_speed" default="6.0" description="Rotation speed at calibration openloop (rpm)">
+            <constraint display="Must be a valid non-negative value.">
+            eval('' +
+            'var input = "${module.middleware.motor_angle.ol_speed}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?$","i");' +
+            'var regex_float_with_suffix = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?F$","i");' +
+            ' ( regex_float.test(input) || regex_float_with_suffix.test(input))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${module.middleware.motor_angle.ol_speed}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)$","i");' +
+            'if (regex_float.test(output)){' +
+            'output = output + "F";' +
+            '}' +
+            'output')
+            </export>
+        </property>
+        <property display="D-axis current at openloop (A)" id="module.middleware.motor_angle.ol_id_ref" default="1.0" description="D-axis current at calibration openloop (A)">
+            <constraint display="Must be a valid non-negative value.">
+            eval('' +
+            'var input = "${module.middleware.motor_angle.ol_id_ref}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?$","i");' +
+            'var regex_float_with_suffix = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?F$","i");' +
+            ' ( regex_float.test(input) || regex_float_with_suffix.test(input))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${module.middleware.motor_angle.ol_id_ref}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)$","i");' +
+            'if (regex_float.test(output)){' +
+            'output = output + "F";' +
+            '}' +
+            'output')
+            </export>
+        </property>
+        <property display="Angle adjustment times" id="module.middleware.motor_angle.angle_adj_times" default="512" description="Times to get signal at angle adjustment">
+            <constraint display="Must be a valid integer.">testInteger("${module.middleware.motor_angle.angle_adj_times}") &amp;&amp; ("${module.middleware.motor_angle.angle_adj_times}" &gt;= 0)</constraint>
+        </property>
+        <property display="Calibration enable" id="module.middleware.motor_angle.calib_enable" default="module.middleware.motor_angle.calib_enable.1" description="Select enable/disable of signal calibration">
+            <option id="module.middleware.motor_angle.calib_enable.0" display="Disable" value="MOTOR_SENSE_INDUCTION_CALIBRATION_DISABLE" />
+            <option id="module.middleware.motor_angle.calib_enable.1" display="Enable" value="MOTOR_SENSE_INDUCTION_CALIBRATION_ENABLE" />
+        </property>
+        <property display="Induction sensor pole pairs" id="module.middleware.motor_angle.isensor_pole_pairs" default="4" description="Induction sensor pole pairs">
+            <constraint display="Must be a valid integer.">testInteger("${module.middleware.motor_angle.isensor_pole_pairs}") &amp;&amp; ("${module.middleware.motor_angle.isensor_pole_pairs}" &gt;= 0)</constraint>
+        </property>
+        <property display="Motor pole pairs" id="module.middleware.motor_angle.pole_pairs" default="4" description="Motor pole pairs">
+            <constraint display="Must be a valid integer.">testInteger("${module.middleware.motor_angle.pole_pairs}") &amp;&amp; ("${module.middleware.motor_angle.pole_pairs}" &gt;= 0)</constraint>
+        </property>
+
+        <header>
+/** Motor Angle Sense Induction Instance */
+extern const motor_angle_instance_t ${module.middleware.motor_angle.name};
+
+/** Access the Motor Angle Sense Induction instance using these structures
+    when calling API functions directly (::p_api is not used). */
+extern motor_sense_induction_instance_ctrl_t ${module.middleware.motor_angle.name}_ctrl;
+extern const motor_sense_induction_extended_cfg_t ${module.middleware.motor_angle.name}_extend;
+extern const motor_angle_cfg_t ${module.middleware.motor_angle.name}_cfg;
+        </header>
+
+        <includes>
+#include &quot;rm_motor_sense_induction.h&quot;
+        </includes>
+
+        <declarations>
+motor_sense_induction_instance_ctrl_t ${module.middleware.motor_angle.name}_ctrl;
+const motor_sense_induction_extended_cfg_t ${module.middleware.motor_angle.name}_extend =
+{
+  .u1_speed_detection_count = ${module.middleware.motor_angle.intr_decimation}U,
+  .u1_get_timing_count = ${module.middleware.motor_angle.get_timing_count}U,
+  .f_current_frequency = ${module.middleware.motor_angle.c_ctrl_freq},
+  .u2_signal_error_limit = ${module.middleware.motor_angle.error_limit}U,
+  .f_speed_lpf = ${module.middleware.motor_angle.speed_lpf},
+  .f_reference_voltage = ${module.middleware.motor_angle.ref_vol},
+  .f_ad_conversion_scale = ${module.middleware.motor_angle.ad_conv},
+  .f_openloop_speed_rpm = ${module.middleware.motor_angle.ol_speed},
+  .f_openloop_id_ref = ${module.middleware.motor_angle.ol_id_ref},
+  .u2_angle_adjustment_time = ${module.middleware.motor_angle.angle_adj_times}U,
+  .e_loop_mode = ${module.middleware.motor_angle.loop_mode},
+  .e_calibration = ${module.middleware.motor_angle.calib_enable},
+  .u1_induction_polepairs = ${module.middleware.motor_angle.isensor_pole_pairs}U,
+  .u1_motor_polepairs = ${module.middleware.motor_angle.pole_pairs}U,
+};
+
+const motor_angle_cfg_t ${module.middleware.motor_angle.name}_cfg =
+{
+  .p_context    = NULL,
+  .p_extend     = &amp;${module.middleware.motor_angle.name}_extend,
+};
+
+/* Instance structure to use Motor Angle module. */
+const motor_angle_instance_t ${module.middleware.motor_angle.name} =
+{
+  .p_ctrl   = &amp;${module.middleware.motor_angle.name}_ctrl,
+  .p_cfg    = &amp;${module.middleware.motor_angle.name}_cfg,
+  .p_api    = &amp;g_motor_angle_on_motor_sense_induction,
+};
+        </declarations>
+    </module>
+</raModuleDescription>

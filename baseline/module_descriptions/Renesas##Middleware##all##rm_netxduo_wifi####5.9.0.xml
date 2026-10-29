@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<raModuleDescription>
+    <config id="config.middleware.rm_netxduo_wifi" path="fsp_cfg/middleware/rm_netxduo_wifi_cfg.h" version="0">
+        <property default="1500" display="IP MTU (bytes)" id="config.middleware.rm_netxduo_wifi.ip_mtu" description="IP MTU">
+            <constraint display="Value must be in the range [576, 1500] bytes.">
+                testInteger("${config.middleware.rm_netxduo_wifi.ip_mtu}")  &amp;&amp; (${config.middleware.rm_netxduo_wifi.ip_mtu} &gt;= 576) &amp;&amp; (${config.middleware.rm_netxduo_wifi.ip_mtu} &lt;= 1500)
+            </constraint>
+        </property>
+        <content>
+    #ifdef __cplusplus
+    extern "C" {
+    #endif
+
+    #define RM_NETXDUO_WIFI_IP_MTU                    (${config.middleware.rm_netxduo_wifi.ip_mtu})
+
+    #ifdef __cplusplus
+    }
+    #endif
+        </content>
+    </config>
+    <module config="config.middleware.rm_netxduo_wifi" display="Networking|NetX Duo WiFi Driver (rm_netxduo_wifi)" id="module.middleware.rm_netxduo_wifi" version="1" url="group___r_m___n_e_t_x_d_u_o___w_i_f_i.html" common="1" visible="false">
+        <constraint display="Hardware TCP/IP support must be enabled in NetX Duo.">
+            ("${config.azure.nxd_src.hardware_tcp_ip}" === "config.azure.nxd_src.hardware_tcp_ip.enable")
+        </constraint>
+        <constraint display="Interface capability must be enabled in NetX Duo.">
+            ("${config.azure.nxd_src.interface_capability}" === "config.azure.nxd_src.interface_capability.enable")
+        </constraint>
+        <requires interface="_rtos" />
+        <requires interface="" />
+        <requires id="module.middleware.rm_netxduo_wifi.requires.threadx" interface="interface.rtos.tx" visible="false" display="Requires ThreadX"/>
+        <requires id="module.middleware.rm_netxduo_wifi.requires.wifi" interface="interface.driver.wifi_onchip_silex_azure" display="Add WiFi Driver"/>
+        <requires id="module.middleware.rm_netxduo_wifi.requires.nxd.common" interface="interface.azure.nxd.common" display="Add NetX Duo Common" />
+        <provides interface="interface.middleware.rm_netxduo_wifi" />
+        <provides interface="interface.middleware.rm_netxduo_wifi.${module.middleware.rm_netxduo_wifi.ip_name}" />
+        <provides interface="interface.azure.nxd.driver" />
+        <property default="ip" id="module.middleware.rm_netxduo_wifi.ip_name"/>
+        <property default="" display="AP SSID" id="module.middleware.rm_netxduo_wifi.ap_name" description="Name of Wireless Access Point to connect to." />
+        <property default="" display="AP Password" id="module.middleware.rm_netxduo_wifi.ap_password" description="Password for the Wireless Access Point to connect to." />
+        <property default="module.middleware.rm_netxduo_wifi.ap_security.wpa2" display="AP Security" id="module.middleware.rm_netxduo_wifi.ap_security" description="Security type for the access point.">
+            <option display="Open" id="module.middleware.rm_netxduo_wifi.ap_security.open" value="eWiFiSecurityOpen"/>
+            <option display="WPA" id="module.middleware.rm_netxduo_wifi.ap_security.wpa" value="eWiFiSecurityWPA"/>
+            <option display="WPA2" id="module.middleware.rm_netxduo_wifi.ap_security.wpa2" value="eWiFiSecurityWPA2"/>
+        </property>
+        <header>
+#if (BSP_FEATURE_TZ_HAS_TRUSTZONE == 1) &amp;&amp; (BSP_TZ_SECURE_BUILD != 1) &amp;&amp; (BSP_TZ_NONSECURE_BUILD != 1)
+#define WIFI_BUFFER_PLACE_IN_SECTION BSP_PLACE_IN_SECTION(".ns_buffer.wifi")
+#else
+#define WIFI_BUFFER_PLACE_IN_SECTION
+#endif
+        </header>
+        <includes>
+#include &quot;rm_netxduo_wifi.h&quot;
+        </includes>
+        <declarations>
+        </declarations>
+    </module>
+    <developerSupport>
+        <api version="1">
+            <platform id="fsp" max="" min="1.1.0"/>
+            <moduleRef id="module.middleware.rm_netxduo_wifi"/>
+            <description><![CDATA[<form><p><span color="header" font="header">Overview</span></p><p>The NetX Duo WiFi Driver provides snippets of code for operating the WiFi driver.</p></form>]]></description>
+            <function display="Quick Setup" id="rm_netxduo_wifi_quick_setup">
+                <description><![CDATA[<form><p>This function provides quick setup for the NetX Duo WiFi Driver instance using the properties from the RA configurator.</p></form>]]></description>
+            </function>
+        </api>
+        <template category="function_call" display="Call Quick Setup" id="module.middleware.rm_netxduo_wifi.quick_setup" version="1">
+            <platform id="fsp" max="" min="1.1.0"/>
+            <moduleRef id="module.middleware.rm_netxduo_wifi">
+                <function id="rm_netxduo_wifi_quick_setup"/>
+            </moduleRef>
+            <content>
+#define WIFI_SSID_NAME          "${wifi_ssid:raProperty(module.middleware.rm_netxduo_wifi.ap_name)}"
+#define WIFI_PASSWORD           "${wifi_password:raProperty(module.middleware.rm_netxduo_wifi.ap_password)}"
+#define WIFI_SECURITY_TYPE      ${wifi_security:raProperty(module.middleware.rm_netxduo_wifi.ap_security)}
+
+void rm_netxduo_wifi_quick_setup();
+
+/* Quick setup for rm_netxduo_wifi. */
+void rm_netxduo_wifi_quick_setup()
+{
+    fsp_err_t err;
+
+    /* Open WiFi module */
+    err = rm_wifi_onchip_silex_open(&amp;g_wifi_onchip_silex_cfg);
+    assert(FSP_SUCCESS == err);
+
+    /* Connect to desired AP */
+    err = rm_wifi_onchip_silex_connect(WIFI_SSID_NAME, WIFI_SECURITY_TYPE, WIFI_PASSWORD);
+    assert(FSP_SUCCESS == err);
+}
+            </content>
+        </template>
+    </developerSupport>
+</raModuleDescription>

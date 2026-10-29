@@ -1,0 +1,402 @@
+﻿<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.driver.ptp" path="fsp_cfg/r_ptp_cfg.h" version="0">
+        <property id="config.driver.ptp.checking" display="Parameter Checking" default="config.driver.ptp.checking.system" description="If selected code for parameter checking is included in the build.">
+            <option id="config.driver.ptp.checking.system" display="Default (BSP)" value="(BSP_CFG_PARAM_CHECKING_ENABLE)" />
+            <option id="config.driver.ptp.checking.enabled" display="Enabled" value="(1)" />
+            <option id="config.driver.ptp.checking.disabled" display="Disabled" value="(0)" />
+        </property>
+        <content>
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#define PTP_CFG_PARAM_CHECKING_ENABLE ${config.driver.ptp.checking}
+
+#ifdef __cplusplus
+}
+#endif
+        </content>
+    </config>
+    <module config="config.driver.ptp" display="Networking|${module.driver.ptp.name} PTP (r_ptp)" id="module.driver.ptp" version="1" url="group___p_t_p.html">
+        <constraint display="The input clock frequency must be 20Mhz, 25Mhz, 50Mhz, or 100Mhz.">eval('' +
+            'var pclka = ${board.clock.peripheral.ptp};' +
+            'var div = "${module.driver.ptp.clock_source}";' +
+            'div = div.split(".");' +
+            'div = div\[div.length - 1\];' +
+            'var output = true;' +
+            'if (div != "ref50ck0") {' +
+            '  var input_frequency = Math.floor(pclka / div / 1000000);' +
+            '  var possible_input_frequencies = \[20, 25, 50, 100\];' +
+            '  if (possible_input_frequencies.indexOf(input_frequency) &lt; 0 || input_frequency * div * 1000000 != ${board.clock.peripheral.ptp}) {' +
+            '    output = false;' +
+            '  }' +
+            '}' +
+            'output')</constraint>
+        <constraint display="Driver > Network > Ethernet Driver must also be added in order to configure Ethernet.">${interface.driver.ether} &gt; 0</constraint>
+        <constraint display="Requires PTP callback to be an application function name (not NULL).">
+          ("${module.driver.ptp.callback}" != "NULL")
+        </constraint>
+        <constraint display="Only one instance of PTP is available.">${interface.driver.ptp} &lt;= 1</constraint>
+        <requires id="module.driver.ptp.requires.edmac" interface="interface.peripheral.edmac" visible="true" display="Requires EDMAC">
+            <override property="module.driver.edmac.channel" value="module.driver.edmac.ptp_edmac"/>
+            <override property="module.driver.edmac.padding_bytes" value="module.driver.edmac.padding_bytes.disable"/>
+            <override property="module.driver.edmac.padding_offset" value="0"/>
+            <override property="module.driver.edmac.rx_descriptor_list_length" value="${module.driver.ptp.rx_num_buffers}"/>
+            <override property="module.driver.edmac.tx_descriptor_list_length" value="${module.driver.ptp.tx_num_buffers}"/>
+            <override property="module.driver.edmac.callback" value="r_ptp_edmac_callback"/>
+            <override property="module.driver.edmac.context" value="&amp;${module.driver.ptp.name}"/>
+        </requires>
+        <requires id="module.driver.ptp.requires.ptp" interface="interface.mcu.etherc_eptpc" visible="false" display="Requires PTP peripheral" />
+        <provides interface="interface.driver.ptp" />
+        <property default="g_ptp${_instance}" display="Name" id="module.driver.ptp.name" description="Module name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.ptp.name}")</constraint>
+        </property>
+        <property default="module.driver.ptp.ethernet_phy_interface.rmii" display="Ethernet PHY Interface Type" id="module.driver.ptp.ethernet_phy_interface" description="The interface type used to communicate with the Ethernet PHY.">
+            <option display="MII" id="module.driver.ptp.ethernet_phy_interface.mii" value="PTP_ETHERNET_PHY_INTERFACE_MII"/>
+            <option display="RMII" id="module.driver.ptp.ethernet_phy_interface.rmii" value="PTP_ETHERNET_PHY_INTERFACE_RMII"/>
+        </property>
+        <property default="module.driver.ptp.frame_filter.ext_promiscuous" display="Frame Filter" id="module.driver.ptp.frame_filter" description="Selects how packets are filtered based on their destination MAC address. Packets that pass the filter are transferred to the ETHERC EDMAC.">
+            <option display="Extended Promiscuous Mode" id="module.driver.ptp.frame_filter.ext_promiscuous" value="PTP_FRAME_FILTER_MODE_EXT_PROMISCUOUS_MODE"/>
+            <option display="Unicast and Multicast" id="module.driver.ptp.frame_filter.unicast_multicast" value="PTP_FRAME_FILTER_MODE_UNICAST_MULTICAST"/>
+            <option display="Unicast and Multicast Filtered" id="module.driver.ptp.frame_filter.ext_promiscuous" value="PTP_FRAME_FILTER_MODE_UNICAST_MULTICAST_FILTERED"/>
+            <option display="Unicast" id="module.driver.ptp.frame_filter.ext_promiscuous" value="PTP_FRAME_FILTER_MODE_UNICAST"/>
+        </property>
+        <property default="module.driver.ptp.frame_format.ethernetii" display="Frame Format" id="module.driver.ptp.frame_format" description="The format of the frames that encapsulate the PTP messages.">
+            <option display="Ethernet II" id="module.driver.ptp.frame_format.ethernetii" value="PTP_FRAME_FORMAT_ETHERII"/>
+            <option display="Ethernet II | IPv4 | UDP" id="module.driver.ptp.frame_format.ethernetii_ip_udp" value="PTP_FRAME_FORMAT_ETHERII_IPV4_UDP"/>
+            <option display="IEEE802.3 | LLC | SNAP" id="module.driver.ptp.frame_format.ieee802_3" value="PTP_FRAME_FORMAT_IEEE802_3"/>
+            <option display="IEEE802.3 | LLC | SNAP | IPv4 | UDP" id="module.driver.ptp.frame_format.ieee802_3_ip_udp" value="PTP_FRAME_FORMAT_IEEE802_3_IPV4_UDP"/>
+        </property>
+        <property default="0" display="Clock Domain" id="module.driver.ptp.clock_domain" description="The PTP clock will only respond to clocks in its domain.">
+            <constraint display="Value must in the range [0,255].">testInteger("${module.driver.ptp.clock_domain}")  &amp;&amp; ("${module.driver.ptp.clock_domain}" &gt;= 0) &amp;&amp; ("${module.driver.ptp.clock_domain}" &lt;= 255)</constraint>
+        </property>
+        <property default="module.driver.ptp.clock_domain_filter.enable" display="Clock Domain Filter" id="module.driver.ptp.clock_domain_filter" description="Filter out PTP messages from other clock domains.">
+            <option display="Enable" id="module.driver.ptp.clock_domain_filter.enable" value="PTP_ENABLE"/>
+            <option display="Disable" id="module.driver.ptp.clock_domain_filter.disable" value="PTP_DISABLE"/>
+        </property>
+        <property default="1536" display="Buffer Size" id="module.driver.ptp.buffer_size" description="The maximum Ethernet packet size that can be transmitted or received by the application from the EDMAC.">
+            <constraint display="Value must in the range [64,1536].">testInteger("${module.driver.ptp.buffer_size}")  &amp;&amp; ("${module.driver.ptp.buffer_size}" &gt;= 64) &amp;&amp; ("${module.driver.ptp.buffer_size}" &lt;= 1536)</constraint>
+            <constraint display="Must be a multiple of 32 bytes.">testInteger("${module.driver.ptp.buffer_size}")  &amp;&amp; (("${module.driver.ptp.buffer_size}" % 32)  == 0)</constraint>
+        </property>
+        <property default="4" display="Number of transmit buffers" id="module.driver.ptp.tx_num_buffers" description="The number of transmit buffers in the packet queue.">
+            <constraint display="Value must in the range [1,16].">testInteger("${module.driver.ptp.tx_num_buffers}")  &amp;&amp; ("${module.driver.ptp.tx_num_buffers}" &gt;= 1) &amp;&amp; ("${module.driver.ptp.tx_num_buffers}" &lt;= 16)</constraint>
+        </property>
+        <property default="4" display="Number of receive buffers" id="module.driver.ptp.rx_num_buffers" description="The number of receive buffers in the packet queue.">
+            <constraint display="Value must in the range [1,16].">testInteger("${module.driver.ptp.rx_num_buffers}")  &amp;&amp; ("${module.driver.ptp.rx_num_buffers}" &gt;= 1) &amp;&amp; ("${module.driver.ptp.rx_num_buffers}" &lt;= 16)</constraint>
+        </property>
+        <property default="module.driver.ptp.delay_req_interval.plus_0" display="Announce message interval." id="module.driver.ptp.announce_interval" description="The period of time between generated announce messages.">
+            <select enum="enum.driver.ptp.interval"/>
+        </property>
+        <property default="module.driver.ptp.delay_req_interval.plus_0" display="Sync message interval." id="module.driver.ptp.sync_interval" description="The period of time between generated sync messages.">
+            <select enum="enum.driver.ptp.interval"/>
+        </property>
+        <property default="module.driver.ptp.delay_req_interval.plus_0" display="Delay_req message interval." id="module.driver.ptp.delay_req_interval" description="The period of time between generated delay_req messages.">
+            <select enum="enum.driver.ptp.interval"/>
+        </property>
+        <property default="4000" display="Message timeout" id="module.driver.ptp.message_timeout" description="The time in milliseconds needed to generate timeout events after not receiving a sync or delay_resp message.">
+            <constraint display="Value must be greater than 0.">testInteger("${module.driver.ptp.message_timeout}")  &amp;&amp; ("${module.driver.ptp.message_timeout}" &gt; 0)</constraint>
+        </property>
+        <property default="128" display="Clock Properties|Priority 1" id="module.driver.ptp.priority1" description="Priority1 field advertised in generated announce packets.">
+            <constraint display="Value must in the range [0,255].">testInteger("${module.driver.ptp.priority1}")  &amp;&amp; ("${module.driver.ptp.priority1}" &gt;= 0) &amp;&amp; ("${module.driver.ptp.priority1}" &lt;= 255)</constraint>
+        </property>
+        <property default="248" display="Clock Properties|Class" id="module.driver.ptp.cclass" description="Class field advertised in generated announce packets.">
+            <constraint display="Value must in the range [0,255].">testInteger("${module.driver.ptp.cclass}")  &amp;&amp; ("${module.driver.ptp.cclass}" &gt;= 0) &amp;&amp; ("${module.driver.ptp.cclass}" &lt;= 255)</constraint>
+        </property>
+        <property default="0xFE" display="Clock Properties|Accuracy" id="module.driver.ptp.accuracy" description="Accuracy field advertised in generated announce packets.">
+            <constraint display="Value must in the range [0,255].">testInteger("${module.driver.ptp.accuracy}")  &amp;&amp; ("${module.driver.ptp.accuracy}" &gt;= 0) &amp;&amp; ("${module.driver.ptp.accuracy}" &lt;= 255)</constraint>
+        </property>
+        <property default="0xFFFF" display="Clock Properties|Variance" id="module.driver.ptp.variance" description="Variance field advertised in generated announce packets.">
+            <constraint display="Value must in the range [0,65535].">testInteger("${module.driver.ptp.variance}")  &amp;&amp; ("${module.driver.ptp.variance}" &gt;= 0) &amp;&amp; ("${module.driver.ptp.variance}" &lt;= 65535)</constraint>
+        </property>
+        <property default="128" display="Clock Properties|Priority 2" id="module.driver.ptp.priority2" description="Priority2 field advertised in generated announce packets.">
+            <constraint display="Value must in the range [0,255].">testInteger("${module.driver.ptp.priority2}")  &amp;&amp; ("${module.driver.ptp.priority2}" &gt;= 0) &amp;&amp; ("${module.driver.ptp.priority2}" &lt;= 255)</constraint>
+        </property>
+        <property default="160" display="Clock Properties|Time Source" id="module.driver.ptp.timesource" description="Time Source field advertised in generated announce packets.">
+            <constraint display="Value must in the range [0,255].">testInteger("${module.driver.ptp.timesource}")  &amp;&amp; ("${module.driver.ptp.timesource}" &gt;= 0) &amp;&amp; ("${module.driver.ptp.timesource}" &lt;= 255)</constraint>
+        </property>
+        <property default="01:1B:19:00:00:00" display="Ethernet|Multicast Filter MAC address" id="module.driver.ptp.multicast_filter_address" description="In Multicast Filtered mode, only multicast addresses that match this address are received by the ETHERC EDMAC.">
+            <constraint display="Must be a valid MAC address">eval('' +
+            'var input = "${module.driver.ptp.multicast_filter_address}";' +
+            'var regex = RegExp("^[0-9A-F]\{2\}\(:[0-9A-F]\{2\}\)\{5\}$","i");' +
+            '(regex.test(input) &amp;&amp; ( 17 === input.length) )')
+            </constraint>
+            <export>"0x" + "${module.driver.ptp.multicast_filter_address}".replace(/\:/g,",0x")</export>       <!-- replace all colons with commas on export and add 0x to mark as hex -->
+        </property>
+        <property default="01:1B:19:00:00:00" display="Ethernet|Primary Destination MAC address" id="module.driver.ptp.primary_mac_address" description="The destination MAC address for primary PTP messages.">
+            <constraint display="Must be a valid MAC address">eval('' +
+            'var input = "${module.driver.ptp.primary_mac_address}";' +
+            'var regex = RegExp("^[0-9A-F]\{2\}\(:[0-9A-F]\{2\}\)\{5\}$","i");' +
+            '(regex.test(input) &amp;&amp; ( 17 === input.length) )')
+            </constraint>
+            <export>"0x" + "${module.driver.ptp.primary_mac_address}".replace(/\:/g,",0x")</export>            <!-- replace all colons with commas on export and add 0x to mark as hex -->
+        </property>
+        <property default="01:80:C2:00:00:0E" display="Ethernet|PDelay Destination MAC address" id="module.driver.ptp.pdelay_mac_address" description="The destination MAC address for PDelay messages.">
+            <constraint display="Must be a valid MAC address">eval('' +
+            'var input = "${module.driver.ptp.pdelay_mac_address}";' +
+            'var regex = RegExp("^[0-9A-F]\{2\}\(:[0-9A-F]\{2\}\)\{5\}$","i");' +
+            '(regex.test(input) &amp;&amp; ( 17 === input.length) )')
+            </constraint>
+            <export>"0x" + "${module.driver.ptp.pdelay_mac_address}".replace(/\:/g,",0x")</export>            <!-- replace all colons with commas on export and add 0x to mark as hex -->
+        </property>
+        <property default="224.0.1.129" display="IP|Primary Destination IP address" id="module.driver.ptp.primary_ip_address" description="The destination IPv4 address for primary messages.">
+            <constraint display="Must be a valid IP address">eval('' +
+            'var input = "${module.driver.ptp.primary_ip_address}";' +
+            'var ary = input.split(".");' +
+            'var r = ary.length == 4;' +
+            'for (var i = 0; i &lt; ary.length; i++) {' +
+            '  var val = parseInt(ary\[i\]);' +
+            '  r = r &amp;&amp; !isNaN(val);' +
+            '  if (r) {' +
+            '    r = r &amp;&amp; val &lt;= 255' +
+            '  }' +
+            '}' +
+            'r')
+            </constraint>
+            <export>eval('' +
+            'var output = "${module.driver.ptp.primary_ip_address}";' +
+            'output = output.split(".");' +
+            '"((" + output\[0\] + "U &lt;&lt; 24U) | (" + output\[1\] + "U &lt;&lt; 16U) | (" + output\[2\] + "U &lt;&lt; 8U) | (" + output\[3\] + "U &lt;&lt; 0U))"'
+            )</export>
+        </property>
+        <property default="224.0.0.107" display="IP|PDelay Destination IP address" id="module.driver.ptp.pdelay_ip_address" description="The destination IPv4 address for PDelay messages.">
+            <constraint display="Must be a valid IP address">eval('' +
+            'var input = "${module.driver.ptp.pdelay_ip_address}";' +
+            'var ary = input.split(".");' +
+            'var r = ary.length == 4;' +
+            'for (var i = 0; i &lt; ary.length; i++) {' +
+            '  var val = parseInt(ary\[i\]);' +
+            '  r = r &amp;&amp; !isNaN(val);' +
+            '  if (r) {' +
+            '    r = r &amp;&amp; val &lt;= 255' +
+            '  }' +
+            '}' +
+            'r')
+            </constraint>
+            <export>eval('' +
+            'var output = "${module.driver.ptp.pdelay_ip_address}";' +
+            'output = output.split(".");' +
+            '"((" + output\[0\] + "U &lt;&lt; 24U) | (" + output\[1\] + "U &lt;&lt; 16U) | (" + output\[2\] + "U &lt;&lt; 8U) | (" + output\[3\] + "U &lt;&lt; 0U))"'
+            )</export>
+        </property>
+        <property default="0" display="IP|Event Message TOS" id="module.driver.ptp.event_tos" description="The IP packet TOS for event messages.">
+            <constraint display="Value must in the range [0,255].">testInteger("${module.driver.ptp.event_tos}")  &amp;&amp; ("${module.driver.ptp.event_tos}" &gt;= 0) &amp;&amp; ("${module.driver.ptp.event_tos}" &lt;= 255)</constraint>
+        </property>
+        <property default="0" display="IP|General Message TOS" id="module.driver.ptp.general_tos" description="The IP packet TOS for general messages.">
+            <constraint display="Value must in the range [0,255].">testInteger("${module.driver.ptp.general_tos}")  &amp;&amp; ("${module.driver.ptp.general_tos}" &gt;= 0) &amp;&amp; ("${module.driver.ptp.general_tos}" &lt;= 255)</constraint>
+        </property>
+        <property default="1" display="IP|Primary Message TTL" id="module.driver.ptp.primary_ttl" description="The IP packet TTL for primary messages.">
+            <constraint display="Value must in the range [0,255].">testInteger("${module.driver.ptp.primary_ttl}")  &amp;&amp; ("${module.driver.ptp.primary_ttl}" &gt;= 0) &amp;&amp; ("${module.driver.ptp.primary_ttl}" &lt;= 255)</constraint>
+        </property>
+        <property default="1" display="IP|PDelay Message TTL" id="module.driver.ptp.pdelay_ttl" description="The IP packet TTL for p_delay messages.">
+            <constraint display="Value must in the range [0,255].">testInteger("${module.driver.ptp.pdelay_ttl}")  &amp;&amp; ("${module.driver.ptp.pdelay_ttl}" &gt;= 0) &amp;&amp; ("${module.driver.ptp.pdelay_ttl}" &lt;= 255)</constraint>
+        </property>
+        <property default="319" display="IP|Event Port" id="module.driver.ptp.event_udp_port" description="The UDP port for event messages.">
+            <constraint display="Value must in the range [0,65535].">testInteger("${module.driver.ptp.event_udp_port}")  &amp;&amp; ("${module.driver.ptp.event_udp_port}" &gt;= 0) &amp;&amp; ("${module.driver.ptp.event_udp_port}" &lt;= 65535)</constraint>
+        </property>
+        <property default="320" display="IP|General Port" id="module.driver.ptp.general_udp_port" description="The UDP port for general messages.">
+            <constraint display="Value must in the range [0,65535].">testInteger("${module.driver.ptp.general_udp_port}")  &amp;&amp; ("${module.driver.ptp.general_udp_port}" &gt;= 0) &amp;&amp; ("${module.driver.ptp.general_udp_port}" &lt;= 65535)</constraint>
+        </property>
+        <property default="module.driver.ptp.clock_source.6" display="Clock Source" id="module.driver.ptp.clock_source" description="The STCA clock source must be 20Mhz, 25Mhz, 50Mhz, or 100Mhz. When REF50CK0 is selected, the STCA frequency is 25Mhz.">
+            <option display="PCLKA / 1" id="module.driver.ptp.clock_source.1" value="PTP_STCA_CLOCK_SEL_PCLKA_DIV_1"/>
+            <option display="PCLKA / 2" id="module.driver.ptp.clock_source.2" value="PTP_STCA_CLOCK_SEL_PCLKA_DIV_2"/>
+            <option display="PCLKA / 3" id="module.driver.ptp.clock_source.3" value="PTP_STCA_CLOCK_SEL_PCLKA_DIV_3"/>
+            <option display="PCLKA / 4" id="module.driver.ptp.clock_source.4" value="PTP_STCA_CLOCK_SEL_PCLKA_DIV_4"/>
+            <option display="PCLKA / 5" id="module.driver.ptp.clock_source.5" value="PTP_STCA_CLOCK_SEL_PCLKA_DIV_5"/>
+            <option display="PCLKA / 6" id="module.driver.ptp.clock_source.6" value="PTP_STCA_CLOCK_SEL_PCLKA_DIV_6"/>
+            <option display="REF50CK0" id="module.driver.ptp.clock_source.ref50ck0" value="PTP_STCA_CLOCK_SEL_REF50CK0"/>
+        </property>
+        <property default="" id="module.driver.ptp.clock_frequency">
+            <export>eval('' +
+            'var pclka = ${board.clock.peripheral.ptp};' +
+            'var div = "${module.driver.ptp.clock_source}";' +
+            'div = div.split("_");' +
+            'div = div\[div.length - 1\];' +
+            'var output = "PTP_STCA_CLOCK_FREQ_25MHZ";' +
+            'if (div != "REF50CK0") {' +
+            '  var input_frequency = Math.floor(pclka / div / 1000000);' +
+            '  var possible_input_frequencies = \[20, 25, 50, 100\];' +
+            '  output = "PTP_STCA_CLOCK_FREQ_" + input_frequency + "MHZ";' +
+            '  if (possible_input_frequencies.indexOf(input_frequency) &lt; 0 || input_frequency * div * 1000000 != ${board.clock.peripheral.ptp}) {' +
+            '    output = "RA_NOT_DEFINED /* Invalid input clock frequency selected. */";' +
+            '  }' +
+            '}' +
+            'output')</export>
+        </property>
+        <property default="module.driver.ptp.clock_correction_mode.1" display="Clock Correction Mode" id="module.driver.ptp.clock_correction_mode" description="Clock correction mode 1 corrects the local clock using the current offsetFromMaster value. Clock correction mode 2 calculates a clock gradient in order to continuously correct the local clock.">
+            <option display="Clock Correction Mode 1" id="module.driver.ptp.clock_correction_mode.1" value="PTP_CLOCK_CORRECTION_MODE1"/>
+            <option display="Clock Correction Mode 2" id="module.driver.ptp.clock_correction_mode.2" value="PTP_CLOCK_CORRECTION_MODE2"/>
+        </property>
+        <property default="32" display="Gradient Worst10 Interval" id="module.driver.ptp.worst10_interval" description="The number of sync messages to use when calculating the worst10 gradient values (Only applies to clock correction mode 2).">
+            <constraint display="Value must in the range [0,255].">testInteger("${module.driver.ptp.worst10_interval}")  &amp;&amp; ("${module.driver.ptp.worst10_interval}" &gt;= 0) &amp;&amp; ("${module.driver.ptp.worst10_interval}" &lt;= 255)</constraint>
+        </property>
+        <property default="1000000" display="Synchronization Detection|Threshold (Nanoseconds)" id="module.driver.ptp.sync_threshold" description="The minimum offsetFromMaster value required in order to synchronize with the master clock.">
+            <constraint display="Value must be greater than 0.">testInteger("${module.driver.ptp.sync_threshold}")  &amp;&amp; ("${module.driver.ptp.sync_threshold}" &gt; 0)</constraint>
+        </property>
+        <property default="5" display="Synchronization Detection|Count" id="module.driver.ptp.sync_count" description="The number of times the calculated offsetFromMaster value must be less than the threshold in order to synchronize with the master clock.">
+            <constraint display="Value must in the range [0,15].">testInteger("${module.driver.ptp.sync_count}")  &amp;&amp; ("${module.driver.ptp.sync_count}" &gt;= 0) &amp;&amp; ("${module.driver.ptp.sync_count}" &lt;= 15)</constraint>
+        </property>
+        <property default="10000000" display="Synchronization Lost Detection|Threshold (Nanoseconds)" id="module.driver.ptp.sync_lost_threshold" description="The minimum offsetFromMaster value required in order to lose synchronization with the master clock.">
+            <constraint display="Value must be greater than 0.">testInteger("${module.driver.ptp.sync_lost_threshold}")  &amp;&amp; ("${module.driver.ptp.sync_lost_threshold}" &gt; 0)</constraint>
+        </property>
+        <property default="5" display="Synchronization Lost Detection|Count" id="module.driver.ptp.sync_lost_count" description="The number of times the calculated offsetFromMaster value must be greater than the threshold in order to lose synchronization with the master.">
+            <constraint display="Value must in the range [0,15].">testInteger("${module.driver.ptp.sync_lost_count}")  &amp;&amp; ("${module.driver.ptp.sync_lost_count}" &gt;= 0) &amp;&amp; ("${module.driver.ptp.sync_lost_count}" &lt;= 15)</constraint>
+        </property>
+        <property default="ptp${_instance}_user_callback" display="Interrupts|Callback" id="module.driver.ptp.callback" description="Called when a STCA/SYNFP event occurs, a PTP message is received, or if a Pulse Timer event occurs.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.ptp.callback}")</constraint>
+        </property>
+        <property default="" display="Interrupts|MINT Interrupt priority" id="module.driver.ptp.mint" description="Select the EPTPC MINT interrupt priority.">
+            <select enum="enum.mcu.nvic.priorities.mandatory"/>
+            <interrupt event="event.eptpc.mint" isr="r_ptp_mint_isr"/>
+        </property>
+        <property default="" display="Interrupts|Pulse Timer Interrupt priority" id="module.driver.ptp.ipls" description="Select the EPTPC IPLS priority.">
+            <select enum="enum.mcu.nvic.priorities.mandatory"/>
+            <interrupt event="event.eptpc.ipls" isr="r_ptp_ipls_isr"/>
+        </property>
+        <property id="module.driver.ptp.transmit_buffers" default="">
+            <export>eval('' +
+            'var output = "uint8_t ${module.driver.ptp.name}_transmit_buffers\[${module.driver.ptp.tx_num_buffers}\]\[${module.driver.ptp.buffer_size}\];";' +
+            'output += "uint8_t * ${module.driver.ptp.name}_transmit_buffer_array\[${module.driver.ptp.tx_num_buffers}\] = {\\n";' +
+            'for (var i= 0 ; i &lt; ${module.driver.ptp.tx_num_buffers}; i++){' +
+            '  output += "\(uint8_t *\) &amp;${module.driver.ptp.name}_transmit_buffers\[" + i + "\]\[0\],\\n";' +
+            '}' +
+            'output += "};\\n";' +
+            'output')
+            </export>
+        </property>
+        <property id="module.driver.ptp.receive_buffers" default="">
+            <export>eval('' +
+            'var output = "BSP_ALIGN_VARIABLE\(32\) uint8_t ${module.driver.ptp.name}_receive_buffers\[${module.driver.ptp.rx_num_buffers}\]\[${module.driver.ptp.buffer_size}\];";' +
+            'output += "uint8_t * ${module.driver.ptp.name}_receive_buffer_array\[${module.driver.ptp.rx_num_buffers}\] = {\\n";' +
+            'for (var i= 0 ; i &lt; ${module.driver.ptp.rx_num_buffers}; i++){' +
+            '  output += "\(uint8_t *\) &amp;${module.driver.ptp.name}_receive_buffers\[" + i + "\]\[0\],\\n";' +
+            '}' +
+            'output += "};\\n";' +
+            'output')
+            </export>
+        </property>
+        <property id="module.driver.ptp.ip_enabled" default="">
+            <export>eval('' +
+            'var output = "1";' +
+            'var format = "${module.driver.ptp.frame_format}";' +
+            'if ("PTP_FRAME_FORMAT_ETHERII" == format || "PTP_FRAME_FORMAT_IEEE802_3" == format) {' +
+            '  output = "0";' +
+            '}' +
+            'output')
+            </export>
+        </property>
+        <memory accumulator="RAM_NS_BUFFER_LENGTH">
+            <!-- Allocate non-secure memory for flat projects, which use secure memory by default. The Ethernet peripheral is always non-secure, and it accesses the descriptors directly, so the descriptors must be in non-secure memory. -->
+            ("${_project.nonsecure}" === "1") ? 0 : (${module.driver.ptp.buffer_size} * (${module.driver.ptp.rx_num_buffers} + ${module.driver.ptp.tx_num_buffers}))
+        </memory>
+        <header>
+extern void ${module.driver.ptp.callback} (ptp_callback_args_t * p_args);
+extern void ptp_edmac_callback(edmac_callback_args_t * p_args);
+
+extern ptp_instance_ctrl_t ${module.driver.ptp.name}_ctrl;
+extern const ptp_cfg_t ${module.driver.ptp.name}_cfg;
+extern ptp_instance_t ${module.driver.ptp.name};
+        </header>
+        <includes>
+#include "r_ptp.h"
+        </includes>
+        <declarations>
+/* Array for storing transmit packets. */
+${module.driver.ptp.transmit_buffers}
+
+/* Array for storing received packets. */
+${module.driver.ptp.receive_buffers}
+
+/* If IPv4 packets are not used then provide destination MAC addresses. */
+#if !${module.driver.ptp.ip_enabled}
+static uint8_t ${module.driver.ptp.name}_primary_mac_addr[] = {${module.driver.ptp.primary_mac_address}};
+static uint8_t ${module.driver.ptp.name}_pdelay_mac_addr[]     = {${module.driver.ptp.pdelay_mac_address}};
+#endif
+
+/* Any multicast addresses that match the multicast filter address are transferred to the ETHERC EDMAC. */
+static uint8_t ${module.driver.ptp.name}_multicast_filter_addr[] = {${module.driver.ptp.multicast_filter_address}};
+
+ptp_instance_ctrl_t ${module.driver.ptp.name}_ctrl;
+
+const ptp_cfg_t ${module.driver.ptp.name}_cfg =
+{
+    .synfp                       =
+    {
+        .ethernet_phy_interface  = ${module.driver.ptp.ethernet_phy_interface},
+        .frame_format            = ${module.driver.ptp.frame_format},
+        .frame_filter            = ${module.driver.ptp.frame_filter},
+        .clock_domain            = ${module.driver.ptp.clock_domain},
+        .clock_domain_filter     = ${module.driver.ptp.clock_domain_filter},
+        .announce_interval       = ${module.driver.ptp.announce_interval},
+        .sync_interval           = ${module.driver.ptp.sync_interval},
+        .delay_req_interval      = ${module.driver.ptp.delay_req_interval},
+        .message_timeout         = ${module.driver.ptp.message_timeout},
+        .clock_properties        =
+        {
+            .priority1 = ${module.driver.ptp.priority1},
+            .cclass    = ${module.driver.ptp.cclass},
+            .accuracy  = ${module.driver.ptp.accuracy},
+            .variance  = ${module.driver.ptp.variance},
+            .priority2 = ${module.driver.ptp.priority2}
+        },
+        .timesource             = ${module.driver.ptp.timesource},
+        .p_multicast_addr_filter = ${module.driver.ptp.name}_multicast_filter_addr,
+        /* If IPv4 packets are used. */
+#if ${module.driver.ptp.ip_enabled}
+        .ipv4 = {
+            .primary_ip_addr = ${module.driver.ptp.primary_ip_address},
+            .pdelay_ip_addr = ${module.driver.ptp.pdelay_ip_address},
+            .event_tos = ${module.driver.ptp.event_tos},
+            .general_tos = ${module.driver.ptp.general_tos},
+            .primary_ttl = ${module.driver.ptp.primary_ttl},
+            .pdelay_ttl = ${module.driver.ptp.pdelay_ttl},
+            .event_udp_port = ${module.driver.ptp.event_udp_port},
+            .general_udp_port = ${module.driver.ptp.general_udp_port},
+        }
+#else
+        .ether              =
+        {
+            .p_primary_mac_addr = ${module.driver.ptp.name}_primary_mac_addr,
+            .p_pdelay_mac_addr     = ${module.driver.ptp.name}_pdelay_mac_addr
+        }
+#endif
+    },
+    .stca                          =
+    {
+        .clock_freq                = ${module.driver.ptp.clock_frequency},
+        .clock_sel                 = ${module.driver.ptp.clock_source},
+        .clock_correction_mode     = ${module.driver.ptp.clock_correction_mode},
+        .gradient_worst10_interval = ${module.driver.ptp.worst10_interval},
+        .sync_threshold            =
+        {
+            .threshold = ${module.driver.ptp.sync_threshold},
+            .count     = ${module.driver.ptp.sync_count},
+        },
+        .sync_loss_threshold       =
+        {
+            .threshold = ${module.driver.ptp.sync_lost_threshold},
+            .count     = ${module.driver.ptp.sync_lost_count},
+        }
+    },
+
+    .mint_irq               = VECTOR_NUMBER_EPTPC_MINT,
+    .ipls_irq               = VECTOR_NUMBER_EPTPC_IPLS,
+    .mint_ipl               = ${module.driver.ptp.mint},
+    .ipls_ipl               = ${module.driver.ptp.ipls},
+    .buffer_size            = ${module.driver.ptp.buffer_size},
+    .p_rx_buffers           = ${module.driver.ptp.name}_receive_buffer_array,
+    .p_tx_buffers           = ${module.driver.ptp.name}_transmit_buffer_array,
+    .p_edmac_instance       = &amp;${module.driver.ptp.requires.edmac::module.driver.edmac.name},
+    .p_callback             = ${module.driver.ptp.callback},
+    .p_context              = NULL,
+    .p_extend               = NULL
+};
+
+ptp_instance_t ${module.driver.ptp.name} = {
+    .p_ctrl = &amp;${module.driver.ptp.name}_ctrl,
+    .p_cfg = &amp;${module.driver.ptp.name}_cfg,
+    .p_api = &amp;g_ptp_api
+};
+        </declarations>
+    </module>
+</raModuleDescription>

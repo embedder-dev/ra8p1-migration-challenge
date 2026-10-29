@@ -1,0 +1,165 @@
+<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.middleware.ble_abs_gtl" path="fsp_cfg/rm_ble_abs_gtl_cfg.h" version="0">
+        <property id="config.middleware.ble_abs_gtl.parameter_checking_enable" display="Parameter Checking" default="config.middleware.ble_abs_gtl.parameter_checking_enable.bsp" description="Specify whether to include code for API parameter checking.">
+            <option id="config.middleware.ble_abs_gtl.parameter_checking_enable.bsp" display="Default (BSP)" value="BSP_CFG_PARAM_CHECKING_ENABLE" />
+            <option id="config.middleware.ble_abs_gtl.parameter_checking_enable.enabled" display="Enable" value="1" />
+            <option id="config.middleware.ble_abs_gtl.parameter_checking_enable.disabled" display="Disable" value="0" />
+        </property>
+        <content>
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#define BLE_ABS_CFG_RF_CONNECTION_MAXIMUM           (1)
+#define BLE_ABS_CFG_GATT_MTU_SIZE                   (247)
+#define BLE_ABS_CFG_NUMBER_BONDING                  (1)
+#define BLE_ABS_CFG_TIMER_NUMBER_OF_SLOT            (10)
+#define BLE_ABS_CFG_PARAM_CHECKING_ENABLE           (${config.middleware.ble_abs_gtl.parameter_checking_enable})
+#define BLE_CFG_RF_CONN_MAX                         (1)
+#define BLE_ABS_CFG_TRANSMIT_POWER_INDEX            (34)
+
+#if ${interface.driver.ble_abs_gtl_transport_spi} > 0
+            #define RM_BLE_ABS_GTL_TRANSPORT_INTERFACE_SPI
+#else
+            #define RM_BLE_ABS_GTL_TRANSPORT_INTERFACE_UART
+#endif
+
+#ifdef __cplusplus
+}
+#endif
+        </content>
+    </config>
+    <module id="module.middleware.ble_abs_gtl" config="config.middleware.ble_abs_gtl" display="Networking|GTL BLE Abstraction (rm_ble_abs_gtl)" version="0" url="group___b_l_e___a_b_s.html">
+        <constraint display="BSP heap of at least 2K bytes is required. Please add a heap under BSP|RA Common|Heap Size.">
+        "${config.bsp.common.heap}" &gt;= 0x800
+        </constraint>
+        <constraint display="FreeRTOS Dynamic Memory Allocation is required. Please enable it under Thread|Common|Memory Allocation|Support Dynamic Allocation.">
+            "${config.awsfreertos.thread.configsupport_dynamic_allocation}" == "config.awsfreertos.thread.configsupport_dynamic_allocation.enabled" || !testExists("${interface.rtos.awsfreertos}")
+        </constraint>
+        <constraint display="FreeRTOS Recursive Mutexes are required. Please enable them under Thread|Common|General|Use Recursive Mutexes.">
+           ("${config.awsfreertos.thread.configuse_recursive_mutexes}" === "config.awsfreertos.thread.configuse_recursive_mutexes.enabled") || !testExists("${interface.rtos.awsfreertos}")
+        </constraint>
+        <constraint display="FreeRTOS xTimerPendFunctionCall function is required. Please enable under Thread|Common|Optional Functions.">
+            ("${config.awsfreertos.thread.include_xtimerpendfunctioncall}" === "config.awsfreertos.thread.include_xtimerpendfunctioncall.enabled") || !testExists("${interface.rtos.awsfreertos}")
+        </constraint>
+        <constraint display="BLE Transport Interface is required.">
+            testExists("${module.middleware.ble_abs_gtl.requires.ble_abs_gtl_transport::module.driver.ble_abs_gtl_transport.name}")
+        </constraint>
+        <requires id="module.middleware.ble_abs_gtl.requires.r_ble_gtl" interface="interface.driver.r_ble_gtl" display="DA14xxx GTL Driver Layer" find="true" />
+        <requires id="module.middleware.ble_abs_gtl.requires.ble_abs_gtl_transport" interface="interface.driver.ble_abs_gtl_transport" display="Transport Interface for communicating with the module." find="true" />
+        <provides interface="interface.driver.ble_abs_gtl" />
+        <provides interface="interface.driver.ble_abs_gtl.${module.middleware.ble_abs_gtl.name}" />
+        <property default="g_ble_abs${_instance}" display="General|Name" id="module.middleware.ble_abs_gtl.name" description="Module name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.middleware.ble_abs_gtl.name}")</constraint>
+        </property>
+        <property display="General|GAP callback" id="module.middleware.ble_abs_gtl.gap_callback" default="gap_cb" description="If QE is used, set to &quot;gap_cb&quot;.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.middleware.ble_abs_gtl.gap_callback}")</constraint>
+        </property>
+        <property display="General|Vendor specific callback" id="module.middleware.ble_abs_gtl.vendor_specific_callback" default="vs_cb" description="If QE is used, set to &quot;vs_cb&quot;.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.middleware.ble_abs_gtl.vendor_specific_callback}")</constraint>
+        </property>
+        <property display="General|GATT server callback parameter" id="module.middleware.ble_abs_gtl.server_cb_list" default="gs_abs_gatts_cb_param" description="If QE is used, set to &quot;gs_abs_gattc_cb_param&quot;.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.middleware.ble_abs_gtl.server_cb_list}")</constraint>
+        </property>
+        <property display="General|GATT server callback number" id="module.middleware.ble_abs_gtl.gatt_server_init_callback_number" default="2" description="The number of GATT Server callback functions.">
+            <constraint display="Must be a valid number">testInteger("${module.middleware.ble_abs_gtl.gatt_server_init_callback_number}") &amp;&amp; ("${module.middleware.ble_abs_gtl.gatt_server_init_callback_number}" &gt;= 0) </constraint>
+        </property>
+        <property display="General|GATT client callback parameter" id="module.middleware.ble_abs_gtl.client_cb_list" default="gs_abs_gattc_cb_param" description="Set GATT client callback parameter. If QE is used, set to &quot;gs_abs_gattc_cb_param&quot;.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.middleware.ble_abs_gtl.client_cb_list}")</constraint>
+        </property>
+        <property display="General|GATT client callback number" id="module.middleware.ble_abs_gtl.gatt_client_init_callback_number" default="2" description="The number of GATT Server callback functions.">
+            <constraint display="Must be a valid number">testInteger("${module.middleware.ble_abs_gtl.gatt_client_init_callback_number}") &amp;&amp; ("${module.middleware.ble_abs_gtl.gatt_client_init_callback_number}" &gt;= 0) </constraint>
+        </property>
+        <property id="module.middleware.ble_abs_gtl.p_context" default="NULL">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.middleware.ble_abs_gtl.p_context}")</constraint>
+            <export>eval('' +
+            'var output = "${module.middleware.ble_abs_gtl.p_context}";' +
+            'if ("NULL" !== output){' +
+            'output = "&amp;" + output  ;' +
+            '}' +
+            'output')
+            </export>
+        </property>
+        <property id="module.middleware.ble_abs_gtl.p_extend" default="NULL">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.middleware.ble_abs_gtl.p_extend}")</constraint>
+            <export>eval('' +
+            'var output = "${module.middleware.ble_abs_gtl.p_extend}";' +
+            'if ("NULL" !== output){' +
+            'output = "&amp;" + output  ;' +
+            '}' +
+            'output')
+            </export>
+        </property>
+        <header>
+/** BLE_ABS on BLE Instance. */
+extern const ble_abs_instance_t ${module.middleware.ble_abs_gtl.name};
+
+/** Access the BLE_ABS instance using these structures when calling API functions directly (::p_api is not used). */
+extern ble_abs_instance_ctrl_t ${module.middleware.ble_abs_gtl.name}_ctrl;
+extern const ble_abs_cfg_t ${module.middleware.ble_abs_gtl.name}_cfg;
+
+/** Callback used by ble_abs_gtl Instance. */
+#ifndef ${module.middleware.ble_abs_gtl.gap_callback}
+void ${module.middleware.ble_abs_gtl.gap_callback}(uint16_t type, ble_status_t result, st_ble_evt_data_t *p_data);
+#endif
+
+#ifndef ${module.middleware.ble_abs_gtl.vendor_specific_callback}
+void ${module.middleware.ble_abs_gtl.vendor_specific_callback}(uint16_t type, ble_status_t result, st_ble_vs_evt_data_t *p_data);
+#endif
+
+#ifndef ${module.middleware.ble_abs_gtl.server_cb_list}
+extern ble_abs_gatt_server_callback_set_t ${module.middleware.ble_abs_gtl.server_cb_list}[];
+#else
+ble_abs_gatt_server_callback_set_t ${module.middleware.ble_abs_gtl.server_cb_list}[];
+#endif
+
+#ifndef ${module.middleware.ble_abs_gtl.client_cb_list}
+extern ble_abs_gatt_client_callback_set_t ${module.middleware.ble_abs_gtl.client_cb_list}[];
+#else
+ble_abs_gatt_client_callback_set_t ${module.middleware.ble_abs_gtl.client_cb_list}[];
+#endif
+
+        </header>
+        <includes>
+#include "rm_ble_abs.h"
+#include "rm_ble_abs_api.h"
+        </includes>
+        <declarations>
+ble_abs_instance_ctrl_t ${module.middleware.ble_abs_gtl.name}_ctrl;
+
+st_ble_dev_addr_t g_own_ble_address; /* Runtime populated */
+
+const ble_abs_cfg_t ${module.middleware.ble_abs_gtl.name}_cfg =
+{
+    .gap_callback = ${module.middleware.ble_abs_gtl.gap_callback},
+    .vendor_specific_callback = ${module.middleware.ble_abs_gtl.vendor_specific_callback},
+    .p_gatt_server_callback_list = ${module.middleware.ble_abs_gtl.server_cb_list},
+    .gatt_server_callback_list_number = ${module.middleware.ble_abs_gtl.gatt_server_init_callback_number},
+    .p_gatt_client_callback_list = ${module.middleware.ble_abs_gtl.client_cb_list},
+    .gatt_client_callback_list_number = ${module.middleware.ble_abs_gtl.gatt_client_init_callback_number},
+#ifdef RM_BLE_ABS_GTL_TRANSPORT_INTERFACE_UART
+    .p_uart_instance = &amp;${module.middleware.ble_abs_gtl.requires.ble_abs_gtl_transport::module.driver.ble_abs_gtl_transport.name}_UART_INSTANCE,
+    .p_spi_instance = NULL,
+    .p_irq_instance = NULL,
+#endif
+#ifdef RM_BLE_ABS_GTL_TRANSPORT_INTERFACE_SPI
+    .p_uart_instance = NULL,
+    .p_spi_instance = &amp;${module.middleware.ble_abs_gtl.requires.ble_abs_gtl_transport::module.driver.ble_abs_gtl_transport.name}_SPI_INSTANCE,
+    .p_irq_instance = &amp;${module.middleware.ble_abs_gtl.requires.ble_abs_gtl_transport::module.driver.ble_abs_gtl_transport.name}_IRQ_INSTANCE,
+#endif
+    .p_callback = NULL,
+    .p_context = ${module.middleware.ble_abs_gtl.p_context},
+    .p_extend = ${module.middleware.ble_abs_gtl.p_extend},
+};
+
+/* Instance structure to use this module. */
+const ble_abs_instance_t ${module.middleware.ble_abs_gtl.name} =
+{
+    .p_ctrl        = &amp;${module.middleware.ble_abs_gtl.name}_ctrl,
+    .p_cfg         = &amp;${module.middleware.ble_abs_gtl.name}_cfg,
+    .p_api         = &amp;g_ble_abs_on_ble
+};
+        </declarations>
+    </module>
+</raModuleDescription>

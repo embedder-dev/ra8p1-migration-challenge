@@ -1,0 +1,17 @@
+<?xml version="1.0" ?>
+<raModuleDescription>
+  <module id="module.driver.sce5b_key_injection" display="Security|Key Injection for PSA Crypto" common="1" version="1" visible="false" url="group___s_c_e___k_e_y___i_n_j_e_c_t_i_o_n.html">    <constraint display="Requires SCE5_B peripheral">
+          "${interface.mcu.rsip.sce5b}" === "1"
+    </constraint>
+    <requires id="module.driver.sce.requires.sce5b" interface="interface.mcu.rsip.sce5b" display="Requires RA6"/>
+    <provides interface="interface.driver.sce5b_key_injection"/>
+    <provides interface="interface.peripheral.rsip"/>
+    <property default="g_sce5b_key_install" display="General|Name" id="module.driver.sce5b_key_injection.name" description="Module name.">
+      <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.sce5b_key_injection.name}")</constraint>
+    </property>
+    <includes>
+      #include &quot;r_sce_key_injection.h&quot;
+      #include &quot;r_sce_key_injection_api.h&quot;
+    </includes>
+  </module>
+</raModuleDescription>

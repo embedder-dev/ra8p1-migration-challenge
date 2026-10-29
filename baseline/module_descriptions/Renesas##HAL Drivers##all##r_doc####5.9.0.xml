@@ -1,0 +1,267 @@
+﻿<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.driver.doc" path="fsp_cfg/r_doc_cfg.h" version="1">
+        <property default="config.doc.param_checking_enable.bsp" display="Parameter Checking" id="config.driver.doc.param_checking_enable" description="If selected code for parameter checking is included in the build.">
+            <option display="Default (BSP)" id="config.doc.param_checking_enable.bsp" value="(BSP_CFG_PARAM_CHECKING_ENABLE)"/>
+            <option display="Enabled" id="config.driver.doc.param_checking_enable.enabled" value="(1)"/>
+            <option display="Disabled" id="config.driver.doc.param_checking_enable.disabled" value="(0)"/>
+        </property>
+        <content>
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#define DOC_CFG_PARAM_CHECKING_ENABLE ${config.driver.doc.param_checking_enable}
+
+#ifdef __cplusplus
+}
+#endif
+        </content>
+    </config>
+    <module config="config.driver.doc" display="Monitoring|${module.driver.doc.name} Data Operation Circuit (r_doc)" id="module.driver.doc_on_doc" version="1" url="group___d_o_c.html">
+        <constraint display="Unique name required for each instance">
+            "${interface.driver.doc.${module.driver.doc.name}}" === "1"
+        </constraint>
+        <constraint display="Requires DOC peripheral">
+          "${interface.mcu.doc}" === "1"
+        </constraint>
+        <constraint display="Additional Reference Data is only used in Comparison Inside Window and Comparison Outside Window modes.">
+            ${module.driver.doc.doc_data_setting_register_value_2} == 0 || "${module.driver.doc.doc_event.event}" == "module.driver.doc.doc_event.comparison_inside_window" || "${module.driver.doc.doc_event.event}" == "module.driver.doc.doc_event.comparison_outside_window"
+        </constraint>
+        <constraint display="Reference/Initial Data must be less than or equal to 0xFFFF.">
+        "${module.driver.doc.doc_bit_width}" != "module.driver.doc.doc_bit_width.16" || ${module.driver.doc.doc_data_setting_register_value} &lt;= 0xFFFF
+        </constraint>
+        <constraint display="Reference/Initial Data must be less than or equal to 0xFFFFFFFF.">
+        "${module.driver.doc.doc_bit_width}" == "module.driver.doc.doc_bit_width.16" || ${module.driver.doc.doc_data_setting_register_value} &lt;= 0xFFFFFFFF
+        </constraint>
+        <constraint display="Additional Reference Data must be less than or equal to 0xFFFF.">
+        "${module.driver.doc.doc_bit_width}" != "module.driver.doc.doc_bit_width.16" || ${module.driver.doc.doc_data_setting_register_value_2} &lt;= 0xFFFF
+        </constraint>
+        <constraint display="Additional Reference Data must be less than or equal to 0xFFFFFFFF.">
+        "${module.driver.doc.doc_bit_width}" == "module.driver.doc.doc_bit_width.16" || ${module.driver.doc.doc_data_setting_register_value_2} &lt;= 0xFFFFFFFF
+        </constraint>
+        <requires id="module.driver.doc_on_doc.requires.doc" interface="interface.mcu.doc" visible="false" display="Requires DOC peripheral" />
+        <provides interface="interface.driver.doc" />
+        <provides interface="interface.driver.doc_on_doc" />
+        <provides interface="interface.driver.doc.${module.driver.doc.name}" />
+        <provides interface="interface.peripheral.doc" />
+        <property default="g_doc${_instance}" display="Name" id="module.driver.doc.name" description="Module name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.doc.name}")</constraint>
+            <signal event="event.doc.int" />
+        </property>
+        <property default="" display="Event" id="module.driver.doc.doc_event.event" description="Select the event that will trigger the DOC interrupt.">
+            <select enum="enum.driver.doc.doc_event"/>
+        </property>
+        <property default="" display="Bit Width" id="module.driver.doc.doc_bit_width" description="The bit width for DOC operations.">
+            <select enum="enum.driver.doc.doc_bit_width"/>
+        </property>
+        <property default="0" display="Reference/Initial Data" id="module.driver.doc.doc_data_setting_register_value" description="Enter Initial Value for Addition/Subtraction or enter reference value for comparison.">
+            <constraint display="Value must be an integer greater than or equal to 0.">
+            testInteger(${module.driver.doc.doc_data_setting_register_value}) &amp;&amp; ${module.driver.doc.doc_data_setting_register_value} &gt;= 0
+            </constraint>
+        </property>
+        <property default="0" display="Additional Reference Data" id="module.driver.doc.doc_data_setting_register_value_2" description="Additional reference data used for Window Compare modes.">
+            <constraint display="Value must be an integer greater than or equal to 0.">
+            testInteger(${module.driver.doc.doc_data_setting_register_value_2}) &amp;&amp; ${module.driver.doc.doc_data_setting_register_value_2} &gt;= 0
+            </constraint>
+        </property>
+        <property default="NULL" display="Callback" id="module.driver.doc.p_callback" description="A user callback function must be provided. This will be called from the interrupt service routine (ISR) when the configured DOC event occurs.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.doc.p_callback}")</constraint>
+        </property>
+        <property default="" display="DOC Interrupt Priority" id="module.driver.doc.ipl" description="Select the DOC interrupt priority.">
+            <select enum="enum.mcu.nvic.priorities.mandatory"/>
+            <interrupt event="event.doc.int" isr="doc_int_isr"/>
+        </property>
+
+        <symbol id="symbol.driver.doc.name" value="${module.driver.doc.name}"/>
+        <symbol id="symbol.driver.doc.guard.open" value="${module.driver.doc.name}_open_guard"/>
+        <symbol id="symbol.driver.doc.guard.macro.open" value="FSP_GUARD_${module.driver.doc.name}_R_DOC_Open"/>
+        <symbol id="symbol.driver.doc.guard.close" value="${module.driver.doc.name}_close_guard"/>
+        <symbol id="symbol.driver.doc.guard.macro.close" value="FSP_GUARD_${module.driver.doc.name}_R_DOC_Close"/>
+        <symbol id="symbol.driver.doc.guard.read" value="${module.driver.doc.name}_read_guard"/>
+        <symbol id="symbol.driver.doc.guard.macro.read" value="FSP_GUARD_${module.driver.doc.name}_R_DOC_Read"/>
+        <symbol id="symbol.driver.doc.guard.write" value="${module.driver.doc.name}_write_guard"/>
+        <symbol id="symbol.driver.doc.guard.macro.write" value="FSP_GUARD_${module.driver.doc.name}_R_DOC_Write"/>
+        <symbol id="symbol.driver.doc.guard.callback_set" value="${module.driver.doc.name}_callback_set_guard"/>
+        <symbol id="symbol.driver.doc.guard.macro.callback_set" value="FSP_GUARD_${module.driver.doc.name}_R_DOC_CallbackSet"/>
+        <symbol id="symbol.driver.doc.nsc_api" value="${module.driver.doc.name}_nsc_api"/>
+        <symbol id="symbol.driver.doc.cfg" value="${module.driver.doc.name}_cfg"/>
+        <symbol id="symbol.driver.doc.ctrl" value="${module.driver.doc.name}_ctrl"/>
+        <header>
+
+extern const doc_instance_t ${module.driver.doc.name};
+
+/** Access the DOC instance using these structures when calling API functions directly (::p_api is not used). */
+extern doc_instance_ctrl_t ${module.driver.doc.name}_ctrl;
+extern const doc_cfg_t ${module.driver.doc.name}_cfg;
+
+#ifndef ${module.driver.doc.p_callback}
+void ${module.driver.doc.p_callback}(doc_callback_args_t * p_args);
+#endif
+        </header>
+
+        <includes>#include &quot;r_doc.h&quot;
+#include &quot;r_doc_api.h&quot;</includes>
+        <declarations>
+
+doc_instance_ctrl_t ${module.driver.doc.name}_ctrl;
+
+
+const doc_cfg_t ${module.driver.doc.name}_cfg =
+{
+    .event          = ${module.driver.doc.doc_event.event},
+    .bit_width      = ${module.driver.doc.doc_bit_width},
+    .doc_data       = ${module.driver.doc.doc_data_setting_register_value},
+    .doc_data_extra   = ${module.driver.doc.doc_data_setting_register_value_2},
+    .p_callback     = ${module.driver.doc.p_callback},
+    .p_context      = NULL,
+    .ipl            = ${module.driver.doc.ipl},
+#if defined(VECTOR_NUMBER_DOC_INT)
+    .irq            = VECTOR_NUMBER_DOC_INT,
+#else
+    .irq            = FSP_INVALID_VECTOR,
+#endif
+};
+/* Instance structure to use this module. */
+const doc_instance_t ${module.driver.doc.name} =
+{
+    .p_ctrl        = &amp;${module.driver.doc.name}_ctrl,
+    .p_cfg         = &amp;${module.driver.doc.name}_cfg,
+    .p_api         = &amp;g_doc_on_doc
+};
+
+        </declarations>
+        <guard>
+            <header>
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.doc.name}_open_guard(doc_ctrl_t *const p_api_ctrl, doc_cfg_t const *const p_cfg);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.doc.name}_close_guard(doc_ctrl_t *const p_api_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.doc.name}_read_guard(doc_ctrl_t *const p_api_ctrl, uint32_t *p_result);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.doc.name}_write_guard(doc_ctrl_t *const p_api_ctrl, uint32_t data);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.doc.name}_callback_set_guard(doc_ctrl_t *const p_api_ctrl, void(*p_callback)(doc_callback_args_t *), void const *const p_context, doc_callback_args_t *const p_callback_memory);
+
+            </header>
+            <template name="${module.driver.doc.name}_guard.c">
+                <![CDATA[
+                    #include "guard.h"
+
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.doc.name}_open_guard (doc_ctrl_t *const p_api_ctrl, doc_cfg_t const *const p_cfg)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+    FSP_PARAMETER_NOT_USED(p_cfg);
+
+    return R_DOC_Open(&${module.driver.doc.name}_ctrl, &${module.driver.doc.name}_cfg);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.doc.name}_close_guard (doc_ctrl_t *const p_api_ctrl)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+
+    return R_DOC_Close(&${module.driver.doc.name}_ctrl);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.doc.name}_read_guard (doc_ctrl_t *const p_api_ctrl, uint32_t *p_result)
+{
+    /* Verify all pointers are in non-secure memory. */
+    uint32_t * p_result_checked = cmse_check_address_range((void *) p_result, sizeof(uint32_t), CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_result_checked != NULL);
+
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+
+    return R_DOC_Read(&${module.driver.doc.name}_ctrl, p_result_checked);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.doc.name}_write_guard (doc_ctrl_t *const p_api_ctrl, uint32_t data)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+
+    return R_DOC_Write(&${module.driver.doc.name}_ctrl, data);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.doc.name}_callback_set_guard (doc_ctrl_t *const p_api_ctrl, void(*p_callback)(doc_callback_args_t *), void const *const p_context, doc_callback_args_t *const p_callback_memory)
+{
+    /* Verify all pointers are in non-secure memory. */
+    void(*p_callback_checked)(doc_callback_args_t *) = (void(*)(doc_callback_args_t *)) cmse_check_address_range((void *) p_callback, sizeof(void *), CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_callback_checked != NULL);
+    doc_callback_args_t *const p_callback_memory_checked = cmse_check_pointed_object(p_callback_memory, CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_callback_memory_checked != NULL);
+
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+    FSP_PARAMETER_NOT_USED(p_context);
+
+    return R_DOC_CallbackSet(&${module.driver.doc.name}_ctrl, p_callback_checked, p_context, p_callback_memory_checked);
+}
+
+                ]]>
+            </template>
+        </guard>
+        <nsc>
+            <header>
+
+#define FSP_GUARD_${module.driver.doc.name}_R_DOC_Open() ${module.driver.doc.name}_open_guard(FSP_SECURE_ARGUMENT, FSP_SECURE_ARGUMENT)
+
+#define FSP_GUARD_${module.driver.doc.name}_R_DOC_Close() ${module.driver.doc.name}_close_guard(FSP_SECURE_ARGUMENT)
+
+#define FSP_GUARD_${module.driver.doc.name}_R_DOC_Read(p_result) ${module.driver.doc.name}_read_guard(FSP_SECURE_ARGUMENT, p_result)
+
+#define FSP_GUARD_${module.driver.doc.name}_R_DOC_Write(data) ${module.driver.doc.name}_write_guard(FSP_SECURE_ARGUMENT, data)
+
+#define FSP_GUARD_${module.driver.doc.name}_R_DOC_CallbackSet(p_callback, p_context, p_callback_memory) ${module.driver.doc.name}_callback_set_guard(FSP_SECURE_ARGUMENT, p_callback, p_context, p_callback_memory)
+
+
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.doc.name}_open_guard(doc_ctrl_t *const p_api_ctrl, doc_cfg_t const *const p_cfg);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.doc.name}_close_guard(doc_ctrl_t *const p_api_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.doc.name}_read_guard(doc_ctrl_t *const p_api_ctrl, uint32_t *p_result);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.doc.name}_write_guard(doc_ctrl_t *const p_api_ctrl, uint32_t data);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.doc.name}_callback_set_guard(doc_ctrl_t *const p_api_ctrl, void(*p_callback)(doc_callback_args_t *), void const *const p_context, doc_callback_args_t *const p_callback_memory);
+
+
+extern const doc_instance_t ${module.driver.doc.name};
+            </header>
+            <declarations>
+                <![CDATA[
+static const doc_api_t ${module.driver.doc.name}_nsc_api =
+{
+    .open = ${module.driver.doc.name}_open_guard,
+    .close = ${module.driver.doc.name}_close_guard,
+    .read = ${module.driver.doc.name}_read_guard,
+    .write = ${module.driver.doc.name}_write_guard,
+    .callbackSet = ${module.driver.doc.name}_callback_set_guard,
+};
+const doc_instance_t ${module.driver.doc.name} =
+{
+    .p_api = &${module.driver.doc.name}_nsc_api,
+    .p_ctrl = FSP_SECURE_ARGUMENT,
+    .p_cfg = FSP_SECURE_ARGUMENT,
+};
+                ]]>
+            </declarations>
+        </nsc>
+        <api configurable="true">
+            <file>ra/fsp/inc/instances/r_doc.h</file>
+            <file>ra/fsp/inc/api/r_doc_api.h</file>
+            <file>ra/fsp/inc/api/r_elc_api.h</file>
+            <file>ra/fsp/inc/api/r_transfer_api.h</file>
+        </api>
+    </module>
+</raModuleDescription>

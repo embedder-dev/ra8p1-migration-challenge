@@ -1,0 +1,7 @@
+<?xml version="1.0" ?>
+<raModuleDescription>
+  <module display="DSP| MACL (rm_cmsis_dsp)" id="module.middleware.rm_cmsis_dsp" visible="false" version="1" url="group___r_m___c_m_s_i_s___d_s_p.html" >
+    <requires id="module.middleware.rm_cmsis_dsp.requires.macl" interface="interface.mcu.macl" visible="true" find="false" display="Requires MACL module" />
+    <provides interface="interface.middleware.rm_cmsis_dsp" />
+  </module>
+</raModuleDescription>

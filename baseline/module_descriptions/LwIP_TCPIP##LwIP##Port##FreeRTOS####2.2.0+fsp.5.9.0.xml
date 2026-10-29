@@ -1,0 +1,6 @@
+<?xml version="1.0" ?>
+<raModuleDescription>
+    <module id="module.lwip.port.freertos" display="Networking|LwIP system FreeRTOS port" common="1" version="0" visible="true" url="https://www.nongnu.org/lwip/2_1_x/index.html">
+        <provides interface="interface.lwip.port.freertos" />
+    </module>
+</raModuleDescription>

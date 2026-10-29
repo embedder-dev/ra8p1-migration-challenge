@@ -1,0 +1,713 @@
+<?xml version="1.0" encoding="utf-8"?>
+<raModuleDescription>
+  <config id="config.bsp.ra2e3" path="fsp_cfg/bsp/bsp_mcu_device_cfg.h" version="0">
+    <property id="config.bsp.series" display="series" default="config.bsp.series.value" macro="BSP_CFG_MCU_PART_SERIES">
+      <option id="config.bsp.series.value" display="2" value="2" />
+    </property>
+    <content>
+      #define BSP_CFG_MCU_PART_SERIES (${config.bsp.series})
+    </content>
+  </config>
+  <bsp id="bsp.ra2e3" config="config.bsp.ra2e3" display="RA2E3" version="0">
+    <provides interface="interface.mcu.ra2e3" />
+    <provides interface="interface.mcu.core.cm23" />
+    <provides interface="interface.mcu.adc" />
+    <provides interface="interface.mcu.adc.0" />
+    <provides interface="interface.mcu.agt" />
+    <provides interface="interface.mcu.agt.0" />
+    <provides interface="interface.mcu.agt.1" />
+    <provides interface="interface.mcu.analog" />
+    <provides interface="interface.mcu.bus" />
+    <provides interface="interface.mcu.cac" />
+    <provides interface="interface.mcu.cgc" />
+    <provides interface="interface.mcu.crc" />
+    <provides interface="interface.mcu.debug" />
+    <provides interface="interface.mcu.doc" />
+    <provides interface="interface.mcu.dtc" />
+    <provides interface="interface.mcu.elc" />
+    <provides interface="interface.mcu.flash" />
+    <provides interface="interface.mcu.flash_lp" />
+    <provides interface="interface.mcu.gpt" />
+    <provides interface="interface.mcu.gpt.0" />
+    <provides interface="interface.mcu.gpt.4" />
+    <provides interface="interface.mcu.gpt.4.gtdvu" />
+    <provides interface="interface.mcu.gpt.4.event_count" />
+    <provides interface="interface.mcu.gpt.5" />
+    <provides interface="interface.mcu.gpt.5.gtdvu" />
+    <provides interface="interface.mcu.gpt.5.event_count" />
+    <provides interface="interface.mcu.gpt.6" />
+    <provides interface="interface.mcu.gpt.6.gtdvu" />
+    <provides interface="interface.mcu.gpt.6.event_count" />
+    <provides interface="interface.mcu.gpt.7" />
+    <provides interface="interface.mcu.gpt.7.gtdvu" />
+    <provides interface="interface.mcu.gpt.7.event_count" />
+    <provides interface="interface.mcu.gpt.8" />
+    <provides interface="interface.mcu.gpt.8.gtdvu" />
+    <provides interface="interface.mcu.gpt.8.event_count" />
+    <provides interface="interface.mcu.gpt.9" />
+    <provides interface="interface.mcu.gpt.9.gtdvu" />
+    <provides interface="interface.mcu.gpt.9.event_count" />
+    <provides interface="interface.mcu.gpt_ops" />
+    <provides interface="interface.mcu.gpt_poeg" />
+    <provides interface="interface.mcu.gpt_poeg.0" />
+    <provides interface="interface.mcu.gpt_poeg.1" />
+    <provides interface="interface.mcu.icu" />
+    <provides interface="interface.mcu.icu_ext_irq" />
+    <provides interface="interface.mcu.icu_ext_irq.0" />
+    <provides interface="interface.mcu.icu_ext_irq.1" />
+    <provides interface="interface.mcu.icu_ext_irq.2" />
+    <provides interface="interface.mcu.icu_ext_irq.3" />
+    <provides interface="interface.mcu.icu_ext_irq.4" />
+    <provides interface="interface.mcu.icu_ext_irq.5" />
+    <provides interface="interface.mcu.icu_ext_irq.6" />
+    <provides interface="interface.mcu.icu_ext_irq.7" />
+    <provides interface="interface.mcu.iic" />
+    <provides interface="interface.mcu.iic.0" />
+    <provides interface="interface.mcu.iic0wu" />
+    <provides interface="interface.mcu.iwdt" />
+    <provides interface="interface.mcu.kint" />
+    <provides interface="interface.mcu.kint.0" />
+    <provides interface="interface.mcu.mpu" />
+    <provides interface="interface.mcu.mpu.0" />
+    <provides interface="interface.mcu.mstp" />
+    <provides interface="interface.mcu.pfs" />
+    <provides interface="interface.mcu.port" />
+    <provides interface="interface.mcu.port.0" />
+    <provides interface="interface.mcu.port.1" />
+    <provides interface="interface.mcu.port.2" />
+    <provides interface="interface.mcu.port.3" />
+    <provides interface="interface.mcu.port.4" />
+    <provides interface="interface.mcu.port.5" />
+    <provides interface="interface.mcu.port.9" />
+    <provides interface="interface.mcu.rtc" />
+    <provides interface="interface.mcu.sci" />
+    <provides interface="interface.mcu.sci.0" />
+    <provides interface="interface.mcu.sci.1" />
+    <provides interface="interface.mcu.sci.2" />
+    <provides interface="interface.mcu.sci.9" />
+    <provides interface="interface.mcu.spi" />
+    <provides interface="interface.mcu.spi.0" />
+    <provides interface="interface.mcu.sram" />
+    <provides interface="interface.mcu.system" />
+    <provides interface="interface.mcu.wdt" />
+    <provides interface="interface.mcu.wdt.0" />
+    <enum id="enum.mcu.acmp.present" default="enum.mcu.acmp.not_present">
+      <option id="enum.mcu.acmp.not_present" display="ACMP is not available on the RA2E3." value="0" />
+    </enum>
+    <enum id="enum.mcu.acmphs.present" default="enum.mcu.acmphs.not_present">
+      <option id="enum.mcu.acmphs.not_present" display="ACMPHS is not available on the RA2E3." value="0" />
+    </enum>
+    <enum id="enum.mcu.acmplp.present" default="enum.mcu.acmplp.not_present">
+      <option id="enum.mcu.acmplp.not_present" display="ACMPLP is not available on the RA2E3." value="0" />
+    </enum>
+    <enum id="enum.mcu.adc.present" default="enum.mcu.adc.is_present">
+      <option id="enum.mcu.adc.is_present" display="ADC is available on the RA2E3." value="1" />
+    </enum>
+    <enum id="enum.mcu.adc.channel.mask" default="enum.mcu.adc.channel.bitmask">
+      <option id="enum.mcu.adc.channel.bitmask" display="ADC channel mask." value="0x1" />
+    </enum>
+    <enum id="enum.mcu.adc_b.present" default="enum.mcu.adc_b.not_present">
+      <option id="enum.mcu.adc_b.not_present" display="ADC_B is not available on the RA2E3." value="0" />
+    </enum>
+    <enum id="enum.mcu.adc_b.pga.supported" default="enum.mcu.adc_b.pga.not_supported">
+      <option id="enum.mcu.adc_b.pga.not_supported" display="ADC_B PGA is not available on the RA2E3." value="0" />
+    </enum>
+    <enum id="enum.mcu.adc_d.present" default="enum.mcu.adc_d.not_present">
+      <option id="enum.mcu.adc_d.not_present" display="ADC_D is not available on the RA2E3." value="0" />
+    </enum>
+    <enum id="enum.mcu.agt.present" default="enum.mcu.agt.is_present">
+      <option id="enum.mcu.agt.is_present" display="AGT is available on the RA2E3." value="1" />
+    </enum>
+    <enum id="enum.mcu.agt.channel.mask" default="enum.mcu.agt.channel.bitmask">
+      <option id="enum.mcu.agt.channel.bitmask" display="AGT channel mask." value="0x3" />
+    </enum>
+    <enum id="enum.mcu.agtw.present" default="enum.mcu.agtw.not_present">
+      <option id="enum.mcu.agtw.not_present" display="AGTW is not available on the RA2E3." value="0" />
+    </enum>
+    <enum id="enum.mcu.ami.present" default="enum.mcu.ami.not_present">
+      <option id="enum.mcu.ami.not_present" display="AMI is not available on the RA2E3." value="0" />
+    </enum>
+    <enum id="enum.mcu.analog.present" default="enum.mcu.analog.is_present">
+      <option id="enum.mcu.analog.is_present" display="ANALOG is available on the RA2E3." value="1" />
+    </enum>
+    <enum id="enum.mcu.bus.present" default="enum.mcu.bus.is_present">
+      <option id="enum.mcu.bus.is_present" display="BUS is available on the RA2E3." value="1" />
+    </enum>
+    <enum id="enum.mcu.cac.present" default="enum.mcu.cac.is_present">
+      <option id="enum.mcu.cac.is_present" display="CAC is available on the RA2E3." value="1" />
+    </enum>
+    <enum id="enum.mcu.cache.present" default="enum.mcu.cache.not_present">
+      <option id="enum.mcu.cache.not_present" display="CACHE is not available on the RA2E3." value="0" />
+    </enum>
+    <enum id="enum.mcu.can.present" default="enum.mcu.can.not_present">
+      <option id="enum.mcu.can.not_present" display="CAN is not available on the RA2E3." value="0" />
+    </enum>
+    <enum id="enum.mcu.canfd.present" default="enum.mcu.canfd.not_present">
+      <option id="enum.mcu.canfd.not_present" display="CANFD is not available on the RA2E3." value="0" />
+    </enum>
+    <enum id="enum.mcu.cec.present" default="enum.mcu.cec.not_present">
+      <option id="enum.mcu.cec.not_present" display="CEC is not available on the RA2E3." value="0" />
+    </enum>
+    <enum id="enum.mcu.ceu.present" default="enum.mcu.ceu.not_present">
+      <option id="enum.mcu.ceu.not_present" display="CEU is not available on the RA2E3." value="0" />
+    </enum>
+    <enum id="enum.mcu.cgc.present" default="enum.mcu.cgc.is_present">
+      <option id="enum.mcu.cgc.is_present" display="CGC is available on the RA2E3." value="1" />
+    </enum>
+    <enum id="enum.mcu.cpscu.present" default="enum.mcu.cpscu.not_present">
+      <option id="enum.mcu.cpscu.not_present" display="CPSCU is not available on the RA2E3." value="0" />
+    </enum>
+    <enum id="enum.mcu.cpu_ctrl.present" default="enum.mcu.cpu_ctrl.not_present">
+      <option id="enum.mcu.cpu_ctrl.not_present" display="CPU_CTRL is not available on the RA2E3." value="0" />
+    </enum>
+    <enum id="enum.mcu.crc.present" default="enum.mcu.crc.is_present">
+      <option id="enum.mcu.crc.is_present" display="CRC is available on the RA2E3." value="1" />
+    </enum>
+    <enum id="enum.mcu.ctsu.present" default="enum.mcu.ctsu.not_present">
+      <option id="enum.mcu.ctsu.not_present" display="CTSU is not available on the RA2E3." value="0" />
+    </enum>
+    <enum id="enum.mcu.dac.present" default="enum.mcu.dac.not_present">
+      <option id="enum.mcu.dac.not_present" display="DAC is not available on the RA2E3." value="0" />
+    </enum>
+    <enum id="enum.mcu.dac12.present" default="enum.mcu.dac12.not_present">
+      <option id="enum.mcu.dac12.not_present" display="DAC12 is not available on the RA2E3." value="0" />
+    </enum>
+    <enum id="enum.mcu.dac8.present" default="enum.mcu.dac8.not_present">
+      <option id="enum.mcu.dac8.not_present" display="DAC8 is not available on the RA2E3." value="0" />
+    </enum>
+    <enum id="enum.mcu.debug.present" default="enum.mcu.debug.is_present">
+      <option id="enum.mcu.debug.is_present" display="DEBUG is available on the RA2E3." value="1" />
+    </enum>
+    <enum id="enum.mcu.dma_dmac.present" default="enum.mcu.dma_dmac.not_present">
+      <option id="enum.mcu.dma_dmac.not_present" display="DMA_DMAC is not available on the RA2E3." value="0" />
+    </enum>
+    <enum id="enum.mcu.dma.present" default="enum.mcu.dma.not_present">
+      <option id="enum.mcu.dma.not_present" display="DMA is not available on the RA2E3." value="0" />
+    </enum>
+    <enum id="enum.mcu.doc.present" default="enum.mcu.doc.is_present">
+      <option id="enum.mcu.doc.is_present" display="DOC is available on the RA2E3." value="1" />
+    </enum>
+    <enum id="enum.mcu.doc_b.present" default="enum.mcu.doc_b.not_present">
+      <option id="enum.mcu.doc_b.not_present" display="DOC_B is not available on the RA2E3." value="0" />
+    </enum>
+    <enum id="enum.mcu.dphycnt.present" default="enum.mcu.dphycnt.not_present">
+      <option id="enum.mcu.dphycnt.not_present" display="DPHYCNT is not available on the RA2E3." value="0" />
+    </enum>
+    <enum id="enum.mcu.drw.present" default="enum.mcu.drw.not_present">
+      <option id="enum.mcu.drw.not_present" display="DRW is not available on the RA2E3." value="0" />
+    </enum>
+    <enum id="enum.mcu.dsilink.present" default="enum.mcu.dsilink.not_present">
+      <option id="enum.mcu.dsilink.not_present" display="DSILINK is not available on the RA2E3." value="0" />
+    </enum>
+    <enum id="enum.mcu.dtc.present" default="enum.mcu.dtc.is_present">
+      <option id="enum.mcu.dtc.is_present" display="DTC is available on the RA2E3." value="1" />
+    </enum>
+    <enum id="enum.mcu.eccafl.present" default="enum.mcu.eccafl.not_present">
+      <option id="enum.mcu.eccafl.not_present" display="ECCAFL is not available on the RA2E3." value="0" />
+    </enum>
+    <enum id="enum.mcu.eccmb.present" default="enum.mcu.eccmb.not_present">
+      <option id="enum.mcu.eccmb.not_present" display="ECCMB is not available on the RA2E3." value="0" />
+    </enum>
+    <enum id="enum.mcu.elc.present" default="enum.mcu.elc.is_present">
+      <option id="enum.mcu.elc.is_present" display="ELC is available on the RA2E3." value="1" />
+    </enum>
+    <enum id="enum.mcu.elc_b.present" default="enum.mcu.elc_b.not_present">
+      <option id="enum.mcu.elc_b.not_present" display="ELC_B is not available on the RA2E3." value="0" />
+    </enum>
+    <enum id="enum.mcu.etherc_edmac.present" default="enum.mcu.etherc_edmac.not_present">
+      <option id="enum.mcu.etherc_edmac.not_present" display="ETHERC_EDMAC is not available on the RA2E3." value="0" />
+    </enum>
+    <enum id="enum.mcu.etherc_eptpc.present" default="enum.mcu.etherc_eptpc.not_present">
+      <option id="enum.mcu.etherc_eptpc.not_present" display="ETHERC_EPTPC is not available on the RA2E3." value="0" />
+    </enum>
+    <enum id="enum.mcu.etherc_eptpc_cfg.present" default="enum.mcu.etherc_eptpc_cfg.not_present">
+      <option id="enum.mcu.etherc_eptpc_cfg.not_present" display="ETHERC_EPTPC_CFG is not available on the RA2E3." value="0" />
+    </enum>
+    <enum id="enum.mcu.etherc_mii.present" default="enum.mcu.etherc_mii.not_present">
+      <option id="enum.mcu.etherc_mii.not_present" display="ETHERC_MII is not available on the RA2E3." value="0" />
+    </enum>
+    <enum id="enum.mcu.etherc_rmii.present" default="enum.mcu.etherc_rmii.not_present">
+      <option id="enum.mcu.etherc_rmii.not_present" display="ETHERC_RMII is not available on the RA2E3." value="0" />
+    </enum>
+    <enum id="enum.mcu.etherc.present" default="enum.mcu.etherc.not_present">
+      <option id="enum.mcu.etherc.not_present" display="ETHERC is not available on the RA2E3." value="0" />
+    </enum>
+    <enum id="enum.mcu.faci.present" default="enum.mcu.faci.not_present">
+      <option id="enum.mcu.faci.not_present" display="FACI is not available on the RA2E3." value="0" />
+    </enum>
+    <enum id="enum.mcu.fcache.present" default="enum.mcu.fcache.not_present">
+      <option id="enum.mcu.fcache.not_present" display="FCACHE is not available on the RA2E3." value="0" />
+    </enum>
+    <enum id="enum.mcu.flad.present" default="enum.mcu.flad.not_present">
+      <option id="enum.mcu.flad.not_present" display="FLAD is not available on the RA2E3." value="0" />
+    </enum>
+    <enum id="enum.mcu.flash_hp.present" default="enum.mcu.flash_hp.not_present">
+      <option id="enum.mcu.flash_hp.not_present" display="FLASH_HP is not available on the RA2E3." value="0" />
+    </enum>
+    <enum id="enum.mcu.flash_lp.present" default="enum.mcu.flash_lp.is_present">
+      <option id="enum.mcu.flash_lp.is_present" display="FLASH_LP is available on the RA2E3." value="1" />
+    </enum>
+    <enum id="enum.mcu.flash.present" default="enum.mcu.flash.is_present">
+      <option id="enum.mcu.flash.is_present" display="FLASH is available on the RA2E3." value="1" />
+    </enum>
+    <enum id="enum.mcu.glcdc.present" default="enum.mcu.glcdc.not_present">
+      <option id="enum.mcu.glcdc.not_present" display="GLCDC is not available on the RA2E3." value="0" />
+    </enum>
+    <enum id="enum.mcu.gpt_gtclk.present" default="enum.mcu.gpt_gtclk.not_present">
+      <option id="enum.mcu.gpt_gtclk.not_present" display="GPT_GTCLK is not available on the RA2E3." value="0" />
+    </enum>
+    <enum id="enum.mcu.gpt_odc.present" default="enum.mcu.gpt_odc.not_present">
+      <option id="enum.mcu.gpt_odc.not_present" display="GPT_ODC is not available on the RA2E3." value="0" />
+    </enum>
+    <enum id="enum.mcu.gpt_odc.128_resolution.supported" default="enum.mcu.gpt_odc.128_resolution.not_supported">
+      <option id="enum.mcu.gpt_odc.128_resolution.not_supported" display="GPT_ODC 128_RESOLUTION is not available on the RA2E3." value="0" />
+    </enum>
+    <enum id="enum.mcu.gpt_ops.present" default="enum.mcu.gpt_ops.is_present">
+      <option id="enum.mcu.gpt_ops.is_present" display="GPT_OPS is available on the RA2E3." value="1" />
+    </enum>
+    <enum id="enum.mcu.gpt_poeg.present" default="enum.mcu.gpt_poeg.is_present">
+      <option id="enum.mcu.gpt_poeg.is_present" display="GPT_POEG is available on the RA2E3." value="1" />
+    </enum>
+    <enum id="enum.mcu.gpt_poeg.channel.mask" default="enum.mcu.gpt_poeg.channel.bitmask">
+      <option id="enum.mcu.gpt_poeg.channel.bitmask" display="GPT_POEG channel mask." value="0x3" />
+    </enum>
+    <enum id="enum.mcu.gpt.present" default="enum.mcu.gpt.is_present">
+      <option id="enum.mcu.gpt.is_present" display="GPT is available on the RA2E3." value="1" />
+    </enum>
+    <enum id="enum.mcu.gpt.channel.mask" default="enum.mcu.gpt.channel.bitmask">
+      <option id="enum.mcu.gpt.channel.bitmask" display="GPT channel mask." value="0x3F1" />
+    </enum>
+    <enum id="enum.mcu.gpt.ad_direct_start.supported" default="enum.mcu.gpt.ad_direct_start.not_supported">
+      <option id="enum.mcu.gpt.ad_direct_start.not_supported" display="GPT AD_DIRECT_START is not available on the RA2E3." value="0" />
+    </enum>
+    <enum id="enum.mcu.gpt.event_count.supported" default="enum.mcu.gpt.event_count.is_supported">
+      <option id="enum.mcu.gpt.event_count.is_supported" display="GPT EVENT_COUNT is available on the RA2E3." value="1" />
+    </enum>
+    <enum id="enum.mcu.gpt.event_count.channel.mask" default="enum.mcu.gpt.event_count.channel.bitmask">
+      <option id="enum.mcu.gpt.event_count.channel.bitmask" display="GPT EVENT_COUNT channel mask." value="0x3F0" />
+    </enum>
+    <enum id="enum.mcu.gpt.gpte.supported" default="enum.mcu.gpt.gpte.not_supported">
+      <option id="enum.mcu.gpt.gpte.not_supported" display="GPT GPTE is not available on the RA2E3." value="0" />
+    </enum>
+    <enum id="enum.mcu.gpt.gpteh.supported" default="enum.mcu.gpt.gpteh.not_supported">
+      <option id="enum.mcu.gpt.gpteh.not_supported" display="GPT GPTEH is not available on the RA2E3." value="0" />
+    </enum>
+    <enum id="enum.mcu.gpt.gtdvu.supported" default="enum.mcu.gpt.gtdvu.is_supported">
+      <option id="enum.mcu.gpt.gtdvu.is_supported" display="GPT GTDVU is available on the RA2E3." value="1" />
+    </enum>
+    <enum id="enum.mcu.gpt.gtdvu.channel.mask" default="enum.mcu.gpt.gtdvu.channel.bitmask">
+      <option id="enum.mcu.gpt.gtdvu.channel.bitmask" display="GPT GTDVU channel mask." value="0x3F0" />
+    </enum>
+    <enum id="enum.mcu.gpt.ops.supported" default="enum.mcu.gpt.ops.not_supported">
+      <option id="enum.mcu.gpt.ops.not_supported" display="GPT OPS is not available on the RA2E3." value="0" />
+    </enum>
+    <enum id="enum.mcu.tau.present" default="enum.mcu.tau.not_present">
+      <option id="enum.mcu.tau.not_present" display="TAU is not available on the RA2E3." value="0" />
+    </enum>
+    <enum id="enum.mcu.tml.present" default="enum.mcu.tml.not_present">
+      <option id="enum.mcu.tml.not_present" display="TML is not available on the RA2E3." value="0" />
+    </enum>
+    <enum id="enum.mcu.i3c.present" default="enum.mcu.i3c.not_present">
+      <option id="enum.mcu.i3c.not_present" display="I3C is not available on the RA2E3." value="0" />
+    </enum>
+    <enum id="enum.mcu.icu_ext_irq.present" default="enum.mcu.icu_ext_irq.is_present">
+      <option id="enum.mcu.icu_ext_irq.is_present" display="ICU_EXT_IRQ is available on the RA2E3." value="1" />
+    </enum>
+    <enum id="enum.mcu.icu_ext_irq.channel.mask" default="enum.mcu.icu_ext_irq.channel.bitmask">
+      <option id="enum.mcu.icu_ext_irq.channel.bitmask" display="ICU_EXT_IRQ channel mask." value="0xFF" />
+    </enum>
+    <enum id="enum.mcu.icu.present" default="enum.mcu.icu.is_present">
+      <option id="enum.mcu.icu.is_present" display="ICU is available on the RA2E3." value="1" />
+    </enum>
+    <enum id="enum.mcu.iic.present" default="enum.mcu.iic.is_present">
+      <option id="enum.mcu.iic.is_present" display="IIC is available on the RA2E3." value="1" />
+    </enum>
+    <enum id="enum.mcu.iic.channel.mask" default="enum.mcu.iic.channel.bitmask">
+      <option id="enum.mcu.iic.channel.bitmask" display="IIC channel mask." value="0x1" />
+    </enum>
+    <enum id="enum.mcu.iica.present" default="enum.mcu.iica.not_present">
+      <option id="enum.mcu.iica.not_present" display="IICA is not available on the RA2E3." value="0" />
+    </enum>
+    <enum id="enum.mcu.iic_b.present" default="enum.mcu.iic_b.not_present">
+      <option id="enum.mcu.iic_b.not_present" display="IIC_B is not available on the RA2E3." value="0" />
+    </enum>
+    <enum id="enum.mcu.iic0wu.present" default="enum.mcu.iic0wu.is_present">
+      <option id="enum.mcu.iic0wu.is_present" display="IIC0WU is available on the RA2E3." value="1" />
+    </enum>
+    <enum id="enum.mcu.iic0wu_b.present" default="enum.mcu.iic0wu_b.not_present">
+      <option id="enum.mcu.iic0wu_b.not_present" display="IIC0WU_B is not available on the RA2E3." value="0" />
+    </enum>
+    <enum id="enum.mcu.tfu.present" default="enum.mcu.tfu.not_present">
+      <option id="enum.mcu.tfu.not_present" display="TFU is not available on the RA2E3." value="0" />
+    </enum>
+    <enum id="enum.mcu.iirfa.present" default="enum.mcu.iirfa.not_present">
+      <option id="enum.mcu.iirfa.not_present" display="IIRFA is not available on the RA2E3." value="0" />
+    </enum>
+    <enum id="enum.mcu.irda.present" default="enum.mcu.irda.not_present">
+      <option id="enum.mcu.irda.not_present" display="IRDA is not available on the RA2E3." value="0" />
+    </enum>
+    <enum id="enum.mcu.iwdt.present" default="enum.mcu.iwdt.is_present">
+      <option id="enum.mcu.iwdt.is_present" display="IWDT is available on the RA2E3." value="1" />
+    </enum>
+    <enum id="enum.mcu.jpeg.present" default="enum.mcu.jpeg.not_present">
+      <option id="enum.mcu.jpeg.not_present" display="JPEG is not available on the RA2E3." value="0" />
+    </enum>
+    <enum id="enum.mcu.kint.present" default="enum.mcu.kint.is_present">
+      <option id="enum.mcu.kint.is_present" display="KINT is available on the RA2E3." value="1" />
+    </enum>
+    <enum id="enum.mcu.kint.channel.mask" default="enum.mcu.kint.channel.bitmask">
+      <option id="enum.mcu.kint.channel.bitmask" display="KINT channel mask." value="0x1" />
+    </enum>
+    <enum id="enum.mcu.macl.present" default="enum.mcu.macl.not_present">
+      <option id="enum.mcu.macl.not_present" display="MACL is not available on the RA2E3." value="0" />
+    </enum>
+    <enum id="enum.mcu.mmf.present" default="enum.mcu.mmf.not_present">
+      <option id="enum.mcu.mmf.not_present" display="MMF is not available on the RA2E3." value="0" />
+    </enum>
+    <enum id="enum.mcu.mipi_dsi.present" default="enum.mcu.mipi_dsi.not_present">
+      <option id="enum.mcu.mipi_dsi.not_present" display="MIPI_DSI is not available on the RA2E3." value="0" />
+    </enum>
+    <enum id="enum.mcu.mpu.present" default="enum.mcu.mpu.is_present">
+      <option id="enum.mcu.mpu.is_present" display="MPU is available on the RA2E3." value="1" />
+    </enum>
+    <enum id="enum.mcu.mpu.channel.mask" default="enum.mcu.mpu.channel.bitmask">
+      <option id="enum.mcu.mpu.channel.bitmask" display="MPU channel mask." value="0x1" />
+    </enum>
+    <enum id="enum.mcu.mstp.present" default="enum.mcu.mstp.is_present">
+      <option id="enum.mcu.mstp.is_present" display="MSTP is available on the RA2E3." value="1" />
+    </enum>
+    <enum id="enum.mcu.ocd.present" default="enum.mcu.ocd.not_present">
+      <option id="enum.mcu.ocd.not_present" display="OCD is not available on the RA2E3." value="0" />
+    </enum>
+    <enum id="enum.mcu.opamp.present" default="enum.mcu.opamp.not_present">
+      <option id="enum.mcu.opamp.not_present" display="OPAMP is not available on the RA2E3." value="0" />
+    </enum>
+    <enum id="enum.mcu.ospi.present" default="enum.mcu.ospi.not_present">
+      <option id="enum.mcu.ospi.not_present" display="OSPI is not available on the RA2E3." value="0" />
+    </enum>
+    <enum id="enum.mcu.ospi_b.present" default="enum.mcu.ospi_b.not_present">
+      <option id="enum.mcu.ospi_b.not_present" display="OSPI_B is not available on the RA2E3." value="0" />
+    </enum>
+    <enum id="enum.mcu.pclbuz.present" default="enum.mcu.pclbuz.not_present">
+      <option id="enum.mcu.pclbuz.not_present" display="PCLBUZ is not available on the RA2E3." value="0" />
+    </enum>
+    <enum id="enum.mcu.pdc.present" default="enum.mcu.pdc.not_present">
+      <option id="enum.mcu.pdc.not_present" display="PDC is not available on the RA2E3." value="0" />
+    </enum>
+    <enum id="enum.mcu.pfs.present" default="enum.mcu.pfs.is_present">
+      <option id="enum.mcu.pfs.is_present" display="PFS is available on the RA2E3." value="1" />
+    </enum>
+    <enum id="enum.mcu.pfs_b.present" default="enum.mcu.pfs_b.not_present">
+      <option id="enum.mcu.pfs_b.not_present" display="PFS_B is not available on the RA2E3." value="0" />
+    </enum>
+    <enum id="enum.mcu.port.present" default="enum.mcu.port.is_present">
+      <option id="enum.mcu.port.is_present" display="PORT is available on the RA2E3." value="1" />
+    </enum>
+    <enum id="enum.mcu.port.channel.mask" default="enum.mcu.port.channel.bitmask">
+      <option id="enum.mcu.port.channel.bitmask" display="PORT channel mask." value="0x23F" />
+    </enum>
+    <enum id="enum.mcu.porga.present" default="enum.mcu.porga.not_present">
+      <option id="enum.mcu.porga.not_present" display="PORGA is not available on the RA2E3." value="0" />
+    </enum>
+    <enum id="enum.mcu.pmisc.present" default="enum.mcu.pmisc.not_present">
+      <option id="enum.mcu.pmisc.not_present" display="PMISC is not available on the RA2E3." value="0" />
+    </enum>
+    <enum id="enum.mcu.pscu.present" default="enum.mcu.pscu.not_present">
+      <option id="enum.mcu.pscu.not_present" display="PSCU is not available on the RA2E3." value="0" />
+    </enum>
+    <enum id="enum.mcu.ptpedmac.present" default="enum.mcu.ptpedmac.not_present">
+      <option id="enum.mcu.ptpedmac.not_present" display="PTPEDMAC is not available on the RA2E3." value="0" />
+    </enum>
+    <enum id="enum.mcu.qspi.present" default="enum.mcu.qspi.not_present">
+      <option id="enum.mcu.qspi.not_present" display="QSPI is not available on the RA2E3." value="0" />
+    </enum>
+    <enum id="enum.mcu.radio.present" default="enum.mcu.radio.not_present">
+      <option id="enum.mcu.radio.not_present" display="RADIO is not available on the RA2E3." value="0" />
+    </enum>
+    <enum id="enum.mcu.rtc.present" default="enum.mcu.rtc.is_present">
+      <option id="enum.mcu.rtc.is_present" display="RTC is available on the RA2E3." value="1" />
+    </enum>
+    <enum id="enum.mcu.rtc_c.present" default="enum.mcu.rtc_c.not_present">
+      <option id="enum.mcu.rtc_c.not_present" display="RTC_C is not available on the RA2E3." value="0" />
+    </enum>
+    <enum id="enum.mcu.irtc.present" default="enum.mcu.irtc.not_present">
+      <option id="enum.mcu.irtc.not_present" display="IRTC is not available on the RA2E3." value="0" />
+    </enum>
+    <enum id="enum.mcu.rsip.present" default="enum.mcu.rsip.not_present">
+      <option id="enum.mcu.rsip.not_present" display="RSIP is not available on the RA2E3." value="0" />
+    </enum>
+    <enum id="enum.mcu.rsip.aes.supported" default="enum.mcu.rsip.aes.not_supported">
+      <option id="enum.mcu.rsip.aes.not_supported" display="RSIP AES is not available on the RA2E3." value="0" />
+    </enum>
+    <enum id="enum.mcu.rsip.aes_b.supported" default="enum.mcu.rsip.aes_b.not_supported">
+      <option id="enum.mcu.rsip.aes_b.not_supported" display="RSIP AES_B is not available on the RA2E3." value="0" />
+    </enum>
+    <enum id="enum.mcu.rsip.rsip_e11a.supported" default="enum.mcu.rsip.rsip_e11a.not_supported">
+      <option id="enum.mcu.rsip.rsip_e11a.not_supported" display="RSIP RSIP_E11A is not available on the RA2E3." value="0" />
+    </enum>
+    <enum id="enum.mcu.rsip.rsip_e31a.supported" default="enum.mcu.rsip.rsip_e31a.not_supported">
+      <option id="enum.mcu.rsip.rsip_e31a.not_supported" display="RSIP RSIP_E31A is not available on the RA2E3." value="0" />
+    </enum>
+    <enum id="enum.mcu.rsip.rsip_e50d.supported" default="enum.mcu.rsip.rsip_e50d.not_supported">
+      <option id="enum.mcu.rsip.rsip_e50d.not_supported" display="RSIP RSIP_E50D is not available on the RA2E3." value="0" />
+    </enum>
+    <enum id="enum.mcu.rsip.rsip_e51a.supported" default="enum.mcu.rsip.rsip_e51a.not_supported">
+      <option id="enum.mcu.rsip.rsip_e51a.not_supported" display="RSIP RSIP_E51A is not available on the RA2E3." value="0" />
+    </enum>
+    <enum id="enum.mcu.rsip.sce5.supported" default="enum.mcu.rsip.sce5.not_supported">
+      <option id="enum.mcu.rsip.sce5.not_supported" display="RSIP SCE5 is not available on the RA2E3." value="0" />
+    </enum>
+    <enum id="enum.mcu.rsip.sce5b.supported" default="enum.mcu.rsip.sce5b.not_supported">
+      <option id="enum.mcu.rsip.sce5b.not_supported" display="RSIP SCE5B is not available on the RA2E3." value="0" />
+    </enum>
+    <enum id="enum.mcu.rsip.sce7.supported" default="enum.mcu.rsip.sce7.not_supported">
+      <option id="enum.mcu.rsip.sce7.not_supported" display="RSIP SCE7 is not available on the RA2E3." value="0" />
+    </enum>
+    <enum id="enum.mcu.rsip.sce9.supported" default="enum.mcu.rsip.sce9.not_supported">
+      <option id="enum.mcu.rsip.sce9.not_supported" display="RSIP SCE9 is not available on the RA2E3." value="0" />
+    </enum>
+    <enum id="enum.mcu.rsip.trng.supported" default="enum.mcu.rsip.trng.not_supported">
+      <option id="enum.mcu.rsip.trng.not_supported" display="RSIP TRNG is not available on the RA2E3." value="0" />
+    </enum>
+    <enum id="enum.mcu.sci.present" default="enum.mcu.sci.is_present">
+      <option id="enum.mcu.sci.is_present" display="SCI is available on the RA2E3." value="1" />
+    </enum>
+    <enum id="enum.mcu.sci.channel.mask" default="enum.mcu.sci.channel.bitmask">
+      <option id="enum.mcu.sci.channel.bitmask" display="SCI channel mask." value="0x207" />
+    </enum>
+    <enum id="enum.mcu.sci.irda.supported" default="enum.mcu.sci.irda.not_supported">
+      <option id="enum.mcu.sci.irda.not_supported" display="SCI IRDA is not available on the RA2E3." value="0" />
+    </enum>
+    <enum id="enum.mcu.sci.lin.supported" default="enum.mcu.sci.lin.not_supported">
+      <option id="enum.mcu.sci.lin.not_supported" display="SCI LIN is not available on the RA2E3." value="0" />
+    </enum>
+    <enum id="enum.mcu.sci_b.present" default="enum.mcu.sci_b.not_present">
+      <option id="enum.mcu.sci_b.not_present" display="SCI_B is not available on the RA2E3." value="0" />
+    </enum>
+    <enum id="enum.mcu.sau.present" default="enum.mcu.sau.not_present">
+      <option id="enum.mcu.sau.not_present" display="SAU is not available on the RA2E3." value="0" />
+    </enum>
+    <enum id="enum.mcu.sau_spi.present" default="enum.mcu.sau_spi.not_present">
+      <option id="enum.mcu.sau_spi.not_present" display="SAU_SPI is not available on the RA2E3." value="0" />
+    </enum>
+    <enum id="enum.mcu.sau_uart.present" default="enum.mcu.sau_uart.not_present">
+      <option id="enum.mcu.sau_uart.not_present" display="SAU_UART is not available on the RA2E3." value="0" />
+    </enum>
+    <enum id="enum.mcu.sau_i2c.present" default="enum.mcu.sau_i2c.not_present">
+      <option id="enum.mcu.sau_i2c.not_present" display="SAU_I2C is not available on the RA2E3." value="0" />
+    </enum>
+    <enum id="enum.mcu.sdadc.present" default="enum.mcu.sdadc.not_present">
+      <option id="enum.mcu.sdadc.not_present" display="SDADC is not available on the RA2E3." value="0" />
+    </enum>
+    <enum id="enum.mcu.sdadc_b.present" default="enum.mcu.sdadc_b.not_present">
+      <option id="enum.mcu.sdadc_b.not_present" display="SDADC_B is not available on the RA2E3." value="0" />
+    </enum>
+    <enum id="enum.mcu.sdhi.present" default="enum.mcu.sdhi.not_present">
+      <option id="enum.mcu.sdhi.not_present" display="SDHI is not available on the RA2E3." value="0" />
+    </enum>
+    <enum id="enum.mcu.slcdc.present" default="enum.mcu.slcdc.not_present">
+      <option id="enum.mcu.slcdc.not_present" display="SLCDC is not available on the RA2E3." value="0" />
+    </enum>
+    <enum id="enum.mcu.spi.present" default="enum.mcu.spi.is_present">
+      <option id="enum.mcu.spi.is_present" display="SPI is available on the RA2E3." value="1" />
+    </enum>
+    <enum id="enum.mcu.spi.channel.mask" default="enum.mcu.spi.channel.bitmask">
+      <option id="enum.mcu.spi.channel.bitmask" display="SPI channel mask." value="0x1" />
+    </enum>
+    <enum id="enum.mcu.spi_b.present" default="enum.mcu.spi_b.not_present">
+      <option id="enum.mcu.spi_b.not_present" display="SPI_B is not available on the RA2E3." value="0" />
+    </enum>
+    <enum id="enum.mcu.spmon.present" default="enum.mcu.spmon.not_present">
+      <option id="enum.mcu.spmon.not_present" display="SPMON is not available on the RA2E3." value="0" />
+    </enum>
+    <enum id="enum.mcu.sram.present" default="enum.mcu.sram.is_present">
+      <option id="enum.mcu.sram.is_present" display="SRAM is available on the RA2E3." value="1" />
+    </enum>
+    <enum id="enum.mcu.srcram.present" default="enum.mcu.srcram.not_present">
+      <option id="enum.mcu.srcram.not_present" display="SRCRAM is not available on the RA2E3." value="0" />
+    </enum>
+    <enum id="enum.mcu.src.present" default="enum.mcu.src.not_present">
+      <option id="enum.mcu.src.not_present" display="SRC is not available on the RA2E3." value="0" />
+    </enum>
+    <enum id="enum.mcu.ssi_common.present" default="enum.mcu.ssi_common.not_present">
+      <option id="enum.mcu.ssi_common.not_present" display="SSI_COMMON is not available on the RA2E3." value="0" />
+    </enum>
+    <enum id="enum.mcu.ssie.present" default="enum.mcu.ssie.not_present">
+      <option id="enum.mcu.ssie.not_present" display="SSIE is not available on the RA2E3." value="0" />
+    </enum>
+    <enum id="enum.mcu.system.present" default="enum.mcu.system.is_present">
+      <option id="enum.mcu.system.is_present" display="SYSTEM is available on the RA2E3." value="1" />
+    </enum>
+    <enum id="enum.mcu.trng.present" default="enum.mcu.trng.not_present">
+      <option id="enum.mcu.trng.not_present" display="TRNG is not available on the RA2E3." value="0" />
+    </enum>
+    <enum id="enum.mcu.tsd.present" default="enum.mcu.tsd.not_present">
+      <option id="enum.mcu.tsd.not_present" display="TSD is not available on the RA2E3." value="0" />
+    </enum>
+    <enum id="enum.mcu.tsn.present" default="enum.mcu.tsn.not_present">
+      <option id="enum.mcu.tsn.not_present" display="TSN is not available on the RA2E3." value="0" />
+    </enum>
+    <enum id="enum.mcu.tzf.present" default="enum.mcu.tzf.not_present">
+      <option id="enum.mcu.tzf.not_present" display="TZF is not available on the RA2E3." value="0" />
+    </enum>
+    <enum id="enum.mcu.uarta.present" default="enum.mcu.uarta.not_present">
+      <option id="enum.mcu.uarta.not_present" display="UARTA is not available on the RA2E3." value="0" />
+    </enum>
+    <enum id="enum.mcu.uarta_ck.present" default="enum.mcu.uarta_ck.not_present">
+      <option id="enum.mcu.uarta_ck.not_present" display="UARTA_CK is not available on the RA2E3." value="0" />
+    </enum>
+    <enum id="enum.mcu.ulpt.present" default="enum.mcu.ulpt.not_present">
+      <option id="enum.mcu.ulpt.not_present" display="ULPT is not available on the RA2E3." value="0" />
+    </enum>
+    <enum id="enum.mcu.usbcc.present" default="enum.mcu.usbcc.not_present">
+      <option id="enum.mcu.usbcc.not_present" display="USBCC is not available on the RA2E3." value="0" />
+    </enum>
+    <enum id="enum.mcu.usb_fs.present" default="enum.mcu.usb_fs.not_present">
+      <option id="enum.mcu.usb_fs.not_present" display="USB_FS is not available on the RA2E3." value="0" />
+    </enum>
+    <enum id="enum.mcu.usb_hs.present" default="enum.mcu.usb_hs.not_present">
+      <option id="enum.mcu.usb_hs.not_present" display="USB_HS is not available on the RA2E3." value="0" />
+    </enum>
+    <enum id="enum.mcu.usb.present" default="enum.mcu.usb.not_present">
+      <option id="enum.mcu.usb.not_present" display="USB is not available on the RA2E3." value="0" />
+    </enum>
+    <enum id="enum.mcu.wdt.present" default="enum.mcu.wdt.is_present">
+      <option id="enum.mcu.wdt.is_present" display="WDT is available on the RA2E3." value="1" />
+    </enum>
+    <enum id="enum.mcu.wdt.channel.mask" default="enum.mcu.wdt.channel.bitmask">
+      <option id="enum.mcu.wdt.channel.bitmask" display="WDT channel mask." value="0x1" />
+    </enum>
+    <enum id="enum.mcu.adc.bits.ch0" default="enum.mcu.adc.bits.ch0.12">
+        <option id="enum.mcu.adc.bits.ch0.12" display="12" value="12" />
+    </enum>
+    <enum id="enum.mcu.adc.bits.ch1" default="enum.mcu.adc.bits.ch1.0">
+        <option id="enum.mcu.adc.bits.ch1.0" display="0" value="0" />
+    </enum>
+    <enum id="enum.mcu.adc.channels" default="enum.mcu.adc.channels.0">
+      <option id="enum.mcu.adc.channels.0" display="ADC0" value="0" />
+    </enum>
+    <enum id="enum.mcu.agt.bits.ch0" default="enum.mcu.agt.bits.ch0.16">
+        <option id="enum.mcu.agt.bits.ch0.16" display="16" value="16" />
+    </enum>
+    <enum id="enum.mcu.agt.bits.ch1" default="enum.mcu.agt.bits.ch1.16">
+        <option id="enum.mcu.agt.bits.ch1.16" display="16" value="16" />
+    </enum>
+    <enum id="enum.mcu.agt.bits.ch2" default="enum.mcu.agt.bits.ch2.0">
+        <option id="enum.mcu.agt.bits.ch2.0" display="0" value="0" />
+    </enum>
+    <enum id="enum.mcu.agt.bits.ch3" default="enum.mcu.agt.bits.ch3.0">
+        <option id="enum.mcu.agt.bits.ch3.0" display="0" value="0" />
+    </enum>
+    <enum id="enum.mcu.agt.bits.ch4" default="enum.mcu.agt.bits.ch4.0">
+        <option id="enum.mcu.agt.bits.ch4.0" display="0" value="0" />
+    </enum>
+    <enum id="enum.mcu.agt.bits.ch5" default="enum.mcu.agt.bits.ch5.0">
+        <option id="enum.mcu.agt.bits.ch5.0" display="0" value="0" />
+    </enum>
+    <enum id="enum.mcu.agt.bits.ch6" default="enum.mcu.agt.bits.ch6.0">
+        <option id="enum.mcu.agt.bits.ch6.0" display="0" value="0" />
+    </enum>
+    <enum id="enum.mcu.agt.bits.ch7" default="enum.mcu.agt.bits.ch7.0">
+        <option id="enum.mcu.agt.bits.ch7.0" display="0" value="0" />
+    </enum>
+    <enum id="enum.mcu.agt.channels" default="enum.mcu.agt.channels.0">
+      <option id="enum.mcu.agt.channels.0" display="AGT0" value="0" />
+      <option id="enum.mcu.agt.channels.1" display="AGT1" value="1" />
+    </enum>
+    <enum id="enum.mcu.gpt.bits.ch0" default="enum.mcu.gpt.bits.ch0.32">
+        <option id="enum.mcu.gpt.bits.ch0.32" display="32" value="32" />
+    </enum>
+    <enum id="enum.mcu.gpt.bits.ch1" default="enum.mcu.gpt.bits.ch1.0">
+        <option id="enum.mcu.gpt.bits.ch1.0" display="0" value="0" />
+    </enum>
+    <enum id="enum.mcu.gpt.bits.ch10" default="enum.mcu.gpt.bits.ch10.0">
+        <option id="enum.mcu.gpt.bits.ch10.0" display="0" value="0" />
+    </enum>
+    <enum id="enum.mcu.gpt.bits.ch11" default="enum.mcu.gpt.bits.ch11.0">
+        <option id="enum.mcu.gpt.bits.ch11.0" display="0" value="0" />
+    </enum>
+    <enum id="enum.mcu.gpt.bits.ch12" default="enum.mcu.gpt.bits.ch12.0">
+        <option id="enum.mcu.gpt.bits.ch12.0" display="0" value="0" />
+    </enum>
+    <enum id="enum.mcu.gpt.bits.ch13" default="enum.mcu.gpt.bits.ch13.0">
+        <option id="enum.mcu.gpt.bits.ch13.0" display="0" value="0" />
+    </enum>
+    <enum id="enum.mcu.gpt.bits.ch2" default="enum.mcu.gpt.bits.ch2.0">
+        <option id="enum.mcu.gpt.bits.ch2.0" display="0" value="0" />
+    </enum>
+    <enum id="enum.mcu.gpt.bits.ch3" default="enum.mcu.gpt.bits.ch3.0">
+        <option id="enum.mcu.gpt.bits.ch3.0" display="0" value="0" />
+    </enum>
+    <enum id="enum.mcu.gpt.bits.ch4" default="enum.mcu.gpt.bits.ch4.16">
+        <option id="enum.mcu.gpt.bits.ch4.16" display="16" value="16" />
+    </enum>
+    <enum id="enum.mcu.gpt.bits.ch5" default="enum.mcu.gpt.bits.ch5.16">
+        <option id="enum.mcu.gpt.bits.ch5.16" display="16" value="16" />
+    </enum>
+    <enum id="enum.mcu.gpt.bits.ch6" default="enum.mcu.gpt.bits.ch6.16">
+        <option id="enum.mcu.gpt.bits.ch6.16" display="16" value="16" />
+    </enum>
+    <enum id="enum.mcu.gpt.bits.ch7" default="enum.mcu.gpt.bits.ch7.16">
+        <option id="enum.mcu.gpt.bits.ch7.16" display="16" value="16" />
+    </enum>
+    <enum id="enum.mcu.gpt.bits.ch8" default="enum.mcu.gpt.bits.ch8.16">
+        <option id="enum.mcu.gpt.bits.ch8.16" display="16" value="16" />
+    </enum>
+    <enum id="enum.mcu.gpt.bits.ch9" default="enum.mcu.gpt.bits.ch9.16">
+        <option id="enum.mcu.gpt.bits.ch9.16" display="16" value="16" />
+    </enum>
+    <enum id="enum.mcu.gpt.channels" default="enum.mcu.gpt.channels.0">
+      <option id="enum.mcu.gpt.channels.0" display="GPT0" value="0" />
+      <option id="enum.mcu.gpt.channels.4" display="GPT4" value="4" />
+      <option id="enum.mcu.gpt.channels.5" display="GPT5" value="5" />
+      <option id="enum.mcu.gpt.channels.6" display="GPT6" value="6" />
+      <option id="enum.mcu.gpt.channels.7" display="GPT7" value="7" />
+      <option id="enum.mcu.gpt.channels.8" display="GPT8" value="8" />
+      <option id="enum.mcu.gpt.channels.9" display="GPT9" value="9" />
+    </enum>
+    <enum id="enum.mcu.gpt_poeg.channels" default="enum.mcu.gpt_poeg.channels.0">
+      <option id="enum.mcu.gpt_poeg.channels.0" display="GPT_POEG0" value="0" />
+      <option id="enum.mcu.gpt_poeg.channels.1" display="GPT_POEG1" value="1" />
+    </enum>
+    <enum id="enum.mcu.icu_ext_irq.channels" default="enum.mcu.icu_ext_irq.channels.0">
+      <option id="enum.mcu.icu_ext_irq.channels.0" display="ICU_EXT_IRQ0" value="0" />
+      <option id="enum.mcu.icu_ext_irq.channels.1" display="ICU_EXT_IRQ1" value="1" />
+      <option id="enum.mcu.icu_ext_irq.channels.2" display="ICU_EXT_IRQ2" value="2" />
+      <option id="enum.mcu.icu_ext_irq.channels.3" display="ICU_EXT_IRQ3" value="3" />
+      <option id="enum.mcu.icu_ext_irq.channels.4" display="ICU_EXT_IRQ4" value="4" />
+      <option id="enum.mcu.icu_ext_irq.channels.5" display="ICU_EXT_IRQ5" value="5" />
+      <option id="enum.mcu.icu_ext_irq.channels.6" display="ICU_EXT_IRQ6" value="6" />
+      <option id="enum.mcu.icu_ext_irq.channels.7" display="ICU_EXT_IRQ7" value="7" />
+    </enum>
+    <enum id="enum.mcu.iic.channels" default="enum.mcu.iic.channels.0">
+      <option id="enum.mcu.iic.channels.0" display="IIC0" value="0" />
+    </enum>
+    <enum id="enum.mcu.kint.channels" default="enum.mcu.kint.channels.0">
+      <option id="enum.mcu.kint.channels.0" display="KINT0" value="0" />
+    </enum>
+    <enum id="enum.mcu.mpu.channels" default="enum.mcu.mpu.channels.0">
+      <option id="enum.mcu.mpu.channels.0" display="MPU0" value="0" />
+    </enum>
+    <enum id="enum.mcu.port.channels" default="enum.mcu.port.channels.0">
+      <option id="enum.mcu.port.channels.0" display="PORT0" value="0" />
+      <option id="enum.mcu.port.channels.1" display="PORT1" value="1" />
+      <option id="enum.mcu.port.channels.2" display="PORT2" value="2" />
+      <option id="enum.mcu.port.channels.3" display="PORT3" value="3" />
+      <option id="enum.mcu.port.channels.4" display="PORT4" value="4" />
+      <option id="enum.mcu.port.channels.5" display="PORT5" value="5" />
+      <option id="enum.mcu.port.channels.9" display="PORT9" value="9" />
+    </enum>
+    <enum id="enum.mcu.sci.channels" default="enum.mcu.sci.channels.0">
+      <option id="enum.mcu.sci.channels.0" display="SCI0" value="0" />
+      <option id="enum.mcu.sci.channels.1" display="SCI1" value="1" />
+      <option id="enum.mcu.sci.channels.2" display="SCI2" value="2" />
+      <option id="enum.mcu.sci.channels.9" display="SCI9" value="9" />
+    </enum>
+    <enum id="enum.mcu.spi.channels" default="enum.mcu.spi.channels.0">
+      <option id="enum.mcu.spi.channels.0" display="SPI0" value="0" />
+    </enum>
+    <enum id="enum.mcu.wdt.channels" default="enum.mcu.wdt.channels.0">
+      <option id="enum.mcu.wdt.channels.0" display="WDT0" value="0" />
+    </enum>
+  </bsp>
+</raModuleDescription>

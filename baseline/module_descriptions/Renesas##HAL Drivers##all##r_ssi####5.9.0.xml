@@ -1,0 +1,484 @@
+﻿<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.driver.ssi" path="fsp_cfg/r_ssi_cfg.h" version="0">
+        <property default="config.driver.ssi.param_checking_enable.bsp" display="Parameter Checking" id="config.driver.ssi.param_checking_enable" description="If selected code for parameter checking is included in the build.">
+            <option display="Default (BSP)" id="config.driver.ssi.param_checking_enable.bsp" value="(BSP_CFG_PARAM_CHECKING_ENABLE)"/>
+            <option display="Enabled" id="config.driver.ssi.param_checking_enable.enabled" value="(1)"/>
+            <option display="Disabled" id="config.driver.ssi.param_checking_enable.disabled" value="(0)"/>
+        </property>
+        <property default="config.driver.ssi.dtc_enable.enabled" display="DTC Support" id="config.driver.ssi.dtc_enable" description="If code for DTC transfer support is included in the build.">
+            <option display="Enabled" id="config.driver.ssi.dtc_enable.enabled" value="(1)"/>
+            <option display="Disabled" id="config.driver.ssi.dtc_enable.disabled" value="(0)"/>
+        </property>
+        <content>
+            #ifdef __cplusplus
+            extern "C" {
+            #endif
+
+            #define SSI_CFG_PARAM_CHECKING_ENABLE ${config.driver.ssi.param_checking_enable}
+            #define SSI_CFG_DTC_ENABLE ${config.driver.ssi.dtc_enable}
+
+            #ifdef __cplusplus
+            }
+            #endif
+        </content>
+    </config>
+    <module config="config.driver.ssi" display="Connectivity|${module.driver.i2s.name} I2S (r_ssi)" id="module.driver.i2s_on_ssi" version="1" url="group___s_s_i.html">
+        <constraint display="Requires Transmit Interrupt (TXI) enabled or Receive Interrupt (RXI) enabled">
+            "0" != "${module.driver.i2s.channel}" || (("${module.driver.i2s.rxi_ipl}" != "_disabled") || ("${module.driver.i2s.txi_ipl}" != "_disabled"))
+        </constraint>
+        <constraint display="Receive and Transmit interrupts cannot both be enabled on channel 1">
+            "1" != "${module.driver.i2s.channel}" || (("${module.driver.i2s.rxi_ipl}" == "_disabled") || ("${module.driver.i2s.txi_ipl}" == "_disabled"))
+        </constraint>
+        <constraint display="All enabled interrupts must be the same priority.">
+            ("_disabled" == "${module.driver.i2s.txi_ipl}" || "${module.driver.i2s.txi_ipl}" == "${module.driver.i2s.idle_err_ipl}") &amp;&amp;
+            ("_disabled" == "${module.driver.i2s.rxi_ipl}" || "${module.driver.i2s.rxi_ipl}" == "${module.driver.i2s.idle_err_ipl}")
+        </constraint>
+        <constraint display="Unique name required for each instance">
+            "${interface.driver.i2s.${module.driver.i2s.name}}" === "1"
+        </constraint>
+        <constraint display="Requires SSI Peripheral">
+          "${interface.mcu.ssie.external}" === "1"
+        </constraint>
+        <constraint display="DTC Driver for Reception requires Receive Interrupt (RXI) to be enabled">
+          ("_disabled" != "${module.driver.i2s.rxi_ipl}") || !testExists("${module.driver.i2s_on_ssi.requires.transfer_rx::module.driver.transfer.name}")
+        </constraint>
+        <constraint display="DTC Driver for Transmission requires Transmit Interrupt (TXI) to be enabled">
+          ("_disabled" != "${module.driver.i2s.txi_ipl}") || !testExists("${module.driver.i2s_on_ssi.requires.transfer_tx::module.driver.transfer.name}")
+        </constraint>
+        <constraint display="Channel not available on selected MCU">
+            "${interface.mcu.ssie.${module.driver.i2s.channel}}" === "1"
+        </constraint>
+        <constraint display="DTC support must be enabled to use DTC">
+           ("${config.driver.ssi.dtc_enable}" === "config.driver.ssi.dtc_enable.enabled") ||
+           ((!testExists("${module.driver.i2s_on_ssi.requires.transfer_tx::module.driver.transfer.name}")) &amp;&amp;
+           (!testExists("${module.driver.i2s_on_ssi.requires.transfer_rx::module.driver.transfer.name}")))
+        </constraint>
+        <constraint display="Add DTC TX or RX stack if DTC support is enabled">
+           ((("${config.driver.ssi.dtc_enable}") != ("config.driver.ssi.dtc_enable.enabled"))||
+           ((testExists("${module.driver.i2s_on_ssi.requires.transfer_tx::module.driver.transfer.name}")) ||
+           (testExists("${module.driver.i2s_on_ssi.requires.transfer_rx::module.driver.transfer.name}"))))
+        </constraint>
+        <constraint display="Disable WS Continue Mode if Operating mode is Slave Mode.">
+           (("${module.driver.i2s.operating_mode}") != ("module.driver.i2s.operating_mode.slave"))||
+           (("${module.driver.i2s.ws_continue}") != ("module.driver.i2s.ws_continue.ws_continue_on"))
+        </constraint>
+        <requires id="module.driver.i2s_on_ssi.requires.ssi" interface="interface.mcu.ssie.external" visible="false" display="Requires SSI Peripheral" />
+        <requires id="module.driver.i2s_on_ssi.requires.transfer_tx" interface="interface.driver.transfer_on_dtc" display="Add DTC Driver for Transmission [Recommended but optional]" optional="true" >
+            <override property="module.driver.transfer.size" value="module.driver.transfer.size.size_4_byte"/>
+            <override property="module.driver.transfer.mode" value="module.driver.transfer.mode.mode_block"/>
+            <override property="module.driver.transfer.dest_addr_mode" value="module.driver.transfer.dest_addr_mode.addr_mode_fixed"/>
+            <override property="module.driver.transfer.src_addr_mode" value="module.driver.transfer.src_addr_mode.addr_mode_incremented"/>
+            <override property="module.driver.transfer.repeat_area" value="module.driver.transfer.repeat_area.repeat_area_source"/>
+            <override property="module.driver.transfer.p_dest" value="NULL"/>
+            <override property="module.driver.transfer.p_src" value="NULL"/>
+            <override property="module.driver.transfer.length" value="0"/>
+            <override property="module.driver.transfer.interrupt" value="module.driver.transfer.interrupt.interrupt_end"/>
+            <override property="module.driver.transfer.num_blocks" value="0"/>
+            <override property="module.driver.transfer.p_callback" value="NULL"/>
+            <override property="module.driver.transfer.event" value="module.driver.transfer.event.event_ssi${module.driver.i2s.channel}_txi"/>
+            <override property="module.driver.transfer.activation_source" value="_signal.event.ssi${module.driver.i2s.channel}.txi"/>
+        </requires>
+        <requires id="module.driver.i2s_on_ssi.requires.transfer_rx" interface="interface.driver.transfer_on_dtc" display="Add DTC Driver for Reception [Recommended but optional]" find="false" optional="true" >
+            <override property="module.driver.transfer.size" value="module.driver.transfer.size.size_4_byte"/>
+            <override property="module.driver.transfer.mode" value="module.driver.transfer.mode.mode_block"/>
+            <override property="module.driver.transfer.dest_addr_mode" value="module.driver.transfer.dest_addr_mode.addr_mode_incremented"/>
+            <override property="module.driver.transfer.src_addr_mode" value="module.driver.transfer.src_addr_mode.addr_mode_fixed"/>
+            <override property="module.driver.transfer.repeat_area" value="module.driver.transfer.repeat_area.repeat_area_destination"/>
+            <override property="module.driver.transfer.p_dest" value="NULL"/>
+            <override property="module.driver.transfer.p_src" value="NULL"/>
+            <override property="module.driver.transfer.length" value="0"/>
+            <override property="module.driver.transfer.interrupt" value="module.driver.transfer.interrupt.interrupt_end"/>
+            <override property="module.driver.transfer.num_blocks" value="0"/>
+            <override property="module.driver.transfer.p_callback" value="NULL"/>
+            <override property="module.driver.transfer.event" value="module.driver.transfer.event.event_ssi${module.driver.i2s.channel}_rxi"/>
+            <override property="module.driver.transfer.activation_source" value="_signal.event.ssi${module.driver.i2s.channel}.rxi"/>
+        </requires>
+        <provides interface="interface.driver.i2s" />
+        <provides interface="interface.driver.i2s_on_ssi" />
+        <provides interface="interface.driver.i2s.${module.driver.i2s.name}" />
+        <provides interface="interface.peripheral.ssie${module.driver.i2s.channel}" />
+        <property default="g_i2s${_instance}" display="Name" id="module.driver.i2s.name" description="Module name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.i2s.name}")</constraint>
+        </property>
+
+        <!-- I2S interface configuration -->
+        <property default="0" display="Channel" id="module.driver.i2s.channel" description="Specify the I2S channel.">
+            <constraint display="Value must be a non-negative integer">testInteger("${module.driver.i2s.channel}")  &amp;&amp; ("${module.driver.i2s.channel}" &gt;= 0)</constraint>
+        </property>
+        <property default="module.driver.i2s.operating_mode.master" display="Operating Mode (Master/Slave)" id="module.driver.i2s.operating_mode" description="Select if the MCU is I2S master or slave.">
+            <option display="Master Mode" id="module.driver.i2s.operating_mode.master" value="I2S_MODE_MASTER"/>
+            <option display="Slave Mode" id="module.driver.i2s.operating_mode.slave" value="I2S_MODE_SLAVE"/>
+        </property>
+        <property default="module.driver.i2s.pcm_width.pcm_width_16" display="Bit Depth" id="module.driver.i2s.pcm_width" description="Select the bit depth of one sample of audio data.">
+            <option display="8 Bits" id="module.driver.i2s.pcm_width.pcm_width_8" value="I2S_PCM_WIDTH_8_BITS"/>
+            <option display="16 Bits" id="module.driver.i2s.pcm_width.pcm_width_16" value="I2S_PCM_WIDTH_16_BITS"/>
+            <option display="18 Bits" id="module.driver.i2s.pcm_width.pcm_width_18" value="I2S_PCM_WIDTH_18_BITS"/>
+            <option display="20 Bits" id="module.driver.i2s.pcm_width.pcm_width_20" value="I2S_PCM_WIDTH_20_BITS"/>
+            <option display="22 Bits" id="module.driver.i2s.pcm_width.pcm_width_22" value="I2S_PCM_WIDTH_22_BITS"/>
+            <option display="24 Bits" id="module.driver.i2s.pcm_width.pcm_width_24" value="I2S_PCM_WIDTH_24_BITS"/>
+            <option display="32 Bits" id="module.driver.i2s.pcm_width.pcm_width_32" value="I2S_PCM_WIDTH_32_BITS"/>
+        </property>
+        <property default="module.driver.i2s.word_length.word_length_16" display="Word Length" id="module.driver.i2s.word_length" description="Select the word length of audio data. Must be at least as large as Data bits.">
+            <option display="8 Bits" id="module.driver.i2s.word_length.word_length_8" value="I2S_WORD_LENGTH_8_BITS"/>
+            <option display="16 Bits" id="module.driver.i2s.word_length.word_length_16" value="I2S_WORD_LENGTH_16_BITS"/>
+            <option display="24 Bits" id="module.driver.i2s.word_length.word_length_24" value="I2S_WORD_LENGTH_24_BITS"/>
+            <option display="32 Bits" id="module.driver.i2s.word_length.word_length_32" value="I2S_WORD_LENGTH_32_BITS"/>
+            <option display="48 Bits" id="module.driver.i2s.word_length.word_length_48" value="I2S_WORD_LENGTH_48_BITS"/>
+            <option display="64 Bits" id="module.driver.i2s.word_length.word_length_64" value="I2S_WORD_LENGTH_64_BITS"/>
+            <option display="128 Bits" id="module.driver.i2s.word_length.word_length_128" value="I2S_WORD_LENGTH_128_BITS"/>
+            <option display="256 Bits" id="module.driver.i2s.word_length.word_length_256" value="I2S_WORD_LENGTH_256_BITS"/>
+        </property>
+        <property default="module.driver.i2s.ws_continue.ws_continue_off" display="WS Continue Mode" id="module.driver.i2s.ws_continue" description="Enable WS continue mode to output the word select (WS) pin even when transmission is idle.">
+            <option display="Enabled" id="module.driver.i2s.ws_continue.ws_continue_on" value="I2S_WS_CONTINUE_ON"/>
+            <option display="Disabled" id="module.driver.i2s.ws_continue.ws_continue_off" value="I2S_WS_CONTINUE_OFF"/>
+        </property>
+        <property default="" display="Bit Clock Source(available only in Master mode)" id="module.driver.i2s.audio_clock" description="Select External AUDIO_CLK for external signal to AUDIO_CLK input pin or Internal AUDIO_CLK for internal connection to MCU specific GPT channel. Please refer to the hardware manual for which GPT channel is connected to the internal signal">
+            <select enum="enum.driver.i2s.audio_clock" />
+        </property>
+        <property default="module.driver.i2s.audio_clock_div.1" display="Bit Clock Divider(available only in Master mode)" id="module.driver.i2s.audio_clock_div" description="Select divider used to generate bit clock from audio clock.">
+            <option display="Audio Clock / 1" id="module.driver.i2s.audio_clock_div.1" value="SSI_CLOCK_DIV_1"/>
+            <option display="Audio Clock / 2" id="module.driver.i2s.audio_clock_div.2" value="SSI_CLOCK_DIV_2"/>
+            <option display="Audio Clock / 4" id="module.driver.i2s.audio_clock_div.4" value="SSI_CLOCK_DIV_4"/>
+            <option display="Audio Clock / 6" id="module.driver.i2s.audio_clock_div.6" value="SSI_CLOCK_DIV_6"/>
+            <option display="Audio Clock / 8" id="module.driver.i2s.audio_clock_div.8" value="SSI_CLOCK_DIV_8"/>
+            <option display="Audio Clock / 12" id="module.driver.i2s.audio_clock_div.12" value="SSI_CLOCK_DIV_12"/>
+            <option display="Audio Clock / 16" id="module.driver.i2s.audio_clock_div.16" value="SSI_CLOCK_DIV_16"/>
+            <option display="Audio Clock / 24" id="module.driver.i2s.audio_clock_div.24" value="SSI_CLOCK_DIV_24"/>
+            <option display="Audio Clock / 32" id="module.driver.i2s.audio_clock_div.32" value="SSI_CLOCK_DIV_32"/>
+            <option display="Audio Clock / 48" id="module.driver.i2s.audio_clock_div.48" value="SSI_CLOCK_DIV_48"/>
+            <option display="Audio Clock / 64" id="module.driver.i2s.audio_clock_div.64" value="SSI_CLOCK_DIV_64"/>
+            <option display="Audio Clock / 96" id="module.driver.i2s.audio_clock_div.96" value="SSI_CLOCK_DIV_96"/>
+            <option display="Audio Clock / 128" id="module.driver.i2s.audio_clock_div.128" value="SSI_CLOCK_DIV_128"/>
+        </property>
+        <!-- External defined callback function -->
+        <property default="NULL" display="Callback" id="module.driver.i2s.callback" description="A user callback function can be provided. If this callback function is provided, it will be called from all three interrupt service routines (ISR).">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.i2s.callback}")</constraint>
+        </property>
+        <property default="board.icu.common.irq.priority2" display="Transmit Interrupt Priority" id="module.driver.i2s.txi_ipl" description="Select the transmit interrupt priority.">
+            <select enum="enum.mcu.nvic.priorities.optional"/>
+            <interrupt event="event.ssi${module.driver.i2s.channel}.txi" isr="ssi_txi_isr"/>
+        </property>
+        <property default="" display="Receive Interrupt Priority" id="module.driver.i2s.rxi_ipl" description="Select the receive interrupt priority.">
+            <select enum="enum.mcu.nvic.priorities.optional"/>
+            <interrupt event="event.ssi${module.driver.i2s.channel}.rxi" isr="ssi_rxi_isr"/>
+        </property>
+        <property default="board.icu.common.irq.priority2" display="Idle/Error Interrupt Priority" id="module.driver.i2s.idle_err_ipl" description="Select the Idle/Error interrupt priority.">
+            <select enum="enum.mcu.nvic.priorities.mandatory"/>
+            <interrupt event="event.ssi${module.driver.i2s.channel}.int" isr="ssi_int_isr"/>
+        </property>
+        <peripheral name="SSI${module.driver.i2s.channel}" component="ssi${module.driver.i2s.channel}" />
+        <peripheral name="SSIE${module.driver.i2s.channel}" component="ssie${module.driver.i2s.channel}" />
+        <symbol id="symbol.driver.i2s.name" value="${module.driver.i2s.name}"/>
+        <symbol id="symbol.driver.i2s.guard.open" value="${module.driver.i2s.name}_open_guard"/>
+        <symbol id="symbol.driver.i2s.guard.macro.open" value="FSP_GUARD_${module.driver.i2s.name}_R_SSI_Open"/>
+        <symbol id="symbol.driver.i2s.guard.stop" value="${module.driver.i2s.name}_stop_guard"/>
+        <symbol id="symbol.driver.i2s.guard.macro.stop" value="FSP_GUARD_${module.driver.i2s.name}_R_SSI_Stop"/>
+        <symbol id="symbol.driver.i2s.guard.status_get" value="${module.driver.i2s.name}_status_get_guard"/>
+        <symbol id="symbol.driver.i2s.guard.macro.status_get" value="FSP_GUARD_${module.driver.i2s.name}_R_SSI_StatusGet"/>
+        <symbol id="symbol.driver.i2s.guard.write" value="${module.driver.i2s.name}_write_guard"/>
+        <symbol id="symbol.driver.i2s.guard.macro.write" value="FSP_GUARD_${module.driver.i2s.name}_R_SSI_Write"/>
+        <symbol id="symbol.driver.i2s.guard.read" value="${module.driver.i2s.name}_read_guard"/>
+        <symbol id="symbol.driver.i2s.guard.macro.read" value="FSP_GUARD_${module.driver.i2s.name}_R_SSI_Read"/>
+        <symbol id="symbol.driver.i2s.guard.write_read" value="${module.driver.i2s.name}_write_read_guard"/>
+        <symbol id="symbol.driver.i2s.guard.macro.write_read" value="FSP_GUARD_${module.driver.i2s.name}_R_SSI_WriteRead"/>
+        <symbol id="symbol.driver.i2s.guard.mute" value="${module.driver.i2s.name}_mute_guard"/>
+        <symbol id="symbol.driver.i2s.guard.macro.mute" value="FSP_GUARD_${module.driver.i2s.name}_R_SSI_Mute"/>
+        <symbol id="symbol.driver.i2s.guard.close" value="${module.driver.i2s.name}_close_guard"/>
+        <symbol id="symbol.driver.i2s.guard.macro.close" value="FSP_GUARD_${module.driver.i2s.name}_R_SSI_Close"/>
+        <symbol id="symbol.driver.i2s.guard.callback_set" value="${module.driver.i2s.name}_callback_set_guard"/>
+        <symbol id="symbol.driver.i2s.guard.macro.callback_set" value="FSP_GUARD_${module.driver.i2s.name}_R_SSI_CallbackSet"/>
+        <symbol id="symbol.driver.i2s.nsc_api" value="${module.driver.i2s.name}_nsc_api"/>
+        <symbol id="symbol.driver.i2s.cfg" value="${module.driver.i2s.name}_cfg"/>
+        <symbol id="symbol.driver.i2s.cfg_extend" value="${module.driver.i2s.name}_cfg_extend"/>
+        <symbol id="symbol.driver.i2s.ctrl" value="${module.driver.i2s.name}_ctrl"/>
+        <header>
+            /** SSI Instance. */
+            extern const i2s_instance_t      ${module.driver.i2s.name};
+
+            /** Access the SSI instance using these structures when calling API functions directly (::p_api is not used). */
+            extern ssi_instance_ctrl_t ${module.driver.i2s.name}_ctrl;
+            extern const i2s_cfg_t ${module.driver.i2s.name}_cfg;
+
+            #ifndef ${module.driver.i2s.callback}
+            void ${module.driver.i2s.callback}(i2s_callback_args_t * p_args);
+            #endif
+        </header>
+        <includes>
+            #include &quot;r_i2s_api.h&quot;
+            #include &quot;r_ssi.h&quot;
+        </includes>
+        <declarations>
+            ssi_instance_ctrl_t     ${module.driver.i2s.name}_ctrl;
+
+            /** SSI instance configuration */
+            const ssi_extended_cfg_t ${module.driver.i2s.name}_cfg_extend =
+            {
+                .audio_clock         = (ssi_audio_clock_t) ${module.driver.i2s.audio_clock},
+                .bit_clock_div       = ${module.driver.i2s.audio_clock_div},
+            };
+
+            /** I2S interface configuration */
+            const i2s_cfg_t ${module.driver.i2s.name}_cfg =
+            {
+                .channel             = ${module.driver.i2s.channel},
+                .pcm_width           = ${module.driver.i2s.pcm_width},
+                .operating_mode      = ${module.driver.i2s.operating_mode},
+                .word_length         = ${module.driver.i2s.word_length},
+                .ws_continue         = ${module.driver.i2s.ws_continue},
+                .p_callback          = ${module.driver.i2s.callback},
+                .p_context           = NULL,
+                .p_extend            = &amp;${module.driver.i2s.name}_cfg_extend,
+#if ${module.driver.i2s.txi_ipl} != BSP_IRQ_DISABLED
+                .txi_irq                 = VECTOR_NUMBER_SSI${module.driver.i2s.channel}_TXI,
+#else
+                .txi_irq                 = FSP_INVALID_VECTOR,
+#endif
+#if ${module.driver.i2s.rxi_ipl} != BSP_IRQ_DISABLED
+                .rxi_irq                 = VECTOR_NUMBER_SSI${module.driver.i2s.channel}_RXI,
+#else
+                .rxi_irq                 = FSP_INVALID_VECTOR,
+#endif
+#if defined(VECTOR_NUMBER_SSI${module.driver.i2s.channel}_INT)
+                .int_irq                 = VECTOR_NUMBER_SSI${module.driver.i2s.channel}_INT,
+#else
+                .int_irq                 = FSP_INVALID_VECTOR,
+#endif
+                .txi_ipl             = ${module.driver.i2s.txi_ipl},
+                .rxi_ipl             = ${module.driver.i2s.rxi_ipl},
+                .idle_err_ipl        = ${module.driver.i2s.idle_err_ipl},
+#define RA_NOT_DEFINED (1)
+#if (RA_NOT_DEFINED == ${module.driver.i2s_on_ssi.requires.transfer_tx::module.driver.transfer.name})
+                .p_transfer_tx       = NULL,
+#else
+                .p_transfer_tx       = &amp;${module.driver.i2s_on_ssi.requires.transfer_tx::module.driver.transfer.name},
+#endif
+#if (RA_NOT_DEFINED == ${module.driver.i2s_on_ssi.requires.transfer_rx::module.driver.transfer.name})
+                .p_transfer_rx       = NULL,
+#else
+                .p_transfer_rx       = &amp;${module.driver.i2s_on_ssi.requires.transfer_rx::module.driver.transfer.name},
+#endif
+#undef RA_NOT_DEFINED
+            };
+
+/* Instance structure to use this module. */
+const i2s_instance_t ${module.driver.i2s.name} =
+{
+    .p_ctrl        = &amp;${module.driver.i2s.name}_ctrl,
+    .p_cfg         = &amp;${module.driver.i2s.name}_cfg,
+    .p_api         = &amp;g_i2s_on_ssi
+};
+        </declarations>
+        <guard>
+            <header>
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.i2s.name}_open_guard(i2s_ctrl_t *const p_ctrl, i2s_cfg_t const *const p_cfg);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.i2s.name}_stop_guard(i2s_ctrl_t *const p_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.i2s.name}_status_get_guard(i2s_ctrl_t *const p_ctrl, i2s_status_t *const p_status);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.i2s.name}_write_guard(i2s_ctrl_t *const p_ctrl, void const *const p_src, uint32_t const bytes);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.i2s.name}_read_guard(i2s_ctrl_t *const p_ctrl, void *const p_dest, uint32_t const bytes);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.i2s.name}_write_read_guard(i2s_ctrl_t *const p_ctrl, void const *const p_src, void *const p_dest, uint32_t const bytes);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.i2s.name}_mute_guard(i2s_ctrl_t *const p_ctrl, i2s_mute_t const mute_enable);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.i2s.name}_close_guard(i2s_ctrl_t *const p_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.i2s.name}_callback_set_guard(i2s_ctrl_t *const p_api_ctrl, void(*p_callback)(i2s_callback_args_t *), void const *const p_context, i2s_callback_args_t *const p_callback_memory);
+
+            </header>
+            <template name="${module.driver.i2s.name}_guard.c">
+                <![CDATA[
+                    #include "guard.h"
+
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.i2s.name}_open_guard (i2s_ctrl_t *const p_ctrl, i2s_cfg_t const *const p_cfg)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+    FSP_PARAMETER_NOT_USED(p_cfg);
+
+    return R_SSI_Open(&${module.driver.i2s.name}_ctrl, &${module.driver.i2s.name}_cfg);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.i2s.name}_stop_guard (i2s_ctrl_t *const p_ctrl)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+
+    return R_SSI_Stop(&${module.driver.i2s.name}_ctrl);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.i2s.name}_status_get_guard (i2s_ctrl_t *const p_ctrl, i2s_status_t *const p_status)
+{
+    /* Verify all pointers are in non-secure memory. */
+    i2s_status_t *const p_status_checked = cmse_check_pointed_object(p_status, CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_status_checked != NULL);
+
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+
+    return R_SSI_StatusGet(&${module.driver.i2s.name}_ctrl, p_status_checked);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.i2s.name}_write_guard (i2s_ctrl_t *const p_ctrl, void const *const p_src, uint32_t const bytes)
+{
+    /* Verify all pointers are in non-secure memory. */
+    void const *const p_src_checked = cmse_check_address_range((void *) p_src, bytes, CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_src_checked != NULL);
+
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+
+    return R_SSI_Write(&${module.driver.i2s.name}_ctrl, p_src_checked, bytes);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.i2s.name}_read_guard (i2s_ctrl_t *const p_ctrl, void *const p_dest, uint32_t const bytes)
+{
+    /* Verify all pointers are in non-secure memory. */
+    void *const p_dest_checked = cmse_check_address_range((void *) p_dest, bytes, CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_dest_checked != NULL);
+
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+
+    return R_SSI_Read(&${module.driver.i2s.name}_ctrl, p_dest_checked, bytes);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.i2s.name}_write_read_guard (i2s_ctrl_t *const p_ctrl, void const *const p_src, void *const p_dest, uint32_t const bytes)
+{
+    /* Verify all pointers are in non-secure memory. */
+    void const *const p_src_checked = cmse_check_address_range((void *) p_src, bytes, CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_src_checked != NULL);
+    void *const p_dest_checked = cmse_check_address_range((void *) p_dest, bytes, CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_dest_checked != NULL);
+
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+
+    return R_SSI_WriteRead(&${module.driver.i2s.name}_ctrl, p_src_checked, p_dest_checked, bytes);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.i2s.name}_mute_guard (i2s_ctrl_t *const p_ctrl, i2s_mute_t const mute_enable)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+
+    return R_SSI_Mute(&${module.driver.i2s.name}_ctrl, mute_enable);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.i2s.name}_close_guard (i2s_ctrl_t *const p_ctrl)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+
+    return R_SSI_Close(&${module.driver.i2s.name}_ctrl);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.i2s.name}_callback_set_guard (i2s_ctrl_t *const p_api_ctrl, void(*p_callback)(i2s_callback_args_t *), void const *const p_context, i2s_callback_args_t *const p_callback_memory)
+{
+    /* Verify all pointers are in non-secure memory. */
+    void(*p_callback_checked)(i2s_callback_args_t *) = (void(*)(i2s_callback_args_t *)) cmse_check_address_range((void *) p_callback, sizeof(void *), CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_callback_checked != NULL);
+    i2s_callback_args_t *const p_callback_memory_checked = cmse_check_pointed_object(p_callback_memory, CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_callback_memory_checked != NULL);
+
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+    FSP_PARAMETER_NOT_USED(p_context);
+
+    return R_SSI_CallbackSet(&${module.driver.i2s.name}_ctrl, p_callback_checked, p_context, p_callback_memory_checked);
+}
+
+                ]]>
+            </template>
+        </guard>
+        <nsc>
+            <header>
+
+#define FSP_GUARD_${module.driver.i2s.name}_R_SSI_Open() ${module.driver.i2s.name}_open_guard(FSP_SECURE_ARGUMENT, FSP_SECURE_ARGUMENT)
+
+#define FSP_GUARD_${module.driver.i2s.name}_R_SSI_Stop() ${module.driver.i2s.name}_stop_guard(FSP_SECURE_ARGUMENT)
+
+#define FSP_GUARD_${module.driver.i2s.name}_R_SSI_StatusGet(p_status) ${module.driver.i2s.name}_status_get_guard(FSP_SECURE_ARGUMENT, p_status)
+
+#define FSP_GUARD_${module.driver.i2s.name}_R_SSI_Write(p_src, bytes) ${module.driver.i2s.name}_write_guard(FSP_SECURE_ARGUMENT, p_src, bytes)
+
+#define FSP_GUARD_${module.driver.i2s.name}_R_SSI_Read(p_dest, bytes) ${module.driver.i2s.name}_read_guard(FSP_SECURE_ARGUMENT, p_dest, bytes)
+
+#define FSP_GUARD_${module.driver.i2s.name}_R_SSI_WriteRead(p_src, p_dest, bytes) ${module.driver.i2s.name}_write_read_guard(FSP_SECURE_ARGUMENT, p_src, p_dest, bytes)
+
+#define FSP_GUARD_${module.driver.i2s.name}_R_SSI_Mute(mute_enable) ${module.driver.i2s.name}_mute_guard(FSP_SECURE_ARGUMENT, mute_enable)
+
+#define FSP_GUARD_${module.driver.i2s.name}_R_SSI_Close() ${module.driver.i2s.name}_close_guard(FSP_SECURE_ARGUMENT)
+
+#define FSP_GUARD_${module.driver.i2s.name}_R_SSI_CallbackSet(p_callback, p_context, p_callback_memory) ${module.driver.i2s.name}_callback_set_guard(FSP_SECURE_ARGUMENT, p_callback, p_context, p_callback_memory)
+
+
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.i2s.name}_open_guard(i2s_ctrl_t *const p_ctrl, i2s_cfg_t const *const p_cfg);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.i2s.name}_stop_guard(i2s_ctrl_t *const p_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.i2s.name}_status_get_guard(i2s_ctrl_t *const p_ctrl, i2s_status_t *const p_status);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.i2s.name}_write_guard(i2s_ctrl_t *const p_ctrl, void const *const p_src, uint32_t const bytes);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.i2s.name}_read_guard(i2s_ctrl_t *const p_ctrl, void *const p_dest, uint32_t const bytes);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.i2s.name}_write_read_guard(i2s_ctrl_t *const p_ctrl, void const *const p_src, void *const p_dest, uint32_t const bytes);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.i2s.name}_mute_guard(i2s_ctrl_t *const p_ctrl, i2s_mute_t const mute_enable);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.i2s.name}_close_guard(i2s_ctrl_t *const p_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.i2s.name}_callback_set_guard(i2s_ctrl_t *const p_api_ctrl, void(*p_callback)(i2s_callback_args_t *), void const *const p_context, i2s_callback_args_t *const p_callback_memory);
+
+
+extern const i2s_instance_t ${module.driver.i2s.name};
+            </header>
+            <declarations>
+                <![CDATA[
+static const i2s_api_t ${module.driver.i2s.name}_nsc_api =
+{
+    .open = ${module.driver.i2s.name}_open_guard,
+    .stop = ${module.driver.i2s.name}_stop_guard,
+    .statusGet = ${module.driver.i2s.name}_status_get_guard,
+    .write = ${module.driver.i2s.name}_write_guard,
+    .read = ${module.driver.i2s.name}_read_guard,
+    .writeRead = ${module.driver.i2s.name}_write_read_guard,
+    .mute = ${module.driver.i2s.name}_mute_guard,
+    .close = ${module.driver.i2s.name}_close_guard,
+    .callbackSet = ${module.driver.i2s.name}_callback_set_guard,
+};
+const i2s_instance_t ${module.driver.i2s.name} =
+{
+    .p_api = &${module.driver.i2s.name}_nsc_api,
+    .p_ctrl = FSP_SECURE_ARGUMENT,
+    .p_cfg = FSP_SECURE_ARGUMENT,
+};
+                ]]>
+            </declarations>
+        </nsc>
+        <api configurable="true">
+            <file>ra/fsp/inc/instances/r_ssi.h</file>
+            <file>ra/fsp/inc/api/r_elc_api.h</file>
+            <file>ra/fsp/inc/api/r_i2s_api.h</file>
+            <file>ra/fsp/inc/api/r_timer_api.h</file>
+            <file>ra/fsp/inc/api/r_transfer_api.h</file>
+        </api>
+    </module>
+</raModuleDescription>

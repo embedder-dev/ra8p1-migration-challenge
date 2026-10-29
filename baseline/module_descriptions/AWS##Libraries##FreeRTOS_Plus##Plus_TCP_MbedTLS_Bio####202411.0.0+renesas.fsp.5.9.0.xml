@@ -1,0 +1,6 @@
+<?xml version="1.0" ?>
+<raModuleDescription>
+    <module id="module.aws.mbedtls_bio.plus_tcp" display="Networking|AWS FreeRTOS+TCP MbedTLS Bio" common="1" version="0" visible="false" url="https://docs.aws.amazon.com/embedded-csdk/latest/lib-ref/libraries/standard/coreMQTT/docs/doxygen/output/html/mqtt_transport_interface.html">
+        <provides interface="interface.aws.mbedtls_bio.plus_tcp" />
+    </module>
+</raModuleDescription>

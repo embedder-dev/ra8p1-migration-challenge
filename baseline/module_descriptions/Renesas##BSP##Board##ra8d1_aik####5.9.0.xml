@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<raModuleDescription>
+  <config id="config.board.ra8d1_aik" path="fsp_cfg/bsp/board_cfg.h" version="0">
+    <content>#include "../../../ra/board/ra8d1_aik/board.h"</content>
+  </config>
+  <board config="config.board.ra8d1_aik" device="R7FA8D1BHECBD" display="RA8|RA8D1|AIK-RA8D1" id="board.ra8d1_aik" version="0" debugger="com.renesas.hardwaredebug.rz.jlink">
+    <provides interface="interface.board.ether_phy.ics1894" />
+    <description>AI-ML evaluation kit for RA8D1 MCU Group&#xA;Visit https://www.renesas.com/aik-ra8d1 to get kit user’s manual, quick start guide, errata, design package, example projects, etc.</description>
+    <capability id="capability.led"/>
+  </board>
+</raModuleDescription>

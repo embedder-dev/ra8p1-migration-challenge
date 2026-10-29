@@ -1,0 +1,1736 @@
+<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.middleware.lwip_tcpip" path="lwip/lwipopts.h" version="0">
+        <property default="config.middleware.lwip_tcpip.no_sys.disabled" display="Infrastructure|NO_SYS" id="config.middleware.lwip_tcpip.no_sys" description="Use lwIP without OS-awareness (no thread, semaphores, mutexes or mboxes).">
+            <option display="Enabled" id="config.middleware.lwip_tcpip.no_sys.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.no_sys.disabled" value="(0)"/>
+        </property>
+        <property default="config.middleware.lwip_tcpip.lwip_timers.enabled" display="Infrastructure|Timers|Timers support" id="config.middleware.lwip_tcpip.lwip_timers" description="Drop support for sys_timeout and lwip-internal cyclic timers.">
+            <option display="Enabled" id="config.middleware.lwip_tcpip.lwip_timers.enabled" value="(1)"/>
+            <!-- <option display="Disabled" id="config.middleware.lwip_tcpip.lwip_timers.disabled" value="(0)"/> -->
+        </property>
+        <property default="config.middleware.lwip_tcpip.lwip_timers_custom.disabled" display="Infrastructure|Timers|Timers custom" id="config.middleware.lwip_tcpip.lwip_timers_custom" description="Provide your own timer implementation.">
+            <option display="Enabled" id="config.middleware.lwip_tcpip.lwip_timers_custom.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.lwip_timers_custom.disabled" value="(0)"/>
+        </property>
+        <property default="memcpy" display="Infrastructure|memcpy|Memcpy" id="config.middleware.lwip_tcpip.memcpy" description="Override this if you have a faster implementation at hand than the one included in your C library.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${config.middleware.lwip_tcpip.memcpy}")</constraint>
+        </property>
+        <property default="memcpy" display="Infrastructure|memcpy|Smemcpy" id="config.middleware.lwip_tcpip.smemcpy" description="override this with care! Some compilers (e.g. gcc) can inline a call to memcpy() if the length is known at compile time and is small.">
+             <constraint display="Name must be a valid C symbol">testSymbol("${config.middleware.lwip_tcpip.smemcpy}")</constraint>
+        </property>
+        <property default="memmove" display="Infrastructure|memcpy|Memmove" id="config.middleware.lwip_tcpip.memmove" description="Override this if you have a faster implementation at hand than the one included in your C library.">
+             <constraint display="Name must be a valid C symbol">testSymbol("${config.middleware.lwip_tcpip.memmove}")</constraint>
+        </property>
+        <property default="config.middleware.lwip_tcpip.lwip_mpu_compatible.disabled" display="Infrastructure|Core locking and MPU|Special memory management" id="config.middleware.lwip_tcpip.lwip_mpu_compatible" description="Enables special memory management mechanism which makes lwip able to work on MPU (Memory Protection Unit) system by not passing stack-pointers to other threads (this decreases performance as memory is allocated from pools instead of keeping it on the stack).">
+            <option display="Enabled" id="config.middleware.lwip_tcpip.lwip_mpu_compatible.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.lwip_mpu_compatible.disabled" value="(0)"/>
+        </property>
+        <property default="config.middleware.lwip_tcpip.lwip_tcpip_core_locking.enabled" display="Infrastructure|Core locking and MPU|TCPIP core locking" id="config.middleware.lwip_tcpip.lwip_tcpip_core_locking" description="LWIP_TCPIP_CORE_LOCKING Creates a global mutex that is held during TCPIP thread operations.">
+            <option display="Enabled" id="config.middleware.lwip_tcpip.lwip_tcpip_core_locking.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.lwip_tcpip_core_locking.disabled" value="(0)"/>
+        </property>
+        <property default="config.middleware.lwip_tcpip.lwip_tcpip_core_locking_input.disabled" display="Infrastructure|Core locking and MPU|TCPIP core locking input" id="config.middleware.lwip_tcpip.lwip_tcpip_core_locking_input" description="When LWIP_TCPIP_CORE_LOCKING is enabled, this lets tcpip_input() grab the mutex for input packets as well, instead of allocating a message and passing it to tcpip_thread.">
+            <option display="Enabled" id="config.middleware.lwip_tcpip.lwip_tcpip_core_locking_input.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.lwip_tcpip_core_locking_input.disabled" value="(0)"/>
+        </property>
+        <property default="config.middleware.lwip_tcpip.sys_lightweight_prot.enabled" display="Infrastructure|Core locking and MPU|SYS lightweight port" id="config.middleware.lwip_tcpip.sys_lightweight_prot" description="Enable inter-task protection (and task-vs-interrupt protection) for certain critical regions during buffer allocation, deallocation and memory allocation and deallocation.">
+            <option display="Enabled" id="config.middleware.lwip_tcpip.sys_lightweight_prot.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.sys_lightweight_prot.disabled" value="(0)"/>
+        </property>
+        <property default="" display="Infrastructure|Core locking and MPU|Assert core locked" id="config.middleware.lwip_tcpip.lwip_assert_core_locked" description="Macro/function to check whether lwIP's threading/locking requirements are satisfied during current function call.">
+        </property>
+        <property default="config.middleware.lwip_tcpip.mem_libc_malloc.disabled" display="Infrastructure|Heap and memory pools|Mem lib C malloc" id="config.middleware.lwip_tcpip.mem_libc_malloc" description="Use malloc/free/realloc provided by your C-library instead of the lwip internal allocator.">
+            <option display="Enabled" id="config.middleware.lwip_tcpip.mem_libc_malloc.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.mem_libc_malloc.disabled" value="(0)"/>
+        </property>
+        <property default="config.middleware.lwip_tcpip.mem_custom_allocator.disabled" display="Infrastructure|Heap and memory pools|Mem custom allocator" id="config.middleware.lwip_tcpip.mem_custom_allocator" description="Use malloc/free/realloc provided by your C-library instead of the lwip internal allocator.">
+            <option display="Enabled" id="config.middleware.lwip_tcpip.mem_custom_allocator.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.mem_custom_allocator.disabled" value="(0)"/>
+        </property>
+        <property default="config.middleware.lwip_tcpip.memp_mem_malloc.disabled" display="Infrastructure|Heap and memory pools|Memp mem malloc" id="config.middleware.lwip_tcpip.memp_mem_malloc" description="Use mem_malloc/mem_free instead of the lwip pool allocator.">
+            <option display="Enabled" id="config.middleware.lwip_tcpip.memp_mem_malloc.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.memp_mem_malloc.disabled" value="(0)"/>
+        </property>
+        <property default="0" display="Infrastructure|Heap and memory pools|Memp mem init" id="config.middleware.lwip_tcpip.memp_mem_init" description="Force use of memset to initialize pool memory.">
+            <constraint display="Must be a positive integer value">testInteger("${config.middleware.lwip_tcpip.memp_mem_init}") &amp;&amp; ("${config.middleware.lwip_tcpip.memp_mem_init}" &gt;= 0)</constraint>
+        </property>
+        <property default="32" display="Infrastructure|Heap and memory pools|Mem alignment" id="config.middleware.lwip_tcpip.mem_alignment" description="Should be set to the alignment of the CPU.">
+            <constraint display="Must be a positive integer value">testInteger("${config.middleware.lwip_tcpip.mem_alignment}") &amp;&amp; ("${config.middleware.lwip_tcpip.mem_alignment}" &gt;= 0)</constraint>
+        </property>
+        <property default="1600" display="Infrastructure|Heap and memory pools|Mem size" id="config.middleware.lwip_tcpip.mem_size" description="The size of the heap memory.">
+            <constraint display="Must be a positive integer value">testInteger("${config.middleware.lwip_tcpip.mem_size}") &amp;&amp; ("${config.middleware.lwip_tcpip.mem_size}" &gt;= 0)</constraint>
+        </property>
+        <property default="config.middleware.lwip_tcpip.memp_overflow_check.nochk" display="Infrastructure|Heap and memory pools|Memp overflow check" id="config.middleware.lwip_tcpip.memp_overflow_check" description="Memp overflow protection reserves a configurable amount of bytes before and after each memp element in every pool and fills it with a prominent default value.0:no checking  1:checks each element when it is freed  2:checks each element in every pool every time  memp_malloc() or memp_free() is called (useful but slow!)">
+            <option display="Every time" id="config.middleware.lwip_tcpip.memp_overflow_check.everytime" value="(2)"/>
+            <option display="When freed" id="config.middleware.lwip_tcpip.memp_overflow_check.freed" value="(1)"/>
+            <option display="No checking" id="config.middleware.lwip_tcpip.memp_overflow_check.nochk" value="(0)"/>
+        </property>
+        <property default="config.middleware.lwip_tcpip.memp_sanity_check.disabled" display="Infrastructure|Heap and memory pools|Memp sanity check" id="config.middleware.lwip_tcpip.memp_sanity_check" description="Run a sanity check after each memp_free() to make sure that there are no cycles in the linked lists.">
+            <option display="Enabled" id="config.middleware.lwip_tcpip.memp_sanity_check.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.memp_sanity_check.disabled" value="(0)"/>
+        </property>
+        <property default="config.middleware.lwip_tcpip.mem_overflow_check.nochk" display="Infrastructure|Heap and memory pools|Mem overflow check" id="config.middleware.lwip_tcpip.mem_overflow_check" description="Mem overflow protection reserves a configurable amount of bytes before and after each heap allocation chunk and fills it with a prominent default value.">
+            <option display="Every time" id="config.middleware.lwip_tcpip.mem_overflow_check.everytime" value="(2)"/>
+            <option display="When freed" id="config.middleware.lwip_tcpip.mem_overflow_check.freed" value="(1)"/>
+            <option display="No checking" id="config.middleware.lwip_tcpip.mem_overflow_check.nochk" value="(0)"/>
+         </property>
+        <property default="config.middleware.lwip_tcpip.mem_sanity_check.disabled" display="Infrastructure|Heap and memory pools|Mem sanity check" id="config.middleware.lwip_tcpip.mem_sanity_check" description="Run a sanity check after each mem_free() to make sure that the linked list of heap elements is not corrupted.">
+            <option display="Enabled" id="config.middleware.lwip_tcpip.mem_sanity_check.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.mem_sanity_check.disabled" value="(0)"/>
+        </property>
+        <property default="config.middleware.lwip_tcpip.mem_use_pools.disabled" display="Infrastructure|Heap and memory pools|Mem use pools" id="config.middleware.lwip_tcpip.mem_use_pools" description="Use an alternative to malloc() by allocating from a set of memory pools of various sizes.">
+            <option display="Enabled" id="config.middleware.lwip_tcpip.mem_use_pools.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.mem_use_pools.disabled" value="(0)"/>
+        </property>
+        <property default="config.middleware.lwip_tcpip.mem_use_pools_try_bigger_pool.disabled" display="Infrastructure|Heap and memory pools|Mem use pools try bigger pool" id="config.middleware.lwip_tcpip.mem_use_pools_try_bigger_pool" description="If one malloc-pool is empty, try the next bigger pool - WARNING: THIS MIGHT WASTE MEMORY but it can make a system more reliable.">
+            <option display="Enabled" id="config.middleware.lwip_tcpip.mem_use_pools_try_bigger_pool.enabled" value="(1)"/>
+            <option display="Disabled" id
+            ="config.middleware.lwip_tcpip.mem_use_pools_try_bigger_pool.disabled" value="(0)"/>
+        </property>
+        <property default="config.middleware.lwip_tcpip.memp_use_custom_pools.disabled" display="Infrastructure|Heap and memory pools|Memp use custom pools" id="config.middleware.lwip_tcpip.memp_use_custom_pools" description="Whether to include a user file lwippools.">
+            <option display="Enabled" id="config.middleware.lwip_tcpip.memp_use_custom_pools.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.memp_use_custom_pools.disabled" value="(0)"/>
+        </property>
+        <property default="config.middleware.lwip_tcpip.lwip_allow_mem_free_from_other_context.disabled" display="Infrastructure|Heap and memory pools|LwIP allow mem free from other context" id="config.middleware.lwip_tcpip.lwip_allow_mem_free_from_other_context" description="As you can see from the above description, this leads to dis-/ enabling interrupts often, which can be slow! Also, on low memory, mem_malloc can need longer.">
+            <option display="Enabled" id="config.middleware.lwip_tcpip.lwip_allow_mem_free_from_other_context.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.lwip_allow_mem_free_from_other_context.disabled" value="(0)"/>
+        </property>
+        <property default="16" display="Infrastructure|Internal memory pools|Memp num pbuf" id="config.middleware.lwip_tcpip.memp_num_pbuf" description="The number of memp struct pbufs (used for PBUF_ROM and PBUF_REF).">
+            <constraint display="Must be a positive integer value">testInteger("${config.middleware.lwip_tcpip.memp_num_pbuf}") &amp;&amp; ("${config.middleware.lwip_tcpip.memp_num_pbuf}" &gt;= 0)</constraint>
+        </property>
+        <property default="4" display="Infrastructure|Internal memory pools|Memp num RAW PCB" id="config.middleware.lwip_tcpip.memp_num_raw_pcb" description="Number of raw connection PCBs (requires the LWIP_RAW option).">
+            <constraint display="Must be a positive integer value">testInteger("${config.middleware.lwip_tcpip.memp_num_raw_pcb}") &amp;&amp; ("${config.middleware.lwip_tcpip.memp_num_raw_pcb}" &gt;= 0)</constraint>
+        </property>
+        <property default="4" display="Infrastructure|Internal memory pools|Memp num UDP PCB" id="config.middleware.lwip_tcpip.memp_num_udp_pcb" description="The number of UDP protocol control blocks.">
+            <constraint display="Must be a positive integer value">testInteger("${config.middleware.lwip_tcpip.memp_num_udp_pcb}") &amp;&amp; ("${config.middleware.lwip_tcpip.memp_num_udp_pcb}" &gt;= 0)</constraint>
+        </property>
+        <property default="5" display="Infrastructure|Internal memory pools|Memp num TCP PCB" id="config.middleware.lwip_tcpip.memp_num_tcp_pcb" description="The number of simultaneously active TCP connections.">
+            <constraint display="Must be a positive integer value">testInteger("${config.middleware.lwip_tcpip.memp_num_tcp_pcb}") &amp;&amp; ("${config.middleware.lwip_tcpip.memp_num_tcp_pcb}" &gt;= 0)</constraint>
+        </property>
+        <property default="8" display="Infrastructure|Internal memory pools|Memp num TCP PCB listen" id="config.middleware.lwip_tcpip.memp_num_tcp_pcb_listen" description="The number of listening TCP connections.">
+            <constraint display="Must be a positive integer value">testInteger("${config.middleware.lwip_tcpip.memp_num_tcp_pcb_listen}") &amp;&amp; ("${config.middleware.lwip_tcpip.memp_num_tcp_pcb_listen}" &gt;= 0)</constraint>
+        </property>
+        <property default="16" display="Infrastructure|Internal memory pools|Memp num TCP seg" id="config.middleware.lwip_tcpip.memp_num_tcp_seg" description="The number of simultaneously queued TCP segments.">
+            <constraint display="Must be a positive integer value">testInteger("${config.middleware.lwip_tcpip.memp_num_tcp_seg}") &amp;&amp; ("${config.middleware.lwip_tcpip.memp_num_tcp_seg}" &gt;= 0)</constraint>
+        </property>
+        <property default="MEMP_NUM_TCP_PCB" display="Infrastructure|Internal memory pools|Memp num ALTCP PBC" id="config.middleware.lwip_tcpip.memp_num_altcp_pcb" description="The number of simultaneously active altcp layer pcbs.">
+            <constraint display="Must be a positive integer value">testInteger("${config.middleware.lwip_tcpip.memp_num_altcp_pcb}") &amp;&amp; ("${config.middleware.lwip_tcpip.memp_num_altcp_pcb}" &gt;= 0)</constraint>
+        </property>
+        <property default="5" display="Infrastructure|Internal memory pools|Memp num reassdata" id="config.middleware.lwip_tcpip.memp_num_reassdata" description="The number of IP packets simultaneously queued for reassembly (whole packets, not fragments!).">
+            <constraint display="Must be a positive integer value">testInteger("${config.middleware.lwip_tcpip.memp_num_reassdata}") &amp;&amp; ("${config.middleware.lwip_tcpip.memp_num_reassdata}" &gt;= 0)</constraint>
+        </property>
+        <property default="15" display="Infrastructure|Internal memory pools|Memp num frag pbuf" id="config.middleware.lwip_tcpip.memp_num_frag_pbuf" description="The number of IP fragments simultaneously sent (fragments, not whole packets!).">
+            <constraint display="Must be a positive integer value">testInteger("${config.middleware.lwip_tcpip.memp_num_frag_pbuf}") &amp;&amp; ("${config.middleware.lwip_tcpip.memp_num_frag_pbuf}" &gt;= 0)</constraint>
+        </property>
+        <property default="30" display="Infrastructure|Internal memory pools|Memp num ARP queue" id="config.middleware.lwip_tcpip.memp_num_arp_queue" description="The number of simultaneously queued outgoing packets (pbufs) that are waiting for an ARP request (to resolve their destination address) to finish.">
+            <constraint display="Must be a positive integer value">testInteger("${config.middleware.lwip_tcpip.memp_num_arp_queue}") &amp;&amp; ("${config.middleware.lwip_tcpip.memp_num_arp_queue}" &gt;= 0)</constraint>
+        </property>
+        <property default="8" display="Infrastructure|Internal memory pools|Memp num igmp group" id="config.middleware.lwip_tcpip.memp_num_igmp_group" description="The number of multicast groups whose network interfaces can be members at the same time (one per netif - allsystems group -, plus one per netif membership).">
+            <constraint display="Must be a positive integer value">testInteger("${config.middleware.lwip_tcpip.memp_num_igmp_group}") &amp;&amp; ("${config.middleware.lwip_tcpip.memp_num_igmp_group}" &gt;= 0)</constraint>
+        </property>
+        <property default="LWIP_NUM_SYS_TIMEOUT_INTERNAL" display="Infrastructure|Internal memory pools|Memp num sys timeout" id="config.middleware.lwip_tcpip.memp_num_sys_timeout" description="The number of simultaneously active timeouts.">
+            <constraint display="Must be a positive integer value">testInteger("${config.middleware.lwip_tcpip.memp_num_sys_timeout}") &amp;&amp; ("${config.middleware.lwip_tcpip.memp_num_sys_timeout}" &gt;= 0)</constraint>
+        </property>
+        <property default="2" display="Infrastructure|Internal memory pools|Memp num netbuf" id="config.middleware.lwip_tcpip.memp_num_netbuf" description="The number of struct netbufs.">
+            <constraint display="Must be a positive integer value">testInteger("${config.middleware.lwip_tcpip.memp_num_netbuf}") &amp;&amp; ("${config.middleware.lwip_tcpip.memp_num_netbuf}" &gt;= 0)</constraint>
+        </property>
+        <property default="4" display="Infrastructure|Internal memory pools|Memp num netconn" id="config.middleware.lwip_tcpip.memp_num_netconn" description="The number of struct netconns.">
+            <constraint display="Must be a positive integer value">testInteger("${config.middleware.lwip_tcpip.memp_num_netconn}") &amp;&amp; ("${config.middleware.lwip_tcpip.memp_num_netconn}" &gt;= 0)</constraint>
+        </property>
+        <property default="4" display="Infrastructure|Internal memory pools|Memp num select cb" id="config.middleware.lwip_tcpip.memp_num_select_cb" description="The number of struct lwip_select_cb.">
+            <constraint display="Must be a positive integer value">testInteger("${config.middleware.lwip_tcpip.memp_num_select_cb}") &amp;&amp; ("${config.middleware.lwip_tcpip.memp_num_select_cb}" &gt;= 0)</constraint>
+        </property>
+        <property default="8" display="Infrastructure|Internal memory pools|Memp num TCPIP msg api" id="config.middleware.lwip_tcpip.memp_num_tcpip_msg_api" description="The number of struct tcpip_msg, which are used for callback/timeout API communication.">
+            <constraint display="Must be a positive integer value">testInteger("${config.middleware.lwip_tcpip.memp_num_tcpip_msg_api}") &amp;&amp; ("${config.middleware.lwip_tcpip.memp_num_tcpip_msg_api}" &gt;= 0)</constraint>
+        </property>
+        <property default="8" display="Infrastructure|Internal memory pools|Memp num TCPIP msg inpkt" id="config.middleware.lwip_tcpip.memp_num_tcpip_msg_inpkt" description="The number of struct tcpip_msg, which are used for incoming packets.">
+            <constraint display="Must be a positive integer value">testInteger("${config.middleware.lwip_tcpip.memp_num_tcpip_msg_inpkt}") &amp;&amp; ("${config.middleware.lwip_tcpip.memp_num_tcpip_msg_inpkt}" &gt;= 0)</constraint>
+        </property>
+        <property default="1" display="Infrastructure|Internal memory pools|Memp num netdb" id="config.middleware.lwip_tcpip.memp_num_netdb" description="The number of concurrently running lwip_addrinfo() calls (before freeing the corresponding memory using lwip_freeaddrinfo()).">
+            <constraint display="Must be a positive integer value">testInteger("${config.middleware.lwip_tcpip.memp_num_netdb}") &amp;&amp; ("${config.middleware.lwip_tcpip.memp_num_netdb}" &gt;= 0)</constraint>
+        </property>
+        <property default="1" display="Infrastructure|Internal memory pools|Memp num localhostlist" id="config.middleware.lwip_tcpip.memp_num_localhostlist" description="The number of host entries in the local host list if DNS_LOCAL_HOSTLIST_IS_DYNAMIC==1.">
+            <constraint display="Must be a positive integer value">testInteger("${config.middleware.lwip_tcpip.memp_num_localhostlist}") &amp;&amp; ("${config.middleware.lwip_tcpip.memp_num_localhostlist}" &gt;= 0)</constraint>
+        </property>
+        <property default="16" display="Infrastructure|Internal memory pools|Pbuf pool size" id="config.middleware.lwip_tcpip.pbuf_pool_size" description="The number of buffers in the pbuf pool.">
+            <constraint display="Must be a positive integer value">testInteger("${config.middleware.lwip_tcpip.pbuf_pool_size}") &amp;&amp; ("${config.middleware.lwip_tcpip.pbuf_pool_size}" &gt;= 0)</constraint>
+        </property>
+        <property default="MEMP_NUM_TCPIP_MSG_API" display="Infrastructure|Internal memory pools|Memp num API msg" id="config.middleware.lwip_tcpip.memp_num_api_msg" description="The number of concurrently active calls to various socket, netconn, and tcpip functions.">
+            <constraint display="Must be a positive integer value">testInteger("${config.middleware.lwip_tcpip.memp_num_api_msg}") &amp;&amp; ("${config.middleware.lwip_tcpip.memp_num_api_msg}" &gt;= 0)</constraint>
+        </property>
+        <property default="MEMP_NUM_TCPIP_MSG_API" display="Infrastructure|Internal memory pools|Memp num DNS API msg" id="config.middleware.lwip_tcpip.memp_num_dns_api_msg" description="The number of concurrently active calls to netconn_gethostbyname.">
+            <constraint display="Must be a positive integer value">testInteger("${config.middleware.lwip_tcpip.memp_num_dns_api_msg}") &amp;&amp; ("${config.middleware.lwip_tcpip.memp_num_dns_api_msg}" &gt;= 0)</constraint>
+        </property>
+        <property default="MEMP_NUM_TCPIP_MSG_API" display="Infrastructure|Internal memory pools|Memp num socket setgetsockopt data" id="config.middleware.lwip_tcpip.memp_num_socket_setgetsockopt_data" description="The number of concurrently active calls to getsockopt/setsockopt.">
+            <constraint display="Must be a positive integer value">testInteger("${config.middleware.lwip_tcpip.memp_num_socket_setgetsockopt_data}") &amp;&amp; ("${config.middleware.lwip_tcpip.memp_num_socket_setgetsockopt_data}" &gt;= 0)</constraint>
+        </property>
+        <property default="MEMP_NUM_TCPIP_MSG_API" display="Infrastructure|Internal memory pools|Memp num netifapi msg" id="config.middleware.lwip_tcpip.memp_num_netifapi_msg" description="The number of concurrently active calls to the netifapi functions.">
+            <constraint display="Must be a positive integer value">testInteger("${config.middleware.lwip_tcpip.memp_num_netifapi_msg}") &amp;&amp; ("${config.middleware.lwip_tcpip.memp_num_netifapi_msg}" &gt;= 0)</constraint>
+        </property>
+        <property default="config.middleware.lwip_tcpip.lwip_arp.enabled" display="IPv4|ARP|LwIP arp" id="config.middleware.lwip_tcpip.lwip_arp" description="Enable ARP functionality.">
+            <option display="Enabled" id="config.middleware.lwip_tcpip.lwip_arp.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.lwip_arp.disabled" value="(0)"/>
+        </property>
+        <property default="10" display="IPv4|ARP|ARP table size" id="config.middleware.lwip_tcpip.arp_table_size" description="Number of active MAC-IP address pairs cached.">
+            <constraint display="Must be a positive integer value">testInteger("${config.middleware.lwip_tcpip.arp_table_size}") &amp;&amp; ("${config.middleware.lwip_tcpip.arp_table_size}" &gt;= 0)</constraint>
+        </property>
+        <property default="300" display="IPv4|ARP|ARP maxage" id="config.middleware.lwip_tcpip.arp_maxage" description="The time an ARP entry stays valid after its last update, for ARP_TMR_INTERVAL = 1000, this is (60 * 5) seconds = 5 minutes.">
+            <constraint display="Must be a positive integer value">testInteger("${config.middleware.lwip_tcpip.arp_maxage}") &amp;&amp; ("${config.middleware.lwip_tcpip.arp_maxage}" &gt;= 0)</constraint>
+        </property>
+        <property default="config.middleware.lwip_tcpip.arp_queueing.disabled" display="IPv4|ARP|ARP queueing" id="config.middleware.lwip_tcpip.arp_queueing" description="Multiple outgoing packets are queued during hardware address resolution.">
+            <option display="Enabled" id="config.middleware.lwip_tcpip.arp_queueing.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.arp_queueing.disabled" value="(0)"/>
+        </property>
+        <property default="3" display="IPv4|ARP|ARP queue len" id="config.middleware.lwip_tcpip.arp_queue_len" description="The maximum number of packets which may be queued for each unresolved address by other network layers.">
+            <constraint display="Must be a positive integer value">testInteger("${config.middleware.lwip_tcpip.arp_queue_len}") &amp;&amp; ("${config.middleware.lwip_tcpip.arp_queue_len}" &gt;= 0)</constraint>
+        </property>
+        <property default="config.middleware.lwip_tcpip.etharp_support_vlan.disabled" display="IPv4|ARP|Etharp support VLAN" id="config.middleware.lwip_tcpip.etharp_support_vlan" description="Support receiving and sending ethernet packets with VLAN header.">
+            <option display="Enabled" id="config.middleware.lwip_tcpip.etharp_support_vlan.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.etharp_support_vlan.disabled" value="(0)"/>
+        </property>
+        <property default="config.middleware.lwip_tcpip.lwip_vlan_pcp.disabled" display="IPv4|ARP|LwIP VLAN PCP" id="config.middleware.lwip_tcpip.lwip_vlan_pcp" description="Enable outgoing VLAN tagging of frames on a per-PCB basis for QoS purposes.">
+            <option display="Enabled" id="config.middleware.lwip_tcpip.lwip_vlan_pcp.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.lwip_vlan_pcp.disabled" value="(0)"/>
+        </property>
+        <property default="LWIP_ARP" display="IPv4|ARP|LwIP ethernet support" id="config.middleware.lwip_tcpip.lwip_ethernet" description="Enable ethernet support even though ARP might be disabled.">
+            <option display="LWIP_ARP" id="config.middleware.lwip_tcpip.lwip_arp" value="LWIP_ARP"/>
+            <option display="Enabled" id="config.middleware.lwip_tcpip.lwip_ethernet.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.lwip_ethernet.disabled" value="(0)"/>
+        </property>
+        <property default="config.middleware.lwip_tcpip.eth_pad_size.disabled" display="IPv4|ARP|Ethernet padding size" id="config.middleware.lwip_tcpip.eth_pad_size" description="Number of bytes added before the ethernet header to ensure alignment of payload after that header.">
+            <option display="2" id="config.middleware.lwip_tcpip.eth_pad_size.enabled" value="(2)"/>
+            <option display="0" id="config.middleware.lwip_tcpip.eth_pad_size.disabled" value="(0)"/>
+        </property>
+        <property default="config.middleware.lwip_tcpip.etharp_support_static_entries.disabled" display="IPv4|ARP|Etharp support static entries" id="config.middleware.lwip_tcpip.etharp_support_static_entries" description="Enable code to support static ARP table entries (using etharp_add_static_entry/etharp_remove_static_entry).">
+            <option display="Enabled" id="config.middleware.lwip_tcpip.etharp_support_static_entries.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.etharp_support_static_entries.disabled" value="(0)"/>
+        </property>
+        <property default="!LWIP_SINGLE_NETIF" display="IPv4|ARP|Etharp table match netif" id="config.middleware.lwip_tcpip.etharp_table_match_netif" description="Match netif for ARP table entries.">
+            <option display="!LWIP_SINGLE_NETIF" id="config.middleware.lwip_tcpip.etharp_table_match_netif.lwip_single_netif" value="(!LWIP_SINGLE_NETIF)"/>
+            <option display="Enabled" id="config.middleware.lwip_tcpip.etharp_table_match_netif.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.etharp_table_match_netif.disabled" value="(0)"/>
+        </property>
+        <property default="config.middleware.lwip_tcpip.lwip_ipv4.enabled" display="IPv4|LwIP IPv4" id="config.middleware.lwip_tcpip.lwip_ipv4" description="Enable IPv4.">
+            <option display="Enabled" id="config.middleware.lwip_tcpip.lwip_ipv4.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.lwip_ipv4.disabled" value="(0)"/>
+        </property>
+        <property default="config.middleware.lwip_tcpip.ip_forward.disabled" display="IPv4|IP forward" id="config.middleware.lwip_tcpip.ip_forward" description="Enables the ability to forward IP packets across network interfaces.">
+            <option display="Enabled" id="config.middleware.lwip_tcpip.ip_forward.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.ip_forward.disabled" value="(0)"/>
+        </property>
+        <property default="config.middleware.lwip_tcpip.ip_reassembly.enabled" display="IPv4|IP reassembly" id="config.middleware.lwip_tcpip.ip_reassembly" description="Reassemble incoming fragmented IP packets.">
+            <option display="Enabled" id="config.middleware.lwip_tcpip.ip_reassembly.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.ip_reassembly.disabled" value="(0)"/>
+        </property>
+        <property default="config.middleware.lwip_tcpip.ip_frag.enabled" display="IPv4|IP fragment" id="config.middleware.lwip_tcpip.ip_frag" description="Fragment outgoing IP packets if their size exceeds MTU.">
+            <option display="Enabled" id="config.middleware.lwip_tcpip.ip_frag.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.ip_frag.disabled" value="(0)"/>
+        </property>
+        <property default="config.middleware.lwip_tcpip.ip_options_allowed.enabled" display="IPv4|IP options allowed" id="config.middleware.lwip_tcpip.ip_options_allowed" description="Defines the behavior for IP options.">
+            <option display="Enabled" id="config.middleware.lwip_tcpip.ip_options_allowed.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.ip_options_allowed.disabled" value="(0)"/>
+        </property>
+        <property default="15" display="IPv4|IP reass maxage" id="config.middleware.lwip_tcpip.ip_reass_maxage" description="Maximum time (in multiples of IP_TMR_INTERVAL - so seconds, normally) a fragmented IP packet waits for all fragments to arrive.">
+            <constraint display="Must be a positive integer value">testInteger("${config.middleware.lwip_tcpip.ip_reass_maxage}") &amp;&amp; ("${config.middleware.lwip_tcpip.ip_reass_maxage}" &gt;= 0)</constraint>
+        </property>
+        <property default="10" display="IPv4|IP reass max pbufs" id="config.middleware.lwip_tcpip.ip_reass_max_pbufs" description="Total maximum amount of pbufs waiting to be reassembled.">
+            <constraint display="Must be a positive integer value">testInteger("${config.middleware.lwip_tcpip.ip_reass_max_pbufs}") &amp;&amp; ("${config.middleware.lwip_tcpip.ip_reass_max_pbufs}" &gt;= 0)</constraint>
+        </property>
+        <property default="255" display="IPv4|IP default TTL" id="config.middleware.lwip_tcpip.ip_default_ttl" description="Default value for Time-To-Live used by transport layers.">
+            <constraint display="Must be a positive integer value">testInteger("${config.middleware.lwip_tcpip.ip_default_ttl}") &amp;&amp; ("${config.middleware.lwip_tcpip.ip_default_ttl}" &gt;= 0)</constraint>
+        </property>
+        <property default="config.middleware.lwip_tcpip.ip_sof_broadcast.disabled" display="IPv4|IP sof broadcast filter" id="config.middleware.lwip_tcpip.ip_sof_broadcast" description="Use the SOF_BROADCAST field to enable broadcast filter per pcb on udp and raw send operations.">
+            <option display="Enabled" id="config.middleware.lwip_tcpip.ip_sof_broadcast.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.ip_sof_broadcast.disabled" value="(0)"/>
+        </property>
+        <property default="config.middleware.lwip_tcpip.ip_sof_broadcast_recv.disabled" display="IPv4|IP sof broadcast recv filter" id="config.middleware.lwip_tcpip.ip_sof_broadcast_recv" description="IP_SOF_BROADCAST_RECV (requires IP_SOF_BROADCAST=1) enable the broadcast filter on recv operations.">
+            <option display="Enabled" id="config.middleware.lwip_tcpip.ip_sof_broadcast_recv.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.ip_sof_broadcast_recv.disabled" value="(0)"/>
+        </property>
+        <property default="config.middleware.lwip_tcpip.ip_forward_allow_tx_on_rx_netif.disabled" display="IPv4|IP forward allow TX on RX netif" id="config.middleware.lwip_tcpip.ip_forward_allow_tx_on_rx_netif" description="Allow ip_forward() to send packets back out on the netif where it was received.">
+            <option display="Enabled" id="config.middleware.lwip_tcpip.ip_forward_allow_tx_on_rx_netif.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.ip_forward_allow_tx_on_rx_netif.disabled" value="(0)"/>
+        </property>
+        <property default="config.middleware.lwip_tcpip.lwip_icmp.enabled" display="IPv4|ICMP|LwIP ICMP" id="config.middleware.lwip_tcpip.lwip_icmp" description="Enable ICMP module inside the IP stack.">
+            <option display="Enabled" id="config.middleware.lwip_tcpip.lwip_icmp.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.lwip_icmp.disabled" value="(0)"/>
+        </property>
+        <property default="IP_DEFAULT_TTL" display="IPv4|ICMP|ICMP TTL" id="config.middleware.lwip_tcpip.icmp_ttl" description="Default value for Time-To-Live used by ICMP packets.">
+            <constraint display="Must be a positive integer value">testInteger("${config.middleware.lwip_tcpip.icmp_ttl}") &amp;&amp; ("${config.middleware.lwip_tcpip.icmp_ttl}" &gt;= 0)</constraint>
+        </property>
+        <property default="config.middleware.lwip_tcpip.lwip_broadcast_ping.disabled" display="IPv4|ICMP|LwIP broadcast ping" id="config.middleware.lwip_tcpip.lwip_broadcast_ping" description="Respond to broadcast pings (default is unicast only).">
+            <option display="Enabled" id="config.middleware.lwip_tcpip.lwip_broadcast_ping.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.lwip_broadcast_ping.disabled" value="(0)"/>
+        </property>
+        <property default="config.middleware.lwip_tcpip.lwip_multicast_ping.disabled" display="IPv4|ICMP|LwIP multicast ping" id="config.middleware.lwip_tcpip.lwip_multicast_ping" description="Respond to multicast pings (default is unicast only).">
+            <option display="Enabled" id="config.middleware.lwip_tcpip.lwip_multicast_ping.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.lwip_multicast_ping.disabled" value="(0)"/>
+        </property>
+        <property default="config.middleware.lwip_tcpip.lwip_raw.disabled" display="Callback-style APIs|RAW|LwIP RAW" id="config.middleware.lwip_tcpip.lwip_raw" description="Enable application layer to hook into the IP layer itself.">
+            <option display="Enabled" id="config.middleware.lwip_tcpip.lwip_raw.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.lwip_raw.disabled" value="(0)"/>
+        </property>
+        <property default="IP_DEFAULT_TTL" display="Callback-style APIs|RAW|RAW TTL" id="config.middleware.lwip_tcpip.raw_ttl" description="Default value for RAW used by ICMP packets.">
+            <constraint display="Must be a positive integer value">testInteger("${config.middleware.lwip_tcpip.raw_ttl}") &amp;&amp; ("${config.middleware.lwip_tcpip.raw_ttl}" &gt;= 0)</constraint>
+        </property>
+        <property default="config.middleware.lwip_tcpip.lwip_dhcp.disabled" display="IPv4|DHCP|LwIP DHCP" id="config.middleware.lwip_tcpip.lwip_dhcp" description="Enable DHCP module.">
+            <option display="Enabled" id="config.middleware.lwip_tcpip.lwip_dhcp.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.lwip_dhcp.disabled" value="(0)"/>
+        </property>
+        <property default="config.middleware.lwip_tcpip.lwip_dhcp_does_acd_check.disabled" display="IPv4|DHCP|LwIP DHCP address check" id="config.middleware.lwip_tcpip.lwip_dhcp_does_acd_check" description="Perform address conflict detection on the dhcp address.">
+            <option display="Enabled" id="config.middleware.lwip_tcpip.lwip_dhcp_does_acd_check.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.lwip_dhcp_does_acd_check.disabled" value="(0)"/>
+        </property>
+        <property default="config.middleware.lwip_tcpip.lwip_dhcp_bootp_file.disabled" display="IPv4|DHCP|LwIP DHCP bootp file" id="config.middleware.lwip_tcpip.lwip_dhcp_bootp_file" description="Store offered_si_addr and boot_file_name.">
+            <option display="Enabled" id="config.middleware.lwip_tcpip.lwip_dhcp_bootp_file.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.lwip_dhcp_bootp_file.disabled" value="(0)"/>
+        </property>
+        <property default="config.middleware.lwip_tcpip.lwip_dhcp_get_ntp_srv.disabled" display="IPv4|DHCP|LwIP DHCP get NTP server" id="config.middleware.lwip_tcpip.lwip_dhcp_get_ntp_srv" description="Request NTP servers with discover/select.">
+            <option display="Enabled" id="config.middleware.lwip_tcpip.lwip_dhcp_get_ntp_srv.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.lwip_dhcp_get_ntp_srv.disabled" value="(0)"/>
+        </property>
+        <property default="1" display="IPv4|DHCP|LwIP DHCP max NTP servers" id="config.middleware.lwip_tcpip.lwip_dhcp_max_ntp_servers" description="The maximum of NTP servers requested.">
+            <constraint display="Must be a positive integer value">testInteger("${config.middleware.lwip_tcpip.lwip_dhcp_max_ntp_servers}") &amp;&amp; ("${config.middleware.lwip_tcpip.lwip_dhcp_max_ntp_servers}" &gt;= 0)</constraint>
+        </property>
+        <property default="DNS_MAX_SERVERS" display="IPv4|DHCP|LwIP DHCP max DNS servers" id="config.middleware.lwip_tcpip.lwip_dhcp_max_dns_servers" description="Request DNS servers with discover/select.">
+            <constraint display="Must be greater than 0">testInteger("${config.middleware.lwip_tcpip.lwip_dhcp_max_dns_servers}") &amp;&amp; ("${config.middleware.lwip_tcpip.lwip_dhcp_max_dns_servers}" &gt;= 1)</constraint>
+        </property>
+        <property default="config.middleware.lwip_tcpip.lwip_dhcp_discover_add_hostname.enabled" display="IPv4|DHCP|LwIP DHCP discover add hostname" id="config.middleware.lwip_tcpip.lwip_dhcp_discover_add_hostname" description="Set to 0 to not include hostname opt in discover packets.">
+            <option display="Enabled" id="config.middleware.lwip_tcpip.lwip_dhcp_discover_add_hostname.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.lwip_dhcp_discover_add_hostname.disabled" value="(0)"/>
+        </property>
+        <property default="config.middleware.lwip_tcpip.lwip_autoip.disabled" display="IPv4|AUTOIP|LwIP autoip" id="config.middleware.lwip_tcpip.lwip_autoip" description="Enable AUTOIP module.">
+            <option display="Enabled" id="config.middleware.lwip_tcpip.lwip_autoip.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.lwip_autoip.disabled" value="(0)"/>
+        </property>
+        <property default="config.middleware.lwip_tcpip.lwip_dhcp_autoip_coop.disabled" display="IPv4|AUTOIP|LwIP DHCP autoip coop" id="config.middleware.lwip_tcpip.lwip_dhcp_autoip_coop" description="Allow DHCP and AUTOIP to be both enabled on the same interface at the same time.">
+            <option display="Enabled" id="config.middleware.lwip_tcpip.lwip_dhcp_autoip_coop.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.lwip_dhcp_autoip_coop.disabled" value="(0)"/>
+        </property>
+        <property default="9" display="IPv4|AUTOIP|LwIP DHCP autoip coop tries" id="config.middleware.lwip_tcpip.lwip_dhcp_autoip_coop_tries" description="Set to the number of DHCP DISCOVER probes that should be sent before falling back on AUTOIP (the DHCP client keeps running in this case).">
+            <constraint display="Must be greater than 0">testInteger("${config.middleware.lwip_tcpip.lwip_dhcp_autoip_coop_tries}") &amp;&amp; ("${config.middleware.lwip_tcpip.lwip_dhcp_autoip_coop_tries}" &gt;= 1)</constraint>
+        </property>
+        <property default="config.middleware.lwip_tcpip.lwip_acd.disabled" display="IPv4|AUTOIP|LwIP ACD" id="config.middleware.lwip_tcpip.lwip_acd" description="Enable ACD module. ACD module is needed when using AUTOIP.">
+            <option display="Enabled" id="config.middleware.lwip_tcpip.lwip_acd.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.lwip_acd.disabled" value="(0)"/>
+        </property>
+        <property default="config.middleware.lwip_tcpip.lwip_mib2_callbacks.disabled" display="Infrastructure|SNMP MIB2 callbacks|LWIP_MIB2_CALLBACKS " id="config.middleware.lwip_tcpip.lwip_mib2_callbacks" description="Turn on SNMP MIB2 callbacks.">
+            <option display="Enabled" id="config.middleware.lwip_tcpip.lwip_mib2_callbacks.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.lwip_mib2_callbacks.disabled" value="(0)"/>
+        </property>
+        <property default="((LWIP_IGMP || LWIP_IPV6_MLD) &amp;&amp; (LWIP_UDP || LWIP_RAW))" display="Infrastructure|Multicast|LwIP multicast TX options" id="config.middleware.lwip_tcpip.lwip_multicast_tx_options" description="Enable multicast TX support like the socket options IP_MULTICAST_TTL/IP_MULTICAST_IF/IP_MULTICAST_LOOP, as well as (currently only) core support for the corresponding IPv6 options.">
+            <option display="((LWIP_IGMP || LWIP_IPV6_MLD) &amp;&amp; (LWIP_UDP || LWIP_RAW))" id="config.middleware.lwip_tcpip.lwip_mib2_callbacks.lwip_igmp_lwip_ipv6_mld_lwip_udp_lwip_raw" value="((LWIP_IGMP || LWIP_IPV6_MLD) &amp;&amp; (LWIP_UDP || LWIP_RAW))"/>
+            <option display="Enabled" id="config.middleware.lwip_tcpip.lwip_multicast_tx_options.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.lwip_multicast_tx_options.disabled" value="(0)"/>
+        </property>
+        <property default="config.middleware.lwip_tcpip.lwip_igmp.disabled" display="IPv4|IGMP|LwIP IGMP" id="config.middleware.lwip_tcpip.lwip_igmp" description="Turn on IGMP module.">
+            <option display="Enabled" id="config.middleware.lwip_tcpip.lwip_igmp.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.lwip_igmp.disabled" value="(0)"/>
+        </property>
+        <property default="config.middleware.lwip_tcpip.lwip_dns.disabled" display="Callback-style APIs|DNS|LwIP DNS" id="config.middleware.lwip_tcpip.lwip_dns" description="Turn on DNS module.">
+            <option display="Enabled" id="config.middleware.lwip_tcpip.lwip_dns.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.lwip_dns.disabled" value="(0)"/>
+        </property>
+        <property default="4" display="Callback-style APIs|DNS|DNS table size" id="config.middleware.lwip_tcpip.dns_table_size" description="DNS maximum number of entries to maintain locally.">
+            <constraint display="Must be a positive integer value">testInteger("${config.middleware.lwip_tcpip.dns_table_size}") &amp;&amp; ("${config.middleware.lwip_tcpip.dns_table_size}" &gt;= 0)</constraint>
+        </property>
+        <property default="256" display="Callback-style APIs|DNS|DNS max name length" id="config.middleware.lwip_tcpip.dns_max_name_length" description="DNS maximum host name length supported in the name table.">
+            <constraint display="Must be a positive integer value">testInteger("${config.middleware.lwip_tcpip.dns_max_name_length}") &amp;&amp; ("${config.middleware.lwip_tcpip.dns_max_name_length}" &gt;= 0)</constraint>
+        </property>
+        <property default="2" display="Callback-style APIs|DNS|DNS max servers" id="config.middleware.lwip_tcpip.dns_max_servers" description="The maximum of DNS servers The first server can be initialized automatically by defining DNS_SERVER_ADDRESS(ipaddr), where 'ipaddr' is an 'ip_addr_t*'.">
+            <constraint display="Must be a positive integer value">testInteger("${config.middleware.lwip_tcpip.dns_max_servers}") &amp;&amp; ("${config.middleware.lwip_tcpip.dns_max_servers}" &gt;= 0)</constraint>
+        </property>
+        <property default="4" display="Callback-style APIs|DNS|DNS max retries" id="config.middleware.lwip_tcpip.dns_max_retries" description="DNS maximum number of retries when asking for a name, before -timeout-.">
+            <constraint display="Must be a positive integer value">testInteger("${config.middleware.lwip_tcpip.dns_max_retries}") &amp;&amp; ("${config.middleware.lwip_tcpip.dns_max_retries}" &gt;= 0)</constraint>
+        </property>
+        <property default="config.middleware.lwip_tcpip.dns_does_name_check.enabled" display="Callback-style APIs|DNS|DNS does name check" id="config.middleware.lwip_tcpip.dns_does_name_check" description="DNS do a name checking between the query and the response.">
+            <option display="Enabled" id="config.middleware.lwip_tcpip.dns_does_name_check.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.dns_does_name_check.disabled" value="(0)"/>
+        </property>
+        <property default="7" display="Callback-style APIs|DNS|LwIP DNS secure" id="config.middleware.lwip_tcpip.lwip_dns_secure" description="Controls the security level of the DNS implementation Use all DNS security features by default.">
+            <constraint display="Must be between 0 and 7">testInteger("${config.middleware.lwip_tcpip.lwip_dns_secure}") &amp;&amp; ("${config.middleware.lwip_tcpip.lwip_dns_secure}" &lt;= 7) &amp;&amp; ("${config.middleware.lwip_tcpip.lwip_dns_secure}" &gt;= 0)</constraint>
+        </property>
+        <property default="config.middleware.lwip_tcpip.dns_local_hostlist.disabled" display="Callback-style APIs|DNS|DNS local hostlist" id="config.middleware.lwip_tcpip.dns_local_hostlist" description="Implements a local host-to-address list.">
+            <option display="Enabled" id="config.middleware.lwip_tcpip.dns_local_hostlist.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.dns_local_hostlist.disabled" value="(0)"/>
+        </property>
+        <property default="config.middleware.lwip_tcpip.dns_local_hostlist_is_dynamic.disabled" display="Callback-style APIs|DNS|DNS local hostlist is dynamic" id="config.middleware.lwip_tcpip.dns_local_hostlist_is_dynamic" description="If this is turned on, the local host-list can be dynamically changed at runtime.">
+            <option display="Enabled" id="config.middleware.lwip_tcpip.dns_local_hostlist_is_dynamic.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.dns_local_hostlist_is_dynamic.disabled" value="(0)"/>
+        </property>
+        <property default="config.middleware.lwip_tcpip.lwip_dns_support_mdns_queries.disabled" display="Callback-style APIs|DNS|LwIP dns support mDNS queries" id="config.middleware.lwip_tcpip.lwip_dns_support_mdns_queries" description="Set this to 1 to enable querying -.local- names via mDNS  using a One-Shot Multicast DNS Query">
+            <option display="Enabled" id="config.middleware.lwip_tcpip.lwip_dns_support_mdns_queries.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.lwip_dns_support_mdns_queries.disabled" value="(0)"/>
+        </property>
+        <property default="config.middleware.lwip_tcpip.lwip_udp.enabled" display="Callback-style APIs|UDP|LwIP UDP" id="config.middleware.lwip_tcpip.lwip_udp" description="Turn on UDP.">
+            <option display="Enabled" id="config.middleware.lwip_tcpip.lwip_udp.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.lwip_udp.disabled" value="(0)"/>
+        </property>
+        <property default="config.middleware.lwip_tcpip.lwip_udplite.disabled" display="Callback-style APIs|UDP|LwIP UDP lite" id="config.middleware.lwip_tcpip.lwip_udplite" description="Turn on UDP-Lite.">
+            <option display="Enabled" id="config.middleware.lwip_tcpip.lwip_udplite.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.lwip_udplite.disabled" value="(0)"/>
+        </property>
+        <property default="IP_DEFAULT_TTL" display="Callback-style APIs|UDP|UDP TTL" id="config.middleware.lwip_tcpip.udp_ttl" description="Default Time-To-Live value.">
+            <constraint display="Must be a positive integer value">testInteger("${config.middleware.lwip_tcpip.udp_ttl}") &amp;&amp; ("${config.middleware.lwip_tcpip.udp_ttl}" &gt;= 0)</constraint>
+        </property>
+        <property default="config.middleware.lwip_tcpip.lwip_netbuf_recvinfo.disabled" display="Callback-style APIs|UDP|LwIP netbuf recvinfo" id="config.middleware.lwip_tcpip.lwip_netbuf_recvinfo" description="Append destination addr and port to every netbuf.">
+            <option display="Enabled" id="config.middleware.lwip_tcpip.lwip_netbuf_recvinfo.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.lwip_netbuf_recvinfo.disabled" value="(0)"/>
+        </property>
+        <property default="config.middleware.lwip_tcpip.lwip_tcp.enabled" display="Callback-style APIs|TCP|LwIP TCP" id="config.middleware.lwip_tcpip.lwip_tcp" description="Turn on TCP.">
+            <option display="Enabled" id="config.middleware.lwip_tcpip.lwip_tcp.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.lwip_tcp.disabled" value="(0)"/>
+        </property>
+        <property default="IP_DEFAULT_TTL" display="Callback-style APIs|TCP|TCP TTL" id="config.middleware.lwip_tcpip.tcp_ttl" description="Default Time-To-Live value.">
+            <constraint display="Must be a positive integer value">testInteger("${config.middleware.lwip_tcpip.tcp_ttl}") &amp;&amp; ("${config.middleware.lwip_tcpip.tcp_ttl}" &gt;= 0)</constraint>
+        </property>
+        <property default="(4 * TCP_MSS)" display="Callback-style APIs|TCP|TCP window size" id="config.middleware.lwip_tcpip.tcp_wnd" description="The size of a TCP window.">
+            <constraint display="Must be a positive integer value">testInteger("${config.middleware.lwip_tcpip.tcp_wnd}") &amp;&amp; ("${config.middleware.lwip_tcpip.tcp_wnd}" &gt;= 0)</constraint>
+        </property>
+        <property default="12" display="Callback-style APIs|TCP|TCP max rtx" id="config.middleware.lwip_tcpip.tcp_maxrtx" description="Maximum number of retransmissions of data segments.">
+            <constraint display="Must be a positive integer value">testInteger("${config.middleware.lwip_tcpip.tcp_maxrtx}") &amp;&amp; ("${config.middleware.lwip_tcpip.tcp_maxrtx}" &gt;= 0)</constraint>
+        </property>
+        <property default="6" display="Callback-style APIs|TCP|TCP SYN max rtx" id="config.middleware.lwip_tcpip.tcp_synmaxrtx" description="Maximum number of retransmissions of SYN segments.">
+            <constraint display="Must be a positive integer value">testInteger("${config.middleware.lwip_tcpip.tcp_synmaxrtx}") &amp;&amp; ("${config.middleware.lwip_tcpip.tcp_synmaxrtx}" &gt;= 0)</constraint>
+        </property>
+        <property default="LWIP_TCP" display="Callback-style APIs|TCP|TCP queue ooswq" id="config.middleware.lwip_tcpip.tcp_queue_ooseq" description="TCP will queue segments that arrive out of order.">
+            <option display="LWIP_TCP" id="config.middleware.lwip_tcpip.tcp_queue_ooseq.lwip_tcp" value="LWIP_TCP"/>
+            <option display="Enabled" id="config.middleware.lwip_tcpip.tcp_queue_ooseq.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.tcp_queue_ooseq.disabled" value="(0)"/>
+        </property>
+        <property default="config.middleware.lwip_tcpip.lwip_tcp_sack_out.disabled" display="Callback-style APIs|TCP|LwIP TCP SACK out" id="config.middleware.lwip_tcpip.lwip_tcp_sack_out" description="TCP will support sending selective acknowledgements (SACKs).">
+            <option display="Enabled" id="config.middleware.lwip_tcpip.lwip_tcp_sack_out.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.lwip_tcp_sack_out.disabled" value="(0)"/>
+        </property>
+        <property default="4" display="Callback-style APIs|TCP|LwIP TCP max SACK num" id="config.middleware.lwip_tcpip.lwip_tcp_max_sack_num" description="The maximum number of SACK values to include in TCP segments.">
+            <constraint display="Must be greater than 0">testInteger("${config.middleware.lwip_tcpip.lwip_tcp_max_sack_num}") &amp;&amp; ("${config.middleware.lwip_tcpip.lwip_tcp_max_sack_num}" &gt;= 1)</constraint>
+        </property>
+        <property default="536" display="Callback-style APIs|TCP|TCP MSS" id="config.middleware.lwip_tcpip.tcp_mss" description="TCP Maximum segment size.">
+            <constraint display="Must be a positive integer value">testInteger("${config.middleware.lwip_tcpip.tcp_mss}") &amp;&amp; ("${config.middleware.lwip_tcpip.tcp_mss}" &gt;= 0)</constraint>
+        </property>
+        <property default="1" display="Callback-style APIs|TCP|TCP calculate eff send MSS" id="config.middleware.lwip_tcpip.tcp_calculate_eff_send_mss" description="-The maximum size of a segment that TCP really sends, the 'effective send MSS,' MUST be the smaller of the send MSS (which reflects the available reassembly buffer size at the remote host) and the largest size permitted by the IP layer- (RFC 1122) Setting this to 1 enables code that checks TCP_MSS against the MTU of the netif used for a connection and limits the MSS if it would be too big otherwise.">
+            <constraint display="Must be a positive integer value">testInteger("${config.middleware.lwip_tcpip.tcp_calculate_eff_send_mss}") &amp;&amp; ("${config.middleware.lwip_tcpip.tcp_calculate_eff_send_mss}" &gt;= 0)</constraint>
+        </property>
+        <property default="3000" display="Callback-style APIs|TCP|LwIP TCP rto time" id="config.middleware.lwip_tcpip.lwip_tcp_rto_time" description="Initial TCP retransmission timeout (ms).">
+            <constraint display="Must be greater than 0">testInteger("${config.middleware.lwip_tcpip.lwip_tcp_rto_time}") &amp;&amp; ("${config.middleware.lwip_tcpip.lwip_tcp_rto_time}" &gt;= 1)</constraint>
+        </property>
+        <property default="(2 * TCP_MSS)" display="Callback-style APIs|TCP|TCP send buffer" id="config.middleware.lwip_tcpip.tcp_snd_buf" description="TCP sender buffer space (bytes).">
+            <constraint display="Must be a positive integer value">testInteger("${config.middleware.lwip_tcpip.tcp_snd_buf}") &amp;&amp; ("${config.middleware.lwip_tcpip.tcp_snd_buf}" &gt;= 0)</constraint>
+        </property>
+        <property default="((4 * (TCP_SND_BUF) + (TCP_MSS - 1))/(TCP_MSS))" display="Callback-style APIs|TCP|TCP send queuelen" id="config.middleware.lwip_tcpip.tcp_snd_queuelen" description="TCP sender buffer space (pbufs).">
+            <constraint display="Must be a positive integer value">testInteger("${config.middleware.lwip_tcpip.tcp_snd_queuelen}") &amp;&amp; ("${config.middleware.lwip_tcpip.tcp_snd_queuelen}" &gt;= 0)</constraint>
+        </property>
+        <property default="LWIP_MIN(LWIP_MAX(((TCP_SND_BUF)/2), (2 * TCP_MSS) + 1), (TCP_SND_BUF) - 1)" display="Callback-style APIs|TCP|TCP writable space" id="config.middleware.lwip_tcpip.tcp_sndlowat" description="This must be less than TCP_SND_BUF. It is the amount of space which must be available in the TCP snd_buf for select to return writable.">
+            <constraint display="Must be a positive integer value">testInteger("${config.middleware.lwip_tcpip.tcp_sndlowat}") &amp;&amp; ("${config.middleware.lwip_tcpip.tcp_sndlowat}" &gt;= 0)</constraint>
+        </property>
+        <property default="LWIP_MAX(((TCP_SND_QUEUELEN)/2), 5)" display="Callback-style APIs|TCP|TCP writable bufs" id="config.middleware.lwip_tcpip.tcp_sndqueuelowat" description="This must be less than TCP_SND_QUEUELEN. If the number of pbufs queued on a pcb drops below this number, select returns writable .">
+            <constraint display="Must be a positive integer value">testInteger("${config.middleware.lwip_tcpip.tcp_sndqueuelowat}") &amp;&amp; ("${config.middleware.lwip_tcpip.tcp_sndqueuelowat}" &gt;= 0)</constraint>
+        </property>
+        <property default="0" display="Callback-style APIs|TCP|TCP ooseq max bytes" id="config.middleware.lwip_tcpip.tcp_ooseq_max_bytes" description="The default maximum number of bytes queued on ooseq per pcb if TCP_OOSEQ_BYTES_LIMIT is not defined.">
+            <constraint display="Must be a positive integer value">testInteger("${config.middleware.lwip_tcpip.tcp_ooseq_max_bytes}") &amp;&amp; ("${config.middleware.lwip_tcpip.tcp_ooseq_max_bytes}" &gt;= 0)</constraint>
+        </property>
+        <property default="TCP_OOSEQ_MAX_BYTES" display="Callback-style APIs|TCP|TCP ooseq bytes limit" id="config.middleware.lwip_tcpip.tcp_ooseq_bytes_limit" description="Return the maximum number of bytes to be queued on ooseq per pcb, given the pcb.">
+            <constraint display="Must be a positive integer value">testInteger("${config.middleware.lwip_tcpip.tcp_ooseq_bytes_limit}") &amp;&amp; ("${config.middleware.lwip_tcpip.tcp_ooseq_bytes_limit}" &gt;= 0)</constraint>
+        </property>
+        <property default="0" display="Callback-style APIs|TCP|TCP ooseq max pbufs" id="config.middleware.lwip_tcpip.tcp_ooseq_max_pbufs" description="The default maximum number of pbufs queued on ooseq per pcb if TCP_OOSEQ_BYTES_LIMIT is not defined.">
+            <constraint display="Must be a positive integer value">testInteger("${config.middleware.lwip_tcpip.tcp_ooseq_max_pbufs}") &amp;&amp; ("${config.middleware.lwip_tcpip.tcp_ooseq_max_pbufs}" &gt;= 0)</constraint>
+        </property>
+        <property default="TCP_OOSEQ_MAX_PBUFS" display="Callback-style APIs|TCP|TCP ooseq pbufs limit" id="config.middleware.lwip_tcpip.tcp_ooseq_pbufs_limit" description="Return the maximum number of pbufs to be queued on ooseq per pcb, given the pcb.">
+            <constraint display="Must be a positive integer value">testInteger("${config.middleware.lwip_tcpip.tcp_ooseq_pbufs_limit}") &amp;&amp; ("${config.middleware.lwip_tcpip.tcp_ooseq_pbufs_limit}" &gt;= 0)</constraint>
+        </property>
+        <property default="config.middleware.lwip_tcpip.tcp_listen_backlog.disabled" display="Callback-style APIs|TCP|TCP listen backlog" id="config.middleware.lwip_tcpip.tcp_listen_backlog" description="Enable the backlog option for tcp listen pcb.">
+            <option display="Enabled" id="config.middleware.lwip_tcpip.tcp_listen_backlog.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.tcp_listen_backlog.disabled" value="(0)"/>
+        </property>
+        <property default="0xff" display="Callback-style APIs|TCP|TCP default listen backlog" id="config.middleware.lwip_tcpip.tcp_default_listen_backlog" description="The maximum allowed backlog for TCP listen netconns.">
+            <constraint display="Must be a positive integer value">testInteger("${config.middleware.lwip_tcpip.tcp_default_listen_backlog}") &amp;&amp; ("${config.middleware.lwip_tcpip.tcp_default_listen_backlog}" &gt;= 0)</constraint>
+        </property>
+        <property default="TCP_MSS" display="Callback-style APIs|TCP|TCP oversize" id="config.middleware.lwip_tcpip.tcp_oversize" description="The maximum number of bytes that tcp_write may allocate ahead of time in an attempt to create shorter pbuf chains for transmission.">
+            <constraint display="Must be a positive integer value">testInteger("${config.middleware.lwip_tcpip.tcp_oversize}") &amp;&amp; ("${config.middleware.lwip_tcpip.tcp_oversize}" &gt;= 0)</constraint>
+        </property>
+        <property default="config.middleware.lwip_tcpip.lwip_tcp_timestamps.disabled" display="Callback-style APIs|TCP|LwIP TCP timestamps" id="config.middleware.lwip_tcpip.lwip_tcp_timestamps" description="Support the TCP timestamp option.">
+            <option display="Enabled" id="config.middleware.lwip_tcpip.lwip_tcp_timestamps.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.lwip_tcp_timestamps.disabled" value="(0)"/>
+        </property>
+        <property default="LWIP_MIN((TCP_WND / 4), (TCP_MSS * 4))" display="Callback-style APIs|TCP|TCP window update threshold" id="config.middleware.lwip_tcpip.tcp_wnd_update_threshold" description="Difference in window to trigger an explicit window update.">
+            <constraint display="Must be a positive integer value">testInteger("${config.middleware.lwip_tcpip.tcp_wnd_update_threshold}") &amp;&amp; ("${config.middleware.lwip_tcpip.tcp_wnd_update_threshold}" &gt;= 0)</constraint>
+        </property>
+        <property default="config.middleware.lwip_tcpip.lwip_event_api.callback" display="Callback-style APIs|TCP|LwIP event or callback API" id="config.middleware.lwip_tcpip.lwip_event_api" description="event API:The user defines lwip_tcp_event() to receive all events (accept, sent, etc) that happen in the system. callback api:The PCB callback function is called directly for the event. This is the default.">
+            <option display="Event API" id="config.middleware.lwip_tcpip.lwip_event_api.event" value="(1)"/>
+            <option display="Callback API" id="config.middleware.lwip_tcpip.lwip_event_api.callback" value="(0)"/>
+        </property>
+        <property default="config.middleware.lwip_tcpip.lwip_wnd_scale.disabled" display="Callback-style APIs|TCP|LwIP window scale" id="config.middleware.lwip_tcpip.lwip_wnd_scale" description="Set LWIP_WND_SCALE to 1 to enable window scaling.">
+            <option display="Enabled" id="config.middleware.lwip_tcpip.lwip_wnd_scale.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.lwip_wnd_scale.disabled" value="(0)"/>
+        </property>
+        <property default="0" display="Callback-style APIs|TCP|TCP rcv scale" id="config.middleware.lwip_tcpip.tcp_rcv_scale" description="Set TCP_RCV_SCALE to the desired scaling factor.">
+            <constraint display="Shift count in the range of [0..14]">testInteger("${config.middleware.lwip_tcpip.tcp_rcv_scale}") &amp;&amp; ("${config.middleware.lwip_tcpip.tcp_rcv_scale}" &gt;= 0) &amp;&amp; ("${config.middleware.lwip_tcpip.tcp_rcv_scale}" &lt;= 14)</constraint>
+        </property>
+        <property default="0" display="Callback-style APIs|TCP|LwIP TCP pcb num ext args" id="config.middleware.lwip_tcpip.lwip_tcp_pcb_num_ext_args" description="When this is > 0, every tcp pcb (including listen pcb) includes a number of additional argument entries in an array (see tcp_ext_arg_alloc_id).">
+            <constraint display="Must be a positive integer value">testInteger("${config.middleware.lwip_tcpip.lwip_tcp_pcb_num_ext_args}") &amp;&amp; ("${config.middleware.lwip_tcpip.lwip_tcp_pcb_num_ext_args}" &gt;= 0)</constraint>
+        </property>
+        <property default="config.middleware.lwip_tcpip.lwip_altcp.disabled" display="Callback-style APIs|TCP|LwIP altcp" id="config.middleware.lwip_tcpip.lwip_altcp" description="Enable the altcp API.">
+            <option display="Enabled" id="config.middleware.lwip_tcpip.lwip_altcp.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.lwip_altcp.disabled" value="(0)"/>
+        </property>
+        <property default="config.middleware.lwip_tcpip.lwip_altcp_tls.disabled" display="Callback-style APIs|TCP|LwIP altcp TLS" id="config.middleware.lwip_tcpip.lwip_altcp_tls" description="Enable TLS support for altcp API.">
+            <option display="Enabled" id="config.middleware.lwip_tcpip.lwip_altcp_tls.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.lwip_altcp_tls.disabled" value="(0)"/>
+        </property>
+        <property default="(14 + ETH_PAD_SIZE)" display="PBUF|Pbuf link hlen" id="config.middleware.lwip_tcpip.pbuf_link_hlen" description="The number of bytes that should be allocated for a link level header. ">
+            <constraint display="Must be a positive integer value">testInteger("${config.middleware.lwip_tcpip.pbuf_link_hlen}") &amp;&amp; ("${config.middleware.lwip_tcpip.pbuf_link_hlen}" &gt;= 0)</constraint>
+        </property>
+        <property default="0" display="PBUF|Pbuf link encapsulation header size" id="config.middleware.lwip_tcpip.pbuf_link_encapsulation_hlen" description="The number of bytes that should be allocated for an additional encapsulation header before ethernet headers (e.g. 802.11)">
+            <constraint display="Must be a positive integer value">testInteger("${config.middleware.lwip_tcpip.pbuf_link_encapsulation_hlen}") &amp;&amp; ("${config.middleware.lwip_tcpip.pbuf_link_encapsulation_hlen}" &gt;= 0)</constraint>
+        </property>
+        <property default="LWIP_MEM_ALIGN_SIZE(TCP_MSS+PBUF_IP_HLEN+PBUF_TRANSPORT_HLEN+PBUF_LINK_ENCAPSULATION_HLEN+PBUF_LINK_HLEN)" display="PBUF|Pbuf pool bufsize" id="config.middleware.lwip_tcpip.pbuf_pool_bufsize" description="The size of each pbuf in the pbuf pool.">
+            <constraint display="Must be a positive integer value">testInteger("${config.middleware.lwip_tcpip.pbuf_pool_bufsize}") &amp;&amp; ("${config.middleware.lwip_tcpip.pbuf_pool_bufsize}" &gt;= 0)</constraint>
+        </property>
+        <property default="config.middleware.lwip_tcpip.lwip_pbuf_ref_t.u8_t" display="PBUF|LwIP pbuf refcount type" id="config.middleware.lwip_tcpip.lwip_pbuf_ref_t" description="Refcount type in pbuf.">
+            <option display="u8_t" id="config.middleware.lwip_tcpip.lwip_pbuf_ref_t.u8_t" value="u8_t"/>
+            <option display="u16_t" id="config.middleware.lwip_tcpip.lwip_pbuf_ref_t.u16_t" value="u16_t"/>
+            <option display="u32_t" id="config.middleware.lwip_tcpip.lwip_pbuf_ref_t.u32_t" value="u32_t"/>
+        </property>
+        <property default="" display="PBUF|LwIP pbuf custom data" id="config.middleware.lwip_tcpip.lwip_pbuf_custom_data" description="Store private data on pbufs (e.g. timestamps) This extends struct pbuf so user can store custom data on every pbuf.">
+            <constraint display="Name must be a valid type and C symbol">eval(
+            'var input = "${config.middleware.lwip_tcpip.lwip_pbuf_custom_data}";' +
+            'var regex = RegExp("^[A-Za-z0-9_]+ [A-Za-z0-9]+$");' +
+            '(regex.test(input) || 0 === input.length)')
+            </constraint>
+            <export>"${config.middleware.lwip_tcpip.lwip_pbuf_custom_data}"</export>            <!-- replace all colons with commas on export and add 0x to mark as hex -->
+        </property>
+        <property default="config.middleware.lwip_tcpip.lwip_pbuf_custom_data_init.disabled" display="PBUF|LwIP pbuf custom data init" id="config.middleware.lwip_tcpip.lwip_pbuf_custom_data_init" description="Initialize private data on pbufs.">
+            <option display="Enabled" id="config.middleware.lwip_tcpip.lwip_pbuf_custom_data_init.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.lwip_pbuf_custom_data_init.disabled" value="(0)"/>
+        </property>
+        <property default="config.middleware.lwip_tcpip.lwip_single_netif.disabled" display="NETIF|LwIP single netif" id="config.middleware.lwip_tcpip.lwip_single_netif" description="Use a single netif only.">
+            <option display="Enabled" id="config.middleware.lwip_tcpip.lwip_single_netif.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.lwip_single_netif.disabled" value="(0)"/>
+        </property>
+        <property default="config.middleware.lwip_tcpip.lwip_netif_hostname.disabled" display="NETIF|LwIP netif hostname" id="config.middleware.lwip_tcpip.lwip_netif_hostname" description="Use DHCP_OPTION_HOSTNAME with netif's hostname field.">
+            <option display="Enabled" id="config.middleware.lwip_tcpip.lwip_netif_hostname.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.lwip_netif_hostname.disabled" value="(0)"/>
+        </property>
+        <property default="config.middleware.lwip_tcpip.lwip_netif_api.disabled" display="NETIF|LwIP netif api" id="config.middleware.lwip_tcpip.lwip_netif_api" description="Support netif api (in netifapi.c)">
+            <option display="Enabled" id="config.middleware.lwip_tcpip.lwip_netif_api.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.lwip_netif_api.disabled" value="(0)"/>
+        </property>
+        <property default="config.middleware.lwip_tcpip.lwip_netif_status_callback.disabled" display="NETIF|LwIP netif status callback" id="config.middleware.lwip_tcpip.lwip_netif_status_callback" description="Support a callback function whenever an interface changes its up/down status (i.">
+            <option display="Enabled" id="config.middleware.lwip_tcpip.lwip_netif_status_callback.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.lwip_netif_status_callback.disabled" value="(0)"/>
+        </property>
+        <property default="config.middleware.lwip_tcpip.lwip_netif_ext_status_callback.disabled" display="NETIF|LwIP netif ext status callback" id="config.middleware.lwip_tcpip.lwip_netif_ext_status_callback" description="Support an extended callback function for several netif related event that supports multiple subscribers.">
+            <option display="Enabled" id="config.middleware.lwip_tcpip.lwip_netif_ext_status_callback.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.lwip_netif_ext_status_callback.disabled" value="(0)"/>
+        </property>
+        <property default="config.middleware.lwip_tcpip.lwip_netif_link_callback.disabled" display="NETIF|LwIP netif link callback" id="config.middleware.lwip_tcpip.lwip_netif_link_callback" description="Support a callback function from an interface whenever the link changes (i.">
+            <option display="Enabled" id="config.middleware.lwip_tcpip.lwip_netif_link_callback.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.lwip_netif_link_callback.disabled" value="(0)"/>
+        </property>
+        <property default="config.middleware.lwip_tcpip.lwip_netif_remove_callback.disabled" display="NETIF|LwIP netif remove callback" id="config.middleware.lwip_tcpip.lwip_netif_remove_callback" description="Support a callback function that is called when a netif has been removed.">
+            <option display="Enabled" id="config.middleware.lwip_tcpip.lwip_netif_remove_callback.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.lwip_netif_remove_callback.disabled" value="(0)"/>
+        </property>
+        <property default="config.middleware.lwip_tcpip.lwip_netif_hwaddrhint.disabled" display="NETIF|LwIP netif hardware addr hint" id="config.middleware.lwip_tcpip.lwip_netif_hwaddrhint" description="Cache link-layer-address hints (e.g. table indices) in struct netif. ">
+            <option display="Enabled" id="config.middleware.lwip_tcpip.lwip_netif_hwaddrhint.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.lwip_netif_hwaddrhint.disabled" value="(0)"/>
+        </property>
+        <property default="config.middleware.lwip_tcpip.lwip_netif_tx_single_pbuf.enabled" display="NETIF|LwIP netif TX single pbuf" id="config.middleware.lwip_tcpip.lwip_netif_tx_single_pbuf" description="If this is set to 1, lwIP *tries* to put all data to be sent into one single pbuf.">
+            <option display="Enabled" id="config.middleware.lwip_tcpip.lwip_netif_tx_single_pbuf.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.lwip_netif_tx_single_pbuf.disabled" value="(0)"/>
+        </property>
+        <property default="0" display="NETIF|LwIP num netif client data" id="config.middleware.lwip_tcpip.lwip_num_netif_client_data" description="Number of clients that may store data in client_data member array of struct netif (max.">
+            <constraint display="Must be between 0 and 256">testInteger("${config.middleware.lwip_tcpip.lwip_num_netif_client_data}") &amp;&amp; ("${config.middleware.lwip_tcpip.lwip_num_netif_client_data}" &lt;= 256) &amp;&amp; ("${config.middleware.lwip_tcpip.lwip_num_netif_client_data}" &gt;= 0)</constraint>
+        </property>
+        <property default="(LWIP_NETIF_LOOPBACK &amp;&amp; !LWIP_SINGLE_NETIF)" display="NETIF|Loopback interface|LwIP have loop interface" id="config.middleware.lwip_tcpip.lwip_have_loopif" description="Support loop interface (127.0.0.1).">
+            <option display="(LWIP_NETIF_LOOPBACK &amp;&amp; !LWIP_SINGLE_NETIF)" id="config.middleware.lwip_tcpip.lwip_have_loopif.lwip_netif_loopback_lwip_single_netif" value="(LWIP_NETIF_LOOPBACK &amp;&amp; !LWIP_SINGLE_NETIF)"/>
+            <option display="Enabled" id="config.middleware.lwip_tcpip.lwip_have_loopif.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.lwip_have_loopif.disabled" value="(0)"/>
+        </property>
+        <property default="config.middleware.lwip_tcpip.lwip_loopif_multicast.disabled" display="NETIF|Loopback interface|LwIP loop interface multicast" id="config.middleware.lwip_tcpip.lwip_loopif_multicast" description=" Support multicast/IGMP on loop interface (127.0.0.1).">
+            <option display="Enabled" id="config.middleware.lwip_tcpip.lwip_loopif_multicast.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.lwip_loopif_multicast.disabled" value="(0)"/>
+        </property>
+        <property default="config.middleware.lwip_tcpip.lwip_netif_loopback.disabled" display="NETIF|Loopback interface|LwIP netif loopback" id="config.middleware.lwip_tcpip.lwip_netif_loopback" description="Support sending packets with a destination IP address equal to the netif IP address, looping them back up the stack.">
+            <option display="Enabled" id="config.middleware.lwip_tcpip.lwip_netif_loopback.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.lwip_netif_loopback.disabled" value="(0)"/>
+        </property>
+        <property default="0" display="NETIF|Loopback interface|LwIP loopback max pbufs" id="config.middleware.lwip_tcpip.lwip_loopback_max_pbufs" description="Maximum number of pbufs on queue for loopback sending for each netif (0 = disabled).">
+            <constraint display="Must be a positive integer value">testInteger("${config.middleware.lwip_tcpip.lwip_loopback_max_pbufs}") &amp;&amp; ("${config.middleware.lwip_tcpip.lwip_loopback_max_pbufs}" &gt;= 0)</constraint>
+        </property>
+        <property default="(!NO_SYS)" display="NETIF|Loopback interface|LwIP netif loopback multithreading" id="config.middleware.lwip_tcpip.lwip_netif_loopback_multithreading" description="Indicates whether threading is enabled in the system, as netifs must change how they behave depending on this setting for the LWIP_NETIF_LOOPBACK option to work.">
+            <option display="(!NO_SYS)" id="config.middleware.lwip_tcpip.lwip_netif_loopback_multithreading.no_sys" value="(!NO_SYS)"/>
+            <option display="Enabled" id="config.middleware.lwip_tcpip.lwip_netif_loopback_multithreading.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.lwip_netif_loopback_multithreading.disabled" value="(0)"/>
+        </property>
+        <property default="tcpip_thread" display="Infrastructure|Threading|TCPIP thread name" id="config.middleware.lwip_tcpip.tcpip_thread_name" description="The name assigned to the main tcpip thread.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${config.middleware.lwip_tcpip.tcpip_thread_name}")</constraint>
+        </property>
+        <property default="0" display="Infrastructure|Threading|TCPIP thread stacksize" id="config.middleware.lwip_tcpip.tcpip_thread_stacksize" description="The stack size used by the main tcpip thread.">
+            <constraint display="Must be a positive integer value">testInteger("${config.middleware.lwip_tcpip.tcpip_thread_stacksize}") &amp;&amp; ("${config.middleware.lwip_tcpip.tcpip_thread_stacksize}" &gt;= 0)</constraint>
+        </property>
+        <property default="1" display="Infrastructure|Threading|TCPIP thread prio" id="config.middleware.lwip_tcpip.tcpip_thread_prio" description="The priority assigned to the main tcpip thread.">
+            <constraint display="Must be a positive integer value">testInteger("${config.middleware.lwip_tcpip.tcpip_thread_prio}") &amp;&amp; ("${config.middleware.lwip_tcpip.tcpip_thread_prio}" &gt;= 0)</constraint>
+        </property>
+        <property default="0" display="Infrastructure|Threading|TCPIP mbox size" id="config.middleware.lwip_tcpip.tcpip_mbox_size" description="The mailbox size for the tcpip thread messages The queue size value itself is platform-dependent, but is passed to sys_mbox_new() when tcpip_init is called.">
+            <constraint display="Must be a positive integer value">testInteger("${config.middleware.lwip_tcpip.tcpip_mbox_size}") &amp;&amp; ("${config.middleware.lwip_tcpip.tcpip_mbox_size}" &gt;= 0)</constraint>
+        </property>
+        <property default="" display="Infrastructure|Threading|LwIP tcpip thread alive" id="config.middleware.lwip_tcpip.lwip_tcpip_thread_alive" description="Define this to something that triggers a watchdog.">
+            <constraint display="Name must be a valid type and C symbol and ()">eval(
+            'var input = "${config.middleware.lwip_tcpip.lwip_tcpip_thread_alive}";' +
+            'var regex = RegExp("^[A-Za-z0-9]+[\(][\)]$");' +
+            '(regex.test(input) || 0 === input.length)')
+            </constraint>
+            <export>"${config.middleware.lwip_tcpip.lwip_tcpip_thread_alive}"</export>            <!-- replace all colons with commas on export and add 0x to mark as hex -->
+        </property>
+        <property default="slipif_loop" display="Infrastructure|Threading|Slipif thread name" id="config.middleware.lwip_tcpip.slipif_thread_name" description="The name assigned to the slipif_loop thread.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${config.middleware.lwip_tcpip.slipif_thread_name}")</constraint>
+        </property>
+        <property default="0" display="Infrastructure|Threading|Slipif thread stacksize" id="config.middleware.lwip_tcpip.slipif_thread_stacksize" description="The stack size used by the slipif_loop thread.">
+            <constraint display="Must be a positive integer value">testInteger("${config.middleware.lwip_tcpip.slipif_thread_stacksize}") &amp;&amp; ("${config.middleware.lwip_tcpip.slipif_thread_stacksize}" &gt;= 0)</constraint>
+        </property>
+        <property default="1" display="Infrastructure|Threading|Slipif thread prio" id="config.middleware.lwip_tcpip.slipif_thread_prio" description="The priority assigned to the slipif_loop thread.">
+            <constraint display="Must be greater than 0">testInteger("${config.middleware.lwip_tcpip.slipif_thread_prio}") &amp;&amp; ("${config.middleware.lwip_tcpip.slipif_thread_prio}" &gt;= 1)</constraint>
+        </property>
+        <property default="lwIP" display="Infrastructure|Threading|Default thread name" id="config.middleware.lwip_tcpip.default_thread_name" description="The name assigned to any other lwIP thread.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${config.middleware.lwip_tcpip.default_thread_name}")</constraint>
+        </property>
+        <property default="0" display="Infrastructure|Threading|Default thread stacksize" id="config.middleware.lwip_tcpip.default_thread_stacksize" description="The stack size used by any other lwIP thread.">
+            <constraint display="Must be a positive integer value">testInteger("${config.middleware.lwip_tcpip.default_thread_stacksize}") &amp;&amp; ("${config.middleware.lwip_tcpip.default_thread_stacksize}" &gt;= 0)</constraint>
+        </property>
+        <property default="1" display="Infrastructure|Threading|Default thread prio" id="config.middleware.lwip_tcpip.default_thread_prio" description="The priority assigned to any other lwIP thread.">
+            <constraint display="Must be a positive integer value">testInteger("${config.middleware.lwip_tcpip.default_thread_prio}") &amp;&amp; ("${config.middleware.lwip_tcpip.default_thread_prio}" &gt;= 0)</constraint>
+        </property>
+        <property default="0" display="Infrastructure|Threading|Default RAW recvmbox size" id="config.middleware.lwip_tcpip.default_raw_recvmbox_size" description="The mailbox size for the incoming packets on a NETCONN_RAW.">
+            <constraint display="Must be a positive integer value">testInteger("${config.middleware.lwip_tcpip.default_raw_recvmbox_size}") &amp;&amp; ("${config.middleware.lwip_tcpip.default_raw_recvmbox_size}" &gt;= 0)</constraint>
+        </property>
+        <property default="0" display="Infrastructure|Threading|Default UDP recvmbox size" id="config.middleware.lwip_tcpip.default_udp_recvmbox_size" description="The mailbox size for the incoming packets on a NETCONN_UDP.">
+            <constraint display="Must be a positive integer value">testInteger("${config.middleware.lwip_tcpip.default_udp_recvmbox_size}") &amp;&amp; ("${config.middleware.lwip_tcpip.default_udp_recvmbox_size}" &gt;= 0)</constraint>
+        </property>
+        <property default="0" display="Infrastructure|Threading|Default TCP recvmbox size" id="config.middleware.lwip_tcpip.default_tcp_recvmbox_size" description="The mailbox size for the incoming packets on a NETCONN_TCP.">
+            <constraint display="Must be a positive integer value">testInteger("${config.middleware.lwip_tcpip.default_tcp_recvmbox_size}") &amp;&amp; ("${config.middleware.lwip_tcpip.default_tcp_recvmbox_size}" &gt;= 0)</constraint>
+        </property>
+        <property default="0" display="Infrastructure|Threading|Default acceptmbox size" id="config.middleware.lwip_tcpip.default_acceptmbox_size" description="The mailbox size for the incoming connections.">
+            <constraint display="Must be a positive integer value">testInteger("${config.middleware.lwip_tcpip.default_acceptmbox_size}") &amp;&amp; ("${config.middleware.lwip_tcpip.default_acceptmbox_size}" &gt;= 0)</constraint>
+        </property>
+        <property default="config.middleware.lwip_tcpip.lwip_netconn.enabled" display="Thread-safe APIs|Netconn|LwIP netconn" id="config.middleware.lwip_tcpip.lwip_netconn" description="Enable Netconn API (require to use api_lib.">
+            <option display="Enabled" id="config.middleware.lwip_tcpip.lwip_netconn.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.lwip_netconn.disabled" value="(0)"/>
+        </property>
+        <property default="config.middleware.lwip_tcpip.lwip_tcpip_timeout.disabled" display="Thread-safe APIs|Netconn|LwIP TCPIP timeout" id="config.middleware.lwip_tcpip.lwip_tcpip_timeout" description="Enable tcpip_timeout/tcpip_untimeout to create timers running in tcpip_thread from another thread.">
+            <option display="Enabled" id="config.middleware.lwip_tcpip.lwip_tcpip_timeout.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.lwip_tcpip_timeout.disabled" value="(0)"/>
+        </property>
+        <property default="config.middleware.lwip_tcpip.lwip_netconn_sem_per_thread.disabled" display="Thread-safe APIs|Netconn|LwIP netconn sem per thread" id="config.middleware.lwip_tcpip.lwip_netconn_sem_per_thread" description="Use one (thread-local) semaphore per thread calling socket/netconn functions instead of allocating one semaphore per netconn (and per select etc.">
+            <option display="Enabled" id="config.middleware.lwip_tcpip.lwip_netconn_sem_per_thread.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.lwip_netconn_sem_per_thread.disabled" value="(0)"/>
+        </property>
+        <property default="config.middleware.lwip_tcpip.lwip_netconn_fullduplex.disabled" display="Thread-safe APIs|Netconn|LwIP netconn fullduplex" id="config.middleware.lwip_tcpip.lwip_netconn_fullduplex" description="Enable code that allows reading from one thread, writing from a 2nd thread and closing from a 3rd thread at the same time.">
+            <option display="Enabled" id="config.middleware.lwip_tcpip.lwip_netconn_fullduplex.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.lwip_netconn_fullduplex.disabled" value="(0)"/>
+        </property>
+        <property default="config.middleware.lwip_tcpip.lwip_socket.enabled" display="Thread-safe APIs|Sockets|LwIP socket" id="config.middleware.lwip_tcpip.lwip_socket" description="Enable Socket API (require to use sockets.">
+            <option display="Enabled" id="config.middleware.lwip_tcpip.lwip_socket.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.lwip_socket.disabled" value="(0)"/>
+        </property>
+        <property default="1" display="Thread-safe APIs|Sockets|LwIP compat sockets" id="config.middleware.lwip_tcpip.lwip_compat_sockets" description="Enable BSD-style sockets functions names through defines.">
+            <constraint display="Must be greater than 0">testInteger("${config.middleware.lwip_tcpip.lwip_compat_sockets}") &amp;&amp; ("${config.middleware.lwip_tcpip.lwip_compat_sockets}" &gt;= 1)</constraint>
+        </property>
+        <property default="config.middleware.lwip_tcpip.lwip_posix_sockets_io_names.enabled" display="Thread-safe APIs|Sockets|LwIP posix sockets io names" id="config.middleware.lwip_tcpip.lwip_posix_sockets_io_names" description="Enable POSIX-style sockets functions names.">
+            <option display="Enable" id="config.middleware.lwip_tcpip.lwip_posix_sockets_io_names.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.lwip_posix_sockets_io_names.disabled" value="(0)"/>
+        </property>
+        <property default="0" display="Thread-safe APIs|Sockets|LwIP socket offset" id="config.middleware.lwip_tcpip.lwip_socket_offset" description="Increases the file descriptor number created by LwIP with n.">
+            <constraint display="Must be a positive integer value">testInteger("${config.middleware.lwip_tcpip.lwip_socket_offset}") &amp;&amp; ("${config.middleware.lwip_tcpip.lwip_socket_offset}" &gt;= 0)</constraint>
+        </property>
+        <property default="config.middleware.lwip_tcpip.lwip_socket_external_headers.disabled" display="Thread-safe APIs|Sockets|LwIP socket external headers" id="config.middleware.lwip_tcpip.lwip_socket_external_headers" description="Use external headers instead of sockets.">
+            <option display="Enabled" id="config.middleware.lwip_tcpip.lwip_socket_external_headers.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.lwip_socket_external_headers.disabled" value="(0)"/>
+        </property>
+        <property default="config.middleware.lwip_tcpip.lwip_tcp_keepalive.disabled" display="Thread-safe APIs|Sockets|LwIP TCP keepalive" id="config.middleware.lwip_tcpip.lwip_tcp_keepalive" description="Enable TCP_KEEPIDLE, TCP_KEEPINTVL and TCP_KEEPCNT options processing.">
+            <option display="Enabled" id="config.middleware.lwip_tcpip.lwip_tcp_keepalive.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.lwip_tcp_keepalive.disabled" value="(0)"/>
+        </property>
+        <property default="config.middleware.lwip_tcpip.lwip_so_sndtimeo.disabled" display="Thread-safe APIs|Sockets|LwIP so send timeout" id="config.middleware.lwip_tcpip.lwip_so_sndtimeo" description="Enable send timeout for sockets/netconns and SO_SNDTIMEO processing.">
+            <option display="Enabled" id="config.middleware.lwip_tcpip.lwip_so_sndtimeo.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.lwip_so_sndtimeo.disabled" value="(0)"/>
+        </property>
+        <property default="config.middleware.lwip_tcpip.lwip_so_rcvtimeo.disabled" display="Thread-safe APIs|Sockets|LwIP so rcv timeout" id="config.middleware.lwip_tcpip.lwip_so_rcvtimeo" description="Enable receive timeout for sockets/netconns and SO_RCVTIMEO processing.">
+            <option display="Enabled" id="config.middleware.lwip_tcpip.lwip_so_rcvtimeo.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.lwip_so_rcvtimeo.disabled" value="(0)"/>
+        </property>
+        <property default="config.middleware.lwip_tcpip.lwip_so_sndrcvtimeo_nonstandard.disabled" display="Thread-safe APIs|Sockets|LwIP so send/rcv timeout nonstandard" id="config.middleware.lwip_tcpip.lwip_so_sndrcvtimeo_nonstandard" description="SO_RCVTIMEO/SO_SNDTIMEO take an int (milliseconds, much like winsock does) instead of a struct timeval (default).">
+            <option display="Enabled" id="config.middleware.lwip_tcpip.lwip_so_sndrcvtimeo_nonstandard.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.lwip_so_sndrcvtimeo_nonstandard.disabled" value="(0)"/>
+        </property>
+        <property default="config.middleware.lwip_tcpip.lwip_so_rcvbuf.disabled" display="Thread-safe APIs|Sockets|LwIP so rcvbuf" id="config.middleware.lwip_tcpip.lwip_so_rcvbuf" description="Enable SO_RCVBUF processing.">
+            <option display="Enabled" id="config.middleware.lwip_tcpip.lwip_so_rcvbuf.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.lwip_so_rcvbuf.disabled" value="(0)"/>
+        </property>
+        <property default="config.middleware.lwip_tcpip.lwip_so_linger.disabled" display="Thread-safe APIs|Sockets|LwIP so linger" id="config.middleware.lwip_tcpip.lwip_so_linger" description="Enable SO_LINGER processing.">
+            <option display="Enabled" id="config.middleware.lwip_tcpip.lwip_so_linger.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.lwip_so_linger.disabled" value="(0)"/>
+        </property>
+        <property default="INT_MAX" display="Thread-safe APIs|Sockets|Recv bufsize" id="config.middleware.lwip_tcpip.recv_bufsize_default" description="If LWIP_SO_RCVBUF is used, this is the default value for recv_bufsize.">
+            <constraint display="Must be a positive integer value">testInteger("${config.middleware.lwip_tcpip.recv_bufsize_default}") &amp;&amp; ("${config.middleware.lwip_tcpip.recv_bufsize_default}" &gt;= 0)</constraint>
+        </property>
+        <property default="20000" display="Thread-safe APIs|Sockets|LwIP tcp close timeout ms" id="config.middleware.lwip_tcpip.lwip_tcp_close_timeout_ms_default" description="By default, TCP socket/netconn close waits 20 seconds max to send the FIN.">
+            <constraint display="Must be a positive integer value">testInteger("${config.middleware.lwip_tcpip.lwip_tcp_close_timeout_ms_default}") &amp;&amp; ("${config.middleware.lwip_tcpip.lwip_tcp_close_timeout_ms_default}" &gt;= 0)</constraint>
+        </property>
+        <property default="config.middleware.lwip_tcpip.so_reuse.disabled" display="Thread-safe APIs|Sockets|So reuseaddr" id="config.middleware.lwip_tcpip.so_reuse" description="Enable SO_REUSEADDR option.">
+            <option display="Enabled" id="config.middleware.lwip_tcpip.so_reuse.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.so_reuse.disabled" value="(0)"/>
+        </property>
+        <property default="config.middleware.lwip_tcpip.so_reuse_rxtoall.disabled" display="Thread-safe APIs|Sockets|So reuse rxtoall" id="config.middleware.lwip_tcpip.so_reuse_rxtoall" description="Pass a copy of incoming broadcast/multicast packets to all local matches if SO_REUSEADDR is turned on.">
+            <option display="Enabled" id="config.middleware.lwip_tcpip.so_reuse_rxtoall.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.so_reuse_rxtoall.disabled" value="(0)"/>
+        </property>
+        <property default="config.middleware.lwip_tcpip.lwip_fionread_linuxmode.disabled" display="Thread-safe APIs|Sockets|LwIP fionread linuxmode" id="config.middleware.lwip_tcpip.lwip_fionread_linuxmode" description="Ioctl/FIONREAD returns the amount of pending data in the network buffer.">
+            <option display="Enabled" id="config.middleware.lwip_tcpip.lwip_fionread_linuxmode.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.lwip_fionread_linuxmode.disabled" value="(0)"/>
+        </property>
+        <property default="config.middleware.lwip_tcpip.lwip_socket_select.enabled" display="Thread-safe APIs|Sockets|LwIP socket select" id="config.middleware.lwip_tcpip.lwip_socket_select" description="Enable select() for sockets (uses a netconn callback to keep track of events).">
+            <option display="Enabled" id="config.middleware.lwip_tcpip.lwip_socket_select.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.lwip_socket_select.disabled" value="(0)"/>
+        </property>
+        <property default="config.middleware.lwip_tcpip.lwip_socket_poll.enabled" display="Thread-safe APIs|Sockets|LwIP socket poll" id="config.middleware.lwip_tcpip.lwip_socket_poll" description="Enable poll() for sockets (including struct pollfd, nfds_t, and constants).">
+            <option display="Enabled" id="config.middleware.lwip_tcpip.lwip_socket_poll.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.lwip_socket_poll.disabled" value="(0)"/>
+        </property>
+        <property default="config.middleware.lwip_tcpip.lwip_stats.enabled" display="Debugging|Statistics|LwIP stats" id="config.middleware.lwip_tcpip.lwip_stats" description="Enable statistics collection in lwip_stats.">
+            <option display="Enabled" id="config.middleware.lwip_tcpip.lwip_stats.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.lwip_stats.disabled" value="(0)"/>
+        </property>
+
+        <property default="config.middleware.lwip_tcpip.lwip_stats_display.disabled" display="Debugging|Statistics|LwIP stats display" id="config.middleware.lwip_tcpip.lwip_stats_display" description="Compile in the statistics output functions.">
+            <option display="Enabled" id="config.middleware.lwip_tcpip.lwip_stats_display.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.lwip_stats_display.disabled" value="(0)"/>
+        </property>
+        <property default="config.middleware.lwip_tcpip.link_stats.enabled" display="Debugging|Statistics|Link stats" id="config.middleware.lwip_tcpip.link_stats" description="Enable link stats.">
+            <option display="Enabled" id="config.middleware.lwip_tcpip.link_stats.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.link_stats.disabled" value="(0)"/>
+        </property>
+        <property default="LWIP_ARP" display="Debugging|Statistics|Etharp stats" id="config.middleware.lwip_tcpip.etharp_stats" description="Enable etharp stats.">
+            <option display="LWIP_ARP" id="config.middleware.lwip_tcpip.etharp_stats.lwip_arp" value="(LWIP_ARP)"/>
+            <option display="Enabled" id="config.middleware.lwip_tcpip.etharp_stats.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.etharp_stats.disabled" value="(0)"/>
+        </property>
+        <property default="config.middleware.lwip_tcpip.ip_stats.enabled" display="Debugging|Statistics|IP stats" id="config.middleware.lwip_tcpip.ip_stats" description="Enable IP stats.">
+            <option display="Enabled" id="config.middleware.lwip_tcpip.ip_stats.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.ip_stats.disabled" value="(0)"/>
+        </property>
+        <property default="(IP_REASSEMBLY || IP_FRAG)" display="Debugging|Statistics|IP frag stats" id="config.middleware.lwip_tcpip.ipfrag_stats" description="Enable IP fragmentation stats.">
+            <option display="(IP_REASSEMBLY || IP_FRAG)" id="config.middleware.lwip_tcpip.ipfrag_stats.ip_reassembly_ip_frag" value="(IP_REASSEMBLY || IP_FRAG)"/>
+            <option display="Enabled" id="config.middleware.lwip_tcpip.ipfrag_stats.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.ipfrag_stats.disabled" value="(0)"/>
+        </property>
+        <property default="config.middleware.lwip_tcpip.icmp_stats.enabled" display="Debugging|Statistics|ICMP stats" id="config.middleware.lwip_tcpip.icmp_stats" description="Enable ICMP stats.">
+            <option display="Enabled" id="config.middleware.lwip_tcpip.icmp_stats.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.icmp_stats.disabled" value="(0)"/>
+        </property>
+        <property default="LWIP_IGMP" display="Debugging|Statistics|IGMP stats" id="config.middleware.lwip_tcpip.igmp_stats" description="Enable IGMP stats.">
+            <option display="LWIP_IGMP" id="config.middleware.lwip_tcpip.igmp_stats.lwip_igmp" value="(LWIP_IGMP)"/>
+            <option display="Enabled" id="config.middleware.lwip_tcpip.igmp_stats.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.igmp_stats.disabled" value="(0)"/>
+        </property>
+        <property default="LWIP_UDP" display="Debugging|Statistics|UDP stats" id="config.middleware.lwip_tcpip.udp_stats" description="Enable UDP stats.">
+            <option display="LWIP_UDP" id="config.middleware.lwip_tcpip.udp_stats.lwip_udp" value="(LWIP_UDP)"/>
+            <option display="Enabled" id="config.middleware.lwip_tcpip.udp_stats.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.udp_stats.disabled" value="(0)"/>
+        </property>
+        <property default="LWIP_TCP" display="Debugging|Statistics|TCP stats" id="config.middleware.lwip_tcpip.tcp_stats" description="Enable TCP stats.">
+            <option display="LWIP_TCP" id="config.middleware.lwip_tcpip.tcp_stats.lwip_tcp" value="(LWIP_TCP)"/>
+            <option display="Enabled" id="config.middleware.lwip_tcpip.tcp_stats.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.tcp_stats.disabled" value="(0)"/>
+        </property>
+        <property default="((MEM_CUSTOM_ALLOCATOR == 0) &amp;&amp; (MEM_USE_POOLS == 0))" display="Debugging|Statistics|Mem stats" id="config.middleware.lwip_tcpip.mem_stats" description="Enable mem.">
+            <option display="((MEM_CUSTOM_ALLOCATOR == 0) &amp;&amp; (MEM_USE_POOLS == 0))" id="config.middleware.lwip_tcpip.mem_stats.mem_custom_allocator_mem_use_pools" value="((MEM_CUSTOM_ALLOCATOR == 0) &amp;&amp; (MEM_USE_POOLS == 0))"/>
+            <option display="Enabled" id="config.middleware.lwip_tcpip.mem_stats.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.mem_stats.disabled" value="(0)"/>
+        </property>
+        <property default="MEMP_MEM_MALLOC == 0" display="Debugging|Statistics|Memp stats" id="config.middleware.lwip_tcpip.memp_stats" description="Enable memp.">
+            <option display="MEMP_MEM_MALLOC == 0" id="config.middleware.lwip_tcpip.memp_stats.memp_mem_malloc" value="MEMP_MEM_MALLOC == 0"/>
+            <option display="Enabled" id="config.middleware.lwip_tcpip.memp_stats.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.memp_stats.disabled" value="(0)"/>
+        </property>
+        <property default="NO_SYS == 0" display="Debugging|Statistics|SYS stats" id="config.middleware.lwip_tcpip.sys_stats" description="Enable system stats (sem and mbox counts, etc).">
+            <option display="NO_SYS == 0" id="config.middleware.lwip_tcpip.sys_stats.no_sys" value="NO_SYS == 0"/>
+            <option display="Enabled" id="config.middleware.lwip_tcpip.sys_stats.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.sys_stats.disabled" value="(0)"/>
+        </property>
+        <property default="LWIP_IPV6" display="Debugging|Statistics|IPv6 stats" id="config.middleware.lwip_tcpip.ip6_stats" description="Enable IPv6 stats.">
+            <option display="LWIP_IPV6" id="config.middleware.lwip_tcpip.ip6_stats.lwip_ipv6" value="(LWIP_IPV6)"/>
+            <option display="Enabled" id="config.middleware.lwip_tcpip.ip6_stats.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.ip6_stats.disabled" value="(0)"/>
+        </property>
+        <property default="(LWIP_IPV6 &amp;&amp; LWIP_ICMP6)" display="Debugging|Statistics|ICMP IPv6 stats" id="config.middleware.lwip_tcpip.icmp6_stats" description="Enable ICMP for IPv6 stats.">
+            <option display="(LWIP_IPV6 &amp;&amp; LWIP_ICMP6)" id="config.middleware.lwip_tcpip.icmp6_stats.lwip_ipv6_lwip_icmp6" value="(LWIP_IPV6 &amp;&amp; LWIP_ICMP6)"/>
+            <option display="Enabled" id="config.middleware.lwip_tcpip.icmp6_stats.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.icmp6_stats.disabled" value="(0)"/>
+        </property>
+        <property default="(LWIP_IPV6 &amp;&amp; (LWIP_IPV6_FRAG || LWIP_IPV6_REASS))" display="Debugging|Statistics|IPv6 frag stats" id="config.middleware.lwip_tcpip.ip6_frag_stats" description="Enable IPv6 fragmentation stats.">
+            <option display="(LWIP_IPV6 &amp;&amp; (LWIP_IPV6_FRAG || LWIP_IPV6_REASS))" id="config.middleware.lwip_tcpip.ip6_frag_stats.lwip_ipv6_lwip_ipv6_frag_lwip_ipv6_reass" value="(LWIP_IPV6 &amp;&amp; (LWIP_IPV6_FRAG || LWIP_IPV6_REASS))"/>
+            <option display="Enabled" id="config.middleware.lwip_tcpip.ip6_frag_stats.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.ip6_frag_stats.disabled" value="(0)"/>
+        </property>
+        <property default="(LWIP_IPV6 &amp;&amp; LWIP_IPV6_MLD)" display="Debugging|Statistics|MLD IPv6 stats" id="config.middleware.lwip_tcpip.mld6_stats" description="Enable MLD for IPv6 stats.">
+            <option display="(LWIP_IPV6 &amp;&amp; LWIP_IPV6_MLD)" id="config.middleware.lwip_tcpip.mld6_stats.lwip_ipv6_lwip_ipv6_mld" value="(LWIP_IPV6 &amp;&amp; LWIP_IPV6_MLD)"/>
+            <option display="Enabled" id="config.middleware.lwip_tcpip.mld6_stats.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.mld6_stats.disabled" value="(0)"/>
+        </property>
+        <property default="LWIP_IPV6" display="Debugging|Statistics|ND IPv6 stats" id="config.middleware.lwip_tcpip.nd6_stats" description="Enable Neighbor discovery for IPv6 stats.">
+            <option display="LWIP_IPV6" id="config.middleware.lwip_tcpip.nd6_stats.lwip_ipv6" value="(LWIP_IPV6)"/>
+            <option display="Enabled" id="config.middleware.lwip_tcpip.nd6_stats.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.nd6_stats.disabled" value="(0)"/>
+        </property>
+        <property default="config.middleware.lwip_tcpip.mib2_stats.disabled" display="Debugging|Statistics|MIB2 stats" id="config.middleware.lwip_tcpip.mib2_stats" description="Stats for SNMP MIB2.">
+            <option display="Enabled" id="config.middleware.lwip_tcpip.mib2_stats.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.mib2_stats.disabled" value="(0)"/>
+        </property>
+
+        <property default="config.middleware.lwip_tcpip.lwip_checksum_ctrl_per_netif.disabled" display="Infrastructure|Checksum|LwIP checksum ctrl per netif" id="config.middleware.lwip_tcpip.lwip_checksum_ctrl_per_netif" description="Checksum generation/check can be enabled/disabled per netif.">
+            <option display="Enabled" id="config.middleware.lwip_tcpip.lwip_checksum_ctrl_per_netif.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.lwip_checksum_ctrl_per_netif.disabled" value="(0)"/>
+        </property>
+        <property default="config.middleware.lwip_tcpip.checksum_gen_ip.enabled" display="Infrastructure|Checksum|Checksum gen IP" id="config.middleware.lwip_tcpip.checksum_gen_ip" description="Generate checksums in software for outgoing IP packets.">
+            <option display="Enabled" id="config.middleware.lwip_tcpip.checksum_gen_ip.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.checksum_gen_ip.disabled" value="(0)"/>
+        </property>
+        <property default="config.middleware.lwip_tcpip.checksum_gen_udp.enabled" display="Infrastructure|Checksum|Checksum gen UDP" id="config.middleware.lwip_tcpip.checksum_gen_udp" description="Generate checksums in software for outgoing UDP packets.">
+            <option display="Enabled" id="config.middleware.lwip_tcpip.checksum_gen_udp.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.checksum_gen_udp.disabled" value="(0)"/>
+        </property>
+        <property default="config.middleware.lwip_tcpip.checksum_gen_tcp.enabled" display="Infrastructure|Checksum|Checksum gen TCP" id="config.middleware.lwip_tcpip.checksum_gen_tcp" description="Generate checksums in software for outgoing TCP packets.">
+            <option display="Enabled" id="config.middleware.lwip_tcpip.checksum_gen_tcp.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.checksum_gen_tcp.disabled" value="(0)"/>
+        </property>
+        <property default="config.middleware.lwip_tcpip.checksum_gen_icmp.enabled" display="Infrastructure|Checksum|Checksum gen ICMP" id="config.middleware.lwip_tcpip.checksum_gen_icmp" description="Generate checksums in software for outgoing ICMP packets.">
+            <option display="Enabled" id="config.middleware.lwip_tcpip.checksum_gen_icmp.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.checksum_gen_icmp.disabled" value="(0)"/>
+        </property>
+        <property default="config.middleware.lwip_tcpip.checksum_gen_icmp6.enabled" display="Infrastructure|Checksum|Checksum gen ICMP6" id="config.middleware.lwip_tcpip.checksum_gen_icmp6" description="Generate checksums in software for outgoing ICMP6 packets.">
+            <option display="Enabled" id="config.middleware.lwip_tcpip.checksum_gen_icmp6.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.checksum_gen_icmp6.disabled" value="(0)"/>
+        </property>
+        <property default="config.middleware.lwip_tcpip.checksum_check_ip.enabled" display="Infrastructure|Checksum|Checksum check IP" id="config.middleware.lwip_tcpip.checksum_check_ip" description="Check checksums in software for incoming IP packets.">
+            <option display="Enabled" id="config.middleware.lwip_tcpip.checksum_check_ip.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.checksum_check_ip.disabled" value="(0)"/>
+        </property>
+        <property default="config.middleware.lwip_tcpip.checksum_check_udp.enabled" display="Infrastructure|Checksum|Checksum check UDP" id="config.middleware.lwip_tcpip.checksum_check_udp" description="Check checksums in software for incoming UDP packets.">
+            <option display="Enabled" id="config.middleware.lwip_tcpip.checksum_check_udp.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.checksum_check_udp.disabled" value="(0)"/>
+        </property>
+        <property default="config.middleware.lwip_tcpip.checksum_check_tcp.enabled" display="Infrastructure|Checksum|Checksum check TCP" id="config.middleware.lwip_tcpip.checksum_check_tcp" description="Check checksums in software for incoming TCP packets.">
+            <option display="Enabled" id="config.middleware.lwip_tcpip.checksum_check_tcp.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.checksum_check_tcp.disabled" value="(0)"/>
+        </property>
+        <property default="config.middleware.lwip_tcpip.checksum_check_icmp.enabled" display="Infrastructure|Checksum|Checksum check ICMP" id="config.middleware.lwip_tcpip.checksum_check_icmp" description="Check checksums in software for incoming ICMP packets.">
+            <option display="Enabled" id="config.middleware.lwip_tcpip.checksum_check_icmp.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.checksum_check_icmp.disabled" value="(0)"/>
+        </property>
+        <property default="config.middleware.lwip_tcpip.checksum_check_icmp6.enabled" display="Infrastructure|Checksum|Checksum check ICMP6" id="config.middleware.lwip_tcpip.checksum_check_icmp6" description="Check checksums in software for incoming ICMPv6 packets.">
+            <option display="Enabled" id="config.middleware.lwip_tcpip.checksum_check_icmp6.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.checksum_check_icmp6.disabled" value="(0)"/>
+        </property>
+        <property default="config.middleware.lwip_tcpip.lwip_checksum_on_copy.disabled" display="Infrastructure|Checksum|LwIP checksum on copy" id="config.middleware.lwip_tcpip.lwip_checksum_on_copy" description="Calculate checksum when copying data from application buffers to pbufs.">
+            <option display="Enabled" id="config.middleware.lwip_tcpip.lwip_checksum_on_copy.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.lwip_checksum_on_copy.disabled" value="(0)"/>
+        </property>
+        <property default="config.middleware.lwip_tcpip.lwip_ipv6.disabled" display="IPv6|LwIP IPv6" id="config.middleware.lwip_tcpip.lwip_ipv6" description="Enable IPv6.">
+            <option display="Enabled" id="config.middleware.lwip_tcpip.lwip_ipv6.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.lwip_ipv6.disabled" value="(0)"/>
+        </property>
+        <property default="60" display="IPv6|IPv6 reass maxage" id="config.middleware.lwip_tcpip.ipv6_reass_maxage" description="Maximum time (in multiples of IP6_REASS_TMR_INTERVAL - so seconds, normally) a fragmented IP packet waits for all fragments to arrive.">
+            <constraint display="Must be a positive integer value">testInteger("${config.middleware.lwip_tcpip.ipv6_reass_maxage}") &amp;&amp; ("${config.middleware.lwip_tcpip.ipv6_reass_maxage}" &gt;= 0)</constraint>
+        </property>
+        <property default="(LWIP_IPV6 &amp;&amp; !LWIP_SINGLE_NETIF)" display="IPv6|LwIP IPv6 scopes" id="config.middleware.lwip_tcpip.lwip_ipv6_scopes" description="Enable support for IPv6 address scopes, ensuring that e.">
+            <option display="(LWIP_IPV6 &amp;&amp; !LWIP_SINGLE_NETIF)" id="config.middleware.lwip_tcpip.lwip_ipv6_scopes.lwip_ipv6_lwip_single_netif" value="(LWIP_IPV6 &amp;&amp; !LWIP_SINGLE_NETIF)"/>
+            <option display="Enabled" id="config.middleware.lwip_tcpip.lwip_ipv6_scopes.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.lwip_ipv6_scopes.disabled" value="(0)"/>
+        </property>
+        <property default="config.middleware.lwip_tcpip.lwip_ipv6_scopes_debug.disabled" display="IPv6|LwIP IPv6 scopes debug" id="config.middleware.lwip_tcpip.lwip_ipv6_scopes_debug" description="Perform run-time checks to verify that addresses are properly zoned (see ip6_zone.">
+            <option display="Enabled" id="config.middleware.lwip_tcpip.lwip_ipv6_scopes_debug.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.lwip_ipv6_scopes_debug.disabled" value="(0)"/>
+        </property>
+        <property default="3" display="IPv6|LwIP IPv6 num addresses" id="config.middleware.lwip_tcpip.lwip_ipv6_num_addresses" description="Number of IPv6 addresses per netif.">
+            <constraint display="Must be a positive integer value">testInteger("${config.middleware.lwip_tcpip.lwip_ipv6_num_addresses}") &amp;&amp; ("${config.middleware.lwip_tcpip.lwip_ipv6_num_addresses}" &gt;= 0)</constraint>
+        </property>
+        <property default="config.middleware.lwip_tcpip.lwip_ipv6_forward.disabled" display="IPv6|LwIP IPv6 forward" id="config.middleware.lwip_tcpip.lwip_ipv6_forward" description="Forward IPv6 packets across netifs.">
+            <option display="Enabled" id="config.middleware.lwip_tcpip.lwip_ipv6_forward.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.lwip_ipv6_forward.disabled" value="(0)"/>
+        </property>
+        <property default="config.middleware.lwip_tcpip.lwip_ipv6_frag.enabled" display="IPv6|LwIP IPv6 frag" id="config.middleware.lwip_tcpip.lwip_ipv6_frag" description="Fragment outgoing IPv6 packets that are too big.">
+            <option display="Enabled" id="config.middleware.lwip_tcpip.lwip_ipv6_frag.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.lwip_ipv6_frag.disabled" value="(0)"/>
+        </property>
+        <property default="LWIP_IPV6" display="IPv6|LwIP IPv6 reass" id="config.middleware.lwip_tcpip.lwip_ipv6_reass" description="Reassemble incoming IPv6 packets that fragmented.">
+            <option display="LWIP_IPV6" id="config.middleware.lwip_tcpip.lwip_ipv6_reass.lwip_ipv6" value="(LWIP_IPV6)"/>
+            <option display="Enabled" id="config.middleware.lwip_tcpip.lwip_ipv6_reass.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.lwip_ipv6_reass.disabled" value="(0)"/>
+        </property>
+        <property default="LWIP_IPV6" display="IPv6|LwIP IPv6 send router solicit" id="config.middleware.lwip_tcpip.lwip_ipv6_send_router_solicit" description="Send router solicitation messages during network startup.">
+            <option display="LWIP_IPV6" id="config.middleware.lwip_tcpip.lwip_ipv6_send_router_solicit.lwip_ipv6" value="(LWIP_IPV6)"/>
+            <option display="Enabled" id="config.middleware.lwip_tcpip.lwip_ipv6_send_router_solicit.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.lwip_ipv6_send_router_solicit.disabled" value="(0)"/>
+        </property>
+        <property default="LWIP_IPV6" display="IPv6|LwIP IPv6 autoconfig" id="config.middleware.lwip_tcpip.lwip_ipv6_autoconfig" description="Enable stateless address autoconfiguration as per RFC 4862.">
+            <option display="LWIP_IPV6" id="config.middleware.lwip_tcpip.lwip_ipv6_autoconfig.lwip_ipv6" value="(LWIP_IPV6)"/>
+            <option display="Enabled" id="config.middleware.lwip_tcpip.lwip_ipv6_autoconfig.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.lwip_ipv6_autoconfig.disabled" value="(0)"/>
+        </property>
+        <property default="LWIP_IPV6_AUTOCONFIG" display="IPv6|LwIP IPv6 address lifetimes" id="config.middleware.lwip_tcpip.lwip_ipv6_address_lifetimes" description="Keep valid and preferred lifetimes for each IPv6 address.">
+            <option display="LWIP_IPV6_AUTOCONFIG" id="config.middleware.lwip_tcpip.lwip_ipv6_address_lifetimes.lwip_ipv6_autoconfig" value="(LWIP_IPV6_AUTOCONFIG)"/>
+            <option display="Enabled" id="config.middleware.lwip_tcpip.lwip_ipv6_address_lifetimes.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.lwip_ipv6_address_lifetimes.disabled" value="(0)"/>
+        </property>
+        <property default="1" display="IPv6|LwIP IPv6 dup detect attempts" id="config.middleware.lwip_tcpip.lwip_ipv6_dup_detect_attempts" description="Number of duplicate address detection attempts.">
+            <constraint display="Must be between 0 and 7">testInteger("${config.middleware.lwip_tcpip.lwip_ipv6_dup_detect_attempts}") &amp;&amp; ("${config.middleware.lwip_tcpip.lwip_ipv6_dup_detect_attempts}" &lt;= 7) &amp;&amp; ("${config.middleware.lwip_tcpip.lwip_ipv6_dup_detect_attempts}" &gt;= 0)</constraint>
+        </property>
+        <property default="LWIP_IPV6" display="IPv6|ICMP6|LwIP ICMP6" id="config.middleware.lwip_tcpip.lwip_icmp6" description="Enable ICMPv6 (mandatory per RFC).">
+            <option display="LWIP_IPV6" id="config.middleware.lwip_tcpip.lwip_icmp6.lwip_ipv6" value="(LWIP_IPV6)"/>
+            <option display="Enabled" id="config.middleware.lwip_tcpip.lwip_icmp6.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.lwip_icmp6.disabled" value="(0)"/>
+        </property>
+        <property default="0" display="IPv6|ICMP6|LwIP ICMP6 datasize" id="config.middleware.lwip_tcpip.lwip_icmp6_datasize" description="Bytes from original packet to send back in ICMPv6 error messages (0 = default of IP6_MIN_MTU_LENGTH) ATTENTION: RFC4443 section 2.">
+            <constraint display="Must be a positive integer value">testInteger("${config.middleware.lwip_tcpip.lwip_icmp6_datasize}") &amp;&amp; ("${config.middleware.lwip_tcpip.lwip_icmp6_datasize}" &gt;= 0)</constraint>
+        </property>
+        <property default="255" display="IPv6|ICMP6|LwIP ICMP6 hop limit" id="config.middleware.lwip_tcpip.lwip_icmp6_hl" description="Default hop limit for ICMPv6 messages.">
+            <constraint display="Must be a positive integer value">testInteger("${config.middleware.lwip_tcpip.lwip_icmp6_hl}") &amp;&amp; ("${config.middleware.lwip_tcpip.lwip_icmp6_hl}" &gt;= 0)</constraint>
+        </property>
+        <property default="LWIP_IPV6" display="IPv6|Multicast listener discovery|LwIP IPv6 mld" id="config.middleware.lwip_tcpip.lwip_ipv6_mld" description="Enable multicast listener discovery protocol.">
+            <option display="LWIP_IPV6" id="config.middleware.lwip_tcpip.lwip_ipv6_mld.lwip_ipv6" value="(LWIP_IPV6)"/>
+            <option display="Enabled" id="config.middleware.lwip_tcpip.lwip_ipv6_mld.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.lwip_ipv6_mld.disabled" value="(0)"/>
+        </property>
+        <property default="4" display="IPv6|Multicast listener discovery|Memp num mld IPv6 group" id="config.middleware.lwip_tcpip.memp_num_mld6_group" description="Max number of IPv6 multicast groups that can be joined.">
+            <constraint display="Must be a positive integer value">testInteger("${config.middleware.lwip_tcpip.memp_num_mld6_group}") &amp;&amp; ("${config.middleware.lwip_tcpip.memp_num_mld6_group}" &gt;= 0)</constraint>
+        </property>
+        <property default="LWIP_IPV6" display="IPv6|Neighbor discovery|LwIP ND IPv6 queueing" id="config.middleware.lwip_tcpip.lwip_nd6_queueing" description="Queue outgoing IPv6 packets while MAC address is being resolved.">
+            <option display="LWIP_IPV6" id="config.middleware.lwip_tcpip.lwip_nd6_queueing.lwip_ipv6" value="(LWIP_IPV6)"/>
+            <option display="Enabled" id="config.middleware.lwip_tcpip.lwip_nd6_queueing.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.lwip_nd6_queueing.disabled" value="(0)"/>
+        </property>
+        <property default="20" display="IPv6|Neighbor discovery|Memp num ND IPv6 queue" id="config.middleware.lwip_tcpip.memp_num_nd6_queue" description="Max number of IPv6 packets to queue during MAC resolution.">
+            <constraint display="Must be a positive integer value">testInteger("${config.middleware.lwip_tcpip.memp_num_nd6_queue}") &amp;&amp; ("${config.middleware.lwip_tcpip.memp_num_nd6_queue}" &gt;= 0)</constraint>
+        </property>
+        <property default="10" display="IPv6|Neighbor discovery|LwIP ND IPv6 num neighbors" id="config.middleware.lwip_tcpip.lwip_nd6_num_neighbors" description="Number of entries in IPv6 neighbor cache.">
+            <constraint display="Must be a positive integer value">testInteger("${config.middleware.lwip_tcpip.lwip_nd6_num_neighbors}") &amp;&amp; ("${config.middleware.lwip_tcpip.lwip_nd6_num_neighbors}" &gt;= 0)</constraint>
+        </property>
+        <property default="10" display="IPv6|Neighbor discovery|LwIP ND IPv6 num destinations" id="config.middleware.lwip_tcpip.lwip_nd6_num_destinations" description="Number of entries in IPv6 destination cache.">
+            <constraint display="Must be a positive integer value">testInteger("${config.middleware.lwip_tcpip.lwip_nd6_num_destinations}") &amp;&amp; ("${config.middleware.lwip_tcpip.lwip_nd6_num_destinations}" &gt;= 0)</constraint>
+        </property>
+        <property default="5" display="IPv6|Neighbor discovery|LwIP ND IPv6 num prefixes" id="config.middleware.lwip_tcpip.lwip_nd6_num_prefixes" description="Number of entries in IPv6 on-link prefixes cache.">
+            <constraint display="Must be a positive integer value">testInteger("${config.middleware.lwip_tcpip.lwip_nd6_num_prefixes}") &amp;&amp; ("${config.middleware.lwip_tcpip.lwip_nd6_num_prefixes}" &gt;= 0)</constraint>
+        </property>
+        <property default="3" display="IPv6|Neighbor discovery|LwIP ND IPv6 num routers" id="config.middleware.lwip_tcpip.lwip_nd6_num_routers" description="Number of entries in IPv6 default router cache.">
+            <constraint display="Must be a positive integer value">testInteger("${config.middleware.lwip_tcpip.lwip_nd6_num_routers}") &amp;&amp; ("${config.middleware.lwip_tcpip.lwip_nd6_num_routers}" &gt;= 0)</constraint>
+        </property>
+        <property default="3" display="IPv6|Neighbor discovery|LwIP ND IPv6 max multicast solicit" id="config.middleware.lwip_tcpip.lwip_nd6_max_multicast_solicit" description="Max number of multicast solicit messages to send (neighbor solicit and router solicit).">
+            <constraint display="Must be a positive integer value">testInteger("${config.middleware.lwip_tcpip.lwip_nd6_max_multicast_solicit}") &amp;&amp; ("${config.middleware.lwip_tcpip.lwip_nd6_max_multicast_solicit}" &gt;= 0)</constraint>
+        </property>
+        <property default="3" display="IPv6|Neighbor discovery|LwIP ND IPv6 max unicast solicit" id="config.middleware.lwip_tcpip.lwip_nd6_max_unicast_solicit" description="Max number of unicast neighbor solicitation messages to send during neighbor reachability detection.">
+            <constraint display="Must be a positive integer value">testInteger("${config.middleware.lwip_tcpip.lwip_nd6_max_unicast_solicit}") &amp;&amp; ("${config.middleware.lwip_tcpip.lwip_nd6_max_unicast_solicit}" &gt;= 0)</constraint>
+        </property>
+<!--
+        <property default="1000" display="IPv6|Neighbor discovery|LwIP ND IPv6 max anycast delay time" id="config.middleware.lwip_tcpip.lwip_nd6_max_anycast_delay_time" description="See ND RFC (time in milliseconds).">
+            <constraint display="Must be a positive integer value">testInteger("${config.middleware.lwip_tcpip.lwip_nd6_max_anycast_delay_time}") &amp;&amp; ("${config.middleware.lwip_tcpip.lwip_nd6_max_anycast_delay_time}" &gt;= 0)</constraint>
+        </property>
+        <property default="3" display="IPv6|Neighbor discovery|LwIP ND IPv6 max neighbor advertisement" id="config.middleware.lwip_tcpip.lwip_nd6_max_neighbor_advertisement" description="See ND RFC.">
+            <constraint display="Must be a positive integer value">testInteger("${config.middleware.lwip_tcpip.lwip_nd6_max_neighbor_advertisement}") &amp;&amp; ("${config.middleware.lwip_tcpip.lwip_nd6_max_neighbor_advertisement}" &gt;= 0)</constraint>
+        </property>
+ -->
+        <property default="30000" display="IPv6|Neighbor discovery|LwIP ND IPv6 reachable time" id="config.middleware.lwip_tcpip.lwip_nd6_reachable_time" description="Default neighbor reachable time (in milliseconds).">
+            <constraint display="Must be a positive integer value">testInteger("${config.middleware.lwip_tcpip.lwip_nd6_reachable_time}") &amp;&amp; ("${config.middleware.lwip_tcpip.lwip_nd6_reachable_time}" &gt;= 0)</constraint>
+        </property>
+        <property default="1000" display="IPv6|Neighbor discovery|LwIP ND IPv6 retrans timer" id="config.middleware.lwip_tcpip.lwip_nd6_retrans_timer" description="Default retransmission timer for solicitation messages.">
+            <constraint display="Must be a positive integer value">testInteger("${config.middleware.lwip_tcpip.lwip_nd6_retrans_timer}") &amp;&amp; ("${config.middleware.lwip_tcpip.lwip_nd6_retrans_timer}" &gt;= 0)</constraint>
+        </property>
+        <property default="5000" display="IPv6|Neighbor discovery|LwIP ND IPv6 delay first probe time" id="config.middleware.lwip_tcpip.lwip_nd6_delay_first_probe_time" description="Delay before first unicast neighbor solicitation message is sent, during neighbor reachability detection.">
+            <constraint display="Must be a positive integer value">testInteger("${config.middleware.lwip_tcpip.lwip_nd6_delay_first_probe_time}") &amp;&amp; ("${config.middleware.lwip_tcpip.lwip_nd6_delay_first_probe_time}" &gt;= 0)</constraint>
+        </property>
+        <property default="config.middleware.lwip_tcpip.lwip_nd6_allow_ra_updates.enabled" display="IPv6|Neighbor discovery|LwIP ND IPv6 allow RA updates" id="config.middleware.lwip_tcpip.lwip_nd6_allow_ra_updates" description="Allow Router Advertisement messages to update Reachable time and retransmission timers, and netif MTU.">
+            <option display="Enabled" id="config.middleware.lwip_tcpip.lwip_nd6_allow_ra_updates.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.lwip_nd6_allow_ra_updates.disabled" value="(0)"/>
+        </property>
+        <property default="config.middleware.lwip_tcpip.lwip_nd6_tcp_reachability_hints.enabled" display="IPv6|Neighbor discovery|LwIP ND IPv6 TCP reachability hints" id="config.middleware.lwip_tcpip.lwip_nd6_tcp_reachability_hints" description="Allow TCP to provide Neighbor Discovery with reachability hints for connected destinations.">
+            <option display="Enabled" id="config.middleware.lwip_tcpip.lwip_nd6_tcp_reachability_hints.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.lwip_nd6_tcp_reachability_hints.disabled" value="(0)"/>
+        </property>
+        <property default="0" display="IPv6|Neighbor discovery|LwIP ND IPv6 rdnss max DNS servers" id="config.middleware.lwip_tcpip.lwip_nd6_rdnss_max_dns_servers" description="Use IPv6 Router Advertisement Recursive DNS Server Option (as per RFC 6106) to copy a defined maximum number of DNS servers to the DNS module.">
+            <constraint display="Must be a positive integer value">testInteger("${config.middleware.lwip_tcpip.lwip_nd6_rdnss_max_dns_servers}") &amp;&amp; ("${config.middleware.lwip_tcpip.lwip_nd6_rdnss_max_dns_servers}" &gt;= 0)</constraint>
+        </property>
+        <property default="config.middleware.lwip_tcpip.lwip_ipv6_dhcp6.disabled" display="IPv6|DHCPv6|LwIP IPv6 DHCP" id="config.middleware.lwip_tcpip.lwip_ipv6_dhcp6" description="Enable DHCPv6 stateful/stateless address autoconfiguration.">
+            <option display="Enabled" id="config.middleware.lwip_tcpip.lwip_ipv6_dhcp6.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.lwip_ipv6_dhcp6.disabled" value="(0)"/>
+        </property>
+        <property default="config.middleware.lwip_tcpip.lwip_ipv6_dhcp6_stateful.disabled" display="IPv6|DHCPv6|LwIP IPv6 DHCP stateful" id="config.middleware.lwip_tcpip.lwip_ipv6_dhcp6_stateful" description="Enable DHCPv6 stateful address autoconfiguration.">
+            <option display="Enabled" id="config.middleware.lwip_tcpip.lwip_ipv6_dhcp6_stateful.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.lwip_ipv6_dhcp6_stateful.disabled" value="(0)"/>
+        </property>
+        <property default="LWIP_IPV6_DHCP6" display="IPv6|DHCPv6|LwIP IPv6 DHCP stateless" id="config.middleware.lwip_tcpip.lwip_ipv6_dhcp6_stateless" description="Enable DHCPv6 stateless address autoconfiguration.">
+            <option display="LWIP_IPV6_DHCP6" id="config.middleware.lwip_tcpip.lwip_ipv6_dhcp6_stateless.lwip_ipv6_dhcp6" value="(LWIP_IPV6_DHCP6)"/>
+            <option display="Enabled" id="config.middleware.lwip_tcpip.lwip_ipv6_dhcp6_stateless.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.lwip_ipv6_dhcp6_stateless.disabled" value="(0)"/>
+        </property>
+        <property default="config.middleware.lwip_tcpip.lwip_dhcp6_get_ntp_srv.disabled" display="IPv6|DHCPv6|LwIP DHCP IPv6 get NTP srv" id="config.middleware.lwip_tcpip.lwip_dhcp6_get_ntp_srv" description="Request NTP servers via DHCPv6.">
+            <option display="Enabled" id="config.middleware.lwip_tcpip.lwip_dhcp6_get_ntp_srv.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.lwip_dhcp6_get_ntp_srv.disabled" value="(0)"/>
+        </property>
+        <property default="1" display="IPv6|DHCPv6|LwIP DHCP IPv6 max NTP servers" id="config.middleware.lwip_tcpip.lwip_dhcp6_max_ntp_servers" description="The maximum of NTP servers requested.">
+            <constraint display="Must be a positive integer value">testInteger("${config.middleware.lwip_tcpip.lwip_dhcp6_max_ntp_servers}") &amp;&amp; ("${config.middleware.lwip_tcpip.lwip_dhcp6_max_ntp_servers}" &gt;= 0)</constraint>
+        </property>
+        <property default="DNS_MAX_SERVERS" display="IPv6|DHCPv6|LwIP DHCP IPv6 max DNS servers" id="config.middleware.lwip_tcpip.lwip_dhcp6_max_dns_servers" description="Request DNS servers via DHCPv6.">
+            <constraint display="Must be a positive integer value">testInteger("${config.middleware.lwip_tcpip.lwip_dhcp6_max_dns_servers}") &amp;&amp; ("${config.middleware.lwip_tcpip.lwip_dhcp6_max_dns_servers}" &gt;= 0)</constraint>
+        </property>
+        <property default="" display="Infrastructure|Hooks|LwIP hook filename" id="config.middleware.lwip_tcpip.lwip_hook_filename" description="Custom filename to #include in files that provide hooks.">
+            <constraint display="Must be a valid file pass">eval(
+            'var input = "${config.middleware.lwip_tcpip.lwip_hook_filename}";' +
+            'var regex = RegExp("[:|\*|\?|&gt;|&lt;]");' +
+            '(!regex.test(input) || 0 === input.length)')
+            </constraint>
+            <export>"${config.middleware.lwip_tcpip.lwip_hook_filename}"</export>            <!-- replace all colons with commas on export and add 0x to mark as hex -->
+        </property>
+        <property default="" id="config.middleware.lwip_tcpip.lwip_hook">
+            <export>eval(
+            'var output;' +
+            'var input = "${config.middleware.lwip_tcpip.lwip_hook_filename}";' +
+            'if (0 === input.length) {'+
+            'output = 0;'+
+            '} else {'+
+            'output = 1;'+
+            '}'+
+            'output')
+            </export>
+        </property>
+        <property default="LWIP_DBG_LEVEL_ALL" display="Debugging|Debug messages|LwIP debug min level" id="config.middleware.lwip_tcpip.lwip_dbg_min_level" description="After masking, the value of the debug is compared against this value.">
+            <constraint display="Must be a positive integer value">testInteger("${config.middleware.lwip_tcpip.lwip_dbg_min_level}") &amp;&amp; ("${config.middleware.lwip_tcpip.lwip_dbg_min_level}" &gt;= 0)</constraint>
+        </property>
+        <property default="LWIP_DBG_ON" display="Debugging|Debug messages|LwIP debug types on" id="config.middleware.lwip_tcpip.lwip_dbg_types_on" description="A mask that can be used to globally enable/disable debug messages of certain types.">
+            <option display="LWIP_DBG_ON" id="config.middleware.lwip_tcpip.lwip_dbg_types_on.lwip_dbg_on" value="(LWIP_DBG_ON)"/>
+            <option display="Enabled" id="config.middleware.lwip_tcpip.lwip_dbg_types_on.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.lwip_dbg_types_on.disabled" value="(0)"/>
+        </property>
+        <property default="LWIP_DBG_OFF" display="Debugging|Debug messages|Etharp debug" id="config.middleware.lwip_tcpip.etharp_debug" description="Enable debugging in etharp.">
+            <option display="LWIP_DBG_OFF" id="config.middleware.lwip_tcpip.etharp_debug.lwip_dbg_off" value="(LWIP_DBG_OFF)"/>
+            <option display="Enabled" id="config.middleware.lwip_tcpip.etharp_debug.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.etharp_debug.disabled" value="(0)"/>
+        </property>
+        <property default="LWIP_DBG_OFF" display="Debugging|Debug messages|Netif debug" id="config.middleware.lwip_tcpip.netif_debug" description="Enable debugging in netif.">
+            <option display="LWIP_DBG_OFF" id="config.middleware.lwip_tcpip.netif_debug.lwip_dbg_off" value="(LWIP_DBG_OFF)"/>
+             <option display="Enabled" id="config.middleware.lwip_tcpip.netif_debug.enabled" value="(1)"/>
+           <option display="Disabled" id="config.middleware.lwip_tcpip.netif_debug.disabled" value="(0)"/>
+        </property>
+        <property default="LWIP_DBG_OFF" display="Debugging|Debug messages|Pbuf debug" id="config.middleware.lwip_tcpip.pbuf_debug" description="Enable debugging in pbuf.">
+            <option display="LWIP_DBG_OFF" id="config.middleware.lwip_tcpip.pbuf_debug.lwip_dbg_off" value="(LWIP_DBG_OFF)"/>
+            <option display="Enabled" id="config.middleware.lwip_tcpip.pbuf_debug.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.pbuf_debug.disabled" value="(0)"/>
+        </property>
+        <property default="LWIP_DBG_OFF" display="Debugging|Debug messages|API lib debug" id="config.middleware.lwip_tcpip.api_lib_debug" description="Enable debugging in api_lib.">
+            <option display="LWIP_DBG_OFF" id="config.middleware.lwip_tcpip.api_lib_debug.lwip_dbg_off" value="(LWIP_DBG_OFF)"/>
+            <option display="Enabled" id="config.middleware.lwip_tcpip.api_lib_debug.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.api_lib_debug.disabled" value="(0)"/>
+        </property>
+        <property default="LWIP_DBG_OFF" display="Debugging|Debug messages|API msg debug" id="config.middleware.lwip_tcpip.api_msg_debug" description="Enable debugging in api_msg.">
+            <option display="LWIP_DBG_OFF" id="config.middleware.lwip_tcpip.api_msg_debug.lwip_dbg_off" value="(LWIP_DBG_OFF)"/>
+            <option display="Enabled" id="config.middleware.lwip_tcpip.api_msg_debug.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.api_msg_debug.disabled" value="(0)"/>
+        </property>
+        <property default="LWIP_DBG_OFF" display="Debugging|Debug messages|Sockets debug" id="config.middleware.lwip_tcpip.sockets_debug" description="Enable debugging in sockets.">
+            <option display="LWIP_DBG_OFF" id="config.middleware.lwip_tcpip.sockets_debug.lwip_dbg_off" value="(LWIP_DBG_OFF)"/>
+            <option display="Enabled" id="config.middleware.lwip_tcpip.sockets_debug.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.sockets_debug.disabled" value="(0)"/>
+        </property>
+        <property default="LWIP_DBG_OFF" display="Debugging|Debug messages|ICMP debug" id="config.middleware.lwip_tcpip.icmp_debug" description="Enable debugging in icmp.">
+            <option display="LWIP_DBG_OFF" id="config.middleware.lwip_tcpip.icmp_debug.lwip_dbg_off" value="(LWIP_DBG_OFF)"/>
+            <option display="Enabled" id="config.middleware.lwip_tcpip.icmp_debug.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.icmp_debug.disabled" value="(0)"/>
+        </property>
+        <property default="LWIP_DBG_OFF" display="Debugging|Debug messages|IGMP debug" id="config.middleware.lwip_tcpip.igmp_debug" description="Enable debugging in igmp.">
+            <option display="LWIP_DBG_OFF" id="config.middleware.lwip_tcpip.igmp_debug.lwip_dbg_off" value="(LWIP_DBG_OFF)"/>
+            <option display="Enabled" id="config.middleware.lwip_tcpip.igmp_debug.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.igmp_debug.disabled" value="(0)"/>
+        </property>
+        <property default="LWIP_DBG_OFF" display="Debugging|Debug messages|Inet debug" id="config.middleware.lwip_tcpip.inet_debug" description="Enable debugging in inet.">
+            <option display="LWIP_DBG_OFF" id="config.middleware.lwip_tcpip.inet_debug.lwip_dbg_off" value="(LWIP_DBG_OFF)"/>
+            <option display="Enabled" id="config.middleware.lwip_tcpip.inet_debug.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.inet_debug.disabled" value="(0)"/>
+        </property>
+        <property default="LWIP_DBG_OFF" display="Debugging|Debug messages|IP debug" id="config.middleware.lwip_tcpip.ip_debug" description="Enable debugging for IP.">
+            <option display="LWIP_DBG_OFF" id="config.middleware.lwip_tcpip.ip_debug.lwip_dbg_off" value="(LWIP_DBG_OFF)"/>
+            <option display="Enabled" id="config.middleware.lwip_tcpip.ip_debug.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.ip_debug.disabled" value="(0)"/>
+        </property>
+        <property default="LWIP_DBG_OFF" display="Debugging|Debug messages|IP reass debug" id="config.middleware.lwip_tcpip.ip_reass_debug" description="Enable debugging in ip_frag.">
+            <option display="LWIP_DBG_OFF" id="config.middleware.lwip_tcpip.ip_reass_debug.lwip_dbg_off" value="(LWIP_DBG_OFF)"/>
+            <option display="Enabled" id="config.middleware.lwip_tcpip.ip_reass_debug.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.ip_reass_debug.disabled" value="(0)"/>
+        </property>
+        <property default="LWIP_DBG_OFF" display="Debugging|Debug messages|RAW debug" id="config.middleware.lwip_tcpip.raw_debug" description="Enable debugging in raw.">
+            <option display="LWIP_DBG_OFF" id="config.middleware.lwip_tcpip.raw_debug.lwip_dbg_off" value="(LWIP_DBG_OFF)"/>
+            <option display="Enabled" id="config.middleware.lwip_tcpip.raw_debug.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.raw_debug.disabled" value="(0)"/>
+        </property>
+        <property default="LWIP_DBG_OFF" display="Debugging|Debug messages|Mem debug" id="config.middleware.lwip_tcpip.mem_debug" description="Enable debugging in mem.">
+            <option display="LWIP_DBG_OFF" id="config.middleware.lwip_tcpip.mem_debug.lwip_dbg_off" value="(LWIP_DBG_OFF)"/>
+            <option display="Enabled" id="config.middleware.lwip_tcpip.mem_debug.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.mem_debug.disabled" value="(0)"/>
+        </property>
+        <property default="LWIP_DBG_OFF" display="Debugging|Debug messages|Memp debug" id="config.middleware.lwip_tcpip.memp_debug" description="Enable debugging in memp.">
+            <option display="LWIP_DBG_OFF" id="config.middleware.lwip_tcpip.memp_debug.lwip_dbg_off" value="(LWIP_DBG_OFF)"/>
+            <option display="Enabled" id="config.middleware.lwip_tcpip.memp_debug.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.memp_debug.disabled" value="(0)"/>
+        </property>
+        <property default="LWIP_DBG_OFF" display="Debugging|Debug messages|SYS debug" id="config.middleware.lwip_tcpip.sys_debug" description="Enable debugging in sys.">
+            <option display="LWIP_DBG_OFF" id="config.middleware.lwip_tcpip.sys_debug.lwip_dbg_off" value="(LWIP_DBG_OFF)"/>
+            <option display="Enabled" id="config.middleware.lwip_tcpip.sys_debug.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.sys_debug.disabled" value="(0)"/>
+        </property>
+        <property default="LWIP_DBG_OFF" display="Debugging|Debug messages|Timers debug" id="config.middleware.lwip_tcpip.timers_debug" description="Enable debugging in timers.">
+            <option display="LWIP_DBG_OFF" id="config.middleware.lwip_tcpip.timers_debug.lwip_dbg_off" value="(LWIP_DBG_OFF)"/>
+            <option display="Enabled" id="config.middleware.lwip_tcpip.timers_debug.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.timers_debug.disabled" value="(0)"/>
+        </property>
+        <property default="LWIP_DBG_OFF" display="Debugging|Debug messages|TCP debug" id="config.middleware.lwip_tcpip.tcp_debug" description="Enable debugging for TCP.">
+            <option display="LWIP_DBG_OFF" id="config.middleware.lwip_tcpip.tcp_debug.lwip_dbg_off" value="(LWIP_DBG_OFF)"/>
+            <option display="Enabled" id="config.middleware.lwip_tcpip.tcp_debug.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.tcp_debug.disabled" value="(0)"/>
+        </property>
+        <property default="LWIP_DBG_OFF" display="Debugging|Debug messages|TCP input debug" id="config.middleware.lwip_tcpip.tcp_input_debug" description="Enable debugging in tcp_in.">
+            <option display="LWIP_DBG_OFF" id="config.middleware.lwip_tcpip.tcp_input_debug.lwip_dbg_off" value="(LWIP_DBG_OFF)"/>
+            <option display="Enabled" id="config.middleware.lwip_tcpip.tcp_input_debug.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.tcp_input_debug.disabled" value="(0)"/>
+        </property>
+        <property default="LWIP_DBG_OFF" display="Debugging|Debug messages|TCP fast retransmit debug" id="config.middleware.lwip_tcpip.tcp_fr_debug" description="Enable debugging in tcp_in.">
+            <option display="LWIP_DBG_OFF" id="config.middleware.lwip_tcpip.tcp_fr_debug.lwip_dbg_off" value="(LWIP_DBG_OFF)"/>
+            <option display="Enabled" id="config.middleware.lwip_tcpip.tcp_fr_debug.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.tcp_fr_debug.disabled" value="(0)"/>
+        </property>
+        <property default="LWIP_DBG_OFF" display="Debugging|Debug messages|TCP retransmit timeout debug" id="config.middleware.lwip_tcpip.tcp_rto_debug" description="Enable debugging in TCP for retransmit timeout.">
+            <option display="LWIP_DBG_OFF" id="config.middleware.lwip_tcpip.tcp_rto_debug.lwip_dbg_off" value="(LWIP_DBG_OFF)"/>
+            <option display="Enabled" id="config.middleware.lwip_tcpip.tcp_rto_debug.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.tcp_rto_debug.disabled" value="(0)"/>
+        </property>
+        <property default="LWIP_DBG_OFF" display="Debugging|Debug messages|TCP congestion window debug" id="config.middleware.lwip_tcpip.tcp_cwnd_debug" description="Enable debugging for TCP congestion window.">
+            <option display="LWIP_DBG_OFF" id="config.middleware.lwip_tcpip.tcp_cwnd_debug.lwip_dbg_off" value="(LWIP_DBG_OFF)"/>
+            <option display="Enabled" id="config.middleware.lwip_tcpip.tcp_cwnd_debug.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.tcp_cwnd_debug.disabled" value="(0)"/>
+        </property>
+        <property default="LWIP_DBG_OFF" display="Debugging|Debug messages|TCP window debug" id="config.middleware.lwip_tcpip.tcp_wnd_debug" description="Enable debugging in tcp_in.">
+            <option display="LWIP_DBG_OFF" id="config.middleware.lwip_tcpip.tcp_wnd_debug.lwip_dbg_off" value="(LWIP_DBG_OFF)"/>
+            <option display="Enabled" id="config.middleware.lwip_tcpip.tcp_wnd_debug.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.tcp_wnd_debug.disabled" value="(0)"/>
+        </property>
+        <property default="LWIP_DBG_OFF" display="Debugging|Debug messages|TCP output debug" id="config.middleware.lwip_tcpip.tcp_output_debug" description="Enable debugging in tcp_out.">
+            <option display="LWIP_DBG_OFF" id="config.middleware.lwip_tcpip.tcp_output_debug.lwip_dbg_off" value="(LWIP_DBG_OFF)"/>
+            <option display="Enabled" id="config.middleware.lwip_tcpip.tcp_output_debug.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.tcp_output_debug.disabled" value="(0)"/>
+        </property>
+        <property default="LWIP_DBG_OFF" display="Debugging|Debug messages|TCP RST debug" id="config.middleware.lwip_tcpip.tcp_rst_debug" description="Enable debugging for TCP with the RST message.">
+            <option display="LWIP_DBG_OFF" id="config.middleware.lwip_tcpip.tcp_rst_debug.lwip_dbg_off" value="(LWIP_DBG_OFF)"/>
+            <option display="Enabled" id="config.middleware.lwip_tcpip.tcp_rst_debug.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.tcp_rst_debug.disabled" value="(0)"/>
+        </property>
+        <property default="LWIP_DBG_OFF" display="Debugging|Debug messages|TCP qlen debug" id="config.middleware.lwip_tcpip.tcp_qlen_debug" description="Enable debugging for TCP queue lengths.">
+            <option display="LWIP_DBG_OFF" id="config.middleware.lwip_tcpip.tcp_qlen_debug.lwip_dbg_off" value="(LWIP_DBG_OFF)"/>
+            <option display="Enabled" id="config.middleware.lwip_tcpip.tcp_qlen_debug.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.tcp_qlen_debug.disabled" value="(0)"/>
+        </property>
+        <property default="LWIP_DBG_OFF" display="Debugging|Debug messages|UDP debug" id="config.middleware.lwip_tcpip.udp_debug" description="Enable debugging in UDP.">
+            <option display="LWIP_DBG_OFF" id="config.middleware.lwip_tcpip.udp_debug.lwip_dbg_off" value="(LWIP_DBG_OFF)"/>
+            <option display="Enabled" id="config.middleware.lwip_tcpip.udp_debug.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.udp_debug.disabled" value="(0)"/>
+        </property>
+        <property default="LWIP_DBG_OFF" display="Debugging|Debug messages|TCPIP debug" id="config.middleware.lwip_tcpip.tcpip_debug" description="Enable debugging in tcpip.">
+            <option display="LWIP_DBG_OFF" id="config.middleware.lwip_tcpip.tcpip_debug.lwip_dbg_off" value="(LWIP_DBG_OFF)"/>
+            <option display="Enabled" id="config.middleware.lwip_tcpip.tcpip_debug.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.tcpip_debug.disabled" value="(0)"/>
+        </property>
+        <property default="LWIP_DBG_OFF" display="Debugging|Debug messages|Slip debug" id="config.middleware.lwip_tcpip.slip_debug" description="Enable debugging in slipif.">
+            <option display="LWIP_DBG_OFF" id="config.middleware.lwip_tcpip.slip_debug.lwip_dbg_off" value="(LWIP_DBG_OFF)"/>
+            <option display="Enabled" id="config.middleware.lwip_tcpip.slip_debug.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.slip_debug.disabled" value="(0)"/>
+        </property>
+        <property default="LWIP_DBG_OFF" display="Debugging|Debug messages|DHCP debug" id="config.middleware.lwip_tcpip.dhcp_debug" description="Enable debugging in dhcp.">
+            <option display="LWIP_DBG_OFF" id="config.middleware.lwip_tcpip.dhcp_debug.lwip_dbg_off" value="(LWIP_DBG_OFF)"/>
+            <option display="Enabled" id="config.middleware.lwip_tcpip.dhcp_debug.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.dhcp_debug.disabled" value="(0)"/>
+        </property>
+        <property default="LWIP_DBG_OFF" display="Debugging|Debug messages|AutoIP debug" id="config.middleware.lwip_tcpip.autoip_debug" description="Enable debugging in autoip.">
+            <option display="LWIP_DBG_OFF" id="config.middleware.lwip_tcpip.autoip_debug.lwip_dbg_off" value="(LWIP_DBG_OFF)"/>
+            <option display="Enabled" id="config.middleware.lwip_tcpip.autoip_debug.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.autoip_debug.disabled" value="(0)"/>
+        </property>
+        <property default="config.middleware.lwip_tcpip.acd_debug.disabled" display="Debugging|Debug messages|Acd debug" id="config.middleware.lwip_tcpip.acd_debug" description="Enable debugging in acd.">
+            <option display="LWIP_DBG_OFF" id="config.middleware.lwip_tcpip.acd_debug.lwip_dbg_off" value="(LWIP_DBG_OFF)"/>
+            <option display="Enabled" id="config.middleware.lwip_tcpip.acd_debug.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.acd_debug.disabled" value="(0)"/>
+        </property>
+        <property default="LWIP_DBG_OFF" display="Debugging|Debug messages|DNS debug" id="config.middleware.lwip_tcpip.dns_debug" description="Enable debugging for DNS.">
+            <option display="LWIP_DBG_OFF" id="config.middleware.lwip_tcpip.dns_debug.lwip_dbg_off" value="(LWIP_DBG_OFF)"/>
+            <option display="Enabled" id="config.middleware.lwip_tcpip.dns_debug.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.dns_debug.disabled" value="(0)"/>
+        </property>
+        <property default="LWIP_DBG_OFF" display="Debugging|Debug messages|IPv6 debug" id="config.middleware.lwip_tcpip.ip6_debug" description="Enable debugging for IPv6.">
+            <option display="LWIP_DBG_OFF" id="config.middleware.lwip_tcpip.ip6_debug.lwip_dbg_off" value="(LWIP_DBG_OFF)"/>
+            <option display="Enabled" id="config.middleware.lwip_tcpip.ip6_debug.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.ip6_debug.disabled" value="(0)"/>
+        </property>
+        <property default="LWIP_DBG_OFF" display="Debugging|Debug messages|DHCP IPv6 debug" id="config.middleware.lwip_tcpip.dhcp6_debug" description="Enable debugging in dhcp6.">
+            <option display="LWIP_DBG_OFF" id="config.middleware.lwip_tcpip.dhcp6_debug.lwip_dbg_off" value="(LWIP_DBG_OFF)"/>
+            <option display="Enabled" id="config.middleware.lwip_tcpip.dhcp6_debug.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.dhcp6_debug.disabled" value="(0)"/>
+        </property>
+        <property default="config.middleware.lwip_tcpip.lwip_testmode.disabled" display="Debugging|Debug messages|LwIP testmode" id="config.middleware.lwip_tcpip.lwip_testmode" description="Changes to make unit test possible.">
+            <option display="Enabled" id="config.middleware.lwip_tcpip.lwip_testmode.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.lwip_testmode.disabled" value="(0)"/>
+        </property>
+        <property default="config.middleware.lwip_tcpip.lwip_perf.disabled" display="Debugging|LwIP perf" id="config.middleware.lwip_tcpip.lwip_perf" description="Enable performance testing for lwIP (if enabled, arch/perf.h is included)">
+            <option display="Enabled" id="config.middleware.lwip_tcpip.lwip_perf.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.lwip_perf.disabled" value="(0)"/>
+        </property>
+        <property default="config.middleware.lwip_tcpip.lwip_support_custom_pbuf.disabled" display="LwIP support custom pbuf" id="config.middleware.lwip_tcpip.lwip_support_custom_pbuf" description="Custom pbufs behave much like their pbuf type but they are allocated by external code and when pbuf_free gives up their last reference, they are freed by calling pbuf_custom->custom_free_function().">
+            <option display="Enabled" id="config.middleware.lwip_tcpip.lwip_support_custom_pbuf.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.lwip_tcpip.lwip_support_custom_pbuf.disabled" value="(0)"/>
+        </property>
+
+        <content>
+#ifdef __cplusplus
+extern "C" {
+#endif
+            #define NO_SYS (${config.middleware.lwip_tcpip.no_sys})
+#if (NO_SYS == 0)
+            #define LWIP_PROVIDE_ERRNO (1)
+#endif
+            #define LWIP_TIMERS (${config.middleware.lwip_tcpip.lwip_timers})
+            #define LWIP_TIMERS_CUSTOM (${config.middleware.lwip_tcpip.lwip_timers_custom})
+            #define LWIP_MPU_COMPATIBLE (${config.middleware.lwip_tcpip.lwip_mpu_compatible})
+            #define MEMCPY ${config.middleware.lwip_tcpip.memcpy}
+            #define SMEMCPY ${config.middleware.lwip_tcpip.smemcpy}
+            #define MEMMOVE ${config.middleware.lwip_tcpip.memmove}
+            #define LWIP_TCPIP_CORE_LOCKING (${config.middleware.lwip_tcpip.lwip_tcpip_core_locking})
+            #define LWIP_TCPIP_CORE_LOCKING_INPUT (${config.middleware.lwip_tcpip.lwip_tcpip_core_locking_input})
+            #define SYS_LIGHTWEIGHT_PROT (${config.middleware.lwip_tcpip.sys_lightweight_prot})
+            #define LWIP_ASSERT_CORE_LOCKED() ${config.middleware.lwip_tcpip.lwip_assert_core_locked}
+            #define MEM_LIBC_MALLOC (${config.middleware.lwip_tcpip.mem_libc_malloc})
+#if (MEM_LIBC_MALLOC == 1)
+            #define MEM_CUSTOM_ALLOCATOR 1
+            #define MEM_CUSTOM_FREE free
+            #define MEM_CUSTOM_MALLOC malloc
+            #define MEM_CUSTOM_CALLOC calloc
+#else
+            #define MEM_CUSTOM_ALLOCATOR (${config.middleware.lwip_tcpip.mem_custom_allocator})
+#endif
+            #define MEMP_MEM_MALLOC (${config.middleware.lwip_tcpip.memp_mem_malloc})
+            #define MEMP_MEM_INIT (${config.middleware.lwip_tcpip.memp_mem_init})
+            #define MEM_ALIGNMENT (${config.middleware.lwip_tcpip.mem_alignment}U)
+            #define MEM_SIZE (${config.middleware.lwip_tcpip.mem_size})
+            #define MEMP_OVERFLOW_CHECK (${config.middleware.lwip_tcpip.memp_overflow_check})
+            #define MEMP_SANITY_CHECK (${config.middleware.lwip_tcpip.memp_sanity_check})
+            #define MEM_OVERFLOW_CHECK (${config.middleware.lwip_tcpip.mem_overflow_check})
+            #define MEM_SANITY_CHECK (${config.middleware.lwip_tcpip.mem_sanity_check})
+            #define MEM_USE_POOLS (${config.middleware.lwip_tcpip.mem_use_pools})
+            #define MEM_USE_POOLS_TRY_BIGGER_POOL (${config.middleware.lwip_tcpip.mem_use_pools_try_bigger_pool})
+            #define MEMP_USE_CUSTOM_POOLS (${config.middleware.lwip_tcpip.memp_use_custom_pools})
+#if MEMP_USE_CUSTOM_POOLS
+            #include "lwippools.h"
+#endif
+            #define LWIP_ALLOW_MEM_FREE_FROM_OTHER_CONTEXT (${config.middleware.lwip_tcpip.lwip_allow_mem_free_from_other_context})
+            #define MEMP_NUM_PBUF (${config.middleware.lwip_tcpip.memp_num_pbuf})
+            #define MEMP_NUM_RAW_PCB (${config.middleware.lwip_tcpip.memp_num_raw_pcb})
+            #define MEMP_NUM_UDP_PCB (${config.middleware.lwip_tcpip.memp_num_udp_pcb})
+            #define MEMP_NUM_TCP_PCB (${config.middleware.lwip_tcpip.memp_num_tcp_pcb})
+            #define MEMP_NUM_TCP_PCB_LISTEN (${config.middleware.lwip_tcpip.memp_num_tcp_pcb_listen})
+            #define MEMP_NUM_TCP_SEG (${config.middleware.lwip_tcpip.memp_num_tcp_seg})
+            #define MEMP_NUM_ALTCP_PCB (${config.middleware.lwip_tcpip.memp_num_altcp_pcb})
+            #define MEMP_NUM_REASSDATA (${config.middleware.lwip_tcpip.memp_num_reassdata})
+            #define MEMP_NUM_FRAG_PBUF (${config.middleware.lwip_tcpip.memp_num_frag_pbuf})
+            #define MEMP_NUM_ARP_QUEUE (${config.middleware.lwip_tcpip.memp_num_arp_queue})
+            #define MEMP_NUM_IGMP_GROUP (${config.middleware.lwip_tcpip.memp_num_igmp_group})
+            #define LWIP_NUM_SYS_TIMEOUT_INTERNAL (LWIP_TCP + IP_REASSEMBLY + LWIP_ARP + (2*LWIP_DHCP) + LWIP_ACD + LWIP_IGMP + LWIP_DNS + PPP_NUM_TIMEOUTS + (LWIP_IPV6 * (1 + LWIP_IPV6_REASS + LWIP_IPV6_MLD + LWIP_IPV6_DHCP6)))
+            #define MEMP_NUM_SYS_TIMEOUT (${config.middleware.lwip_tcpip.memp_num_sys_timeout} + 1)
+            #define MEMP_NUM_NETBUF (${config.middleware.lwip_tcpip.memp_num_netbuf})
+            #define MEMP_NUM_NETCONN (${config.middleware.lwip_tcpip.memp_num_netconn})
+            #define MEMP_NUM_SELECT_CB (${config.middleware.lwip_tcpip.memp_num_select_cb})
+            #define MEMP_NUM_TCPIP_MSG_API (${config.middleware.lwip_tcpip.memp_num_tcpip_msg_api})
+            #define MEMP_NUM_TCPIP_MSG_INPKT (${config.middleware.lwip_tcpip.memp_num_tcpip_msg_inpkt})
+            #define MEMP_NUM_NETDB (${config.middleware.lwip_tcpip.memp_num_netdb})
+            #define MEMP_NUM_LOCALHOSTLIST (${config.middleware.lwip_tcpip.memp_num_localhostlist})
+            #define PBUF_POOL_SIZE (${config.middleware.lwip_tcpip.pbuf_pool_size})
+            #define MEMP_NUM_API_MSG (${config.middleware.lwip_tcpip.memp_num_api_msg})
+            #define MEMP_NUM_DNS_API_MSG (${config.middleware.lwip_tcpip.memp_num_dns_api_msg})
+            #define LWIP_ARP (${config.middleware.lwip_tcpip.lwip_arp})
+            #define ARP_TABLE_SIZE (${config.middleware.lwip_tcpip.arp_table_size})
+            #define ARP_MAXAGE (${config.middleware.lwip_tcpip.arp_maxage})
+            #define ARP_QUEUEING (${config.middleware.lwip_tcpip.arp_queueing})
+            #define ARP_QUEUE_LEN (${config.middleware.lwip_tcpip.arp_queue_len})
+            #define ETHARP_SUPPORT_VLAN (${config.middleware.lwip_tcpip.etharp_support_vlan})
+            #define LWIP_VLAN_PCP (${config.middleware.lwip_tcpip.lwip_vlan_pcp})
+            #define LWIP_ETHERNET (${config.middleware.lwip_tcpip.lwip_ethernet})
+            #define ETH_PAD_SIZE (${config.middleware.lwip_tcpip.eth_pad_size})
+            #define ETHARP_SUPPORT_STATIC_ENTRIES (${config.middleware.lwip_tcpip.etharp_support_static_entries})
+            #define ETHARP_TABLE_MATCH_NETIF (${config.middleware.lwip_tcpip.etharp_table_match_netif})
+            #define LWIP_IPV4 (${config.middleware.lwip_tcpip.lwip_ipv4})
+#if (LWIP_IPV4 == 0)
+            #define IP_FORWARD 0
+            #define IP_REASSEMBLY 0
+            #define IP_FRAG 0
+#else
+            #define IP_FORWARD (${config.middleware.lwip_tcpip.ip_forward})
+            #define IP_REASSEMBLY (${config.middleware.lwip_tcpip.ip_reassembly})
+            #define IP_FRAG (${config.middleware.lwip_tcpip.ip_frag})
+#endif
+            #define IP_OPTIONS_ALLOWED (${config.middleware.lwip_tcpip.ip_options_allowed})
+            #define IP_REASS_MAXAGE (${config.middleware.lwip_tcpip.ip_reass_maxage})
+            #define IP_REASS_MAX_PBUFS (${config.middleware.lwip_tcpip.ip_reass_max_pbufs})
+            #define IP_DEFAULT_TTL (${config.middleware.lwip_tcpip.ip_default_ttl})
+            #define IP_SOF_BROADCAST (${config.middleware.lwip_tcpip.ip_sof_broadcast})
+            #define IP_SOF_BROADCAST_RECV (${config.middleware.lwip_tcpip.ip_sof_broadcast_recv})
+            #define IP_FORWARD_ALLOW_TX_ON_RX_NETIF (${config.middleware.lwip_tcpip.ip_forward_allow_tx_on_rx_netif})
+            #define LWIP_ICMP (${config.middleware.lwip_tcpip.lwip_icmp})
+            #define ICMP_TTL (${config.middleware.lwip_tcpip.icmp_ttl})
+            #define LWIP_BROADCAST_PING (${config.middleware.lwip_tcpip.lwip_broadcast_ping})
+            #define LWIP_MULTICAST_PING (${config.middleware.lwip_tcpip.lwip_multicast_ping})
+            #define LWIP_RAW (${config.middleware.lwip_tcpip.lwip_raw})
+            #define LWIP_DHCP (${config.middleware.lwip_tcpip.lwip_dhcp})
+            #define LWIP_DHCP_DOES_ACD_CHECK (${config.middleware.lwip_tcpip.lwip_dhcp_does_acd_check})
+            #define LWIP_DHCP_BOOTP_FILE (${config.middleware.lwip_tcpip.lwip_dhcp_bootp_file})
+            #define LWIP_DHCP_GET_NTP_SRV (${config.middleware.lwip_tcpip.lwip_dhcp_get_ntp_srv})
+            #define LWIP_DHCP_MAX_NTP_SERVERS (${config.middleware.lwip_tcpip.lwip_dhcp_max_ntp_servers})
+            #define LWIP_DHCP_MAX_DNS_SERVERS (${config.middleware.lwip_tcpip.lwip_dhcp_max_dns_servers})
+            #define LWIP_DHCP_DISCOVER_ADD_HOSTNAME (${config.middleware.lwip_tcpip.lwip_dhcp_discover_add_hostname})
+#if (LWIP_IPV4 == 0)
+            #define LWIP_AUTOIP 0
+#else
+            #define LWIP_AUTOIP (${config.middleware.lwip_tcpip.lwip_autoip})
+#endif
+            #define LWIP_DHCP_AUTOIP_COOP (${config.middleware.lwip_tcpip.lwip_dhcp_autoip_coop})
+            #define LWIP_DHCP_AUTOIP_COOP_TRIES (${config.middleware.lwip_tcpip.lwip_dhcp_autoip_coop_tries})
+#if (LWIP_IPV4 == 0)
+            #define LWIP_ACD 0
+#else
+            #define LWIP_ACD (${config.middleware.lwip_tcpip.lwip_acd})
+#endif
+            #define LWIP_MIB2_CALLBACKS (${config.middleware.lwip_tcpip.lwip_mib2_callbacks})
+            #define LWIP_MULTICAST_TX_OPTIONS (${config.middleware.lwip_tcpip.lwip_multicast_tx_options})
+#if (LWIP_IPV4 == 0)
+            #define LWIP_IGMP 0
+#else
+            #define LWIP_IGMP (${config.middleware.lwip_tcpip.lwip_igmp})
+#endif
+            #define LWIP_DNS (${config.middleware.lwip_tcpip.lwip_dns})
+            #define DNS_TABLE_SIZE (${config.middleware.lwip_tcpip.dns_table_size})
+            #define DNS_MAX_NAME_LENGTH (${config.middleware.lwip_tcpip.dns_max_name_length})
+            #define DNS_MAX_SERVERS (${config.middleware.lwip_tcpip.dns_max_servers})
+            #define DNS_MAX_RETRIES (${config.middleware.lwip_tcpip.dns_max_retries})
+            #define DNS_DOES_NAME_CHECK (${config.middleware.lwip_tcpip.dns_does_name_check})
+            #define LWIP_DNS_SECURE (${config.middleware.lwip_tcpip.lwip_dns_secure})
+            #define LWIP_DNS_SECURE_RAND_XID 1
+            #define LWIP_DNS_SECURE_NO_MULTIPLE_OUTSTANDING 2
+            #define LWIP_DNS_SECURE_RAND_SRC_PORT 4
+            #define DNS_LOCAL_HOSTLIST (${config.middleware.lwip_tcpip.dns_local_hostlist})
+            #define DNS_LOCAL_HOSTLIST_IS_DYNAMIC (${config.middleware.lwip_tcpip.dns_local_hostlist_is_dynamic})
+            #define LWIP_DNS_SUPPORT_MDNS_QUERIES (${config.middleware.lwip_tcpip.lwip_dns_support_mdns_queries})
+            #define LWIP_UDP (${config.middleware.lwip_tcpip.lwip_udp})
+            #define LWIP_UDPLITE (${config.middleware.lwip_tcpip.lwip_udplite})
+            #define UDP_TTL (${config.middleware.lwip_tcpip.udp_ttl})
+            #define LWIP_NETBUF_RECVINFO (${config.middleware.lwip_tcpip.lwip_netbuf_recvinfo})
+            #define LWIP_TCP (${config.middleware.lwip_tcpip.lwip_tcp})
+            #define TCP_TTL (${config.middleware.lwip_tcpip.tcp_ttl})
+            #define TCP_WND (${config.middleware.lwip_tcpip.tcp_wnd})
+            #define TCP_MAXRTX (${config.middleware.lwip_tcpip.tcp_maxrtx})
+            #define TCP_SYNMAXRTX (${config.middleware.lwip_tcpip.tcp_synmaxrtx})
+            #define TCP_QUEUE_OOSEQ (${config.middleware.lwip_tcpip.tcp_queue_ooseq})
+            #define LWIP_TCP_SACK_OUT (${config.middleware.lwip_tcpip.lwip_tcp_sack_out})
+            #define LWIP_TCP_MAX_SACK_NUM (${config.middleware.lwip_tcpip.lwip_tcp_max_sack_num})
+            #define TCP_MSS (${config.middleware.lwip_tcpip.tcp_mss})
+            #define TCP_CALCULATE_EFF_SEND_MSS (${config.middleware.lwip_tcpip.tcp_calculate_eff_send_mss})
+            #define LWIP_TCP_RTO_TIME (${config.middleware.lwip_tcpip.lwip_tcp_rto_time})
+            #define TCP_SND_BUF (${config.middleware.lwip_tcpip.tcp_snd_buf})
+            #define TCP_SND_QUEUELEN (${config.middleware.lwip_tcpip.tcp_snd_queuelen})
+            #define TCP_SNDLOWAT (${config.middleware.lwip_tcpip.tcp_sndlowat})
+            #define TCP_SNDQUEUELOWAT (${config.middleware.lwip_tcpip.tcp_sndqueuelowat})
+            #define TCP_OOSEQ_MAX_BYTES (${config.middleware.lwip_tcpip.tcp_ooseq_max_bytes})
+            #define TCP_OOSEQ_BYTES_LIMIT(pbc) (${config.middleware.lwip_tcpip.tcp_ooseq_bytes_limit})
+            #define TCP_OOSEQ_MAX_PBUFS (${config.middleware.lwip_tcpip.tcp_ooseq_max_pbufs})
+            #define TCP_OOSEQ_PBUFS_LIMIT(pbc) (${config.middleware.lwip_tcpip.tcp_ooseq_pbufs_limit})
+            #define TCP_LISTEN_BACKLOG (${config.middleware.lwip_tcpip.tcp_listen_backlog})
+            #define TCP_DEFAULT_LISTEN_BACKLOG (${config.middleware.lwip_tcpip.tcp_default_listen_backlog})
+            #define TCP_OVERSIZE (${config.middleware.lwip_tcpip.tcp_oversize})
+            #define LWIP_TCP_TIMESTAMPS (${config.middleware.lwip_tcpip.lwip_tcp_timestamps})
+            #define TCP_WND_UPDATE_THRESHOLD (${config.middleware.lwip_tcpip.tcp_wnd_update_threshold})
+            #define LWIP_EVENT_API (${config.middleware.lwip_tcpip.lwip_event_api})
+#if (LWIP_EVENT_API == 0)
+            #define LWIP_CALLBACK_API 1
+#else
+            #define LWIP_CALLBACK_API 0
+#endif
+            #define LWIP_WND_SCALE (${config.middleware.lwip_tcpip.lwip_wnd_scale})
+            #define TCP_RCV_SCALE (${config.middleware.lwip_tcpip.tcp_rcv_scale})
+            #define LWIP_TCP_PCB_NUM_EXT_ARGS (${config.middleware.lwip_tcpip.lwip_tcp_pcb_num_ext_args})
+            #define LWIP_ALTCP (${config.middleware.lwip_tcpip.lwip_altcp})
+            #define LWIP_ALTCP_TLS (${config.middleware.lwip_tcpip.lwip_altcp_tls})
+            #define PBUF_LINK_HLEN (${config.middleware.lwip_tcpip.pbuf_link_hlen})
+            #define PBUF_LINK_ENCAPSULATION_HLEN (${config.middleware.lwip_tcpip.pbuf_link_encapsulation_hlen})
+            #define PBUF_POOL_BUFSIZE (${config.middleware.lwip_tcpip.pbuf_pool_bufsize})
+            #define LWIP_PBUF_REF_T ${config.middleware.lwip_tcpip.lwip_pbuf_ref_t}
+            #define LWIP_PBUF_CUSTOM_DATA ${config.middleware.lwip_tcpip.lwip_pbuf_custom_data}
+            #define LWIP_PBUF_CUSTOM_DATA_INIT (${config.middleware.lwip_tcpip.lwip_pbuf_custom_data_init})
+            #define LWIP_SINGLE_NETIF (${config.middleware.lwip_tcpip.lwip_single_netif})
+            #define LWIP_NETIF_HOSTNAME (${config.middleware.lwip_tcpip.lwip_netif_hostname})
+            #define LWIP_NETIF_API (${config.middleware.lwip_tcpip.lwip_netif_api})
+            #define LWIP_NETIF_STATUS_CALLBACK (${config.middleware.lwip_tcpip.lwip_netif_status_callback})
+            #define LWIP_NETIF_EXT_STATUS_CALLBACK (${config.middleware.lwip_tcpip.lwip_netif_ext_status_callback})
+            #define LWIP_NETIF_LINK_CALLBACK (${config.middleware.lwip_tcpip.lwip_netif_link_callback})
+            #define LWIP_NETIF_REMOVE_CALLBACK (${config.middleware.lwip_tcpip.lwip_netif_remove_callback})
+            #define LWIP_NETIF_HWADDRHINT (${config.middleware.lwip_tcpip.lwip_netif_hwaddrhint})
+            #define LWIP_NETIF_TX_SINGLE_PBUF (${config.middleware.lwip_tcpip.lwip_netif_tx_single_pbuf})
+            #define LWIP_NUM_NETIF_CLIENT_DATA (${config.middleware.lwip_tcpip.lwip_num_netif_client_data})
+            #define LWIP_HAVE_LOOPIF (${config.middleware.lwip_tcpip.lwip_have_loopif})
+            #define LWIP_LOOPIF_MULTICAST (${config.middleware.lwip_tcpip.lwip_loopif_multicast})
+            #define LWIP_NETIF_LOOPBACK (${config.middleware.lwip_tcpip.lwip_netif_loopback})
+            #define LWIP_LOOPBACK_MAX_PBUFS (${config.middleware.lwip_tcpip.lwip_loopback_max_pbufs})
+            #define LWIP_NETIF_LOOPBACK_MULTITHREADING (${config.middleware.lwip_tcpip.lwip_netif_loopback_multithreading})
+            #define TCPIP_THREAD_NAME ("${config.middleware.lwip_tcpip.tcpip_thread_name}")
+            #define TCPIP_THREAD_STACKSIZE (${config.middleware.lwip_tcpip.tcpip_thread_stacksize})
+            #define TCPIP_THREAD_PRIO (${config.middleware.lwip_tcpip.tcpip_thread_prio})
+            #define TCPIP_MBOX_SIZE (${config.middleware.lwip_tcpip.tcpip_mbox_size})
+            #define LWIP_TCPIP_THREAD_ALIVE() ${config.middleware.lwip_tcpip.lwip_tcpip_thread_alive}
+            #define SLIPIF_THREAD_NAME (${config.middleware.lwip_tcpip.slipif_thread_name})
+            #define SLIPIF_THREAD_STACKSIZE (${config.middleware.lwip_tcpip.slipif_thread_stacksize})
+            #define SLIPIF_THREAD_PRIO (${config.middleware.lwip_tcpip.slipif_thread_prio})
+            #define DEFAULT_THREAD_NAME (${config.middleware.lwip_tcpip.default_thread_name})
+            #define DEFAULT_THREAD_STACKSIZE (${config.middleware.lwip_tcpip.default_thread_stacksize})
+            #define DEFAULT_THREAD_PRIO (${config.middleware.lwip_tcpip.default_thread_prio})
+            #define DEFAULT_RAW_RECVMBOX_SIZE (${config.middleware.lwip_tcpip.default_raw_recvmbox_size})
+            #define DEFAULT_UDP_RECVMBOX_SIZE (${config.middleware.lwip_tcpip.default_udp_recvmbox_size})
+            #define DEFAULT_TCP_RECVMBOX_SIZE (${config.middleware.lwip_tcpip.default_tcp_recvmbox_size})
+            #define DEFAULT_ACCEPTMBOX_SIZE (${config.middleware.lwip_tcpip.default_acceptmbox_size})
+            #define LWIP_NETCONN (${config.middleware.lwip_tcpip.lwip_netconn})
+            #define LWIP_TCPIP_TIMEOUT (${config.middleware.lwip_tcpip.lwip_tcpip_timeout})
+            #define LWIP_NETCONN_SEM_PER_THREAD (${config.middleware.lwip_tcpip.lwip_netconn_sem_per_thread})
+            #define LWIP_NETCONN_FULLDUPLEX (${config.middleware.lwip_tcpip.lwip_netconn_fullduplex})
+            #define LWIP_SOCKET (${config.middleware.lwip_tcpip.lwip_socket})
+            #define LWIP_COMPAT_SOCKETS (${config.middleware.lwip_tcpip.lwip_compat_sockets})
+            #define LWIP_POSIX_SOCKETS_IO_NAMES (${config.middleware.lwip_tcpip.lwip_posix_sockets_io_names})
+            #define LWIP_SOCKET_OFFSET (${config.middleware.lwip_tcpip.lwip_socket_offset})
+            #define LWIP_SOCKET_EXTERNAL_HEADERS (${config.middleware.lwip_tcpip.lwip_socket_external_headers})
+            #define LWIP_TCP_KEEPALIVE (${config.middleware.lwip_tcpip.lwip_tcp_keepalive})
+            #define LWIP_SO_SNDTIMEO (${config.middleware.lwip_tcpip.lwip_so_sndtimeo})
+            #define LWIP_SO_RCVTIMEO (${config.middleware.lwip_tcpip.lwip_so_rcvtimeo})
+            #define LWIP_SO_SNDRCVTIMEO_NONSTANDARD (${config.middleware.lwip_tcpip.lwip_so_sndrcvtimeo_nonstandard})
+            #define LWIP_SO_RCVBUF (${config.middleware.lwip_tcpip.lwip_so_rcvbuf})
+            #define LWIP_SO_LINGER (${config.middleware.lwip_tcpip.lwip_so_linger})
+            #define RECV_BUFSIZE_DEFAULT (${config.middleware.lwip_tcpip.recv_bufsize_default})
+            #define LWIP_TCP_CLOSE_TIMEOUT_MS_DEFAULT (${config.middleware.lwip_tcpip.lwip_tcp_close_timeout_ms_default})
+            #define SO_REUSE (${config.middleware.lwip_tcpip.so_reuse})
+            #define SO_REUSE_RXTOALL (${config.middleware.lwip_tcpip.so_reuse_rxtoall})
+            #define LWIP_FIONREAD_LINUXMODE (${config.middleware.lwip_tcpip.lwip_fionread_linuxmode})
+            #define LWIP_SOCKET_SELECT (${config.middleware.lwip_tcpip.lwip_socket_select})
+            #define LWIP_SOCKET_POLL (${config.middleware.lwip_tcpip.lwip_socket_poll})
+            #define LWIP_STATS (${config.middleware.lwip_tcpip.lwip_stats})
+#if (LWIP_STATS == 1)
+            #define LWIP_STATS_DISPLAY (${config.middleware.lwip_tcpip.lwip_stats_display})
+            #define LINK_STATS (${config.middleware.lwip_tcpip.link_stats})
+            #define ETHARP_STATS (${config.middleware.lwip_tcpip.etharp_stats})
+            #define IP_STATS (${config.middleware.lwip_tcpip.ip_stats})
+            #define IPFRAG_STATS (${config.middleware.lwip_tcpip.ipfrag_stats})
+            #define ICMP_STATS (${config.middleware.lwip_tcpip.icmp_stats})
+            #define IGMP_STATS (${config.middleware.lwip_tcpip.igmp_stats})
+            #define UDP_STATS (${config.middleware.lwip_tcpip.udp_stats})
+            #define TCP_STATS (${config.middleware.lwip_tcpip.tcp_stats})
+            #define MEM_STATS (${config.middleware.lwip_tcpip.mem_stats})
+            #define MEMP_STATS (${config.middleware.lwip_tcpip.memp_stats})
+            #define SYS_STATS (${config.middleware.lwip_tcpip.sys_stats})
+            #define IP6_STATS (${config.middleware.lwip_tcpip.ip6_stats})
+            #define ICMP6_STATS (${config.middleware.lwip_tcpip.icmp6_stats})
+            #define IP6_FRAG_STATS (${config.middleware.lwip_tcpip.ip6_frag_stats})
+            #define MLD6_STATS (${config.middleware.lwip_tcpip.mld6_stats})
+            #define ND6_STATS (${config.middleware.lwip_tcpip.nd6_stats})
+            #define MIB2_STATS (${config.middleware.lwip_tcpip.mib2_stats})
+#endif
+            #define LWIP_CHECKSUM_CTRL_PER_NETIF (${config.middleware.lwip_tcpip.lwip_checksum_ctrl_per_netif})
+            #define CHECKSUM_GEN_IP (${config.middleware.lwip_tcpip.checksum_gen_ip})
+            #define CHECKSUM_GEN_UDP (${config.middleware.lwip_tcpip.checksum_gen_udp})
+            #define CHECKSUM_GEN_TCP (${config.middleware.lwip_tcpip.checksum_gen_tcp})
+            #define CHECKSUM_GEN_ICMP (${config.middleware.lwip_tcpip.checksum_gen_icmp})
+            #define CHECKSUM_GEN_ICMP6 (${config.middleware.lwip_tcpip.checksum_gen_icmp6})
+            #define CHECKSUM_CHECK_IP (${config.middleware.lwip_tcpip.checksum_check_ip})
+            #define CHECKSUM_CHECK_UDP (${config.middleware.lwip_tcpip.checksum_check_udp})
+            #define CHECKSUM_CHECK_TCP (${config.middleware.lwip_tcpip.checksum_check_tcp})
+            #define CHECKSUM_CHECK_ICMP (${config.middleware.lwip_tcpip.checksum_check_icmp})
+            #define CHECKSUM_CHECK_ICMP6 (${config.middleware.lwip_tcpip.checksum_check_icmp6})
+            #define LWIP_CHECKSUM_ON_COPY (${config.middleware.lwip_tcpip.lwip_checksum_on_copy})
+            #define LWIP_IPV6 (${config.middleware.lwip_tcpip.lwip_ipv6})
+            #define IPV6_REASS_MAXAGE (${config.middleware.lwip_tcpip.ipv6_reass_maxage})
+            #define LWIP_IPV6_SCOPES (${config.middleware.lwip_tcpip.lwip_ipv6_scopes})
+            #define LWIP_IPV6_SCOPES_DEBUG (${config.middleware.lwip_tcpip.lwip_ipv6_scopes_debug})
+            #define LWIP_IPV6_NUM_ADDRESSES (${config.middleware.lwip_tcpip.lwip_ipv6_num_addresses})
+            #define LWIP_IPV6_FORWARD (${config.middleware.lwip_tcpip.lwip_ipv6_forward})
+            #define LWIP_IPV6_FRAG (${config.middleware.lwip_tcpip.lwip_ipv6_frag})
+            #define LWIP_IPV6_REASS (${config.middleware.lwip_tcpip.lwip_ipv6_reass})
+            #define LWIP_IPV6_SEND_ROUTER_SOLICIT (${config.middleware.lwip_tcpip.lwip_ipv6_send_router_solicit})
+            #define LWIP_IPV6_AUTOCONFIG (${config.middleware.lwip_tcpip.lwip_ipv6_autoconfig})
+            #define LWIP_IPV6_ADDRESS_LIFETIMES (${config.middleware.lwip_tcpip.lwip_ipv6_address_lifetimes})
+            #define LWIP_IPV6_DUP_DETECT_ATTEMPTS (${config.middleware.lwip_tcpip.lwip_ipv6_dup_detect_attempts})
+            #define LWIP_ICMP6 (${config.middleware.lwip_tcpip.lwip_icmp6})
+            #define LWIP_ICMP6_DATASIZE (${config.middleware.lwip_tcpip.lwip_icmp6_datasize})
+            #define LWIP_ICMP6_HL (${config.middleware.lwip_tcpip.lwip_icmp6_hl})
+            #define LWIP_IPV6_MLD (${config.middleware.lwip_tcpip.lwip_ipv6_mld})
+            #define MEMP_NUM_MLD6_GROUP (${config.middleware.lwip_tcpip.memp_num_mld6_group})
+            #define LWIP_ND6_QUEUEING (${config.middleware.lwip_tcpip.lwip_nd6_queueing})
+            #define MEMP_NUM_ND6_QUEUE (${config.middleware.lwip_tcpip.memp_num_nd6_queue})
+            #define LWIP_ND6_NUM_NEIGHBORS (${config.middleware.lwip_tcpip.lwip_nd6_num_neighbors})
+            #define LWIP_ND6_NUM_DESTINATIONS (${config.middleware.lwip_tcpip.lwip_nd6_num_destinations})
+            #define LWIP_ND6_NUM_PREFIXES (${config.middleware.lwip_tcpip.lwip_nd6_num_prefixes})
+            #define LWIP_ND6_NUM_ROUTERS (${config.middleware.lwip_tcpip.lwip_nd6_num_routers})
+            #define LWIP_ND6_MAX_MULTICAST_SOLICIT (${config.middleware.lwip_tcpip.lwip_nd6_max_multicast_solicit})
+            #define LWIP_ND6_MAX_UNICAST_SOLICIT (${config.middleware.lwip_tcpip.lwip_nd6_max_unicast_solicit})
+            #define LWIP_ND6_MAX_ANYCAST_DELAY_TIME (${config.middleware.lwip_tcpip.lwip_nd6_max_anycast_delay_time})
+            #define LWIP_ND6_MAX_NEIGHBOR_ADVERTISEMENT (${config.middleware.lwip_tcpip.lwip_nd6_max_neighbor_advertisement})
+            #define LWIP_ND6_REACHABLE_TIME (${config.middleware.lwip_tcpip.lwip_nd6_reachable_time})
+            #define LWIP_ND6_RETRANS_TIMER (${config.middleware.lwip_tcpip.lwip_nd6_retrans_timer})
+            #define LWIP_ND6_DELAY_FIRST_PROBE_TIME (${config.middleware.lwip_tcpip.lwip_nd6_delay_first_probe_time})
+            #define LWIP_ND6_ALLOW_RA_UPDATES (${config.middleware.lwip_tcpip.lwip_nd6_allow_ra_updates})
+            #define LWIP_ND6_TCP_REACHABILITY_HINTS (${config.middleware.lwip_tcpip.lwip_nd6_tcp_reachability_hints})
+            #define LWIP_ND6_RDNSS_MAX_DNS_SERVERS (${config.middleware.lwip_tcpip.lwip_nd6_rdnss_max_dns_servers})
+            #define LWIP_IPV6_DHCP6 (${config.middleware.lwip_tcpip.lwip_ipv6_dhcp6})
+            #define LWIP_IPV6_DHCP6_STATEFUL (${config.middleware.lwip_tcpip.lwip_ipv6_dhcp6_stateful})
+            #define LWIP_IPV6_DHCP6_STATELESS (${config.middleware.lwip_tcpip.lwip_ipv6_dhcp6_stateless})
+            #define LWIP_DHCP6_GET_NTP_SRV (${config.middleware.lwip_tcpip.lwip_dhcp6_get_ntp_srv})
+            #define LWIP_DHCP6_MAX_NTP_SERVERS (${config.middleware.lwip_tcpip.lwip_dhcp6_max_ntp_servers})
+            #define LWIP_DHCP6_MAX_DNS_SERVERS (${config.middleware.lwip_tcpip.lwip_dhcp6_max_dns_servers})
+            #define LWIP_HOOK (${config.middleware.lwip_tcpip.lwip_hook})
+#if(LWIP_HOOK)
+            #define LWIP_HOOK_FILENAME ${config.middleware.lwip_tcpip.lwip_hook_filename}
+#endif
+            #define LWIP_DBG_MIN_LEVEL (${config.middleware.lwip_tcpip.lwip_dbg_min_level})
+            #define LWIP_DBG_TYPES_ON (${config.middleware.lwip_tcpip.lwip_dbg_types_on})
+            #define ETHARP_DEBUG (${config.middleware.lwip_tcpip.etharp_debug})
+            #define NETIF_DEBUG (${config.middleware.lwip_tcpip.netif_debug})
+            #define PBUF_DEBUG (${config.middleware.lwip_tcpip.pbuf_debug})
+            #define API_LIB_DEBUG (${config.middleware.lwip_tcpip.api_lib_debug})
+            #define API_MSG_DEBUG (${config.middleware.lwip_tcpip.api_msg_debug})
+            #define SOCKETS_DEBUG (${config.middleware.lwip_tcpip.sockets_debug})
+            #define ICMP_DEBUG (${config.middleware.lwip_tcpip.icmp_debug})
+            #define IGMP_DEBUG (${config.middleware.lwip_tcpip.igmp_debug})
+            #define INET_DEBUG (${config.middleware.lwip_tcpip.inet_debug})
+            #define IP_DEBUG (${config.middleware.lwip_tcpip.ip_debug})
+            #define IP_REASS_DEBUG (${config.middleware.lwip_tcpip.ip_reass_debug})
+            #define RAW_DEBUG (${config.middleware.lwip_tcpip.raw_debug})
+            #define MEM_DEBUG (${config.middleware.lwip_tcpip.mem_debug})
+            #define MEMP_DEBUG (${config.middleware.lwip_tcpip.memp_debug})
+            #define SYS_DEBUG (${config.middleware.lwip_tcpip.sys_debug})
+            #define TIMERS_DEBUG (${config.middleware.lwip_tcpip.timers_debug})
+            #define TCP_DEBUG (${config.middleware.lwip_tcpip.tcp_debug})
+            #define TCP_INPUT_DEBUG (${config.middleware.lwip_tcpip.tcp_input_debug})
+            #define TCP_FR_DEBUG (${config.middleware.lwip_tcpip.tcp_fr_debug})
+            #define TCP_RTO_DEBUG (${config.middleware.lwip_tcpip.tcp_rto_debug})
+            #define TCP_CWND_DEBUG (${config.middleware.lwip_tcpip.tcp_cwnd_debug})
+            #define TCP_WND_DEBUG (${config.middleware.lwip_tcpip.tcp_wnd_debug})
+            #define TCP_OUTPUT_DEBUG (${config.middleware.lwip_tcpip.tcp_output_debug})
+            #define TCP_RST_DEBUG (${config.middleware.lwip_tcpip.tcp_rst_debug})
+            #define TCP_QLEN_DEBUG (${config.middleware.lwip_tcpip.tcp_qlen_debug})
+            #define UDP_DEBUG (${config.middleware.lwip_tcpip.udp_debug})
+            #define TCPIP_DEBUG (${config.middleware.lwip_tcpip.tcpip_debug})
+            #define SLIP_DEBUG (${config.middleware.lwip_tcpip.slip_debug})
+            #define DHCP_DEBUG (${config.middleware.lwip_tcpip.dhcp_debug})
+            #define AUTOIP_DEBUG (${config.middleware.lwip_tcpip.autoip_debug})
+            #define ACD_DEBUG (${config.middleware.lwip_tcpip.acd_debug})
+            #define DNS_DEBUG (${config.middleware.lwip_tcpip.dns_debug})
+            #define IP6_DEBUG (${config.middleware.lwip_tcpip.ip6_debug})
+            #define DHCP6_DEBUG (${config.middleware.lwip_tcpip.dhcp6_debug})
+            #define LWIP_TESTMODE (${config.middleware.lwip_tcpip.lwip_testmode})
+            #define LWIP_PERF (${config.middleware.lwip_tcpip.lwip_perf})
+            #define LWIP_SUPPORT_CUSTOM_PBUF (${config.middleware.lwip_tcpip.lwip_support_custom_pbuf})
+
+#ifdef __cplusplus
+}
+#endif
+        </content>
+
+    </config>
+    <config id="config.middleware.lwip_tcpip_cc" path="lwip/arch/cc.h" version="0">
+        <property default="bsp_api.h" description="Add a path to your custom header file. It can be used to define additional configurations." display="Platform abstraction|Custom config" id="config.middleware.lwip_tcpip.custom_config">
+            <export>eval('' +
+                'var input = "${config.middleware.lwip_tcpip.custom_config}";' +
+                'if (input != "")' +
+                '{' +
+                '    input = \'#include "\' + input + \'"\';' +
+                '}' +
+                '    input' +
+                '')</export>
+        </property>
+        <property default="do {FSP_LOG_PRINT(x); BSP_CFG_HANDLE_UNRECOVERABLE_ERROR(0);} while (0)" display="Platform abstraction|Platform assert" id="config.middleware.lwip_tcpip.platform_assert" description="Override this if you have a faster implementation at hand than the one included in your C library.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${config.middleware.lwip_tcpip.platform_assert}")</constraint>
+        </property>
+        <property default="(u32_t) rand()" display="Platform abstraction|Rand" id="config.middleware.lwip_tcpip.rand" description="Override this if you have a faster implementation at hand than the one included in your C library.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${config.middleware.lwip_tcpip.rand}")</constraint>
+        </property>
+         <content>
+
+${config.middleware.lwip_tcpip.custom_config}
+
+#define LWIP_PLATFORM_ASSERT(x)    ${config.middleware.lwip_tcpip.platform_assert}
+#define LWIP_RAND()                (${config.middleware.lwip_tcpip.rand})
+
+#if defined(__ICCARM__)
+ #define PACK_STRUCT_BEGIN    __packed
+#endif
+
+        </content>
+    </config>
+    <module id="module.middleware.lwip_tcpip" display="Networking|lwIP tcpip (lwip_tcpip)" config="config.middleware.lwip_tcpip" version="0" visible="true" url="https://www.nongnu.org/lwip/2_1_x/index.html">
+        <constraint display="Can't enable SYS_LIGHTWEIGHT_PROT without RTOS.">
+            ("${config.middleware.lwip_tcpip.no_sys}" === "config.middleware.lwip_tcpip.no_sys.disabled")
+            || ("${config.middleware.lwip_tcpip.sys_lightweight_prot}" === "config.middleware.lwip_tcpip.sys_lightweight_prot.disabled")
+        </constraint>
+        <constraint display="Can't enable LWIP_NETCONN without RTOS.">
+            ("${config.middleware.lwip_tcpip.no_sys}" === "config.middleware.lwip_tcpip.no_sys.disabled")
+            || ("${config.middleware.lwip_tcpip.lwip_netconn}" === "config.middleware.lwip_tcpip.lwip_netconn.disabled")
+        </constraint>
+        <constraint display="Can't enable LWIP_SOCKET without RTOS.">
+            ("${config.middleware.lwip_tcpip.no_sys}" === "config.middleware.lwip_tcpip.no_sys.disabled")
+            || ("${config.middleware.lwip_tcpip.lwip_socket}" === "config.middleware.lwip_tcpip.lwip_socket.disabled")
+        </constraint>
+        <constraint display="Pbuf pool size is larger than IP reass max pbufs">
+            (("${config.middleware.lwip_tcpip.lwip_ipv4}" === "config.middleware.lwip_tcpip.lwip_ipv4.disabled")
+            || ("${config.middleware.lwip_tcpip.lwip_ipv6}" === "config.middleware.lwip_tcpip.lwip_ipv6.disabled"))
+            &amp;&amp; ("${config.middleware.lwip_tcpip.pbuf_pool_size}" &gt; "${config.middleware.lwip_tcpip.ip_reass_max_pbufs}")
+            || ("${config.middleware.lwip_tcpip.pbuf_pool_size}" &gt; (2 * "${config.middleware.lwip_tcpip.ip_reass_max_pbufs}"))
+        </constraint>
+        <constraint display="rm_lwip_ether is only available when applying lwip_netif_remove_callback, lwip_support_custom_pbufB, and lwip_arp.">
+            ("1" != "${interface.middleware.lwip_ether}")
+            || (("${config.middleware.lwip_tcpip.lwip_netif_remove_callback}" === "config.middleware.lwip_tcpip.lwip_netif_remove_callback.enabled")
+            &amp;&amp; ("${config.middleware.lwip_tcpip.lwip_support_custom_pbuf}" === "config.middleware.lwip_tcpip.lwip_support_custom_pbuf.enabled")
+            &amp;&amp; ("${config.middleware.lwip_tcpip.lwip_arp}" === "config.middleware.lwip_tcpip.lwip_arp.enabled"))
+        </constraint>
+        <constraint display="rm_lwip_ether is only available when alignment is equal to 32byte.">
+            ("1" != "${interface.middleware.lwip_ether}")
+            || ("${config.middleware.lwip_tcpip.mem_alignment}" === "32")
+        </constraint>
+        <constraint display="rm_lwip_sys_baremetal is only available when NO_SYS and lwip_timers_custom is enabled.">
+            ("1" != "${interface.middleware.lwip_sys_baremetal}")
+            || (("${config.middleware.lwip_tcpip.no_sys}" === "config.middleware.lwip_tcpip.no_sys.enabled")
+            &amp;&amp; ("${config.middleware.lwip_tcpip.lwip_timers_custom}" === "config.middleware.lwip_tcpip.lwip_timers_custom.enabled"))
+        </constraint>
+        <constraint display="rm_lwip_sys_freertos is only available when NO_SYS is not enabled">
+            ("1" != "${interface.middleware.lwip_sys_freertos}")
+            || ("${config.middleware.lwip_tcpip.no_sys}" === "config.middleware.lwip_tcpip.no_sys.disabled")
+        </constraint>
+        <constraint display="LwIP does not work by itself. Please add LwIP system FreeRTOS port.">
+            ("1" == "${interface.middleware.lwip_sys_port}")
+        </constraint>
+        <requires id="module.middleware.lwip_tcp_on_lwip.requires.lwip_tcpip_nic" interface="interface.middleware.lwip_nic_driver" display="Add lwip nic Driver"/>
+        <requires id="module.middleware.lwip_tcp_on_lwip.requires.lwip_tcpip_sys" interface="interface.middleware.lwip_sys_port" display="Add lwip sys port Driver" find="false"/>
+        <provides interface="interface.lwip.tcpip"/>
+        <property default="" id="module.middleware.lwip_ether.name_upper">
+            <export>"${module.middleware.lwip_tcp_on_lwip.requires.lwip_tcpip_nic::module.middleware.lwip_ether.name}".toUpperCase()</export>
+        </property>
+    </module>
+    <module id="module.middleware.lwip_tcpip_cc" display="Networking|lwIP Compiler and Platform abstraction" config="config.middleware.lwip_tcpip_cc" version="0" visible="true" url="https://www.nongnu.org/lwip/2_1_x/group__compiler__abstraction.html">
+    </module>
+    <developerSupport>
+        <api version="1">
+            <platform id="fsp" max="" min="1.1.0"/>
+            <moduleRef id="module.middleware.lwip_tcpip"/>
+            <description><![CDATA[<form><p><span color="header" font="header">Overview</span></p><p>lwIP tcpip quick examples.</p></form>]]></description>
+            <function display="Network interface setup" id="lwip_tcpip_setup_example">
+                <description><![CDATA[<form><p>This function provides a quick example for how to setup lwIP tcpip connection.</p></form>]]></description>
+            </function>
+            <function display="Initializing lwIP core" id="lwip_init_core_example">
+                <description><![CDATA[<form><p>This function provides a quick example for how to setup lwIP tcpip initalizing core.</p></form>]]></description>
+            </function>
+            <function display="Network interface Tear Down" id="lwip_tcpip_teardown_example">
+                <description><![CDATA[<form><p>This function provides a quick example for how to Tear Down lwIP tcpip connection.</p></form>]]></description>
+            </function>
+        </api>
+        <template category="function_call" display="Call lwIP tcpip Network interface Setup Example" id="module.middleware.lwip_tcpip.lwip_tcpip_setup_example" version="1">
+            <platform id="fsp" max="" min="1.1.0"/>
+            <moduleRef id="module.middleware.lwip_tcpip">
+                <function id="lwip_tcpip_setup_example"/>
+            </moduleRef>
+            <content>
+/* Network interface setup example for lwip_tcpip.*/
+#define ${lwip_ether_name_upper:raProperty(module.middleware.lwip_ether.name_upper)}_IPADDR1  (192)
+#define ${lwip_ether_name_upper}_IPADDR2  (168)
+#define ${lwip_ether_name_upper}_IPADDR3  (10)
+#define ${lwip_ether_name_upper}_IPADDR4  (4)
+#define ${lwip_ether_name_upper}_NETMASK1 (255)
+#define ${lwip_ether_name_upper}_NETMASK2 (255)
+#define ${lwip_ether_name_upper}_NETMASK3 (255)
+#define ${lwip_ether_name_upper}_NETMASK4 (0)
+#define ${lwip_ether_name_upper}_GW1      (192)
+#define ${lwip_ether_name_upper}_GW2      (168)
+#define ${lwip_ether_name_upper}_GW3      (10)
+#define ${lwip_ether_name_upper}_GW4      (1)
+
+struct netif     g_${lwip_ether_name:raProperty(module.middleware.lwip_ether.name)}_netif;
+
+void ${lwip_ether_name}_netif_setup(void);
+
+/* Network interface setup for lwip_tcpip. */
+void ${lwip_ether_name}_netif_setup(void)
+{
+    ip_addr_t ipaddr;
+    ip_addr_t netmask;
+    ip_addr_t gw;
+
+    /* Set ip address of the board. */
+    IP4_ADDR(&amp;ipaddr, ${lwip_ether_name_upper}_IPADDR1, ${lwip_ether_name_upper}_IPADDR2, ${lwip_ether_name_upper}_IPADDR3, ${lwip_ether_name_upper}_IPADDR4);
+    IP4_ADDR(&amp;netmask, ${lwip_ether_name_upper}_NETMASK1, ${lwip_ether_name_upper}_NETMASK2, ${lwip_ether_name_upper}_NETMASK3, ${lwip_ether_name_upper}_NETMASK4);
+    IP4_ADDR(&amp;gw, ${lwip_ether_name_upper}_GW1, ${lwip_ether_name_upper}_GW2, ${lwip_ether_name_upper}_GW3, ${lwip_ether_name_upper}_GW4);
+
+    /* Initialize netif. Please pass rm_lwip_ether_init() function and the instance of rm_lwip_ether to netif_add(). */
+    netif_add(&amp;g_${lwip_ether_name}_netif, &amp;ipaddr, &amp;netmask, &amp;gw, &amp;${lwip_ether_name}_instance, rm_lwip_ether_init, netif_input);
+
+    /* Set netif as default and enable */
+    netif_set_default(&amp;g_${lwip_ether_name}_netif);
+    netif_set_up(&amp;g_${lwip_ether_name}_netif);
+    netif_set_link_up(&amp;g_${lwip_ether_name}_netif);
+}
+            </content>
+        </template>
+        <template category="function_call" display="Core initial Example" id="module.lwip.core.lwip_init_core_example" version="1">
+            <platform id="fsp" max="" min="1.1.0"/>
+            <moduleRef id="module.middleware.lwip_tcpip">
+                <function id="lwip_init_core_example"/>
+            </moduleRef>
+            <content>
+/* Quick tear down example for initializing lwIP core.
+*  Please use this example after calling quick setup example
+*/
+void lwip_core_setup(void);
+
+/* Quick tear down example for initializing lwIP core. */
+void lwip_core_setup(void)
+{
+    /* Initializing lwIP core. */
+#if NO_SYS
+    lwip_init();
+#else
+    tcpip_init(NULL, NULL);
+#endif
+}
+            </content>
+        </template>
+        <template category="function_call" display="Call lwIP tcpip Network interface Tear Down Example" id="module.middleware.lwip_tcpip.lwip_tcpip_teardown_example" version="1">
+            <platform id="fsp" max="" min="1.1.0"/>
+            <moduleRef id="module.middleware.lwip_tcpip">
+                <function id="lwip_tcpip_teardown_example"/>
+            </moduleRef>
+            <content>
+/* Quick tear down example for network interface.
+*/
+void ${lwip_ether_name:raProperty(module.middleware.lwip_ether.name)}_netif_teardown(void);
+
+/* Quick tear down example for network interface. */
+void ${lwip_ether_name}_netif_teardown(void)
+{
+    /* Tear Down netif. */
+    netif_remove(&amp;g_${lwip_ether_name}_netif);
+}
+            </content>
+        </template>
+    </developerSupport>
+</raModuleDescription>

@@ -1,0 +1,113 @@
+﻿<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.driver.rtc_c" path="fsp_cfg/r_rtc_c_cfg.h" version="0">
+        <property default="config.driver.rtc.param_checking_enable.bsp" display="Parameter Checking" id="config.driver.rtc.param_checking_enable" description="If selected code for parameter checking is included in the build.">
+            <option display="Default (BSP)" id="config.driver.rtc.param_checking_enable.bsp" value="(BSP_CFG_PARAM_CHECKING_ENABLE)"/>
+            <option display="Enabled" id="config.driver.rtc.param_checking_enable.enabled" value="(1)"/>
+            <option display="Disabled" id="config.driver.rtc.param_checking_enable.disabled" value="(0)"/>
+        </property>
+        <content>
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#define RTC_C_CFG_PARAM_CHECKING_ENABLE ${config.driver.rtc.param_checking_enable}
+
+#ifdef __cplusplus
+}
+#endif
+        </content>
+    </config>
+    <module config="config.driver.rtc_c" display="Timers|${module.driver.rtc.name} Realtime Clock (r_rtc_c)" id="module.driver.rtc_on_rtc_c" version="1" url="group___r_t_c___c.html">
+        <constraint display="A callback function is required when interrupts are enabled.">
+          ("${module.driver.rtc.p_callback}" != "NULL") || ("${module.driver.rtc.interrupt_ipl}" == "_disabled")
+        </constraint>
+        <constraint display="Unique name required for each instance">
+            "${interface.driver.rtc.${module.driver.rtc.name}}" === "1"
+        </constraint>
+        <constraint display="Requires RTC Peripheral">
+          "${interface.mcu.rtc_c}" === "1"
+        </constraint>
+        <constraint display="Requires FSXP to be enabled on the Clocks tab.">
+             testExists("${board.clock.peripheral.rtc_c}") &amp;&amp; (Number("${board.clock.peripheral.rtc_c}") &gt; 0)
+        </constraint>
+        <requires id="module.driver.rtc_on_rtc_c.requires.rtc" interface="interface.mcu.rtc_c" visible="false" display="Requires RTC Peripheral" />
+        <provides interface="interface.driver.rtc" />
+        <provides interface="interface.driver.rtc_on_rtc_c" />
+        <provides interface="interface.driver.rtc.${module.driver.rtc.name}" />
+        <provides interface="interface.peripheral.rtc_c" />
+        <property default="g_rtc${_instance}" display="Name" id="module.driver.rtc.name" description="Module name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.rtc.name}")</constraint>
+            <signal event="event.rtc.alarm.or.period" />
+        </property>
+        <property default="module.driver.rtc.clock_source.clock_source_fsxp" display="Operation clock" id="module.driver.rtc.subclock_division" description="Select the RTC operation clock. If using 'SOSC/256' as the source for RTCCLK, the FSXP source cannot be LOCO in Clock tab.">
+            <option display="FSXP" id="module.driver.rtc.clock_source.clock_source_fsxp" value="RTC_CLOCK_SOURCE_SUBCLOCK_DIV_BY_1"/>
+            <option display="SOSC/256 (128 Hz)" id="module.driver.rtc.clock_source.clock_source_fclk128hz" value="RTC_CLOCK_SOURCE_SUBCLOCK_DIV_BY_256"/>
+        </property>
+        <property default="NULL" display="Callback" id="module.driver.rtc.p_callback" description="A user callback function can be provided. If this callback function is provided, it will be called from the interrupt service routine (ISR).">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.rtc.p_callback}")</constraint>
+        </property>
+        <property default="" display="Interrupt Priority" id="module.driver.rtc.interrupt_ipl" description="Select the period or alarm interrupt priority.">
+            <select enum="enum.mcu.nvic.priorities.optional"/>
+            <interrupt event="event.rtc.alarm.or.period" isr="rtc_c_alarm_prd_or_alm_isr"/>
+        </property>
+        <peripheral name="RTC" component="rtc0" />
+        <!-- For MCU's whose pinmapping files have been generated with MPC Designer Tool -->
+        <peripheral name="RTC" component="rtc" />
+        <symbol id="symbol.driver.rtc.name" value="${module.driver.rtc.name}"/>
+        <symbol id="symbol.driver.rtc.cfg" value="${module.driver.rtc.name}_cfg"/>
+        <symbol id="symbol.driver.rtc.ctrl" value="${module.driver.rtc.name}_ctrl"/>
+        <symbol id="symbol.driver.rtc.err_cfg" value="${module.driver.rtc.name}_err_cfg"/>
+        <header>
+/* RTC Instance. */
+extern const rtc_instance_t ${module.driver.rtc.name};
+
+/** Access the RTC instance using these structures when calling API functions directly (::p_api is not used). */
+extern rtc_c_instance_ctrl_t ${module.driver.rtc.name}_ctrl;
+extern const rtc_cfg_t ${module.driver.rtc.name}_cfg;
+extern const rtc_c_extended_cfg ${module.driver.rtc.name}_cfg_extend;
+
+#ifndef ${module.driver.rtc.p_callback}
+void ${module.driver.rtc.p_callback}(rtc_callback_args_t * p_args);
+#endif
+        </header>
+        <includes>#include &quot;r_rtc_c.h&quot;
+#include &quot;r_rtc_api.h&quot;</includes>
+        <declarations>
+rtc_c_instance_ctrl_t ${module.driver.rtc.name}_ctrl;
+
+/** RTC_C extended configuration */
+const rtc_c_extended_cfg ${module.driver.rtc.name}_cfg_extend =
+{
+    .clock_source_div          = ${module.driver.rtc.subclock_division},
+};
+
+const rtc_cfg_t ${module.driver.rtc.name}_cfg =
+{
+    .p_err_cfg               = NULL,
+    .p_callback              = ${module.driver.rtc.p_callback},
+    .p_context               = NULL,
+    .periodic_ipl            = ${module.driver.rtc.interrupt_ipl},
+    .alarm_irq               = FSP_INVALID_VECTOR,
+#if defined(VECTOR_NUMBER_RTC_ALARM_OR_PERIOD)
+    .periodic_irq            = VECTOR_NUMBER_RTC_ALARM_OR_PERIOD,
+#else
+    .periodic_irq            = FSP_INVALID_VECTOR,
+#endif
+.p_extend                = &amp;${module.driver.rtc.name}_cfg_extend,
+};
+/* Instance structure to use this module. */
+const rtc_instance_t ${module.driver.rtc.name} =
+{
+    .p_ctrl        = &amp;${module.driver.rtc.name}_ctrl,
+    .p_cfg         = &amp;${module.driver.rtc.name}_cfg,
+    .p_api         = &amp;g_rtc_on_rtc_c
+};
+        </declarations>
+        <api configurable="true">
+            <file>ra/fsp/inc/instances/r_rtc_c.h</file>
+            <file>ra/fsp/inc/api/r_cgc_api.h</file>
+            <file>ra/fsp/inc/api/r_rtc_api.h</file>
+        </api>
+    </module>
+</raModuleDescription>

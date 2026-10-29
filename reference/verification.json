@@ -1,0 +1,31 @@
+{
+  "checks": {
+    "baseline_additions": {
+      "details": {
+        "only_original_metadata_added": true,
+        "untracked_files_verified": 1019
+      },
+      "passed": true
+    },
+    "baseline_sources": {
+      "details": {
+        "commit": "5e8fbb10c752e16272790bd3a2587485d0377835",
+        "tracked_files_verified": 3135,
+        "version": "5.9.0"
+      },
+      "passed": true
+    },
+    "original_metadata": {
+      "details": {
+        "archive_sha256": "99c4abae6239a68171fcbff86070971f591f0a8945e90a50eb07d87843bee363",
+        "metadata_files_verified": 1019,
+        "packs": 158,
+        "version": "5.9.0",
+        "xml_entries_parsed": 1019
+      },
+      "passed": true
+    }
+  },
+  "scope": "FSP 5.9.0 baseline integrity only; no solution, build or hardware validation",
+  "success": true
+}

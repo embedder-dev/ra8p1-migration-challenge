@@ -1,0 +1,193 @@
+﻿<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.driver.dmac" path="fsp_cfg/r_dmac_cfg.h" version="0">
+        <property default="config.driver.dmac.param_checking_enable.bsp" display="Parameter Checking" id="config.driver.dmac.param_checking_enable" description="If selected code for parameter checking is included in the build.">
+            <option display="Default (BSP)" id="config.driver.dmac.param_checking_enable.bsp" value="(BSP_CFG_PARAM_CHECKING_ENABLE)"/>
+            <option display="Enabled" id="config.driver.dmac.param_checking_enable.enabled" value="(1)"/>
+            <option display="Disabled" id="config.driver.dmac.param_checking_enable.disabled" value="(0)"/>
+        </property>
+        <content>
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#define DMAC_CFG_PARAM_CHECKING_ENABLE ${config.driver.dmac.param_checking_enable}
+
+#ifdef __cplusplus
+}
+#endif
+        </content>
+    </config>
+    <module config="config.driver.dmac" display="Transfer|${module.driver.transfer.name} Transfer (r_dmac) ${module.driver.transfer.activation_event}" id="module.driver.transfer_on_dmac" version="1" url="group___d_m_a_c.html">
+        <constraint display="'Number of Transfers' must be a valid non negative integer between 0 and 65535 in 'Normal Mode'.">
+            ((testInteger("${module.driver.transfer.length}") &amp;&amp; ("${module.driver.transfer.length}" &gt;= 0) &amp;&amp; ("${module.driver.transfer.length}" &lt;= 65535)) || (("${module.driver.transfer.mode}") != ("module.driver.transfer.mode.mode_normal")))
+        </constraint>
+        <constraint display="'Number of Transfers' must be a valid non negative integer with a maximum configurable value of 1023 in 'Repeat Mode'.">
+            ((testInteger("${module.driver.transfer.length}") &amp;&amp; ("${module.driver.transfer.length}" &gt;= 0) &amp;&amp; ("${module.driver.transfer.length}" &lt;= 1023)) || (("${module.driver.transfer.mode}") != ("module.driver.transfer.mode.mode_repeat")))
+        </constraint>
+        <constraint display="'Number of Transfers' must be a valid non negative integer with a maximum configurable value of 1023 in 'Block Mode'.">
+            ((testInteger("${module.driver.transfer.length}") &amp;&amp; ("${module.driver.transfer.length}" &gt;= 0) &amp;&amp; ("${module.driver.transfer.length}" &lt;= 1023)) || (("${module.driver.transfer.mode}") != ("module.driver.transfer.mode.mode_block")))
+        </constraint>
+        <!-- This constraint cannot be used because the ADC w/DMAC module needs to set this to a macro value due to limitations in how requires values can be translated between modules. -->
+        <!-- <constraint display="'Number of Transfers' must be a valid non negative integer with a maximum configurable value of 1023 in 'Repeat Block Mode'.">
+            ((testInteger("${module.driver.transfer.length}") &amp;&amp; ("${module.driver.transfer.length}" &gt;= 0) &amp;&amp; ("${module.driver.transfer.length}" &lt;= 1023)) || (("${module.driver.transfer.mode}") != ("module.driver.transfer.mode.mode_repeat_block")))
+        </constraint> -->
+        <constraint display="'Number of Blocks' must be a valid non negative integer with a maximum configurable value of 65535 in 'Repeat Mode'.">
+            ((testInteger("${module.driver.transfer.num_blocks}") &amp;&amp; ("${module.driver.transfer.num_blocks}" &gt;= 0) &amp;&amp; ("${module.driver.transfer.num_blocks}" &lt;= 65535)) || (("${module.driver.transfer.mode}") != ("module.driver.transfer.mode.mode_repeat")))
+        </constraint>
+        <constraint display="'Number of Blocks' must be a valid non negative integer with a maximum configurable value of 65535 in 'Block Mode'.">
+            ((testInteger("${module.driver.transfer.num_blocks}") &amp;&amp; ("${module.driver.transfer.num_blocks}" &gt;= 0) &amp;&amp; ("${module.driver.transfer.num_blocks}" &lt;= 65535)) || (("${module.driver.transfer.mode}") != ("module.driver.transfer.mode.mode_block")))
+        </constraint>
+        <constraint display="'Number of Blocks' must be a valid non negative integer with a maximum configurable value of 65535 in 'Repeat Block Mode'.">
+            ((testInteger("${module.driver.transfer.num_blocks}") &amp;&amp; ("${module.driver.transfer.num_blocks}" &gt;= 0) &amp;&amp; ("${module.driver.transfer.num_blocks}" &lt;= 65535)) || (("${module.driver.transfer.mode}") != ("module.driver.transfer.mode.mode_repeat_block")))
+        </constraint>
+        <constraint display="Interrupt Frequency setting invalid for Repeat-Block transfer Mode.">
+            ("${module.driver.transfer.mode}" != "module.driver.transfer.mode.mode_repeat_block") || ("${module.driver.transfer.interrupt}" != "module.driver.transfer.interrupt.interrupt_each")
+        </constraint>
+        <constraint display="Channel not available on selected MCU">
+            "${interface.mcu.dma_dmac.${module.driver.transfer.channel}}" === "1"
+        </constraint>
+        <constraint display="Unique name required for each instance">
+            "${interface.driver.transfer.${module.driver.transfer.name}}" === "1"
+        </constraint>
+        <constraint display="Requires DMAC peripheral">
+          "${interface.mcu.dma_dmac}" === "1"
+        </constraint>
+        <requires id="module.driver.transfer_on_dmac.requires.dmac" interface="interface.mcu.dma_dmac" visible="false" display="Requires DMAC peripheral" />
+        <provides interface="interface.peripheral.dtc_dmac" />
+        <provides interface="interface.peripheral.dmac${module.driver.transfer.channel}" />
+        <provides interface="interface.driver.transfer" />
+        <provides interface="interface.driver.transfer_on_dmac" />
+        <provides interface="interface.driver.transfer.${module.driver.transfer.name}" />
+        <provides interface="interface.driver.transfer_on_dmac.${module.driver.transfer.name}" />
+        <provides interface="interface.driver.transfer_on_dmac.${module.driver.transfer.channel}" />
+        <property default="g_transfer${_instance}" display="Name" id="module.driver.transfer.name" description="Module name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.transfer.name}")</constraint>
+        </property>
+        <property default="${_instance}" display="Channel" id="module.driver.transfer.channel" description="Specify the hardware channel.">
+            <constraint display="Value must be a non-negative integer">testInteger("${module.driver.transfer.channel}")  &amp;&amp; ("${module.driver.transfer.channel}" &gt;= 0)</constraint>
+            <signal event="event.dmac${module.driver.transfer.channel}.int" />
+        </property>
+        <property default="module.driver.transfer.mode.mode_normal" display="Mode" id="module.driver.transfer.mode" description="Select the transfer mode. Normal: One transfer per activation, transfer ends after Number of Transfers; Repeat: One transfer per activation, Repeat Area address reset after Number of Transfers, transfer ends after Number of Blocks; Block: Number of Blocks per activation, Repeat Area address reset after Number of Transfers, transfer ends after Number of Blocks.">
+            <select enum="enum.mcu.dmac.transfer_mode" />
+        </property>
+        <property default="module.driver.transfer.size.size_2_byte" display="Transfer Size" id="module.driver.transfer.size" description="Select the transfer size.">
+            <option display="1 Byte" id="module.driver.transfer.size.size_1_byte" value="TRANSFER_SIZE_1_BYTE"/>
+            <option display="2 Bytes" id="module.driver.transfer.size.size_2_byte" value="TRANSFER_SIZE_2_BYTE"/>
+            <option display="4 Bytes" id="module.driver.transfer.size.size_4_byte" value="TRANSFER_SIZE_4_BYTE"/>
+        </property>
+        <property default="module.driver.transfer.dest_addr_mode.addr_mode_fixed" display="Destination Address Mode" id="module.driver.transfer.dest_addr_mode" description="Select the address mode for the destination.">
+            <option display="Fixed" id="module.driver.transfer.dest_addr_mode.addr_mode_fixed" value="TRANSFER_ADDR_MODE_FIXED"/>
+            <option display="Offset addition" id="module.driver.transfer.dest_addr_mode.addr_mode_offset" value="TRANSFER_ADDR_MODE_OFFSET"/>
+            <option display="Incremented" id="module.driver.transfer.dest_addr_mode.addr_mode_incremented" value="TRANSFER_ADDR_MODE_INCREMENTED"/>
+            <option display="Decremented" id="module.driver.transfer.dest_addr_mode.addr_mode_decremented" value="TRANSFER_ADDR_MODE_DECREMENTED"/>
+        </property>
+        <property default="module.driver.transfer.src_addr_mode.addr_mode_fixed" display="Source Address Mode" id="module.driver.transfer.src_addr_mode" description="Select the address mode for the source.">
+            <option display="Fixed" id="module.driver.transfer.src_addr_mode.addr_mode_fixed" value="TRANSFER_ADDR_MODE_FIXED"/>
+            <option display="Offset addition" id="module.driver.transfer.src_addr_mode.addr_mode_offset" value="TRANSFER_ADDR_MODE_OFFSET"/>
+            <option display="Incremented" id="module.driver.transfer.src_addr_mode.addr_mode_incremented" value="TRANSFER_ADDR_MODE_INCREMENTED"/>
+            <option display="Decremented" id="module.driver.transfer.src_addr_mode.addr_mode_decremented" value="TRANSFER_ADDR_MODE_DECREMENTED"/>
+        </property>
+        <property default="module.driver.transfer.repeat_area.repeat_area_source" display="Repeat Area (Unused in Normal Mode)" id="module.driver.transfer.repeat_area" description="Select the repeat area. Either the source or destination address resets to its initial value after completing Number of Transfers in Repeat or Block mode.">
+            <option display="Destination" id="module.driver.transfer.repeat_area.repeat_area_destination" value="TRANSFER_REPEAT_AREA_DESTINATION"/>
+            <option display="Source" id="module.driver.transfer.repeat_area.repeat_area_source" value="TRANSFER_REPEAT_AREA_SOURCE"/>
+        </property>
+        <property default="NULL" id="module.driver.transfer.p_dest" description="Specify the transfer destination pointer." />
+        <property default="NULL" id="module.driver.transfer.p_src" description="Specify the transfer source pointer." />
+        <property default="1" display="Number of Transfers" id="module.driver.transfer.length" description="Specify the number of transfers for repeat and normal mode or block size for repeat-block transfer mode.">
+            <constraint display="Value must be a non-negative integer">testInteger("${module.driver.transfer.length}")  &amp;&amp; ("${module.driver.transfer.length}" &gt;= 0)</constraint>
+        </property>
+        <property default="0" display="Number of Blocks (Valid only in Repeat,Block or Repeat-Block Mode)" id="module.driver.transfer.num_blocks" description="Specify the number of blocks to transfer in Repeat,Block or Repeat-Block mode.">
+            <constraint display="Value must be a non-negative integer">testInteger("${module.driver.transfer.num_blocks}") &amp;&amp; ("${module.driver.transfer.num_blocks}" &gt;= 0)</constraint>
+        </property>
+        <property default="" display="Activation Source" id="module.driver.transfer.activation_event" destination="destination.dmac" description="Select the DMAC transfer start event. If no ELC event is chosen then software start can be used." >
+            <select enum="enum.elc_none" />
+            <select enum="scope.dmac" />
+        </property>
+        <property default="NULL" display="Callback" id="module.driver.transfer.p_callback" description="A user callback that is called at the end of the transfer.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.transfer.p_callback}")</constraint>
+        </property>
+        <property default="NULL" id="module.driver.transfer.p_context" description="Pointer to the context structure passed through the callback argument."/>
+        <property default="" display="Transfer End Interrupt Priority" id="module.driver.transfer.ipl" description="Select the transfer end interrupt priority.">
+            <select enum="enum.mcu.nvic.priorities.optional"/>
+            <interrupt event="event.dmac${module.driver.transfer.channel}.int" isr="dmac_int_isr"/>
+        </property>
+        <property default="module.driver.transfer.interrupt.interrupt_end" display="Interrupt Frequency" id="module.driver.transfer.interrupt" description="Select to have interrupt after each transfer or after last transfer.">
+            <option display="Interrupt after all transfers have completed" id="module.driver.transfer.interrupt.interrupt_end" value="TRANSFER_IRQ_END"/>
+            <option display="Interrupt after each block, or repeat size is transfered" id="module.driver.transfer.interrupt.interrupt_each" value="TRANSFER_IRQ_EACH"/>
+        </property>
+        <property default="1" display="Offset value (Valid only when address mode is \'Offset\')" id="module.driver.transfer.offset" description="Offset value is added to the address after each transfer.">
+            <constraint display="Value must be a 24 bit signed integer.">testInteger("${module.driver.transfer.offset}") &amp;&amp; ("${module.driver.transfer.offset}" &gt;= -8388608) &amp;&amp; ("${module.driver.transfer.offset}" &lt;= 8388607)</constraint>
+        </property>
+        <property default="1" display="Source Buffer Size" id="module.driver.transfer.src.buffer" description="Specify the size of whole source buffer (valid only for Repeat-Block transfer mode with source address update mode other than offset addition).">
+            <constraint display="Value must be a non-negative integer with a maximum configurable value of 65535.">testInteger("${module.driver.transfer.src.buffer}")  &amp;&amp; ("${module.driver.transfer.src.buffer}" &lt;= 65535) &amp;&amp; ("${module.driver.transfer.src.buffer}" &gt;= 0)</constraint>
+        </property>
+        <peripheral name="DMA_DMAC${module.driver.transfer.channel}" component="" />
+        <header>
+/* Transfer on DMAC Instance. */
+extern const transfer_instance_t ${module.driver.transfer.name};
+
+/** Access the DMAC instance using these structures when calling API functions directly (::p_api is not used). */
+extern dmac_instance_ctrl_t ${module.driver.transfer.name}_ctrl;
+extern const transfer_cfg_t ${module.driver.transfer.name}_cfg;
+
+#ifndef ${module.driver.transfer.p_callback}
+void ${module.driver.transfer.p_callback}(transfer_callback_args_t * p_args);
+#endif
+        </header>
+        <includes>
+#include &quot;r_dmac.h&quot;
+#include &quot;r_transfer_api.h&quot;
+        </includes>
+        <declarations>
+
+dmac_instance_ctrl_t ${module.driver.transfer.name}_ctrl;
+transfer_info_t ${module.driver.transfer.name}_info =
+{
+    .transfer_settings_word_b.dest_addr_mode = ${module.driver.transfer.dest_addr_mode},
+    .transfer_settings_word_b.repeat_area    = ${module.driver.transfer.repeat_area},
+    .transfer_settings_word_b.irq            = ${module.driver.transfer.interrupt},
+    .transfer_settings_word_b.chain_mode     = TRANSFER_CHAIN_MODE_DISABLED,
+    .transfer_settings_word_b.src_addr_mode  = ${module.driver.transfer.src_addr_mode},
+    .transfer_settings_word_b.size           = ${module.driver.transfer.size},
+    .transfer_settings_word_b.mode           = ${module.driver.transfer.mode},
+    .p_dest                                  = (void *) ${module.driver.transfer.p_dest},
+    .p_src                                   = (void const *) ${module.driver.transfer.p_src},
+    .num_blocks                              = ${module.driver.transfer.num_blocks},
+    .length                                  = ${module.driver.transfer.length},
+};
+const dmac_extended_cfg_t ${module.driver.transfer.name}_extend =
+{
+    .offset              = ${module.driver.transfer.offset},
+    .src_buffer_size     = ${module.driver.transfer.src.buffer},
+#if defined(VECTOR_NUMBER_DMAC${module.driver.transfer.channel}_INT)
+    .irq                 = VECTOR_NUMBER_DMAC${module.driver.transfer.channel}_INT,
+#else
+    .irq                 = FSP_INVALID_VECTOR,
+#endif
+    .ipl                 = ${module.driver.transfer.ipl},
+    .channel             = ${module.driver.transfer.channel},
+    .p_callback          = ${module.driver.transfer.p_callback},
+    .p_context           = ${module.driver.transfer.p_context},
+    .activation_source   = ELC_EVENT_${module.driver.transfer.activation_event},
+};
+const transfer_cfg_t ${module.driver.transfer.name}_cfg =
+{
+    .p_info              = &amp;${module.driver.transfer.name}_info,
+    .p_extend            = &amp;${module.driver.transfer.name}_extend,
+};
+/* Instance structure to use this module. */
+const transfer_instance_t ${module.driver.transfer.name} =
+{
+    .p_ctrl        = &amp;${module.driver.transfer.name}_ctrl,
+    .p_cfg         = &amp;${module.driver.transfer.name}_cfg,
+    .p_api         = &amp;g_transfer_on_dmac
+};
+
+        </declarations>
+        <api configurable="true">
+            <file>ra/fsp/inc/instances/r_dmac.h</file>
+            <file>ra/fsp/inc/api/r_transfer_api.h</file>
+        </api>
+    </module>
+</raModuleDescription>

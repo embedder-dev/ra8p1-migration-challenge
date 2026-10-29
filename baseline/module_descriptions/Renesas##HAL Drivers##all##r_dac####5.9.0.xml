@@ -1,0 +1,261 @@
+﻿<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.driver.dac" path="fsp_cfg/r_dac_cfg.h" version="0">
+        <property default="config.driver.dac.param_checking_enable.bsp" display="Parameter Checking" id="config.driver.dac.param_checking_enable" description="If selected code for parameter checking is included in the build.">
+            <option display="Default (BSP)" id="config.driver.dac.param_checking_enable.bsp" value="(BSP_CFG_PARAM_CHECKING_ENABLE)"/>
+            <option display="Enabled" id="config.driver.dac.param_checking_enable.enabled" value="(1)"/>
+            <option display="Disabled" id="config.driver.dac.param_checking_enable.disabled" value="(0)"/>
+        </property>
+        <content>
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#define DAC_CFG_PARAM_CHECKING_ENABLE ${config.driver.dac.param_checking_enable}
+
+#ifdef __cplusplus
+}
+#endif
+        </content>
+    </config>
+    <module config="config.driver.dac" display="Analog|${module.driver.dac.name} DAC (r_dac)" id="module.driver.dac_on_dac" version="1" url="group___d_a_c.html">
+        <constraint display="Unique name required for each instance">
+            "${interface.driver.dac.${module.driver.dac.name}}" === "1"
+        </constraint>
+        <constraint display="Requires DAC peripheral">
+          "${interface.mcu.dac12}" === "1"
+        </constraint>
+        <constraint display="Channel not available on selected MCU" id="module.driver.dac.channel_id.constraint">
+            eval('\n' +
+                 'var selected_channel = "${module.driver.dac.channel_id}"; \n' +
+                 'var temp_unit_count = "${module.driver.dac.unit_count}".split(".") \n' +
+                 'var temp_channels_per_unit = "${module.driver.dac.channels_per_unit}".split(".") \n' +
+                 'var available_channels = temp_unit_count[temp_unit_count.length -1] * temp_channels_per_unit[temp_channels_per_unit.length -1]; \n' +
+                 'output = selected_channel &lt; available_channels; \n' +
+                 'output\n' +
+                 '')
+        </constraint>
+        <constraint display="ELC signal source selection requires an ELC Driver">
+            (!"${module.driver.dac.elc_trigger}".startsWith("_signal.")) || ("1" === "${interface.driver.elc}")
+        </constraint>
+        <constraint display="Requires output amplifier disabled to use ELC trigger">
+            (("${module.driver.dac.elc_trigger}" === "_disabled") || ("${module.driver.dac.output_amplifier_enabled}" === "module.driver.dac.output_amplifier.disabled"))
+        </constraint>
+        <constraint display="Requires ADC synchronization feature to be disabled to use ELC trigger due to interference between D/A and A/D conversions">
+            (("${module.driver.dac.elc_trigger}" === "_disabled") || ("${module.driver.dac.ad_da_synchronized}" === "module.driver.dac.ad_da_synchronized.disabled"))
+        </constraint>
+        <requires id="module.driver.dac_on_dac.requires.dac" interface="interface.mcu.dac12" visible="false" display="Requires DAC peripheral" />
+        <provides interface="interface.driver.dac" />
+        <provides interface="interface.driver.dac_on_dac" />
+        <provides interface="interface.driver.dac.${module.driver.dac.name}" />
+        <provides interface="interface.peripheral.dac" />
+        <property default="g_dac${_instance}" display="Name" id="module.driver.dac.name" description="Module name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.dac.name}")</constraint>
+        </property>
+        <property default="0" display="Channel" id="module.driver.dac.channel_id" description="Specify the hardware channel.">
+            <constraint display="Value must be an integer greater than or equal to 0">testInteger("${module.driver.dac.channel_id}")  &amp;&amp; ("${module.driver.dac.channel_id}" &gt;= 0)</constraint>
+        </property>
+        <property default="" id="module.driver.dac.unit_count" description="Hidden Property - Total number of units for DAC12 on this MCU.">
+            <select enum="enum.mcu.dac12.unit.count" />
+        </property>
+        <property default="" id="module.driver.dac.channels_per_unit" description="Hidden Property - Total output channels per unit for DAC12 on this MCU.">
+            <select enum="enum.mcu.dac12.channels_per_unit" />
+        </property>
+        <property default="module.driver.dac.ad_da_synchronized.disabled" display="Synchronize with ADC" id="module.driver.dac.ad_da_synchronized" description="Enable DA/AD synchronization.">
+            <select enum="enum.mcu.dac.ad_da_synchronized" />
+        </property>
+        <property default="module.driver.dac.data_format.data_format_flush_right" display="Data Format" id="module.driver.dac.data_format" description="Specify the DAC data format.">
+            <option display="Right Justified" id="module.driver.dac.data_format.data_format_flush_right" value="DAC_DATA_FORMAT_FLUSH_RIGHT"/>
+            <option display="Left Justified" id="module.driver.dac.data_format.data_format_flush_left" value="DAC_DATA_FORMAT_FLUSH_LEFT"/>
+        </property>
+        <property default="module.driver.dac.output_amplifier.disabled" display="Output Amplifier" id="module.driver.dac.output_amplifier_enabled" description="Enable the DAC output amplifier.">
+            <select enum="enum.mcu.dac.output_amplifier" />
+        </property>
+        <property default="module.driver.dac.charge_pump_enabled.disabled" display="Charge Pump (Requires MOCO active)" id="module.driver.dac.charge_pump_enabled" description="Enable the DAC charge pump.">
+            <select enum="enum.mcu.dac.charge_pump" />
+        </property>
+        <property default="module.driver.dac.internal_output.disabled" display="Internal Output" id="module.driver.dac.internal_output" description="Enable DAC output to internal modules.">
+            <select enum="enum.mcu.dac.internal_output" />
+        </property>
+        <property default="" display="ELC Trigger Source" id="module.driver.dac.elc_trigger" description="ELC event source that will trigger the DAC to start a conversion.">
+            <select enum="enum.disabled" />
+            <select enum="_signal" />
+            <linkConstraint display="Requires an ELC peripheral function for DAC">
+                "${_link}" === "link.dac${module.driver.dac.channel_id}"
+            </linkConstraint>
+        </property>
+        <property default="" display="Reference Voltage" id="module.driver.dac.ref_volt_sel" description="Select the DAC reference voltage.">
+            <select enum="enum.driver.dac.ref_volt_sel" />
+        </property>
+        <peripheral name="DAC${module.driver.dac.channel_id}" component="dac${module.driver.dac.channel_id}" />
+        <peripheral name="DAC12${module.driver.dac.channel_id}" component="dac12${module.driver.dac.channel_id}" />
+        <symbol id="symbol.driver.dac.name" value="${module.driver.dac.name}"/>
+        <symbol id="symbol.driver.dac.guard.open" value="${module.driver.dac.name}_open_guard"/>
+        <symbol id="symbol.driver.dac.guard.macro.open" value="FSP_GUARD_${module.driver.dac.name}_R_DAC_Open"/>
+        <symbol id="symbol.driver.dac.guard.write" value="${module.driver.dac.name}_write_guard"/>
+        <symbol id="symbol.driver.dac.guard.macro.write" value="FSP_GUARD_${module.driver.dac.name}_R_DAC_Write"/>
+        <symbol id="symbol.driver.dac.guard.start" value="${module.driver.dac.name}_start_guard"/>
+        <symbol id="symbol.driver.dac.guard.macro.start" value="FSP_GUARD_${module.driver.dac.name}_R_DAC_Start"/>
+        <symbol id="symbol.driver.dac.guard.stop" value="${module.driver.dac.name}_stop_guard"/>
+        <symbol id="symbol.driver.dac.guard.macro.stop" value="FSP_GUARD_${module.driver.dac.name}_R_DAC_Stop"/>
+        <symbol id="symbol.driver.dac.guard.close" value="${module.driver.dac.name}_close_guard"/>
+        <symbol id="symbol.driver.dac.guard.macro.close" value="FSP_GUARD_${module.driver.dac.name}_R_DAC_Close"/>
+        <symbol id="symbol.driver.dac.nsc_api" value="${module.driver.dac.name}_nsc_api"/>
+        <symbol id="symbol.driver.dac.cfg" value="${module.driver.dac.name}_cfg"/>
+        <symbol id="symbol.driver.dac.ctrl" value="${module.driver.dac.name}_ctrl"/>
+        <symbol id="symbol.driver.dac.ext_cfg" value="${module.driver.dac.name}_ext_cfg"/>
+        <header>
+/** DAC on DAC Instance. */
+extern const dac_instance_t ${module.driver.dac.name};
+
+/** Access the DAC instance using these structures when calling API functions directly (::p_api is not used). */
+extern dac_instance_ctrl_t ${module.driver.dac.name}_ctrl;
+extern const dac_cfg_t ${module.driver.dac.name}_cfg;
+
+        </header>
+        <includes>#include &quot;r_dac.h&quot;
+#include &quot;r_dac_api.h&quot;</includes>
+        <declarations>dac_instance_ctrl_t ${module.driver.dac.name}_ctrl;
+const dac_extended_cfg_t ${module.driver.dac.name}_ext_cfg =
+{
+    .enable_charge_pump       = ${module.driver.dac.charge_pump_enabled},
+    .data_format              = ${module.driver.dac.data_format},
+    .output_amplifier_enabled = ${module.driver.dac.output_amplifier_enabled},
+    .internal_output_enabled  = ${module.driver.dac.internal_output},
+    .ref_volt_sel             = (dac_ref_volt_sel_t) ${module.driver.dac.ref_volt_sel}
+};
+const dac_cfg_t ${module.driver.dac.name}_cfg =
+{
+    .channel             = ${module.driver.dac.channel_id},
+    .ad_da_synchronized  = ${module.driver.dac.ad_da_synchronized},
+    .p_extend            = &amp;${module.driver.dac.name}_ext_cfg
+};
+/* Instance structure to use this module. */
+const dac_instance_t ${module.driver.dac.name} =
+{
+    .p_ctrl    = &amp;${module.driver.dac.name}_ctrl,
+    .p_cfg     = &amp;${module.driver.dac.name}_cfg,
+    .p_api     = &amp;g_dac_on_dac
+};
+        </declarations>
+        <guard>
+            <header>
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.dac.name}_open_guard(dac_ctrl_t *p_api_ctrl, dac_cfg_t const *const p_cfg);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.dac.name}_write_guard(dac_ctrl_t *p_api_ctrl, uint16_t value);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.dac.name}_start_guard(dac_ctrl_t *p_api_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.dac.name}_stop_guard(dac_ctrl_t *p_api_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.dac.name}_close_guard(dac_ctrl_t *p_api_ctrl);
+
+            </header>
+            <template name="${module.driver.dac.name}_guard.c">
+                <![CDATA[
+                    #include "guard.h"
+
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.dac.name}_open_guard (dac_ctrl_t *p_api_ctrl, dac_cfg_t const *const p_cfg)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+    FSP_PARAMETER_NOT_USED(p_cfg);
+
+    return R_DAC_Open(&${module.driver.dac.name}_ctrl, &${module.driver.dac.name}_cfg);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.dac.name}_write_guard (dac_ctrl_t *p_api_ctrl, uint16_t value)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+
+    return R_DAC_Write(&${module.driver.dac.name}_ctrl, value);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.dac.name}_start_guard (dac_ctrl_t *p_api_ctrl)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+
+    return R_DAC_Start(&${module.driver.dac.name}_ctrl);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.dac.name}_stop_guard (dac_ctrl_t *p_api_ctrl)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+
+    return R_DAC_Stop(&${module.driver.dac.name}_ctrl);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.dac.name}_close_guard (dac_ctrl_t *p_api_ctrl)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+
+    return R_DAC_Close(&${module.driver.dac.name}_ctrl);
+}
+
+                ]]>
+            </template>
+        </guard>
+        <nsc>
+            <header>
+
+#define FSP_GUARD_${module.driver.dac.name}_R_DAC_Open() ${module.driver.dac.name}_open_guard(FSP_SECURE_ARGUMENT, FSP_SECURE_ARGUMENT)
+
+#define FSP_GUARD_${module.driver.dac.name}_R_DAC_Write(value) ${module.driver.dac.name}_write_guard(FSP_SECURE_ARGUMENT, value)
+
+#define FSP_GUARD_${module.driver.dac.name}_R_DAC_Start() ${module.driver.dac.name}_start_guard(FSP_SECURE_ARGUMENT)
+
+#define FSP_GUARD_${module.driver.dac.name}_R_DAC_Stop() ${module.driver.dac.name}_stop_guard(FSP_SECURE_ARGUMENT)
+
+#define FSP_GUARD_${module.driver.dac.name}_R_DAC_Close() ${module.driver.dac.name}_close_guard(FSP_SECURE_ARGUMENT)
+
+
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.dac.name}_open_guard(dac_ctrl_t *p_api_ctrl, dac_cfg_t const *const p_cfg);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.dac.name}_write_guard(dac_ctrl_t *p_api_ctrl, uint16_t value);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.dac.name}_start_guard(dac_ctrl_t *p_api_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.dac.name}_stop_guard(dac_ctrl_t *p_api_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.dac.name}_close_guard(dac_ctrl_t *p_api_ctrl);
+
+
+extern const dac_instance_t ${module.driver.dac.name};
+            </header>
+            <declarations>
+                <![CDATA[
+static const dac_api_t ${module.driver.dac.name}_nsc_api =
+{
+    .open = ${module.driver.dac.name}_open_guard,
+    .write = ${module.driver.dac.name}_write_guard,
+    .start = ${module.driver.dac.name}_start_guard,
+    .stop = ${module.driver.dac.name}_stop_guard,
+    .close = ${module.driver.dac.name}_close_guard,
+};
+const dac_instance_t ${module.driver.dac.name} =
+{
+    .p_api = &${module.driver.dac.name}_nsc_api,
+    .p_ctrl = FSP_SECURE_ARGUMENT,
+    .p_cfg = FSP_SECURE_ARGUMENT,
+};
+                ]]>
+            </declarations>
+        </nsc>
+        <api configurable="true">
+            <file>ra/fsp/inc/instances/r_dac.h</file>
+            <file>ra/fsp/inc/api/r_dac_api.h</file>
+        </api>
+    </module>
+</raModuleDescription>

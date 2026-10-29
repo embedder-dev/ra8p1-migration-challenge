@@ -1,0 +1,262 @@
+﻿<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.driver.iirfa" path="fsp_cfg/r_iirfa_cfg.h" version="0">
+        <property default="config.driver.iirfa.param_checking_enable.bsp" display="Parameter Checking" id="config.driver.iirfa.param_checking_enable" description="If selected code for parameter checking is included in the build.">
+            <option display="Default (BSP)" id="config.driver.iirfa.param_checking_enable.bsp" value="(BSP_CFG_PARAM_CHECKING_ENABLE)"/>
+            <option display="Enabled" id="config.driver.iirfa.param_checking_enable.enabled" value="(1)"/>
+            <option display="Disabled" id="config.driver.iirfa.param_checking_enable.disabled" value="(0)"/>
+        </property>
+        <!-- <property default="" display="Error Interrupt Priority" id="config.driver.iirfa.err_ipl" description="Select the interrupt priority for the Error (ERR) interrupt.">
+            <interrupt event="event.iirfa.err" isr="iirfa_err_isr"/>
+            <select enum="enum.mcu.nvic.priorities.optional"/>
+        </property> -->
+        <property default="config.driver.iirfa.use_polling.enabled" display="Polling Mode" id="config.driver.iirfa.use_polling" description="When enabled the IIRFA driver will poll for completion before reading the output register. This prevents IIRFA operations from delaying global interrupt processing at the cost of slower filter performance.">
+            <option display="Enabled" id="config.driver.iirfa.use_polling.enabled" value="(1)"/>
+            <option display="Disabled" id="config.driver.iirfa.use_polling.disabled" value="(0)"/>
+        </property>
+        <property default="config.driver.iirfa.loop_unroll_depth.1" display="Software Loop Unroll Depth" id="config.driver.iirfa.loop_unroll_depth" description="Select the number of samples to process for every loop. This setting generally only affects filters that use 1 biquad stage.">
+            <option display="1 Sample" id="config.driver.iirfa.loop_unroll_depth.1" value="(1)"/>
+            <option display="2 Samples" id="config.driver.iirfa.loop_unroll_depth.2" value="(2)"/>
+            <option display="3 Samples" id="config.driver.iirfa.loop_unroll_depth.3" value="(3)"/>
+            <option display="4 Samples" id="config.driver.iirfa.loop_unroll_depth.4" value="(4)"/>
+            <option display="5 Samples" id="config.driver.iirfa.loop_unroll_depth.5" value="(5)"/>
+            <option display="6 Samples" id="config.driver.iirfa.loop_unroll_depth.6" value="(6)"/>
+            <option display="7 Samples" id="config.driver.iirfa.loop_unroll_depth.7" value="(7)"/>
+            <option display="8 Samples" id="config.driver.iirfa.loop_unroll_depth.8" value="(8)"/>
+            <option display="9 Samples" id="config.driver.iirfa.loop_unroll_depth.9" value="(9)"/>
+            <option display="10 Samples" id="config.driver.iirfa.loop_unroll_depth.10" value="(10)"/>
+            <option display="11 Samples" id="config.driver.iirfa.loop_unroll_depth.11" value="(11)"/>
+            <option display="12 Samples" id="config.driver.iirfa.loop_unroll_depth.12" value="(12)"/>
+            <option display="16 Samples" id="config.driver.iirfa.loop_unroll_depth.16" value="(16)"/>
+            <option display="20 Samples" id="config.driver.iirfa.loop_unroll_depth.20" value="(20)"/>
+            <option display="24 Samples" id="config.driver.iirfa.loop_unroll_depth.24" value="(24)"/>
+            <option display="32 Samples" id="config.driver.iirfa.loop_unroll_depth.32" value="(32)"/>
+        </property>
+        <property default="config.driver.iirfa.ecc.enabled" display="ECC Support" id="config.driver.iirfa.ecc" description="Select whether to detect ECC errors. When set to 'Enabled (no writeback)' 1-bit ECC errors will not be corrected.">
+            <option display="Disabled" id="config.driver.iirfa.ecc.disabled" value="(0)"/>
+            <option display="Enabled" id="config.driver.iirfa.ecc.enabled" value="(1)"/>
+            <option display="Enabled (no writeback)" id="config.driver.iirfa.ecc.enabled_no_writeback" value="(3)"/>
+        </property>
+        <property default="config.driver.iirfa.round.nearest" display="Rounding Mode" id="config.driver.iirfa.round" description="Select how to round calculation results.">
+            <option display="Nearest" id="config.driver.iirfa.round.nearest" value="(0)"/>
+            <option display="Toward zero" id="config.driver.iirfa.round.down" value="(1)"/>
+        </property>
+        <content>
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#define IIRFA_CFG_PARAM_CHECKING_ENABLE   ${config.driver.iirfa.param_checking_enable}
+#define IIRFA_CFG_LOOP_UNROLL_DEPTH       ${config.driver.iirfa.loop_unroll_depth}
+#define IIRFA_CFG_LOOP_USE_POLLING        ${config.driver.iirfa.use_polling}
+#define IIRFA_CFG_ECC_SUPPORT             ${config.driver.iirfa.ecc}
+#define IIRFA_CFG_ROUNDING_MODE           ${config.driver.iirfa.round}
+                        <!-- #define IIRFA_CFG_ERROR_IPL               ${config.driver.iirfa.err_ipl} -->
+
+#ifdef __cplusplus
+}
+#endif
+        </content>
+    </config>
+    <module config="config.driver.iirfa" display="DSP|${module.driver.iirfa.name} IIR Filter Accelerator (r_iirfa)" id="module.driver.iir_on_iirfa" version="1" url="group___i_i_r_f_a.html">
+        <constraint display="Unique name required for each instance">
+            "${interface.driver.iirfa.${module.driver.iirfa.name}}" === "1"
+        </constraint>
+        <requires id="module.driver.iirfa.requires.iirfa" interface="interface.mcu.iirfa" visible="false" display="Requires IIRFA Peripheral" />
+        <provides interface="interface.driver.iirfa" />
+        <provides interface="interface.driver.iirfa.${module.driver.iirfa.name}" />
+        <provides interface="interface.peripheral.iirfa${module.driver.iirfa.channel}" />
+
+        <property default="g_iirfa${_instance}" display="Name" id="module.driver.iirfa.name" description="Module name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.iirfa.name}")</constraint>
+        </property>
+        <property default="0" display="Channel" id="module.driver.iirfa.channel" description="Select the IIRFA channel.">
+            <constraint display="Value must be an integer between 0 and 15">testInteger("${module.driver.iirfa.channel}")  &amp;&amp; ("${module.driver.iirfa.channel}" &gt;= 0) &amp;&amp; ("${module.driver.iirfa.channel}" &lt; 16)</constraint>
+        </property>
+        <!-- <property default="module.driver.iirfa.err_int_enable.disabled" display="Channel Error Interrupt" id="module.driver.iirfa.err_int_enable" description="Select whether to enable error interrupts for this channel.">
+            <option display="Enabled" id="module.driver.iirfa.err_int_enable.enabled" value="(1)"/>
+            <option display="Disabled" id="module.driver.iirfa.err_int_enable.disabled" value="(0)"/>
+        </property> -->
+
+        <symbol id="symbol.driver.iirfa.name" value="${module.driver.iirfa.name}"/>
+        <symbol id="symbol.driver.iirfa.guard.open" value="${module.driver.iirfa.name}_open_guard"/>
+        <symbol id="symbol.driver.iirfa.guard.macro.open" value="FSP_GUARD_${module.driver.iirfa.name}_R_IIRFA_Open"/>
+        <symbol id="symbol.driver.iirfa.guard.configure" value="${module.driver.iirfa.name}_configure_guard"/>
+        <symbol id="symbol.driver.iirfa.guard.macro.configure" value="FSP_GUARD_${module.driver.iirfa.name}_R_IIRFA_Configure"/>
+        <symbol id="symbol.driver.iirfa.guard.filter" value="${module.driver.iirfa.name}_filter_guard"/>
+        <symbol id="symbol.driver.iirfa.guard.macro.filter" value="FSP_GUARD_${module.driver.iirfa.name}_R_IIRFA_Filter"/>
+        <symbol id="symbol.driver.iirfa.guard.status_get" value="${module.driver.iirfa.name}_status_get_guard"/>
+        <symbol id="symbol.driver.iirfa.guard.macro.status_get" value="FSP_GUARD_${module.driver.iirfa.name}_R_IIRFA_StatusGet"/>
+        <symbol id="symbol.driver.iirfa.guard.close" value="${module.driver.iirfa.name}_close_guard"/>
+        <symbol id="symbol.driver.iirfa.guard.macro.close" value="FSP_GUARD_${module.driver.iirfa.name}_R_IIRFA_Close"/>
+        <symbol id="symbol.driver.iirfa.nsc_api" value="${module.driver.iirfa.name}_nsc_api"/>
+        <symbol id="symbol.driver.iirfa.cfg" value="${module.driver.iirfa.name}_cfg"/>
+        <symbol id="symbol.driver.iirfa.ctrl" value="${module.driver.iirfa.name}_ctrl"/>
+        <header>
+
+/** IIRFA Instance. */
+extern const iirfa_instance_t ${module.driver.iirfa.name};
+
+/** Access the IIRFA instance using these structures when calling API functions directly (::p_api is not used). */
+extern iirfa_instance_ctrl_t ${module.driver.iirfa.name}_ctrl;
+extern const iir_cfg_t ${module.driver.iirfa.name}_cfg;
+
+        </header>
+        <includes>
+#include &quot;r_iirfa.h&quot;
+#include &quot;r_iir_api.h&quot;
+        </includes>
+        <declarations>
+
+iirfa_instance_ctrl_t ${module.driver.iirfa.name}_ctrl;
+
+const iir_cfg_t ${module.driver.iirfa.name}_cfg =
+{
+    .channel         = ${module.driver.iirfa.channel},
+    .p_extend        = NULL,
+};
+
+/* Instance structure to use this module. */
+const iirfa_instance_t ${module.driver.iirfa.name} =
+{
+    .p_ctrl          = &amp;${module.driver.iirfa.name}_ctrl,
+    .p_cfg           = &amp;${module.driver.iirfa.name}_cfg,
+    .p_api           = &amp;g_iir_on_iirfa
+};
+
+        </declarations>
+        <guard>
+            <header>
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.iirfa.name}_open_guard(iir_ctrl_t *const p_api_ctrl, iir_cfg_t const *const p_cfg);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.iirfa.name}_configure_guard(iir_ctrl_t *const p_api_ctrl, iir_filter_cfg_t const *const p_filter_cfg);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.iirfa.name}_filter_guard(iir_ctrl_t *const p_api_ctrl, float const *p_data_in, float *p_data_out, uint16_t const num_samples);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.iirfa.name}_status_get_guard(iir_ctrl_t *const p_api_ctrl, iir_status_t *const p_status);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.iirfa.name}_close_guard(iir_ctrl_t *const p_api_ctrl);
+
+            </header>
+            <template name="${module.driver.iirfa.name}_guard.c">
+                <![CDATA[
+                    #include "guard.h"
+
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.iirfa.name}_open_guard (iir_ctrl_t *const p_api_ctrl, iir_cfg_t const *const p_cfg)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+    FSP_PARAMETER_NOT_USED(p_cfg);
+
+    return R_IIRFA_Open(&${module.driver.iirfa.name}_ctrl, &${module.driver.iirfa.name}_cfg);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.iirfa.name}_configure_guard (iir_ctrl_t *const p_api_ctrl, iir_filter_cfg_t const *const p_filter_cfg)
+{
+    /* Verify all pointers are in non-secure memory. */
+    iir_filter_cfg_t const *const p_filter_cfg_checked = cmse_check_pointed_object((iir_filter_cfg_t *) p_filter_cfg, CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_filter_cfg_checked != NULL);
+
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+
+    return R_IIRFA_Configure(&${module.driver.iirfa.name}_ctrl, p_filter_cfg_checked);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.iirfa.name}_filter_guard (iir_ctrl_t *const p_api_ctrl, float const *p_data_in, float *p_data_out, uint16_t const num_samples)
+{
+    /* Verify all pointers are in non-secure memory. */
+    float const * p_data_in_checked = cmse_check_address_range((void *) p_data_in, num_samples, CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_data_in_checked != NULL);
+    float * p_data_out_checked = cmse_check_address_range((void *) p_data_out, num_samples, CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_data_out_checked != NULL);
+
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+
+    return R_IIRFA_Filter(&${module.driver.iirfa.name}_ctrl, p_data_in_checked, p_data_out_checked, num_samples);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.iirfa.name}_status_get_guard (iir_ctrl_t *const p_api_ctrl, iir_status_t *const p_status)
+{
+    /* Verify all pointers are in non-secure memory. */
+    iir_status_t *const p_status_checked = cmse_check_pointed_object(p_status, CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_status_checked != NULL);
+
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+
+    return R_IIRFA_StatusGet(&${module.driver.iirfa.name}_ctrl, p_status_checked);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.iirfa.name}_close_guard (iir_ctrl_t *const p_api_ctrl)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+
+    return R_IIRFA_Close(&${module.driver.iirfa.name}_ctrl);
+}
+
+                ]]>
+            </template>
+        </guard>
+        <nsc>
+            <header>
+
+#define FSP_GUARD_${module.driver.iirfa.name}_R_IIRFA_Open() ${module.driver.iirfa.name}_open_guard(FSP_SECURE_ARGUMENT, FSP_SECURE_ARGUMENT)
+
+#define FSP_GUARD_${module.driver.iirfa.name}_R_IIRFA_Configure(p_filter_cfg) ${module.driver.iirfa.name}_configure_guard(FSP_SECURE_ARGUMENT, p_filter_cfg)
+
+#define FSP_GUARD_${module.driver.iirfa.name}_R_IIRFA_Filter(p_data_in, p_data_out, num_samples) ${module.driver.iirfa.name}_filter_guard(FSP_SECURE_ARGUMENT, p_data_in, p_data_out, num_samples)
+
+#define FSP_GUARD_${module.driver.iirfa.name}_R_IIRFA_StatusGet(p_status) ${module.driver.iirfa.name}_status_get_guard(FSP_SECURE_ARGUMENT, p_status)
+
+#define FSP_GUARD_${module.driver.iirfa.name}_R_IIRFA_Close() ${module.driver.iirfa.name}_close_guard(FSP_SECURE_ARGUMENT)
+
+
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.iirfa.name}_open_guard(iir_ctrl_t *const p_api_ctrl, iir_cfg_t const *const p_cfg);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.iirfa.name}_configure_guard(iir_ctrl_t *const p_api_ctrl, iir_filter_cfg_t const *const p_filter_cfg);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.iirfa.name}_filter_guard(iir_ctrl_t *const p_api_ctrl, float const *p_data_in, float *p_data_out, uint16_t const num_samples);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.iirfa.name}_status_get_guard(iir_ctrl_t *const p_api_ctrl, iir_status_t *const p_status);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.iirfa.name}_close_guard(iir_ctrl_t *const p_api_ctrl);
+
+
+extern const iirfa_instance_t ${module.driver.iirfa.name};
+            </header>
+            <declarations>
+                <![CDATA[
+static const iir_api_t ${module.driver.iirfa.name}_nsc_api =
+{
+    .open = ${module.driver.iirfa.name}_open_guard,
+    .configure = ${module.driver.iirfa.name}_configure_guard,
+    .filter = ${module.driver.iirfa.name}_filter_guard,
+    .statusGet = ${module.driver.iirfa.name}_status_get_guard,
+    .close = ${module.driver.iirfa.name}_close_guard,
+};
+const iirfa_instance_t ${module.driver.iirfa.name} =
+{
+    .p_api = &${module.driver.iirfa.name}_nsc_api,
+    .p_ctrl = FSP_SECURE_ARGUMENT,
+    .p_cfg = FSP_SECURE_ARGUMENT,
+};
+                ]]>
+            </declarations>
+        </nsc>
+        <api configurable="true">
+            <file>ra/fsp/inc/instances/r_iirfa.h</file>
+            <file>ra/fsp/inc/api/r_iir_api.h</file>
+        </api>
+    </module>
+</raModuleDescription>

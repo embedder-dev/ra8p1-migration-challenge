@@ -1,0 +1,12 @@
+<?xml version="1.0" ?>
+<raModuleDescription>
+  <module display="Security|RSIP Compatibility Mode" id="module.driver.rsip7.plaintext" common="1" version="1" visible="false" url="">
+    <requires id="module.driver.sce.requires.rsip7" interface="interface.mcu.rsip.rsip_e51a" visible="false" display="Requires RA8 with RSIP_E51A" />
+    <requires id="module.driver.sce.requires.rsip7_key_injection" interface="interface.driver.rsip7_key_injection" visible="true" display="Add Key Injection for PSA Crypto (Optional)" find="false" optional="true" />
+    <provides interface="interface.peripheral.rsip"/>
+    <provides interface="interface.driver.rsip.dotf"/>
+    <provides interface="interface.driver.rsip.plaintext"/>
+    <provides interface="interface.driver.sce"/>
+    <provides interface="interface.driver.sce_for_nx"/>
+  </module>
+</raModuleDescription>

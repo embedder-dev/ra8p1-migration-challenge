@@ -1,0 +1,139 @@
+﻿<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.middleware.rm_littlefs_flash" path="fsp_cfg/rm_littlefs_flash_cfg.h" version="0">
+        <property default="config.middleware.rm_littlefs_flash.param_checking_enable.bsp" display="Parameter Checking" id="config.middleware.rm_littlefs_flash.param_checking_enable" description="If selected code for parameter checking is included in the build.">
+            <option display="Default (BSP)" id="config.middleware.rm_littlefs_flash.param_checking_enable.bsp" value="(BSP_CFG_PARAM_CHECKING_ENABLE)"/>
+            <option display="Enabled" id="config.middleware.rm_littlefs_flash.param_checking_enable.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.rm_littlefs_flash.param_checking_enable.disabled" value="(0)"/>
+        </property>
+        <content>
+        #ifdef __cplusplus
+        extern "C" {
+        #endif
+
+        #define RM_LITTLEFS_FLASH_CFG_PARAM_CHECKING_ENABLE ${config.middleware.rm_littlefs_flash.param_checking_enable}
+
+        #ifdef __cplusplus
+        }
+        #endif
+        </content>
+    </config>
+    <module id="module.middleware.rm_littlefs" display="Storage|LittleFS on Flash (rm_littlefs_flash)" config="config.middleware.rm_littlefs_flash" common="1" version="0" visible="false" url="group___r_m___l_i_t_t_l_e_f_s___f_l_a_s_h.html">
+        <constraint display="Unique name required for each instance">
+            "${interface.middleware.rm_littlefs.${module.middleware.rm_littlefs.name}}" === "1"
+        </constraint>
+        <constraint display="Block size must be a multiple of the read and program sizes">
+            (${module.middleware.rm_littlefs.block_size} % ${module.middleware.rm_littlefs.prog_size} === 0) &amp;&amp;
+            (${module.middleware.rm_littlefs.block_size} % ${module.middleware.rm_littlefs.read_size} === 0)
+        </constraint>
+        <constraint display="Cache size must be a multiple of the read and program sizes">
+            (${module.middleware.rm_littlefs.cache_size} % ${module.middleware.rm_littlefs.prog_size} === 0) &amp;&amp;
+            (${module.middleware.rm_littlefs.cache_size} % ${module.middleware.rm_littlefs.read_size} === 0)
+        </constraint>
+        <constraint display="Cache size must be a factor of the block size">
+            (${module.middleware.rm_littlefs.block_size} % ${module.middleware.rm_littlefs.cache_size} === 0)
+        </constraint>
+        <requires id="module.middleware.rm_littlefs.requires.r_flash" interface="interface.driver.flash" display="Add Flash Implementation [Required]">
+            <override property="module.driver.flash.data_flash_bgo" value="module.driver.flash.data_flash_bgo.disabled"/>
+        </requires>
+        <provides interface="interface.middleware.littlefs_port" />
+        <provides interface="interface.middleware.rm_littlefs" />
+        <provides interface="interface.middleware.rm_littlefs.${module.middleware.rm_littlefs.name}" />
+        <property default="g_rm_littlefs${_instance}" display="Name" id="module.middleware.rm_littlefs.name" description="Module name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.middleware.rm_littlefs.name}")</constraint>
+        </property>
+        <property display="Read Size" id="module.middleware.rm_littlefs.read_size" default="1" description="Minimum size of a block read. All read operations will be a multiple of this value.">
+            <constraint display="Must be a non-negative integer">testInteger(${module.middleware.rm_littlefs.read_size}) &amp;&amp; (${module.middleware.rm_littlefs.read_size} &gt;= 0) </constraint>
+        </property>
+        <property display="Program Size" id="module.middleware.rm_littlefs.prog_size" default="4" description="Minimum size of a block program. All program operations will be a multiple of this value.">
+            <constraint display="Must be a non-negative integer">testInteger(${module.middleware.rm_littlefs.prog_size}) &amp;&amp; (${module.middleware.rm_littlefs.prog_size} &gt;= 0) </constraint>
+        </property>
+        <property display="Block Size (bytes)" id="module.middleware.rm_littlefs.block_size" default="128" description="Size of an erasable block. This does not impact RAM consumption and may be larger than the physical erase size. However, non-inlined files take up at minimum one block. Must be a multiple of the read and program sizes.">
+            <constraint display="Must be a multiple of 64">testInteger(${module.middleware.rm_littlefs.block_size}) &amp;&amp; (${module.middleware.rm_littlefs.block_size} &gt;= 0) &amp;&amp; (${module.middleware.rm_littlefs.block_size} % 64 === 0) </constraint>
+            <constraint display="Must be larger than 104 bytes">(${module.middleware.rm_littlefs.block_size} &gt;= 104)</constraint>
+        </property>
+        <property display="Block Count" id="module.middleware.rm_littlefs.block_count" default="(BSP_DATA_FLASH_SIZE_BYTES/128)" description="Number of erasable blocks on the device.">
+        </property>
+        <property display="Block Cycles" id="module.middleware.rm_littlefs.block_cycles" default="1024" description="Number of erase cycles before LittleFS evicts metadata logs and moves the metadata to another block. Suggested values are in the range 100-1000, with large values having better performance at the cost of less consistent wear distribution. Set to -1 to disable block-level wear-leveling.">
+            <constraint display="Must be an integer">testInteger(${module.middleware.rm_littlefs.block_cycles})</constraint>
+        </property>
+        <property display="Cache Size" id="module.middleware.rm_littlefs.cache_size" default="64" description="Size of block caches. Each cache buffers a portion of a block in RAM. The LittleFS needs a read cache, a program cache, and one additional cache per file. Larger caches can improve performance by storing more data and reducing the number of disk accesses. Must be a multiple of the read and program sizes, and a factor of the block size.">
+            <constraint display="Must be a non-negative integer">testInteger(${module.middleware.rm_littlefs.cache_size}) &amp;&amp; (${module.middleware.rm_littlefs.cache_size} &gt; 0) </constraint>
+        </property>
+        <property display="Lookahead Size" id="module.middleware.rm_littlefs.lookahead_size" default="16" description="Size of the lookahead buffer in bytes. A larger lookahead buffer increases the number of blocks found during an allocation pass. The lookahead buffer is stored as a compact bitmap, so each byte of RAM can track 8 blocks. Must be a multiple of 8.">
+            <constraint display="Must be a non-negative multiple of 8">testInteger(${module.middleware.rm_littlefs.lookahead_size}) &amp;&amp; (${module.middleware.rm_littlefs.lookahead_size} &gt; 0) &amp;&amp; (${module.middleware.rm_littlefs.lookahead_size} % 8 === 0) </constraint>
+        </property>
+        <header>
+        /** LittleFS on Flash Instance. */
+        extern const rm_littlefs_instance_t ${module.middleware.rm_littlefs.name};
+        extern rm_littlefs_flash_instance_ctrl_t ${module.middleware.rm_littlefs.name}_ctrl;
+        extern const rm_littlefs_cfg_t ${module.middleware.rm_littlefs.name}_cfg;
+
+        extern struct lfs ${module.middleware.rm_littlefs.name}_lfs;
+        extern const struct lfs_config ${module.middleware.rm_littlefs.name}_lfs_cfg;
+        </header>
+        <includes>
+#include "rm_littlefs_api.h"
+#include "rm_littlefs_flash.h"
+#include "lfs_util.h"
+        </includes>
+        <declarations>
+rm_littlefs_flash_instance_ctrl_t ${module.middleware.rm_littlefs.name}_ctrl;
+
+#ifdef LFS_NO_MALLOC
+static uint8_t ${module.middleware.rm_littlefs.name}_read[${module.middleware.rm_littlefs.cache_size}];
+static uint8_t ${module.middleware.rm_littlefs.name}_prog[${module.middleware.rm_littlefs.cache_size}];
+static uint8_t ${module.middleware.rm_littlefs.name}_lookahead[${module.middleware.rm_littlefs.lookahead_size}];
+#endif
+
+struct lfs ${module.middleware.rm_littlefs.name}_lfs;
+
+const struct lfs_config ${module.middleware.rm_littlefs.name}_lfs_cfg =
+{
+    .context = &amp;${module.middleware.rm_littlefs.name}_ctrl,
+    .read    = &amp;rm_littlefs_flash_read,
+    .prog    = &amp;rm_littlefs_flash_write,
+    .erase   = &amp;rm_littlefs_flash_erase,
+    .sync    = &amp;rm_littlefs_flash_sync,
+    .read_size      = ${module.middleware.rm_littlefs.read_size},
+    .prog_size      = ${module.middleware.rm_littlefs.prog_size},
+    .block_size     = ${module.middleware.rm_littlefs.block_size},
+    .block_count    = ${module.middleware.rm_littlefs.block_count},
+    .block_cycles   = ${module.middleware.rm_littlefs.block_cycles},
+    .cache_size     = ${module.middleware.rm_littlefs.cache_size},
+    .lookahead_size = ${module.middleware.rm_littlefs.lookahead_size},
+#ifdef LFS_NO_MALLOC
+    .read_buffer = (void *) ${module.middleware.rm_littlefs.name}_read,
+    .prog_buffer = (void *) ${module.middleware.rm_littlefs.name}_prog,
+    .lookahead_buffer = (void *) ${module.middleware.rm_littlefs.name}_lookahead,
+#endif
+#ifdef LFS_THREADSAFE
+    .lock   = &amp;rm_littlefs_flash_lock,
+    .unlock = &amp;rm_littlefs_flash_unlock,
+#endif
+};
+
+const rm_littlefs_flash_cfg_t ${module.middleware.rm_littlefs.name}_ext_cfg =
+{
+    .p_flash = &amp;${module.middleware.rm_littlefs.requires.r_flash::module.driver.flash.name},
+};
+
+const rm_littlefs_cfg_t ${module.middleware.rm_littlefs.name}_cfg =
+{
+    .p_lfs_cfg    = &amp;${module.middleware.rm_littlefs.name}_lfs_cfg,
+    .p_extend     = &amp;${module.middleware.rm_littlefs.name}_ext_cfg,
+};
+
+/* Instance structure to use this module. */
+const rm_littlefs_instance_t ${module.middleware.rm_littlefs.name} =
+{
+    .p_ctrl        = &amp;${module.middleware.rm_littlefs.name}_ctrl,
+    .p_cfg         = &amp;${module.middleware.rm_littlefs.name}_cfg,
+    .p_api         = &amp;g_rm_littlefs_on_flash,
+};
+        </declarations>
+        <functions>
+        </functions>
+    </module>
+</raModuleDescription>
+

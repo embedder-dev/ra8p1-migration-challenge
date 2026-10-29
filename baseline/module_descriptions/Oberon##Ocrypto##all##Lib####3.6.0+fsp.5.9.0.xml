@@ -1,0 +1,33 @@
+<?xml version="1.0" ?>
+<raModuleDescription>
+    <module id="module.oberon.ocrypto" display="Security|Ocrypto (S/W Only)" common="1" version="0" url="_u_s_i_n_g__o_c_r_y_p_t_o.html">
+        <constraint display="A minimum main stack of 0x800 is required to use Ocrypto.">("${config.bsp.common.main}" &gt;= 0x800)</constraint>
+        <constraint display="Only one Ocrypto instance can be used at a time.">
+                "${interface.driver.ocrypto}" === "1"
+        </constraint>
+        <requires id="module.oberon.ocrypto.requires.trng" interface="interface.middleware.rm_ocrypto_trng_port" visible="true" find="false" optional="true" display="TRNG" />
+        <requires id="module.oberon.ocrypto.requires.ra2e1" interface="interface.mcu.ra2e1" visible="false" find="false" optional="false" display="RA2E1" />
+        <provides interface="interface.driver.ocrypto" />
+        <provides interface="interface.driver.mcuboot_crypto" />
+        <includes>
+        #include "ocrypto_aes_cbc_pkcs.h"
+        #include "ocrypto_aes_cbc.h"
+        #include "ocrypto_aes_cmac.h"
+        #include "ocrypto_aes_ctr.h"
+        #include "ocrypto_aes_ecb.h"
+        #include "ocrypto_aes_gcm.h"
+        #include "ocrypto_aes_key.h"
+        #include "ocrypto_constant_time.h"
+        #include "ocrypto_ecdh_p256.h"
+        #include "ocrypto_ecdsa_p256.h"
+        #include "ocrypto_ecdsa_p256_det_sign.h"
+        #include "ocrypto_hmac_sha256.h"
+        #include "ocrypto_hmac_sha512.h"
+        #include "ocrypto_sha224.h"
+        #include "ocrypto_sha256.h"
+        #include "ocrypto_sha384.h"
+        #include "ocrypto_sha512.h"
+        #include "ocrypto_types.h"
+        </includes>
+    </module>
+</raModuleDescription>

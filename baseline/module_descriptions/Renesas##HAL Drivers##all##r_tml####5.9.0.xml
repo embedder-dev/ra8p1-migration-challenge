@@ -1,0 +1,405 @@
+﻿<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.driver.tml" path="fsp_cfg/r_tml_cfg.h" version="0">
+        <property default="config.driver.tml.param_checking_enable.bsp" display="Parameter Checking" id="config.driver.tml.param_checking_enable" description="If selected code for parameter checking is included in the build.">
+            <option display="Default (BSP)" id="config.driver.tml.param_checking_enable.bsp" value="(BSP_CFG_PARAM_CHECKING_ENABLE)"/>
+            <option display="Enabled" id="config.driver.tml.param_checking_enable.enabled" value="(1)"/>
+            <option display="Disabled" id="config.driver.tml.param_checking_enable.disabled" value="(0)"/>
+        </property>
+        <property default="config.driver.tml.critical_section_enable.disabled" display="Critical Section Guarding" id="config.driver.tml.critical_section_enable" description="Enable critical section guarding around peripheral configuration updates. This should be enabled if multiple instances of the R_TML module are being used.">
+            <option display="Enabled" id="config.driver.tml.critical_section_enable.enabled" value="(1)"/>
+            <option display="Disabled" id="config.driver.tml.critical_section_enable.disabled" value="(0)"/>
+        </property>
+        <property default="config.driver.tml.16_bit_capture_support.disabled" display="16-bit Capture Mode Support" id="config.driver.tml.16_bit_capture_support" description="Controls whether 16-bit capture mode support is included in the build. This setting applies globally to all r_tml_instances. If 16-bit capture mode is not used by any instance, disable this setting to reduce ROM usage.">
+            <option display="Disabled" id="config.driver.tml.16_bit_capture_support.disabled" value="(0)"/>
+            <option display="Enabled" id="config.driver.tml.16_bit_capture_support.enabled" value="(1)"/>
+        </property>
+        <property default="config.driver.tml.single_channel.disabled" display="Enable Single Channel" id="config.driver.tml.single_channel" description="Enable single channel to reduce code size. Assumes channel 0.">
+            <option display="Disabled" id="config.driver.tml.single_channel.disabled" value="(0)"/>
+            <option display="Enabled" id="config.driver.tml.single_channel.enabled" value="(1)"/>
+        </property>
+        <property default="config.driver.tml.interrupt_support.disabled" display="Interrupt Support" id="config.driver.tml.interrupt_support" description="Enable support for interrupts.">
+            <option display="Disabled" id="config.driver.tml.interrupt_support.disabled" value="(0)"/>
+            <option display="Enabled" id="config.driver.tml.interrupt_support.enabled" value="(1)"/>
+        </property>
+        <content>
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#define TML_CFG_CRITICAL_SECTION_ENABLE     ${config.driver.tml.critical_section_enable}
+#define TML_CFG_PARAM_CHECKING_ENABLE       ${config.driver.tml.param_checking_enable}
+#define TML_CFG_16_BIT_CAPTURE_MODE_ENABLE  ${config.driver.tml.16_bit_capture_support}
+#define TML_CFG_SINGLE_CHANNEL_ENABLE       ${config.driver.tml.single_channel}
+#define TML_CFG_INTERRUPT_SUPPORT_ENABLE    ${config.driver.tml.interrupt_support}
+
+#ifdef __cplusplus
+}
+#endif
+        </content>
+    </config>
+    <module config="config.driver.tml" display="Timers|${module.driver.timer.name} 32-bit Interval Timer (r_tml)" id="module.driver.timer_on_tml" version="1" url="group___t_m_l.html">
+        <constraint display="Interrupt must be enabled when Callback function is defined">
+            "${module.driver.timer.p_callback}" === "NULL" || "${module.driver.timer.ipl}" != "_disabled"
+        </constraint>
+        <constraint display="Unique name required for each instance">
+            "${interface.driver.timer.${module.driver.timer.name}}" === "1"
+        </constraint>
+        <constraint display="When the Trigger Source is FSXP (LOCO/SOSC), the FITL2 clock frequency in Clocks tab must be greater than 0">
+            !("${module.driver.tml.mode}" === "module.driver.tml.mode.16_bit_capture_mode") ||
+            !("${module.driver.tml.capture_trigger}" === "module.driver.tml.capture_trigger.loco_sosc") ||
+            ("${board.clock.peripheral.tml.fitl2}" &gt; "0")
+        </constraint>
+        <constraint display="When the FITL0 Counter Clock Source is the ELC, only Raw Counts can be selected for Counter Period Unit">
+            "${board.clock.peripheral.tml.fitl0}" &gt; "0" ||
+            "${module.driver.timer.counter_unit}" === "module.driver.timer.counter_unit.unit_period_raw_counts"
+        </constraint>
+        <constraint display="When the FITL1 Capture Clock Source is the ELC, only Raw Counts can be selected for Capture Period Unit">
+            !("${module.driver.tml.mode}" === "module.driver.tml.mode.16_bit_capture_mode") ||
+            "${board.clock.peripheral.tml.fitl1}" &gt; "0" ||
+            ("${module.driver.timer.capture_unit}" === "module.driver.timer.capture_unit.unit_period_raw_counts")
+        </constraint>
+        <constraint display="Requires TML peripheral">
+            "${interface.mcu.tml}" === "1"
+        </constraint>
+        <constraint display="Channel Mode Mismatch: 16-bit Counter Mode can use Chan 0 or Chan 2, and 16-bit Capture and 32-bit Counter Modes both require Chan 0">
+	        ("${module.driver.tml.mode}" === "module.driver.tml.mode.8_bit_counter_mode") ||
+	        (("${module.driver.tml.mode}" === "module.driver.tml.mode.16_bit_counter_mode") &amp;&amp;
+	        (("${module.driver.timer.channel}" == "0") || ("${module.driver.timer.channel}" == "2"))) ||
+	        (("${module.driver.tml.mode}" === "module.driver.tml.mode.32_bit_counter_mode") &amp;&amp;
+	        ("${module.driver.timer.channel}" == "0")) ||
+	        (("${module.driver.tml.mode}" === "module.driver.tml.mode.16_bit_capture_mode") &amp;&amp;
+	        ("${module.driver.timer.channel}" == "0"))
+        </constraint>
+        <constraint display="Single channel mode requires channel 0.">
+            testOption("${config.driver.tml.single_channel}", "config.driver.tml.single_channel.disabled") || ("${module.driver.timer.channel}" == "0")
+        </constraint>
+        <constraint display="Support for the 16-bit capture mode must be enabled in the 'Common' properties">
+            "${module.driver.tml.mode}" != "module.driver.tml.mode.16_bit_capture_mode" ||
+            "${config.driver.tml.16_bit_capture_support}" === "config.driver.tml.16_bit_capture_support.enabled"
+        </constraint>
+        <constraint display="Support for interrupt must be enabled in the 'Common' properties">
+            "${module.driver.timer.ipl}" === "_disabled" ||
+            "${config.driver.tml.interrupt_support}" === "config.driver.tml.interrupt_support.enabled"
+        </constraint>
+        <constraint display="'General->ELC event' must be selected if the FITL0 or FITL1 source is ELC event">
+            ("${board.clock.peripheral.tml.fitl0}" &gt; "0" &amp;&amp;
+            (("${module.driver.tml.mode}" === "module.driver.tml.mode.16_bit_capture_mode" &amp;&amp;
+            "${module.driver.tml.capture_trigger}" === "module.driver.tml.capture_trigger.itlcmp01") ||
+            "${board.clock.peripheral.tml.fitl1}" &gt; "0")) ||
+            "enum.driver.tml.elc_event.disabled" != "${module.driver.tml.elc_event}"
+        </constraint>
+        <constraint display="'General->ELC event' cannot be 'Disabled' if 'Capture Mode Settings->Capture Trigger' is 'Event input from ELC (rising edge)'">
+            !("${module.driver.tml.mode}" === "module.driver.tml.mode.16_bit_capture_mode" &amp;&amp;
+              "${module.driver.tml.capture_trigger}" === "module.driver.tml.capture_trigger.elc" &amp;&amp;
+              "${module.driver.tml.elc_event}" === "enum.driver.tml.elc_event.disabled")
+        </constraint>
+        <constraint display="ELC signal source selection requires an ELC Driver">
+            (!testDynamicEnum("${module.driver.tml.elc_event}", "_signal")) ||
+            "1" === "${interface.driver.elc}"
+        </constraint>
+        <!-- Check that input period is not out of range -->
+        <constraint id="module.driver.tml.constraint.period">
+            eval('' +
+'/* INPUTS */' +
+'    var requested_period = ${module.driver.timer.counter_period};' +
+'    var requested_unit_string = "${module.driver.timer.counter_unit}";' +
+'    var mode_string = "${module.driver.tml.mode}";' +
+'    var peripheral_clock_hz = ${board.clock.peripheral.tml.fitl0};' +
+'' +
+'    var convert_to_ticks = {'+
+'      "module.driver.timer.counter_unit.unit_period_nsec": function (requested_period, peripheral_clock_hz) {  return Math.floor(requested_period / 1000000000 * peripheral_clock_hz); },'+
+'      "module.driver.timer.counter_unit.unit_period_usec": function (requested_period, peripheral_clock_hz) {  return  Math.floor(requested_period / 1000000 * peripheral_clock_hz); },'+
+'      "module.driver.timer.counter_unit.unit_period_msec": function (requested_period, peripheral_clock_hz) {  return  Math.floor(requested_period / 1000 * peripheral_clock_hz); },'+
+'      "module.driver.timer.counter_unit.unit_period_sec": function (requested_period, peripheral_clock_hz) {  return  Math.floor(requested_period * peripheral_clock_hz); },'+
+'      "module.driver.timer.counter_unit.unit_frequency_hz": function (requested_period, peripheral_clock_hz) {  return  Math.floor((1 / requested_period) * peripheral_clock_hz); },'+
+'      "module.driver.timer.counter_unit.unit_frequency_khz": function (requested_period, peripheral_clock_hz) {  return  Math.floor((1 / (requested_period * 1000)) * peripheral_clock_hz); },'+
+'      "module.driver.timer.counter_unit.unit_period_raw_counts": function (requested_period, peripheral_clock_hz) {  return  requested_period; },'+
+'    };'+
+''+
+'    /* Valid period range for each timer mode */'+
+'    var timer_counter_limits = {'+
+'      "module.driver.tml.mode.8_bit_counter_mode": 0x8000,'+
+'      "module.driver.tml.mode.16_bit_counter_mode": 0x800000,'+
+'      "module.driver.tml.mode.32_bit_counter_mode": 0x8000000000,'+
+'    };'+
+''+
+'    /* Convert requested period to timer ticks */'+
+'    var ticks = convert_to_ticks[requested_unit_string](requested_period, peripheral_clock_hz);'+
+''+
+'    /* Check calculated period is in valid range */'+
+'    var min = 0x2;'+
+'    var output = null;'+
+'    if ("module.driver.tml.mode.16_bit_capture_mode" != mode_string)' +
+'    {' +
+'        var max = timer_counter_limits[mode_string];' +
+'        if (ticks &gt; max || ticks &lt; min)'+
+'        {'+
+'            output = "Requested counter period not achievable. Valid range: [0x" + min.toString(16) + ", 0x" + max.toString(16) + "] ticks. Actual calculated: 0x" + ticks.toString(16) + " ticks";'+
+'        }'+
+'    }' +
+''+
+'    output'+
+'')
+        </constraint>
+        <!-- Check that input period is not out of range -->
+        <constraint id="module.driver.tml.constraint.capture_period">
+            eval('' +
+'/* INPUTS */' +
+'    var requested_period = ${module.driver.timer.capture_period};' +
+'    var requested_unit_string = "${module.driver.timer.capture_unit}";' +
+'    var peripheral_clock_hz = ${board.clock.peripheral.tml.fitl1};' +
+'' +
+'    var convert_to_ticks = {'+
+'      "module.driver.timer.capture_unit.unit_period_nsec": function (requested_period, peripheral_clock_hz) {  return Math.floor(requested_period / 1000000000 * peripheral_clock_hz); },'+
+'      "module.driver.timer.capture_unit.unit_period_usec": function (requested_period, peripheral_clock_hz) {  return  Math.floor(requested_period / 1000000 * peripheral_clock_hz); },'+
+'      "module.driver.timer.capture_unit.unit_period_msec": function (requested_period, peripheral_clock_hz) {  return  Math.floor(requested_period / 1000 * peripheral_clock_hz); },'+
+'      "module.driver.timer.capture_unit.unit_period_sec": function (requested_period, peripheral_clock_hz) {  return  Math.floor(requested_period * peripheral_clock_hz); },'+
+'      "module.driver.timer.capture_unit.unit_frequency_hz": function (requested_period, peripheral_clock_hz) {  return  Math.floor((1 / requested_period) * peripheral_clock_hz); },'+
+'      "module.driver.timer.capture_unit.unit_frequency_khz": function (requested_period, peripheral_clock_hz) {  return  Math.floor((1 / (requested_period * 1000)) * peripheral_clock_hz); },'+
+'      "module.driver.timer.capture_unit.unit_period_raw_counts": function (requested_period, peripheral_clock_hz) {  return  requested_period; },'+
+'    };'+
+''+
+'    /* Convert requested period to timer ticks */'+
+'    var ticks = convert_to_ticks[requested_unit_string](requested_period, peripheral_clock_hz);'+
+''+
+'    /* Check calculated period is in valid range */'+
+'    var min = 0x2;'+
+'    var max = 0x10000;'+
+'    var output = null;'+
+'    if ("module.driver.tml.mode.16_bit_capture_mode" === "${module.driver.tml.mode}" &amp;&amp; "module.driver.tml.capture_trigger.itlcmp01" === "${module.driver.tml.capture_trigger}")' +
+'    {' +
+'        if (ticks &gt; max || ticks &lt; min)'+
+'        {'+
+'            output = "Requested capture period not achievable. Valid range: [0x" + min.toString(16) + ", 0x" + max.toString(16) + "] ticks. Actual calculated: 0x" + ticks.toString(16) + " ticks";'+
+'        }'+
+'    }' +
+''+
+'    output'+
+'')
+        </constraint>
+        <requires id="module.driver.timer_on_tml.requires.tml" interface="interface.mcu.tml" visible="false" display="Requires TML peripheral" />
+        <provides interface="interface.driver.timer" />
+        <provides interface="interface.driver.timer_on_tml" />
+        <provides interface="interface.driver.timer.${module.driver.timer.name}" />
+        <provides interface="interface.driver.timer.${module.driver.tml.mode}" />
+        <property default="g_timer${_instance}" display="General|Name" id="module.driver.timer.name" description="Module name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.timer.name}")</constraint>
+        </property>
+        <property default="module.driver.tml.mode.16_bit_counter_mode" display="General|Mode" id="module.driver.tml.mode" description="Selection of Operating mode.">
+            <option display="8-bit Counter Mode" id="module.driver.tml.mode.8_bit_counter_mode" value="TIMER_MODE_8_BIT_COUNTER"/>
+            <option display="16-bit Counter Mode" id="module.driver.tml.mode.16_bit_counter_mode" value="TIMER_MODE_16_BIT_COUNTER"/>
+            <option display="32-bit Counter Mode" id="module.driver.tml.mode.32_bit_counter_mode" value="TIMER_MODE_32_BIT_COUNTER"/>
+            <option display="16-bit Capture Mode" id="module.driver.tml.mode.16_bit_capture_mode" value="TIMER_MODE_16_BIT_CAPTURE"/>
+        </property>
+        <property default="0" display="General|Channel Selection" id="module.driver.timer.channel" description="Specify the hardware channel.">
+            <constraint display="Channel number must exist on this MCU">testInteger("${module.driver.timer.channel}")  &amp;&amp; ("${module.driver.timer.channel}" &gt;= 0)  &amp;&amp; ("${module.driver.timer.channel}" &lt;= 3)</constraint>
+        </property>
+        <property default="0" id="module.driver.timer.channel.elc">
+            <export><![CDATA[eval('' +
+'    var channel = "${module.driver.timer.channel}";' +
+'    var mode = "${module.driver.tml.mode}";' +
+'    if ("TIMER_MODE_16_BIT_CAPTURE" == mode)' +
+'    {' +
+'        channel = "invalid";' +
+'    }' +
+'    channel' +
+'')
+]]>            </export>
+            <signal event="event.tml0.itl${module.driver.timer.channel.elc}"/>
+        </property>
+        <property default="" display="General|ELC event" id="module.driver.tml.elc_event" description="Select the elc event.">
+            <select enum="enum.driver.tml.elc_event" />
+            <select enum="_signal" />
+            <linkConstraint display="Requires an ELC peripheral function for TML">
+                "${_link}".startsWith("link.itlc")
+            </linkConstraint>
+        </property>
+        <property default="0x10000" display="Counter Mode Settings|Period" id="module.driver.timer.counter_period" description="Specify the timer period in units selected below.\n\nSet the period to 0x100 (8-bit) or 0x10000 (16-bit) or 0x100000000 (32-bit) raw counts for a free running timer. Since the maxmimum divider is 128... the raw counts period can be set up to the (max count+1)*128. [0x8000 (8-bit) or 0x800000 (16-bit), or 0x8000000000 (32-bit)].">
+            <constraint display="Value must be positive integer">
+                testInteger("${module.driver.timer.counter_period}") &amp;&amp; ("${module.driver.timer.counter_period}" &gt; 0)
+            </constraint>
+            <export><![CDATA[eval('' +
+'/* INPUTS */' +
+'    var requested_period = ${module.driver.timer.counter_period};' +
+'    var requested_unit_string = "${module.driver.timer.counter_unit}";' +
+'    var mode_string = "${module.driver.tml.mode}";' +
+'    var peripheral_clock_hz = ${board.clock.peripheral.tml.fitl0};' +
+'    if ("TIMER_MODE_16_BIT_CAPTURE" == mode_string)' +
+'    {' +
+'        requested_period = ${module.driver.timer.capture_period};' +
+'        requested_unit_string = "${module.driver.timer.capture_unit}";' +
+'        peripheral_clock_hz = ${board.clock.peripheral.tml.fitl1};' +
+'    }' +
+'' +
+'    var convert_to_ticks = {'+
+'      "ns": function (requested_period, peripheral_clock_hz) {  return Math.floor(requested_period / 1000000000 * peripheral_clock_hz); },'+
+'      "us": function (requested_period, peripheral_clock_hz) {  return  Math.floor(requested_period / 1000000 * peripheral_clock_hz); },'+
+'      "ms": function (requested_period, peripheral_clock_hz) {  return  Math.floor(requested_period / 1000 * peripheral_clock_hz); },'+
+'      "s": function (requested_period, peripheral_clock_hz) {  return  Math.floor(requested_period * peripheral_clock_hz); },'+
+'      "hz": function (requested_period, peripheral_clock_hz) {  return  Math.floor((1 / requested_period) * peripheral_clock_hz); },'+
+'      "khz": function (requested_period, peripheral_clock_hz) {  return  Math.floor((1 / (requested_period * 1000)) * peripheral_clock_hz); },'+
+'      "raw": function (requested_period, peripheral_clock_hz) {  return  requested_period; },'+
+'    };'+
+'' +
+'    /* Convert requested period to timer ticks */'+
+'    var period_counts = convert_to_ticks[requested_unit_string](requested_period, peripheral_clock_hz);'+
+'' +
+'    /* Valid period range for each timer mode */'+
+'    var timer_counter_limits = {'+
+'      "TIMER_MODE_8_BIT_COUNTER": 0x100,'+
+'      "TIMER_MODE_16_BIT_COUNTER": 0x10000,'+
+'      "TIMER_MODE_32_BIT_COUNTER": 0x100000000,'+
+'    };'+
+'' +
+'    /* Calculate the smallest divider required to fit the period in the specified # of bits. The maximum divider is based on BSP_FEATURE_TML_MAX_CLOCK_DIVIDER (TIMER_SOURCE_DIV_128) or 2^7. */' +
+'    var divider = 0;' +
+'    var max_divider = 7;' +
+'    var max_period_count = 0x10000;' +
+'' +
+'    if ("TIMER_MODE_16_BIT_CAPTURE" != mode_string)' +
+'    {' +
+'        max_period_count = timer_counter_limits[mode_string];' +
+'        while (period_counts > max_period_count)' +
+'        {' +
+'            divider += 1;' +
+'            if (divider > max_divider)' +
+'            {' +
+'                divider = max_divider;' +
+'                break;' +
+'            }' +
+'            period_counts /= 2;' +
+'        }' +
+'    }' +
+'' +
+'    /* Round period down. */' +
+'    period_counts = Math.floor(period_counts);' +
+'' +
+'    if ("TIMER_MODE_16_BIT_CAPTURE" == mode_string)' +
+'    {' +
+'        divider = ${module.driver.tml.capture_clock_div};' +
+'        if ("TML_CAPTURE_TRIGGER_ITLCMP01" != "${module.driver.tml.capture_trigger}")'+
+'        {'+
+'            /* Set the period counts to maximum in case the capture trigger is not an interrupt from itlcmp01. */' +
+'            period_counts = max_period_count;'+
+'        }'+
+'    }' +
+'' +
+'    /* Calculate the actual values. */' +
+'    var actual_period = period_counts / (peripheral_clock_hz >> divider);' +
+'    counter_period_setting = "/* Actual period: " + actual_period.toString() + " seconds. */" + ' +
+'                   " .period_counts = (uint32_t) 0x" + period_counts.toString(16) +' +
+'                   ", .source_div = (timer_source_div_t)" + divider.toString();' +
+'    counter_period_setting' +
+'')
+]]>            </export>
+        </property>
+        <property default="module.driver.timer.counter_unit.unit_period_raw_counts" display="Counter Mode Settings|Period Unit" id="module.driver.timer.counter_unit" description="Unit of the period specified above. When the Counter Clock Source is the ELC, only Raw Counts can be selected here.">
+            <option display="Raw Counts" id="module.driver.timer.counter_unit.unit_period_raw_counts" value="raw"/>
+            <option display="Nanoseconds" id="module.driver.timer.counter_unit.unit_period_nsec" value="ns"/>
+            <option display="Microseconds" id="module.driver.timer.counter_unit.unit_period_usec" value="us"/>
+            <option display="Milliseconds" id="module.driver.timer.counter_unit.unit_period_msec" value="ms"/>
+            <option display="Seconds" id="module.driver.timer.counter_unit.unit_period_sec" value="s"/>
+            <option display="Hertz" id="module.driver.timer.counter_unit.unit_frequency_hz" value="hz"/>
+            <option display="Kilohertz" id="module.driver.timer.counter_unit.unit_frequency_khz" value="khz"/>
+        </property>
+        <property default="" display="Capture Mode Settings|Capture Trigger" id="module.driver.tml.capture_trigger" description="Selection of capture trigger.">
+            <select enum="enum.driver.tml.capture_triggers"/>
+        </property>
+        <property default="module.driver.tml.capture_clock_div.fitl0_div_1" display="Capture Mode Settings|Capture Clock Divider" id="module.driver.tml.capture_clock_div" description="Configure FDIV0 for the counter clock in 16-bit Capture Mode.">
+            <option display="fITL0" id="module.driver.tml.capture_clock_div.fitl0_div_1" value="0"/>
+            <option display="fITL0/2" id="module.driver.tml.capture_clock_div.fitl0_div_2" value="1"/>
+            <option display="fITL0/4" id="module.driver.tml.capture_clock_div.fitl0_div_4" value="2"/>
+            <option display="fITL0/8" id="module.driver.tml.capture_clock_div.fitl0_div_8" value="3"/>
+            <option display="fITL0/16" id="module.driver.tml.capture_clock_div.fitl0_div_16" value="4"/>
+            <option display="fITL0/32" id="module.driver.tml.capture_clock_div.fitl0_div_32" value="5"/>
+            <option display="fITL0/64" id="module.driver.tml.capture_clock_div.fitl0_div_64" value="6"/>
+            <option display="fITL0/128" id="module.driver.tml.capture_clock_div.fitl0_div_128" value="7"/>
+        </property>
+        <property default="module.driver.tml.counter_status.retained_after_capturing" display="Capture Mode Settings|Counter Status" id="module.driver.tml.counter_status" description="Selection of the 16-bit counter (ITL000 + ITL001) clearing after capturing.">
+            <option display="Retained after the completion of capturing" id="module.driver.tml.counter_status.retained_after_capturing" value="TML_COUNTER_STATUS_RETAINED_AFTER_CAPTURING"/>
+            <option display="Cleared after the completion of capturing" id="module.driver.tml.counter_status.cleared_after_capturing" value="TML_COUNTER_STATUS_CLEARED_AFTER_CAPTURING"/>
+        </property>
+        <property default="0x10000" display="Capture Mode Settings|16-Bit Counter Input Settings (when Capture source = Interrupt on compare match with ITLCMP01)|Period" id="module.driver.timer.capture_period" description="Specify the timer period in units selected below.\n\nSet the period to 0x10000 raw counts in the maximum period of 16-bit capture.">
+            <constraint display="Value must be positive integer">
+                testInteger("${module.driver.timer.capture_period}") &amp;&amp; ("${module.driver.timer.capture_period}" &gt; 0)
+            </constraint>
+        </property>
+        <property default="module.driver.timer.capture_unit.unit_period_raw_counts" display="Capture Mode Settings|16-Bit Counter Input Settings (when Capture source = Interrupt on compare match with ITLCMP01)|Period Unit" id="module.driver.timer.capture_unit" description="Unit of the period specified above. When the Capture Clock Source is the ELC, only Raw Counts can be selected here.">
+            <option display="Raw Counts" id="module.driver.timer.capture_unit.unit_period_raw_counts" value="raw"/>
+            <option display="Nanoseconds" id="module.driver.timer.capture_unit.unit_period_nsec" value="ns"/>
+            <option display="Microseconds" id="module.driver.timer.capture_unit.unit_period_usec" value="us"/>
+            <option display="Milliseconds" id="module.driver.timer.capture_unit.unit_period_msec" value="ms"/>
+            <option display="Seconds" id="module.driver.timer.capture_unit.unit_period_sec" value="s"/>
+            <option display="Hertz" id="module.driver.timer.capture_unit.unit_frequency_hz" value="hz"/>
+            <option display="Kilohertz" id="module.driver.timer.capture_unit.unit_frequency_khz" value="khz"/>
+        </property>
+        <property default="NULL" id="module.driver.tml.p_context" />
+        <property default="NULL" display="Interrupt|Callback function" id="module.driver.timer.p_callback" description="A user callback function can be provided here. If this callback function is provided, it is called from the interrupt service routine (ISR) each time the IRQn triggers">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.timer.p_callback}")</constraint>
+        </property>
+        <property default="" display="Interrupt|Priority" id="module.driver.timer.ipl" description="Select the interrupt priority.">
+            <select enum="enum.mcu.nvic.priorities.optional"/>
+            <interrupt event="event.tml0.itl.or" isr="tml_itl_or_isr"/>
+        </property>
+        <peripheral name="TML_${module.driver.timer.channel}" component="tml_${module.driver.timer.channel}" />
+        <symbol id="symbol.driver.tml.name" value="${module.driver.timer.name}"/>
+        <symbol id="symbol.driver.tml.cfg" value="${module.driver.timer.name}_cfg"/>
+        <symbol id="symbol.driver.tml.ctrl" value="${module.driver.timer.name}_ctrl"/>
+        <header>
+/** Timer on TML Instance. */
+extern const timer_instance_t ${module.driver.timer.name};
+
+/** Access the TML instance using these structures when calling API functions directly (::p_api is not used). */
+extern tml_instance_ctrl_t ${module.driver.timer.name}_ctrl;
+extern const timer_cfg_t ${module.driver.timer.name}_cfg;
+
+#ifndef ${module.driver.timer.p_callback}
+void ${module.driver.timer.p_callback}(timer_callback_args_t * p_args);
+#endif
+        </header>
+        <includes>#include &quot;r_tml.h&quot;
+#include &quot;r_timer_api.h&quot;</includes>
+        <macros>
+        </macros>
+        <declarations>
+tml_instance_ctrl_t ${module.driver.timer.name}_ctrl;
+const tml_extended_cfg_t ${module.driver.timer.name}_extend =
+{
+    .capture_trigger    = ${module.driver.tml.capture_trigger},
+    .counter_status     = ${module.driver.tml.counter_status},
+};
+const timer_cfg_t ${module.driver.timer.name}_cfg =
+{
+    .mode               = ${module.driver.tml.mode},
+    ${module.driver.timer.counter_period},
+    .channel            = ${module.driver.timer.channel},
+    .p_callback         = ${module.driver.timer.p_callback},
+    /** If NULL then do not add &amp; */
+#if defined(${module.driver.tml.p_context})
+    .p_context          = ${module.driver.tml.p_context},
+#else
+    .p_context          = &amp;${module.driver.tml.p_context},
+#endif
+    .p_extend           = &amp;${module.driver.timer.name}_extend,
+    .cycle_end_ipl      = ${module.driver.timer.ipl},
+#if defined(VECTOR_NUMBER_TML0_ITL_OR)
+    .cycle_end_irq      = VECTOR_NUMBER_TML0_ITL_OR,
+#else
+    .cycle_end_irq      = FSP_INVALID_VECTOR,
+#endif
+};
+/* Instance structure to use this module. */
+const timer_instance_t ${module.driver.timer.name} =
+{
+    .p_ctrl             = &amp;${module.driver.timer.name}_ctrl,
+    .p_cfg              = &amp;${module.driver.timer.name}_cfg,
+    .p_api              = &amp;g_timer_on_tml
+};
+        </declarations>
+        <api configurable="true">
+            <file>ra/fsp/inc/instances/r_tml.h</file>
+            <file>ra/fsp/inc/api/r_timer_api.h</file>
+        </api>
+    </module>
+</raModuleDescription>

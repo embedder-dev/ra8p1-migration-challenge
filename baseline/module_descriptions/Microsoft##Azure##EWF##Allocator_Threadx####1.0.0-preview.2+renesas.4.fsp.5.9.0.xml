@@ -1,0 +1,10 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<raModuleDescription>
+    <module config="config.azure.ewf" id="module.azure.ewf.allocator.threadx" display="Networking|Azure EWF ThreadX Allocator" common="1" version="0" url="https://azure.github.io/embedded-wireless-framework/html/index.html" visible="false">
+        <requires id="module.azure.ewf.allocator.threadx.requires.threadx" interface="interface.rtos.tx" visible="false" display="Requires ThreadX"/>
+        <provides interface="interface.azure.ewf.allocator" />
+        <includes>
+#include &quot;ewf_allocator_threadx.h&quot;
+        </includes>
+    </module>
+</raModuleDescription>

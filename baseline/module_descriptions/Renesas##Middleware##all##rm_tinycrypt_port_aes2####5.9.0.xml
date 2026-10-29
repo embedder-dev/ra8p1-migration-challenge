@@ -1,0 +1,10 @@
+<?xml version="1.0" ?>
+<raModuleDescription>
+  <module display="Security|TinyCrypt H/W Acceleration (rm_tinycrypt_port_aes2)" id="module.middleware.rm_tinycrypt_port_aes2" visible="false" version="1" url="group___r_m___t_i_n_y_c_r_y_p_t___p_o_r_t.html">
+    <constraint display="Requires SCE Driver">
+          "${interface.driver.sce}" === "1"
+    </constraint>
+    <requires id="module.middleware.rm_tinycrypt_port_aes2.requires.sce" interface="interface.driver.sce" visible="true" find="true" display="Accelerate with Crypto H/W " />
+    <provides interface="interface.middleware.rm_tinycrypt_port_aes2" />
+  </module>
+</raModuleDescription>

@@ -1,0 +1,211 @@
+﻿<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.driver.qspi" path="driver/r_qspi_cfg.h" version="0">
+        <property default="config.driver.qspi.param_checking_enable.bsp" display="Parameter Checking" id="config.driver.qspi.param_checking_enable" description="If selected code for parameter checking is included in the build.">
+            <option display="Default (BSP)" id="config.driver.qspi.param_checking_enable.bsp" value="(BSP_CFG_PARAM_CHECKING_ENABLE)"/>
+            <option display="Enabled" id="config.driver.qspi.param_checking_enable.enabled" value="(1)"/>
+            <option display="Disabled" id="config.driver.qspi.param_checking_enable.disabled" value="(0)"/>
+        </property>
+        <property default="config.driver.qspi.extended_spi_multi_line_program.disabled" display="Support Multiple Line Program in Extended SPI Mode" id="config.driver.qspi.extended_spi_multi_line_program" description="If selected code for programming on multiple lines in extended SPI mode is included in the build.">
+            <option display="Enabled" id="config.driver.qspi.extended_spi_multi_line_program.enabled" value="(1)"/>
+            <option display="Disabled" id="config.driver.qspi.extended_spi_multi_line_program.disabled" value="(0)"/>
+        </property>
+        <content>
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#define QSPI_CFG_PARAM_CHECKING_ENABLE ${config.driver.qspi.param_checking_enable}
+#define QSPI_CFG_SUPPORT_EXTENDED_SPI_MULTI_LINE_PROGRAM  ${config.driver.qspi.extended_spi_multi_line_program}
+
+#ifdef __cplusplus
+}
+#endif
+        </content>
+    </config>
+    <module config="config.driver.qspi" display="Storage|${module.driver.qspi.name} QSPI (r_qspi)" id="module.driver.qspi_on_qspi" version="1" url="group___q_s_p_i.html">
+        <constraint display="Unique name required for each instance">
+            "${interface.driver.qspi.${module.driver.qspi.name}}" === "1"
+        </constraint>
+        <constraint display="Requires QSPI peripheral">
+          "${interface.mcu.qspi.external}" === "1"
+        </constraint>
+        <requires id="module.driver.qspi_on_qspi.requires.qspi" interface="interface.mcu.qspi.external" visible="false" display="Requires QSPI peripheral" />
+        <provides interface="interface.driver.spi_flash" />
+        <provides interface="interface.driver.qspi" />
+        <provides interface="interface.driver.qspi_on_qspi" />
+        <provides interface="interface.driver.qspi.${module.driver.qspi.name}" />
+        <provides interface="interface.driver.rm_mcuboot_external_memory" />
+        <property default="g_qspi${_instance}" display="General|Name" id="module.driver.qspi.name" description="Module name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.qspi.name}")</constraint>
+        </property>
+        <property default="module.driver.qspi.spi_protocol.protocol_extended_spi" display="General|SPI Protocol" id="module.driver.qspi.spi_protocol" description="Select the initial SPI protocol.  SPI protocol can be changed in @ref R_QSPI_Direct().">
+            <option display="Extended SPI" id="module.driver.qspi.spi_protocol.protocol_extended_spi" value="SPI_FLASH_PROTOCOL_EXTENDED_SPI"/>
+            <option display="QPI" id="module.driver.qspi.spi_protocol.protocol_qpi" value="SPI_FLASH_PROTOCOL_QPI"/>
+        </property>
+        <property default="module.driver.qspi.address_bytes.address_bytes_3" display="General|Address Bytes" id="module.driver.qspi.address_bytes" description="Select the number of address bytes. Selecting '4 with 4-byte read code' converts the default read code determined in Read Mode to the 4-byte version. If 4-byte mode is selected without using 4-byte commands, the application must issue the EN4B command using @ref R_QSPI_Direct().">
+            <option display="3" id="module.driver.qspi.address_bytes.address_bytes_3" value="SPI_FLASH_ADDRESS_BYTES_3"/>
+            <option display="4" id="module.driver.qspi.address_bytes.address_bytes_4" value="SPI_FLASH_ADDRESS_BYTES_4"/>
+            <option display="4 with 4-byte read code" id="module.driver.qspi.address_bytes.address_bytes_4_read_code_4" value="SPI_FLASH_ADDRESS_BYTES_4_4BYTE_READ_CODE"/>
+        </property>
+        <property default="module.driver.qspi.read_mode.read_mode_fast_read_quad_io" display="General|Read Mode" id="module.driver.qspi.read_mode" description="Select the read mode for memory mapped access.">
+            <option display="Standard Read" id="module.driver.qspi.read_mode.read_mode_standard" value="SPI_FLASH_READ_MODE_STANDARD"/>
+            <option display="Fast Read" id="module.driver.qspi.read_mode.read_mode_fast_read" value="SPI_FLASH_READ_MODE_FAST_READ"/>
+            <option display="Fast Read Dual Output" id="module.driver.qspi.read_mode.read_mode_fast_read_dual_output" value="SPI_FLASH_READ_MODE_FAST_READ_DUAL_OUTPUT"/>
+            <option display="Fast Read Dual I/O" id="module.driver.qspi.read_mode.read_mode_fast_read_dual_io" value="SPI_FLASH_READ_MODE_FAST_READ_DUAL_IO"/>
+            <option display="Fast Read Quad Output" id="module.driver.qspi.read_mode.read_mode_fast_read_quad_output" value="SPI_FLASH_READ_MODE_FAST_READ_QUAD_OUTPUT"/>
+            <option display="Fast Read Quad I/O" id="module.driver.qspi.read_mode.read_mode_fast_read_quad_io" value="SPI_FLASH_READ_MODE_FAST_READ_QUAD_IO"/>
+        </property>
+        <property default="module.driver.qspi.dummy_clocks.dummy_clocks_default" display="General|Dummy Clocks for Fast Read" id="module.driver.qspi.dummy_clocks" description="Select the number of dummy clocks for fast read operations. Default is 6 clocks for Fast Read Quad I/O, 4 clocks for Fast Read Dual I/O, and 8 clocks for other fast read instructions including Fast Read Quad Output, Fast Read Dual Output, and Fast Read">
+            <option display="Default" id="module.driver.qspi.dummy_clocks.dummy_clocks_default" value="SPI_FLASH_DUMMY_CLOCKS_DEFAULT"/>
+            <option display="3" id="module.driver.qspi.dummy_clocks.dummy_clocks_3" value="SPI_FLASH_DUMMY_CLOCKS_3"/>
+            <option display="4" id="module.driver.qspi.dummy_clocks.dummy_clocks_4" value="SPI_FLASH_DUMMY_CLOCKS_4"/>
+            <option display="5" id="module.driver.qspi.dummy_clocks.dummy_clocks_5" value="SPI_FLASH_DUMMY_CLOCKS_5"/>
+            <option display="6" id="module.driver.qspi.dummy_clocks.dummy_clocks_6" value="SPI_FLASH_DUMMY_CLOCKS_6"/>
+            <option display="7" id="module.driver.qspi.dummy_clocks.dummy_clocks_7" value="SPI_FLASH_DUMMY_CLOCKS_7"/>
+            <option display="8" id="module.driver.qspi.dummy_clocks.dummy_clocks_8" value="SPI_FLASH_DUMMY_CLOCKS_8"/>
+            <option display="9" id="module.driver.qspi.dummy_clocks.dummy_clocks_9" value="SPI_FLASH_DUMMY_CLOCKS_9"/>
+            <option display="10" id="module.driver.qspi.dummy_clocks.dummy_clocks_10" value="SPI_FLASH_DUMMY_CLOCKS_10"/>
+            <option display="11" id="module.driver.qspi.dummy_clocks.dummy_clocks_11" value="SPI_FLASH_DUMMY_CLOCKS_11"/>
+            <option display="12" id="module.driver.qspi.dummy_clocks.dummy_clocks_12" value="SPI_FLASH_DUMMY_CLOCKS_12"/>
+            <option display="13" id="module.driver.qspi.dummy_clocks.dummy_clocks_13" value="SPI_FLASH_DUMMY_CLOCKS_13"/>
+            <option display="14" id="module.driver.qspi.dummy_clocks.dummy_clocks_14" value="SPI_FLASH_DUMMY_CLOCKS_14"/>
+            <option display="15" id="module.driver.qspi.dummy_clocks.dummy_clocks_15" value="SPI_FLASH_DUMMY_CLOCKS_15"/>
+            <option display="16" id="module.driver.qspi.dummy_clocks.dummy_clocks_16" value="SPI_FLASH_DUMMY_CLOCKS_16"/>
+            <option display="17" id="module.driver.qspi.dummy_clocks.dummy_clocks_17" value="SPI_FLASH_DUMMY_CLOCKS_17"/>
+        </property>
+        <property default="256" display="General|Page Size Bytes" id="module.driver.qspi.page_size_bytes" description="The maximum number of bytes allowed for a single write.">
+            <constraint display="Must be an integer greater than 0">testInteger("${module.driver.qspi.page_size_bytes}") &amp;&amp; ${module.driver.qspi.page_size_bytes} &gt; 0</constraint>
+        </property>
+        <property default="0x02" display="Command Definitions|Page Program Command" id="module.driver.qspi.page_program_command" description="The command to program a page. If 'Support Multiple Line Program in Extended SPI Mode' is Enabled, this command must use the same number of data lines as the selected read mode.">
+            <constraint display="Must be an 8-bit QSPI Page Program Command under Command Definitions">testInteger("${module.driver.qspi.page_program_command}") &amp;&amp; ${module.driver.qspi.page_program_command} &gt;= 0 &amp;&amp; ${module.driver.qspi.page_program_command} &lt; 256</constraint>
+        </property>
+        <property default="module.driver.qspi.page_program_address_lines.data_lines_1" display="Command Definitions|Page Program Address Lines" id="module.driver.qspi.page_program_address_lines" description="Select the number of lines to use for the address bytes during write operations. This can be determined by referencing the datasheet for the external QSPI.  It should either be 1 or match the number of data lines used for memory mapped fast read operations.">
+            <option display="1" id="module.driver.qspi.page_program_address_lines.data_lines_1" value="SPI_FLASH_DATA_LINES_1"/>
+            <option display="2" id="module.driver.qspi.page_program_address_lines.data_lines_2" value="SPI_FLASH_DATA_LINES_2"/>
+            <option display="4" id="module.driver.qspi.page_program_address_lines.data_lines_4" value="SPI_FLASH_DATA_LINES_4"/>
+        </property>
+        <property default="0x06" display="Command Definitions|Write Enable Command" id="module.driver.qspi.write_enable_command" description="The command to enable write.">
+            <constraint display="Must be an 8-bit QSPI Write Enable Command under Command Definitions">testInteger("${module.driver.qspi.write_enable_command}") &amp;&amp; ${module.driver.qspi.write_enable_command} &gt;= 0 &amp;&amp; ${module.driver.qspi.write_enable_command} &lt; 256</constraint>
+        </property>
+        <property default="0x05" display="Command Definitions|Status Command" id="module.driver.qspi.status_command" description="The command to query the status of a write or erase command.">
+            <constraint display="Must be an 8-bit QSPI Status Command under Command Definitions">testInteger("${module.driver.qspi.status_command}") &amp;&amp; ${module.driver.qspi.status_command} &gt;= 0 &amp;&amp; ${module.driver.qspi.status_command} &lt; 256</constraint>
+        </property>
+        <property default="0" display="Command Definitions|Write Status Bit" id="module.driver.qspi.write_status_bit" description="Which bit contains the write in progress status returned from the Write Status Command.">
+            <constraint display="Must be an integer between 0 and 7">testInteger("${module.driver.qspi.write_status_bit}") &amp;&amp; ${module.driver.qspi.write_status_bit} &gt;= 0 &amp;&amp; ${module.driver.qspi.write_status_bit} &lt; 8</constraint>
+        </property>
+        <property default="0x20" display="Command Definitions|Sector Erase Command" id="module.driver.qspi.sector_erase_command" description="The command to erase a sector.  Set Sector Erase Size to 0 if unused.">
+            <constraint display="Must be an 8-bit QSPI Sector Erase Command under Command Definitions">testInteger("${module.driver.qspi.sector_erase_command}") &amp;&amp; ${module.driver.qspi.sector_erase_command} &gt;= 0 &amp;&amp; ${module.driver.qspi.sector_erase_command} &lt; 256</constraint>
+        </property>
+        <property default="4096" display="Command Definitions|Sector Erase Size" id="module.driver.qspi.sector_erase_size" description="The sector erase size.  Set Sector Erase Size to 0 if Sector Erase is not supported.">
+            <constraint display="Must be an integer greater than or equal to 0">testInteger("${module.driver.qspi.sector_erase_size}") &amp;&amp; ${module.driver.qspi.sector_erase_size} &gt;= 0</constraint>
+        </property>
+        <property default="0xD8" display="Command Definitions|Block Erase Command" id="module.driver.qspi.block_erase_command" description="The command to erase a block.  Set Block Erase Size to 0 if unused.">
+            <constraint display="Must be an 8-bit QSPI Block Erase Command under Command Definitions">testInteger("${module.driver.qspi.block_erase_command}") &amp;&amp; ${module.driver.qspi.block_erase_command} &gt;= 0 &amp;&amp; ${module.driver.qspi.block_erase_command} &lt; 256</constraint>
+        </property>
+        <property default="65536" display="Command Definitions|Block Erase Size" id="module.driver.qspi.block_erase_size" description="The block erase size.  Set Block Erase Size to 0 if Block Erase is not supported.">
+            <constraint display="Must be an integer greater than or equal to 0">testInteger("${module.driver.qspi.block_erase_size}") &amp;&amp; ${module.driver.qspi.block_erase_size} &gt;= 0</constraint>
+        </property>
+        <property default="0x52" display="Command Definitions|Block Erase 32KB Command" id="module.driver.qspi.block_erase_32kb_command" description="The command to erase a 32KB block.  Set Block Erase Size to 0 if unused.">
+            <constraint display="Must be an 8-bit QSPI Block Erase 32KB Command under Command Definitions">testInteger("${module.driver.qspi.block_erase_32kb_command}") &amp;&amp; ${module.driver.qspi.block_erase_32kb_command} &gt;= 0 &amp;&amp; ${module.driver.qspi.block_erase_32kb_command} &lt; 256</constraint>
+        </property>
+        <property default="32768" display="Command Definitions|Block Erase 32KB Size" id="module.driver.qspi.block_erase_32kb_size" description="The block erase 32KB size.  Set Block Erase 32KB Size to 0 if Block Erase 32KB is not supported.">
+            <constraint display="Must be an integer greater than or equal to 0">testInteger("${module.driver.qspi.block_erase_32kb_size}") &amp;&amp; ${module.driver.qspi.block_erase_32kb_size} &gt;= 0</constraint>
+        </property>
+        <property default="0xC7" display="Command Definitions|Chip Erase Command" id="module.driver.qspi.chip_erase_command" description="The command to erase the entire chip.  Set Chip Erase Command to 0 if unused.">
+            <constraint display="Must be an 8-bit QSPI Chip Erase Command under Command Definitions">testInteger("${module.driver.qspi.chip_erase_command}") &amp;&amp; ${module.driver.qspi.chip_erase_command} &gt;= 0 &amp;&amp; ${module.driver.qspi.chip_erase_command} &lt; 256</constraint>
+        </property>
+        <property default="0x20" display="Command Definitions|XIP Enter M7-M0" id="module.driver.qspi.xip_enter_command" description="How to set M7-M0 to enter XIP mode.">
+            <constraint display="Must be an 8-bit QSPI XIP Enter M7-M0 command under Command Definitions">testInteger("${module.driver.qspi.xip_enter_command}") &amp;&amp; ${module.driver.qspi.xip_enter_command} &gt;= 0 &amp;&amp; ${module.driver.qspi.xip_enter_command} &lt; 256</constraint>
+        </property>
+        <property default="0xFF" display="Command Definitions|XIP Exit M7-M0" id="module.driver.qspi.xip_exit_command" description="How to set M7-M0 exit XIP mode.">
+            <constraint display="Must be an 8-bit QSPI XIP Exit M7-M0 command under Command Definitions">testInteger("${module.driver.qspi.xip_exit_command}") &amp;&amp; ${module.driver.qspi.xip_exit_command} &gt;= 0 &amp;&amp; ${module.driver.qspi.xip_exit_command} &lt; 256</constraint>
+        </property>
+        <property default="" display="Bus Timing|QSPKCLK Divisor" id="module.driver.qspi.qspclk_div" description="Select the divisor to apply to PCLK to get QSPCLK.">
+            <select enum="enum.mcu.qspi.qspclk_div" />
+        </property>
+        <property default="module.driver.qspi.min_qssl_deselect_cycles.qssl_min_high_level_4_qspclk" display="Bus Timing|Minimum QSSL Deselect Cycles" id="module.driver.qspi.min_qssl_deselect_cycles" description="Define the minimum number of QSPCLK cycles for QSSL to remain high beween operations.">
+            <option display="1 QSPCLK" id="module.driver.qspi.min_qssl_deselect_cycles.qssl_min_high_level_1_qspclk" value="QSPI_QSSL_MIN_HIGH_LEVEL_1_QSPCLK"/>
+            <option display="2 QSPCLK" id="module.driver.qspi.min_qssl_deselect_cycles.qssl_min_high_level_2_qspclk" value="QSPI_QSSL_MIN_HIGH_LEVEL_2_QSPCLK"/>
+            <option display="3 QSPCLK" id="module.driver.qspi.min_qssl_deselect_cycles.qssl_min_high_level_3_qspclk" value="QSPI_QSSL_MIN_HIGH_LEVEL_3_QSPCLK"/>
+            <option display="4 QSPCLK" id="module.driver.qspi.min_qssl_deselect_cycles.qssl_min_high_level_4_qspclk" value="QSPI_QSSL_MIN_HIGH_LEVEL_4_QSPCLK"/>
+            <option display="5 QSPCLK" id="module.driver.qspi.min_qssl_deselect_cycles.qssl_min_high_level_5_qspclk" value="QSPI_QSSL_MIN_HIGH_LEVEL_5_QSPCLK"/>
+            <option display="6 QSPCLK" id="module.driver.qspi.min_qssl_deselect_cycles.qssl_min_high_level_6_qspclk" value="QSPI_QSSL_MIN_HIGH_LEVEL_6_QSPCLK"/>
+            <option display="7 QSPCLK" id="module.driver.qspi.min_qssl_deselect_cycles.qssl_min_high_level_7_qspclk" value="QSPI_QSSL_MIN_HIGH_LEVEL_7_QSPCLK"/>
+            <option display="8 QSPCLK" id="module.driver.qspi.min_qssl_deselect_cycles.qssl_min_high_level_8_qspclk" value="QSPI_QSSL_MIN_HIGH_LEVEL_8_QSPCLK"/>
+            <option display="9 QSPCLK" id="module.driver.qspi.min_qssl_deselect_cycles.qssl_min_high_level_9_qspclk" value="QSPI_QSSL_MIN_HIGH_LEVEL_9_QSPCLK"/>
+            <option display="10 QSPCLK" id="module.driver.qspi.min_qssl_deselect_cycles.qssl_min_high_level_10_qspclk" value="QSPI_QSSL_MIN_HIGH_LEVEL_10_QSPCLK"/>
+            <option display="11 QSPCLK" id="module.driver.qspi.min_qssl_deselect_cycles.qssl_min_high_level_11_qspclk" value="QSPI_QSSL_MIN_HIGH_LEVEL_11_QSPCLK"/>
+            <option display="12 QSPCLK" id="module.driver.qspi.min_qssl_deselect_cycles.qssl_min_high_level_12_qspclk" value="QSPI_QSSL_MIN_HIGH_LEVEL_12_QSPCLK"/>
+            <option display="13 QSPCLK" id="module.driver.qspi.min_qssl_deselect_cycles.qssl_min_high_level_13_qspclk" value="QSPI_QSSL_MIN_HIGH_LEVEL_13_QSPCLK"/>
+            <option display="14 QSPCLK" id="module.driver.qspi.min_qssl_deselect_cycles.qssl_min_high_level_14_qspclk" value="QSPI_QSSL_MIN_HIGH_LEVEL_14_QSPCLK"/>
+            <option display="15 QSPCLK" id="module.driver.qspi.min_qssl_deselect_cycles.qssl_min_high_level_15_qspclk" value="QSPI_QSSL_MIN_HIGH_LEVEL_15_QSPCLK"/>
+            <option display="16 QSPCLK" id="module.driver.qspi.min_qssl_deselect_cycles.qssl_min_high_level_16_qspclk" value="QSPI_QSSL_MIN_HIGH_LEVEL_16_QSPCLK"/>
+        </property>
+        <peripheral name="QSPI" component="qspi0" />
+        <!-- For MCU's whose pinmapping files have been generated with MPC Designer Tool -->
+        <peripheral name="QSPI" component="qspi" />
+        <header>
+            extern const spi_flash_instance_t ${module.driver.qspi.name};
+            extern qspi_instance_ctrl_t ${module.driver.qspi.name}_ctrl;
+            extern const spi_flash_cfg_t ${module.driver.qspi.name}_cfg;
+        </header>
+        <includes>
+            #include &quot;r_qspi.h&quot;
+            #include &quot;r_spi_flash_api.h&quot;
+        </includes>
+        <declarations>
+qspi_instance_ctrl_t ${module.driver.qspi.name}_ctrl;
+
+static const spi_flash_erase_command_t ${module.driver.qspi.name}_erase_command_list[] =
+{
+#if ${module.driver.qspi.sector_erase_size} > 0
+    {.command = ${module.driver.qspi.sector_erase_command},     .size = ${module.driver.qspi.sector_erase_size} },
+#endif
+#if ${module.driver.qspi.block_erase_32kb_size} > 0
+    {.command = ${module.driver.qspi.block_erase_32kb_command}, .size = ${module.driver.qspi.block_erase_32kb_size} },
+#endif
+#if ${module.driver.qspi.block_erase_size} > 0
+    {.command = ${module.driver.qspi.block_erase_command},      .size = ${module.driver.qspi.block_erase_size} },
+#endif
+#if ${module.driver.qspi.chip_erase_command} > 0
+    {.command = ${module.driver.qspi.chip_erase_command},       .size  = SPI_FLASH_ERASE_SIZE_CHIP_ERASE         },
+#endif
+};
+static const qspi_extended_cfg_t ${module.driver.qspi.name}_extended_cfg =
+{
+    .min_qssl_deselect_cycles = ${module.driver.qspi.min_qssl_deselect_cycles},
+    .qspclk_div          = ${module.driver.qspi.qspclk_div},
+};
+const spi_flash_cfg_t ${module.driver.qspi.name}_cfg =
+{
+    .spi_protocol        = ${module.driver.qspi.spi_protocol},
+    .read_mode           = ${module.driver.qspi.read_mode},
+    .address_bytes       = ${module.driver.qspi.address_bytes},
+    .dummy_clocks        = ${module.driver.qspi.dummy_clocks},
+    .page_program_address_lines = ${module.driver.qspi.page_program_address_lines},
+    .page_size_bytes     = ${module.driver.qspi.page_size_bytes},
+    .page_program_command = ${module.driver.qspi.page_program_command},
+    .write_enable_command = ${module.driver.qspi.write_enable_command},
+    .status_command = ${module.driver.qspi.status_command},
+    .write_status_bit    = ${module.driver.qspi.write_status_bit},
+    .xip_enter_command   = ${module.driver.qspi.xip_enter_command},
+    .xip_exit_command    = ${module.driver.qspi.xip_exit_command},
+    .p_erase_command_list = &amp;${module.driver.qspi.name}_erase_command_list[0],
+    .erase_command_list_length = sizeof(${module.driver.qspi.name}_erase_command_list) / sizeof(${module.driver.qspi.name}_erase_command_list[0]),
+    .p_extend            = &amp;${module.driver.qspi.name}_extended_cfg,
+};
+/** This structure encompasses everything that is needed to use an instance of this interface. */
+const spi_flash_instance_t ${module.driver.qspi.name} =
+{
+    .p_ctrl = &amp;${module.driver.qspi.name}_ctrl,
+    .p_cfg =  &amp;${module.driver.qspi.name}_cfg,
+    .p_api =  &amp;g_qspi_on_spi_flash,
+};
+        </declarations>
+        <api configurable="true">
+            <file>ra/fsp/inc/instances/r_qspi.h</file>
+            <file>ra/fsp/inc/api/r_spi_flash_api.h</file>
+        </api>
+    </module>
+</raModuleDescription>

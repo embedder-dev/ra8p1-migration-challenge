@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<raModuleDescription>
+    <module display="Networking|TinyCBOR" id="module.intel.tinycbor" common="1" version="1" visible="false" url="https://github.com/intel/tinycbor/">
+        <provides interface="interface.intel.tinycbor" />
+        <includes>
+        </includes>
+        <declarations>
+        </declarations>
+    </module>
+</raModuleDescription>

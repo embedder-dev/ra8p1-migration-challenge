@@ -1,0 +1,13 @@
+<?xml version="1.0" ?>
+<raModuleDescription>
+    <module id="module.aws.sockets_wrapper.tcp" display="Networking|AWS TCP Sockets Wrapper" common="1" version="0" visible="false" url="https://docs.aws.amazon.com/embedded-csdk/latest/lib-ref/libraries/standard/coreMQTT/docs/doxygen/output/html/mqtt_transport_interface.html">
+        <requires id="module.aws.sockets_wrapper.tcp.requires.awsfreertos" interface="interface.rtos.awsfreertos" visible="false" display="Requires FreeRTOS"/>
+        <requires id="module.aws.sockets_wrapper.tcp.requires.freertosplus_tcp" interface="interface.freertosplus.freertosplus_tcp" display="Add FreeRTOS Plus TCP" find="true" />
+        <requires id="module.aws.sockets_wrapper.tcp.requires.mbedtls_bio.tcp" interface="interface.aws.mbedtls_bio.plus_tcp" display="Add MbedTLS Bio" find="true" />
+        <provides interface="interface.aws.sockets_wrapper" />
+        <provides interface="interface.aws.sockets_wrapper.tcp" />
+        <includes>
+#include "tcp_sockets_wrapper.h"
+        </includes>
+    </module>
+</raModuleDescription>

@@ -1,0 +1,36 @@
+﻿<?xml version="1.0" ?>
+<raModuleDescription>
+    <module config="config.driver.usb_pvnd" display="Connectivity|${module.driver.pvnd.name} USB PVND (r_usb_pvnd)" id="module.driver.pvnd_on_usb" version="1" url="group___u_s_b___p_v_n_d.html">
+        <constraint display="Unique name required for each instance">
+            "${interface.driver.pvnd.${module.driver.pvnd.name}}" === "1"
+        </constraint>
+        <constraint display="Requires USB Peripheral">
+          "${interface.mcu.usb_fs.external}" === "1"
+        </constraint>
+        <constraint display="Use USBX instead in Azure RTOS projects.">
+            !testExists("${interface.rtos.tx}")
+        </constraint>
+        <requires id="module.driver.pvnd_on_usb.requires.pvnd" interface="interface.mcu.usb_fs.external" visible="false" display="Requires USB Peripheral" />
+        <requires id="module.driver.basic_on_usb.requires.basic" interface="interface.driver.basic_on_usb" display="Add USB Driver">
+            <override property="module.driver.usb_basic.usb_mode" value="module.driver.usb_basic.usb_mode.peri"/>
+            <override property="module.driver.usb_basic.usb_classtype" value="module.driver.usb_basic.usb_classtype.pvnd"/>
+        </requires>
+        <requires id="module.driver.pvnd_on_usb.ignore.azure_projects" interface="interface.rtos.supports.renesas_usb" visible="false" display="Use Azure USBX for Azure RTOS projects."/>
+        <provides interface="interface.driver.usb" />
+        <provides interface="interface.driver.pvnd.${module.driver.pvnd.name}" />
+        <provides interface="interface.driver.pvnd" />
+        <property default="pvnd" id="module.driver.pvnd.pvnd_interface" description=""/>
+        <property default="g_pvnd${_instance}" display="Name" id="module.driver.pvnd.name" description="Module name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.pvnd.name}")</constraint>
+        </property>
+        <property default="NULL" id="module.driver.pvnd.usb_basic_name">
+            <export>eval('"${module.driver.basic_on_usb.requires.basic::module.driver.basic.name}"')
+            </export>
+        </property>
+    </module>
+    <module config="config.driver.usb_pvnd_class" display="Connectivity|${module.driver.pvnd_class.name} USB PVND (r_usb_pvnd_class)" id="module.driver.pvnd_class_on_usb" visible="false" version="1" url="group___u_s_b___p_v_n_d.html">
+        <property default="g_pvnd_class${_instance}" display="Name" id="module.driver.pvnd_class.name" description="Class Module name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.pvnd_class.name}")</constraint>
+        </property>
+    </module>
+</raModuleDescription>

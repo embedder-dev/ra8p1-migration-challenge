@@ -1,0 +1,87 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<raModuleDescription>
+    <module display="Networking|Azure RTOS NetX Duo BSD Support" id="module.azure.nxd_bsd" version="1" common="100" url="https://github.com/eclipse-threadx/rtos-docs/blob/main/rtos-docs/netx-duo/netx-duo-bsd/chapter1.md">
+        <!-- NetX BSD Adaptation Layer requires compilation with _POSIX_SOURCE preprocess MACRO defined for GCC -->
+        <constraint display="For GCC compiler, define the C preprocessor symbol _POSIX_C_SOURCE. This message will remain until NetX BSD Warning is set to Disabled.">
+            "${module.azure.nxd_bsd.warning}" === "module.azure.nxd_bsd.warning.disabled"
+        </constraint>
+        <constraint display="Requires NetX Duo Source 'Extended Notify Support' enabled">
+            "${config.azure.nxd_src.extended_notify_support}" === "config.azure.nxd_src.extended_notify_support.enabled"
+        </constraint>
+        <constraint display="Requires BSD support to be enabled (Thread > Common > General > BSD Support)">
+            "${config.azure.tx.bsd_support}" === "config.azure.tx.bsd_support.enabled"
+        </constraint>
+
+        <requires id="module.azure.nxd_bsd.requires.threadx" interface="interface.rtos.tx" visible="false" display="Requires ThreadX"/>
+        <requires id="module.azure.nxd_bsd.requires.nx.ip" interface="interface.azure.nxd.ip" display="Add NetX Duo IP Instance">
+            <override property="module.azure.nx.ip.arp" value="module.azure.nx.ip.arp.enable" />
+        </requires>
+        <requires id="module.azure.nxd_bsd.requires.nx.packet_pool" interface="interface.azure.nxd.packet_pool" display="Add NetX Duo Packet Pool" />
+        <!-- NetX and NetX Duo -->
+        <provides interface="interface.azure.nx_bsd" />
+        <!-- NetX Only -->
+        <provides interface="interface.azure.nxd_bsd" />
+        <!-- NetX BSD Adaptation Layer requires compilation with _POSIX_SOURCE preprocess MACRO defined for GCC -->
+        <property default="module.azure.nxd_bsd.warning.enabled" display="NetX BSD Warning" id="module.azure.nxd_bsd.warning">
+            <option display="Enabled" id="module.azure.nxd_bsd.warning.enabled" value="0"/>
+            <option display="Disabled" id="module.azure.nxd_bsd.warning.disabled" value="1"/>
+        </property>
+        <property default="2048" display="Internal thread stack size (bytes)" id="module.azure.nxd_bsd.stack_size">
+            <constraint display="Value must be a non-negative integer and divisible by 8">
+                testInteger("${module.azure.nxd_bsd.stack_size}")  &amp;&amp; (("${module.azure.nxd_bsd.stack_size}" % 8) == 0)
+            </constraint>
+        </property>
+        <property default="3" display="Internal thread priority" id="module.azure.nxd_bsd.priority">
+            <constraint display="Value must be a non-negative integer">
+                testInteger("${module.azure.nxd_bsd.priority}")  &amp;&amp; ("${module.azure.nxd_bsd.priority}" &gt;= 0)
+            </constraint>
+        </property>
+        <header>
+#define BSD_SUPPORT_TASK_STACK_SIZE (${module.azure.nxd_bsd.stack_size})
+#define BSD_SUPPORT_TASK_PRIORITY   (${module.azure.nxd_bsd.priority})
+
+void bsd_quick_setup();
+        </header>
+        <includes>
+#include "nxd_bsd.h"
+        </includes>
+    </module>
+    <developerSupport>
+        <api version="1">
+            <platform id="fsp" max="" min="1.1.0"/>
+            <moduleRef id="module.azure.nxd_bsd"/>
+            <description><![CDATA[<form><p><span color="header" font="header">Overview</span></p><p>The BSD module provides snippets of code for getting started using the BSD Socket API Compliancy Wrapper.</p></form>]]></description>
+            <function display="Quick Setup" id="bsd_quick_setup">
+                <description><![CDATA[<form><p>This function provides quick setup for the BSD client instance using the RA configurator. Make sure to setup the IP instance before calling this function.</p></form>]]></description>
+            </function>
+        </api>
+        <template category="function_call" display="Call Quick Setup" id="module.azure.nxd_bsd.bsd_quick_setup" version="1">
+            <platform id="fsp" max="" min="1.1.0"/>
+            <moduleRef id="module.azure.nxd_bsd">
+                <function id="bsd_quick_setup"/>
+            </moduleRef>
+            <content>
+/* Stack memory for BSD support. */
+CHAR bsd_stack_memory[BSD_SUPPORT_TASK_STACK_SIZE] BSP_PLACE_IN_SECTION(".stack.bsd") BSP_ALIGN_VARIABLE(BSP_STACK_ALIGNMENT);
+
+/* Quick setup for BSD support.
+ * - ${ip_name:raProperty(module.azure.nxd.ip.name)} must be setup before calling this function
+ *     (See Developer Assistance -> Azure RTOS NetX Duo BSD Support -> ${ip_name} -> Quick Setup).
+ * - ${packet_pool_name:raProperty(module.azure.nxd.packet_pool.name)} must be setup before calling this function
+ *     (See Developer Assistance -> Azure RTOS NetX Duo BSD Support -> ${packet_pool_name} -> Quick Setup).
+ * - nx_system_initialize() must be called before calling this function.
+ */
+void bsd_quick_setup()
+{
+    /* Initialize BSD Support for NetX Duo. */
+    UINT status = bsd_initialize(&amp;${ip_name},
+                                    &amp;${packet_pool_name},
+                                    bsd_stack_memory,
+                                    BSD_SUPPORT_TASK_STACK_SIZE,
+                                    BSD_SUPPORT_TASK_PRIORITY);
+    assert(NX_SUCCESS == status);
+}
+            </content>
+        </template>
+    </developerSupport>
+</raModuleDescription>

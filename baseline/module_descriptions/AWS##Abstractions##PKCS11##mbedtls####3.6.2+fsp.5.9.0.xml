@@ -1,0 +1,147 @@
+<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.aws.pkcs11.mbedtls" path="aws/core_pkcs11_config.h" version="0">
+        <property default="" description="Add a path to your custom core_pkcs11_config.h file. It can be used to override some or all of the configurations defined here, and to define additional configurations." display="Custom iot_pkcs11_config.h" id="config.aws.pkcs11.mbedtls.custom_pkcs11_config">
+            <export>eval('' +
+'var input = "${config.aws.pkcs11.mbedtls.custom_pkcs11_config}";' +
+'if (input != "")' +
+'{' +
+'    input = \'#include "\' + input + \'"\';' +
+'}' +
+'    input' +
+                '')</export>
+        </property>
+        <property display="PKCS11 Configuration Max Label Length" id="config.aws.pkcs11.mbedtls.max_label_length" default="32" description="Maximum length (in characters) for a PKCS #11 CKA_LABEL attribute." />
+        <property display="PKCS11 Configuration Max Number Of Objects" id="config.aws.pkcs11.mbedtls.max_num_objects" default="6" description="Maximum number of token objects that can be stored by the PKCS #11 module." />
+        <property display="PKCS11 Configuration Max Number Of Sessions" id="config.aws.pkcs11.mbedtls.max_num_sessions" default="10" description="Maximum number of sessions that can be stored by the PKCS #11 module." />
+        <property display="Device Private Key For TLS" id="config.aws.pkcs11.mbedtls.tls_private_key" default="Device Priv TLS Key" description="Private key for connection to AWS IoT endpoint. The corresponding public key should be registered with the AWS IoT endpoint." />
+        <property display="Device Public Key For TLS" id="config.aws.pkcs11.mbedtls.tls_public_key" default="Device Pub TLS Key" description="The public key corresponding to device private key." />
+        <property display="Device Certificate For TLS" id="config.aws.pkcs11.mbedtls.tls_certificate" default="Device Cert" description="Device certificate corresponding to device private key." />
+        <property display="Code Verification Key" id="config.aws.pkcs11.mbedtls.code_verification_key" default="Code Verify Key" description="Used by over-the-air update code to verify an incoming signed image." />
+        <property display="Root Certificate" id="config.aws.pkcs11.mbedtls.root_certificate" default="Root Cert" description="The PKCS #11 label for the AWS Trusted Root Certificate." />
+        <property display="JITP Certificate" id="config.aws.pkcs11.mbedtls.jitp_certificate" default="JITP Cert" description="The certificate corresponding to the issuer of the device certificate (pkcs11configLABEL_DEVICE_CERTIFICATE_FOR_TLS) when using the JITR or JITP flow." />
+        <property display="Default User PIN" id="config.aws.pkcs11.mbedtls.default_user_pin" default="0000" description="The PKCS #11 standard specifies the presence of a user PIN. That feature is sensible for applications that have an interactive user interface and memory protections. However, since typical microcontroller applications lack one or both of those, the user PIN is assumed to be used herein for interoperability purposes only, and not as a security feature." />
+        <property display="PKCS11 Malloc" id="config.aws.pkcs11.mbedtls.malloc" default="pvPortMalloc" description="Malloc API used by core_pkcs11.h" />
+        <property display="PKCS11 Free" id="config.aws.pkcs11.mbedtls.free" default="vPortFree" description="Free API used by core_pkcs11.h" />
+        <property display="PAL Destroy Supported" id="config.aws.pkcs11.mbedtls.pal_destroy" default="config.aws.pkcs11.mbedtls.pal_destroy.disabled" description="If set to disabled, no PAL destroy object is implemented, and this functionality is implemented in the common PKCS #11 layer.">
+            <option id="config.aws.pkcs11.mbedtls.pal_destroy.enabled" display="Enabled" value="1" />
+            <option id="config.aws.pkcs11.mbedtls.pal_destroy.disabled" display="Disabled" value="0" />
+        </property>
+        <property display="OTA Supported" id="config.aws.pkcs11.mbedtls.ota_supported" default="config.aws.pkcs11.mbedtls.ota_supported.disabled" description="If set to disabled, OTA code signing certificate is built in via aws_ota_codesigner_certificate.h.">
+            <option id="config.aws.pkcs11.mbedtls.ota_supported.enabled" display="Enabled" value="1" />
+            <option id="config.aws.pkcs11.mbedtls.ota_supported.disabled" display="Disabled" value="0" />
+        </property>
+        <property display="JITP Code Verify Root Cert Supported" id="config.aws.pkcs11.mbedtls.jitp_root_cert" default="config.aws.pkcs11.mbedtls.jitp_root_cert.disabled" description="Set to enabled if PAL supports storage for JITP certificate, code verify certificate, and trusted server root certificate. If set to 0, PAL does not support storage mechanism for these, and they are accessed via headers compiled into the code.">
+            <option id="config.aws.pkcs11.mbedtls.jitp_root_cert.enabled" display="Enabled" value="1" />
+            <option id="config.aws.pkcs11.mbedtls.jitp_root_cert.disabled" display="Disabled" value="0" />
+        </property>
+        <property display="HMAC Key" id="config.aws.pkcs11.mbedtls.hmac_key" default="HMAC Key" description="The PKCS #11 label for the object to be used for HMAC operations." />
+        <property display="CMAC Key" id="config.aws.pkcs11.mbedtls.cmac_key" default="CMAC Key" description="The PKCS #11 label for the object to be used for CMAC operations." />
+        <content>
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+${config.aws.pkcs11.mbedtls.custom_pkcs11_config}
+
+#include "logging_levels.h"
+
+#include "logging_stack.h"
+
+/* FreeRTOS include. */
+#include "FreeRTOS.h"
+
+#ifndef pkcs11configPKCS11_MALLOC
+#define pkcs11configPKCS11_MALLOC       ${config.aws.pkcs11.mbedtls.malloc}
+#endif
+
+#ifndef pkcs11configPKCS11_FREE
+#define pkcs11configPKCS11_FREE         ${config.aws.pkcs11.mbedtls.free}
+#endif
+
+
+#ifndef configPKCS11_DEFAULT_USER_PIN
+#define configPKCS11_DEFAULT_USER_PIN            "${config.aws.pkcs11.mbedtls.default_user_pin}"
+#endif
+
+#ifndef pkcs11configMAX_LABEL_LENGTH
+#define pkcs11configMAX_LABEL_LENGTH                    ${config.aws.pkcs11.mbedtls.max_label_length}
+#endif
+
+#ifndef pkcs11configMAX_NUM_OBJECTS
+#define pkcs11configMAX_NUM_OBJECTS                     ${config.aws.pkcs11.mbedtls.max_num_objects}
+#endif
+
+#ifndef pkcs11configMAX_SESSIONS
+#define pkcs11configMAX_SESSIONS                        ${config.aws.pkcs11.mbedtls.max_num_sessions}
+#endif
+
+#ifndef pkcs11configPAL_DESTROY_SUPPORTED
+#define pkcs11configPAL_DESTROY_SUPPORTED               ${config.aws.pkcs11.mbedtls.pal_destroy}
+#endif
+
+#ifndef pkcs11configOTA_SUPPORTED
+#define pkcs11configOTA_SUPPORTED                       ${config.aws.pkcs11.mbedtls.ota_supported}
+#endif
+
+#ifndef pkcs11configJITP_CODEVERIFY_ROOT_CERT_SUPPORTED
+#define pkcs11configJITP_CODEVERIFY_ROOT_CERT_SUPPORTED ${config.aws.pkcs11.mbedtls.jitp_root_cert}
+#endif
+
+#ifndef pkcs11configLABEL_DEVICE_PRIVATE_KEY_FOR_TLS
+#define pkcs11configLABEL_DEVICE_PRIVATE_KEY_FOR_TLS    "${config.aws.pkcs11.mbedtls.tls_private_key}"
+#endif
+
+#ifndef pkcs11configLABEL_DEVICE_PUBLIC_KEY_FOR_TLS
+#define pkcs11configLABEL_DEVICE_PUBLIC_KEY_FOR_TLS     "${config.aws.pkcs11.mbedtls.tls_public_key}"
+#endif
+
+#ifndef pkcs11configLABEL_DEVICE_CERTIFICATE_FOR_TLS
+#define pkcs11configLABEL_DEVICE_CERTIFICATE_FOR_TLS    "${config.aws.pkcs11.mbedtls.tls_certificate}"
+#endif
+
+#ifndef pkcs11configLABEL_ROOT_CERTIFICATE
+#define pkcs11configLABEL_ROOT_CERTIFICATE              "${config.aws.pkcs11.mbedtls.root_certificate}"
+#endif
+
+#ifndef pkcs11configLABEL_CODE_VERIFICATION_KEY
+#define pkcs11configLABEL_CODE_VERIFICATION_KEY         "${config.aws.pkcs11.mbedtls.code_verification_key}"
+#endif
+
+#ifndef pkcs11configLABEL_JITP_CERTIFICATE
+#define pkcs11configLABEL_JITP_CERTIFICATE              "${config.aws.pkcs11.mbedtls.jitp_certificate}"
+#endif
+
+#ifndef pkcs11configLABEL_HMAC_KEY
+#define pkcs11configLABEL_HMAC_KEY                       "${config.aws.pkcs11.mbedtls.hmac_key}"
+#endif
+
+#ifndef pkcs11configLABEL_CMAC_KEY
+#define pkcs11configLABEL_CMAC_KEY                       "${config.aws.pkcs11.mbedtls.cmac_key}"
+#endif
+
+#ifdef __cplusplus
+}
+#endif
+        </content>
+    </config>
+    <module id="module.aws.pkcs11.mbedtls" display="Networking|AWS PKCS11 to MbedTLS" config="config.aws.pkcs11.mbedtls" common="1" visible="false" version="0" url="https://docs.aws.amazon.com/freertos/latest/userguide/security-pkcs.html">
+        <constraint display="Platform Memory must be enabled in the MbedTLS (Crypto Only) config under Common|Platform|MBEDTLS_PLATFORM_MEMORY.">
+            "${config.driver.psa_crypto.mbedtls_platform_memory}" === "config.driver.psa_crypto.mbedtls_platform_memory.enabled"
+        </constraint>
+        <constraint display="CMAC must be enabled in the MbedTLS (Crypto Only) config under Common|Message Authentication Code (MAC)|MBEDTLS_CMAC_C.">
+            "${config.driver.psa_crypto.mbedtls_cmac_c}" === "config.driver.psa_crypto.mbedtls_cmac_c.enabled"
+        </constraint>
+        <!-- This is not listed as a <requires> to keep stack smaller in e2 -->
+        <constraint display="Requires MbedTLS">
+          "${interface.driver.mbedtls}" === "1"
+        </constraint>
+        <constraint display="Requires PKCS11 PAL">
+          "${interface.driver.rm_aws_pkcs11_pal}" === "1"
+        </constraint>
+        <requires id="module.aws.pkcs11.mbedtls.requires.pal" interface="interface.driver.rm_aws_pkcs11_pal" display="Add AWS PKCS11 PAL module" find="true" />
+        <requires id="module.aws.pkcs11.mbedtls.requires.freertospluscrypto" interface="interface.aws.freertosplus.crypto" display="Add FreeRTOS MbedTLS Port" find="true" />
+        <provides interface="interface.aws.pkcs11.mbedtls" />
+        <provides interface="interface.aws.pkcs11" />
+    </module>
+</raModuleDescription>

@@ -1,0 +1,71 @@
+<?xml version="1.0" ?>
+<raModuleDescription>
+    <module id="module.driver.ble_abs_spp_transport_spi" config="" display="Networking|BLE SPP Transport on SPI (rm_ble_abs_spp_transport)" version="0" url="group___b_l_e___a_b_s.html">
+        <constraint display="The SPI Software SSL Pin and SPI Software SSL Port must both be configured in order to enable software control of SSL.">
+            "${module.driver.ble_abs_spp_transport_spi.requires.spi::module.driver.spi.spi_clksyn}" === "module.driver.spi.spi_clksyn.spi_operation" || ("${module.driver.ble_abs_spp.software_ssl_pin}" != "module.driver.ble_abs_spp.software_ssl_pin.PIN_DISABLE" &amp;&amp; "${module.driver.ble_abs_spp.software_ssl_port}" != "module.driver.ble_abs_spp.software_ssl_port.PIN_DISABLE")
+        </constraint>
+        <constraint display="When the SPI SSL Pin is controlled by hardware (SPI Operation), the SPI Software SSL Pin must be disabled.">
+            "${module.driver.ble_abs_spp_transport_spi.requires.spi::module.driver.spi.spi_clksyn}" != "module.driver.spi.spi_clksyn.spi_operation" || ("${module.driver.ble_abs_spp.software_ssl_pin}" === "module.driver.ble_abs_spp.software_ssl_pin.PIN_DISABLE" &amp;&amp; "${module.driver.ble_abs_spp.software_ssl_port}" === "module.driver.ble_abs_spp.software_ssl_port.PIN_DISABLE")
+        </constraint>
+        <constraint display="A SPI Interface must be added.">
+            testExists("${module.driver.ble_abs_spp_transport_spi.requires.spi::module.driver.spi.name}")
+        </constraint>
+        <constraint display="The maximum supported SPI clock frequency is 500 KHz.">
+            ${module.driver.ble_abs_spp_transport_spi.requires.spi::module.driver.spi.bitrate} &lt;= 500000
+        </constraint>
+        <requires id="module.driver.ble_abs_spp_transport_spi.requires.spi" interface="interface.driver.spi" display="Requires SPI Driver" find="true">
+            <override property="module.driver.spi.p_callback" value="rm_ble_spp_host_spi_callback"/>
+            <override property="module.driver.spi.operating_mode" value="module.driver.spi.operating_mode.mode_master"/>
+            <override property="module.driver.spi.clk_phase" value="module.driver.spi.clk_phase.clk_phase_edge_odd"/>
+            <override property="module.driver.spi.clk_polarity" value="module.driver.spi.clk_polarity.clk_polarity_low"/>
+            <override property="module.driver.spi.bit_order" value="module.driver.spi.bit_order.bit_order_msb_first"/>
+            <override property="module.driver.spi.spi_comm" value="module.driver.spi.spi_comm.full_duplex"/>
+            <override property="module.driver.spi.ssl_polarity" value="module.driver.spi.ssl_polarity.low"/>
+            <override property="module.driver.spi.parity" value="module.driver.spi.parity_mode.disable"/>
+            <override property="module.driver.spi.byte_swap" value="module.driver.spi.byte_swap"/>
+        </requires>
+        <requires id="module.driver.ble_abs_spp_transport_spi.requires.irq" interface="interface.driver.external_irq" display="Data Ready Pin" find="true">
+            <override property="module.driver.external_irq.trigger" value="module.driver.external_irq.trigger.trig_rising"/>
+            <override property="module.driver.external_irq.p_callback" value="rm_ble_spp_data_ready_callback"/>
+        </requires>
+        <provides interface="interface.driver.ble_abs_spp_transport" />
+        <provides interface="interface.driver.ble_abs_spp_transport_spi" />
+        <property default="g_ble_abs_transport${_instance}" display="General|Name" id="module.driver.ble_abs_spp_transport.name" description="Module name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.ble_abs_spp_transport.name}")</constraint>
+        </property>
+        <header>
+        </header>
+        <includes>
+        </includes>
+        <declarations>
+#define ${module.driver.ble_abs_spp_transport.name}_SPI_INSTANCE ${module.driver.ble_abs_spp_transport_spi.requires.spi::module.driver.spi.name}
+#define ${module.driver.ble_abs_spp_transport.name}_IRQ_INSTANCE ${module.driver.ble_abs_spp_transport_spi.requires.irq::module.driver.external_irq.name}
+        </declarations>
+        <functions>
+        </functions>
+    </module>
+    <module id="module.driver.ble_abs_spp_transport_uart" config="config.driver.ble_abs_spp_transport" display="Networking|BLE SPP Transport on UART (rm_ble_abs_spp_transport)" version="0" url="group___b_l_e___a_b_s.html">
+        <constraint display="The software SSL pin is not used with the UART transport.">
+            "${module.driver.ble_abs_spp.software_ssl_port}" === "module.driver.ble_abs_spp.software_ssl_port.PIN_DISABLE" &amp;&amp; "${module.driver.ble_abs_spp.software_ssl_pin}" === "module.driver.ble_abs_spp.software_ssl_pin.PIN_DISABLE"
+        </constraint>
+        <requires id="module.driver.ble_abs_spp_transport_uart.requires.uart" interface="interface.driver.uart" display="Requires SCI UART Peripheral Cmd/Data Port" find="true">
+            <override property="module.driver.uart.callback" value="rm_ble_spp_callback"/>
+            <override property="module.driver.uart.p_context" value="${module.driver.ble_abs_spp_transport.p_context}"/>
+        </requires>
+        <provides interface="interface.driver.ble_abs_spp_transport" />
+        <provides interface="interface.driver.ble_abs_spp_transport_uart" />
+        <property default="g_ble_abs_transport${_instance}" display="General|Name" id="module.driver.ble_abs_spp_transport.name" description="Module name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.ble_abs_spp_transport.name}")</constraint>
+        </property>
+        <property default="NULL" id="module.driver.ble_abs_spp_transport.p_context" description="Context to pass down to the transport interface."/>
+        <header>
+        </header>
+        <includes>
+        </includes>
+        <declarations>
+#define ${module.driver.ble_abs_spp_transport.name}_UART_INSTANCE ${module.driver.ble_abs_spp_transport_uart.requires.uart::module.driver.uart.name}
+        </declarations>
+        <functions>
+        </functions>
+    </module>
+</raModuleDescription>

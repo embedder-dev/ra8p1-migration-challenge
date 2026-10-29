@@ -1,0 +1,25 @@
+<?xml version="1.0" ?>
+<raModuleDescription>
+    <module id="module.cellular_interface.platform" display="Networking|AWS Cellular Platform (rm_cellular_platform_aws)" common="1" version="0" visible="false" url="https://www.freertos.org/Documentation/api-ref/cellular/cellular_porting.html">
+        <constraint display="Mutexes must be enabled in the FreeRTOS thread config under Common|General|Use Mutexes.">
+            "${config.awsfreertos.thread.configuse_mutexes}" === "config.awsfreertos.thread.configuse_mutexes.enabled"
+        </constraint>
+        <constraint display="Recursive Mutexes must be enabled in FreeRTOS in Thread Properties|Common|General|Use Recursive Mutexes.">
+            ("${config.awsfreertos.thread.configuse_recursive_mutexes}" === "config.awsfreertos.thread.configuse_recursive_mutexes.enabled")
+        </constraint>
+        <constraint display="xTimerPendFunctionCall must be enabled. Set in thread->common->optional functions properties.">
+            ("${config.awsfreertos.thread.include_xtimerpendfunctioncall}" === "config.awsfreertos.thread.include_xtimerpendfunctioncall.enabled")
+        </constraint>
+        <constraint display="Requires FreeRTOS heap implementation 4 or 5">
+            "${interface.freertos.heap_4_or_5}" === "1"
+        </constraint>
+        <constraint display="configTOTAL_HEAP_SIZE must be an integer and greater than 12288. Set in FreeRTOS Common properties.">
+            &quot;${config.awsfreertos.thread.configtotal_heap_size}&quot; &gt; 12288
+        </constraint>
+        <requires id="module.cellular_interface.platform.requires.awsfreertos" interface="interface.rtos.awsfreertos" visible="false" display="Requires FreeRTOS"/>
+        <provides interface="interface.cellular_interface.platform" />
+        <includes>
+#include "cellular_platform.h"
+        </includes>
+    </module>
+</raModuleDescription>

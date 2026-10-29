@@ -1,0 +1,176 @@
+<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.middleware.rm_ble_mesh_upper_trans" path="fsp_cfg/rm_ble_mesh_upper_trans_cfg.h" version="0">
+        <content>
+            #ifdef __cplusplus
+            extern "C" {
+            #endif
+
+            #ifdef __cplusplus
+            }
+            #endif
+        </content>
+    </config>
+    <module id="module.middleware.rm_ble_mesh_upper_trans_on_rm_ble_mesh_upper_trans" display="Networking|BLE Mesh Network modules|BLE Mesh Upper Trans (rm_ble_mesh_upper_trans)" config="config.middleware.rm_ble_mesh_upper_trans" common="1" version="0" visible="true" url="group___r_m___b_l_e___m_e_s_h___u_p_p_e_r___t_r_a_n_s.html">
+
+        <constraint display="Requires Low Level Library Implementation">
+            "${interface.middleware.rm_ble_mesh_upper_trans}" === "1"
+        </constraint>
+        <constraint display="BLE Mesh Upper Trans middleware not support R_BLE_SPP module">
+            "${interface.mcu.radio}" === "1"
+        </constraint>
+        <requires id="module.middleware.rm_ble_mesh_upper_trans.requires.rm_ble_mesh_lower_trans" interface="interface.middleware.rm_ble_mesh_lower_trans.${module.middleware.rm_ble_mesh_lower_trans.name}" visible="true" display="Add BLE Mesh Lower Trans Module" find="true"/>
+
+        <provides interface="interface.middleware.rm_ble_mesh_upper_trans"/>
+        <provides interface="interface.middleware.rm_ble_mesh_upper_trans_on_rm_ble_mesh_upper_trans"/>
+        <provides interface="interface.middleware.rm_ble_mesh_upper_trans.${module.middleware.rm_ble_mesh_upper_trans.name}"/>
+
+        <property display="General|Name" id="module.middleware.rm_ble_mesh_upper_trans.name" default="g_rm_ble_mesh_upper_trans${_instance}" description="Module name.">
+            <constraint display="Name Must Be a Valid C Symbol">testSymbol("${module.middleware.rm_ble_mesh_upper_trans.name}")</constraint>
+        </property>
+
+        <property display="Channel Number" id="module.middleware.rm_ble_mesh_upper_trans.channel" default="0" description="Select channel corresponding to the channel number of the hardware.">
+            <constraint display="Invalid Channel Number">testInteger("${module.middleware.rm_ble_mesh_upper_trans.channel}") &amp;&amp; ("${module.middleware.rm_ble_mesh_upper_trans.channel}" &gt;= 0) &amp;&amp; ("${module.middleware.rm_ble_mesh_upper_trans.channel}" &lt;= 4294967295)</constraint>
+        </property>
+
+        <property display="Control Message Event Enable" default="module.middleware.rm_ble_mesh_upper_trans.control_message_evnet.disabled" id="module.middleware.rm_ble_mesh_upper_trans.control_message_evnet" description="Whether to enable the control message event or not.">
+            <option display="Enabled" id="module.middleware.rm_ble_mesh_upper_trans.control_message_evnet.enabled" value="(1)"/>
+            <option display="Disabled" id="module.middleware.rm_ble_mesh_upper_trans.control_message_evnet.disabled" value="(0)"/>
+        </property>
+
+        <property display="Access Message Event Enable" default="module.middleware.rm_ble_mesh_upper_trans.access_message_evnet.disabled" id="module.middleware.rm_ble_mesh_upper_trans.access_message_evnet" description="Whether to enable the access message event or not.">
+            <option display="Enabled" id="module.middleware.rm_ble_mesh_upper_trans.access_message_evnet.enabled" value="(1)"/>
+            <option display="Disabled" id="module.middleware.rm_ble_mesh_upper_trans.access_message_evnet.disabled" value="(0)"/>
+        </property>
+
+        <property display="Callback" id="module.middleware.rm_ble_mesh_upper_trans.upper_trans_callback" default="NULL" description="Callback function name.">
+            <constraint display="Name Must Be a Valid C Symbol">testSymbol("${module.middleware.rm_ble_mesh_upper_trans.upper_trans_callback}")</constraint>
+        </property>
+
+        <property id="module.middleware.rm_ble_mesh_upper_trans.p_context" default="NULL">
+            <constraint display="Name Must Be a Valid C Symbol">testSymbol("${module.middleware.rm_ble_mesh_upper_trans.p_context}")</constraint>
+            <export>eval('' +
+                'var output = "${module.middleware.rm_ble_mesh_upper_trans.p_context}";' +
+                'if ("NULL" !== output) {' +
+                'output = "&amp;" + output;' +
+                '}' +
+                'output')
+            </export>
+        </property>
+
+        <header>
+/** BLE Mesh Upper Trans BLE Mesh Upper Trans Instance. */
+extern const rm_ble_mesh_upper_trans_instance_t ${module.middleware.rm_ble_mesh_upper_trans.name};
+
+/** Access the BLE Mesh upper trans instance using these structures when calling API functions directly (::p_api is not used). */
+extern rm_ble_mesh_upper_trans_instance_ctrl_t ${module.middleware.rm_ble_mesh_upper_trans.name}_ctrl;
+extern const rm_ble_mesh_upper_trans_cfg_t ${module.middleware.rm_ble_mesh_upper_trans.name}_cfg;
+
+#ifndef ${module.middleware.rm_ble_mesh_upper_trans.upper_trans_callback}
+void ${module.middleware.rm_ble_mesh_upper_trans.upper_trans_callback}(rm_ble_mesh_upper_trans_callback_args_t * p_args);
+#endif
+
+        </header>
+        <includes>
+#include "rm_ble_mesh_upper_trans.h"
+#include "rm_ble_mesh_upper_trans_api.h"
+#include "rm_ble_mesh_lower_trans_api.h"
+        </includes>
+        <declarations>
+rm_ble_mesh_upper_trans_instance_ctrl_t ${module.middleware.rm_ble_mesh_upper_trans.name}_ctrl;
+
+/** BLE MESH configuration parameters. */
+const rm_ble_mesh_upper_trans_cfg_t ${module.middleware.rm_ble_mesh_upper_trans.name}_cfg =
+{
+    /** the parameters for initialization. */
+    .channel                         = ${module.middleware.rm_ble_mesh_upper_trans.channel},
+    .control_message_evnet           = (rm_ble_mesh_upper_trans_control_message_evnet_t) ${module.middleware.rm_ble_mesh_upper_trans.control_message_evnet},
+    .access_message_evnet            = (rm_ble_mesh_upper_trans_access_message_evnet_t) ${module.middleware.rm_ble_mesh_upper_trans.access_message_evnet},
+    .p_mesh_lower_trans_instance     = &amp;${module.middleware.rm_ble_mesh_upper_trans.requires.rm_ble_mesh_lower_trans::module.middleware.rm_ble_mesh_lower_trans.name},
+    .p_callback                      = ${module.middleware.rm_ble_mesh_upper_trans.upper_trans_callback},
+    .p_context                       = ${module.middleware.rm_ble_mesh_upper_trans.p_context},
+    .p_extend                        = NULL
+};
+
+
+/** This structure encompasses everything that is needed to use an instance of this interface. */
+const rm_ble_mesh_upper_trans_instance_t ${module.middleware.rm_ble_mesh_upper_trans.name} =
+{
+    .p_ctrl = &amp;${module.middleware.rm_ble_mesh_upper_trans.name}_ctrl,
+    .p_cfg  = &amp;${module.middleware.rm_ble_mesh_upper_trans.name}_cfg,
+    .p_api  = &amp;g_rm_ble_mesh_upper_trans_on_rm_ble_mesh_upper_trans
+};
+        </declarations>
+    </module>
+
+    <!-- Developer Assistance -->
+    <developerSupport>
+        <template category="none" display="Setup Friendship" id="module.middleware.rm_ble_mesh_upper_trans.setup_friendship" version="1">
+            <platform id="fsp" max="" min="3.6.0"/>
+            <moduleRef id="module.middleware.rm_ble_mesh_upper_trans_on_rm_ble_mesh_upper_trans"/>
+            <content><![CDATA[
+/* Prototype declaration */
+fsp_err_t ${rm_ble_mesh_upper_trans_name:raProperty(module.middleware.rm_ble_mesh_upper_trans.name)}_setup_friendship(rm_ble_mesh_upper_trans_friendship_setting_t const * const p_friendship_setting);
+
+/*
+ * This function is used to send the friend request to friend node.
+ * Before executing this function need to enable mesh friend feature.
+ */
+fsp_err_t ${rm_ble_mesh_upper_trans_name}_setup_friendship(rm_ble_mesh_upper_trans_friendship_setting_t const * const p_friendship_setting)
+{
+    fsp_err_t  result = FSP_SUCCESS;
+
+    RM_BLE_MESH_UPPER_TRANS_Open(&${rm_ble_mesh_upper_trans_name}_ctrl, &${rm_ble_mesh_upper_trans_name}_cfg);
+    result = RM_BLE_MESH_UPPER_TRANS_LpnSetupFriendship
+          (
+              &${rm_ble_mesh_upper_trans_name}_ctrl,
+              p_friendship_setting
+          );
+
+    return result;
+}
+]]>            </content>
+        </template>
+        <template category="none" display="Friendship Callback" id="rm_ble_mesh_upper_trans_friendship_callback" version="1">
+            <platform id="fsp" max="" min="3.6.0"/>
+            <moduleRef id="module.middleware.rm_ble_mesh_upper_trans_on_rm_ble_mesh_upper_trans"/>
+            <content><![CDATA[
+#ifndef RM_BLE_MESH_UPPER_TRANS_CFG_ACQUISITION_LIST_COUNT
+#define RM_BLE_MESH_UPPER_TRANS_CFG_ACQUISITION_LIST_COUNT    (5)
+#endif /* RM_BLE_MESH_UPPER_TRANS_CFG_ACQUISITION_LIST_COUNT */
+
+/* Call this function in callback function on ${rm_ble_mesh_upper_trans_name:raProperty(module.middleware.rm_ble_mesh_upper_trans.name)}. */
+void ${rm_ble_mesh_upper_trans_name}_friendship_callback(rm_ble_mesh_upper_trans_callback_args_t * p_args)
+{
+    uint16_t subscription_address_count;
+    uint16_t subscription_address_list[RM_BLE_MESH_UPPER_TRANS_CFG_ACQUISITION_LIST_COUNT];
+
+    switch (p_args->event)
+    {
+        case RM_BLE_MESH_UPPER_TRANS_EVENT_FRIENDSHIP_SETUP:
+            if (RM_BLE_MESH_ERROR_CODE_SUCCESS == p_args->result)
+            {
+                /* Get the subscription list */
+                subscription_address_count = sizeof(subscription_address_list) / sizeof(uint16_t);
+                RM_BLE_MESH_ACCESS_GetAllModelSubscriptionList(&${rm_ble_mesh_access_name:raProperty(module.middleware.rm_ble_mesh_access.name)}_ctrl, &subscription_address_count, subscription_address_list);
+
+                if (0 < subscription_address_count)
+                {
+                    RM_BLE_MESH_UPPER_TRANS_LpnManageSubscription(&${rm_ble_mesh_upper_trans_name}_ctrl, RM_BLE_MESH_UPPER_TRANS_CONTROL_OPCODE_FRIEND_SUBSCRN_LIST_ADD, subscription_address_list, subscription_address_count);
+                }
+            }
+            break;
+
+        case RM_BLE_MESH_UPPER_TRANS_EVENT_FRIENDSHIP_SUBSCRIPTION_LIST:
+        case RM_BLE_MESH_UPPER_TRANS_EVENT_FRIENDSHIP_CLEAR:
+        case RM_BLE_MESH_UPPER_TRANS_EVENT_FRIENDSHIP_TERMINATE:
+            break;
+
+        default:
+            break;
+    }
+}
+]]>            </content>
+        </template>
+    </developerSupport>
+</raModuleDescription>

@@ -1,0 +1,81 @@
+﻿<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.driver.edmac" path="fsp_cfg/r_edmac.h" version="0">
+        <content>
+        </content>
+    </config>
+    <module config="config.driver.edmac" display="Transfer|${module.driver.edmac.name} Ethernet DMA (r_edmac)" id="module.driver.edmac" version="1"  url="" visible="false">
+        <requires id="module.driver.edmac.requires.etherc_edmac" interface="interface.mcu.etherc_edmac" visible="false" display="Requires EDMAC peripheral" />
+        <provides interface="interface.peripheral.edmac" />
+        <property default="g_edmac${_instance}" display="General|Name" id="module.driver.edmac.name" description="Module name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.edmac.name}")</constraint>
+        </property>
+        <property default="module.driver.edmac.channel.ether_edmac" display="General|Channel" id="module.driver.edmac.channel" description="The channel number for the EDMAC instance.">
+            <option display="Ethernet EDMAC" id="module.driver.edmac.channel.ether_edmac" value="ETHERC_EDMAC_CHANNEL"/>
+            <option display="PTP EDMAC" id="module.driver.edmac.ptp_edmac" value="PTPC_EDMAC_CHANNEL"/>
+        </property>
+        <property default="module.driver.edmac.padding_bytes.disable" display="Buffer Descriptors|Receive|Padding Bytes" id="module.driver.edmac.padding_bytes" description="The number of padding bytes to insert into a received Ethernet Packet.">
+            <option display="Disabled" id="module.driver.edmac.padding_bytes.disable" value="EDMAC_PADDING_DISABLE"/>
+            <option display="1 Byte" id="module.driver.edmac.padding_bytes.1" value="EDMAC_PADDING_1BYTE"/>
+            <option display="2 Bytes" id="module.driver.edmac.padding_bytes.2" value="EDMAC_PADDING_2BYTE"/>
+            <option display="3 Bytes" id="module.driver.edmac.padding_bytes.3" value="EDMAC_PADDING_3BYTE"/>
+        </property>
+        <property default="0" display="Buffer Descriptors|Receive|Padding Offset" id="module.driver.edmac.padding_offset" description="The offset from the start of the received Ethernet packet to insert padding bytes.">
+            <constraint display="Value must in the range [0,255].">testInteger("${module.driver.edmac.padding_offset}")  &amp;&amp; ("${module.driver.edmac.padding_offset}" &gt;= 0) &amp;&amp; ("${module.driver.edmac.padding_offset}" &lt;= 255)</constraint>
+        </property>
+        <property default="4" display="Buffer Descriptors|Receive|Descriptor List Length" id="module.driver.edmac.rx_descriptor_list_length" description="The length of the receive descriptor list.">
+            <constraint display="Value must in the range [1,32].">testInteger("${module.driver.edmac.rx_descriptor_list_length}")  &amp;&amp; ("${module.driver.edmac.rx_descriptor_list_length}" &gt;= 1) &amp;&amp; ("${module.driver.edmac.rx_descriptor_list_length}" &lt;= 32)</constraint>
+        </property>
+        <property default="4" display="Buffer Descriptors|Transmit|Descriptor List Length" id="module.driver.edmac.tx_descriptor_list_length" description="The length of the transmit descriptor list.">
+            <constraint display="Value must in the range [1,32].">testInteger("${module.driver.edmac.tx_descriptor_list_length}")  &amp;&amp; ("${module.driver.edmac.tx_descriptor_list_length}" &gt;= 1) &amp;&amp; ("${module.driver.edmac.tx_descriptor_list_length}" &lt;= 32)</constraint>
+        </property>
+        <property default="" display="Interrupts|Interrupt priority" id="module.driver.edmac.ipl" description="Select the EDMAC interrupt priority.">
+            <select enum="enum.mcu.nvic.priorities.mandatory"/>
+            <interrupt event="event.eptpc.pint" isr="edmac_eint_isr"/>
+        </property>
+        <property default="edmac${_instance}_callback" display="Interrupts|EDMAC Callback" id="module.driver.edmac.callback" description="Called when a EDMAC event occurs.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.edmac.callback}")</constraint>
+        </property>
+        <property id="module.driver.edmac.context" default="NULL">
+            <constraint display="Must be a valid C symbol">testSymbol("${module.driver.edmac.context}")</constraint>
+        </property>
+
+        <memory accumulator="RAM_NS_BUFFER_LENGTH">
+            <!-- Allocate non-secure memory for flat projects, which use secure memory by default. The Ethernet peripheral is always non-secure, and it accesses the descriptors directly, so the descriptors must be in non-secure memory. -->
+            ("${_project.nonsecure}" === "1") ? 0 : (16 * (${module.driver.edmac.rx_descriptor_list_length} + ${module.driver.edmac.tx_descriptor_list_length}))
+        </memory>
+        <header>
+extern void ${module.driver.edmac.callback} (edmac_callback_args_t * p_args);
+extern edmac_instance_ctrl_t ${module.driver.edmac.name}_ctrl;
+extern const edmac_cfg_t ${module.driver.edmac.name}_cfg;
+extern edmac_instance_t ${module.driver.edmac.name};
+        </header>
+        <includes>
+        </includes>
+        <declarations>
+BSP_ALIGN_VARIABLE(16) edmac_desc_t ${module.driver.edmac.name}_rx_descriptors[${module.driver.edmac.rx_descriptor_list_length}] ETHER_BUFFER_PLACE_IN_SECTION;
+BSP_ALIGN_VARIABLE(16) edmac_desc_t ${module.driver.edmac.name}_tx_descriptors[${module.driver.edmac.tx_descriptor_list_length}] ETHER_BUFFER_PLACE_IN_SECTION;
+
+edmac_instance_ctrl_t ${module.driver.edmac.name}_ctrl;
+const edmac_cfg_t ${module.driver.edmac.name}_cfg = {
+    .channel = ${module.driver.edmac.channel},
+    .padding = ${module.driver.edmac.padding_bytes},
+    .padding_offset = ${module.driver.edmac.padding_offset},
+    .num_tx_desc = ${module.driver.edmac.tx_descriptor_list_length},
+    .num_rx_desc = ${module.driver.edmac.rx_descriptor_list_length},
+    .p_tx_descriptors = ${module.driver.edmac.name}_tx_descriptors,
+    .p_rx_descriptors = ${module.driver.edmac.name}_rx_descriptors,
+    .p_callback = ${module.driver.edmac.callback},
+    .edmac_ipl = ${module.driver.edmac.ipl},
+    .edmac_irq = VECTOR_NUMBER_EPTPC_PINT,
+    .p_context = ${module.driver.edmac.context},
+    .p_extend = NULL
+};
+edmac_instance_t ${module.driver.edmac.name} =
+{
+    .p_ctrl = &amp;${module.driver.edmac.name}_ctrl,
+    .p_cfg  = &amp;${module.driver.edmac.name}_cfg
+};
+        </declarations>
+    </module>
+</raModuleDescription>

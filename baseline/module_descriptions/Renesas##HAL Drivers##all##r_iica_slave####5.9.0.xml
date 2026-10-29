@@ -1,0 +1,256 @@
+<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.driver.iica_slave" path="fsp_cfg/r_iica_slave_cfg.h" version="0">
+        <property default="config.driver.iica_slave.param_checking_enable.bsp" display="Parameter Checking" id="config.driver.iica_slave.param_checking_enable" description="If selected code for parameter checking is included in the build.">
+            <option display="Default (BSP)" id="config.driver.iica_slave.param_checking_enable.bsp" value="(BSP_CFG_PARAM_CHECKING_ENABLE)"/>
+            <option display="Enabled" id="config.driver.iica_slave.param_checking_enable.enabled" value="(1)"/>
+            <option display="Disabled" id="config.driver.iica_slave.param_checking_enable.disabled" value="(0)"/>
+        </property>
+        <property default="config.driver.iica_slave.addr_mode_10_bit_enable.disabled" display="10-bit slave addressing" id="config.driver.iica_slave.addr_mode_10_bit_enable" description="If enabled, the driver will support 10-bit slave addressing mode.">
+            <option display="Enabled" id="config.driver.iica_slave.addr_mode_10_bit_enable.enabled" value="(1)"/>
+            <option display="Disabled" id="config.driver.iica_slave.addr_mode_10_bit_enable.disabled" value="(0)"/>
+        </property>
+        <property default="config.driver.iica_slave.general_call_addr_enable.disabled" display="General call addressing" id="config.driver.iica_slave.general_call_addr_enable" description="If enabled, the driver will support general call slave addressing mode along with the non-general call slave addressing mode.">
+            <option display="Enabled" id="config.driver.iica_slave.general_call_addr_enable.enabled" value="(1)"/>
+            <option display="Disabled" id="config.driver.iica_slave.general_call_addr_enable.disabled" value="(0)"/>
+        </property>
+        <property default="config.driver.iica.channel.disabled" display="Enable Single Channel" id="config.driver.iica_slave.single_channel" description="Enable single channel to reduce code size if only one channel is to be configured for IICA.">
+            <select enum="enum.driver.iica.channel"/>
+        </property>
+        <content>
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#define IICA_SLAVE_CFG_PARAM_CHECKING_ENABLE ${config.driver.iica_slave.param_checking_enable}
+#define IICA_SLAVE_CFG_ADDR_MODE_10_BIT_ENABLE ${config.driver.iica_slave.addr_mode_10_bit_enable}
+#define IICA_SLAVE_CFG_ADDR_MODE_GENERAL_CALL_ENABLE ${config.driver.iica_slave.general_call_addr_enable}
+#define IICA_SLAVE_CFG_SINGLE_CHANNEL ${config.driver.iica_slave.single_channel}
+
+#ifdef __cplusplus
+}
+#endif
+        </content>
+    </config>
+    <module config="config.driver.iica_slave" display="Connectivity|${module.driver.i2c_slave.name} IICA Slave (r_iica_slave)" id="module.driver.iica_on_iica_slave" version="1" url="group___i_i_c_a___s_l_a_v_e.html">
+        <constraint display="Slave address in 7 bit address mode should be between 0x08 and 0x77; also refer to the I2C spec for information about reserved addresses">
+            ((testInteger("${module.driver.i2c_slave.slave}")  &amp;&amp; ("${module.driver.i2c_slave.slave}" &gt; 7) &amp;&amp; ("${module.driver.i2c_slave.slave}" &lt; 120)) || (("${module.driver.i2c_slave.addr_mode}") != ("module.driver.i2c_slave.addr_mode.addr_mode_7bit")))
+        </constraint>
+        <constraint display="Maximum configurable value for 10 bit address mode is 0x3FF ">
+            ((testInteger("${module.driver.i2c_slave.slave}")  &amp;&amp; ("${module.driver.i2c_slave.slave}" &gt;= 0)&amp;&amp; ("${module.driver.i2c_slave.slave}" &lt;= 1023)) || (("${module.driver.i2c_slave.addr_mode}") != ("module.driver.i2c_slave.addr_mode.addr_mode_10bit")))
+        </constraint>
+        <constraint display="The sum of falling time and rising time must be less or equal to duty cycle / bitrate">
+            ((("${module.driver.i2c_slave.rate}") == ("module.driver.i2c_slave.rate.rate_standard")) &amp;&amp; ((${module.driver.i2c_slave.fall_time_us} + ${module.driver.i2c_slave.rise_time_us}) &lt;= ${module.driver.i2c_slave.duty}/10.0))
+            ||((("${module.driver.i2c_slave.rate}") == ("module.driver.i2c_slave.rate.rate_fast")) &amp;&amp; ((${module.driver.i2c_slave.fall_time_us} + ${module.driver.i2c_slave.rise_time_us}) &lt;= ${module.driver.i2c_slave.duty}/40.0))||
+            ((("${module.driver.i2c_slave.rate}") == ("module.driver.i2c_slave.rate.rate_fastplus")) &amp;&amp; ((${module.driver.i2c_slave.fall_time_us} + ${module.driver.i2c_slave.rise_time_us}) &lt;= ${module.driver.i2c_slave.duty}/100.0))
+        </constraint>
+        <constraint display="Unique name required for each instance">
+            "${interface.driver.i2c_slave.${module.driver.i2c_slave.name}}" === "1"
+        </constraint>
+       <constraint display="Enable 10-bit slave addressing mode">
+            ((("${config.driver.iica_slave.addr_mode_10_bit_enable}") === ("config.driver.iica_slave.addr_mode_10_bit_enable.enabled")) || (("${module.driver.i2c_slave.addr_mode}") != ("module.driver.i2c_slave.addr_mode.addr_mode_10bit")))
+        </constraint>
+        <constraint display="Channel not available on selected MCU">
+            "${interface.mcu.iica.${module.driver.i2c_slave.channel}}" === "1"
+        </constraint>
+        <constraint display="Requires IICA Peripheral">
+            "${interface.mcu.iica.external}" === "1"
+        </constraint>
+        <constraint display="Channel must match value configured for single channel mode.">
+            ("${config.driver.iica_slave.single_channel}" === "config.driver.iica.channel.disabled") ||
+                ("${config.driver.iica_slave.single_channel}" === "config.driver.iica.channel." + "${module.driver.i2c_slave.channel}")
+        </constraint>
+        <constraint display="The digital filter to be enabled only in fast mode and fast mode plus">
+            ((("${module.driver.i2c_slave.rate}") != ("module.driver.i2c_slave.rate.rate_standard")) || ("${module.driver.i2c_slave.dnf.enabled}" != ("module.driver.i2c_slave.dnf.enabled.enabled")))
+        </constraint>
+        <requires id="module.driver.iica_on_iica_slave.requires.iica" interface="interface.mcu.iica.external" visible="false" display="Requires IICA Peripheral" />
+        <provides interface="interface.driver.i2c_slave" />
+        <provides interface="interface.driver.i2c_slave_on_iica" />
+        <provides interface="interface.driver.i2c_slave.${module.driver.i2c_slave.name}" />
+        <provides interface="interface.peripheral.iica${module.driver.i2c_slave.channel}" />
+        <provides interface="interface.peripheral.iica" />
+        <property default="g_iica_slave${_instance}" display="Name" id="module.driver.i2c_slave.name" description="Module name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.i2c_slave.name}")</constraint>
+        </property>
+        <property default="0" display="Channel" id="module.driver.i2c_slave.channel" description="Specify the IICA channel.">
+            <constraint display="Value must be a non-negative integer">testInteger("${module.driver.i2c_slave.channel}")  &amp;&amp; ("${module.driver.i2c_slave.channel}" &gt;= 0)</constraint>
+            <signal event="event.iica${module.driver.i2c_slave.channel}.txrxi" />
+        </property>
+        <property default="module.driver.i2c_slave.rate.rate_standard" display="Rate" id="module.driver.i2c_slave.rate" description="Select the transfer rate.\n\nIf the requested transfer rate cannot be achieved, the settings with the largest possible transfer rate that is less than or equal to the requested transfer rate are used. The theoretical calculated transfer rate is printed in a comment in the generated iica_slave_extended_cfg_t structure.">
+            <option display="Standard" id="module.driver.i2c_slave.rate.rate_standard" value="I2C_SLAVE_RATE_STANDARD"/>
+            <option display="Fast-mode" id="module.driver.i2c_slave.rate.rate_fast" value="I2C_SLAVE_RATE_FAST"/>
+            <option display="Fast-mode plus" id="module.driver.i2c_slave.rate.rate_fastplus" value="I2C_SLAVE_RATE_FASTPLUS"/>
+        </property>
+        <property default="module.driver.i2c_slave.cks.cks_1" display="Internal Reference Clock" id="module.driver.i2c_slave.cks" description="Select the internal reference clock for IICA slave.">
+            <option display="PCLKB / 1" id="module.driver.i2c_slave.cks.cks_1" value="0"/>
+            <option display="PCLKB / 2" id="module.driver.i2c_slave.cks.cks_2" value="1"/>
+        </property>
+        <property default="0" display="Signal Rising Time (us)" id="module.driver.i2c_slave.rise_time_us" description="Set the SDA and SCL signal rising time in micro-seconds.">
+            <constraint display="Must be a valid value">
+            eval('' +
+            'var input = "${module.driver.i2c_slave.rise_time_us}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?$","i");' +
+            'var regex_float_with_suffix = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?$","i");' +
+            ' ( regex_float.test(input) || regex_float_with_suffix.test(input))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${module.driver.i2c_slave.rise_time_us}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)$","i");' +
+            'if (regex_float.test(output)){' +
+            'output = output;' +
+            '}' +
+            'output')
+            </export>
+        </property>
+        <property default="0" display="Signal Falling Time (us)" id="module.driver.i2c_slave.fall_time_us" description="Set the SDA and SCL signal falling time in micro-seconds.">
+            <constraint display="Must be a valid value">
+            eval('' +
+            'var input = "${module.driver.i2c_slave.fall_time_us}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?$","i");' +
+            'var regex_float_with_suffix = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?$","i");' +
+            ' ( regex_float.test(input) || regex_float_with_suffix.test(input))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${module.driver.i2c_slave.fall_time_us}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([0-9]+)$","i");' +
+            'if (regex_float.test(output)){' +
+            'output = output;' +
+            '}' +
+            'output')
+            </export>
+        </property>
+        <property default="53" display="Duty Cycle (%)" id="module.driver.i2c_slave.duty" description="Set SCL high duty cycle.">
+            <constraint display="Value must be an integer between 0 and 100">testInteger("${module.driver.i2c_slave.duty}")  &amp;&amp; ("${module.driver.i2c_slave.duty}" &gt;= 0)  &amp;&amp; ("${module.driver.i2c_slave.duty}" &lt;= 100)</constraint>
+        </property>
+        <property default="module.driver.i2c_slave.dnf.enabled.disabled" display="Digital Filter" id="module.driver.i2c_slave.dnf.enabled" description="Configure digital filter.">
+            <option display="Enabled" id="module.driver.i2c_slave.dnf.enabled.enabled" value="1"/>
+            <option display="Disabled" id="module.driver.i2c_slave.dnf.enabled.disabled" value="0"/>
+        </property>
+        <property default="0" id="module.driver.iica.bitrate">
+            <export><![CDATA[eval('' +
+'/* INPUTS */' +
+'    var rate_enum = "${module.driver.i2c_slave.rate}";' +
+'    var peripheral_clock = ${board.clock.peripheral.iica} / 1000000;' +
+'    var cks = ${module.driver.i2c_slave.cks};' +
+'    var tR = ${module.driver.i2c_slave.rise_time_us};' +
+'    var tF = ${module.driver.i2c_slave.fall_time_us};' +
+'    var requested_bitrate = 0.0;' +
+'    var wl_us = 0.0;' +
+'    var wh_us = ${module.driver.i2c_slave.duty} / 100.00;' +
+'' +
+'    if ("I2C_SLAVE_RATE_FASTPLUS" == rate_enum)' +
+'    {' +
+'        requested_bitrate = 1000000;' +
+'        wl_us = Math.round((1 - wh_us) * 100) / 100.00;' +
+'    }' +
+'    else if ("I2C_SLAVE_RATE_FAST" == rate_enum)' +
+'    {' +
+'        requested_bitrate = 400000;' +
+'        wl_us = Math.round((1 - wh_us) * 100) * 4 / 100.00;' +
+'        wh_us *= 4' +
+'    }' +
+'    else' +
+'    {' +
+'        requested_bitrate = 100000;' +
+'        wl_us = Math.round((1 - wh_us) * 100) * 10 / 100.00;' +
+'        wh_us *= 10' +
+'    }' +
+'' +
+'    var divided_iclk = peripheral_clock / (1 << cks);' +
+'    var IICWL = Math.ceil(wl_us * divided_iclk);' +
+'    var IICWH = Math.ceil((wh_us - tR - tF) * divided_iclk);' +
+'' +
+'    bitrate_setting = " .clock_settings.iicwl_value = " + IICWL.toString() +' +
+'                   ", .clock_settings.iicwh_value = " + IICWH.toString() +' +
+'                   ", .clock_settings.cks_value = " + cks.toString();' +
+'    bitrate_setting' +
+'')
+]]>            </export>
+        </property>
+       <property default="module.driver.i2c_slave.addr_mode.addr_mode_7bit" display="Address Mode" id="module.driver.i2c_slave.addr_mode" description="Select the slave address mode. Ensure 10-bit slave addressing is enabled in the configuration to use 10-Bit setting here.">
+            <option display="7-Bit" id="module.driver.i2c_slave.addr_mode.addr_mode_7bit" value="I2C_SLAVE_ADDR_MODE_7BIT"/>
+            <option display="10-Bit" id="module.driver.i2c_slave.addr_mode.addr_mode_10bit" value="I2C_SLAVE_ADDR_MODE_10BIT"/>
+        </property>
+        <property default="0x08" display="Slave Address" id="module.driver.i2c_slave.slave" description="Specify the slave address.">
+            <constraint display="Value must be non-negative">testInteger("${module.driver.i2c_slave.slave}")  &amp;&amp; ("${module.driver.i2c_slave.slave}" &gt;= 0)</constraint>
+        </property>
+        <property default="iica_slave_callback" display="Callback" id="module.driver.i2c_slave.p_callback" description="A user callback function must be provided. This will be called from the interrupt service routine (ISR) to report IICA Slave transaction events and status.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.i2c_slave.p_callback}") &amp;&amp; ("${module.driver.i2c_slave.p_callback}" != "NULL")</constraint>
+        </property>
+        <property default="" display="Interrupt Priority Level" id="module.driver.i2c_slave.ipl" description="Select end of IICA communication interrupt priority.">
+            <select enum="enum.mcu.nvic.priorities.mandatory"/>
+            <interrupt event="event.iica${module.driver.i2c_slave.channel}.txrxi" isr="iica_slave_txrxi_isr"/>
+        </property>
+        <peripheral name="IICA${module.driver.i2c_slave.channel}" component="iica${module.driver.i2c_slave.channel}" />
+        <header>
+/** IICA Slave on IICA Instance. */
+extern const i2c_slave_instance_t ${module.driver.i2c_slave.name};
+
+/** Access the IICA Slave instance using these structures when calling API functions directly (::p_api is not used). */
+extern iica_slave_instance_ctrl_t ${module.driver.i2c_slave.name}_ctrl;
+extern const i2c_slave_cfg_t ${module.driver.i2c_slave.name}_cfg;
+
+#ifndef ${module.driver.i2c_slave.p_callback}
+void ${module.driver.i2c_slave.p_callback}(i2c_slave_callback_args_t * p_args);
+#endif
+        </header>
+        <includes>
+#include &quot;r_iica_slave.h&quot;
+#include &quot;r_i2c_slave_api.h&quot;
+        </includes>
+        <declarations>
+iica_slave_instance_ctrl_t ${module.driver.i2c_slave.name}_ctrl;
+const iica_slave_extended_cfg_t ${module.driver.i2c_slave.name}_extend =
+{
+    .clock_settings.digital_filter = ${module.driver.i2c_slave.dnf.enabled},
+    .clock_settings.operation_clock = ${module.driver.i2c_slave.cks},
+    ${module.driver.iica.bitrate},
+#if defined(PIN_SDAA${module.driver.i2c_slave.channel})
+    .sda_pin_settings.pin = PIN_SDAA${module.driver.i2c_slave.channel},
+#else
+    .sda_pin_settings.pin = (bsp_io_port_pin_t) UINT16_MAX,
+#endif
+#if defined(CFG_SDAA${module.driver.i2c_slave.channel})
+    .sda_pin_settings.cfg = CFG_SDAA${module.driver.i2c_slave.channel} | (uint32_t) IOPORT_PERIPHERAL_PIN_IO,
+#else
+    .sda_pin_settings.cfg = (uint32_t) IOPORT_CFG_PORT_DIRECTION_INPUT,
+#endif
+#if defined(PIN_SCLA${module.driver.i2c_slave.channel})
+    .scl_pin_settings.pin = PIN_SCLA${module.driver.i2c_slave.channel},
+#else
+    .scl_pin_settings.pin = (bsp_io_port_pin_t) UINT16_MAX,
+#endif
+#if defined(CFG_SCLA${module.driver.i2c_slave.channel})
+    .scl_pin_settings.cfg = CFG_SCLA${module.driver.i2c_slave.channel} | (uint32_t) IOPORT_PERIPHERAL_PIN_IO,
+#else
+    .scl_pin_settings.cfg = (uint32_t) IOPORT_CFG_PORT_DIRECTION_INPUT,
+#endif
+};
+const i2c_slave_cfg_t ${module.driver.i2c_slave.name}_cfg =
+{
+    .channel                 = ${module.driver.i2c_slave.channel},
+    .rate                    = ${module.driver.i2c_slave.rate},
+    .slave                   = ${module.driver.i2c_slave.slave},
+    .addr_mode               = ${module.driver.i2c_slave.addr_mode},
+    .p_callback              = ${module.driver.i2c_slave.p_callback},
+    .p_context               = NULL,
+#if defined(VECTOR_NUMBER_IICA${module.driver.i2c_slave.channel}_TXRXI)
+    .tei_irq             = VECTOR_NUMBER_IICA${module.driver.i2c_slave.channel}_TXRXI,
+#else
+    .tei_irq                 = FSP_INVALID_VECTOR,
+#endif
+    .ipl                     = ${module.driver.i2c_slave.ipl},
+    .p_extend            = &amp;${module.driver.i2c_slave.name}_extend,
+};
+/* Instance structure to use this module. */
+const i2c_slave_instance_t ${module.driver.i2c_slave.name} =
+{
+    .p_ctrl        = &amp;${module.driver.i2c_slave.name}_ctrl,
+    .p_cfg         = &amp;${module.driver.i2c_slave.name}_cfg,
+    .p_api         = &amp;g_iica_slave_on_iica
+};
+        </declarations>
+    </module>
+</raModuleDescription>

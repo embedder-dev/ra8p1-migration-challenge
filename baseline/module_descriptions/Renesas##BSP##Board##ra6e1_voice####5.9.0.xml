@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<raModuleDescription>
+  <config id="config.board.ra6e1_voice" path="fsp_cfg/bsp/board_cfg.h" version="0">
+    <content>#include "../../../ra/board/ra6e1_voice/board.h"</content>
+  </config>
+  <board config="config.board.ra6e1_voice" device="R7FA6E10F2CFM" display="RA6|RA6E1|VOICE-RA6E1" id="board.ra6e1_voice" version="0">
+    <description>Voice User Interface for RA6E1 MCU Group&#xA;Visit https://www.renesas.com/us/en/products/microcontrollers-microprocessors/ra-cortex-m-mcus/tw001-vuia6e1pocz-ra6e1-voice-user-reference-kit to get kit user’s manual, quick start guide, errata, design package, example projects, etc</description>
+    <capability id="capability.led"/>
+  </board>
+</raModuleDescription>

@@ -1,0 +1,137 @@
+<?xml version="1.0" ?>
+<raModuleDescription>
+    <module display="Sensor|OB1203 Proximity mode (rm_ob1203)" id="module.driver.ob1203_prox_mode_on_ob1203" version="1" visible="false" url="group___r_m___o_b1203.html">
+        <constraint display="The number of LED pulses cannot be combinated with the pulse width and the measurement period.">
+            (("${module.driver.ob1203_mode.prox_num_led_pulses}" != "module.driver.ob1203_mode.prox_num_led_pulses.num_32") ||
+            (("${module.driver.ob1203_mode.prox_width_period}" != "module.driver.ob1203_mode.prox_width_period.26us_3p125ms") &amp;&amp;
+            ("${module.driver.ob1203_mode.prox_width_period}" != "module.driver.ob1203_mode.prox_width_period.42us_3p125ms") &amp;&amp;
+            ("${module.driver.ob1203_mode.prox_width_period}" != "module.driver.ob1203_mode.prox_width_period.71us_3p125ms") &amp;&amp;
+            ("${module.driver.ob1203_mode.prox_width_period}" != "module.driver.ob1203_mode.prox_width_period.71us_6p25ms"))) &amp;&amp;
+            (("${module.driver.ob1203_mode.prox_num_led_pulses}" != "module.driver.ob1203_mode.prox_num_led_pulses.num_16") ||
+            ("${module.driver.ob1203_mode.prox_width_period}" != "module.driver.ob1203_mode.prox_width_period.71us_3p125ms"))
+        </constraint>
+        <requires id="module.driver.ob1203.requires.comms_i2c_device" interface="interface.driver.comms_i2c_device" visible="true" display="Requires I2C Communications Device">
+            <override property="module.driver.comms_i2c_device.slave_address" value="0x53"/>
+            <override property="module.driver.comms_i2c_device.address_mode" value="I2C_MASTER_ADDR_MODE_7BIT"/>
+            <override property="module.driver.comms_i2c_device.p_context" value="${module.driver.ob1203_mode.p_context}"/>
+            <override property="module.driver.comms_i2c_device.p_callback" value="rm_ob1203_comms_i2c_callback"/>
+        </requires>
+
+        <provides interface="interface.driver.ob1203_mode" />
+        <provides interface="interface.driver.ob1203_mode_on_ob1203" />
+        <property default="NULL" id="module.driver.ob1203_mode.p_context" />
+        <property default="ob1203" id="module.driver.ob1203_mode.instance_name" />
+        <property default="module.driver.ob1203_mode.prox_interrupt_type.normal" display="Interrupt Type" id="module.driver.ob1203_mode.prox_interrupt_type" description="Set interrupt type.">
+            <option display="Normal" id="module.driver.ob1203_mode.prox_interrupt_type.normal" value="RM_OB1203_PROX_INTERRUPT_TYPE_NORMAL"/>
+            <option display="Logic" id="module.driver.ob1203_mode.prox_interrupt_type.logic" value="RM_OB1203_PROX_INTERRUPT_TYPE_LOGIC"/>
+        </property>
+        <property default="0x02" display="The Number of Similar Consecutive Interrupt Events" id="module.driver.ob1203_mode.prox_interrupt_persist" description="The number of similar consecutive Proximity mode interrupt events that must occur before the interrupt is asserted (4bits). Min = 0x0 and Max = 0xF">
+            <constraint display="Value must be a non-negative integer">testInteger("${module.driver.ob1203_mode.prox_interrupt_persist}")  &amp;&amp; ("${module.driver.ob1203_mode.prox_interrupt_persist}" &gt;= 0)</constraint>
+            <constraint display="Value must be 4bits or less">("${module.driver.ob1203_mode.prox_interrupt_persist}" &lt;= 0xF)</constraint>
+        </property>
+        <property default="module.driver.ob1203_mode.prox_sleep_after_interrupt.disabled" display="Sleep after Interrupt" id="module.driver.ob1203_mode.prox_sleep_after_interrupt" description="Set sleep after interrupt.">
+            <option display="Enabled" id="module.driver.ob1203_mode.prox_sleep_after_interrupt.enabled" value="RM_OB1203_SLEEP_AFTER_INTERRUPT_ENABLE"/>
+            <option display="Disabled" id="module.driver.ob1203_mode.prox_sleep_after_interrupt.disabled" value="RM_OB1203_SLEEP_AFTER_INTERRUPT_DISABLE"/>
+        </property>
+        <property default="module.driver.ob1203_mode.prox_gain.mode_1" display="Gain" id="module.driver.ob1203_mode.prox_gain" description="Set gain of ADC output and noise.">
+            <option display="1" id="module.driver.ob1203_mode.prox_gain.mode_1" value="RM_OB1203_PPG_PROX_GAIN_1"/>
+            <option display="1.5" id="module.driver.ob1203_mode.prox_gain.mode_1p5" value="RM_OB1203_PPG_PROX_GAIN_1P5"/>
+            <option display="2" id="module.driver.ob1203_mode.prox_gain.mode_2" value="RM_OB1203_PPG_PROX_GAIN_2"/>
+            <option display="4" id="module.driver.ob1203_mode.prox_gain.mode_4" value="RM_OB1203_PPG_PROX_GAIN_4"/>
+        </property>
+        <property default="0x100" display="LED Current" id="module.driver.ob1203_mode.prox_led_current" description="Set Current for LED (10bits). Min = 0x000 and Max = 0x3FF">
+            <constraint display="Value must be a non-negative integer">testInteger("${module.driver.ob1203_mode.prox_led_current}")  &amp;&amp; ("${module.driver.ob1203_mode.prox_led_current}" &gt;= 0)</constraint>
+            <constraint display="Value must be 10bits or less">("${module.driver.ob1203_mode.prox_led_current}" &lt;= 0x3FF)</constraint>
+        </property>
+        <property default="module.driver.ob1203_mode.prox_led_order.ir_red_order" display="LED Order" id="module.driver.ob1203_mode.prox_led_order" description="Set LED order.">
+            <option display="IR LED first, Red LED second" id="module.driver.ob1203_mode.prox_led_order.ir_red_order" value="RM_OB1203_LED_IR_FIRST_RED_SECOND"/>
+            <option display="Red LED first, IR LED second" id="module.driver.ob1203_mode.prox_led_order.red_ir_order" value="RM_OB1203_LED_RED_FIRST_IR_SECOND"/>
+        </property>
+        <property default="module.driver.ob1203_mode.prox_led_analog_cancel.disabled" display="LED Analog Cancellation" id="module.driver.ob1203_mode.prox_led_analog_cancel" description="Set analog cancellation level.">
+            <option display="Enabled (50% offset of the full-scale value)" id="module.driver.ob1203_mode.prox_led_analog_cancel.enabled" value="RM_OB1203_ANALOG_CANCELLATION_ENABLE"/>
+            <option display="Disabled" id="module.driver.ob1203_mode.prox_led_analog_cancel.disabled" value="RM_OB1203_ANALOG_CANCELLATION_DISABLE"/>
+        </property>
+        <property default="0x100" display="LED Digital Cancellation" id="module.driver.ob1203_mode.prox_led_digital_cancel" description="Set digital cancellation level (16bits). Min = 0x0000 and Max = 0xFFFF">
+            <constraint display="Value must be a non-negative integer">testInteger("${module.driver.ob1203_mode.prox_led_digital_cancel}")  &amp;&amp; ("${module.driver.ob1203_mode.prox_led_digital_cancel}" &gt;= 0)</constraint>
+            <constraint display="Value must be 16bits or less">("${module.driver.ob1203_mode.prox_led_digital_cancel}" &lt;= 0xFFFF)</constraint>
+        </property>
+        <property default="module.driver.ob1203_mode.prox_num_led_pulses.num_8" display="Number of LED pulses" id="module.driver.ob1203_mode.prox_num_led_pulses" description="Set number of LED pulses.">
+            <option display="1 pulse" id="module.driver.ob1203_mode.prox_num_led_pulses.num_1" value="RM_OB1203_NUM_LED_PULSES_1"/>
+            <option display="2 pulses" id="module.driver.ob1203_mode.prox_num_led_pulses.num_2" value="RM_OB1203_NUM_LED_PULSES_2"/>
+            <option display="4 pulses" id="module.driver.ob1203_mode.prox_num_led_pulses.num_4" value="RM_OB1203_NUM_LED_PULSES_4"/>
+            <option display="8 pulses" id="module.driver.ob1203_mode.prox_num_led_pulses.num_8" value="RM_OB1203_NUM_LED_PULSES_8"/>
+            <option display="16 pulses" id="module.driver.ob1203_mode.prox_num_led_pulses.num_16" value="RM_OB1203_NUM_LED_PULSES_16"/>
+            <option display="32 pulses" id="module.driver.ob1203_mode.prox_num_led_pulses.num_32" value="RM_OB1203_NUM_LED_PULSES_32"/>
+        </property>
+        <property default="module.driver.ob1203_mode.prox_width_period.42us_100ms" display="Pulse Width and Measurement Period" id="module.driver.ob1203_mode.prox_width_period" description="Set pulse width and measurement period.">
+            <option display="Pulse width:26us. Measurement Period:3.125ms. (Except for the number 32 of LED pulses)" id="module.driver.ob1203_mode.prox_width_period.26us_3p125ms" value="RM_OB1203_PROX_WIDTH_26US_PERIOD_3P125MS"/>
+            <option display="Pulse width:26us. Measurement Period:6.25ms" id="module.driver.ob1203_mode.prox_width_period.26us_6p25ms" value="RM_OB1203_PROX_WIDTH_26US_PERIOD_6P25MS"/>
+            <option display="Pulse width:26us. Measurement Period:12.5ms" id="module.driver.ob1203_mode.prox_width_period.26us_12p5ms" value="RM_OB1203_PROX_WIDTH_26US_PERIOD_12P5MS"/>
+            <option display="Pulse width:26us. Measurement Period:25ms" id="module.driver.ob1203_mode.prox_width_period.26us_25ms" value="RM_OB1203_PROX_WIDTH_26US_PERIOD_25MS"/>
+            <option display="Pulse width:26us. Measurement Period:50ms" id="module.driver.ob1203_mode.prox_width_period.26us_50ms" value="RM_OB1203_PROX_WIDTH_26US_PERIOD_50MS"/>
+            <option display="Pulse width:26us. Measurement Period:100ms" id="module.driver.ob1203_mode.prox_width_period.26us_100ms" value="RM_OB1203_PROX_WIDTH_26US_PERIOD_100MS"/>
+            <option display="Pulse width:26us. Measurement Period:200ms" id="module.driver.ob1203_mode.prox_width_period.26us_200ms" value="RM_OB1203_PROX_WIDTH_26US_PERIOD_200MS"/>
+            <option display="Pulse width:26us. Measurement Period:400ms" id="module.driver.ob1203_mode.prox_width_period.26us_400ms" value="RM_OB1203_PROX_WIDTH_26US_PERIOD_400MS"/>
+            <option display="Pulse width:42us. Measurement Period:3.125ms. (Except for the number 32 of LED pulses)" id="module.driver.ob1203_mode.prox_width_period.42us_3p125ms" value="RM_OB1203_PROX_WIDTH_42US_PERIOD_3P125MS"/>
+            <option display="Pulse width:42us. Measurement Period:6.25ms" id="module.driver.ob1203_mode.prox_width_period.42us_6p25ms" value="RM_OB1203_PROX_WIDTH_42US_PERIOD_6P25MS"/>
+            <option display="Pulse width:42us. Measurement Period:12.5ms" id="module.driver.ob1203_mode.prox_width_period.42us_12p5ms" value="RM_OB1203_PROX_WIDTH_42US_PERIOD_12P5MS"/>
+            <option display="Pulse width:42us. Measurement Period:25ms" id="module.driver.ob1203_mode.prox_width_period.42us_25ms" value="RM_OB1203_PROX_WIDTH_42US_PERIOD_25MS"/>
+            <option display="Pulse width:42us. Measurement Period:50ms" id="module.driver.ob1203_mode.prox_width_period.42us_50ms" value="RM_OB1203_PROX_WIDTH_42US_PERIOD_50MS"/>
+            <option display="Pulse width:42us. Measurement Period:100ms" id="module.driver.ob1203_mode.prox_width_period.42us_100ms" value="RM_OB1203_PROX_WIDTH_42US_PERIOD_100MS"/>
+            <option display="Pulse width:42us. Measurement Period:200ms" id="module.driver.ob1203_mode.prox_width_period.42us_200ms" value="RM_OB1203_PROX_WIDTH_42US_PERIOD_200MS"/>
+            <option display="Pulse width:42us. Measurement Period:400ms" id="module.driver.ob1203_mode.prox_width_period.42us_400ms" value="RM_OB1203_PROX_WIDTH_42US_PERIOD_400MS"/>
+            <option display="Pulse width:71us. Measurement Period:3.125ms. (Except for the number 16 and 32 of LED pulses)" id="module.driver.ob1203_mode.prox_width_period.71us_3p125ms" value="RM_OB1203_PROX_WIDTH_71US_PERIOD_3P125MS"/>
+            <option display="Pulse width:71us. Measurement Period:6.25ms. (Except for the number 32 of LED pulses)" id="module.driver.ob1203_mode.prox_width_period.71us_6p25ms" value="RM_OB1203_PROX_WIDTH_71US_PERIOD_6P25MS"/>
+            <option display="Pulse width:71us. Measurement Period:12.5ms" id="module.driver.ob1203_mode.prox_width_period.71us_12p5ms" value="RM_OB1203_PROX_WIDTH_71US_PERIOD_12P5MS"/>
+            <option display="Pulse width:71us. Measurement Period:25ms" id="module.driver.ob1203_mode.prox_width_period.71us_25ms" value="RM_OB1203_PROX_WIDTH_71US_PERIOD_25MS"/>
+            <option display="Pulse width:71us. Measurement Period:50ms" id="module.driver.ob1203_mode.prox_width_period.71us_50ms" value="RM_OB1203_PROX_WIDTH_71US_PERIOD_50MS"/>
+            <option display="Pulse width:71us. Measurement Period:100ms" id="module.driver.ob1203_mode.prox_width_period.71us_100ms" value="RM_OB1203_PROX_WIDTH_71US_PERIOD_100MS"/>
+            <option display="Pulse width:71us. Measurement Period:200ms" id="module.driver.ob1203_mode.prox_width_period.71us_200ms" value="RM_OB1203_PROX_WIDTH_71US_PERIOD_200MS"/>
+            <option display="Pulse width:71us. Measurement Period:400ms" id="module.driver.ob1203_mode.prox_width_period.71us_400ms" value="RM_OB1203_PROX_WIDTH_71US_PERIOD_400MS"/>
+        </property>
+        <property default="module.driver.ob1203_mode.prox_moving_average.disabled" display="Moving Average" id="module.driver.ob1203_mode.prox_moving_average" description="Set moving average.">
+            <option display="Enabled" id="module.driver.ob1203_mode.prox_moving_average.enabled" value="RM_OB1203_MOVING_AVERAGE_ENABLE"/>
+            <option display="Disabled" id="module.driver.ob1203_mode.prox_moving_average.disabled" value="RM_OB1203_MOVING_AVERAGE_DISABLE"/>
+        </property>
+        <property default="0x00" display="Hysteresis" id="module.driver.ob1203_mode.prox_hysteresis" description="Set hysteresis level (7bits). Min = 0x00 and Max = 0x7F.">
+            <constraint display="Value must be a non-negative integer">testInteger("${module.driver.ob1203_mode.prox_hysteresis}")  &amp;&amp; ("${module.driver.ob1203_mode.prox_hysteresis}" &gt;= 0)</constraint>
+            <constraint display="Value must be 7bits or less">("${module.driver.ob1203_mode.prox_hysteresis}" &lt;= 0x7F)</constraint>
+        </property>
+        <property default="0x0600" display="Upper Threshold" id="module.driver.ob1203_mode.prox_upper_threshold" description="Set upper threshold value (16bits). Min = 0x0000 and Max = 0xFFFF.">
+            <constraint display="Value must be a non-negative integer">testInteger("${module.driver.ob1203_mode.prox_upper_threshold}")  &amp;&amp; ("${module.driver.ob1203_mode.prox_upper_threshold}" &gt;= 0)</constraint>
+            <constraint display="Value must be 16bits or less">("${module.driver.ob1203_mode.prox_upper_threshold}" &lt;= 0xFFFF)</constraint>
+        </property>
+        <property default="0x0000" display="Lower Threshold" id="module.driver.ob1203_mode.prox_lower_threshold" description="Set lower threshold value (16bits). Min = 0x0000 and Max = 0xFFFF.">
+            <constraint display="Value must be a non-negative integer">testInteger("${module.driver.ob1203_mode.prox_lower_threshold}")  &amp;&amp; ("${module.driver.ob1203_mode.prox_lower_threshold}" &gt;= 0)</constraint>
+            <constraint display="Value must be 16bits or less">("${module.driver.ob1203_mode.prox_lower_threshold}" &lt;= 0xFFFF)</constraint>
+        </property>
+
+        <header>
+/* OB1203 Proximity mode */
+extern rm_ob1203_mode_extended_cfg_t ${module.driver.ob1203_mode.instance_name}_extended_cfg;
+        </header>
+
+        <declarations>
+extern rm_ob1203_api_t const  g_ob1203_on_ob1203_proximity;
+rm_ob1203_mode_extended_cfg_t ${module.driver.ob1203_mode.instance_name}_extended_cfg =
+{
+    .p_api = (void *)&amp;g_ob1203_on_ob1203_proximity,
+    .ppg_prox_gain = ${module.driver.ob1203_mode.prox_gain},
+    .led_order = ${module.driver.ob1203_mode.prox_led_order},
+    .prox_sleep = ${module.driver.ob1203_mode.prox_sleep_after_interrupt},
+    .prox_interrupt_type = ${module.driver.ob1203_mode.prox_interrupt_type},
+    .prox_interrupt_persist = ${module.driver.ob1203_mode.prox_interrupt_persist},
+    .prox_led_current = ${module.driver.ob1203_mode.prox_led_current},
+    .prox_ana_can = ${module.driver.ob1203_mode.prox_led_analog_cancel},
+    .prox_dig_can = ${module.driver.ob1203_mode.prox_led_digital_cancel},
+    .prox_num_led_pulses = ${module.driver.ob1203_mode.prox_num_led_pulses},
+    .prox_upper_threshold = ${module.driver.ob1203_mode.prox_upper_threshold},
+    .prox_lower_threshold = ${module.driver.ob1203_mode.prox_lower_threshold},
+    .prox_width_period = ${module.driver.ob1203_mode.prox_width_period},
+    .prox_moving_average = ${module.driver.ob1203_mode.prox_moving_average},
+    .prox_hysteresis = ${module.driver.ob1203_mode.prox_hysteresis},
+};
+        </declarations>
+
+    </module>
+</raModuleDescription>

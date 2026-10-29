@@ -1,0 +1,301 @@
+﻿<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.driver.iwdt" path="fsp_cfg/r_iwdt_cfg.h" version="0">
+        <property id="config.driver.iwdt.param_checking_enable" display="Parameter Checking" default="config.driver.iwdt.param_checking_enable.bsp" description="If selected code for parameter checking is included in the build.">
+            <option id="config.driver.iwdt.param_checking_enable.bsp" display="Default (BSP)" value="BSP_CFG_PARAM_CHECKING_ENABLE" />
+            <option id="config.driver.iwdt.param_checking_enable.enabled" display="Enabled" value="(1)" />
+            <option id="config.driver.iwdt.param_checking_enable.disabled" display="Disabled" value="(0)" />
+        </property>
+        <property id="config.driver.iwdt.register_start_nmi_supported" display="Register Start NMI Support" default="" description="If enabled, code for NMI support in register start mode is included in the build.">
+            <select enum="enum.driver.iwdt.register_start_nmi_supported" />
+        </property>
+        <content>
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#define IWDT_CFG_PARAM_CHECKING_ENABLE (${config.driver.iwdt.param_checking_enable})
+#define IWDT_CFG_REGISTER_START_NMI_SUPPORTED (${config.driver.iwdt.register_start_nmi_supported})
+
+#ifdef __cplusplus
+}
+#endif
+        </content>
+    </config>
+    <module id="module.driver.watchdog_on_iwdt" config="config.driver.iwdt" display="Monitoring|${module.driver.watchdog.name} Independent Watchdog (r_iwdt)" version="0" url="group___i_w_d_t.html">
+        <constraint display="Unique name required for each instance">
+            "${interface.driver.wdt.${module.driver.watchdog.name}}" === "1"
+        </constraint>
+        <constraint display="Driver used multiple times. Can only be used once.">
+            "${interface.driver.wdt_on_iwdt}" === "1"
+        </constraint>
+        <constraint display="Requires IWDT peripheral">
+          "${interface.mcu.iwdt}" === "1"
+        </constraint>
+        <constraint display="If 'Reset Control' is 'NMI Generated', 'Common|Register Start NMI Support' must be enabled.">
+            (("${config.driver.iwdt.register_start_nmi_supported}" === "enum.driver.iwdt.register_start_nmi_supported.enabled") || ("${module.driver.watchdog.reset_control}" != "enum.driver.iwdt.reset_control.nmi"))
+        </constraint>
+        <requires id="module.driver.watchdog_on_iwdt.requires.iwdt" interface="interface.mcu.iwdt" visible="false" display="Requires IWDT peripheral" />
+        <provides interface="interface.driver.wdt" />
+        <provides interface="interface.driver.wdt_on_iwdt" />
+        <provides interface="interface.driver.wdt.${module.driver.watchdog.name}" />
+        <provides interface="interface.peripheral.iwdt" />
+        <property default="g_wdt${_instance}" display="Name" id="module.driver.watchdog.name" description="Module name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.watchdog.name}")</constraint>
+            <signal event="event.iwdt.underflow" />
+        </property>
+        <property display="Timeout" id="module.driver.watchdog.timeout" default="" description="Select the independent watchdog timeout in cycles.">
+            <select enum="enum.driver.iwdt.timeout" />
+        </property>
+        <property display="Clock Division Ratio" id="module.driver.watchdog.clock_division" default="" description="Select the independent watchdog clock divisor.">
+            <select enum="enum.driver.iwdt.clock_division" />
+        </property>
+        <property display="Window Start Position" id="module.driver.watchdog.window_start" default="" description="Select the allowed independent watchdog refresh start point in %.">
+            <select enum="enum.driver.iwdt.window_start" />
+        </property>
+        <property display="Window End Position" id="module.driver.watchdog.window_end" default="" description="Select the allowed independent watchdog refresh end point in %.">
+            <select enum="enum.driver.iwdt.window_end" />
+        </property>
+        <property display="Reset Control" id="module.driver.watchdog.reset_control" default="" description="Select what happens when the independent watchdog timer expires.">
+            <select enum="enum.driver.iwdt.reset_control" />
+        </property>
+        <property display="Stop Control" id="module.driver.watchdog.stop_control" default="" description="Select the independent watchdog state in low power mode.">
+            <select enum="enum.driver.iwdt.stop_control" />
+        </property>
+        <property display="NMI callback" id="module.driver.watchdog.nmi_callback" default="NULL" description="A user callback function can be provided here. If this callback function is provided, it is called from the interrupt service routine (ISR) when the watchdog triggers.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.watchdog.nmi_callback}")</constraint>
+        </property>
+        <symbol id="symbol.driver.watchdog.name" value="${module.driver.watchdog.name}"/>
+        <symbol id="symbol.driver.watchdog.guard.refresh" value="${module.driver.watchdog.name}_refresh_guard"/>
+        <symbol id="symbol.driver.watchdog.guard.macro.refresh" value="FSP_GUARD_${module.driver.watchdog.name}_R_IWDT_Refresh"/>
+        <symbol id="symbol.driver.watchdog.guard.open" value="${module.driver.watchdog.name}_open_guard"/>
+        <symbol id="symbol.driver.watchdog.guard.macro.open" value="FSP_GUARD_${module.driver.watchdog.name}_R_IWDT_Open"/>
+        <symbol id="symbol.driver.watchdog.guard.status_clear" value="${module.driver.watchdog.name}_status_clear_guard"/>
+        <symbol id="symbol.driver.watchdog.guard.macro.status_clear" value="FSP_GUARD_${module.driver.watchdog.name}_R_IWDT_StatusClear"/>
+        <symbol id="symbol.driver.watchdog.guard.status_get" value="${module.driver.watchdog.name}_status_get_guard"/>
+        <symbol id="symbol.driver.watchdog.guard.macro.status_get" value="FSP_GUARD_${module.driver.watchdog.name}_R_IWDT_StatusGet"/>
+        <symbol id="symbol.driver.watchdog.guard.counter_get" value="${module.driver.watchdog.name}_counter_get_guard"/>
+        <symbol id="symbol.driver.watchdog.guard.macro.counter_get" value="FSP_GUARD_${module.driver.watchdog.name}_R_IWDT_CounterGet"/>
+        <symbol id="symbol.driver.watchdog.guard.timeout_get" value="${module.driver.watchdog.name}_timeout_get_guard"/>
+        <symbol id="symbol.driver.watchdog.guard.macro.timeout_get" value="FSP_GUARD_${module.driver.watchdog.name}_R_IWDT_TimeoutGet"/>
+        <symbol id="symbol.driver.watchdog.guard.callback_set" value="${module.driver.watchdog.name}_callback_set_guard"/>
+        <symbol id="symbol.driver.watchdog.guard.macro.callback_set" value="FSP_GUARD_${module.driver.watchdog.name}_R_IWDT_CallbackSet"/>
+        <symbol id="symbol.driver.watchdog.nsc_api" value="${module.driver.watchdog.name}_nsc_api"/>
+        <symbol id="symbol.driver.watchdog.cfg" value="${module.driver.watchdog.name}_cfg"/>
+        <symbol id="symbol.driver.watchdog.ctrl" value="${module.driver.watchdog.name}_ctrl"/>
+        <header>
+/** WDT on IWDT Instance. */
+extern const wdt_instance_t ${module.driver.watchdog.name};
+
+
+/** Access the IWDT instance using these structures when calling API functions directly (::p_api is not used). */
+extern iwdt_instance_ctrl_t ${module.driver.watchdog.name}_ctrl;
+extern const wdt_cfg_t ${module.driver.watchdog.name}_cfg;
+
+#ifndef ${module.driver.watchdog.nmi_callback}
+void ${module.driver.watchdog.nmi_callback}(wdt_callback_args_t * p_args);
+#endif
+
+        </header>
+        <includes>
+            #include "r_iwdt.h"
+            #include "r_wdt_api.h"
+        </includes>
+        <declarations>
+
+iwdt_instance_ctrl_t ${module.driver.watchdog.name}_ctrl;
+
+const wdt_cfg_t ${module.driver.watchdog.name}_cfg =
+{
+    .timeout = (wdt_timeout_t) ${module.driver.watchdog.timeout},
+    .clock_division = (wdt_clock_division_t) ${module.driver.watchdog.clock_division},
+    .window_start = (wdt_window_start_t) ${module.driver.watchdog.window_start},
+    .window_end = (wdt_window_end_t) ${module.driver.watchdog.window_end},
+    .reset_control = (wdt_reset_control_t) ${module.driver.watchdog.reset_control},
+    .stop_control = (wdt_stop_control_t) ${module.driver.watchdog.stop_control},
+    .p_callback = ${module.driver.watchdog.nmi_callback},
+};
+
+/* Instance structure to use this module. */
+const wdt_instance_t ${module.driver.watchdog.name} =
+{
+    .p_ctrl        = &amp;${module.driver.watchdog.name}_ctrl,
+    .p_cfg         = &amp;${module.driver.watchdog.name}_cfg,
+    .p_api         = &amp;g_wdt_on_iwdt
+};
+
+        </declarations>
+        <functions>
+        </functions>
+        <guard>
+            <header>
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.watchdog.name}_refresh_guard(wdt_ctrl_t *const p_api_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.watchdog.name}_open_guard(wdt_ctrl_t *const p_api_ctrl, wdt_cfg_t const *const p_cfg);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.watchdog.name}_status_clear_guard(wdt_ctrl_t *const p_api_ctrl, const wdt_status_t status);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.watchdog.name}_status_get_guard(wdt_ctrl_t *const p_api_ctrl, wdt_status_t *const p_status);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.watchdog.name}_counter_get_guard(wdt_ctrl_t *const p_api_ctrl, uint32_t *const p_count);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.watchdog.name}_timeout_get_guard(wdt_ctrl_t *const p_api_ctrl, wdt_timeout_values_t *const p_timeout);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.watchdog.name}_callback_set_guard(wdt_ctrl_t *const p_ctrl, void(*p_callback)(wdt_callback_args_t *), void const *const p_context, wdt_callback_args_t *const p_callback_memory);
+
+            </header>
+            <template name="${module.driver.watchdog.name}_guard.c">
+                <![CDATA[
+                    #include "guard.h"
+
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.watchdog.name}_refresh_guard (wdt_ctrl_t *const p_api_ctrl)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+
+    return R_IWDT_Refresh(&${module.driver.watchdog.name}_ctrl);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.watchdog.name}_open_guard (wdt_ctrl_t *const p_api_ctrl, wdt_cfg_t const *const p_cfg)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+    FSP_PARAMETER_NOT_USED(p_cfg);
+
+    return R_IWDT_Open(&${module.driver.watchdog.name}_ctrl, &${module.driver.watchdog.name}_cfg);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.watchdog.name}_status_clear_guard (wdt_ctrl_t *const p_api_ctrl, const wdt_status_t status)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+
+    return R_IWDT_StatusClear(&${module.driver.watchdog.name}_ctrl, status);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.watchdog.name}_status_get_guard (wdt_ctrl_t *const p_api_ctrl, wdt_status_t *const p_status)
+{
+    /* Verify all pointers are in non-secure memory. */
+    wdt_status_t *const p_status_checked = cmse_check_pointed_object(p_status, CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_status_checked != NULL);
+
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+
+    return R_IWDT_StatusGet(&${module.driver.watchdog.name}_ctrl, p_status_checked);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.watchdog.name}_counter_get_guard (wdt_ctrl_t *const p_api_ctrl, uint32_t *const p_count)
+{
+    /* Verify all pointers are in non-secure memory. */
+    uint32_t *const p_count_checked = cmse_check_address_range((void *) p_count, sizeof(uint32_t), CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_count_checked != NULL);
+
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+
+    return R_IWDT_CounterGet(&${module.driver.watchdog.name}_ctrl, p_count_checked);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.watchdog.name}_timeout_get_guard (wdt_ctrl_t *const p_api_ctrl, wdt_timeout_values_t *const p_timeout)
+{
+    /* Verify all pointers are in non-secure memory. */
+    wdt_timeout_values_t *const p_timeout_checked = cmse_check_pointed_object(p_timeout, CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_timeout_checked != NULL);
+
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+
+    return R_IWDT_TimeoutGet(&${module.driver.watchdog.name}_ctrl, p_timeout_checked);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.watchdog.name}_callback_set_guard (wdt_ctrl_t *const p_ctrl, void(*p_callback)(wdt_callback_args_t *), void const *const p_context, wdt_callback_args_t *const p_callback_memory)
+{
+    /* Verify all pointers are in non-secure memory. */
+    void(*p_callback_checked)(wdt_callback_args_t *) = (void(*)(wdt_callback_args_t *)) cmse_check_address_range((void *) p_callback, sizeof(void *), CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_callback_checked != NULL);
+    wdt_callback_args_t *const p_callback_memory_checked = cmse_check_pointed_object(p_callback_memory, CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_callback_memory_checked != NULL);
+
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+    FSP_PARAMETER_NOT_USED(p_context);
+
+    return R_IWDT_CallbackSet(&${module.driver.watchdog.name}_ctrl, p_callback_checked, p_context, p_callback_memory_checked);
+}
+
+                ]]>
+            </template>
+        </guard>
+        <nsc>
+            <header>
+
+#define FSP_GUARD_${module.driver.watchdog.name}_R_IWDT_Refresh() ${module.driver.watchdog.name}_refresh_guard(FSP_SECURE_ARGUMENT)
+
+#define FSP_GUARD_${module.driver.watchdog.name}_R_IWDT_Open() ${module.driver.watchdog.name}_open_guard(FSP_SECURE_ARGUMENT, FSP_SECURE_ARGUMENT)
+
+#define FSP_GUARD_${module.driver.watchdog.name}_R_IWDT_StatusClear(status) ${module.driver.watchdog.name}_status_clear_guard(FSP_SECURE_ARGUMENT, status)
+
+#define FSP_GUARD_${module.driver.watchdog.name}_R_IWDT_StatusGet(p_status) ${module.driver.watchdog.name}_status_get_guard(FSP_SECURE_ARGUMENT, p_status)
+
+#define FSP_GUARD_${module.driver.watchdog.name}_R_IWDT_CounterGet(p_count) ${module.driver.watchdog.name}_counter_get_guard(FSP_SECURE_ARGUMENT, p_count)
+
+#define FSP_GUARD_${module.driver.watchdog.name}_R_IWDT_TimeoutGet(p_timeout) ${module.driver.watchdog.name}_timeout_get_guard(FSP_SECURE_ARGUMENT, p_timeout)
+
+#define FSP_GUARD_${module.driver.watchdog.name}_R_IWDT_CallbackSet(p_callback, p_context, p_callback_memory) ${module.driver.watchdog.name}_callback_set_guard(FSP_SECURE_ARGUMENT, p_callback, p_context, p_callback_memory)
+
+
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.watchdog.name}_refresh_guard(wdt_ctrl_t *const p_api_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.watchdog.name}_open_guard(wdt_ctrl_t *const p_api_ctrl, wdt_cfg_t const *const p_cfg);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.watchdog.name}_status_clear_guard(wdt_ctrl_t *const p_api_ctrl, const wdt_status_t status);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.watchdog.name}_status_get_guard(wdt_ctrl_t *const p_api_ctrl, wdt_status_t *const p_status);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.watchdog.name}_counter_get_guard(wdt_ctrl_t *const p_api_ctrl, uint32_t *const p_count);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.watchdog.name}_timeout_get_guard(wdt_ctrl_t *const p_api_ctrl, wdt_timeout_values_t *const p_timeout);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.watchdog.name}_callback_set_guard(wdt_ctrl_t *const p_ctrl, void(*p_callback)(wdt_callback_args_t *), void const *const p_context, wdt_callback_args_t *const p_callback_memory);
+
+
+extern const wdt_instance_t ${module.driver.watchdog.name};
+            </header>
+            <declarations>
+                <![CDATA[
+static const wdt_api_t ${module.driver.watchdog.name}_nsc_api =
+{
+    .refresh = ${module.driver.watchdog.name}_refresh_guard,
+    .open = ${module.driver.watchdog.name}_open_guard,
+    .statusClear = ${module.driver.watchdog.name}_status_clear_guard,
+    .statusGet = ${module.driver.watchdog.name}_status_get_guard,
+    .counterGet = ${module.driver.watchdog.name}_counter_get_guard,
+    .timeoutGet = ${module.driver.watchdog.name}_timeout_get_guard,
+    .callbackSet = ${module.driver.watchdog.name}_callback_set_guard,
+};
+const wdt_instance_t ${module.driver.watchdog.name} =
+{
+    .p_api = &${module.driver.watchdog.name}_nsc_api,
+    .p_ctrl = FSP_SECURE_ARGUMENT,
+    .p_cfg = FSP_SECURE_ARGUMENT,
+};
+                ]]>
+            </declarations>
+        </nsc>
+        <api configurable="true">
+            <file>ra/fsp/inc/instances/r_iwdt.h</file>
+            <file>ra/fsp/inc/api/r_wdt_api.h</file>
+        </api>
+    </module>
+</raModuleDescription>

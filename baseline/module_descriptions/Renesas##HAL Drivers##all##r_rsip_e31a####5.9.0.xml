@@ -1,0 +1,10 @@
+<?xml version="1.0" ?>
+<raModuleDescription>
+  <module display="Security|RSIP-E31A Compatibility Mode" id="module.driver.crypto.rsip_e31a" common="1" version="1" visible="false" url="">
+    <requires id="module.driver.sce.requires.crypto.rsip_e31a" interface="interface.mcu.rsip.rsip_e31a" visible="false" display="Requires RSIP-E31A" />
+    <requires id="module.driver.sce.requires.rsip_e31a_key_injection" interface="interface.driver.rsip_e31a_key_injection" visible="true" display="Add Key Injection for PSA Crypto (Optional)" find="false" optional="true" />
+    <provides interface="interface.peripheral.rsip"/>
+    <provides interface="interface.driver.sce"/>
+    <provides interface="interface.driver.sce_for_nx"/>
+  </module>
+</raModuleDescription>

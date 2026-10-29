@@ -1,0 +1,69 @@
+<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.cellular_interface.comm_uart" path="fsp_cfg/middleware/rm_cellular_comm_uart_aws_cfg.h" version="0">
+        <property default="config.cellular_interface.comm_uart.param_checking_enable.bsp" display="Parameter Checking" id="config.cellular_interface.comm_uart.param_checking_enable" description="Selects if code for parameter checking is to be included in the build.">
+            <option display="Default (BSP)" id="config.cellular_interface.comm_uart.param_checking_enable.bsp" value="(BSP_CFG_PARAM_CHECKING_ENABLE)"/>
+            <option display="Enabled" id="config.cellular_interface.comm_uart.param_checking_enable.enabled" value="(1)"/>
+            <option display="Disabled" id="config.cellular_interface.comm_uart.param_checking_enable.disabled" value="(0)"/>
+        </property>
+        <property default="256" display="Receive Buffer" id="config.cellular_interface.comm_uart.read_buffer_size" description="Temporary buffer for received bytes. When read function is called reamaining bytes will be read directly into buffer specified by read function argument.">
+            <constraint display="Size should be greater than zero">testInteger("${config.cellular_interface.comm_uart.read_buffer_size}") &amp;&amp; ("${config.cellular_interface.comm_uart.read_buffer_size}" &gt; 0)</constraint>
+        </property>
+        <property default="512" display="Receive Transfer Size" id="config.cellular_interface.comm_uart.read_transfer_size" description="The comm interface will break down UART reads into smaller read requests based on this number. For instance if this is set to 512 bytes then the interface will request 512 bytes at a time until the requested length is met or timeout. This is helpful for making use of DTC without having a long timeout period. AWS Cellular Interface Common->Comm Interface Receive Timeout is the timeout used for individual reads and should set accordingly based on this setting.">
+            <constraint display="Size should be greater than zero">testInteger("${config.cellular_interface.comm_uart.read_transfer_size}") &amp;&amp; ("${config.cellular_interface.comm_uart.read_transfer_size}" &gt; 0)</constraint>
+        </property>
+        <content>
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#define RM_CELLULAR_COMM_UART_AWS_PARAM_CHECKING_ENABLE ${config.cellular_interface.comm_uart.param_checking_enable}
+#define RM_CELLULAR_COMM_UART_AWS_RX_BUFFER_SIZE (${config.cellular_interface.comm_uart.read_buffer_size})
+#define RM_CELLULAR_COMM_UART_AWS_RECEIVE_CLUSTER_BYTE_COUNT (${config.cellular_interface.comm_uart.read_transfer_size})
+
+#ifdef __cplusplus
+}
+#endif
+        </content>
+    </config>
+    <module config="config.cellular_interface.comm_uart" id="module.cellular_interface.comm_uart" display="Networking|Cellular Comm Interface on UART (rm_cellular_comm_uart_aws)" version="0" visible="false" url="https://www.freertos.org/Documentation/api-ref/cellular/cellular__comm__interface_8h.html">
+        <requires id="module.cellular_interface.comm_uart.requires.awsfreertos" interface="interface.rtos.awsfreertos" visible="false" display="Requires FreeRTOS"/>
+        <requires id="module.cellular_interface.comm_uart.requires.uart" interface="interface.driver.uart" display="Requires UART Peripheral" find="true">
+            <override property="module.driver.uart.callback" value="comm_uart_aws_callback"/>
+            <override property="module.driver.uart.flow_control" value="module.driver.uart.flow_control.ctsrts"/>
+        </requires>
+        <provides interface="interface.cellular_interface.comm_uart" />
+        <provides interface="interface.cellular_interface.comm_if" />
+        <property default="g_rm_cellular_comm_uart${_instance}" display="Name" id="module.cellular_interface.comm_uart.name" description="Module name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.cellular_interface.comm_uart.name}")</constraint>
+        </property>
+        <header>
+extern CellularCommInterface_t ${module.cellular_interface.comm_uart.name};
+        </header>
+        <includes>
+#include "rm_cellular_comm_uart_aws.h"
+        </includes>
+        <declarations>
+static CellularCommInterfaceError_t ${module.cellular_interface.comm_uart.name}_open(CellularCommInterfaceReceiveCallback_t receive_callback, void * pUserData, CellularCommInterfaceHandle_t * pCommInterfaceHandle);
+
+rm_cellular_comm_uart_aws_instance_ctrl_t ${module.cellular_interface.comm_uart.name}_ctrl;
+
+CellularCommInterface_t ${module.cellular_interface.comm_uart.name} =
+{
+    .open  = ${module.cellular_interface.comm_uart.name}_open,
+    .send  = RM_CELLULAR_COMM_UART_AWS_Send,
+    .recv  = RM_CELLULAR_COMM_UART_AWS_Receive,
+    .close = RM_CELLULAR_COMM_UART_AWS_Close
+};
+
+static CellularCommInterfaceError_t ${module.cellular_interface.comm_uart.name}_open (CellularCommInterfaceReceiveCallback_t receive_callback, void * pUserData, CellularCommInterfaceHandle_t * pCommInterfaceHandle)
+{
+    *pCommInterfaceHandle = (CellularCommInterfaceHandle_t) &amp;${module.cellular_interface.comm_uart.name}_ctrl;
+
+    ${module.cellular_interface.comm_uart.name}_ctrl.p_lower_level_instance = (uart_instance_t *) &amp;${module.cellular_interface.comm_uart.requires.uart::module.driver.uart.name};
+
+    return RM_CELLULAR_COMM_UART_AWS_Open(&amp;${module.cellular_interface.comm_uart.name}_ctrl, receive_callback, pUserData);
+}
+        </declarations>
+    </module>
+</raModuleDescription>

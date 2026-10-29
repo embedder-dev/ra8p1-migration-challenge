@@ -1,0 +1,548 @@
+<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.aws.freertosplus.freertosplus_tcp" path="aws/FreeRTOSIPConfig.h" version="0">
+        <property id="config.aws.freertosplus.freertosplus_tcp.ipconfigHAS_DEBUG_PRINTF" display="Print debug messages" default="config.aws.freertosplus.freertosplus_tcp.ipconfigHAS_DEBUG_PRINTF.0" description="If ipconfigHAS_DEBUG_PRINTF is set to 1 then FreeRTOS_debug_printf should be defined to the function  used to print out the debugging messages.">
+            <option id="config.aws.freertosplus.freertosplus_tcp.ipconfigHAS_DEBUG_PRINTF.0" display="Disable" value="0"/>
+            <option id="config.aws.freertosplus.freertosplus_tcp.ipconfigHAS_DEBUG_PRINTF.1" display="Enable " value="1"/>
+        </property>
+        <property id="config.aws.freertosplus.freertosplus_tcp.ipconfigIPv4_BACKWARD_COMPATIBLE" display="Backward Compatible Mode" default="config.aws.freertosplus.freertosplus_tcp.ipconfigIPv4_BACKWARD_COMPATIBLE.1" description="Run the code in backward compatible mode">
+            <option id="config.aws.freertosplus.freertosplus_tcp.ipconfigIPv4_BACKWARD_COMPATIBLE.0" display="No" value="0"/>
+            <option id="config.aws.freertosplus.freertosplus_tcp.ipconfigIPv4_BACKWARD_COMPATIBLE.1" display="Yes " value="1"/>
+        </property>
+        <property id="config.aws.freertosplus.freertosplus_tcp.ipconfigUSE_IPv6" display="Enable IPV6" default="config.aws.freertosplus.freertosplus_tcp.ipconfigUSE_IPv6.0" description="Stack supports handling IPv6 packets (including handling IPv6 header, ND, RA, and so on) when enabled">
+            <option id="config.aws.freertosplus.freertosplus_tcp.ipconfigUSE_IPv6.0" display="Disable" value="0"/>
+            <option id="config.aws.freertosplus.freertosplus_tcp.ipconfigUSE_IPv6.1" display="Enable " value="1"/>
+        </property>
+        <property id="config.aws.freertosplus.freertosplus_tcp.ipconfigHAS_PRINTF" display="Print info messages" default="config.aws.freertosplus.freertosplus_tcp.ipconfigHAS_PRINTF.0" description="Set to 1 to print out non debugging messages, for example the output of the  FreeRTOS_netstat() command, and ping replies.  If ipconfigHAS_PRINTF is set to 1 then FreeRTOS_printf should be set to the function used to print out the  messages.">
+            <option id="config.aws.freertosplus.freertosplus_tcp.ipconfigHAS_PRINTF.0" display="Disable" value="0"/>
+            <option id="config.aws.freertosplus.freertosplus_tcp.ipconfigHAS_PRINTF.1" display="Enable " value="1"/>
+        </property>
+        <property id="config.aws.freertosplus.freertosplus_tcp.ipconfigBYTE_ORDER" display="Byte order of the target MCU" default="config.aws.freertosplus.freertosplus_tcp.ipconfigBYTE_ORDER.pdFREERTOS_LITTLE_ENDIAN" description="Define the byte order of the target MCU">
+            <option id="config.aws.freertosplus.freertosplus_tcp.ipconfigBYTE_ORDER.pdFREERTOS_LITTLE_ENDIAN" display="pdFREERTOS_LITTLE_ENDIAN " value="pdFREERTOS_LITTLE_ENDIAN "/>
+            <!-- <option id="config.aws.freertosplus.freertosplus_tcp.ipconfigBYTE_ORDER.pdFREERTOS_BIG_ENDIAN" display="pdFREERTOS_BIG_ENDIAN" value="pdFREERTOS_BIG_ENDIAN"/> -->
+        </property>
+        <property id="config.aws.freertosplus.freertosplus_tcp.ipconfigDRIVER_INCLUDED_RX_IP_CHECKSUM" display="IP/TCP/UDP checksums" default="config.aws.freertosplus.freertosplus_tcp.ipconfigDRIVER_INCLUDED_RX_IP_CHECKSUM.1" description="If the network card/driver includes checksum offloading (IP/TCP/UDP checksums) then set ipconfigDRIVER_INCLUDED_RX_IP_CHECKSUM to 1 to prevent the software stack repeating the checksum calculations.">
+            <option id="config.aws.freertosplus.freertosplus_tcp.ipconfigDRIVER_INCLUDED_RX_IP_CHECKSUM.0" display="Disable" value="0"/>
+            <option id="config.aws.freertosplus.freertosplus_tcp.ipconfigDRIVER_INCLUDED_RX_IP_CHECKSUM.1" display="Enable " value="1"/>
+        </property>
+        <property id="config.aws.freertosplus.freertosplus_tcp.ipconfigSOCK_DEFAULT_RECEIVE_BLOCK_TIME" display="Receive Block Time" default="10000" description="Amount of time FreeRTOS_recv() will block for. The timeouts can be set per socket, using setsockopt().">
+            <constraint display="Value must be a non-negative integer">testInteger("${config.aws.freertosplus.freertosplus_tcp.ipconfigSOCK_DEFAULT_RECEIVE_BLOCK_TIME}") &amp;&amp; ("${config.aws.freertosplus.freertosplus_tcp.ipconfigSOCK_DEFAULT_RECEIVE_BLOCK_TIME}" &gt;= 0)</constraint>
+        </property>
+        <property id="config.aws.freertosplus.freertosplus_tcp.ipconfigSOCK_DEFAULT_SEND_BLOCK_TIME" display="Send Block Time" default="10000" description="Amount of time FreeRTOS_send() will block for. The timeouts can be set per socket, using setsockopt().">
+            <constraint display="Value must be a non-negative integer">testInteger("${config.aws.freertosplus.freertosplus_tcp.ipconfigSOCK_DEFAULT_SEND_BLOCK_TIME}") &amp;&amp; ("${config.aws.freertosplus.freertosplus_tcp.ipconfigSOCK_DEFAULT_SEND_BLOCK_TIME}" &gt;= 0)</constraint>
+        </property>
+        <property id="config.aws.freertosplus.freertosplus_tcp.ipconfigUSE_DNS_CACHE" display="DNS caching" default="config.aws.freertosplus.freertosplus_tcp.ipconfigUSE_DNS_CACHE.1" description="DNS caching">
+            <option id="config.aws.freertosplus.freertosplus_tcp.ipconfigUSE_DNS_CACHE.0" display="Disable" value="0"/>
+            <option id="config.aws.freertosplus.freertosplus_tcp.ipconfigUSE_DNS_CACHE.1" display="Enable " value="1"/>
+        </property>
+        <property id="config.aws.freertosplus.freertosplus_tcp.ipconfigDNS_REQUEST_ATTEMPTS" display="DNS Request Attempts" default="2" description="When a cache is present, ipconfigDNS_REQUEST_ATTEMPTS can be kept low and also DNS may use small timeouts.">
+            <constraint display="Value must be an integer">testInteger("${config.aws.freertosplus.freertosplus_tcp.ipconfigDNS_REQUEST_ATTEMPTS}")</constraint>
+            <constraint display="Value must be greater than 0">("${config.aws.freertosplus.freertosplus_tcp.ipconfigDNS_REQUEST_ATTEMPTS}" &gt;= 1) </constraint>
+        </property>
+        <property id="config.aws.freertosplus.freertosplus_tcp.ipconfigIP_TASK_PRIORITY" display="IP stack task priority" default="configMAX_PRIORITIES - 2" description="Set the priority of the task that executes the IP stack.">
+            <constraint display="Only symbols, numbers and arithmetic operators are valid.">
+            eval('' +
+            'var input = "${config.aws.freertosplus.freertosplus_tcp.ipconfigIP_TASK_PRIORITY}";' +
+            'var regex = RegExp("^\([a-zA-Z_][0-9a-zA-Z_]*|[1-9][0-9]*|0\)\(\\\\s*[+-/*]\\\\s*\([_a-zA-Z][a-zA-Z0-9]*|[1-9][0-9]*|0\)\)*$");' +
+            'regex.test(input)')
+            </constraint>
+        </property>
+        <property id="config.aws.freertosplus.freertosplus_tcp.ipconfigIP_TASK_STACK_SIZE_WORDS" display="Stack size in words (not bytes)" default="configMINIMAL_STACK_SIZE * 5" description="The size, in words (not bytes), of the stack allocated to the FreeRTOS+TCP stack.">
+            <constraint display="Only symbols, numbers and arithmetic operators are valid.">
+            eval('' +
+            'var input = "${config.aws.freertosplus.freertosplus_tcp.ipconfigIP_TASK_STACK_SIZE_WORDS}";' +
+            'var regex = RegExp("^\([a-zA-Z_][0-9a-zA-Z_]*|[1-9][0-9]*|0\)\(\\\\s*[+-/*]\\\\s*\([_a-zA-Z][a-zA-Z0-9]*|[1-9][0-9]*|0\)\)*$");' +
+            'regex.test(input)')
+            </constraint>
+        </property>
+        <property id="config.aws.freertosplus.freertosplus_tcp.ipconfigUSE_NETWORK_EVENT_HOOK" display="Network Events call vApplicationIPNetworkEventHook" default="config.aws.freertosplus.freertosplus_tcp.ipconfigUSE_NETWORK_EVENT_HOOK.1" description="vApplicationIPNetworkEventHook is called when the network connects or disconnects.">
+            <option id="config.aws.freertosplus.freertosplus_tcp.ipconfigUSE_NETWORK_EVENT_HOOK.0" display="Disable" value="0"/>
+            <option id="config.aws.freertosplus.freertosplus_tcp.ipconfigUSE_NETWORK_EVENT_HOOK.1" display="Enable " value="1"/>
+        </property>
+        <property id="config.aws.freertosplus.freertosplus_tcp.ipconfigUDP_MAX_SEND_BLOCK_TIME_TICKS" display="Max UDP send block time" default="15000 / portTICK_PERIOD_MS" description="Max UDP send block time">
+            <constraint display="Only symbols, numbers and arithmetic operators are valid.">
+            eval('' +
+            'var input = "${config.aws.freertosplus.freertosplus_tcp.ipconfigUDP_MAX_SEND_BLOCK_TIME_TICKS}";' +
+            'var regex = RegExp("^\([a-zA-Z_][0-9a-zA-Z_]*|[1-9][0-9]*|0\)\(\\\\s*[+-/*]\\\\s*\([_a-zA-Z][0-9a-zA-Z_]*|[1-9][0-9]*|0\)\)*$");' +
+            'regex.test(input)')
+            </constraint>
+        </property>
+        <property id="config.aws.freertosplus.freertosplus_tcp.ipconfigUSE_DHCP" display="Use DHCP" default="config.aws.freertosplus.freertosplus_tcp.ipconfigUSE_DHCP.1" description="If ipconfigUSE_DHCP is 1 then FreeRTOS+TCP will attempt to retrieve an IP address, netmask, DNS server address and gateway address from a DHCP server.">
+            <option id="config.aws.freertosplus.freertosplus_tcp.ipconfigUSE_DHCP.0" display="Disable" value="0"/>
+            <option id="config.aws.freertosplus.freertosplus_tcp.ipconfigUSE_DHCP.1" display="Enable " value="1"/>
+        </property>
+        <property id="config.aws.freertosplus.freertosplus_tcp.ipconfigDHCP_REGISTER_HOSTNAME" display="DHCP Register Hostname" default="config.aws.freertosplus.freertosplus_tcp.ipconfigDHCP_REGISTER_HOSTNAME.1" description="Register hostname when using DHCP">
+            <option id="config.aws.freertosplus.freertosplus_tcp.ipconfigDHCP_REGISTER_HOSTNAME.0" display="Disable" value="0"/>
+            <option id="config.aws.freertosplus.freertosplus_tcp.ipconfigDHCP_REGISTER_HOSTNAME.1" display="Enable " value="1"/>
+        </property>
+        <property id="config.aws.freertosplus.freertosplus_tcp.ipconfigDHCP_USES_UNICAST" display="DHCP Uses Unicast" default="config.aws.freertosplus.freertosplus_tcp.ipconfigDHCP_USES_UNICAST.1" description="DHCP uses unicast.">
+            <option id="config.aws.freertosplus.freertosplus_tcp.ipconfigDHCP_USES_UNICAST.0" display="Disable" value="0"/>
+            <option id="config.aws.freertosplus.freertosplus_tcp.ipconfigDHCP_USES_UNICAST.1" display="Enable " value="1"/>
+        </property>
+        <property id="config.aws.freertosplus.freertosplus_tcp.ipconfigUSE_DHCP_HOOK" display="DHCP callback function" default="config.aws.freertosplus.freertosplus_tcp.ipconfigUSE_DHCP_HOOK.0" description="Provide an implementation of the DHCP callback function(xApplicationDHCPHook)">
+            <option id="config.aws.freertosplus.freertosplus_tcp.ipconfigUSE_DHCP_HOOK.0" display="Disable" value="0"/>
+            <option id="config.aws.freertosplus.freertosplus_tcp.ipconfigUSE_DHCP_HOOK.1" display="Enable " value="1"/>
+        </property>
+        <property id="config.aws.freertosplus.freertosplus_tcp.ipconfigMAXIMUM_DISCOVER_TX_PERIOD" display="Interval between transmissions" default="120000 / portTICK_PERIOD_MS" description="When ipconfigUSE_DHCP is set to 1, DHCP requests will be sent out at increasing time intervals until either a reply is received from a DHCP server and accepted, or the interval between transmissions reaches ipconfigMAXIMUM_DISCOVER_TX_PERIOD.">
+            <constraint display="Only symbols, numbers and arithmetic operators are valid.">
+            eval('' +
+            'var input = "${config.aws.freertosplus.freertosplus_tcp.ipconfigMAXIMUM_DISCOVER_TX_PERIOD}";' +
+            'var regex = RegExp("^\([a-zA-Z_][0-9a-zA-Z_]*|[1-9][0-9]*|0\)\(\\\\s*[+-/*]\\\\s*\([_a-zA-Z][0-9a-zA-Z_]*|[1-9][0-9]*|0\)\)*$");' +
+            'regex.test(input)')
+            </constraint>
+        </property>
+        <property id="config.aws.freertosplus.freertosplus_tcp.ipconfigARP_CACHE_ENTRIES" display="ARP Cache Entries" default="6" description="The maximum number of entries that can exist in the ARP table at any one time">
+            <constraint display="Value must be an integer">testInteger("${config.aws.freertosplus.freertosplus_tcp.ipconfigARP_CACHE_ENTRIES}")</constraint>
+            <constraint display="Value must be greater than 0">("${config.aws.freertosplus.freertosplus_tcp.ipconfigARP_CACHE_ENTRIES}" &gt;= 1) </constraint>
+        </property>
+        <property id="config.aws.freertosplus.freertosplus_tcp.ipconfigMAX_ARP_RETRANSMISSIONS" display="ARP Request Retransmissions" default="5" description="ARP requests that do not result in an ARP response will be re-transmitted a maximum of ipconfigMAX_ARP_RETRANSMISSIONS times before the ARP request is aborted.">
+            <constraint display="Value must be an integer">testInteger("${config.aws.freertosplus.freertosplus_tcp.ipconfigMAX_ARP_RETRANSMISSIONS}")</constraint>
+            <constraint display="Value must be greater than 0">("${config.aws.freertosplus.freertosplus_tcp.ipconfigMAX_ARP_RETRANSMISSIONS}" &gt;= 1) </constraint>
+        </property>
+        <property id="config.aws.freertosplus.freertosplus_tcp.ipconfigMAX_ARP_AGE" display="Maximum time before ARP table entry becomes stale" default="150" description="The maximum time between an entry in the ARP table being created or refreshed and the entry being removed because it is stale">
+            <constraint display="Value must be an integer">testInteger("${config.aws.freertosplus.freertosplus_tcp.ipconfigMAX_ARP_AGE}")</constraint>
+            <constraint display="Value must be 1~255">("${config.aws.freertosplus.freertosplus_tcp.ipconfigMAX_ARP_AGE}" &gt;= 1) &amp;&amp; ("${config.aws.freertosplus.freertosplus_tcp.ipconfigMAX_ARP_AGE}" &lt;= 255)</constraint>
+        </property>
+        <property id="config.aws.freertosplus.freertosplus_tcp.ipconfigINCLUDE_FULL_INET_ADDR" display="Use string for IP Address" default="config.aws.freertosplus.freertosplus_tcp.ipconfigINCLUDE_FULL_INET_ADDR.1" description="Take an IP in decimal dot format (for example, &quot;192.168.0.1&quot;) as its parameter FreeRTOS_inet_addr_quick() takes an IP address as four separate numerical octets (for example, 192, 168, 0, 1) as its parameters">
+            <option id="config.aws.freertosplus.freertosplus_tcp.ipconfigINCLUDE_FULL_INET_ADDR.0" display="Disable" value="0"/>
+            <option id="config.aws.freertosplus.freertosplus_tcp.ipconfigINCLUDE_FULL_INET_ADDR.1" display="Enable " value="1"/>
+        </property>
+        <property id="config.aws.freertosplus.freertosplus_tcp.ipconfigNUM_NETWORK_BUFFER_DESCRIPTORS" display="Total number of available network buffers" default="10" description="Define the total number of network buffer that  are available to the IP stack">
+            <constraint display="Value must be an integer">testInteger("${config.aws.freertosplus.freertosplus_tcp.ipconfigNUM_NETWORK_BUFFER_DESCRIPTORS}")</constraint>
+            <constraint display="Value must be greater than 0">("${config.aws.freertosplus.freertosplus_tcp.ipconfigNUM_NETWORK_BUFFER_DESCRIPTORS}" &gt;= 1) </constraint>
+        </property>
+        <property id="config.aws.freertosplus.freertosplus_tcp.ipconfigEVENT_QUEUE_LENGTH" display="Set the maximum number of events" default="ipconfigNUM_NETWORK_BUFFER_DESCRIPTORS + 5" description="Set the maximum number of events that can be queued for processing at any one time.  The event queue must be a minimum of  5 greater than the total number of network buffers">
+            <constraint display="Only symbols, numbers and arithmetic operators are valid.">
+            eval('' +
+            'var input = "${config.aws.freertosplus.freertosplus_tcp.ipconfigEVENT_QUEUE_LENGTH}";' +
+            'var regex = RegExp("^\([a-zA-Z_][0-9a-zA-Z_]*|[1-9][0-9]*|0\)\(\\\\s*[+-/*]\\\\s*\([_a-zA-Z][a-zA-Z0-9]*|[1-9][0-9]*|0\)\)*$");' +
+            'regex.test(input)')
+            </constraint>
+        </property>
+        <property id="config.aws.freertosplus.freertosplus_tcp.ipconfigALLOW_SOCKET_SEND_WITHOUT_BIND" display="Enable FreeRTOS_sendto() without calling Bind" default="config.aws.freertosplus.freertosplus_tcp.ipconfigALLOW_SOCKET_SEND_WITHOUT_BIND.0" description="Set to 1 then calling FreeRTOS_sendto() on a socket that has not yet been bound will result in the IP stack automatically binding the socket to a port number from the range socketAUTO_PORT_ALLOCATION_START_NUMBER to 0xffff.  If
+ ipconfigALLOW_SOCKET_SEND_WITHOUT_BIND is set to 0 then calling FreeRTOS_sendto() on a socket that has not yet been bound will result in the send operation being aborted.">
+            <option id="config.aws.freertosplus.freertosplus_tcp.ipconfigALLOW_SOCKET_SEND_WITHOUT_BIND.1" display="Enable " value="1"/>
+            <option id="config.aws.freertosplus.freertosplus_tcp.ipconfigALLOW_SOCKET_SEND_WITHOUT_BIND.0" display="Disable" value="0"/>
+        </property>
+        <property id="config.aws.freertosplus.freertosplus_tcp.ipconfigUDP_TIME_TO_LIVE" display="TTL values for UDP packets" default="128" description="Define the Time To Live (TTL) values used in outgoing UDP packets">
+            <constraint display="Value must be an integer">testInteger("${config.aws.freertosplus.freertosplus_tcp.ipconfigUDP_TIME_TO_LIVE}")</constraint>
+            <constraint display="Value must be greater than 0">("${config.aws.freertosplus.freertosplus_tcp.ipconfigUDP_TIME_TO_LIVE}" &gt;= 1) </constraint>
+        </property>
+        <property id="config.aws.freertosplus.freertosplus_tcp.ipconfigTCP_TIME_TO_LIVE" display="TTL values for TCP packets" default="128" description="Defines the Time To Live (TTL) values used in outgoing TCP packets">
+            <constraint display="Value must be an integer">testInteger("${config.aws.freertosplus.freertosplus_tcp.ipconfigTCP_TIME_TO_LIVE}")</constraint>
+            <constraint display="Value must be 1~255">("${config.aws.freertosplus.freertosplus_tcp.ipconfigTCP_TIME_TO_LIVE}" &gt;= 1) &amp;&amp; ("${config.aws.freertosplus.freertosplus_tcp.ipconfigTCP_TIME_TO_LIVE}" &lt;= 255)</constraint>
+        </property>
+        <property id="config.aws.freertosplus.freertosplus_tcp.ipconfigUSE_TCP" display="Use TCP and all its features" default="config.aws.freertosplus.freertosplus_tcp.ipconfigUSE_TCP.1" description="Use TCP and all its features">
+            <option id="config.aws.freertosplus.freertosplus_tcp.ipconfigUSE_TCP.0" display="Disable " value="0"/>
+            <option id="config.aws.freertosplus.freertosplus_tcp.ipconfigUSE_TCP.1" display="Enable" value="1"/>
+        </property>
+        <property id="config.aws.freertosplus.freertosplus_tcp.ipconfigUSE_TCP_WIN" display="Let TCP use windowing mechanism" default="config.aws.freertosplus.freertosplus_tcp.ipconfigUSE_TCP_WIN.0" description="Let TCP use windowing mechanism">
+            <option id="config.aws.freertosplus.freertosplus_tcp.ipconfigUSE_TCP_WIN.0" display="Disable " value="0"/>
+            <option id="config.aws.freertosplus.freertosplus_tcp.ipconfigUSE_TCP_WIN.1" display="Enable" value="1"/>
+        </property>
+        <property id="config.aws.freertosplus.freertosplus_tcp.ipconfigNETWORK_MTU" display="Maximum number of bytes the payload of a network frame can contain" default="1500" description="Maximum number of bytes the payload of a network frame can contain">
+            <constraint display="Value must be an integer">testInteger("${config.aws.freertosplus.freertosplus_tcp.ipconfigNETWORK_MTU}")</constraint>
+            <constraint display="Value must be in the range 1 ~1500">("${config.aws.freertosplus.freertosplus_tcp.ipconfigNETWORK_MTU}" &gt;= 1) &amp;&amp; ("${config.aws.freertosplus.freertosplus_tcp.ipconfigNETWORK_MTU}" &lt;= 1500)</constraint>
+        </property>
+        <property id="config.aws.freertosplus.freertosplus_tcp.ipconfigUSE_DNS" display="Basic DNS client or resolver" default="config.aws.freertosplus.freertosplus_tcp.ipconfigUSE_DNS.1" description="Set ipconfigUSE_DNS to 1 to include a basic DNS client/resolver.  DNS is used through the FreeRTOS_gethostbyname() API function.">
+            <option id="config.aws.freertosplus.freertosplus_tcp.ipconfigUSE_DNS.0" display="Disable" value="0"/>
+            <option id="config.aws.freertosplus.freertosplus_tcp.ipconfigUSE_DNS.1" display="Enable " value="1"/>
+        </property>
+        <property id="config.aws.freertosplus.freertosplus_tcp.ipconfigREPLY_TO_INCOMING_PINGS" display="Reply to incoming ICMP echo (ping) requests" default="config.aws.freertosplus.freertosplus_tcp.ipconfigREPLY_TO_INCOMING_PINGS.1" description="If ipconfigREPLY_TO_INCOMING_PINGS is set to 1 then the IP stack will generate replies to incoming ICMP echo (ping) requests.">
+            <option id="config.aws.freertosplus.freertosplus_tcp.ipconfigREPLY_TO_INCOMING_PINGS.0" display="Disable" value="0"/>
+            <option id="config.aws.freertosplus.freertosplus_tcp.ipconfigREPLY_TO_INCOMING_PINGS.1" display="Enable " value="1"/>
+        </property>
+        <property id="config.aws.freertosplus.freertosplus_tcp.ipconfigSUPPORT_OUTGOING_PINGS" display="FreeRTOS_SendPingRequest() is available" default="config.aws.freertosplus.freertosplus_tcp.ipconfigSUPPORT_OUTGOING_PINGS.0" description="If ipconfigSUPPORT_OUTGOING_PINGS is set to 1 then the  FreeRTOS_SendPingRequest() API function is available.">
+            <option id="config.aws.freertosplus.freertosplus_tcp.ipconfigSUPPORT_OUTGOING_PINGS.0" display="Disable" value="0"/>
+            <option id="config.aws.freertosplus.freertosplus_tcp.ipconfigSUPPORT_OUTGOING_PINGS.1" display="Enable " value="1"/>
+        </property>
+        <property id="config.aws.freertosplus.freertosplus_tcp.ipconfigSUPPORT_SELECT_FUNCTION" display="FreeRTOS_select() (and associated) API function is available" default="config.aws.freertosplus.freertosplus_tcp.ipconfigSUPPORT_SELECT_FUNCTION.0" description="If ipconfigSUPPORT_SELECT_FUNCTION is set to 1 then the FreeRTOS_select()  (and associated) API function is available">
+            <option id="config.aws.freertosplus.freertosplus_tcp.ipconfigSUPPORT_SELECT_FUNCTION.0" display="Disable" value="0"/>
+            <option id="config.aws.freertosplus.freertosplus_tcp.ipconfigSUPPORT_SELECT_FUNCTION.1" display="Enable " value="1"/>
+        </property>
+        <property id="config.aws.freertosplus.freertosplus_tcp.ipconfigFILTER_OUT_NON_ETHERNET_II_FRAMES" display="Filter out non Ethernet II frames." default="config.aws.freertosplus.freertosplus_tcp.ipconfigFILTER_OUT_NON_ETHERNET_II_FRAMES.1" description="If ipconfigFILTER_OUT_NON_ETHERNET_II_FRAMES is set to 1 then Ethernet frames that are not in Ethernet II format will be dropped. This option is included for potential future IP stack developments">
+            <option id="config.aws.freertosplus.freertosplus_tcp.ipconfigFILTER_OUT_NON_ETHERNET_II_FRAMES.0" display="Disable" value="0"/>
+            <option id="config.aws.freertosplus.freertosplus_tcp.ipconfigFILTER_OUT_NON_ETHERNET_II_FRAMES.1" display="Enable " value="1"/>
+        </property>
+        <property id="config.aws.freertosplus.freertosplus_tcp.ipconfigETHERNET_DRIVER_FILTERS_FRAME_TYPES" display="Responsibility of the Ethernet interface to filter out packets" default="config.aws.freertosplus.freertosplus_tcp.ipconfigETHERNET_DRIVER_FILTERS_FRAME_TYPES.0" description="If ipconfigETHERNET_DRIVER_FILTERS_FRAME_TYPES is set to 1 then it is the  responsibility of the Ethernet interface to filter out packets that are of no interest.">
+            <option id="config.aws.freertosplus.freertosplus_tcp.ipconfigETHERNET_DRIVER_FILTERS_FRAME_TYPES.0" display="Disable" value="0"/>
+            <option id="config.aws.freertosplus.freertosplus_tcp.ipconfigETHERNET_DRIVER_FILTERS_FRAME_TYPES.1" display="Enable " value="1"/>
+        </property>
+        <property id="config.aws.freertosplus.freertosplus_tcp.ipconfigPACKET_FILLER_SIZE" display="Access 32-bit fields in the IP packets" default="2" description="To access 32-bit fields in the IP packets with  32-bit memory instructions, all packets will be stored 32-bit-aligned,  plus 16-bits. This has to do with the contents of the IP-packets: all  32-bit fields are 32-bit-aligned, plus 16-bit">
+            <constraint display="Value must be an integer">testInteger("${config.aws.freertosplus.freertosplus_tcp.ipconfigPACKET_FILLER_SIZE}")</constraint>
+            <constraint display="Value must be greater than 0">("${config.aws.freertosplus.freertosplus_tcp.ipconfigPACKET_FILLER_SIZE}" &gt;= 1) </constraint>
+        </property>
+        <property id="config.aws.freertosplus.freertosplus_tcp.ipconfigTCP_WIN_SEG_COUNT" display="Size of the pool of TCP window descriptors" default="240" description="Define the size of the pool of TCP window descriptors">
+            <constraint display="Value must be an integer">testInteger("${config.aws.freertosplus.freertosplus_tcp.ipconfigTCP_WIN_SEG_COUNT}")</constraint>
+            <constraint display="Value must be greater than 1">("${config.aws.freertosplus.freertosplus_tcp.ipconfigTCP_WIN_SEG_COUNT}" &gt;= 1) </constraint>
+        </property>
+        <property id="config.aws.freertosplus.freertosplus_tcp.ipconfigTCP_RX_BUFFER_LENGTH" display="Size of Rx buffer for TCP sockets" default="3000" description="Define the size of Rx buffer for TCP sockets">
+            <constraint display="Value must be an integer">testInteger("${config.aws.freertosplus.freertosplus_tcp.ipconfigTCP_RX_BUFFER_LENGTH}")</constraint>
+            <constraint display="Value must be greater than 0">("${config.aws.freertosplus.freertosplus_tcp.ipconfigTCP_RX_BUFFER_LENGTH}" &gt;= 1) </constraint>
+        </property>
+        <property id="config.aws.freertosplus.freertosplus_tcp.ipconfigTCP_TX_BUFFER_LENGTH" display="Size of Tx buffer for TCP sockets" default="3000" description="Define the size of Tx buffer for TCP sockets">
+            <constraint display="Value must be an integer">testInteger("${config.aws.freertosplus.freertosplus_tcp.ipconfigTCP_TX_BUFFER_LENGTH}")</constraint>
+            <constraint display="Value must be greater than 0">("${config.aws.freertosplus.freertosplus_tcp.ipconfigTCP_TX_BUFFER_LENGTH}" &gt;= 1) </constraint>
+        </property>
+        <property id="config.aws.freertosplus.freertosplus_tcp.ipconfigTCP_KEEP_ALIVE" display="TCP keep-alive" default="config.aws.freertosplus.freertosplus_tcp.ipconfigTCP_KEEP_ALIVE.1" description="TCP keep-alive is avaiable or not">
+            <option id="config.aws.freertosplus.freertosplus_tcp.ipconfigTCP_KEEP_ALIVE.0" display="Disable" value="0"/>
+            <option id="config.aws.freertosplus.freertosplus_tcp.ipconfigTCP_KEEP_ALIVE.1" display="Enable " value="1"/>
+        </property>
+        <property id="config.aws.freertosplus.freertosplus_tcp.ipconfigTCP_KEEP_ALIVE_INTERVAL" display="TCP keep-alive interval" default="120" description="TCP keep-alive interval in second">
+            <constraint display="Value must be an integer">testInteger("${config.aws.freertosplus.freertosplus_tcp.ipconfigTCP_KEEP_ALIVE_INTERVAL}")</constraint>
+            <constraint display="Value must be greater than 0">("${config.aws.freertosplus.freertosplus_tcp.ipconfigTCP_KEEP_ALIVE_INTERVAL}" &gt;= 1) </constraint>
+        </property>
+        <property id="config.aws.freertosplus.freertosplus_tcp.ipconfigSOCKET_HAS_USER_SEMAPHORE" display="The socket semaphore to unblock the MQTT task (USER_SEMAPHORE)" default="config.aws.freertosplus.freertosplus_tcp.ipconfigSOCKET_HAS_USER_SEMAPHORE.0" description="The socket semaphore is used to unblock the MQTT task">
+            <option id="config.aws.freertosplus.freertosplus_tcp.ipconfigSOCKET_HAS_USER_SEMAPHORE.0" display="Disable" value="0"/>
+            <option id="config.aws.freertosplus.freertosplus_tcp.ipconfigSOCKET_HAS_USER_SEMAPHORE.1" display="Enable " value="1"/>
+        </property>
+        <property id="config.aws.freertosplus.freertosplus_tcp.ipconfigSOCKET_HAS_USER_WAKE_CALLBACK" display="The socket semaphore to unblock the MQTT task (WAKE_CALLBACK)" default="config.aws.freertosplus.freertosplus_tcp.ipconfigSOCKET_HAS_USER_WAKE_CALLBACK.1" description="The socket semaphore is used to unblock the MQTT task">
+            <option id="config.aws.freertosplus.freertosplus_tcp.ipconfigSOCKET_HAS_USER_WAKE_CALLBACK.0" display="Disable" value="0"/>
+            <option id="config.aws.freertosplus.freertosplus_tcp.ipconfigSOCKET_HAS_USER_WAKE_CALLBACK.1" display="Enable " value="1"/>
+        </property>
+        <property id="config.aws.freertosplus.freertosplus_tcp.ipconfigUSE_CALLBACKS" display="The socket semaphore  to unblock the MQTT task (USE_CALLBACKS)" default="config.aws.freertosplus.freertosplus_tcp.ipconfigUSE_CALLBACKS.0" description="The socket semaphore is used to unblock the MQTT task">
+            <option id="config.aws.freertosplus.freertosplus_tcp.ipconfigUSE_CALLBACKS.0" display="Disable" value="0"/>
+            <option id="config.aws.freertosplus.freertosplus_tcp.ipconfigUSE_CALLBACKS.1" display="Enable " value="1"/>
+        </property>
+        <property id="config.aws.freertosplus.freertosplus_tcp.ipconfigZERO_COPY_TX_DRIVER" display="The socket semaphore to unblock the MQTT task (TX_DRIVER)" default="config.aws.freertosplus.freertosplus_tcp.ipconfigZERO_COPY_TX_DRIVER.0" description="The socket semaphore is used to unblock the MQTT task">
+            <option id="config.aws.freertosplus.freertosplus_tcp.ipconfigZERO_COPY_TX_DRIVER.0" display="Disable" value="0"/>
+            <option id="config.aws.freertosplus.freertosplus_tcp.ipconfigZERO_COPY_TX_DRIVER.1" display="Enable " value="1"/>
+        </property>
+        <property id="config.aws.freertosplus.freertosplus_tcp.ipconfigZERO_COPY_RX_DRIVER" display="The socket semaphore to unblock the MQTT task (RX_DRIVER)" default="config.aws.freertosplus.freertosplus_tcp.ipconfigZERO_COPY_RX_DRIVER.0" description="The socket semaphore is used to unblock the MQTT task">
+            <option id="config.aws.freertosplus.freertosplus_tcp.ipconfigZERO_COPY_RX_DRIVER.0" display="Disable" value="0"/>
+            <option id="config.aws.freertosplus.freertosplus_tcp.ipconfigZERO_COPY_RX_DRIVER.1" display="Enable " value="1"/>
+        </property>
+        <property id="config.aws.freertosplus.freertosplus_tcp.ipconfigUSE_LINKED_RX_MESSAGES" display="Possible optimisation for expert users" default="config.aws.freertosplus.freertosplus_tcp.ipconfigUSE_LINKED_RX_MESSAGES.0" description="Possible optimisation for expert users - requires network driver support. It is is useful when there is high network traffic. If non-zero value then instead of passing received packets into the IP task one at a time the network interface can chain received packets together and pass them into the IP task in one go. If set to 0 then only one buffer will be sent at a time.">
+            <option id="config.aws.freertosplus.freertosplus_tcp.ipconfigUSE_LINKED_RX_MESSAGES.0" display="Disable" value="0"/>
+            <option id="config.aws.freertosplus.freertosplus_tcp.ipconfigUSE_LINKED_RX_MESSAGES.1" display="Enable " value="1"/>
+        </property>
+        <content>
+        /*
+ * FreeRTOS V202212.01
+ * Copyright (C) 2017 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+ * the Software, and to permit persons to whom the Software is furnished to do so,
+ * subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+ * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+ * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+ * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+ * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ *
+ * https://aws.amazon.com/freertos
+ * https://www.FreeRTOS.org
+ */
+
+
+/*****************************************************************************
+*
+* See the following URL for configuration information.
+* http://www.freertos.org/FreeRTOS-Plus/FreeRTOS_Plus_TCP/TCP_IP_Configuration.html
+*
+*****************************************************************************/
+#ifndef FREERTOS_IP_CONFIG_H
+#define FREERTOS_IP_CONFIG_H
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/* Set to 1 to print out debug messages.  If ipconfigHAS_DEBUG_PRINTF is set to
+ * 1 then FreeRTOS_debug_printf should be defined to the function used to print
+ * out the debugging messages. */
+#define ipconfigHAS_DEBUG_PRINTF    ${config.aws.freertosplus.freertosplus_tcp.ipconfigHAS_DEBUG_PRINTF}
+#if ( ipconfigHAS_DEBUG_PRINTF == 1 )
+    #define FreeRTOS_debug_printf( X )    vLoggingPrintf X
+#endif
+
+/* Set to 1 to print out non debugging messages, for example the output of the
+ * FreeRTOS_netstat() command, and ping replies.  If ipconfigHAS_PRINTF is set to 1
+ * then FreeRTOS_printf should be set to the function used to print out the
+ * messages. */
+#define ipconfigHAS_PRINTF    ${config.aws.freertosplus.freertosplus_tcp.ipconfigHAS_PRINTF}
+#if ( ipconfigHAS_PRINTF == 1 )
+    #define FreeRTOS_printf( X )    vLoggingPrintf X
+#endif
+
+/* Define the byte order of the target MCU (the MCU FreeRTOS+TCP is executing
+ * on).  Valid options are pdFREERTOS_BIG_ENDIAN and pdFREERTOS_LITTLE_ENDIAN. */
+#define ipconfigBYTE_ORDER                         ${config.aws.freertosplus.freertosplus_tcp.ipconfigBYTE_ORDER}
+
+/* If the network card/driver includes checksum offloading (IP/TCP/UDP checksums)
+ * then set ipconfigDRIVER_INCLUDED_RX_IP_CHECKSUM to 1 to prevent the software
+ * stack repeating the checksum calculations. */
+#define ipconfigDRIVER_INCLUDED_RX_IP_CHECKSUM     ${config.aws.freertosplus.freertosplus_tcp.ipconfigDRIVER_INCLUDED_RX_IP_CHECKSUM}
+
+/* Several API's will block until the result is known, or the action has been
+ * performed, for example FreeRTOS_send() and FreeRTOS_recv().  The timeouts can be
+ * set per socket, using setsockopt().  If not set, the times below will be
+ * used as defaults. */
+#define ipconfigSOCK_DEFAULT_RECEIVE_BLOCK_TIME    (${config.aws.freertosplus.freertosplus_tcp.ipconfigSOCK_DEFAULT_RECEIVE_BLOCK_TIME})
+#define ipconfigSOCK_DEFAULT_SEND_BLOCK_TIME       (${config.aws.freertosplus.freertosplus_tcp.ipconfigSOCK_DEFAULT_SEND_BLOCK_TIME})
+
+/* Include support for DNS caching.  For TCP, having a small DNS cache is very
+ * useful.  When a cache is present, ipconfigDNS_REQUEST_ATTEMPTS can be kept low
+ * and also DNS may use small timeouts.  If a DNS reply comes in after the DNS
+ * socket has been destroyed, the result will be stored into the cache.  The next
+ * call to FreeRTOS_gethostbyname() will return immediately, without even creating
+ * a socket. */
+#define ipconfigUSE_DNS_CACHE                      (${config.aws.freertosplus.freertosplus_tcp.ipconfigUSE_DNS_CACHE})
+#define ipconfigDNS_REQUEST_ATTEMPTS               (${config.aws.freertosplus.freertosplus_tcp.ipconfigDNS_REQUEST_ATTEMPTS})
+
+/* The IP stack executes it its own task (although any application task can make
+ * use of its services through the published sockets API). ipconfigUDP_TASK_PRIORITY
+ * sets the priority of the task that executes the IP stack.  The priority is a
+ * standard FreeRTOS task priority so can take any value from 0 (the lowest
+ * priority) to (configMAX_PRIORITIES - 1) (the highest priority).
+ * configMAX_PRIORITIES is a standard FreeRTOS configuration parameter defined in
+ * FreeRTOSConfig.h, not FreeRTOSIPConfig.h. Consideration needs to be given as to
+ * the priority assigned to the task executing the IP stack relative to the
+ * priority assigned to tasks that use the IP stack. */
+#define ipconfigIP_TASK_PRIORITY                   (${config.aws.freertosplus.freertosplus_tcp.ipconfigIP_TASK_PRIORITY})
+
+/* The size, in words (not bytes), of the stack allocated to the FreeRTOS+TCP
+ * task.  This setting is less important when the FreeRTOS Win32 simulator is used
+ * as the Win32 simulator only stores a fixed amount of information on the task
+ * stack.  FreeRTOS includes optional stack overflow detection, see:
+ * http://www.freertos.org/Stacks-and-stack-overflow-checking.html. */
+#define ipconfigIP_TASK_STACK_SIZE_WORDS           (${config.aws.freertosplus.freertosplus_tcp.ipconfigIP_TASK_STACK_SIZE_WORDS})
+
+/* If ipconfigUSE_NETWORK_EVENT_HOOK is set to 1 then FreeRTOS+TCP will call the
+ * network event hook at the appropriate times.  If ipconfigUSE_NETWORK_EVENT_HOOK
+ * is not set to 1 then the network event hook will never be called. See:
+ * http://www.FreeRTOS.org/FreeRTOS-Plus/FreeRTOS_Plus_UDP/API/vApplicationIPNetworkEventHook.shtml.
+ */
+#define ipconfigUSE_NETWORK_EVENT_HOOK           ${config.aws.freertosplus.freertosplus_tcp.ipconfigUSE_NETWORK_EVENT_HOOK}
+
+/* Sockets have a send block time attribute.  If FreeRTOS_sendto() is called but
+ * a network buffer cannot be obtained then the calling task is held in the Blocked
+ * state (so other tasks can continue to executed) until either a network buffer
+ * becomes available or the send block time expires.  If the send block time expires
+ * then the send operation is aborted.  The maximum allowable send block time is
+ * capped to the value set by ipconfigMAX_SEND_BLOCK_TIME_TICKS.  Capping the
+ * maximum allowable send block time prevents prevents a deadlock occurring when
+ * all the network buffers are in use and the tasks that process (and subsequently
+ * free) the network buffers are themselves blocked waiting for a network buffer.
+ * ipconfigMAX_SEND_BLOCK_TIME_TICKS is specified in RTOS ticks.  A time in
+ * milliseconds can be converted to a time in ticks by dividing the time in
+ * milliseconds by portTICK_PERIOD_MS. */
+#define ipconfigUDP_MAX_SEND_BLOCK_TIME_TICKS    (${config.aws.freertosplus.freertosplus_tcp.ipconfigUDP_MAX_SEND_BLOCK_TIME_TICKS})
+
+/* If ipconfigUSE_DHCP is 1 then FreeRTOS+TCP will attempt to retrieve an IP
+ * address, netmask, DNS server address and gateway address from a DHCP server.  If
+ * ipconfigUSE_DHCP is 0 then FreeRTOS+TCP will use a static IP address.  The
+ * stack will revert to using the static IP address even when ipconfigUSE_DHCP is
+ * set to 1 if a valid configuration cannot be obtained from a DHCP server for any
+ * reason.  The static configuration used is that passed into the stack by the
+ * FreeRTOS_IPInit() function call. */
+#define ipconfigUSE_DHCP                         ${config.aws.freertosplus.freertosplus_tcp.ipconfigUSE_DHCP}
+#define ipconfigDHCP_REGISTER_HOSTNAME           ${config.aws.freertosplus.freertosplus_tcp.ipconfigDHCP_REGISTER_HOSTNAME}
+#define ipconfigDHCP_USES_UNICAST                ${config.aws.freertosplus.freertosplus_tcp.ipconfigDHCP_USES_UNICAST}
+
+/* If ipconfigDHCP_USES_USER_HOOK is set to 1 then the application writer must
+ * provide an implementation of the DHCP callback function,
+ * xApplicationDHCPUserHook(). */
+#define ipconfigUSE_DHCP_HOOK                    ${config.aws.freertosplus.freertosplus_tcp.ipconfigUSE_DHCP_HOOK}
+
+/* When ipconfigUSE_DHCP is set to 1, DHCP requests will be sent out at
+ * increasing time intervals until either a reply is received from a DHCP server
+ * and accepted, or the interval between transmissions reaches
+ * ipconfigMAXIMUM_DISCOVER_TX_PERIOD.  The IP stack will revert to using the
+ * static IP address passed as a parameter to FreeRTOS_IPInit() if the
+ * re-transmission time interval reaches ipconfigMAXIMUM_DISCOVER_TX_PERIOD without
+ * a DHCP reply being received. */
+#define ipconfigMAXIMUM_DISCOVER_TX_PERIOD     (${config.aws.freertosplus.freertosplus_tcp.ipconfigMAXIMUM_DISCOVER_TX_PERIOD})
+
+/* The ARP cache is a table that maps IP addresses to MAC addresses.  The IP
+ * stack can only send a UDP message to a remove IP address if it knowns the MAC
+ * address associated with the IP address, or the MAC address of the router used to
+ * contact the remote IP address.  When a UDP message is received from a remote IP
+ * address the MAC address and IP address are added to the ARP cache.  When a UDP
+ * message is sent to a remote IP address that does not already appear in the ARP
+ * cache then the UDP message is replaced by a ARP message that solicits the
+ * required MAC address information.  ipconfigARP_CACHE_ENTRIES defines the maximum
+ * number of entries that can exist in the ARP table at any one time. */
+#define ipconfigARP_CACHE_ENTRIES                 ${config.aws.freertosplus.freertosplus_tcp.ipconfigARP_CACHE_ENTRIES}
+
+/* ARP requests that do not result in an ARP response will be re-transmitted a
+ * maximum of ipconfigMAX_ARP_RETRANSMISSIONS times before the ARP request is
+ * aborted. */
+#define ipconfigMAX_ARP_RETRANSMISSIONS           (${config.aws.freertosplus.freertosplus_tcp.ipconfigMAX_ARP_RETRANSMISSIONS})
+
+/* ipconfigMAX_ARP_AGE defines the maximum time between an entry in the ARP
+ * table being created or refreshed and the entry being removed because it is stale.
+ * New ARP requests are sent for ARP cache entries that are nearing their maximum
+ * age.  ipconfigMAX_ARP_AGE is specified in tens of seconds, so a value of 150 is
+ * equal to 1500 seconds (or 25 minutes). */
+#define ipconfigMAX_ARP_AGE                       ${config.aws.freertosplus.freertosplus_tcp.ipconfigMAX_ARP_AGE}
+
+/* Implementing FreeRTOS_inet_addr() necessitates the use of string handling
+ * routines, which are relatively large.  To save code space the full
+ * FreeRTOS_inet_addr() implementation is made optional, and a smaller and faster
+ * alternative called FreeRTOS_inet_addr_quick() is provided.  FreeRTOS_inet_addr()
+ * takes an IP in decimal dot format (for example, "192.168.0.1") as its parameter.
+ * FreeRTOS_inet_addr_quick() takes an IP address as four separate numerical octets
+ * (for example, 192, 168, 0, 1) as its parameters.  If
+ * ipconfigINCLUDE_FULL_INET_ADDR is set to 1 then both FreeRTOS_inet_addr() and
+ * FreeRTOS_indet_addr_quick() are available.  If ipconfigINCLUDE_FULL_INET_ADDR is
+ * not set to 1 then only FreeRTOS_indet_addr_quick() is available. */
+#define ipconfigINCLUDE_FULL_INET_ADDR            ${config.aws.freertosplus.freertosplus_tcp.ipconfigINCLUDE_FULL_INET_ADDR}
+
+/* ipconfigNUM_NETWORK_BUFFER_DESCRIPTORS defines the total number of network buffer that
+ * are available to the IP stack.  The total number of network buffers is limited
+ * to ensure the total amount of RAM that can be consumed by the IP stack is capped
+ * to a pre-determinable value. */
+#define ipconfigNUM_NETWORK_BUFFER_DESCRIPTORS    ${config.aws.freertosplus.freertosplus_tcp.ipconfigNUM_NETWORK_BUFFER_DESCRIPTORS}
+
+/* A FreeRTOS queue is used to send events from application tasks to the IP
+ * stack.  ipconfigEVENT_QUEUE_LENGTH sets the maximum number of events that can
+ * be queued for processing at any one time.  The event queue must be a minimum of
+ * 5 greater than the total number of network buffers. */
+#define ipconfigEVENT_QUEUE_LENGTH     (${config.aws.freertosplus.freertosplus_tcp.ipconfigEVENT_QUEUE_LENGTH})
+
+/* The address of a socket is the combination of its IP address and its port
+ * number.  FreeRTOS_bind() is used to manually allocate a port number to a socket
+ * (to 'bind' the socket to a port), but manual binding is not normally necessary
+ * for client sockets (those sockets that initiate outgoing connections rather than
+ * wait for incoming connections on a known port number).  If
+ * ipconfigALLOW_SOCKET_SEND_WITHOUT_BIND is set to 1 then calling
+ * FreeRTOS_sendto() on a socket that has not yet been bound will result in the IP
+ * stack automatically binding the socket to a port number from the range
+ * socketAUTO_PORT_ALLOCATION_START_NUMBER to 0xffff.  If
+ * ipconfigALLOW_SOCKET_SEND_WITHOUT_BIND is set to 0 then calling FreeRTOS_sendto()
+ * on a socket that has not yet been bound will result in the send operation being
+ * aborted. */
+#define ipconfigALLOW_SOCKET_SEND_WITHOUT_BIND         ${config.aws.freertosplus.freertosplus_tcp.ipconfigALLOW_SOCKET_SEND_WITHOUT_BIND}
+
+/* Defines the Time To Live (TTL) values used in outgoing UDP packets. */
+#define ipconfigUDP_TIME_TO_LIVE                       ${config.aws.freertosplus.freertosplus_tcp.ipconfigUDP_TIME_TO_LIVE}
+/* Also defined in FreeRTOSIPConfigDefaults.h. */
+#define ipconfigTCP_TIME_TO_LIVE                       ${config.aws.freertosplus.freertosplus_tcp.ipconfigTCP_TIME_TO_LIVE}
+
+/* USE_TCP: Use TCP and all its features. */
+#define ipconfigUSE_TCP                                (${config.aws.freertosplus.freertosplus_tcp.ipconfigUSE_TCP})
+
+/* USE_WIN: Let TCP use windowing mechanism. */
+#define ipconfigUSE_TCP_WIN                            (${config.aws.freertosplus.freertosplus_tcp.ipconfigUSE_TCP_WIN})
+
+/* The MTU is the maximum number of bytes the payload of a network frame can
+ * contain.  For normal Ethernet V2 frames the maximum MTU is 1500.  Setting a
+ * lower value can save RAM, depending on the buffer management scheme used.  If
+ * ipconfigCAN_FRAGMENT_OUTGOING_PACKETS is 1 then (ipconfigNETWORK_MTU - 28) must
+ * be divisible by 8. */
+#define ipconfigNETWORK_MTU                            ${config.aws.freertosplus.freertosplus_tcp.ipconfigNETWORK_MTU}
+
+/* Set ipconfigUSE_DNS to 1 to include a basic DNS client/resolver.  DNS is used
+ * through the FreeRTOS_gethostbyname() API function. */
+#define ipconfigUSE_DNS                                ${config.aws.freertosplus.freertosplus_tcp.ipconfigUSE_DNS}
+
+/* If ipconfigREPLY_TO_INCOMING_PINGS is set to 1 then the IP stack will
+ * generate replies to incoming ICMP echo (ping) requests. */
+#define ipconfigREPLY_TO_INCOMING_PINGS                ${config.aws.freertosplus.freertosplus_tcp.ipconfigREPLY_TO_INCOMING_PINGS}
+
+/* If ipconfigSUPPORT_OUTGOING_PINGS is set to 1 then the
+ * FreeRTOS_SendPingRequest() API function is available. */
+#define ipconfigSUPPORT_OUTGOING_PINGS                 ${config.aws.freertosplus.freertosplus_tcp.ipconfigSUPPORT_OUTGOING_PINGS}
+
+/* If ipconfigSUPPORT_SELECT_FUNCTION is set to 1 then the FreeRTOS_select()
+ * (and associated) API function is available. */
+#define ipconfigSUPPORT_SELECT_FUNCTION                ${config.aws.freertosplus.freertosplus_tcp.ipconfigSUPPORT_SELECT_FUNCTION}
+
+/* If ipconfigFILTER_OUT_NON_ETHERNET_II_FRAMES is set to 1 then Ethernet frames
+ * that are not in Ethernet II format will be dropped.  This option is included for
+ * potential future IP stack developments. */
+#define ipconfigFILTER_OUT_NON_ETHERNET_II_FRAMES      ${config.aws.freertosplus.freertosplus_tcp.ipconfigFILTER_OUT_NON_ETHERNET_II_FRAMES}
+
+/* If ipconfigETHERNET_DRIVER_FILTERS_FRAME_TYPES is set to 1 then it is the
+ * responsibility of the Ethernet interface to filter out packets that are of no
+ * interest.  If the Ethernet interface does not implement this functionality, then
+ * set ipconfigETHERNET_DRIVER_FILTERS_FRAME_TYPES to 0 to have the IP stack
+ * perform the filtering instead (it is much less efficient for the stack to do it
+ * because the packet will already have been passed into the stack).  If the
+ * Ethernet driver does all the necessary filtering in hardware then software
+ * filtering can be removed by using a value other than 1 or 0. */
+#define ipconfigETHERNET_DRIVER_FILTERS_FRAME_TYPES    ${config.aws.freertosplus.freertosplus_tcp.ipconfigFILTER_OUT_NON_ETHERNET_II_FRAMES} //XXX
+
+/* Advanced only: in order to access 32-bit fields in the IP packets with
+ * 32-bit memory instructions, all packets will be stored 32-bit-aligned,
+ * plus 16-bits. This has to do with the contents of the IP-packets: all
+ * 32-bit fields are 32-bit-aligned, plus 16-bit. */
+#define ipconfigPACKET_FILLER_SIZE                     ${config.aws.freertosplus.freertosplus_tcp.ipconfigPACKET_FILLER_SIZE}
+
+/* Define the size of the pool of TCP window descriptors.  On the average, each
+ * TCP socket will use up to 2 x 6 descriptors, meaning that it can have 2 x 6
+ * outstanding packets (for Rx and Tx).  When using up to 10 TP sockets
+ * simultaneously, one could define TCP_WIN_SEG_COUNT as 120. */
+#define ipconfigTCP_WIN_SEG_COUNT                      ${config.aws.freertosplus.freertosplus_tcp.ipconfigTCP_WIN_SEG_COUNT}
+
+/* Each TCP socket has a circular buffers for Rx and Tx, which have a fixed
+ * maximum size.  Define the size of Rx buffer for TCP sockets. */
+#define ipconfigTCP_RX_BUFFER_LENGTH                   (${config.aws.freertosplus.freertosplus_tcp.ipconfigTCP_RX_BUFFER_LENGTH})
+
+/* Define the size of Tx buffer for TCP sockets. */
+#define ipconfigTCP_TX_BUFFER_LENGTH                   (${config.aws.freertosplus.freertosplus_tcp.ipconfigTCP_TX_BUFFER_LENGTH})
+
+/* When using call-back handlers, the driver may check if the handler points to
+ * real program memory (RAM or flash) or just has a random non-zero value. */
+#define ipconfigIS_VALID_PROG_ADDRESS( x )    ( ( x ) != NULL )
+
+/* Include support for TCP keep-alive messages. */
+#define ipconfigTCP_KEEP_ALIVE                   (${config.aws.freertosplus.freertosplus_tcp.ipconfigTCP_KEEP_ALIVE})
+#define ipconfigTCP_KEEP_ALIVE_INTERVAL          (${config.aws.freertosplus.freertosplus_tcp.ipconfigTCP_KEEP_ALIVE_INTERVAL}) /* Seconds. */
+
+/* The socket semaphore is used to unblock the MQTT task. */
+#define ipconfigSOCKET_HAS_USER_SEMAPHORE        (${config.aws.freertosplus.freertosplus_tcp.ipconfigSOCKET_HAS_USER_SEMAPHORE})
+
+#define ipconfigSOCKET_HAS_USER_WAKE_CALLBACK    (${config.aws.freertosplus.freertosplus_tcp.ipconfigSOCKET_HAS_USER_WAKE_CALLBACK})
+#define ipconfigUSE_CALLBACKS                    (${config.aws.freertosplus.freertosplus_tcp.ipconfigUSE_CALLBACKS})
+
+#define ipconfigZERO_COPY_TX_DRIVER              (${config.aws.freertosplus.freertosplus_tcp.ipconfigZERO_COPY_TX_DRIVER})
+#define ipconfigZERO_COPY_RX_DRIVER              (${config.aws.freertosplus.freertosplus_tcp.ipconfigZERO_COPY_RX_DRIVER})
+
+/* Possible optimisation for expert users - requires network driver support.
+ * When ipconfigUSE_LINKED_RX_MESSAGES is set to non-zero value then
+ * instead of passing received packets into the IP task one at a time the
+ * network interface can chain received packets together and pass them into
+ * the IP task in one go.  The packets are chained using the pxNextBuffer
+ * member. This optimisation is useful when there is high network traffic.
+ * When ipconfigUSE_LINKED_RX_MESSAGES is set to 0 then only one buffer will
+ * be sent at a time.  This is the default way for +TCP to pass messages from
+ * the MAC to the TCP/IP stack. */
+#define ipconfigUSE_LINKED_RX_MESSAGES           (${config.aws.freertosplus.freertosplus_tcp.ipconfigZERO_COPY_RX_DRIVER})
+
+#define ipconfigUSE_IPv6                         (${config.aws.freertosplus.freertosplus_tcp.ipconfigUSE_IPv6})
+
+#define ipconfigIPv4_BACKWARD_COMPATIBLE         (${config.aws.freertosplus.freertosplus_tcp.ipconfigIPv4_BACKWARD_COMPATIBLE})
+
+#if defined(__GNUC__) || defined(__ARMCC_VERSION)
+  #define portINLINE          __inline
+#elif defined(__ICCARM__)
+  #define portINLINE          inline
+#endif
+
+void vApplicationMQTTGetKeys( const char ** ppcRootCA,
+                              const char ** ppcClientCert,
+                              const char ** ppcClientPrivateKey );
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* FREERTOS_IP_CONFIG_H */
+        </content>
+    </config>
+    <module id="module.aws.freertosplus.freertosplus_tcp" display="Networking|FreeRTOS+TCP" config="config.aws.freertosplus.freertosplus_tcp" common="1" version="0" url="https://www.freertos.org/FreeRTOS-Plus/FreeRTOS_Plus_TCP/TCP_IP_Configuration.html">
+        <requires id="module.aws.freertosplus.freertosplus_tcp.requires.freertosplus_tcp_driver" interface="interface.driver.freertos_plus_tcp_on_ether" display="Add FreeRTOS Plus TCP Driver" find="true" />
+        <requires id="module.aws.freertosplus.freertosplus_tcp.requires.awsfreertos" interface="interface.rtos.awsfreertos" visible="false" display="Requires FreeRTOS"/>
+        <provides interface="interface.freertosplus.freertosplus_tcp" />
+    </module>
+</raModuleDescription>

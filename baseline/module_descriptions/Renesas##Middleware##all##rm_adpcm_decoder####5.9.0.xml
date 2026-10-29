@@ -1,0 +1,68 @@
+<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.middleware.adpcm_decoder" path="fsp_cfg/rm_adpcm_decoder_cfg.h" version="0">
+        <property default="config.middleware.adpcm_decoder.param_checking_enable.bsp" display="Parameter Checking" id="config.middleware.adpcm_decoder.param_checking_enable" description="If selected code for parameter checking is included in the build.">
+            <option display="Default (BSP)" id="config.middleware.adpcm_decoder.param_checking_enable.bsp" value="(BSP_CFG_PARAM_CHECKING_ENABLE)"/>
+            <option display="Enabled" id="config.middleware.adpcm_decoder.param_checking_enable.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.adpcm_decoder.param_checking_enable.disabled" value="(0)"/>
+        </property>
+
+        <content>
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#define RM_ADPCM_DECODER_CFG_PARAM_CHECKING_ENABLE   ${config.middleware.adpcm_decoder.param_checking_enable}
+
+#ifdef __cplusplus
+}
+#endif
+        </content>
+    </config>
+    <module config="config.middleware.adpcm_decoder" display="Audio|${module.middleware.adpcm_decoder.name} ADPCM Decoder (rm_adpcm_decoder)" id="module.middleware.adpcm_decoder_on_adpcm_decoder" version="1" url="group___r_m___a_d_p_c_m___d_e_c_o_d_e_r.html">
+        <constraint display="Unique name required for each instance">
+            "${interface.middleware.adpcm_decoder.${module.middleware.adpcm_decoder.name}}" === "1"
+        </constraint>
+
+        <!-- ADPCM Decoder configuration -->
+        <provides interface="interface.middleware.adpcm_decoder" />
+        <provides interface="interface.middleware.adpcm_decoder.adpcm_decoder_on_adpcm_decoder" />
+        <provides interface="interface.middleware.adpcm_decoder.${module.middleware.adpcm_decoder.name}" />
+        <property default="g_adpcm_decoder${_instance}" display="Name" id="module.middleware.adpcm_decoder.name" description="Module name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.middleware.adpcm_decoder.name}")</constraint>
+        </property>
+
+        <header>
+/** ADPCM Audio Decoder Instance */
+extern const adpcm_decoder_instance_t ${module.middleware.adpcm_decoder.name};
+
+/** Access the ADPCM Audio Decoder instance using these structures
+    when calling API functions directly (::p_api is not used). */
+extern adpcm_decoder_instance_ctrl_t ${module.middleware.adpcm_decoder.name}_ctrl;
+
+extern const adpcm_decoder_cfg_t ${module.middleware.adpcm_decoder.name}_cfg;
+        </header>
+
+        <includes>
+#include &quot;rm_adpcm_decoder.h&quot;
+        </includes>
+
+        <declarations>
+adpcm_decoder_instance_ctrl_t ${module.middleware.adpcm_decoder.name}_ctrl;
+
+
+const adpcm_decoder_cfg_t ${module.middleware.adpcm_decoder.name}_cfg =
+{
+  .p_extend     = NULL,
+};
+
+/* Instance structure to use ADPCM Audio decoder module. */
+const adpcm_decoder_instance_t ${module.middleware.adpcm_decoder.name} =
+{
+  .p_ctrl   = &amp;${module.middleware.adpcm_decoder.name}_ctrl,
+  .p_cfg    = &amp;${module.middleware.adpcm_decoder.name}_cfg,
+  .p_api    = &amp;g_adpcm_decoder_on_adpcm_decoder
+};
+        </declarations>
+    </module>
+</raModuleDescription>

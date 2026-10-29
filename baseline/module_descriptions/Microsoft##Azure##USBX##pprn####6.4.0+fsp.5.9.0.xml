@@ -1,0 +1,107 @@
+﻿<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.driver.usbx_pprn" path="fsp_cfg/r_usb_pprn_cfg.h" version="0">
+        <property id="config.driver.usbx_pprn.bulk_in" display="Bulk In Pipe" default="config.driver.usbx_pprn.bulk_in.pipe4" description="Select the USB pipe to use for bulk input transfers.">
+            <option id="config.driver.usbx_pprn.bulk_in.pipe1" display="USB PIPE1" value="USB_PIPE1"/>
+            <option id="config.driver.usbx_pprn.bulk_in.pipe2" display="USB PIPE2" value="USB_PIPE2"/>
+            <option id="config.driver.usbx_pprn.bulk_in.pipe3" display="USB PIPE3" value="USB_PIPE3"/>
+            <option id="config.driver.usbx_pprn.bulk_in.pipe4" display="USB PIPE4" value="USB_PIPE4"/>
+            <option id="config.driver.usbx_pprn.bulk_in.pipe5" display="USB PIPE5" value="USB_PIPE5"/>
+        </property>
+        <property id="config.driver.usbx_pprn.bulk_out" display="Bulk Out Pipe" default="config.driver.usbx_pprn.bulk_out.pipe5" description="Select the USB pipe to use for bulk output transfers.">
+            <option id="config.driver.usbx_pprn.bulk_out.pipe1" display="USB PIPE1" value="USB_PIPE1"/>
+            <option id="config.driver.usbx_pprn.bulk_out.pipe2" display="USB PIPE2" value="USB_PIPE2"/>
+            <option id="config.driver.usbx_pprn.bulk_out.pipe3" display="USB PIPE3" value="USB_PIPE3"/>
+            <option id="config.driver.usbx_pprn.bulk_out.pipe4" display="USB PIPE4" value="USB_PIPE4"/>
+            <option id="config.driver.usbx_pprn.bulk_out.pipe5" display="USB PIPE5" value="USB_PIPE5"/>
+        </property>
+        <content>
+            #ifdef __cplusplus
+            extern "C" {
+            #endif
+
+            #define USB_CFG_PPRN_BULK_IN (${config.driver.usbx_pprn.bulk_in})
+            #define USB_CFG_PPRN_BULK_OUT (${config.driver.usbx_pprn.bulk_out})
+
+            #ifdef __cplusplus
+            }
+            #endif
+        </content>
+    </config>
+    <module config="config.driver.usbx_pprn" display="Connectivity|Azure RTOS USBX PPRN" id="module.driver.usbx_pprn" version="1" url="https://github.com/eclipse-threadx/rtos-docs/blob/main/rtos-docs/usbx/index.md">
+        <constraint display="Unique name required for each instance">
+            "${interface.driver.usbx_pprn.${module.driver.usbx_pprn.name}}" === "1"
+        </constraint>
+        <constraint display="Requires USB Peripheral">
+          "${interface.mcu.usb_fs.external}" === "1"
+        </constraint>
+        <constraint display="The USB pipe numbers for Bulk Input and Bulk Output must be different.">
+            !(("${config.driver.usbx_pprn.bulk_in}" === "config.driver.usbx_pprn.bulk_in.pipe1") &amp;&amp;
+            ("${config.driver.usbx_pprn.bulk_out}" === "config.driver.usbx_pprn.bulk_out.pipe1"))
+        </constraint>
+        <constraint display="The USB pipe numbers for Bulk Input and Bulk Output must be different.">
+            !(("${config.driver.usbx_pprn.bulk_in}" === "config.driver.usbx_pprn.bulk_in.pipe2") &amp;&amp;
+            ("${config.driver.usbx_pprn.bulk_out}" === "config.driver.usbx_pprn.bulk_out.pipe2"))
+        </constraint>
+        <constraint display="The USB pipe numbers for Bulk Input and Bulk Output must be different.">
+            !(("${config.driver.usbx_pprn.bulk_in}" === "config.driver.usbx_pprn.bulk_in.pipe3") &amp;&amp;
+            ("${config.driver.usbx_pprn.bulk_out}" === "config.driver.usbx_pprn.bulk_out.pipe3"))
+        </constraint>
+        <constraint display="The USB pipe numbers for Bulk Input and Bulk Output must be different.">
+            !(("${config.driver.usbx_pprn.bulk_in}" === "config.driver.usbx_pprn.bulk_in.pipe4") &amp;&amp;
+            ("${config.driver.usbx_pprn.bulk_out}" === "config.driver.usbx_pprn.bulk_out.pipe4"))
+        </constraint>
+        <constraint display="The USB pipe numbers for Bulk Input and Bulk Output must be different.">
+            !(("${config.driver.usbx_pprn.bulk_in}" === "config.driver.usbx_pprn.bulk_in.pipe5") &amp;&amp;
+            ("${config.driver.usbx_pprn.bulk_out}" === "config.driver.usbx_pprn.bulk_out.pipe5"))
+        </constraint>
+        <constraint display="Requires USB PIPE4 or PIPE5 for Bulk Input transfer when using this MCU.">
+            !(("${interface.mcu.usb.pipes.0.4.5.6.7}" === "1") &amp;&amp;
+            ("${config.driver.usbx_pprn.bulk_in}" === "config.driver.usbx_pprn.bulk_in.pipe1"))
+        </constraint>
+        <constraint display="Requires USB PIPE4 or PIPE5 for Bulk Input transfer when using this MCU.">
+            !(("${interface.mcu.usb.pipes.0.4.5.6.7}" === "1") &amp;&amp;
+            ("${config.driver.usbx_pprn.bulk_in}" === "config.driver.usbx_pprn.bulk_in.pipe2"))
+        </constraint>
+        <constraint display="Requires USB PIPE4 or PIPE5 for Bulk Input transfer when using this MCU.">
+            !(("${interface.mcu.usb.pipes.0.4.5.6.7}" === "1") &amp;&amp;
+            ("${config.driver.usbx_pprn.bulk_in}" === "config.driver.usbx_pprn.bulk_in.pipe3"))
+        </constraint>
+        <constraint display="Requires USB PIPE4 or PIPE5 for Bulk Output transfer when using this MCU.">
+            !(("${interface.mcu.usb.pipes.0.4.5.6.7}" === "1") &amp;&amp;
+            ("${config.driver.usbx_pprn.bulk_out}" === "config.driver.usbx_pprn.bulk_out.pipe1"))
+        </constraint>
+        <constraint display="Requires USB PIPE4 or PIPE5 for Bulk Output transfer when using this MCU.">
+            !(("${interface.mcu.usb.pipes.0.4.5.6.7}" === "1") &amp;&amp;
+            ("${config.driver.usbx_pprn.bulk_out}" === "config.driver.usbx_pprn.bulk_out.pipe2"))
+        </constraint>
+        <constraint display="Requires USB PIPE4 or PIPE5 for Bulk Output transfer when using this MCU.">
+            !(("${interface.mcu.usb.pipes.0.4.5.6.7}" === "1") &amp;&amp;
+            ("${config.driver.usbx_pprn.bulk_out}" === "config.driver.usbx_pprn.bulk_out.pipe3"))
+        </constraint>
+        <requires id="module.azure.usbx_pprn.requires.threadx" interface="interface.rtos.tx" visible="false" display="Requires ThreadX"/>
+        <requires id="module.driver.usbx_pprn.requires.usb_basic" interface="interface.middleware.rm_usbx_port" visible="true" display="USBX PPRN">
+            <override property="module.middleware.rm_usbx_port.usb_mode" value="module.middleware.rm_usbx_port.usb_mode.peri"/>
+            <override property="module.middleware.rm_usbx_port.usb_classtype" value="module.middleware.rm_usbx_port.usb_classtype.pprn"/>
+            <override property="module.middleware.rm_usbx_port.p_usb_reg" value="NULL"/>
+        </requires>
+        <provides interface="interface.driver.usbx_pprn" />
+        <provides interface="interface.driver.usbx_pprn.${module.driver.usbx_pprn.name}" />
+        <property default="usbx_pprn" id="module.driver.usbx_pprn.usbx_pprn_interface" description=""/>
+        <property default="g_usbx_pprn${_instance}" display="Name" id="module.driver.usbx_pprn.name" description="Module name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.usbx_pprn.name}")</constraint>
+        </property>
+        <header>
+        /** Printer Driver on USB Instance. */
+        </header>
+        <includes>
+#include "ux_device_class_printer.h"
+        </includes>
+        <declarations>
+        </declarations>
+        <functions>
+        </functions>
+        <api configurable="true">
+        </api>
+    </module>
+</raModuleDescription>

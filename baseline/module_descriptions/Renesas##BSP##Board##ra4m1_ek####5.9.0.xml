@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<raModuleDescription>
+    <config id="config.board.ra4m1ek" path="fsp_cfg/bsp/board_cfg.h" version="0">
+        <content>
+            #include "../../../ra/board/ra4m1_ek/board.h"
+        </content>
+    </config>
+    <board id="board.ra4m1ek" display="RA4|RA4M1|EK-RA4M1" device="R7FA4M1AB3CFP" config="config.board.ra4m1ek" version="0" debugger="com.renesas.hardwaredebug.rz.jlink">
+        <description>Evaluation kit for RA4M1 MCU Group&#xA;Visit https://www.renesas.com/ra/ek-ra4m1 to get kit user’s manual, quick start guide, errata, design package, example projects, etc.</description>
+        <capability id="capability.led"/>
+    </board>
+</raModuleDescription>

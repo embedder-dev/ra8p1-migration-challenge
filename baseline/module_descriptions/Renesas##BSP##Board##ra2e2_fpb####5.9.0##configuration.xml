@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<raConfiguration version="4">
+  <raBspConfiguration>
+    <config id="config.bsp.ra">
+      <property id="config.bsp.common.main_osc_populated" value="config.bsp.common.main_osc_populated.disabled"/>
+      <property id="config.bsp.common.subclock_populated" value="config.bsp.common.subclock_populated.disabled"/>
+    </config>
+  </raBspConfiguration>
+  <raPinConfiguration>
+    <symbolicName propertyId="p010.symbolic_name" value="VREFH0"/>
+    <symbolicName propertyId="p011.symbolic_name" value="VREFL0"/>
+    <symbolicName propertyId="p014.symbolic_name" value="ARDUINO_RESET_PMOD1_RESET"/>
+    <symbolicName propertyId="p015.symbolic_name" value="LED1_PMOD1_INT"/>
+    <symbolicName propertyId="p100.symbolic_name" value="ARDUINO_D12_MISO_PMOD1_MISO"/>
+    <symbolicName propertyId="p101.symbolic_name" value="ARDUINO_D11_MOSI_PMOD1_MOSI"/>
+    <symbolicName propertyId="p102.symbolic_name" value="ARDUINO_D13_CLK_PMOD1_CLK"/>
+    <symbolicName propertyId="p103.symbolic_name" value="ARDUINO_D10_SS_PMOD1_SS"/>
+    <symbolicName propertyId="p109.symbolic_name" value="ARDUINO_D1_TX_PMOD2_MOSI"/>
+    <symbolicName propertyId="p110.symbolic_name" value="ARDUINO_D0_RX_PMOD2_MISO"/>
+    <symbolicName propertyId="p111.symbolic_name" value="PMOD2_IRQ"/>
+    <symbolicName propertyId="p112.symbolic_name" value="PMOD2_RESET"/>
+    <symbolicName propertyId="p205.symbolic_name" value="USER_SW1"/>
+    <symbolicName propertyId="p400.symbolic_name" value="ARDUINO_PMOD1_SCK"/>
+    <symbolicName propertyId="p401.symbolic_name" value="ARDUINO_PMOD1_SDA"/>
+    <symbolicName propertyId="p914.symbolic_name" value="LED2"/>
+    <pincfg active="true" name="FPB_RA2E2.pincfg" selected="true" symbol="g_bsp_pin_cfg">
+      <configSetting altId="adc0.mode.custom.free" configurationId="adc0.mode"/>
+      <configSetting altId="i3c0.mode.enabled.a" configurationId="i3c0.mode"/>
+      <configSetting altId="i3c0.pairing.a" configurationId="i3c0.pairing"/>
+      <configSetting altId="i3c0.scl0.p400" configurationId="i3c0.scl0"/>
+      <configSetting altId="i3c0.sda0.p401" configurationId="i3c0.sda0"/>
+      <configSetting altId="irq.irq1.p205" configurationId="irq.irq1"/>
+      <configSetting altId="irq.irq4.p111" configurationId="irq.irq4"/>
+      <configSetting altId="irq.mode.custom.free" configurationId="irq.mode"/>
+      <configSetting altId="jtag_fslash_swd.mode.swd.free" configurationId="jtag_fslash_swd.mode"/>
+      <configSetting altId="jtag_fslash_swd.swclk.p300" configurationId="jtag_fslash_swd.swclk"/>
+      <configSetting altId="jtag_fslash_swd.swdio.p108" configurationId="jtag_fslash_swd.swdio"/>
+      <configSetting altId="p010.output.low" configurationId="p010"/>
+      <configSetting altId="p010.gpio_mode.gpio_mode_out.low" configurationId="p010.gpio_mode"/>
+      <configSetting altId="p014.output.high" configurationId="p014"/>
+      <configSetting altId="p014.gpio_mode.gpio_mode_out.high" configurationId="p014.gpio_mode"/>
+      <configSetting altId="p015.output.low" configurationId="p015"/>
+      <configSetting altId="p015.gpio_mode.gpio_mode_out.low" configurationId="p015.gpio_mode"/>
+      <configSetting altId="p100.spi0.miso0" configurationId="p100"/>
+      <configSetting altId="p100.gpio_mode.gpio_mode_peripheral" configurationId="p100.gpio_mode"/>
+      <configSetting altId="p101.spi0.mosi0" configurationId="p101"/>
+      <configSetting altId="p101.gpio_mode.gpio_mode_peripheral" configurationId="p101.gpio_mode"/>
+      <configSetting altId="p101.gpio_pupd.gpio_pupd_ip_up" configurationId="p101.gpio_pupd"/>
+      <configSetting altId="p102.spi0.rspck0" configurationId="p102"/>
+      <configSetting altId="p102.gpio_mode.gpio_mode_peripheral" configurationId="p102.gpio_mode"/>
+      <configSetting altId="p103.spi0.ssla0" configurationId="p103"/>
+      <configSetting altId="p103.gpio_mode.gpio_mode_peripheral" configurationId="p103.gpio_mode"/>
+      <configSetting altId="p108.jtag_fslash_swd.swdio" configurationId="p108"/>
+      <configSetting altId="p108.gpio_mode.gpio_mode_peripheral" configurationId="p108.gpio_mode"/>
+      <configSetting altId="p111.irq.irq4" configurationId="p111"/>
+      <configSetting altId="p111.gpio_irq.gpio_irq_enabled" configurationId="p111.gpio_irq"/>
+      <configSetting altId="p111.gpio_mode.gpio_mode_irq" configurationId="p111.gpio_mode"/>
+      <configSetting altId="p112.output.high" configurationId="p112"/>
+      <configSetting altId="p112.gpio_mode.gpio_mode_out.high" configurationId="p112.gpio_mode"/>
+      <configSetting altId="p205.irq.irq1" configurationId="p205"/>
+      <configSetting altId="p205.gpio_irq.gpio_irq_enabled" configurationId="p205.gpio_irq"/>
+      <configSetting altId="p205.gpio_mode.gpio_mode_irq" configurationId="p205.gpio_mode"/>
+      <configSetting altId="p300.jtag_fslash_swd.swclk" configurationId="p300"/>
+      <configSetting altId="p300.gpio_mode.gpio_mode_peripheral" configurationId="p300.gpio_mode"/>
+      <configSetting altId="p400.i3c0.scl0" configurationId="p400"/>
+      <configSetting altId="p400.gpio_mode.gpio_mode_peripheral" configurationId="p400.gpio_mode"/>
+      <configSetting altId="p401.i3c0.sda0" configurationId="p401"/>
+      <configSetting altId="p401.gpio_mode.gpio_mode_peripheral" configurationId="p401.gpio_mode"/>
+      <configSetting altId="p914.output.low" configurationId="p914"/>
+      <configSetting altId="p914.gpio_mode.gpio_mode_out.low" configurationId="p914.gpio_mode"/>
+      <configSetting altId="spi0.miso0.p100" configurationId="spi0.miso0"/>
+      <configSetting altId="spi0.mode.enabled.a" configurationId="spi0.mode"/>
+      <configSetting altId="spi0.mosi0.p101" configurationId="spi0.mosi0"/>
+      <configSetting altId="spi0.rspck0.p102" configurationId="spi0.rspck0"/>
+      <configSetting altId="spi0.ssla0.p103" configurationId="spi0.ssla0"/>
+    </pincfg>
+  </raPinConfiguration>
+</raConfiguration>

@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<raModuleDescription>
+    <module display="Connectivity|${module.middleware.usbx_port.name} Azure RTOS USBX Port (rm_usbx_port)" id="module.azure.usbx_port" visible="false" version="0" url="group___u_s_b_x.html">
+        <constraint display="The Timer Ticks Per Second for Azure RTOS is not set to 1000. ">
+          !("${config.azure.tx.timer_ticks_per_second}" != "1000")
+        </constraint>
+        <requires id="module.driver.basic_on_usb.requires.basic" interface="interface.driver.basic_on_usb" visible="true" display="USBX Porting Layer">
+            <override property="module.driver.usb_basic.usb_mode" value="${module.middleware.rm_usbx_port.usb_mode}"/>
+            <override property="module.driver.usb_basic.usb_classtype" value="${module.middleware.rm_usbx_port.usb_classtype}"/>
+            <override property="module.driver.usb_basic.p_usb_reg" value="${module.middleware.rm_usbx_port.p_usb_reg}"/>
+            <override property="module.driver.usb_basic.rtos_callback" value="NULL"/>
+        </requires>
+        <provides interface="interface.middleware.rm_usbx_port" />
+        <provides interface="interface.middleware.rm_usbx_port.${module.middleware.usbx_port.name}" />
+        <property default="g_usbx_port${_instance}" display="Name" id="module.middleware.usbx_port.name" description="Module name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.middleware.usbx_port.name}")</constraint>
+        </property>
+        <property default="NULL" display="USB Mode" id="module.middleware.rm_usbx_port.usb_mode" description="Select the usb mode.">
+            <option id="module.middleware.rm_usbx_port.usb_mode.peri" display="Peri mode" value="module.driver.usb_basic.usb_mode.peri" />
+            <option id="module.middleware.rm_usbx_port.usb_mode.host" display="Host mode" value="module.driver.usb_basic.usb_mode.host" />
+            <option id="module.middleware.rm_usbx_port.usb_mode.host_and_peri" display="OTG mode" value="module.driver.usb_basic.usb_mode.host_and_peri" />
+        </property>
+        <property default="NULL" display="USB Device Class" id="module.middleware.rm_usbx_port.usb_classtype" description="Select the USB device class.">
+            <option id="module.middleware.rm_usbx_port.usb_classtype.pcdc" display="Peripheral Communications Device Class" value="module.driver.usb_basic.usb_classtype.pcdc" />
+            <option id="module.middleware.rm_usbx_port.usb_classtype.phid" display="Peripheral Human Interface Device Class" value="module.driver.usb_basic.usb_classtype.phid" />
+            <option id="module.middleware.rm_usbx_port.usb_classtype.pmsc" display="Peripheral Mass Storage Class" value="module.driver.usb_basic.usb_classtype.pmsc" />
+            <option id="module.middleware.rm_usbx_port.usb_classtype.pvnd" display="Peripheral Vendor Class" value="module.driver.usb_basic.usb_classtype.pvnd" />
+            <option id="module.middleware.rm_usbx_port.usb_classtype.paud" display="Peripheral Audio Class" value="module.driver.usb_basic.usb_classtype.paud" />
+            <option id="module.middleware.rm_usbx_port.usb_classtype.pprn" display="Peripheral Printer Class" value="module.driver.usb_basic.usb_classtype.pprn" />
+            <option id="module.middleware.rm_usbx_port.usb_classtype.hcdc" display="Host Communications Device Class" value="module.driver.usb_basic.usb_classtype.hcdc" />
+            <option id="module.middleware.rm_usbx_port.usb_classtype.hhid" display="Host Human Interface Device Class" value="module.driver.usb_basic.usb_classtype.hhid" />
+            <option id="module.middleware.rm_usbx_port.usb_classtype.hmsc" display="Host Mass Storage Class" value="module.driver.usb_basic.usb_classtype.hmsc" />
+            <option id="module.middleware.rm_usbx_port.usb_classtype.hprn" display="Host Printer Class" value="module.driver.usb_basic.usb_classtype.hprn" />
+            <option id="module.middleware.rm_usbx_port.usb_classtype.huvc" display="Host Video Class" value="module.driver.usb_basic.usb_classtype.huvc" />
+            <option id="module.middleware.rm_usbx_port.usb_classtype.hvnd" display="Host Vendor Class" value="module.driver.usb_basic.usb_classtype.hvnd" />
+            <option id="module.middleware.rm_usbx_port.usb_classtype.haud" display="Host Audio Class" value="module.driver.usb_basic.usb_classtype.haud" />
+            <option id="module.middleware.rm_usbx_port.usb_classtype.dfu" display="DFU Class" value="module.driver.usb_basic.usb_classtype.dfu" />
+        </property>
+        <property default="NULL" display="USB Descriptor" id="module.middleware.rm_usbx_port.p_usb_reg" description="Enter the name of the descriptor to be used.\nFor how to create a descriptor structure, refer to the Descriptor definition chapter in the usb_basic manual.\nSpecify NULL when using the Host class.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.middleware.rm_usbx_port.p_usb_reg}")</constraint>
+        </property>
+        <includes>
+#include "ux_api.h"
+        </includes>
+    </module>
+    <module display="Connectivity|${module.middleware.usbx_port.name} Azure RTOS USBX Port (rm_usbx_port)" id="module.azure.usbx_port_pmsc" visible="false" version="0" url="group___u_s_b_x.html">
+        <constraint display="The Timer Ticks Per Second for Azure RTOS is not set to 1000. ">
+          !("${config.azure.tx.timer_ticks_per_second}" != "1000")
+        </constraint>
+        <requires id="module.driver.basic_on_usb.requires.basic" interface="interface.driver.basic_on_usb" visible="true" display="USBX Porting Layer">
+            <override property="module.driver.usb_basic.usb_mode" value="${module.middleware.rm_usbx_port.usb_mode}"/>
+            <override property="module.driver.usb_basic.usb_classtype" value="${module.middleware.rm_usbx_port.usb_classtype}"/>
+            <override property="module.driver.usb_basic.p_usb_reg" value="${module.middleware.rm_usbx_port.p_usb_reg}"/>
+            <override property="module.driver.usb_basic.rtos_callback" value="NULL"/>
+            <override property="module.driver.usb_basic.other_context" value="${module.middleware.rm_usbx_port.p_context}"/>
+        </requires>
+        <provides interface="interface.middleware.rm_usbx_port_pmsc" />
+        <provides interface="interface.middleware.rm_usbx_port.${module.middleware.usbx_port.name}" />
+        <property default="g_usbx_port${_instance}" display="Name" id="module.middleware.usbx_port.name" description="Module name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.middleware.usbx_port.name}")</constraint>
+        </property>
+        <property default="NULL" display="USB Mode" id="module.middleware.rm_usbx_port.usb_mode" description="Select the usb mode.">
+            <option id="module.middleware.rm_usbx_port.usb_mode.peri" display="Peri mode" value="module.driver.usb_basic.usb_mode.peri" />
+            <option id="module.middleware.rm_usbx_port.usb_mode.host" display="Host mode" value="module.driver.usb_basic.usb_mode.host" />
+            <option id="module.middleware.rm_usbx_port.usb_mode.host_and_peri" display="OTG mode" value="module.driver.usb_basic.usb_mode.host_and_peri" />
+        </property>
+        <property default="NULL" display="USB Device Class" id="module.middleware.rm_usbx_port.usb_classtype" description="Select the USB device class.">
+            <option id="module.middleware.rm_usbx_port.usb_classtype.pcdc" display="Peripheral Communications Device Class" value="module.driver.usb_basic.usb_classtype.pcdc" />
+            <option id="module.middleware.rm_usbx_port.usb_classtype.phid" display="Peripheral Human Interface Device Class" value="module.driver.usb_basic.usb_classtype.phid" />
+            <option id="module.middleware.rm_usbx_port.usb_classtype.pmsc" display="Peripheral Mass Storage Class" value="module.driver.usb_basic.usb_classtype.pmsc" />
+            <option id="module.middleware.rm_usbx_port.usb_classtype.pvnd" display="Peripheral Vendor Class" value="module.driver.usb_basic.usb_classtype.pvnd" />
+            <option id="module.middleware.rm_usbx_port.usb_classtype.paud" display="Peripheral Audio Class" value="module.driver.usb_basic.usb_classtype.paud" />
+            <option id="module.middleware.rm_usbx_port.usb_classtype.hcdc" display="Host Communications Device Class" value="module.driver.usb_basic.usb_classtype.hcdc" />
+            <option id="module.middleware.rm_usbx_port.usb_classtype.hhid" display="Host Human Interface Device Class" value="module.driver.usb_basic.usb_classtype.hhid" />
+            <option id="module.middleware.rm_usbx_port.usb_classtype.hmsc" display="Host Mass Storage Class" value="module.driver.usb_basic.usb_classtype.hmsc" />
+            <option id="module.middleware.rm_usbx_port.usb_classtype.huvc" display="Host Video Class" value="module.driver.usb_basic.usb_classtype.huvc" />
+            <option id="module.middleware.rm_usbx_port.usb_classtype.hvnd" display="Host Vendor Class" value="module.driver.usb_basic.usb_classtype.hvnd" />
+            <option id="module.middleware.rm_usbx_port.usb_classtype.haud" display="Host Audio Class" value="module.driver.usb_basic.usb_classtype.haud" />
+            <option id="module.middleware.rm_usbx_port.usb_classtype.dfu" display="DFU Class" value="module.driver.usb_basic.usb_classtype.dfu" />
+        </property>
+        <property default="NULL" display="USB Descriptor" id="module.middleware.rm_usbx_port.p_usb_reg" description="Enter the name of the descriptor to be used.\nFor how to create a descriptor structure, refer to the Descriptor definition chapter in the usb_basic manual.\nSpecify NULL when using the Host class.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.middleware.rm_usbx_port.p_usb_reg}")</constraint>
+        </property>
+        <property default="NULL" display="USB Context" id="module.middleware.rm_usbx_port.p_context" description="Set the other context info here.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.middleware.rm_usbx_port.p_context}")</constraint>
+        </property>
+        <includes>
+#include "ux_api.h"
+        </includes>
+    </module>
+
+    <module display="Connectivity|${module.middleware.usbx_port.name} Azure RTOS USBX Port (rm_usbx_port)" id="module.azure.usbx_port_hid" visible="false" version="0" url="group___u_s_b_x.html">
+        <constraint display="The Timer Ticks Per Second for Azure RTOS is not set to 1000. ">
+          !("${config.azure.tx.timer_ticks_per_second}" != "1000")
+        </constraint>
+        <requires id="module.driver.basic_on_usb.requires.basic" interface="interface.driver.basic_on_usb_hid" visible="true" display="USBX Porting Layer">
+            <override property="module.driver.usb_basic.usb_mode" value="${module.middleware.rm_usbx_port.usb_mode}"/>
+            <override property="module.driver.usb_basic.usb_classtype" value="${module.middleware.rm_usbx_port.usb_classtype}"/>
+            <override property="module.driver.usb_basic.p_usb_reg" value="${module.middleware.rm_usbx_port.p_usb_reg}"/>
+            <override property="module.driver.usb_basic.rtos_callback" value="NULL"/>
+        </requires>
+        <provides interface="interface.middleware.rm_usbx_port_hid" />
+        <provides interface="interface.middleware.rm_usbx_port.${module.middleware.usbx_port.name}" />
+        <property default="g_usbx_port${_instance}" display="Name" id="module.middleware.usbx_port.name" description="Module name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.middleware.usbx_port.name}")</constraint>
+        </property>
+        <property default="NULL" display="USB Mode" id="module.middleware.rm_usbx_port.usb_mode" description="Select the usb mode.">
+            <option id="module.middleware.rm_usbx_port.usb_mode.peri" display="Peri mode" value="module.driver.usb_basic.usb_mode.peri" />
+            <option id="module.middleware.rm_usbx_port.usb_mode.host" display="Host mode" value="module.driver.usb_basic.usb_mode.host" />
+            <option id="module.middleware.rm_usbx_port.usb_mode.host_and_peri" display="OTG mode" value="module.driver.usb_basic.usb_mode.host_and_peri" />
+        </property>
+        <property default="NULL" display="USB Device Class" id="module.middleware.rm_usbx_port.usb_classtype" description="Select the USB device class.">
+            <option id="module.middleware.rm_usbx_port.usb_classtype.pcdc" display="Peripheral Communications Device Class" value="module.driver.usb_basic.usb_classtype.pcdc" />
+            <option id="module.middleware.rm_usbx_port.usb_classtype.phid" display="Peripheral Human Interface Device Class" value="module.driver.usb_basic.usb_classtype.phid" />
+            <option id="module.middleware.rm_usbx_port.usb_classtype.pmsc" display="Peripheral Mass Storage Class" value="module.driver.usb_basic.usb_classtype.pmsc" />
+            <option id="module.middleware.rm_usbx_port.usb_classtype.pvnd" display="Peripheral Vendor Class" value="module.driver.usb_basic.usb_classtype.pvnd" />
+            <option id="module.middleware.rm_usbx_port.usb_classtype.paud" display="Peripheral Audio Class" value="module.driver.usb_basic.usb_classtype.paud" />
+            <option id="module.middleware.rm_usbx_port.usb_classtype.hcdc" display="Host Communications Device Class" value="module.driver.usb_basic.usb_classtype.hcdc" />
+            <option id="module.middleware.rm_usbx_port.usb_classtype.hhid" display="Host Human Interface Device Class" value="module.driver.usb_basic.usb_classtype.hhid" />
+            <option id="module.middleware.rm_usbx_port.usb_classtype.hmsc" display="Host Mass Storage Class" value="module.driver.usb_basic.usb_classtype.hmsc" />
+            <option id="module.middleware.rm_usbx_port.usb_classtype.huvc" display="Host Video Class" value="module.driver.usb_basic.usb_classtype.huvc" />
+            <option id="module.middleware.rm_usbx_port.usb_classtype.hvnd" display="Host Vendor Class" value="module.driver.usb_basic.usb_classtype.hvnd" />
+            <option id="module.middleware.rm_usbx_port.usb_classtype.haud" display="Host Audio Class" value="module.driver.usb_basic.usb_classtype.haud" />
+            <option id="module.middleware.rm_usbx_port.usb_classtype.dfu" display="DFU Class" value="module.driver.usb_basic.usb_classtype.dfu" />
+        </property>
+        <property default="NULL" display="USB Descriptor" id="module.middleware.rm_usbx_port.p_usb_reg" description="Enter the name of the descriptor to be used.\nFor how to create a descriptor structure, refer to the Descriptor definition chapter in the usb_basic manual.\nSpecify NULL when using the Host class.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.middleware.rm_usbx_port.p_usb_reg}")</constraint>
+        </property>
+        <includes>
+#include "ux_api.h"
+        </includes>
+    </module>
+</raModuleDescription>

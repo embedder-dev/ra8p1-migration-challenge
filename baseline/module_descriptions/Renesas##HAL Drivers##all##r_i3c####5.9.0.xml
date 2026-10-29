@@ -1,0 +1,556 @@
+﻿<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.driver.i3c" path="fsp_cfg/r_i3c_cfg.h" version="0">
+        <property default="config.driver.i3c.param_checking_enable.bsp" display="Parameter Checking" id="config.driver.i3c.param_checking_enable" description="If selected code for parameter checking is included in the build.">
+            <option display="Default (BSP)" id="config.driver.i3c.param_checking_enable.bsp" value="(BSP_CFG_PARAM_CHECKING_ENABLE)"/>
+            <option display="Enabled" id="config.driver.i3c.param_checking_enable.enabled" value="(1)"/>
+            <option display="Disabled" id="config.driver.i3c.param_checking_enable.disabled" value="(0)"/>
+        </property>
+        <property default="config.driver.i3c.unaligned_buffer_support.enabled" display="Unaligned Buffer Support" id="config.driver.i3c.unaligned_buffer_support" description="Unaligned buffer support may be optionally disabled for improved performance.">
+            <option display="Enabled" id="config.driver.i3c.unaligned_buffer_support.enabled" value="(1)"/>
+            <option display="Disabled" id="config.driver.i3c.unaligned_buffer_support.disabled" value="(0)"/>
+        </property>
+        <property default="config.driver.i3c.master_support.enabled" display="Master Support" id="config.driver.i3c.master_support" description="If only slave mode is required, disable master support to decrease code size.">
+            <option display="Enabled" id="config.driver.i3c.master_support.enabled" value="(1)"/>
+            <option display="Disabled" id="config.driver.i3c.master_support.disabled" value="(0)"/>
+        </property>
+        <property default="config.driver.i3c.slave_support.enabled" display="Slave Support" id="config.driver.i3c.slave_support" description="If only master mode is required, disable slave support to decrease code size.">
+            <option display="Enabled" id="config.driver.i3c.slave_support.enabled" value="(1)"/>
+            <option display="Disabled" id="config.driver.i3c.slave_support.disabled" value="(0)"/>
+        </property>
+        <property default="" display="Error Recovery Procedure" id="config.driver.i3c.error_recovery" description="There are two different chip versions of the RA2E2 MCU (Version 1 and Version 2). Each version requires a different procedure for recovering from errors.">
+            <select enum="enum.driver.i3c.error_recovery" />
+        </property>
+        <content>
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#define I3C_CFG_PARAM_CHECKING_ENABLE ${config.driver.i3c.param_checking_enable}
+#define I3C_CFG_UNALIGNED_BUFFER_SUPPORT ${config.driver.i3c.unaligned_buffer_support}
+#define I3C_CFG_MASTER_SUPPORT ${config.driver.i3c.master_support}
+#define I3C_CFG_SLAVE_SUPPORT ${config.driver.i3c.slave_support}
+#define I3C_CFG_ERROR_RECOVERY_SUPPORT ${config.driver.i3c.error_recovery}
+
+#ifdef __cplusplus
+}
+#endif
+        </content>
+    </config>
+    <module config="config.driver.i3c" display="Connectivity|${module.driver.i3c.name} I3C (r_i3c)" id="module.driver.i3c_on_i3c" version="1" url="group___i3_c.html">
+        <!-- RA2E2 Specific Clock Constraints -->
+        <constraint display="The ratio of PCLKD to PCLKB must be exactly 2:1 or 1:1.">
+            ${board.clock.peripheral.i3c.tclk} / ${board.clock.peripheral.i3c.pclk} == 2 || ${board.clock.peripheral.i3c.tclk} / ${board.clock.peripheral.i3c.pclk} == 1 || !("${interface.mcu.ra2e2}" == "1" || "${interface.mcu.ra2l2}" == "1")
+        </constraint>
+        <constraint display="PCLKD must be either 48Mhz or 64Mhz.">
+            ${board.clock.peripheral.i3c.tclk} == 48000000 || ${board.clock.peripheral.i3c.tclk} == 64000000 || !("${interface.mcu.ra2e2}" == "1" || "${interface.mcu.ra2l2}" == "1")
+        </constraint>
+        <constraint display="When PCLKD is 48 Mhz, the maximum SCL Frequency is 3.4 Mhz.">
+            (${module.driver.i3c.stdbr.pushpull.frequency} &lt;= 3400000 &amp;&amp; ${module.driver.i3c.extbr.pushpull.frequency} &lt;= 3400000) || ${board.clock.peripheral.i3c.tclk} != 48000000 || !("${interface.mcu.ra2e2}" == "1" || "${interface.mcu.ra2l2}" == "1")
+        </constraint>
+        <constraint display="When PCLKD is 64 Mhz, the maximum SCL Frequency is 4.6 Mhz.">
+            (${module.driver.i3c.stdbr.pushpull.frequency} &lt;= 4600000 &amp;&amp; ${module.driver.i3c.extbr.pushpull.frequency} &lt;= 4600000) || ${board.clock.peripheral.i3c.tclk} != 64000000 || !("${interface.mcu.ra2e2}" == "1" || "${interface.mcu.ra2l2}" == "1")
+        </constraint>
+
+        <!-- Common Constraints -->
+        <constraint display="The I3C Instance name must be unique.">
+            ${interface.driver.i3c.${module.driver.i3c.name}} == 1
+        </constraint>
+        <constraint display="The I3CCLK must be enabled.">
+            ${board.clock.peripheral.i3c.tclk} &gt; 0
+        </constraint>
+        <constraint display="The bus free detection time is too large.">
+            (511 / ${board.clock.peripheral.i3c.tclk}) &gt;= (${module.driver.i3c.bus_free_condition} / 1e9)
+        </constraint>
+        <constraint display="The bus available detection time must be greater than or equal to the bus free detection time.">
+            (${module.driver.i3c.bus_free_condition} / 1e9) &lt;= (${module.driver.i3c.bus_available_condition} / 1e6)
+        </constraint>
+        <constraint display="The bus available detection time is too large.">
+            (511 / ${board.clock.peripheral.i3c.tclk}) &gt;= (${module.driver.i3c.bus_available_condition} / 1e6)
+        </constraint>
+        <constraint display="The bus idle detection time must be greater than or equal to the bus available detection time.">
+            (${module.driver.i3c.bus_available_condition}) &lt;= (${module.driver.i3c.bus_idle_condition})
+        </constraint>
+        <constraint display="The bus idle detection time is too large.">
+            (262143 / ${board.clock.peripheral.i3c.tclk}) &gt;= (${module.driver.i3c.bus_idle_condition} / 1e6)
+        </constraint>
+        <constraint display="The Clock Stalling time is too large.">
+            (65535 / ${board.clock.peripheral.i3c.tclk}) &gt;= (${module.driver.i3c.clock_stalling_time} / 1e6)
+        </constraint>
+        <constraint display="Master mode and slave mode cannot be disabled at the same time.">
+            "${config.driver.i3c.master_support}" === "config.driver.i3c.master_support.enabled" || "${config.driver.i3c.slave_support}" === "config.driver.i3c.slave_support.enabled"
+        </constraint>
+        <constraint display="Master support must be enabled when selected device type is master.">
+            "${module.driver.i3c.device_type}" === "module.driver.i3c.device_type.slave" || "${config.driver.i3c.master_support}" === "config.driver.i3c.master_support.enabled"
+        </constraint>
+        <constraint display="Slave support must be enabled when selected device type is slave.">
+            "${module.driver.i3c.device_type}" === "module.driver.i3c.device_type.main_master" || "${config.driver.i3c.slave_support}" === "config.driver.i3c.slave_support.enabled"
+        </constraint>
+        <constraint display="The desired bitrate settings are invalid. Please check the generated value of the bitrate_settings member in the i3c_extended_cfg_t structure for more information.">
+                eval("" +
+                "var tclk = ${board.clock.peripheral.i3c.tclk};\n" +
+                "var od_cr = ${module.driver.i3c.bitrate_settings.bus_timing.open_drain_rising};\n" +
+                "var od_cf = ${module.driver.i3c.bitrate_settings.bus_timing.open_drain_falling};\n" +
+                "var pp_cr = ${module.driver.i3c.bitrate_settings.bus_timing.push_pull_rising};\n" +
+                "var pp_cf = ${module.driver.i3c.bitrate_settings.bus_timing.push_pull_falling};\n" +
+                "var pp_t_low = 24;\n" +
+                "var pp_t_dig_l = 32;\n" +
+                "var pp_t_high = 24;\n" +
+                "var pp_t_dig_h = 32;\n" +
+                "if (\"${interface.mcu.ra2e2}\" == \"1\" || \"${interface.mcu.ra2l2}\" == \"1\") {\n" +
+                "   pp_t_low = 104;\n" +
+                "   pp_t_dig_l = 112;\n" +
+                "   pp_t_high = 148;\n" +
+                "   pp_t_dig_h = 156;\n" +
+                "   if (64000000 == tclk) {\n" +
+                "       pp_t_low = 80;\n" +
+                "       pp_t_dig_l = 88;\n" +
+                "       pp_t_high = 112;\n" +
+                "       pp_t_dig_h = 120;\n" +
+                "   }\n" +
+                "}\n" +
+                "function calculate_period(t_high, desired_frequency, t_cr, t_cf, register_max, dsbrpo, mode) {\n" +
+                "    var divider = dsbrpo + 1;\n" +
+                "    var result = {};\n" +
+                "    result.high_setting = Math.max(1, Math.min(register_max, Math.floor(tclk * t_high / (1e9 * divider))));\n" +
+                "    result.actual_t_high = (result.high_setting * divider / tclk * 1e9);\n" +
+                "    var t_low = (1e9 / desired_frequency - (t_cr + t_cf + result.actual_t_high)) / 1e9;\n" +
+                "    result.low_setting = Math.max(1, Math.min(register_max, Math.ceil(t_low * tclk / divider)));\n" +
+                "    result.actual_frequency = Math.round((1 / ((result.high_setting + result.low_setting) * divider / tclk + (t_cr + t_cf) / 1e9)) * 10) / 10;\n" +
+                "    result.actual_t_low = Math.round(result.low_setting / tclk * 1e9 * 10) / 10;\n" +
+                "    result.actual_t_high = Math.round(result.actual_t_high * 10) / 10;\n" +
+                "    result.valid = true;\n" +
+                "    result.comment_message = \" \" + mode + \"; Actual Frequency (Hz): \" + result.actual_frequency + \", Actual High Period (ns): \" + result.actual_t_high + \". \";\n" +
+                "    if (!(Math.abs(t_high - result.actual_t_high) / t_high &lt;= 0.1)) {\n" +
+                "        result.valid = false;\n" +
+                "        result.comment_message += \"Error: The \" + mode + \" High Period is off by more than 10%. \";\n" +
+                "    }\n" +
+                "    if (!(Math.abs(desired_frequency - result.actual_frequency) / desired_frequency &lt;= 0.1)) {\n" +
+                "        result.valid = false;\n" +
+                "        result.comment_message += \"Error: The \" + mode + \" Frequency is off by more than 10%. \";\n" +
+                "    }\n" +
+                "    if (mode.indexOf(\"Open Drain\") !== -1 &amp;&amp; result.actual_t_low &lt; 200) {\n" +
+                "        result.valid = false;\n" +
+                "        result.comment_message += \"Error: The \" + mode + \" SCL Low period must be greater than or equal to 200 nanoseconds. \";\n" +
+                "    }\n" +
+                "    else if (mode.indexOf(\"Push-Pull\") !== -1) {\n" +
+                "        if (result.actual_t_low &lt; pp_t_low) {\n" +
+                "            result.valid = false;\n" +
+                "            result.comment_message += \"Error: The \" + mode + \" SCL Low period (T_low) must be greater than or equal to \" + pp_t_low + \" nanoseconds. \";\n" +
+                "        }\n" +
+                "        if (t_cf > Math.min(60, 150e6 / result.actual_frequency)) {\n" +
+                "            result.valid = false;\n" +
+                "            result.comment_message += \"Error: Push-Pull Rising time is too large for the \" + mode + \" SCL frequency . \";\n" +
+                "        }\n" +
+                "        if (t_cr > Math.min(60, 150e6 / result.actual_frequency)) {\n" +
+                "            result.valid = false;\n" +
+                "            result.comment_message += \"Error: Push-Pull Falling time is too large for the \" + mode + \" SCL frequency . \";\n" +
+                "        }\n" +
+                "    }\n" +
+                "    if (result.actual_t_high &lt; pp_t_high) {\n" +
+                "        result.valid = false;\n" +
+                "        result.comment_message += \"Error: The \" + mode + \" SCL High period (T_high) must be greater than or equal to \" + pp_t_high +\" nanoseconds. \";\n" +
+                "    }\n" +
+                "    return result;\n" +
+                "}\n" +
+                "var stdod = calculate_period(${module.driver.i3c.stdbr.opendrain.logic_high}, ${module.driver.i3c.stdbr.opendrain.frequency}, od_cr, od_cf, 511, 0, \"Standard Open Drain\");\n" +
+                "stdod.dsbrpo = 0;\n" +
+                "if (stdod.high_setting &gt;= 256 || stdod.low_setting &gt;= 256) {\n" +
+                "    stdod = calculate_period(${module.driver.i3c.stdbr.opendrain.logic_high}, ${module.driver.i3c.stdbr.opendrain.frequency}, od_cr, od_cf, 255, 1, \"Standard Open Drain\");\n" +
+                "    stdod.dsbrpo = 1;\n" +
+                "}\n" +
+                "var stdpp = calculate_period(${module.driver.i3c.stdbr.pushpull.logic_high}, ${module.driver.i3c.stdbr.pushpull.frequency}, pp_cr, pp_cf, 63, 0, \"Standard Push-Pull\");\n" +
+                "var extod = calculate_period(${module.driver.i3c.extbr.opendrain.logic_high}, ${module.driver.i3c.extbr.opendrain.frequency}, od_cr, od_cf, 255, 0, \"Extended Open Drain\");\n" +
+                "var extpp = calculate_period(${module.driver.i3c.extbr.pushpull.logic_high}, ${module.driver.i3c.extbr.pushpull.frequency}, pp_cr, pp_cf, 63, 0, \"Extended Push-Pull\");\n" +
+                "stdod.valid &amp;&amp; stdpp.valid &amp;&amp; extod.valid &amp;&amp; extpp.valid;\n" +
+                "")
+        </constraint>
+        <requires id="module.driver.i3c.requires.i3c" interface="interface.mcu.i3c.external" visible="false" display="Requires I3C Peripheral" />
+        <provides interface="interface.driver.i3c" />
+        <provides interface="interface.driver.i3c.${module.driver.i3c.name}" />
+        <provides interface="interface.driver.i3c.${module.driver.i3c.channel}" />
+        <property default="g_i3c${_instance}" display="Name" id="module.driver.i3c.name" description="Module name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.i3c.name}")</constraint>
+        </property>
+        <property default="0" id="module.driver.i3c.channel" description="Specify the hardware channel.">
+            <constraint display="Invalid channel number.">testInteger("${module.driver.i3c.channel}")  &amp;&amp; ("${module.driver.i3c.channel}" == 0)</constraint>
+            <signal event="event.i3c${module.driver.i3c.channel}.rcv.status" />
+            <signal event="event.i3c${module.driver.i3c.channel}.response" />
+            <signal event="event.i3c${module.driver.i3c.channel}.rx" />
+            <signal event="event.i3c${module.driver.i3c.channel}.tx" />
+            <signal event="event.i3c${module.driver.i3c.channel}.eei" />
+            <signal event="event.i3c${module.driver.i3c.channel}.ibi" />
+        </property>
+        <property default="g_i3c${_instance}_callback" display="Callback" id="module.driver.i3c.p_callback" description="A user callback function must be provided. This will be called in order to notify the application of I3C events and provide status information.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.i3c.p_callback}")</constraint>
+            <constraint display="A callback is required.">"${module.driver.i3c.p_callback}" != "NULL"</constraint>
+        </property>
+        <property default="NULL" id="module.driver.i3c.p_context" description="A pointer to additional application specific information that is provided to the callback.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.i3c.p_context}")</constraint>
+        </property>
+        <property default="module.driver.i3c.device_type.slave" display="Device Type" id="module.driver.i3c.device_type" description="The role that the I3C instance will take on the I3C bus.">
+            <option display="Main Master" id="module.driver.i3c.device_type.main_master" value="I3C_DEVICE_TYPE_MAIN_MASTER"/>
+            <option display="Slave" id="module.driver.i3c.device_type.slave" value="I3C_DEVICE_TYPE_SLAVE"/>
+        </property>
+        <property default="167" display="Bitrate Settings|Standard Mode|Open-Drain|Logic High Period (ns)" id="module.driver.i3c.stdbr.opendrain.logic_high" description="The Logic High period of SCL during Standard Mode Open Drain transfers.">
+            <constraint display="Must be an integer greater than 0.">testInteger("${module.driver.i3c.stdbr.opendrain.logic_high}") &amp;&amp; ${module.driver.i3c.stdbr.opendrain.logic_high} &gt; 0</constraint>
+        </property>
+        <property default="1000000" display="Bitrate Settings|Standard Mode|Open-Drain|Frequency" id="module.driver.i3c.stdbr.opendrain.frequency" description="The Frequency of SCL during Standard Mode Open Drain transfers.">
+            <constraint display="Must be an integer greater than 0.">testInteger("${module.driver.i3c.stdbr.opendrain.frequency}") &amp;&amp; ${module.driver.i3c.stdbr.opendrain.frequency} &gt; 0</constraint>
+            <constraint display="Open-Drain frequency must be less than or equal to 5 Mhz.">${module.driver.i3c.stdbr.opendrain.frequency} &lt;= 5000000</constraint>
+        </property>
+        <property default="167" display="Bitrate Settings|Standard Mode|Push-Pull|Logic High Period (ns)" id="module.driver.i3c.stdbr.pushpull.logic_high" description="The Logic High period of SCL during Standard Mode Push Pull transfers.">
+            <constraint display="The Logic High Period must be greater than or equal to 24 Nanoseconds.">testInteger("${module.driver.i3c.stdbr.pushpull.logic_high}") &amp;&amp; ${module.driver.i3c.stdbr.pushpull.logic_high} &gt;= 24</constraint>
+        </property>
+        <property default="3400000" display="Bitrate Settings|Standard Mode|Push-Pull|Frequency" id="module.driver.i3c.stdbr.pushpull.frequency" description="The Frequency of SCL during Standard Mode Push-Pull transfers.">
+            <constraint display="Push-Pull frequency must be greater than or equal to 10000 Hz.">testInteger("${module.driver.i3c.stdbr.pushpull.frequency}") &amp;&amp; ${module.driver.i3c.stdbr.pushpull.frequency} &gt;= 10000</constraint>
+            <constraint display="Push-Pull frequency must be less than or equal to 12.9 MHz.">testInteger("${module.driver.i3c.stdbr.pushpull.frequency}") &amp;&amp; ${module.driver.i3c.stdbr.pushpull.frequency} &lt;= 12900000</constraint>
+        </property>
+        <property default="167" display="Bitrate Settings|Extended Mode|Open-Drain|Logic High Period (ns)" id="module.driver.i3c.extbr.opendrain.logic_high" description="The Logic High period of SCL during Extended Mode Open Drain transfers.">
+            <constraint display="Must be an integer greater than 0.">testInteger("${module.driver.i3c.extbr.opendrain.logic_high}") &amp;&amp; ${module.driver.i3c.extbr.opendrain.logic_high} &gt; 0</constraint>
+        </property>
+        <property default="1000000" display="Bitrate Settings|Extended Mode|Open-Drain|Frequency" id="module.driver.i3c.extbr.opendrain.frequency" description="The Frequency of SCL during Extended Mode Open Drain transfers.">
+            <constraint display="Must be an integer greater than 0.">testInteger("${module.driver.i3c.extbr.opendrain.frequency}") &amp;&amp; ${module.driver.i3c.extbr.opendrain.frequency} &gt; 0</constraint>
+            <constraint display="Open-Drain frequency must be less than or equal to 5 Mhz.">${module.driver.i3c.extbr.opendrain.frequency} &lt;= 5000000</constraint>
+        </property>
+        <property default="167" display="Bitrate Settings|Extended Mode|Push-Pull|Logic High Period (ns)" id="module.driver.i3c.extbr.pushpull.logic_high" description="The Logic High period of SCL during Extended Mode Push Pull transfers.">
+            <constraint display="The Logic High Period must be greater than or equal to 24 Nanoseconds.">testInteger("${module.driver.i3c.extbr.pushpull.logic_high}") &amp;&amp; ${module.driver.i3c.extbr.pushpull.logic_high} &gt;= 24</constraint>
+        </property>
+        <property default="3400000" display="Bitrate Settings|Extended Mode|Push-Pull|Frequency" id="module.driver.i3c.extbr.pushpull.frequency" description="The Frequency of SCL during Extended Mode Push-Pull transfers.">
+            <constraint display="Push-Pull frequency must be greater than or equal to 10000 Hz.">testInteger("${module.driver.i3c.extbr.pushpull.frequency}") &amp;&amp; ${module.driver.i3c.extbr.pushpull.frequency} &gt;= 10000</constraint>
+            <constraint display="Push-Pull frequency must be less than or equal to 12.9 MHz.">testInteger("${module.driver.i3c.extbr.pushpull.frequency}") &amp;&amp; ${module.driver.i3c.extbr.pushpull.frequency} &lt;= 12900000</constraint>
+        </property>
+        <property default="0" display="Bitrate Settings|Bus Timing|Open Drain Rising Time (ns)" id="module.driver.i3c.bitrate_settings.bus_timing.open_drain_rising" description="The Open Drain rising time in nanoseconds.">
+            <constraint display="Rising time must be greater than or equal to 0 nanoseconds.">testInteger("${module.driver.i3c.bitrate_settings.bus_timing.open_drain_rising}") &amp;&amp; ${module.driver.i3c.bitrate_settings.bus_timing.open_drain_rising} &gt;= 0</constraint>
+            <constraint display="Rising time must be less than or equal to 300 nanoseconds.">${module.driver.i3c.bitrate_settings.bus_timing.open_drain_rising} &lt;= 300</constraint>
+        </property>
+        <property default="0" display="Bitrate Settings|Bus Timing|Open Drain Falling Time (ns)" id="module.driver.i3c.bitrate_settings.bus_timing.open_drain_falling" description="The Open Drain falling time in nanoseconds.">
+            <constraint display="Falling time must be greater than or equal to 0 nanoseconds.">testInteger("${module.driver.i3c.bitrate_settings.bus_timing.open_drain_falling}") &amp;&amp; ${module.driver.i3c.bitrate_settings.bus_timing.open_drain_falling} &gt;= 0</constraint>
+            <constraint display="Falling time must be less than or equal to 300 nanoseconds.">${module.driver.i3c.bitrate_settings.bus_timing.open_drain_falling} &lt;= 300</constraint>
+        </property>
+        <property default="0" display="Bitrate Settings|Bus Timing|Push-Pull Rising Time (ns)" id="module.driver.i3c.bitrate_settings.bus_timing.push_pull_rising" description="The Push-Pull rising time in nanoseconds.">
+            <constraint display="Rising time must be greater than or equal to 0 nanoseconds.">testInteger("${module.driver.i3c.bitrate_settings.bus_timing.push_pull_rising}") &amp;&amp; ${module.driver.i3c.bitrate_settings.bus_timing.push_pull_rising} &gt;= 0</constraint>
+        </property>
+        <property default="0" display="Bitrate Settings|Bus Timing|Push-Pull Falling Time (ns)" id="module.driver.i3c.bitrate_settings.bus_timing.push_pull_falling" description="The Push-Pull rising time in nanoseconds.">
+            <constraint display="Falling time must be greater than or equal to 0 nanoseconds.">testInteger("${module.driver.i3c.bitrate_settings.bus_timing.push_pull_falling}") &amp;&amp; ${module.driver.i3c.bitrate_settings.bus_timing.push_pull_falling} &gt;= 0</constraint>
+        </property>
+        <property default="" id="module.driver.i3c.clock_constraints">
+            <select enum="enum.driver.i3c.clock_constraints"/>
+        </property>
+        <property default="" id="module.driver.bitrate_calculation">
+            <export>
+                eval("" +
+                "var tclk = ${board.clock.peripheral.i3c.tclk};\n" +
+                "var od_cr = ${module.driver.i3c.bitrate_settings.bus_timing.open_drain_rising};\n" +
+                "var od_cf = ${module.driver.i3c.bitrate_settings.bus_timing.open_drain_falling};\n" +
+                "var pp_cr = ${module.driver.i3c.bitrate_settings.bus_timing.push_pull_rising};\n" +
+                "var pp_cf = ${module.driver.i3c.bitrate_settings.bus_timing.push_pull_falling};\n" +
+                "var pp_t_low = 24;\n" +
+                "var pp_t_dig_l = 32;\n" +
+                "var pp_t_high = 24;\n" +
+                "var pp_t_dig_h = 32;\n" +
+                "if (\"${module.driver.i3c.clock_constraints}\" == \"ra2e2\" || \"${module.driver.i3c.clock_constraints}\" == \"ra2l2\") {\n" +
+                "   pp_t_low = 104;\n" +
+                "   pp_t_dig_l = 112;\n" +
+                "   pp_t_high = 148;\n" +
+                "   pp_t_dig_h = 156;\n" +
+                "   if (64000000 == tclk) {\n" +
+                "       pp_t_low = 80;\n" +
+                "       pp_t_dig_l = 88;\n" +
+                "       pp_t_high = 112;\n" +
+                "       pp_t_dig_h = 120;\n" +
+                "   }\n" +
+                "}\n" +
+                "function calculate_period(t_high, desired_frequency, t_cr, t_cf, register_max, dsbrpo, mode) {\n" +
+                "    var divider = dsbrpo + 1;\n" +
+                "    var result = {};\n" +
+                "    result.high_setting = Math.max(1, Math.min(register_max, Math.floor(tclk * t_high / (1e9 * divider))));\n" +
+                "    result.actual_t_high = (result.high_setting * divider / tclk * 1e9);\n" +
+                "    var t_low = (1e9 / desired_frequency - (t_cr + t_cf + result.actual_t_high)) / 1e9;\n" +
+                "    result.low_setting = Math.max(1, Math.min(register_max, Math.ceil(t_low * tclk / divider)));\n" +
+                "    result.actual_frequency = Math.round((1 / ((result.high_setting + result.low_setting) * divider / tclk + (t_cr + t_cf) / 1e9)) * 10) / 10;\n" +
+                "    result.actual_t_low = Math.round(result.low_setting / tclk * 1e9 * 10) / 10;\n" +
+                "    result.actual_t_high = Math.round(result.actual_t_high * 10) / 10;\n" +
+                "    result.valid = true;\n" +
+                "    result.comment_message = \" \" + mode + \"; Actual Frequency (Hz): \" + result.actual_frequency + \", Actual High Period (ns): \" + result.actual_t_high + \". \";\n" +
+                "    if (!(Math.abs(t_high - result.actual_t_high) / t_high &lt;= 0.1)) {\n" +
+                "        result.valid = false;\n" +
+                "        result.comment_message += \"Error: The \" + mode + \" High Period is off by more than 10%. \";\n" +
+                "    }\n" +
+                "    if (!(Math.abs(desired_frequency - result.actual_frequency) / desired_frequency &lt;= 0.1)) {\n" +
+                "        result.valid = false;\n" +
+                "        result.comment_message += \"Error: The \" + mode + \" Frequency is off by more than 10%. \";\n" +
+                "    }\n" +
+                "    if (mode.indexOf(\"Open Drain\") !== -1 &amp;&amp; result.actual_t_low &lt; 200) {\n" +
+                "        result.valid = false;\n" +
+                "        result.comment_message += \"Error: The \" + mode + \" SCL Low period must be greater than or equal to 200 nanoseconds. \";\n" +
+                "    }\n" +
+                "    else if (mode.indexOf(\"Push-Pull\") !== -1) {\n" +
+                "        if (result.actual_t_low &lt; pp_t_low) {\n" +
+                "            result.valid = false;\n" +
+                "            result.comment_message += \"Error: The \" + mode + \" SCL Low period (T_low) must be greater than or equal to \" + pp_t_low + \" nanoseconds. \";\n" +
+                "        }\n" +
+                "        if (t_cf > Math.min(60, 150e6 / result.actual_frequency)) {\n" +
+                "            result.valid = false;\n" +
+                "            result.comment_message += \"Error: Push-Pull Falling time is too large for the \" + mode + \" SCL frequency. \";\n" +
+                "        }\n" +
+                "        if (t_cr > Math.min(60, 150e6 / result.actual_frequency)) {\n" +
+                "            result.valid = false;\n" +
+                "            result.comment_message += \"Error: Push-Pull Rising time is too large for the \" + mode + \" SCL frequency. \";\n" +
+                "        }\n" +
+                "    }\n" +
+                "    if (result.actual_t_high &lt; pp_t_high) {\n" +
+                "        result.valid = false;\n" +
+                "        result.comment_message += \"Error: The \" + mode + \" SCL High period (T_high) must be greater than or equal to \" + pp_t_high +\" nanoseconds. \";\n" +
+                "    }\n" +
+                "    return result;\n" +
+                "}\n" +
+                "var stdod = calculate_period(${module.driver.i3c.stdbr.opendrain.logic_high}, ${module.driver.i3c.stdbr.opendrain.frequency}, od_cr, od_cf, 511, 0, \"Standard Open Drain\");\n" +
+                "stdod.dsbrpo = 0;\n" +
+                "if (stdod.high_setting &gt;= 256 || stdod.low_setting &gt;= 256) {\n" +
+                "    stdod = calculate_period(${module.driver.i3c.stdbr.opendrain.logic_high}, ${module.driver.i3c.stdbr.opendrain.frequency}, od_cr, od_cf, 255, 1, \"Standard Open Drain\");\n" +
+                "    stdod.dsbrpo = 1;\n" +
+                "}\n" +
+                "var stdpp = calculate_period(${module.driver.i3c.stdbr.pushpull.logic_high}, ${module.driver.i3c.stdbr.pushpull.frequency}, pp_cr, pp_cf, 63, 0, \"Standard Push-Pull\");\n" +
+                "var extod = calculate_period(${module.driver.i3c.extbr.opendrain.logic_high}, ${module.driver.i3c.extbr.opendrain.frequency}, od_cr, od_cf, 255, 0, \"Extended Open Drain\");\n" +
+                "var extpp = calculate_period(${module.driver.i3c.extbr.pushpull.logic_high}, ${module.driver.i3c.extbr.pushpull.frequency}, pp_cr, pp_cf, 63, 0, \"Extended Push-Pull\");\n" +
+                "var stdbr = \"/*\" + stdod.comment_message + \"*/\\n\";\n" +
+                "stdbr += \".stdbr = ((\" + stdod.high_setting + \"U &lt;&lt; R_I3C0_STDBR_SBRHO_Pos) | (\" + stdod.low_setting + \"U &lt;&lt; R_I3C0_STDBR_SBRLO_Pos))\\n\";\n" +
+                "stdbr += \"/*\" + stdpp.comment_message + \"*/\\n\";\n" +
+                "stdbr += \"| ((\" + stdpp.high_setting + \"U &lt;&lt; R_I3C0_STDBR_SBRHP_Pos) | (\" + stdpp.low_setting + \"U &lt;&lt; R_I3C0_STDBR_SBRLP_Pos))\\n\";\n" +
+                "stdbr += \"| (\" + stdod.dsbrpo + \"U &lt;&lt; R_I3C0_STDBR_DSBRPO_Pos),\\n\"\n" +
+                "var extbr = \"/*\" + extod.comment_message + \"*/\\n\";\n" +
+                "extbr += \".extbr = ((\" + extod.high_setting + \"U &lt;&lt; R_I3C0_EXTBR_EBRHO_Pos) | (\" + extod.low_setting + \"U &lt;&lt; R_I3C0_EXTBR_EBRLO_Pos))\\n\";\n" +
+                "extbr += \"/*\" + extpp.comment_message + \" */\\n\";\n" +
+                "extbr += \"| ((\" + extpp.high_setting + \"U &lt;&lt; R_I3C0_EXTBR_EBRHP_Pos) | (\" + extpp.low_setting + \"U &lt;&lt; R_I3C0_EXTBR_EBRLP_Pos)),\\n\";\n" +
+                "stdbr + extbr\n" +
+                "")
+            </export>
+        </property>
+        <property default="module.driver.i3c.clock_stalling_address_assignment_phase.disabled" display="Bitrate Settings|Clock Stalling|Address Assignment Phase" id="module.driver.i3c.clock_stalling_address_assignment_phase" description="Enable clock stalling during the Address Assignment Phase of ENTDAA.">
+            <option display="Enabled" id="module.driver.i3c.clock_stalling_address_assignment_phase.enabled" value="1"/>
+            <option display="Disabled" id="module.driver.i3c.clock_stalling_address_assignment_phase.disabled" value="0"/>
+        </property>
+        <property default="" display="Bitrate Settings|Clock Stalling|Transition Phase" id="module.driver.i3c.clock_stalling_transition_phase" description="Enable clock stalling during the Transition Bit of a read transfer.">
+            <select enum="enum.driver.i3c.clock_stalling_transition_phase"/>
+        </property>
+        <property default="module.driver.i3c.clock_stalling_parity_phase.disabled" display="Bitrate Settings|Clock Stalling|Parity Phase" id="module.driver.i3c.clock_stalling_parity_phase" description="Enable clock stalling during the Parity Bit of a write transfer.">
+            <option display="Enabled" id="module.driver.i3c.clock_stalling_parity_phase.enabled" value="1"/>
+            <option display="Disabled" id="module.driver.i3c.clock_stalling_parity_phase.disabled" value="0"/>
+        </property>
+        <property default="module.driver.i3c.clock_stalling_ack_phase.disabled" display="Bitrate Settings|Clock Stalling|Ack Phase" id="module.driver.i3c.clock_stalling_ack_phase" description="Enable clock stalling during the ACK phase of a transfer.">
+            <option display="Enabled" id="module.driver.i3c.clock_stalling_ack_phase.enabled" value="1"/>
+            <option display="Disabled" id="module.driver.i3c.clock_stalling_ack_phase.disabled" value="0"/>
+        </property>
+        <property default="0" display="Bitrate Settings|Clock Stalling|Time (us)" id="module.driver.i3c.clock_stalling_time" description="The amount of time to stall the clock during the Address Assignment Phase, Transition Phase, Parity Phase, and ACK Phase.">
+            <constraint display="Must be greater than or equal to 0.">Number(${module.driver.i3c.clock_stalling_time}) != "NaN" &amp;&amp; ${module.driver.i3c.clock_stalling_time} &gt;= 0</constraint>
+            <export>Math.min(65535, Math.ceil(${board.clock.peripheral.i3c.tclk} * ${module.driver.i3c.clock_stalling_time} / 1e6))</export>
+        </property>
+        <property default="38.4" display="Bus Free Condition Detection Time (ns)" id="module.driver.i3c.bus_free_condition" description="The minimum period occurring after a STOP and before a START.">
+            <constraint display="Must be greater than or equal to 38.4 nanoseconds.">Number(${module.driver.i3c.bus_free_condition}) != "NaN" &amp;&amp; ${module.driver.i3c.bus_free_condition} &gt;= 38.4</constraint>
+            <export>Math.min(511, Math.ceil(${board.clock.peripheral.i3c.tclk} * ${module.driver.i3c.bus_free_condition} / 1e9))</export>
+        </property>
+        <property default="1" display="Bus Available Condition Detection Time (us)" id="module.driver.i3c.bus_available_condition" description="The minimum period occurring after the Bus Free Condition when Slaves can initiate IBI requests.">
+            <constraint display="Must be greater than or equal to 1 microsecond.">Number(${module.driver.i3c.bus_available_condition}) != "NaN" &amp;&amp; ${module.driver.i3c.bus_available_condition} &gt;= 1</constraint>
+            <export>Math.min(511, Math.ceil(${board.clock.peripheral.i3c.tclk} * ${module.driver.i3c.bus_available_condition} / 1e6))</export>
+        </property>
+        <property default="1000" display="Bus Idle Condition Detection Time (us)" id="module.driver.i3c.bus_idle_condition" description="The minimum period occurring after the Bus Available Condition when Slaves can initiate Hot-Join requests.">
+            <constraint display="Must be greater than or equal to 1000 microseconds.">Number(${module.driver.i3c.bus_idle_condition}) != "NaN" &amp;&amp; ${module.driver.i3c.bus_idle_condition} &gt;= 1000</constraint>
+            <export>Math.min(262143, Math.ceil(${board.clock.peripheral.i3c.tclk} * ${module.driver.i3c.bus_idle_condition} / 1e6))</export>
+        </property>
+        <property default="module.driver.i3c.ack_hot_join.disabled" display="Master Mode|ACK Hot-Join Requests" id="module.driver.i3c.ack_hot_join" description="If enabled, the I3C instance will ACK Hot-Join Requests and notify the application.">
+            <option display="Enabled" id="module.driver.i3c.ack_hot_join.enabled" value="1"/>
+            <option display="Disabled" id="module.driver.i3c.ack_hot_join.disabled" value="0"/>
+        </property>
+        <property default="module.driver.i3c.notify_rejected_hot_join_request.disabled" display="Master Mode|Notify Rejected Hot-Join Requests." id="module.driver.i3c.notify_rejected_hot_join_request" description="If enabled, the application will get a callback when an IBI Hot-Join Request is rejected.">
+            <option display="Enabled" id="module.driver.i3c.notify_rejected_hot_join_request.enabled" value="1"/>
+            <option display="Disabled" id="module.driver.i3c.notify_rejected_hot_join_request.disabled" value="0"/>
+        </property>
+        <property default="module.driver.i3c.notify_rejected_mastership_request.disabled" display="Master Mode|Notify Rejected Mastership Requests." id="module.driver.i3c.notify_rejected_mastership_request" description="If enabled, the application will get a callback when an IBI Mastership Request is rejected.">
+            <option display="Enabled" id="module.driver.i3c.notify_rejected_mastership_request.enabled" value="1"/>
+            <option display="Disabled" id="module.driver.i3c.notify_rejected_mastership_request.disabled" value="0"/>
+        </property>
+        <property default="module.driver.i3c.notify_rejected_interrupt_request.disabled" display="Master Mode|Notify Rejected Interrupt Requests." id="module.driver.i3c.notify_rejected_interrupt_request" description="If enabled, the application will get a callback when an IBI Interrupt Request is rejected.">
+            <option display="Enabled" id="module.driver.i3c.notify_rejected_interrupt_request.enabled" value="1"/>
+            <option display="Disabled" id="module.driver.i3c.notify_rejected_interrupt_request.disabled" value="0"/>
+        </property>
+        <property default="module.driver.i3c.inband_interrupts.disabled" display="Slave Mode|Command Response Info|ENEC/DISEC|In-Band Interrupts" id="module.driver.i3c.inband_interrupts" description="Configure whether the slave can issue IBI requests.">
+            <option display="Enabled" id="module.driver.i3c.inband_interrupts.enabled" value="true"/>
+            <option display="Disabled" id="module.driver.i3c.inband_interrupts.disabled" value="false"/>
+        </property>
+        <property default="module.driver.i3c.timeout_detection.disabled" display="Timeout Detection" id="module.driver.i3c.timeout_detection" description="If enabled, the application will get a callback if SCL is stuck at a logic high or logic low level for more than 65535 cycles of the I3C source clock.">
+            <option display="Enabled" id="module.driver.i3c.timeout_detection.enabled" value="true"/>
+            <option display="Disabled" id="module.driver.i3c.timeout_detection.disabled" value="false"/>
+        </property>
+        <!-- <property default="module.driver.i3c.mastership_requests.disabled" display="Slave Mode|Command Response Info|ENEC/DISEC|Mastership Requests" id="module.driver.i3c.mastership_requests" description="Configure whether the slave can issue Mastership requests.">
+            <option display="Enabled" id="module.driver.i3c.mastership_requests.enabled" value="true"/>
+            <option display="Disabled" id="module.driver.i3c.mastership_requests.disabled" value="false"/>
+        </property> -->
+        <property default="module.driver.i3c.hotjoin_requests.disabled" display="Slave Mode|Command Response Info|ENEC/DISEC|Hot-Join Requests" id="module.driver.i3c.hotjoin_requests" description="Configure whether the slave can issue Hot-Join requests.">
+            <option display="Enabled" id="module.driver.i3c.hotjoin_requests.enabled" value="true"/>
+            <option display="Disabled" id="module.driver.i3c.hotjoin_requests.disabled" value="false"/>
+        </property>
+        <property default="module.driver.i3c.activity_state.0" display="Slave Mode|Command Response Info|ENTASn|Activity State" id="module.driver.i3c.activity_state" description="Configure the starting activity state of the slave.">
+            <option display="Activity State 0" id="module.driver.i3c.activity_state.0" value="I3C_ACTIVITY_STATE_ENTAS0"/>
+            <option display="Activity State 1" id="module.driver.i3c.activity_state.1" value="I3C_ACTIVITY_STATE_ENTAS1"/>
+            <option display="Activity State 2" id="module.driver.i3c.activity_state.2" value="I3C_ACTIVITY_STATE_ENTAS2"/>
+            <option display="Activity State 3" id="module.driver.i3c.activity_state.3" value="I3C_ACTIVITY_STATE_ENTAS3"/>
+        </property>
+        <property default="65535" display="Slave Mode|Command Response Info|SETMWL/GETMWL|Max Write Length" id="module.driver.i3c.write_length" description="Set the max write length.">
+            <constraint display="Write length must be in the range of [8, 65535].">testInteger("${module.driver.i3c.write_length}")  &amp;&amp; ${module.driver.i3c.write_length} &gt;= 8 &amp;&amp; ${module.driver.i3c.write_length} &lt; 65536</constraint>
+        </property>
+        <property default="65535" display="Slave Mode|Command Response Info|SETMRL/GETMRL|Max Read Length" id="module.driver.i3c.read_length" description="Set the max read length.">
+            <constraint display="Read length must be in the range of [16, 65535].">testInteger("${module.driver.i3c.read_length}")  &amp;&amp; ${module.driver.i3c.read_length} &gt;= 16 &amp;&amp; ${module.driver.i3c.read_length} &lt; 65536</constraint>
+        </property>
+        <property default="0" display="Slave Mode|Command Response Info|SETMRL/GETMRL|Max IBI Payload Length" id="module.driver.i3c.ibi_payload_length" description="Set the max IBI payload length, or set it to 0 for unlimited.">
+            <constraint display="Read length must be in the range of [0, 255].">testInteger("${module.driver.i3c.ibi_payload_length}")  &amp;&amp; ${module.driver.i3c.ibi_payload_length} &gt; 0 &amp;&amp; ${module.driver.i3c.ibi_payload_length} &lt; 256</constraint>
+        </property>
+        <property default="module.driver.i3c.write_data_rate.2mhz" display="Slave Mode|Command Response Info|GETMXDS|Write Data Rate" id="module.driver.i3c.write_data_rate" description="Set the max write data rate.">
+            <option display="FSCL_MAX" id="module.driver.i3c.write_data_rate.fscl_max" value="I3C_DATA_RATE_SETTING_FSCL_MAX"/>
+            <option display="8Mhz" id="module.driver.i3c.write_data_rate.8mhz" value="I3C_DATA_RATE_SETTING_8MHZ"/>
+            <option display="6Mhz" id="module.driver.i3c.write_data_rate.6mhz" value="I3C_DATA_RATE_SETTING_6MHZ"/>
+            <option display="4Mhz" id="module.driver.i3c.write_data_rate.4mhz" value="I3C_DATA_RATE_SETTING_4MHZ"/>
+            <option display="2Mhz" id="module.driver.i3c.write_data_rate.2mhz" value="I3C_DATA_RATE_SETTING_2MHZ"/>
+        </property>
+        <property default="module.driver.i3c.read_data_rate.2mhz" display="Slave Mode|Command Response Info|GETMXDS|Read Data Rate" id="module.driver.i3c.read_data_rate" description="Set the max read data rate.">
+            <option display="FSCL_MAX" id="module.driver.i3c.read_data_rate.fscl_max" value="I3C_DATA_RATE_SETTING_FSCL_MAX"/>
+            <option display="8Mhz" id="module.driver.i3c.read_data_rate.8mhz" value="I3C_DATA_RATE_SETTING_8MHZ"/>
+            <option display="6Mhz" id="module.driver.i3c.read_data_rate.6mhz" value="I3C_DATA_RATE_SETTING_6MHZ"/>
+            <option display="4Mhz" id="module.driver.i3c.read_data_rate.4mhz" value="I3C_DATA_RATE_SETTING_4MHZ"/>
+            <option display="2Mhz" id="module.driver.i3c.read_data_rate.2mhz" value="I3C_DATA_RATE_SETTING_2MHZ"/>
+        </property>
+        <property default="module.driver.i3c.clock_to_data_time.8ns" display="Slave Mode|Command Response Info|GETMXDS|Clock to Data Turnaround Time" id="module.driver.i3c.clock_to_data_time" description="Set the clock to data turnaround time.">
+            <option display="8 Nanoseconds" id="module.driver.i3c.clock_to_data_time.8ns" value="I3C_CLOCK_DATA_TURNAROUND_8NS"/>
+            <option display="9 Nanoseconds" id="module.driver.i3c.clock_to_data_time.9ns" value="I3C_CLOCK_DATA_TURNAROUND_9NS"/>
+            <option display="10 Nanoseconds" id="module.driver.i3c.clock_to_data_time.10ns" value="I3C_CLOCK_DATA_TURNAROUND_10NS"/>
+            <option display="11 Nanoseconds" id="module.driver.i3c.clock_to_data_time.11ns" value="I3C_CLOCK_DATA_TURNAROUND_11NS"/>
+            <option display="12 Nanoseconds" id="module.driver.i3c.clock_to_data_time.12ns" value="I3C_CLOCK_DATA_TURNAROUND_12NS"/>
+            <option display="Greater than 12 Nanoseconds" id="module.driver.i3c.clock_to_data_time.ext" value="I3C_CLOCK_DATA_TURNAROUND_EXTENDED"/>
+        </property>
+        <property default="module.driver.i3c.include_max_read_turnaround_time.disabled" display="Slave Mode|Command Response Info|GETMXDS|Include Max Read Turnaround Time" id="module.driver.i3c.include_max_read_turnaround_time" description="Configure whether the Max Read Turnaround time will be transmitted.">
+            <option display="Enabled" id="module.driver.i3c.include_max_read_turnaround_time.enabled" value="true"/>
+            <option display="Disabled" id="module.driver.i3c.include_max_read_turnaround_time.disabled" value="false"/>
+        </property>
+        <property default="0" display="Slave Mode|Command Response Info|GETMXDS|Max Read Turnaround Time" id="module.driver.i3c.max_read_turnaround_time" description="Set max read turnaround time.">
+            <constraint display="Value must be in the range [0, 255].">testInteger("${module.driver.i3c.max_read_turnaround_time}")  &amp;&amp; ${module.driver.i3c.max_read_turnaround_time} &gt;= 0 &amp;&amp; ${module.driver.i3c.max_read_turnaround_time} &lt; 256</constraint>
+        </property>
+        <property default="0" display="Slave Mode|Command Response Info|GETXTIME|Frequency Byte" id="module.driver.i3c.frequency_byte" description="Set the internal oscillator frequency in increments of 0.5 Mhz.">
+            <constraint display="Value must be in the range [0, 255].">testInteger("${module.driver.i3c.frequency_byte}")  &amp;&amp; ${module.driver.i3c.frequency_byte} &gt;= 0 &amp;&amp; ${module.driver.i3c.frequency_byte} &lt; 256</constraint>
+        </property>
+        <property default="0" display="Slave Mode|Command Response Info|GETXTIME|Inaccuracy Byte" id="module.driver.i3c.inaccuracy_byte" description="Set the oscillator inaccuracy byte in increments of 0.5%">
+            <constraint display="Value must be in the range [0, 255].">testInteger("${module.driver.i3c.inaccuracy_byte}")  &amp;&amp; ${module.driver.i3c.inaccuracy_byte} &gt;= 0 &amp;&amp; ${module.driver.i3c.inaccuracy_byte} &lt; 256</constraint>
+        </property>
+        <property default="" display="Slave Mode|Command Response Info|GETCAP/GETHDRCAP|HDR-DDR (Mode 0)" id="module.driver.i3c.hdr_ddr" description="Slave supports HDR-DDR (Mode 0)">
+            <select enum="enum.driver.i3c.hdr_ddr"/>
+        </property>
+        <property default="" display="Slave Mode|Command Response Info|GETCAP/GETHDRCAP|HDR-TSP (Mode 1)" id="module.driver.i3c.hdr_tsp" description="Slave supports HDR-TSP (Mode 1)">
+            <select enum="enum.driver.i3c.hdr_tsp"/>
+        </property>
+        <property default="" display="Slave Mode|Command Response Info|GETCAP/GETHDRCAP|HDR-TSL (Mode 2)" id="module.driver.i3c.hdr_tsl" description="Slave supports HDR-TSL (Mode 2)">
+            <select enum="enum.driver.i3c.hdr_tsl"/>
+        </property>
+        <property default="" display="Interrupts|Interrupt Priority" id="module.driver.i3c.ipl" description="The interrupt priority of the RX, TX, RESPONSE, RCV_STATUS, and IBI ISRs.">
+            <select enum="enum.mcu.nvic.priorities.mandatory"/>
+            <interrupt event="event.i3c${module.driver.i3c.channel}.rcv.status" isr="i3c_rcv_isr"/>
+            <interrupt event="event.i3c${module.driver.i3c.channel}.response" isr="i3c_resp_isr"/>
+            <interrupt event="event.i3c${module.driver.i3c.channel}.rx" isr="i3c_rx_isr"/>
+            <interrupt event="event.i3c${module.driver.i3c.channel}.tx" isr="i3c_tx_isr"/>
+            <interrupt event="event.i3c${module.driver.i3c.channel}.ibi" isr="i3c_ibi_isr"/>
+        </property>
+        <property default="" display="Interrupts|Error and Event Interrupt Priority" id="module.driver.i3c.eei_ipl" description="The interrupt priority of the EEI ISR which is used to notify the application when an Internal Error, HDR Exit Pattern, or Timeout is detected.">
+            <select enum="enum.mcu.nvic.priorities.mandatory"/>
+            <interrupt event="event.i3c${module.driver.i3c.channel}.eei" isr="i3c_eei_isr"/>
+        </property>
+        <peripheral name="I3C" component="i3c${module.driver.i3c.channel}" />
+        <header>
+/** I3C on I3C Instance. */
+extern const i3c_instance_t ${module.driver.i3c.name};
+
+/** Access the I3C instance using these structures when calling API functions directly (::p_api is not used). */
+extern i3c_instance_ctrl_t ${module.driver.i3c.name}_ctrl;
+extern const i3c_cfg_t ${module.driver.i3c.name}_cfg;
+
+#ifndef ${module.driver.i3c.p_callback}
+void ${module.driver.i3c.p_callback}(i3c_callback_args_t const * const p_args);
+#endif
+        </header>
+        <includes>
+#include &quot;r_i3c.h&quot;
+        </includes>
+        <declarations>
+/* Control structure for storing the driver's internal state. */
+i3c_instance_ctrl_t ${module.driver.i3c.name}_ctrl;
+
+/* Extended configuration for this instance of I3C. */
+const i3c_extended_cfg_t ${module.driver.i3c.name}_cfg_extend = {
+    .bitrate_settings = {
+        ${module.driver.bitrate_calculation}
+        .clock_stalling = {
+            .assigned_address_phase_enable = ${module.driver.i3c.clock_stalling_address_assignment_phase},
+            .transition_phase_enable = ${module.driver.i3c.clock_stalling_transition_phase},
+            .parity_phase_enable = ${module.driver.i3c.clock_stalling_parity_phase},
+            .ack_phase_enable = ${module.driver.i3c.clock_stalling_ack_phase},
+            .clock_stalling_time = ${module.driver.i3c.clock_stalling_time},
+        },
+    },
+    .ibi_control.hot_join_acknowledge = ${module.driver.i3c.ack_hot_join},
+    .ibi_control.notify_rejected_hot_join_requests = ${module.driver.i3c.notify_rejected_hot_join_request},
+    .ibi_control.notify_rejected_mastership_requests = ${module.driver.i3c.notify_rejected_mastership_request},
+    .ibi_control.notify_rejected_interrupt_requests = ${module.driver.i3c.notify_rejected_interrupt_request},
+    .bus_free_detection_time = ${module.driver.i3c.bus_free_condition},
+    .bus_available_detection_time = ${module.driver.i3c.bus_available_condition},
+    .bus_idle_detection_time = ${module.driver.i3c.bus_idle_condition},
+    .timeout_detection_enable = ${module.driver.i3c.timeout_detection},
+    .slave_command_response_info = {
+        .inband_interrupt_enable = ${module.driver.i3c.inband_interrupts},
+        .mastership_request_enable = 0,
+        .hotjoin_request_enable = ${module.driver.i3c.hotjoin_requests},
+        .activity_state = ${module.driver.i3c.activity_state},
+        .write_length = ${module.driver.i3c.write_length},
+        .read_length = ${module.driver.i3c.read_length},
+        .ibi_payload_length = ${module.driver.i3c.ibi_payload_length},
+        .write_data_rate = ${module.driver.i3c.write_data_rate},
+        .read_data_rate = ${module.driver.i3c.read_data_rate},
+        .clock_data_turnaround = ${module.driver.i3c.clock_to_data_time},
+        .read_turnaround_time_enable = ${module.driver.i3c.include_max_read_turnaround_time},
+        .read_turnaround_time = ${module.driver.i3c.max_read_turnaround_time},
+        .oscillator_frequency = ${module.driver.i3c.frequency_byte},
+        .oscillator_inaccuracy = ${module.driver.i3c.inaccuracy_byte},
+        .hdr_ddr_support = ${module.driver.i3c.hdr_ddr},
+        .hdr_tsp_support = ${module.driver.i3c.hdr_tsp},
+        .hdr_tsl_support = ${module.driver.i3c.hdr_tsl},
+    },
+    .resp_irq = VECTOR_NUMBER_I3C${module.driver.i3c.channel}_RESPONSE,
+    .rcv_irq = VECTOR_NUMBER_I3C${module.driver.i3c.channel}_RCV_STATUS,
+    .rx_irq = VECTOR_NUMBER_I3C${module.driver.i3c.channel}_RX,
+    .tx_irq = VECTOR_NUMBER_I3C${module.driver.i3c.channel}_TX,
+    .ibi_irq = VECTOR_NUMBER_I3C${module.driver.i3c.channel}_IBI,
+    .eei_irq = VECTOR_NUMBER_I3C${module.driver.i3c.channel}_EEI,
+
+    .ipl = ${module.driver.i3c.ipl},
+    .eei_ipl = ${module.driver.i3c.eei_ipl},
+};
+
+/* Configuration for this instance. */
+const i3c_cfg_t ${module.driver.i3c.name}_cfg = {
+    .channel = ${module.driver.i3c.channel},
+    .device_type = ${module.driver.i3c.device_type},
+    .p_callback = ${module.driver.i3c.p_callback},
+#if defined(${module.driver.i3c.p_context})
+    .p_context = ${module.driver.i3c.p_context},
+#else
+    .p_context = &amp;${module.driver.i3c.p_context},
+#endif
+    .p_extend = &amp;${module.driver.i3c.name}_cfg_extend,
+};
+
+/* Instance structure to use this module. */
+const i3c_instance_t ${module.driver.i3c.name} =
+{
+    .p_ctrl        = &amp;${module.driver.i3c.name}_ctrl,
+    .p_cfg         = &amp;${module.driver.i3c.name}_cfg,
+    .p_api         = &amp;g_i3c_on_i3c
+};
+        </declarations>
+    </module>
+</raModuleDescription>

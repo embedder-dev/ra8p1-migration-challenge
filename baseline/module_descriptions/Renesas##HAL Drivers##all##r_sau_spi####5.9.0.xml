@@ -1,0 +1,512 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+IMPORTANT NOTE:
+Do not modify this file directly.
+
+This file is generated using: scripts/jinja/mdf_render.sh
+-->
+<raModuleDescription>
+    <config id="config.driver.sau_spi" path="fsp_cfg/r_sau_spi_cfg.h" version="0">
+        <property default="config.driver.sau_spi.param_checking_enable.bsp" display="Parameter Checking" id="config.driver.sau_spi.param_checking_enable" description="If selected code for parameter checking is included in the build.">
+            <option display="Default (BSP)" id="config.driver.sau_spi.param_checking_enable.bsp" value="(BSP_CFG_PARAM_CHECKING_ENABLE)"/>
+            <option display="Enabled" id="config.driver.sau_spi.param_checking_enable.enabled" value="(1)"/>
+            <option display="Disabled" id="config.driver.sau_spi.param_checking_enable.disabled" value="(0)"/>
+        </property>
+        <property default="config.driver.sau_spi.critical_section_enable.disabled" display="Critical Section Guarding" id="config.driver.sau_spi.critical_section_enable" description="Enable critical section guarding around peripheral configuration updates. This should be enabled if the R_SAU_I2C or R_SAU_UART module is being used simultaneously with this module.">
+            <option display="Enabled" id="config.driver.sau_spi.critical_section_enable.enabled" value="(1)"/>
+            <option display="Disabled" id="config.driver.sau_spi.critical_section_enable.disabled" value="(0)"/>
+        </property>
+        <property default="config.driver.sau_spi.single_channel_enable.disabled" display="Enable Single Channel" id="config.driver.sau_spi.single_channel_enable" description="Enable single channel to reduce code size if only one channel is to be configured for SAU SPI.">
+            <select enum="enum.driver.sau_spi.single_channel" />
+        </property>
+        <property default="config.driver.spi.transfer_operation_mode_transmission_reception" display="Transfer Operating Mode" id="config.driver.spi.transfer_operation_mode" description="Select transfer operation mode.">
+            <option display="Reception" id="config.driver.spi.transfer_operation_mode_reception" value="(SAU_SPI_TRANSFER_MODE_RECEPTION)"/>
+            <option display="Transmission" id="config.driver.spi.transfer_operation_mode_transmission" value="(SAU_SPI_TRANSFER_MODE_TRANSMISSION)"/>
+            <option display="Transmission/Reception" id="config.driver.spi.transfer_operation_mode_transmission_reception" value="(SAU_SPI_TRANSFER_MODE_TRANSMISSION_RECEPTION)"/>
+        </property>
+        <property default="config.driver.sau_spi.dtc_support.disabled" display="DTC Support" id="config.driver.sau_spi.dtc_support" description="Enable DTC support for the SAU SPI module.">
+            <option display="Enabled" id="config.driver.sau_spi.dtc_support.enabled" value="(1)"/>
+            <option display="Disabled" id="config.driver.sau_spi.dtc_support.disabled" value="(0)"/>
+        </property>
+        <property default="config.driver.sau_spi.multiple_slave_enable.disabled" display="Multiple Slave Compatibility Mode" id="config.driver.sau_spi.multiple_slave_enable" description="Enable multiple slave compatibility mode when SAU SPI is configured to slave mode for multiple-slave applications.">
+            <option display="Enabled" id="config.driver.sau_spi.multiple_slave_enable.enabled" value="(1)"/>
+            <option display="Disabled" id="config.driver.sau_spi.multiple_slave_enable.disabled" value="(0)"/>
+        </property>
+        <property default="config.driver.sau_spi.transfer_continuous_enable.enabled" display="Continuous Transfer Mode" id="config.driver.sau_spi.transfer_continuous_enable" description="Set to 'Enabled' if transfer in continuous mode is needed.">
+            <option display="Enabled" id="config.driver.sau_spi.transfer_continuous_enable.enabled" value="(1)"/>
+            <option display="Disabled" id="config.driver.sau_spi.transfer_continuous_enable.disabled" value="(0)"/>
+        </property>
+        <content>
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#define SAU_SPI_CFG_CRITICAL_SECTION_ENABLE ${config.driver.sau_spi.critical_section_enable}
+#define SAU_SPI_CFG_SINGLE_CHANNEL_ENABLE ${config.driver.sau_spi.single_channel_enable}
+#define SAU_SPI_CFG_PARAM_CHECKING_ENABLE ${config.driver.sau_spi.param_checking_enable}
+#define SAU_SPI_TRANSFER_OPERATION_MODE ${config.driver.spi.transfer_operation_mode}
+#define SAU_SPI_CFG_DTC_SUPPORT_ENABLE ${config.driver.sau_spi.dtc_support}
+#define SAU_SPI_CFG_MULTIPLE_SLAVE_COMPATIBILITY_MODE_ENABLE ${config.driver.sau_spi.multiple_slave_enable}
+#define SAU_SPI_TRANSFER_MODE_CONTINUOUS_ENABLE ${config.driver.sau_spi.transfer_continuous_enable}
+
+#ifdef __cplusplus
+}
+#endif
+        </content>
+    </config>
+    <module config="config.driver.sau_spi" display="Connectivity|${module.driver.spi.name} SPI (r_sau_spi)" id="module.driver.spi_on_sau_spi" version="1" url="group___s_a_u___s_p_i.html">
+        <constraint display="Unique name required for each instance">
+            "${interface.driver.spi.${module.driver.spi.name}}" === "1"
+        </constraint>
+        <constraint display="Channel not available on selected MCU">
+            ((("${interface.mcu.sau_spi.external.00}" === "1") &amp;&amp; ("${module.driver.spi.channel}" === "module.driver.sau.spi_channel.sau_spi00"))
+             || (("${interface.mcu.sau_spi.external.01}" === "1") &amp;&amp; ("${module.driver.spi.channel}" === "module.driver.sau.spi_channel.sau_spi01"))
+             || (("${interface.mcu.sau_spi.external.10}" === "1") &amp;&amp; ("${module.driver.spi.channel}" === "module.driver.sau.spi_channel.sau_spi10"))
+             || (("${interface.mcu.sau_spi.external.11}" === "1") &amp;&amp; ("${module.driver.spi.channel}" === "module.driver.sau.spi_channel.sau_spi11"))
+             || (("${interface.mcu.sau_spi.external.20}" === "1") &amp;&amp; ("${module.driver.spi.channel}" === "module.driver.sau.spi_channel.sau_spi20"))
+             || (("${interface.mcu.sau_spi.external.21}" === "1") &amp;&amp; ("${module.driver.spi.channel}" === "module.driver.sau.spi_channel.sau_spi21")))
+        </constraint>
+        <constraint display="Specified 'Bitrate' is not available on selected MCU.">
+            testInteger("${module.driver.spi.bitrate}") &amp;&amp; ("${module.driver.spi.bitrate}" &gt; 0) &amp;&amp; ("${module.driver.spi.bitrate}" &lt;= (Number("${config.bsp.fsp.mcu.sau_spi.max_bitrate}")))
+        </constraint>
+        <constraint display="Single Channel is enabled on channel 00, please change Channel setting to 00">
+            (("${config.driver.sau_spi.single_channel_enable}" !== "config.driver.sau_spi.single_channel_enable.sau_spi00") || ("${module.driver.spi.channel}" === "module.driver.sau.spi_channel.sau_spi00"))
+        </constraint>
+        <constraint display="Single Channel is enabled on channel 01, please change Channel setting to 01">
+            (("${config.driver.sau_spi.single_channel_enable}" !== "config.driver.sau_spi.single_channel_enable.sau_spi01") || ("${module.driver.spi.channel}" === "module.driver.sau.spi_channel.sau_spi01"))
+        </constraint>
+        <constraint display="Single Channel is enabled on channel 10, please change Channel setting to 10">
+            (("${config.driver.sau_spi.single_channel_enable}" !== "config.driver.sau_spi.single_channel_enable.sau_spi10") || ("${module.driver.spi.channel}" === "module.driver.sau.spi_channel.sau_spi10"))
+        </constraint>
+        <constraint display="Single Channel is enabled on channel 11, please change Channel setting to 11">
+            (("${config.driver.sau_spi.single_channel_enable}" !== "config.driver.sau_spi.single_channel_enable.sau_spi11") || ("${module.driver.spi.channel}" === "module.driver.sau.spi_channel.sau_spi11"))
+        </constraint>
+        <constraint display="Single Channel is enabled on channel 20, please change Channel setting to 20">
+            (("${config.driver.sau_spi.single_channel_enable}" !== "config.driver.sau_spi.single_channel_enable.sau_spi20") || ("${module.driver.spi.channel}" === "module.driver.sau.spi_channel.sau_spi20"))
+        </constraint>
+        <constraint display="Single Channel is enabled on channel 21, please change Channel setting to 21">
+            (("${config.driver.sau_spi.single_channel_enable}" !== "config.driver.sau_spi.single_channel_enable.sau_spi21") || ("${module.driver.spi.channel}" === "module.driver.sau.spi_channel.sau_spi21"))
+        </constraint>
+        <constraint display="Continuous transfer mode cannot be use in slave reception.">
+            !(("${config.driver.spi.transfer_operation_mode}" === "config.driver.spi.transfer_operation_mode_reception") &amp;&amp;("${module.driver.spi.operation_mode}" === "module.driver.spi.operation_mode_slave") &amp;&amp;("${module.driver.spi.transfer.mode}" === "module.driver.spi.transfer.mode.continuous"))
+        </constraint>
+        <constraint display="Specified 'Bitrate' is not available on continuous transfer mode.">
+            !(("${module.driver.spi.transfer.mode}" === "module.driver.spi.transfer.mode.continuous") &amp;&amp; ("${module.driver.spi.bitrate}" &gt; (Number("${board.clock.peripheral.sau}") / 16)))
+        </constraint>
+        <constraint display="DTC support must be enabled to use DTC">
+            ("${config.driver.sau_spi.dtc_support}" === "config.driver.sau_spi.dtc_support.enabled") ||
+            (!testExists("${module.driver.sau_spi.requires.transfer_rx_tx::module.driver.transfer.name}"))
+        </constraint>
+        <constraint display="Add DTC stack if DTC support is enabled">
+            ("${config.driver.sau_spi.dtc_support}" !== "config.driver.sau_spi.dtc_support.enabled") ||
+            (testExists("${module.driver.sau_spi.requires.transfer_rx_tx::module.driver.transfer.name}"))
+        </constraint>
+        <constraint display="Bitrate cannot exceed PCLKB/4 on selected Channel.">
+            ("${module.driver.spi.channel}" === "module.driver.sau.spi_channel.sau_spi00") || (${module.driver.spi.bitrate} &lt;= ${board.clock.peripheral.sau}/4)
+        </constraint>
+        <constraint display="Please enable Common|Continuous Transfer Mode">
+            ("${config.driver.sau_spi.transfer_continuous_enable}" === "config.driver.sau_spi.transfer_continuous_enable.enabled")  || ("${module.driver.spi.transfer.mode}" === "module.driver.spi.transfer.mode.single")
+        </constraint>
+        <constraint id="module.driver.sau_spi.constraint.bitrate">
+            <![CDATA[eval('/* Converter for SAU unit to configured operation clock frequency */' +
+'var fclk_freq_by_unit_get = {' +
+'    "0": function (operation_clock) { return operation_clock === "0" ? ${board.clock.peripheral.sau.ck00} : ${board.clock.peripheral.sau.ck01}; },' +
+'    "1": function (operation_clock) { return operation_clock === "0" ? ${board.clock.peripheral.sau.ck10} : ${board.clock.peripheral.sau.ck11}; },' +
+'};' +
+'' +
+'/* Function to calculate SDR.STCLK register value. Note: This function does not check whether the value is in range. */' +
+'function stclk_calculate(f_mck, bitrate)' +
+'{' +
+'    return Math.round(f_mck / (2 * bitrate)) - 1;' +
+'}' +
+'' +
+'/* Function to calculate SAU unit value */' +
+'function sau_unit_calculate(channel) {' +
+'    return Math.floor(channel / 2);' +
+'}' +
+'' +
+'/* Function to calculate and validate bitrate */' +
+'function validate_stclk(f_mck, bitrate, stclk_limits)' +
+'{' +
+'    /* Calculate SDR.STCLK register value */' +
+'    var stclk = stclk_calculate(f_mck, bitrate);' +
+'' +
+'    return ((stclk <= stclk_limits.max) && (stclk >= stclk_limits.min));' +
+'}' +
+'/* Function to validate the operation clock divisor */' +
+'function validate_divisor(divisor, bitrate, stclk_limits)' +
+'{' +
+'    var f_pclk = ${board.clock.peripheral.sau};' +
+'    var best_f_mck = f_pclk / (1 << divisor);' +
+'    var is_valid = validate_stclk(best_f_mck, bitrate, stclk_limits);' +
+'' +
+'    return is_valid;' +
+'}' +
+'' +
+'/* Function to validate bitrate, generating a constraint message if invalid */' +
+'function validate_bitrate(f_mck, bitrate, stclk_limits)' +
+'{' +
+'    constraint_message = null;' +
+'    if (false === validate_stclk(f_mck, bitrate, stclk_limits)){' +
+'        constraint_message = "bitrate of " + bitrate.toString();' +
+'    }' +
+'' +
+'    return constraint_message;' +
+'}' +
+'var channel = "${module.driver.spi.channel}".slice(-2);' +
+'var f_pclk = ${board.clock.peripheral.sau};' +
+'var bitrate = ${module.driver.spi.bitrate};' +
+'' +
+'/* Transfer rate cannot exceed PCLKB/2 on SPI00, and it cannot exceed' +
+' * PCLKB/4 on SPI11 or SPI20 in master mode. An error message for these' +
+' * conditions is covered by a separate constriant. */' +
+'var max_bitrate = ("00" == channel) ? (f_pclk / 2) :  (f_pclk / 4);' +
+'bitrate = Math.min(bitrate, max_bitrate);' +
+'' +
+'' +
+'function check_bitrate_valid(bitrate, sau_unit, operation_clock, stclk_limits) {' +
+'    /* Look up SAU operation clock frequency */' +
+'    var f_mck = fclk_freq_by_unit_get[sau_unit](operation_clock);' +
+'' +
+'    /* Get operation source clock frequency (PCLKB/ICLK) */' +
+'    var f_pclk = ${board.clock.peripheral.sau};' +
+'' +
+'    /* Validate bitrate, if not valid will generate constraint message */' +
+'    var constraint_message = validate_bitrate(f_mck, bitrate, stclk_limits);' +
+'' +
+'    if (constraint_message != null)' +
+'    {' +
+'        var ck_str = "SAU CK" + sau_unit + operation_clock;' +
+'        constraint_message = "SAU SPI " + constraint_message + " is not achievable with selected operation clock settings.\\n" +' +
+'            "Change the Operation clock in the SAU SPI properties, or adjust operation clock frequency on the Clocks tab.";' +
+'' +
+'        /* Search for best valid divisor setting. Valid divisor is 0-0xF */' +
+'        for (var divisor = 0; divisor <= 15; divisor++)' +
+'        {' +
+'            /* Add recommendation to constraint message if valid combination found and exit loop, since the smallest valid divisor will have the lowest error. */' +
+'            if (validate_divisor(divisor, bitrate, stclk_limits)){' +
+'                var best_f_mck = f_pclk / (1 << divisor);' +
+'                constraint_message += "\\nRecommended frequency: " + best_f_mck.toString() + " Hz (" + ck_str + " Div /" + (1 << divisor).toString() + ")";' +
+'                break;' +
+'            }' +
+'        }' +
+'    }' +
+'' +
+'    return constraint_message;' +
+'}' +
+'' +
+'var sau_unit = sau_unit_calculate("${module.driver.spi.channel}".slice(-2, -1));' +
+'var operation_clock = "${module.driver.spi.operation_clock}".slice(-1);' +
+'var stclk_limits = { min : 0, max : 127 };' +
+'' +
+'check_bitrate_valid(bitrate, sau_unit, operation_clock, stclk_limits)')]]>
+        </constraint>
+        <requires id="module.driver.spi_on_sau_spi.requires.sau" interface="interface.mcu.sau.external" visible="false" display="Requires SAU Peripheral" />
+        <requires id="module.driver.sau_spi.requires.transfer_rx_tx" interface="interface.driver.transfer_on_dtc" display="Add DTC Driver for Transmission and Reception [Optional]" find="false" optional="true" >
+            <override property="module.driver.transfer.size" value="module.driver.transfer.size.size_1_byte"/>
+            <override property="module.driver.transfer.mode" value="module.driver.transfer.mode.mode_normal"/>
+            <override property="module.driver.transfer.dest_addr_mode" value="module.driver.transfer.dest_addr_mode.addr_mode_fixed"/>
+            <override property="module.driver.transfer.src_addr_mode" value="module.driver.transfer.src_addr_mode.addr_mode_incremented"/>
+            <override property="module.driver.transfer.repeat_area" value="module.driver.transfer.repeat_area.repeat_area_source"/>
+            <override property="module.driver.transfer.p_dest" value="NULL"/>
+            <override property="module.driver.transfer.p_src" value="NULL"/>
+            <override property="module.driver.transfer.length" value="0"/>
+            <override property="module.driver.transfer.interrupt" value="module.driver.transfer.interrupt.interrupt_end"/>
+            <override property="module.driver.transfer.num_blocks" value="0"/>
+            <override property="module.driver.transfer.auto_enable" value="module.driver.transfer.auto_enable.false"/>
+            <override property="module.driver.transfer.p_callback" value="NULL"/>
+            <override property="module.driver.transfer.number_of_descriptors" value="0"/>
+            <override property="module.driver.transfer.activation_source" value="_interrupt.event.sau${module.driver.sau.unit.number}.spi.txrxi${module.driver.spi.channel.number}"/>
+        </requires>
+        <provides interface="interface.driver.spi" />
+        <provides interface="interface.driver.spi_on_sau_spi" />
+        <provides interface="interface.driver.spi.${module.driver.spi.name}" />
+        <provides interface="interface.peripheral.sau${module.driver.spi.channel}" />
+        <provides interface="interface.snooze_mode.${module.driver.spi.channel.number}" />
+        <property default="sau" id="module.driver.spi.spi_interface" description=""/>
+        <property default="g_spi${_instance}" display="Name" id="module.driver.spi.name" description="Module name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.spi.name}")</constraint>
+        </property>
+        <property default="00" display="Channel" id="module.driver.spi.channel" description="Select the SAU channel.">
+           <select enum="enum.driver.sau.spi_channel" />
+           <signal event="event.sau${module.driver.sau.unit.number}.spi.txrxi${module.driver.spi.channel}" />
+        </property>
+        <property default="0" id="module.driver.sau.unit.number" description="">
+            <export><![CDATA[eval('var channel = "${module.driver.spi.channel}";' +
+'    var unit = "INVALID /* Unknown channel selected */";' +
+'    if (channel.indexOf("00") >= 0) {' +
+'        unit = "0";' +
+'    } else if (channel.indexOf("01") >= 0) {' +
+'        unit = "0";' +
+'    } else if (channel.indexOf("10") >= 0) {' +
+'        unit = "0";' +
+'    } else if (channel.indexOf("11") >= 0) {' +
+'        unit = "0";' +
+'    } else if (channel.indexOf("20") >= 0) {' +
+'        unit = "1";' +
+'    } else if (channel.indexOf("21") >= 0) {' +
+'        unit = "1";' +
+'    }' +
+'    unit')]]>
+            </export>
+        </property>
+        <property default="0" id="module.driver.sau.channel.number" description="">
+            <export><![CDATA[eval('var channel = "${module.driver.spi.channel}";' +
+'    var sau_channel_number = "INVALID /* Unknown channel selected */";' +
+'    if (channel.indexOf("00")  >= 0) {' +
+'        sau_channel_number = "0";' +
+'    } else if (channel.indexOf("01") >= 0) {' +
+'        sau_channel_number = "1";' +
+'    } else if (channel.indexOf("10") >= 0) {' +
+'        sau_channel_number = "2";' +
+'    } else if (channel.indexOf("11") >= 0) {' +
+'        sau_channel_number = "3";' +
+'    } else if (channel.indexOf("20") >= 0) {' +
+'        sau_channel_number = "0";' +
+'    } else if (channel.indexOf("21") >= 0) {' +
+'        sau_channel_number = "1";' +
+'    }' +
+'    sau_channel_number')]]>
+            </export>
+        </property>
+        <property default="00" id="module.driver.spi.channel.number" description="">
+            <export><![CDATA[eval('var channel = "${module.driver.spi.channel}";' +
+'    var spi_channel_number = "INVALID /* Unknown channel selected */";' +
+'    if (channel.indexOf("00") >= 0) {' +
+'        spi_channel_number = "00";' +
+'    } else if (channel.indexOf("01") >= 0) {' +
+'        spi_channel_number = "01";' +
+'    } else if (channel.indexOf("10") >= 0) {' +
+'        spi_channel_number = "10";' +
+'    } else if (channel.indexOf("11") >= 0) {' +
+'        spi_channel_number = "11";' +
+'    } else if (channel.indexOf("20") >= 0) {' +
+'        spi_channel_number = "20";' +
+'    } else if (channel.indexOf("21") >= 0) {' +
+'        spi_channel_number = "21";' +
+'    }' +
+'    spi_channel_number')]]>
+            </export>
+        </property>
+        <property default="module.driver.spi.operation_mode_master" display="Operating Mode" id="module.driver.spi.operation_mode" description="Select the SPI operating mode.">
+            <option display="Master" id="module.driver.spi.operation_mode_master" value="SPI_MODE_MASTER"/>
+            <option display="Slave" id="module.driver.spi.operation_mode_slave" value="SPI_MODE_SLAVE"/>
+        </property>
+       <property default="module.driver.spi.operation_clock.ck0" display="Operation Clock" id="module.driver.spi.operation_clock" description="Select the operation clock. Use the Clocks tab to set the operation clock divider.">
+            <option id="module.driver.spi.operation_clock.ck0" display="CKm0" value="SAU_SPI_OPERATION_CLOCK_CK0" />
+            <option id="module.driver.spi.operation_clock.ck1" display="CKm1" value="SAU_SPI_OPERATION_CLOCK_CK1" />
+        </property>
+        <property default="module.driver.spi.transfer.mode.single" display="Transfer Mode " id="module.driver.spi.transfer.mode" description="Select transfer mode in transfer end interrupt. But buffer empty interrupt (in continuous transfer mode) cannot be selected in Slave Reception.">
+            <option display="Single transfer mode" id="module.driver.spi.transfer.mode.single" value="SAU_SPI_TRANSFER_MODE_SINGLE"/>
+            <option display="Continuous transfer mode" id="module.driver.spi.transfer.mode.continuous" value="SAU_SPI_TRANSFER_MODE_CONTINUOUS"/>
+        </property>
+        <property default="module.driver.spi.bit_order.msb_first" display="Bit Order" id="module.driver.spi.bit_order" description="Select of data transfer sequence.">
+            <option display="MSB First" id="module.driver.spi.bit_order.msb_first" value="SPI_BIT_ORDER_MSB_FIRST"/>
+            <option display="LSB First" id="module.driver.spi.bit_order.lsb_first" value="SPI_BIT_ORDER_LSB_FIRST"/>
+        </property>
+        <property default="module.driver.spi.data_phase.from_start" display="Data Phase" id="module.driver.spi.data_phase" description="Select when data output shall start compared with the serial clock operation.">
+            <option display="Data sampling on odd edge, data variation on even edge" id="module.driver.spi.data_phase.from_start" value="SAU_SPI_DATA_PHASE_START"/>
+            <option display="Data sampling on even edge, data variation on odd edge" id="module.driver.spi.data_phase.before_start" value="SAU_SPI_DATA_PHASE_HALF_CYCLE_START"/>
+        </property>
+        <property default="module.driver.spi.clock_phase.non_reverse" display="Clock Phase" id="module.driver.spi.clock_phase" description="Select clock phase.">
+            <option display="High when idle" id="module.driver.spi.clock_phase.non_reverse" value="SAU_SPI_CLOCK_PHASE_NON_REVERSE"/>
+            <option display="Low when idle" id="module.driver.spi.clock_phase.reverse" value="SAU_SPI_CLOCK_PHASE_REVERSE"/>
+        </property>
+        <property default="500000" display="Bitrate" id="module.driver.spi.bitrate" description="Enter the desired bitrate.\n\nIf the requested bitrate cannot be achieved, adjust the operation clock frequency until the bitrate is achievable. The calculated bitrate is printed in a comment in the generated sau_spi_extended_cfg_t structure.">
+            <constraint display="Value must be an integer greater than 0">testInteger("${module.driver.spi.bitrate}")  &amp;&amp; ("${module.driver.spi.bitrate}" &gt; 0)</constraint>
+            <export>
+                <![CDATA[eval('/* Converter for SAU unit to configured operation clock frequency */' +
+'var fclk_freq_by_unit_get = {' +
+'    "0": function (operation_clock) { return operation_clock === "0" ? ${board.clock.peripheral.sau.ck00} : ${board.clock.peripheral.sau.ck01}; },' +
+'    "1": function (operation_clock) { return operation_clock === "0" ? ${board.clock.peripheral.sau.ck10} : ${board.clock.peripheral.sau.ck11}; },' +
+'};' +
+'' +
+'/* Function to calculate SDR.STCLK register value. Note: This function does not check whether the value is in range. */' +
+'function stclk_calculate(f_mck, bitrate)' +
+'{' +
+'    return Math.round(f_mck / (2 * bitrate)) - 1;' +
+'}' +
+'' +
+'/* Function to calculate SAU unit value */' +
+'function sau_unit_calculate(channel) {' +
+'    return Math.floor(channel / 2);' +
+'}var channel = "${module.driver.spi.channel}".slice(-2);' +
+'var f_pclk = ${board.clock.peripheral.sau};' +
+'var bitrate = ${module.driver.spi.bitrate};' +
+'' +
+'/* Transfer rate cannot exceed PCLKB/2 on SPI00, and it cannot exceed PCLKB/4 on SPI11 or SPI20 in master mode */' +
+'var max_bitrate = ("00" == channel) ? (f_pclk / 2) :  (f_pclk / 4);' +
+'bitrate = Math.min(bitrate, max_bitrate);' +
+'' +
+'' +
+'function bitrate_calculate(bitrate, sau_unit, operation_clock, stclk_limits) {' +
+'    /* Look up SAU operation clock frequency */' +
+'    var f_mck = fclk_freq_by_unit_get[sau_unit](operation_clock);' +
+'' +
+'    /* Calculate SDR.STCLK register value */' +
+'    var stclk = stclk_calculate(f_mck, bitrate);' +
+'' +
+'    /* Cap the setting within the valid register range */' +
+'    stclk = Math.min(stclk, stclk_limits.max);' +
+'    stclk = Math.max(stclk, stclk_limits.min);' +
+'' +
+'   /* Calculate actual bitrate with this SDR.STCLK value for printing in the comment */' +
+'    var actual_bitrate = f_mck / (2 * (stclk + 1));' +
+'' +
+'    return "/* Actual calculated bitrate: " + actual_bitrate.toFixed(0) + " */\\n" +' +
+'        ".stclk = " + stclk.toString();' +
+'}' +
+'' +
+'var sau_unit = sau_unit_calculate("${module.driver.spi.channel}".slice(-2, -1));' +
+'var operation_clock = "${module.driver.spi.operation_clock}".slice(-1);' +
+'var stclk_limits = { min : 0, max : 127 };' +
+'' +
+'bitrate_calculate(bitrate, sau_unit, operation_clock, stclk_limits)')]]>
+            </export>
+        </property>
+        <property default="sau_spi_callback" display="Callback" id="module.driver.spi.p_callback" description="A user callback function that is called from the sau spi interrupts when a transfer is completed or an error has occurred.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.spi.p_callback}") &amp;&amp;("${module.driver.spi.p_callback}" != "NULL") </constraint>
+        </property>
+        <property default="" display="Transmit End Interrupt Priority" id="module.driver.spi.tei_ipl" description="Select the transmit end interrupt priority.">
+            <select enum="enum.mcu.nvic.priorities.mandatory"/>
+            <interrupt event="event.sau${module.driver.sau.unit.number}.spi.txrxi${module.driver.spi.channel.number}" isr="sau_spi_txrxi_isr"/>
+        </property>
+        <peripheral name="sau${module.driver.sau.unit.number}" component="sau_spi${module.driver.spi.channel}" pin="sau_spi${module.driver.spi.channel}.sck${module.driver.spi.channel}" />
+        <peripheral name="sau${module.driver.sau.unit.number}" component="sau_spi${module.driver.spi.channel}" pin="sau_spi${module.driver.spi.channel}.si${module.driver.spi.channel}" />
+        <peripheral name="sau${module.driver.sau.unit.number}" component="sau_spi${module.driver.spi.channel}" pin="sau_spi${module.driver.spi.channel}.so${module.driver.spi.channel}" />
+        <peripheral name="sau${module.driver.sau.unit.number}" component="sau_spi${module.driver.spi.channel}" pin="sau_spi${module.driver.spi.channel}.ssi${module.driver.spi.channel}" />
+        <symbol id="symbol.driver.spi.name" value="${module.driver.spi.name}"/>
+        <symbol id="symbol.driver.spi.cfg" value="${module.driver.spi.name}_cfg"/>
+        <symbol id="symbol.driver.spi.cfg_extend" value="${module.driver.spi.name}_cfg_extend"/>
+        <symbol id="symbol.driver.spi.ctrl" value="${module.driver.spi.name}_ctrl"/>
+        <header>
+/** SPI on SAU Instance. */
+extern const spi_instance_t ${module.driver.spi.name};
+
+/** Access the SAU_SPI instance using these structures when calling API functions directly (::p_api is not used). */
+extern sau_spi_instance_ctrl_t ${module.driver.spi.name}_ctrl;
+extern const spi_cfg_t ${module.driver.spi.name}_cfg;
+
+/** Called by the driver when a transfer has completed or an error has occurred (Must be implemented by the user). */
+#ifndef ${module.driver.spi.p_callback}
+void ${module.driver.spi.p_callback}(spi_callback_args_t * p_args);
+#endif
+
+        </header>
+        <includes>
+#include &quot;r_sau_spi.h&quot;
+#include &quot;r_spi_api.h&quot;
+        </includes>
+        <declarations>
+#include &quot;r_sau_spi_cfg.h&quot;
+sau_spi_instance_ctrl_t ${module.driver.spi.name}_ctrl;
+#if SAU_SPI_CFG_DTC_SUPPORT_ENABLE
+transfer_info_t ${module.driver.sau_spi.requires.transfer_rx_tx::module.driver.transfer.name}_info[2] =
+{
+    { .transfer_settings_word_b.dest_addr_mode = TRANSFER_ADDR_MODE_INCREMENTED,
+      .transfer_settings_word_b.repeat_area = TRANSFER_REPEAT_AREA_DESTINATION,
+      .transfer_settings_word_b.irq = TRANSFER_IRQ_END,
+      .transfer_settings_word_b.chain_mode = TRANSFER_CHAIN_MODE_EACH,
+      .transfer_settings_word_b.src_addr_mode = TRANSFER_ADDR_MODE_FIXED,
+      .transfer_settings_word_b.size = TRANSFER_SIZE_1_BYTE,
+      .transfer_settings_word_b.mode = TRANSFER_MODE_NORMAL,
+      .p_dest = (void*) NULL,
+      .p_src = (void const*) NULL,
+      .num_blocks = 0,
+      .length = 0, },
+    { .transfer_settings_word_b.dest_addr_mode = TRANSFER_ADDR_MODE_FIXED,
+      .transfer_settings_word_b.repeat_area = TRANSFER_REPEAT_AREA_DESTINATION,
+      .transfer_settings_word_b.irq = TRANSFER_IRQ_END,
+      .transfer_settings_word_b.chain_mode = TRANSFER_CHAIN_MODE_DISABLED,
+      .transfer_settings_word_b.src_addr_mode = TRANSFER_ADDR_MODE_FIXED,
+      .transfer_settings_word_b.size = TRANSFER_SIZE_1_BYTE,
+      .transfer_settings_word_b.mode = TRANSFER_MODE_NORMAL,
+      .p_dest = (void*) NULL,
+      .p_src = (void const*) NULL,
+      .num_blocks = 0,
+      .length = 0, }
+};
+const transfer_cfg_t ${module.driver.sau_spi.requires.transfer_rx_tx::module.driver.transfer.name}_cfg_sau_spi =
+{
+  .p_info              = ${module.driver.sau_spi.requires.transfer_rx_tx::module.driver.transfer.name}_info,
+  .p_extend = &amp;${module.driver.sau_spi.requires.transfer_rx_tx::module.driver.transfer.name}_cfg_extend, };
+
+/* Instance structure to use this module. */
+const transfer_instance_t ${module.driver.sau_spi.requires.transfer_rx_tx::module.driver.transfer.name}_sau_spi =
+{
+    .p_ctrl        = &amp;${module.driver.sau_spi.requires.transfer_rx_tx::module.driver.transfer.name}_ctrl,
+    .p_cfg         = &amp;${module.driver.sau_spi.requires.transfer_rx_tx::module.driver.transfer.name}_cfg_sau_spi,
+    .p_api         = &amp;g_transfer_on_dtc
+};
+
+#endif
+/** SPI extended configuration */
+const sau_spi_extended_cfg_t ${module.driver.spi.name}_cfg_extend =
+{
+    .clk_div         = {
+        ${module.driver.spi.bitrate},
+        .operation_clock         = ${module.driver.spi.operation_clock},
+    },
+    .transfer_mode           = ${module.driver.spi.transfer.mode},
+    .data_phase              = ${module.driver.spi.data_phase},
+    .clock_phase             = ${module.driver.spi.clock_phase},
+    .sau_unit                = ${module.driver.sau.unit.number},
+#if defined(PIN_SCK${module.driver.spi.channel})
+    .sck_pin_settings.pin = PIN_SCK${module.driver.spi.channel},
+#else
+    .sck_pin_settings.pin = (bsp_io_port_pin_t) UINT16_MAX,
+#endif
+#if defined(CFG_SCK${module.driver.spi.channel})
+    .sck_pin_settings.cfg = CFG_SCK${module.driver.spi.channel},
+#else
+    .sck_pin_settings.cfg = (uint32_t) IOPORT_CFG_PORT_DIRECTION_INPUT,
+#endif
+#if defined(PIN_SO${module.driver.spi.channel})
+    .so_pin_settings.pin = PIN_SO${module.driver.spi.channel},
+#else
+    .so_pin_settings.pin = (bsp_io_port_pin_t) UINT16_MAX,
+#endif
+#if defined(CFG_SO${module.driver.spi.channel})
+    .so_pin_settings.cfg = CFG_SO${module.driver.spi.channel},
+#else
+    .so_pin_settings.cfg = (uint32_t) IOPORT_CFG_PORT_DIRECTION_INPUT,
+#endif
+};
+
+const spi_cfg_t ${module.driver.spi.name}_cfg =
+{
+    .channel         = ${module.driver.sau.channel.number},
+    .operating_mode  = ${module.driver.spi.operation_mode},
+    .bit_order       = ${module.driver.spi.bit_order},
+    .p_callback      = ${module.driver.spi.p_callback},
+    .p_context       = NULL,
+#if defined(VECTOR_NUMBER_SAU${module.driver.sau.unit.number}_SPI_TXRXI${module.driver.spi.channel})
+    .tei_irq         = VECTOR_NUMBER_SAU${module.driver.sau.unit.number}_SPI_TXRXI${module.driver.spi.channel},
+#else
+    .tei_irq         = FSP_INVALID_VECTOR,
+#endif
+#define RA_NOT_DEFINED (1)
+#if (RA_NOT_DEFINED == ${module.driver.sau_spi.requires.transfer_rx_tx::module.driver.transfer.name})
+    .p_transfer_tx   = NULL,
+#else
+    .p_transfer_tx   = &amp;${module.driver.sau_spi.requires.transfer_rx_tx::module.driver.transfer.name}_sau_spi,
+#endif
+#undef RA_NOT_DEFINED
+    .tei_ipl         = ${module.driver.spi.tei_ipl},
+    .p_extend        = &amp;${module.driver.spi.name}_cfg_extend,
+};
+/* Instance structure to use this module. */
+const spi_instance_t ${module.driver.spi.name} =
+{
+    .p_ctrl          = &amp;${module.driver.spi.name}_ctrl,
+    .p_cfg           = &amp;${module.driver.spi.name}_cfg,
+    .p_api           = &amp;g_spi_on_sau
+};
+        </declarations>
+        <api configurable="true">
+            <file>ra/fsp/inc/instances/r_sau_spi.h</file>
+            <file>ra/fsp/inc/api/r_spi_api.h</file>
+            <file>ra/fsp/inc/api/r_transfer_api.h</file>
+        </api>
+    </module>
+</raModuleDescription>

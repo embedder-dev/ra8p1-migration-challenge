@@ -1,0 +1,87 @@
+<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.middleware.rm_mesh_config_clt" path="fsp_cfg/rm_mesh_config_clt_cfg.h" version="0">
+        <content>
+            #ifdef __cplusplus
+            extern "C" {
+            #endif
+
+            #ifdef __cplusplus
+            }
+            #endif
+        </content>
+    </config>
+    <module id="module.middleware.rm_ble_mesh_config_client_on_rm_mesh_config_clt" display="Networking|BLE Mesh Network modules|BLE Mesh Config Client (rm_mesh_config_clt)" config="config.middleware.rm_mesh_config_clt" version="0" visible="true" url="group___r_m___m_e_s_h___c_o_n_f_i_g___c_l_t.html">
+
+        <!-- <constraint display="Requires Low Level Library Implementation">
+            "${interface.middleware.rm_ble_mesh_access_on_rm_ble_mesh_access}" === "1"
+        </constraint> -->
+        <constraint display="BLE Mesh Config Client middleware not support R_BLE_SPP module">
+            "${interface.mcu.radio}" === "1"
+        </constraint>
+        <requires id="module.middleware.rm_ble_mesh_config_client.requires.rm_ble_mesh_access" interface="interface.middleware.rm_ble_mesh_access_on_rm_ble_mesh_access" visible="true" display="Add BLE Mesh Access Module" find="true"/>
+
+        <provides interface="interface.middleware.rm_ble_mesh_config_client"/>
+        <provides interface="interface.middleware.rm_ble_mesh_config_client_on_rm_mesh_config_clt"/>
+        <provides interface="interface.middleware.rm_ble_mesh_config_client.${module.middleware.rm_ble_mesh_config_client.name}"/>
+
+        <property display="Name" default="g_rm_mesh_config_clt${_instance}" id="module.middleware.rm_ble_mesh_config_client.name" description="Module name.">
+            <constraint display="Name Must Be a Valid C Symbol">testSymbol("${module.middleware.rm_ble_mesh_config_client.name}")</constraint>
+        </property>
+
+        <property display="Interrupts|Callback Provided when Timeout Occurs" id="module.middleware.rm_ble_mesh_config_client.p_callback" default="NULL" description="Callback provided when mesh config client ISR occurs">
+            <constraint display="Name Must Be a Valid C Symbol">testSymbol("${module.middleware.rm_ble_mesh_config_client.p_callback}")</constraint>
+        </property>
+
+        <property id="module.middleware.rm_ble_mesh_config_client.p_context" default="NULL">
+            <constraint display="Name Must Be a Valid C Symbol">testSymbol("${module.middleware.rm_ble_mesh_config_client.p_context}")</constraint>
+            <export>eval('' +
+                'var output = "${module.middleware.rm_ble_mesh_config_client.p_context}";' +
+                'if ("NULL" !== output) {' +
+                'output = "&amp;" + output;' +
+                '}' +
+                'output')
+            </export>
+        </property>
+
+        <header>
+/** BLE Mesh Config on BLE Mesh Config Client Instance. */
+extern const rm_ble_mesh_config_client_instance_t ${module.middleware.rm_ble_mesh_config_client.name};
+
+/** Access the BLE Mesh config client instance using these structures when calling API functions directly (::p_api is not used). */
+extern rm_mesh_config_clt_instance_ctrl_t ${module.middleware.rm_ble_mesh_config_client.name}_ctrl;
+extern const rm_ble_mesh_config_client_cfg_t ${module.middleware.rm_ble_mesh_config_client.name}_cfg;
+
+#ifndef ${module.middleware.rm_ble_mesh_config_client.p_callback}
+void ${module.middleware.rm_ble_mesh_config_client.p_callback}(rm_ble_mesh_config_client_callback_args_t * p_args);
+#endif
+
+        </header>
+        <includes>
+#include "rm_mesh_config_clt.h"
+#include "rm_ble_mesh_config_client_api.h"
+        </includes>
+        <declarations>
+rm_mesh_config_clt_instance_ctrl_t ${module.middleware.rm_ble_mesh_config_client.name}_ctrl;
+
+/** BLE MESH configuration parameters. */
+const rm_ble_mesh_config_client_cfg_t ${module.middleware.rm_ble_mesh_config_client.name}_cfg =
+{
+    /** the parameters for initialization. */
+    .p_access_instance = &amp;${module.middleware.rm_ble_mesh_config_client.requires.rm_ble_mesh_access::module.middleware.rm_ble_mesh_access.name},
+    .p_callback        = ${module.middleware.rm_ble_mesh_config_client.p_callback},
+    .p_context         = ${module.middleware.rm_ble_mesh_config_client.p_context},
+    .p_extend          = NULL
+};
+
+
+/** This structure encompasses everything that is needed to use an instance of this interface. */
+const rm_ble_mesh_config_client_instance_t ${module.middleware.rm_ble_mesh_config_client.name} =
+{
+    .p_ctrl = &amp;${module.middleware.rm_ble_mesh_config_client.name}_ctrl,
+    .p_cfg  = &amp;${module.middleware.rm_ble_mesh_config_client.name}_cfg,
+    .p_api  = &amp;g_rm_ble_mesh_config_client_on_rm_mesh_config_clt
+};
+        </declarations>
+    </module>
+</raModuleDescription>

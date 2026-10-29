@@ -1,0 +1,301 @@
+﻿<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.middleware.motor_estimate" path="fsp_cfg/rm_motor_estimate_cfg.h" version="0">
+        <property default="config.middleware.motor_estimate.param_checking_enable.bsp" display="Parameter Checking" id="config.middleware.motor_estimate.param_checking_enable" description="If selected code for parameter checking is included in the build.">
+            <option display="Default (BSP)" id="config.middleware.motor_estimate.param_checking_enable.bsp" value="(BSP_CFG_PARAM_CHECKING_ENABLE)"/>
+            <option display="Enabled" id="config.middleware.motor_estimate.param_checking_enable.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.motor_estimate.param_checking_enable.disabled" value="(0)"/>
+        </property>
+
+        <content>
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#define MOTOR_ESTIMATE_CFG_PARAM_CHECKING_ENABLE   ${config.middleware.motor_estimate.param_checking_enable}
+
+#ifdef __cplusplus
+}
+#endif
+        </content>
+    </config>
+    <module config="config.middleware.motor_estimate" display="Motor|${module.middleware.motor_angle.name} Motor Angle and Speed Estimation (rm_motor_estimate)" id="module.middleware.motor_angle_on_motor_estimate" version="1" url="group___m_o_t_o_r___e_s_t_i_m_a_t_e.html">
+        <constraint display="Unique name required for each instance">
+            "${interface.middleware.motor_angle.${module.middleware.motor_angle.name}}" === "1"
+        </constraint>
+
+        <!-- motor_estimate configuration -->
+        <provides interface="interface.middleware.motor_angle" />
+        <provides interface="interface.middleware.motor_angle.motor_angle_on_motor_estimate" />
+        <provides interface="interface.middleware.motor_angle.${module.middleware.motor_angle.name}" />
+        <property default="g_motor_angle${_instance}" display="Name" id="module.middleware.motor_angle.name" description="Module name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.middleware.motor_angle.name}")</constraint>
+        </property>
+
+        <property display="Openloop damping" id="module.middleware.motor_estimate.openloop_damping" default="module.middleware.motor_estimate.openloop_damping.1" description="Openloop damping functionally enable or disable">
+            <option id="module.middleware.motor_estimate.openloop_damping.0" display="Disable" value="MOTOR_ESTIMATE_OPENLOOP_DAMPING_DISABLE" />
+            <option id="module.middleware.motor_estimate.openloop_damping.1" display="Enable" value="MOTOR_ESTIMATE_OPENLOOP_DAMPING_ENABLE" />
+        </property>
+
+        <property display="Natural frequency of BEMF observer" id="module.middleware.motor_estimate.e_obs_omega" default="1000.0F" description="Natural frequency of BEMF observer">
+            <constraint display="Must be a valid value">
+            eval('' +
+            'var input = "${module.middleware.motor_estimate.e_obs_omega}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?$","i");' +
+            'var regex_float_with_suffix = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?F$","i");' +
+            ' ( regex_float.test(input) || regex_float_with_suffix.test(input))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${module.middleware.motor_estimate.e_obs_omega}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)$","i");' +
+            'if (regex_float.test(output)){' +
+            'output = output + "F";' +
+            '}' +
+            'output')
+            </export>
+        </property>
+
+        <property display="Damping ratio of BEMF observer" id="module.middleware.motor_estimate.e_obs_zeta" default="1.0F" description="Damping ratio of BEMF observer">
+            <constraint display="Must be a valid value">
+            eval('' +
+            'var input = "${module.middleware.motor_estimate.e_obs_zeta}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?$","i");' +
+            'var regex_float_with_suffix = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?F$","i");' +
+            ' ( regex_float.test(input) || regex_float_with_suffix.test(input))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${module.middleware.motor_estimate.e_obs_zeta}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)$","i");' +
+            'if (regex_float.test(output)){' +
+            'output = output + "F";' +
+            '}' +
+            'output')
+            </export>
+        </property>
+
+        <property display="Natural frequency of PLL Speed estimate loop" id="module.middleware.motor_estimate.pll_est_omega" default="20.0F" description="Natural frequency of PLL Speed estimate loop">
+            <constraint display="Must be a valid value">
+            eval('' +
+            'var input = "${module.middleware.motor_estimate.pll_est_omega}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?$","i");' +
+            'var regex_float_with_suffix = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?F$","i");' +
+            ' ( regex_float.test(input) || regex_float_with_suffix.test(input))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${module.middleware.motor_estimate.pll_est_omega}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)$","i");' +
+            'if (regex_float.test(output)){' +
+            'output = output + "F";' +
+            '}' +
+            'output')
+            </export>
+        </property>
+
+        <property display="Damping ratio of PLL Speed estimate loop" id="module.middleware.motor_estimate.pll_est_zeta" default="1.0F" description="Damping ratio of PLL Speed estimate loop">
+            <constraint display="Must be a valid value">
+            eval('' +
+            'var input = "${module.middleware.motor_estimate.pll_est_zeta}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?$","i");' +
+            'var regex_float_with_suffix = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?F$","i");' +
+            ' ( regex_float.test(input) || regex_float_with_suffix.test(input))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${module.middleware.motor_estimate.pll_est_zeta}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)$","i");' +
+            'if (regex_float.test(output)){' +
+            'output = output + "F";' +
+            '}' +
+            'output')
+            </export>
+        </property>
+
+        <property display="Control period" id="module.middleware.motor_estimate.ctrl_period" default="0.00005F" description="Control period">
+            <constraint display="Must be a valid value">
+            eval('' +
+            'var input = "${module.middleware.motor_estimate.ctrl_period}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?$","i");' +
+            'var regex_float_with_suffix = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?F$","i");' +
+            ' ( regex_float.test(input) || regex_float_with_suffix.test(input))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${module.middleware.motor_estimate.ctrl_period}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)$","i");' +
+            'if (regex_float.test(output)){' +
+            'output = output + "F";' +
+            '}' +
+            'output')
+            </export>
+        </property>
+
+        <property display="Motor Parameter|Pole pairs" id="module.middleware.motor_estimate.mtr_pp" default="2" description="Pole pairs">
+            <constraint display="Must be a valid positive integer.">testInteger("${module.middleware.motor_estimate.mtr_pp}") &amp;&amp; ("${module.middleware.motor_estimate.mtr_pp}" &gt;= 0)</constraint>
+        </property>
+
+        <property display="Motor Parameter|Resistance[ohm]" id="module.middleware.motor_estimate.mtr_r" default="8.5F" description="Resistance">
+            <constraint display="Must be a valid value">
+            eval('' +
+            'var input = "${module.middleware.motor_estimate.mtr_r}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?$","i");' +
+            'var regex_float_with_suffix = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?F$","i");' +
+            ' ( regex_float.test(input) || regex_float_with_suffix.test(input))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${module.middleware.motor_estimate.mtr_r}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)$","i");' +
+            'if (regex_float.test(output)){' +
+            'output = output + "F";' +
+            '}' +
+            'output')
+            </export>
+        </property>
+
+        <property display="Motor Parameter|Inductance of d-axis[H]" id="module.middleware.motor_estimate.mtr_ld" default="0.0045F" description="Inductance of d-axis">
+            <constraint display="Must be a valid value">
+            eval('' +
+            'var input = "${module.middleware.motor_estimate.mtr_ld}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?$","i");' +
+            'var regex_float_with_suffix = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?F$","i");' +
+            ' ( regex_float.test(input) || regex_float_with_suffix.test(input))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${module.middleware.motor_estimate.mtr_ld}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)$","i");' +
+            'if (regex_float.test(output)){' +
+            'output = output + "F";' +
+            '}' +
+            'output')
+            </export>
+        </property>
+
+        <property display="Motor Parameter|Inductance of q-axis[H]" id="module.middleware.motor_estimate.mtr_lq" default="0.0045F" description="Inductance of q-axis">
+            <constraint display="Must be a valid value">
+            eval('' +
+            'var input = "${module.middleware.motor_estimate.mtr_lq}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?$","i");' +
+            'var regex_float_with_suffix = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?F$","i");' +
+            ' ( regex_float.test(input) || regex_float_with_suffix.test(input))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${module.middleware.motor_estimate.mtr_lq}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)$","i");' +
+            'if (regex_float.test(output)){' +
+            'output = output + "F";' +
+            '}' +
+            'output')
+            </export>
+        </property>
+
+        <property display="Motor Parameter|Permanent magnetic flux[Wb]" id="module.middleware.motor_estimate.mtr_m" default="0.02159F" description="Permanent magnetic flux">
+            <constraint display="Must be a valid value">
+            eval('' +
+            'var input = "${module.middleware.motor_estimate.mtr_m}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?$","i");' +
+            'var regex_float_with_suffix = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?F$","i");' +
+            ' ( regex_float.test(input) || regex_float_with_suffix.test(input))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${module.middleware.motor_estimate.mtr_m}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)$","i");' +
+            'if (regex_float.test(output)){' +
+            'output = output + "F";' +
+            '}' +
+            'output')
+            </export>
+        </property>
+
+        <property display="Motor Parameter|Rotor inertia[kgm^2]" id="module.middleware.motor_estimate.mtr_j" default="0.0000028F" description="Rotor inertia">
+            <constraint display="Must be a valid value">
+            eval('' +
+            'var input = "${module.middleware.motor_estimate.mtr_j}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?$","i");' +
+            'var regex_float_with_suffix = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?F$","i");' +
+            ' ( regex_float.test(input) || regex_float_with_suffix.test(input))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${module.middleware.motor_estimate.mtr_j}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)$","i");' +
+            'if (regex_float.test(output)){' +
+            'output = output + "F";' +
+            '}' +
+            'output')
+            </export>
+        </property>
+
+        <property display="Motor Parameter|Nominal current[Arms]" id="module.middleware.motor_estimate.mtr_nominal_current" default="1.67" description="Nominal current">
+            <constraint display="Must be a valid value">
+            eval('' +
+            'var input = "${module.middleware.motor_estimate.mtr_nominal_current}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?$","i");' +
+            'var regex_float_with_suffix = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?F$","i");' +
+            ' ( regex_float.test(input) || regex_float_with_suffix.test(input))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${module.middleware.motor_estimate.mtr_nominal_current}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)$","i");' +
+            'if (regex_float.test(output)){' +
+            'output = output + "F";' +
+            '}' +
+            'output')
+            </export>
+        </property>
+
+        <header>
+/** Motor Angle Estimation Instance */
+extern const motor_angle_instance_t ${module.middleware.motor_angle.name};
+
+/** Access the Motor Angle Estimation instance using these structures
+    when calling API functions directly (::p_api is not used). */
+extern motor_estimate_instance_ctrl_t ${module.middleware.motor_angle.name}_ctrl;
+extern const motor_angle_cfg_t ${module.middleware.motor_angle.name}_cfg;
+        </header>
+
+        <includes>
+#include &quot;rm_motor_estimate.h&quot;
+        </includes>
+
+        <declarations>
+motor_estimate_instance_ctrl_t ${module.middleware.motor_angle.name}_ctrl;
+const motor_estimate_extended_cfg_t ${module.middleware.motor_angle.name}_extend =
+{
+  .openloop_damping = ${module.middleware.motor_estimate.openloop_damping},
+  .f_e_obs_omega    = ${module.middleware.motor_estimate.e_obs_omega},
+  .f_e_obs_zeta     = ${module.middleware.motor_estimate.e_obs_zeta},
+  .f_pll_est_omega  = ${module.middleware.motor_estimate.pll_est_omega},
+  .f_pll_est_zeta   = ${module.middleware.motor_estimate.pll_est_zeta},
+  .f4_ctrl_period   = ${module.middleware.motor_estimate.ctrl_period},
+  .st_motor_params.u2_mtr_pp = ${module.middleware.motor_estimate.mtr_pp},
+  .st_motor_params.f4_mtr_r  = ${module.middleware.motor_estimate.mtr_r},
+  .st_motor_params.f4_mtr_ld = ${module.middleware.motor_estimate.mtr_ld},
+  .st_motor_params.f4_mtr_lq = ${module.middleware.motor_estimate.mtr_lq},
+  .st_motor_params.f4_mtr_m  = ${module.middleware.motor_estimate.mtr_m},
+  .st_motor_params.f4_mtr_j  = ${module.middleware.motor_estimate.mtr_j},
+  .st_motor_params.f4_mtr_nominal_current  = ${module.middleware.motor_estimate.mtr_nominal_current},
+};
+
+const motor_angle_cfg_t ${module.middleware.motor_angle.name}_cfg =
+{
+  .p_context    = NULL,
+  .p_extend     = &amp;${module.middleware.motor_angle.name}_extend,
+};
+
+/* Instance structure to use Motor Angle module. */
+const motor_angle_instance_t ${module.middleware.motor_angle.name} =
+{
+  .p_ctrl   = &amp;${module.middleware.motor_angle.name}_ctrl,
+  .p_cfg    = &amp;${module.middleware.motor_angle.name}_cfg,
+  .p_api    = &amp;g_motor_angle_on_motor_estimate
+};
+        </declarations>
+    </module>
+</raModuleDescription>

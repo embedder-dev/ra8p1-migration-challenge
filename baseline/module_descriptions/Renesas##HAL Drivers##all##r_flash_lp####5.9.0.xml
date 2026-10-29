@@ -1,0 +1,138 @@
+﻿<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.driver.flash_lp" path="fsp_cfg/r_flash_lp_cfg.h" version="1">
+        <property default="config.flash_lp.param_checking_enable.bsp" display="Parameter Checking" id="config.driver.flash_lp.param_checking_enable" description="If selected code for parameter checking is included in the build.">
+            <option display="Default (BSP)" id="config.flash_lp.param_checking_enable.bsp" value="(BSP_CFG_PARAM_CHECKING_ENABLE)"/>
+            <option display="Enabled" id="config.driver.flash_lp.param_checking_enable.enabled" value="(1)"/>
+            <option display="Disabled" id="config.driver.flash_lp.param_checking_enable.disabled" value="(0)"/>
+        </property>
+        <property default="config.driver.flash_lp.param_code_flash_programming_enable.disabled" display="Code Flash Programming" id="config.driver.flash_lp.param_code_flash_programming_enable" description="Controls whether or not code-flash programming is enabled. Disabling reduces the amount of ROM and RAM used by the API.">
+            <option display="Enabled" id="config.driver.flash_lp.param_code_flash_programming_enable.enabled" value="(1)"/>
+            <option display="Disabled" id="config.driver.flash_lp.param_code_flash_programming_enable.disabled" value="(0)"/>
+        </property>
+        <property default="" display="Code Flash Background Operation Support With Bank Programming" id="config.driver.flash_lp.bank_programming_enable" description="Enables execution from the startup code flash bank while programming the other code flash bank.">
+            <select enum="enum.mcu.flash.bank_programming"/>
+        </property>
+        <property default="config.driver.flash_lp.param_data_flash_programming_enable.enabled" display="Data Flash Programming" id="config.driver.flash_lp.param_data_flash_programming_enable" description="Controls whether or not data-flash programming is enabled. Disabling reduces the amount of ROM used by the API.">
+            <option display="Enabled" id="config.driver.flash_lp.param_data_flash_programming_enable.enabled" value="(1)"/>
+            <option display="Disabled" id="config.driver.flash_lp.param_data_flash_programming_enable.disabled" value="(0)"/>
+        </property>
+        <property default="config.driver.flash_lp.data_flash_bgo_enable.enabled" display="Data Flash Background Operation Support" id="config.driver.flash_lp.data_flash_bgo_enable" description="Controls whether or not Data Flash Background Operation support is included in the build. Disabling reduces the amount of ROM used by the API.">
+            <option display="Enabled" id="config.driver.flash_lp.data_flash_bgo_enable.enabled" value="(1)"/>
+            <option display="Disabled" id="config.driver.flash_lp.data_flash_bgo_enable.disabled" value="(0)"/>
+        </property>
+        <property default="" display="Instant Bank Swap (No Reset Required)" id="config.driver.flash_lp.instant_bank_swap" description="Calls to R_FLASH_LP_BankSwap will immediately swap banks without requiring a reset.">
+            <select enum="enum.mcu.flash.instant_bank_swap"/>
+        </property>
+        <content>
+         #ifdef __cplusplus
+         extern "C" {
+         #endif
+
+         #define FLASH_LP_CFG_PARAM_CHECKING_ENABLE ${config.driver.flash_lp.param_checking_enable}
+         #define FLASH_LP_CFG_CODE_FLASH_PROGRAMMING_ENABLE ${config.driver.flash_lp.param_code_flash_programming_enable}
+         #define FLASH_LP_CFG_CODE_FLASH_BANK_PROGRAMMING_ENABLE ${config.driver.flash_lp.bank_programming_enable}
+         #define FLASH_LP_CFG_DATA_FLASH_PROGRAMMING_ENABLE ${config.driver.flash_lp.param_data_flash_programming_enable}
+         #define FLASH_LP_CFG_DATA_FLASH_BGO_SUPPORT_ENABLE ${config.driver.flash_lp.data_flash_bgo_enable}
+         #define FLASH_LP_CFG_DUAL_BANK_INSTANT_SWAP ${config.driver.flash_lp.instant_bank_swap}
+
+         #ifdef __cplusplus
+         }
+         #endif
+        </content>
+    </config>
+    <module config="config.driver.flash_lp" display="Storage|${module.driver.flash.name} Flash (r_flash_lp)" id="module.driver.flash_on_flash_lp" version="1" url="group___f_l_a_s_h___l_p.html">
+        <constraint display="Unique name required for each instance">
+            "${interface.driver.flash.${module.driver.flash.name}}" === "1"
+        </constraint>
+
+        <constraint display="Code Flash or Data Flash Programming must be enabled.">
+            "${config.driver.flash_lp.param_code_flash_programming_enable}" == "config.driver.flash_lp.param_code_flash_programming_enable.enabled" || "${config.driver.flash_lp.param_data_flash_programming_enable}" == "config.driver.flash_lp.param_data_flash_programming_enable.enabled"
+        </constraint>
+        <constraint display="Common|Data Flash Background Operation Support must be enabled if Data Flash Background Operation is enabled.">
+            !(("${module.driver.flash.data_flash_bgo}" == "module.driver.flash.data_flash_bgo.enabled") &amp;&amp;
+            ("${config.driver.flash_lp.data_flash_bgo_enable}" == "config.driver.flash_lp.data_flash_bgo_enable.disabled"))
+        </constraint>
+        <constraint display="Flash Ready Interrupt must be enabled if Bank Programming is enabled.">
+            ("${config.driver.flash_lp.bank_programming_enable}" != "enum.mcu.flash.bank_programming.enabled") ||
+            ("${module.driver.flash.ipl}" != "_disabled")
+        </constraint>
+        <constraint display="Flash Ready Interrupt must be enabled if Data Flash Background Operation is enabled.">
+            ("${module.driver.flash.data_flash_bgo}" != "module.driver.flash.data_flash_bgo.enabled") ||
+            ("${module.driver.flash.ipl}" != "_disabled")
+        </constraint>
+        <constraint display="Callback must be provided if Data Flash Background Operation is enabled.">
+            ("${module.driver.flash.data_flash_bgo}" != "module.driver.flash.data_flash_bgo.enabled") ||
+            ("${module.driver.flash.p_callback}" != "NULL")
+        </constraint>
+        <constraint display="Requires Flash LP peripheral">
+          "${interface.mcu.flash_lp}" === "1"
+        </constraint>
+        <constraint display="Common|Code Flash Programming must be enabled if Code flash Background Operation Support With Bank Programming is enabled.">
+            ("${config.driver.flash_lp.bank_programming_enable}" == "enum.mcu.flash.bank_programming.disabled") ||
+            ("${config.driver.flash_lp.param_code_flash_programming_enable}" == "config.driver.flash_lp.param_code_flash_programming_enable.enabled")
+        </constraint>
+        <requires id="interface.driver.flash_lp.requires.mcu" visible="false" interface="interface.mcu.flash_lp" display="Requires Flash LP peripheral"/>
+        <provides interface="interface.driver.flash" />
+        <provides interface="interface.driver.flash_on_flash_lp" />
+        <provides interface="interface.driver.flash.${module.driver.flash.name}" />
+        <property default="g_flash${_instance}" display="Name" id="module.driver.flash.name" description="Module name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.flash.name}")</constraint>
+        </property>
+        <property default="module.driver.flash.data_flash_bgo.enabled" display="Data Flash Background Operation" id="module.driver.flash.data_flash_bgo" description="Enabling allows Flash API calls that reference data-flash to return immediately, with the operation continuing in the background.">
+            <option display="Enabled" id="module.driver.flash.data_flash_bgo.enabled" value="true"/>
+            <option display="Disabled" id="module.driver.flash.data_flash_bgo.disabled" value="false"/>
+        </property>
+        <property default="NULL" display="Callback" id="module.driver.flash.p_callback" description="A user callback function can be specified. Callback function called when a Data Flash Background Operation completes or errors.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.flash.p_callback}")</constraint>
+        </property>
+        <property default="NULL" id="module.driver.flash.p_context" description="A user specified context that will be provided back to the user when a callback occurs.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.flash.p_context}")</constraint>
+        </property>
+        <property default="" display="Flash Ready Interrupt Priority" id="module.driver.flash.ipl" description="Select the flash ready interrupt priority.">
+            <select enum="enum.mcu.nvic.priorities.optional"/>
+            <interrupt event="event.fcu.frdyi" isr="fcu_frdyi_isr"/>
+        </property>
+        <header>
+/* Flash on Flash LP Instance. */
+extern const flash_instance_t ${module.driver.flash.name};
+
+/** Access the Flash LP instance using these structures when calling API functions directly (::p_api is not used). */
+extern flash_lp_instance_ctrl_t ${module.driver.flash.name}_ctrl;
+extern const flash_cfg_t ${module.driver.flash.name}_cfg;
+
+#ifndef ${module.driver.flash.p_callback}
+void ${module.driver.flash.p_callback}(flash_callback_args_t * p_args);
+#endif
+        </header>
+        <includes>#include &quot;r_flash_lp.h&quot;
+#include &quot;r_flash_api.h&quot;</includes>
+        <declarations>
+flash_lp_instance_ctrl_t ${module.driver.flash.name}_ctrl;
+const flash_cfg_t ${module.driver.flash.name}_cfg =
+{
+    .data_flash_bgo      = ${module.driver.flash.data_flash_bgo},
+    .p_callback          = ${module.driver.flash.p_callback},
+    .p_context           = ${module.driver.flash.p_context},
+    .ipl                 = ${module.driver.flash.ipl},
+#if defined(VECTOR_NUMBER_FCU_FRDYI)
+    .irq                 = VECTOR_NUMBER_FCU_FRDYI,
+#else
+    .irq                 = FSP_INVALID_VECTOR,
+#endif
+};
+/* Instance structure to use this module. */
+const flash_instance_t ${module.driver.flash.name} =
+{
+    .p_ctrl        = &amp;${module.driver.flash.name}_ctrl,
+    .p_cfg         = &amp;${module.driver.flash.name}_cfg,
+    .p_api         = &amp;g_flash_on_flash_lp
+};
+        </declarations>
+        <api configurable="true">
+            <file>ra/fsp/inc/instances/r_flash_lp.h</file>
+            <file>ra/fsp/inc/api/r_cgc_api.h</file>
+            <file>ra/fsp/inc/api/r_flash_api.h</file>
+        </api>
+    </module>
+</raModuleDescription>

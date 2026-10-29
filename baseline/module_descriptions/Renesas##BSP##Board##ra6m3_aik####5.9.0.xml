@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<raModuleDescription>
+  <config id="config.board.ra6m3_aik" path="fsp_cfg/bsp/board_cfg.h" version="0">
+    <content>#include "../../../ra/board/ra6m3_aik/board.h"</content>
+  </config>
+  <board config="config.board.ra6m3_aik" device="R7FA6M3AH3CFC" display="RA6|RA6M3|AIK-RA6M3" id="board.ra6m3_aik" version="0" debugger="com.renesas.hardwaredebug.rz.jlink">
+    <provides interface="interface.board.ether_phy.ics1894" />
+    <description>AI-ML evaluation kit for RA6M3 MCU Group&#xA;Visit https://www.renesas.com/aik-ra6m3 to get kit user’s manual, quick start guide, errata, design package, example projects, etc.</description>
+    <capability id="capability.led"/>
+  </board>
+</raModuleDescription>

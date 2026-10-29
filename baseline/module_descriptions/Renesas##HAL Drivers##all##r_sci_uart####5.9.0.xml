@@ -1,0 +1,887 @@
+﻿<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.driver.sci_uart" path="fsp_cfg/r_sci_uart_cfg.h" version="0">
+        <property default="config.driver.sci_uart.param_checking_enable.bsp" display="Parameter Checking" id="config.driver.sci_uart.param_checking_enable" description="If selected code for parameter checking is included in the build.">
+            <option display="Default (BSP)" id="config.driver.sci_uart.param_checking_enable.bsp" value="(BSP_CFG_PARAM_CHECKING_ENABLE)"/>
+            <option display="Enabled" id="config.driver.sci_uart.param_checking_enable.enabled" value="(1)"/>
+            <option display="Disabled" id="config.driver.sci_uart.param_checking_enable.disabled" value="(0)"/>
+        </property>
+        <property default="config.driver.sci_uart.fifo_support.disabled" display="FIFO Support" id="config.driver.sci_uart.fifo_support" description="Enable FIFO support for the SCI_UART module.">
+            <option display="Enable" id="config.driver.sci_uart.fifo_support.enabled" value="(1)"/>
+            <option display="Disable" id="config.driver.sci_uart.fifo_support.disabled" value="(0)"/>
+        </property>
+        <property default="config.driver.sci_uart.dtc_support.disabled" display="DTC Support" id="config.driver.sci_uart.dtc_support" description="Enable DTC support for the SCI_UART module.">
+            <option display="Enable" id="config.driver.sci_uart.dtc_support.enabled" value="(1)"/>
+            <option display="Disable" id="config.driver.sci_uart.dtc_support.disabled" value="(0)"/>
+        </property>
+        <property default="config.driver.sci_uart.flow_control.disabled" display="Flow Control Support" id="config.driver.sci_uart.flow_control" description="Enable RS232 and RS-485 flow control support using a user provided pin.">
+            <option display="Enable" id="config.driver.sci_uart.flow_control.enabled" value="(1)"/>
+            <option display="Disable" id="config.driver.sci_uart.flow_control.disabled" value="(0)"/>
+        </property>
+        <property default="config.driver.sci_uart.rs485.disabled" display="RS-485 Support" id="config.driver.sci_uart.rs485" description="Enable support for controlling the RS-485 DE pin.">
+            <option display="Enable" id="config.driver.sci_uart.rs485.enabled" value="(1)"/>
+            <option display="Disable" id="config.driver.sci_uart.rs485.disabled" value="(0)"/>
+        </property>
+        <property default="config.driver.sci_uart.irda.disabled" display="IrDA Support" id="config.driver.sci_uart.irda" description="Enable support for IrDA pulse encoding/decoding.">
+            <option display="Enabled" id="config.driver.sci_uart.irda.enabled" value="(1)"/>
+            <option display="Disabled" id="config.driver.sci_uart.irda.disabled" value="(0)"/>
+        </property>
+        <content>
+            #ifdef __cplusplus
+            extern "C" {
+            #endif
+
+            #define SCI_UART_CFG_PARAM_CHECKING_ENABLE ${config.driver.sci_uart.param_checking_enable}
+            #define SCI_UART_CFG_FIFO_SUPPORT ${config.driver.sci_uart.fifo_support}
+            #define SCI_UART_CFG_DTC_SUPPORTED ${config.driver.sci_uart.dtc_support}
+            #define SCI_UART_CFG_FLOW_CONTROL_SUPPORT ${config.driver.sci_uart.flow_control}
+            #define SCI_UART_CFG_RS485_SUPPORT ${config.driver.sci_uart.rs485}
+            #define SCI_UART_CFG_IRDA_SUPPORT ${config.driver.sci_uart.irda}
+            #ifdef __cplusplus
+            }
+            #endif
+        </content>
+    </config>
+    <module config="config.driver.sci_uart" display="Connectivity|${module.driver.uart.name} UART (r_sci_uart)" id="module.driver.uart_on_sci_uart" version="1" url="group___s_c_i___u_a_r_t.html">
+        <constraint display="If 'Flow Control|CTS/RTS Selection' is not 'Hardware CTS and Software RTS', disable 'Flow Control|Software RTS Pin', 'Flow Control|Software RTS Port'.">
+            ("${module.driver.uart.flow_control}" === "module.driver.uart.flow_control.ctsrts") || ("${module.driver.uart.pin_control_port}" === "module.driver.uart.pin_control_port.PORT_DISABLE") &amp;&amp; ("${module.driver.uart.pin_control_pin}" === "module.driver.uart.pin_control_pin.PIN_DISABLE")
+        </constraint>
+        <constraint display="If 'Flow Control|CTS/RTS Selection' is 'Hardware CTS and Software RTS', 'Flow Control|Software RTS Pin' and 'Flow Control|Software RTS Port' must be configured.">
+            ("${module.driver.uart.flow_control}" != "module.driver.uart.flow_control.ctsrts") || ("${module.driver.uart.pin_control_port}" != "module.driver.uart.pin_control_port.PORT_DISABLE") &amp;&amp; ("${module.driver.uart.pin_control_pin}" != "module.driver.uart.pin_control_pin.PIN_DISABLE")
+        </constraint>
+        <constraint display="If 'Flow Control|CTS/RTS Selection' is 'Hardware CTS and Software RTS', 'Common|Flow Control Support' must be enabled.">
+            ("${config.driver.sci_uart.flow_control}" == "config.driver.sci_uart.flow_control.enabled") || ("${module.driver.uart.flow_control}" != "module.driver.uart.flow_control.ctsrts")
+        </constraint>
+        <constraint display="Specified 'Baud Rate' is not available on selected MCU.">
+            testInteger("${module.driver.uart.baud}") &amp;&amp; ("${module.driver.uart.baud}" &gt; 0) &amp;&amp; ("${module.driver.uart.baud}" &lt;= (Number("${config.bsp.fsp.mcu.sci_uart.max_baud}")))
+        </constraint>
+        <constraint display="Unique name required for each instance">
+            "${interface.driver.uart.${module.driver.uart.name}}" === "1"
+        </constraint>
+        <constraint display="Requires SCI Peripheral">
+          "${interface.mcu.sci.external}" === "1"
+        </constraint>
+        <constraint display="Channel not available on selected MCU">
+            "${interface.mcu.sci.${module.driver.uart.channel}}" === "1"
+        </constraint>
+        <constraint display="DTC support must be enabled to use DTC">
+            ("${config.driver.sci_uart.dtc_support}" === "config.driver.sci_uart.dtc_support.enabled") ||
+            ((!testExists("${module.driver.uart_on_sci_uart.requires.transfer_tx::module.driver.transfer.name}")) &amp;&amp;
+             (!testExists("${module.driver.uart_on_sci_uart.requires.transfer_rx::module.driver.transfer.name}")))
+        </constraint>
+        <constraint display="Hardware CTS and Hardware RTS flow control not available on selected channel">
+            ((("${config.bsp.fsp.mcu.sci_uart.cstpen_channels}" &amp; ("1" &lt;&lt; "${module.driver.uart.channel}")) != "0") || ("${module.driver.uart.flow_control}" != "module.driver.uart.flow_control.hardware.ctsrts"))
+        </constraint>
+        <constraint display="When the RS-485 DE pin is enabled, a 'DE Port Number' and 'DE Pin Number' must be configured.">
+            "${module.driver.uart.rs485.de_enable}" == "module.driver.uart.rs485.de_enable.disabled" || ("${module.driver.uart.rs485.de_port_number}" != "module.driver.uart.rs485.de_port_number.PORT_DISABLE" &amp;&amp; "${module.driver.uart.rs485.de_pin_number}" != "module.driver.uart.rs485.de_pin_number.PIN_DISABLE")
+        </constraint>
+        <constraint display="'RS-485 Support' must be enabled in order to enable the DE pin.">
+            "${module.driver.uart.rs485.de_enable}" == "module.driver.uart.rs485.de_enable.disabled" || "${config.driver.sci_uart.rs485}" == "config.driver.sci_uart.rs485.enabled"
+        </constraint>
+        <constraint display="DE Pin must be enabled when DE Port number or DE Pin number is configured.">
+            ("${module.driver.uart.rs485.de_port_number}" == "module.driver.uart.rs485.de_port_number.PORT_DISABLE" &amp;&amp; "${module.driver.uart.rs485.de_pin_number}" == "module.driver.uart.rs485.de_pin_number.PIN_DISABLE") || ("${module.driver.uart.rs485.de_enable}" == "module.driver.uart.rs485.de_enable.enabled")
+        </constraint>
+        <constraint display="'IrDA Support' must be enabled in order to use IrDA.">
+            "${config.driver.sci_uart.irda}" == "config.driver.sci_uart.irda.enabled" || "${module.driver.uart.irda.ire}" == "module.driver.uart.irda.ire.disabled"
+        </constraint>
+        <!-- IrDA interface is supported on SCI channel 5 or 1 only -->
+        <constraint id="module.driver.uart.constraint.irda_channel">
+             eval('\n' +
+            'var output = null; \n' +
+            'var enabled = "${module.driver.uart.irda.ire}" === "module.driver.uart.irda.ire.enabled"; \n' +
+            'var has_interface = "${interface.mcu.irda}" === "1"; \n' +
+            'if(enabled) \n' +
+            '{ \n' +
+            '  if(!has_interface) \n' +
+            '  { \n' +
+            '      output = "IrDA not supported on this MCU."; \n' +
+            '  } \n' +
+            '  else \n' +
+            '  { \n' +
+            '    if("${interface.mcu.sci.external.${module.driver.uart.channel}.irda}" !== "1") \n' +
+            '    { \n' +
+            '      var irda_ch = "${interface.mcu.sci.external.5.irda}" == "1" ? 5 : 1; \n' +
+            '      output = "IrDA is only supported on SCI channel " + irda_ch; \n' +
+            '    } \n' +
+            '  } \n' +
+            '} \n' +
+            'output')
+        </constraint>
+        <constraint display="Baud rate must be equal or less than 115200 bps when used as IrDA channel.">
+            ("${module.driver.uart.irda.ire}" == "module.driver.uart.irda.ire.disabled") || ("${module.driver.uart.baud}" &lt;= 115200)
+        </constraint>
+        <requires id="module.driver.uart_on_sci_uart.requires.sci" interface="interface.mcu.sci.external" visible="false" display="Requires SCI Peripheral" />
+        <requires id="module.driver.uart_on_sci_uart.requires.transfer_tx" interface="interface.driver.transfer_on_dtc" display="Add DTC Driver for Transmission [Recommended but optional]" find="false" optional="true" >
+            <override property="module.driver.transfer.size" value="module.driver.transfer.size.size_1_byte"/>
+            <override property="module.driver.transfer.mode" value="module.driver.transfer.mode.mode_normal"/>
+            <override property="module.driver.transfer.dest_addr_mode" value="module.driver.transfer.dest_addr_mode.addr_mode_fixed"/>
+            <override property="module.driver.transfer.src_addr_mode" value="module.driver.transfer.src_addr_mode.addr_mode_incremented"/>
+            <override property="module.driver.transfer.repeat_area" value="module.driver.transfer.repeat_area.repeat_area_source"/>
+            <override property="module.driver.transfer.p_dest" value="NULL"/>
+            <override property="module.driver.transfer.p_src" value="NULL"/>
+            <override property="module.driver.transfer.length" value="0"/>
+            <override property="module.driver.transfer.interrupt" value="module.driver.transfer.interrupt.interrupt_end"/>
+            <override property="module.driver.transfer.num_blocks" value="0"/>
+            <override property="module.driver.transfer.auto_enable" value="module.driver.transfer.auto_enable.false"/>
+            <override property="module.driver.transfer.p_callback" value="NULL"/>
+            <override property="module.driver.transfer.activation_source" value="_signal.event.sci${module.driver.uart.channel}.txi"/>
+        </requires>
+        <requires id="module.driver.uart_on_sci_uart.requires.transfer_rx" interface="interface.driver.transfer_on_dtc" display="Add DTC Driver for Reception [Not recommended]" find="false">
+            <override property="module.driver.transfer.size" value="module.driver.transfer.size.size_1_byte"/>
+            <override property="module.driver.transfer.mode" value="module.driver.transfer.mode.mode_normal"/>
+            <override property="module.driver.transfer.dest_addr_mode" value="module.driver.transfer.dest_addr_mode.addr_mode_incremented"/>
+            <override property="module.driver.transfer.src_addr_mode" value="module.driver.transfer.src_addr_mode.addr_mode_fixed"/>
+            <override property="module.driver.transfer.repeat_area" value="module.driver.transfer.repeat_area.repeat_area_destination"/>
+            <override property="module.driver.transfer.p_dest" value="NULL"/>
+            <override property="module.driver.transfer.p_src" value="NULL"/>
+            <override property="module.driver.transfer.length" value="0"/>
+            <override property="module.driver.transfer.interrupt" value="module.driver.transfer.interrupt.interrupt_end"/>
+            <override property="module.driver.transfer.num_blocks" value="0"/>
+            <override property="module.driver.transfer.auto_enable" value="module.driver.transfer.auto_enable.false"/>
+            <override property="module.driver.transfer.p_callback" value="NULL"/>
+            <override property="module.driver.transfer.activation_source" value="_signal.event.sci${module.driver.uart.channel}.rxi"/>
+        </requires>
+        <provides interface="interface.peripheral.sci${module.driver.uart.channel}" />
+        <provides interface="interface.driver.uart" />
+        <provides interface="interface.driver.uart_on_sci_uart" />
+        <provides interface="interface.driver.uart.${module.driver.uart.name}" />
+        <property default="g_uart${_instance}" display="General|Name" id="module.driver.uart.name" description="Module name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.uart.name}")</constraint>
+        </property>
+
+        <!-- UART interface configuration -->
+        <property default="0" display="General|Channel" id="module.driver.uart.channel" description="Select the SCI channel.">
+            <constraint display="Value must be a non-negative integer">testInteger("${module.driver.uart.channel}") &amp;&amp; ("${module.driver.uart.channel}" &gt;= 0)</constraint>
+            <signal event="event.sci${module.driver.uart.channel}.rxi" />
+            <signal event="event.sci${module.driver.uart.channel}.txi" />
+            <signal event="event.sci${module.driver.uart.channel}.tei" />
+            <signal event="event.sci${module.driver.uart.channel}.eri" />
+            <signal event="event.sci${module.driver.uart.channel}.am" />
+        </property>
+        <property default="module.driver.uart.data_bits.data_bits_8" display="General|Data Bits" id="module.driver.uart.data_bits" description="Select the number of bits per word.">
+            <option display="8bits" id="module.driver.uart.data_bits.data_bits_8" value="UART_DATA_BITS_8"/>
+            <option display="7bits" id="module.driver.uart.data_bits.data_bits_7" value="UART_DATA_BITS_7"/>
+            <option display="9bits" id="module.driver.uart.data_bits.data_bits_9" value="UART_DATA_BITS_9"/>
+        </property>
+        <property default="module.driver.uart.parity.parity_off" display="General|Parity" id="module.driver.uart.parity" description="Select the parity mode.">
+            <option display="None" id="module.driver.uart.parity.parity_off" value="UART_PARITY_OFF"/>
+            <option display="Odd" id="module.driver.uart.parity.parity_odd" value="UART_PARITY_ODD"/>
+            <option display="Even" id="module.driver.uart.parity.parity_even" value="UART_PARITY_EVEN"/>
+        </property>
+        <property default="module.driver.uart.stop_bits.stop_bits_1" display="General|Stop Bits" id="module.driver.uart.stop_bits" description="Select the number of stop bits.">
+            <option display="1bit" id="module.driver.uart.stop_bits.stop_bits_1" value="UART_STOP_BITS_1"/>
+            <option display="2bits" id="module.driver.uart.stop_bits.stop_bits_2" value="UART_STOP_BITS_2"/>
+        </property>
+        <property default="115200" display="Baud|Baud Rate" id="module.driver.uart.baud" description="Enter the desired baud rate.\n\nIf the requested baud rate cannot be achieved, the settings with the smallest percent error are used. The theoretical calculated baud rate and percent error are printed in a comment in the generated baud_setting_t structure.\n\nFor RA4 and RA6 MCUs, refer the datasheet to calculate baud rate considering the SEMR.ABCSE bit restriction.">
+            <constraint display="Value must be an integer greater than 0">testInteger("${module.driver.uart.baud}")  &amp;&amp; ("${module.driver.uart.baud}" &gt; 0)</constraint>
+            <export><![CDATA[eval('' +
+'/* INPUTS */' +
+'    var freq_hz = ${board.clock.peripheral.sci};' +
+'    var baudrate = ${module.driver.uart.baud};' +
+'    var mod_enabled = ${module.driver.uart.baudrate_modulation};' +
+'    var baud_rate_error_max = ${module.driver.uart.baudrate_max_err};' +
+'    var irda_en = ${module.driver.uart.irda.ire}; ' +
+'    var async_baud = [' +
+'      {  divisor : 6,    bgdm : 0, abcs : 0, abcse : 1, n : 0 },' +
+'      {  divisor : 8,    bgdm : 1, abcs : 1, abcse : 0, n : 0 },' +
+'      {  divisor : 16,   bgdm : 1, abcs : 0, abcse : 0, n : 0 },' +
+'      {  divisor : 24,   bgdm : 0, abcs : 0, abcse : 1, n : 1 },' +
+'      {  divisor : 32,   bgdm : 0, abcs : 0, abcse : 0, n : 0 },' +
+'      {  divisor : 64,   bgdm : 1, abcs : 0, abcse : 0, n : 1 },' +
+'      {  divisor : 96,   bgdm : 0, abcs : 0, abcse : 1, n : 2 },' +
+'      {  divisor : 128,  bgdm : 0, abcs : 0, abcse : 0, n : 1 },' +
+'      {  divisor : 256,  bgdm : 1, abcs : 0, abcse : 0, n : 2 },' +
+'      {  divisor : 384,  bgdm : 0, abcs : 0, abcse : 1, n : 3 },' +
+'      {  divisor : 512,  bgdm : 0, abcs : 0, abcse : 0, n : 2 },' +
+'      {  divisor : 1024, bgdm : 1, abcs : 0, abcse : 0, n : 3 },' +
+'      {  divisor : 2048, bgdm : 0, abcs : 0, abcse : 0, n : 3 }' +
+'      ];' +
+'    var SCI_UART_BRR_MAX = 255;' +
+'    var SCI_UART_MDDR_MAX = 256;' +
+'    var SCI_UART_MDDR_MIN = 128;' +
+'    /*******************************************************************************************************************//**' +
+'     * Calculates baud rate register settings based on internal clock frequency. Evaluates and determines the best possible' +
+'     * settings set to the baud rate related registers. Ported from R_SCI_UART_BaudCalculate.' +
+'     *' +
+'     * @param[in]  freq_hz                             The source clock frequency for the SCI internal clock' +
+'     * @param[in]  baudrate                            Baud rate[bps] e.g. 19200, 57600, 115200, etc.' +
+'     * @param[in]  mod_enabled                         true to enable bit rate modulation, otherwise disabled' +
+'     * @param[in]  select_16_base_clk_cycles           If true, only find solutions when abcs and abcse are equal to 0' +
+'     * @param[in]  skip_double_speed_mode              If true, double speed mode should be skipped' +
+'     *' +
+'     * @return  {brr_value,                            Value for the BRR' +
+'     *           baud_setting,                         Baud settings: {divisor, bgdm, abcs, abcse, n}' +
+'     *           mddr,                                 Value for the MDDR' +
+'     *           error}                                % bit rate error' +
+'     **********************************************************************************************************************/' +
+'    function r_sci_uart_brr_mddr_calculate(freq_hz, baudrate, mod_enabled, select_16_base_clk_cycles, skip_double_speed_mode) {' +
+'        /** Find the best BRR (bit rate register) value.' +
+'         *  In table async_baud, divisor values are stored for BGDM, ABCS, ABCSE and N values.  Each set of divisors' +
+'         *  is tried, and the settings with the lowest bit rate error are stored. The formula to calculate BRR is as' +
+'         *  follows and it must be 255 or less:' +
+'         *  BRR = (PCLK / (div_coefficient * baud)) - 1' +
+'         */' +
+'        var baudinfo = async_baud;' +
+'        var divisor = 0;' +
+'        var result = {brr_value : 0, baud_setting : async_baud[0], mddr : SCI_UART_MDDR_MAX, bitrateerror : 100};' +
+'        ' +
+'        for (var i = 0; i < async_baud.length; i++) {' +
+'            /** if select_16_base_clk_cycles == true:  Skip this calculation for divisors that are not acheivable with 16 base clk cycles per bit.' +
+'            *  if select_16_base_clk_cycles == false: Skip this calculation for divisors that are only acheivable without 16 base clk cycles per bit.' +
+'            */' +
+'            if (((select_16_base_clk_cycles ? 0 : 1) ^ (baudinfo[i].abcs | baudinfo[i].abcse)) != 0)' +
+'            {' +
+'                continue;' +
+'            }' +
+'' +
+'            /* Double speed mode should be skipped */ ' +
+'            if (skip_double_speed_mode && baudinfo[i].bgdm)' +
+'            {' +
+'                continue;' +
+'            }' +
+'            divisor = baudinfo[i].divisor * baudrate;' +
+'            var temp_brr = Math.floor(freq_hz / divisor);' +
+'' +
+'            if (temp_brr <= (SCI_UART_BRR_MAX + 1))' +
+'            {' +
+'                while (temp_brr > 0)' +
+'                {' +
+'                    temp_brr -= 1;' +
+'' +
+'                    /** Calculate the bit rate error. The formula is as follows:' +
+'                     *  bit rate error[%] = {(PCLK / (baud * div_coefficient * (BRR + 1)) - 1} x 100' +
+'                     *  calculates bit rate error[%] to three decimal places' +
+'                     */' +
+'                    var err_divisor = (divisor * (temp_brr + 1));' +
+'' +
+'                    /* Promoting to 64 bits for calculation, but the final value can never be more than 32 bits, as' +
+'                     * described below, so this cast is safe.' +
+'                     *    1. (temp_brr + 1) can be off by an upper limit of 1 due to rounding from the calculation:' +
+'                     *       freq_hz / divisor, or:' +
+'                     *       freq_hz / divisor <= (temp_brr + 1) < (freq_hz / divisor) + 1' +
+'                     *    2. Solving for err_divisor:' +
+'                     *       freq_hz <= err_divisor < freq_hz + divisor' +
+'                     *    3. Solving for bit_err:' +
+'                     *       0 >= bit_err >= (freq_hz * 100000 / (freq_hz + divisor)) - 100000' +
+'                     *    4. freq_hz >= divisor (or temp_brr would be -1 and we would never enter this while loop), so:' +
+'                     *       0 >= bit_err >= 100000 / freq_hz - 100000' +
+'                     *    5. Larger frequencies yield larger bit errors (absolute value).  As the frequency grows,' +
+'                     *       the bit_err approaches -100000, so:' +
+'                     *       0 >= bit_err >= -100000' +
+'                     *    6. bit_err is between -100000 and 0.  This entire range fits in an int32_t type, so the cast' +
+'                     *       to (int32_t) is safe.' +
+'                     */' +
+'                    var bit_err = (((freq_hz * 100) / err_divisor) - 100);' +
+'' +
+'                    var mddr = 0;' +
+'                    if (mod_enabled)' +
+'                    {' +
+'                        /** Calculate the MDDR (M) value if bit rate modulation is enabled,' +
+'                         * The formula to calculate MBBR (from the M and N relationship given in the hardware manual) is as follows' +
+'                         * and it must be between 128 and 256.' +
+'                         * MDDR = ((div_coefficient * baud * 256) * (BRR + 1)) / PCLK */' +
+'                        mddr = Math.floor(err_divisor / Math.floor(freq_hz / SCI_UART_MDDR_MAX));' +
+'' +
+'                        /* Both the upper and lower bounds are checked. */' +
+'                        if ((mddr < SCI_UART_MDDR_MIN) || (mddr == SCI_UART_MDDR_MAX))' +
+'                        {' +
+'                            break;' +
+'                        }' +
+'' +
+'                        /** Adjust bit rate error for bit rate modulation. The following formula is used:' +
+'                         *  bit rate error [%] = ((bit rate error [%, no modulation] + 100) * MDDR / 256) - 100' +
+'                         */' +
+'                        bit_err = (((bit_err + 100) * mddr) /' +
+'                                  SCI_UART_MDDR_MAX) - 100;' +
+'                    }' +
+'                    ' +
+'                    /** Take the absolute value of the bit rate error. */' +
+'                    if (bit_err < 0)' +
+'                    {' +
+'                        bit_err = -bit_err;' +
+'                    }' +
+'' +
+'                    /** If the absolute value of the bit rate error is less than the previous lowest absolute value of' +
+'                     *  bit rate error, then store these settings as the best value.' +
+'                     */' +
+'                    if (bit_err < result.bitrateerror)' +
+'                    {' +
+'                        result.baud_setting = baudinfo[i];' +
+'                        result.brr_value = temp_brr;' +
+'                        result.bitrateerror = bit_err;' +
+'                        if (mod_enabled)' +
+'                        {' +
+'                            result.mddr = mddr;' +
+'                        }' +
+'                    }' +
+'                    ' +
+'                    if (!mod_enabled)' +
+'                    {' +
+'                        break;' +
+'                    }' +
+'                    ' +
+'                }' +
+'            }' +
+'        }' +
+'        ' +
+'        return result;' +
+'    }' +
+'    if(!irda_en) ' +
+'    {' +
+'       /* Try to get accurate baudrate using 16 base clk cycles per bit */' +
+'       temp_result = r_sci_uart_brr_mddr_calculate(freq_hz, baudrate, mod_enabled, true, false);' +
+'       /* If the clock is not accurate enough, try with different base clk cycles per bit */' +
+'       if (temp_result.bitrateerror > baud_rate_error_max) ' +
+'       {' +
+'           temp_result = r_sci_uart_brr_mddr_calculate(freq_hz, baudrate, mod_enabled, false, false);' +
+'       }' +
+'    }' +
+'    else '+
+'    {' +
+'        /* ' +
+'         * R01UH0886EJ0110 35.4.2 Asynchronous Reference Clock for SCI1 ' +
+'         * The IrDA receives a clock with a frequency 16 times the bit rate from SCI1 and operates in conjunction with SCI1. ' +
+'         * When using the IrDA, set the SCI1.SEMR.ABCS bit to 0. ' +
+'         */ ' +
+'        temp_result = r_sci_uart_brr_mddr_calculate(freq_hz, baudrate, mod_enabled, true, true);' +
+'    }' +
+'    ' +
+'    baud_setting = "/* Baud rate calculated with " + temp_result.bitrateerror.toFixed(3) + "% error. */ .semr_baudrate_bits_b.abcse = " + temp_result.baud_setting.abcse.toString() +' +
+'                   ", .semr_baudrate_bits_b.abcs = " + temp_result.baud_setting.abcs.toString() +' +
+'                   ", .semr_baudrate_bits_b.bgdm = " + temp_result.baud_setting.bgdm.toString() +' +
+'                   ", .cks = " + temp_result.baud_setting.n.toString() +' +
+'                   ", .brr = " + temp_result.brr_value.toString() +' +
+'                   ", .mddr = (uint8_t) " + temp_result.mddr.toString() +' +
+'                   ", .semr_baudrate_bits_b.brme = " + "${module.driver.uart.baudrate_modulation}";' +
+'    baud_setting' +
+'')
+]]>            </export>
+        </property>
+        <property default="module.driver.uart.baudrate_modulation.disabled" display="Baud|Baud Rate Modulation" id="module.driver.uart.baudrate_modulation" description="Enabling baud rate modulation reduces the percent error of the actual baud rate with respect to the requested baud rate. It does this by modulating the number of cycles per clock, so some bits are slightly longer than others.">
+            <option display="Disabled" id="module.driver.uart.baudrate_modulation.disabled" value="false"/>
+            <option display="Enabled" id="module.driver.uart.baudrate_modulation.enabled" value="true"/>
+        </property>
+        <property default="5" display="Baud|Max Error (%)" id="module.driver.uart.baudrate_max_err" description="Maximum percent error allowed during baud calculation. This is used by the algorithm to determine whether or not to consider using less accurate alternative register settings.\n\nNOTE: The baud calculation does not show an error in the tool if this percent error was not achieved. The calculated percent error is recorded in a comment in the generated baud_setting_t structure.">
+            <constraint display="Must be a valid non-negative integer with a maximum configurable value of 100">testInteger("${module.driver.uart.baudrate_max_err}") &amp;&amp; ("${module.driver.uart.baudrate_max_err}" &gt; 0) &amp;&amp; ("${module.driver.uart.baudrate_max_err}" &lt;= 100)</constraint>
+        </property>
+        <property default="" display="Flow Control|CTS/RTS Selection" id="module.driver.uart.flow_control" description="Select either CTS or RTS function on the CTSn_RTSn pin of SCI channel n or select CTS function on CTSn pin and RTS function on CTSn_RTSn pin of SCI channel n (Available on selected MCUs and channels).">
+            <select enum="enum.driver.uart.flow_control" />
+        </property>
+        <property default="module.driver.uart.pin_control_port.PORT_DISABLE" display="Flow Control|Software RTS Port" id="module.driver.uart.pin_control_port" description="Specify the flow control pin port for the MCU.">
+            <option id="module.driver.uart.pin_control_port.PORT_DISABLE" display="Disabled" value="FF" />
+            <option id="module.driver.uart.pin_control_port.PORT_00" display="00" value="00" />
+            <option id="module.driver.uart.pin_control_port.PORT_01" display="01" value="01" />
+            <option id="module.driver.uart.pin_control_port.PORT_02" display="02" value="02" />
+            <option id="module.driver.uart.pin_control_port.PORT_03" display="03" value="03" />
+            <option id="module.driver.uart.pin_control_port.PORT_04" display="04" value="04" />
+            <option id="module.driver.uart.pin_control_port.PORT_05" display="05" value="05" />
+            <option id="module.driver.uart.pin_control_port.PORT_06" display="06" value="06" />
+            <option id="module.driver.uart.pin_control_port.PORT_07" display="07" value="07" />
+            <option id="module.driver.uart.pin_control_port.PORT_08" display="08" value="08" />
+            <option id="module.driver.uart.pin_control_port.PORT_09" display="09" value="09" />
+            <option id="module.driver.uart.pin_control_port.PORT_10" display="10" value="10" />
+            <option id="module.driver.uart.pin_control_port.PORT_11" display="11" value="11" />
+        </property>
+        <property default="module.driver.uart.pin_control_pin.PIN_DISABLE" display="Flow Control|Software RTS Pin" id="module.driver.uart.pin_control_pin" description="Specify the flow control pin for the MCU.">
+            <option id="module.driver.uart.pin_control_pin.PIN_DISABLE" display="Disabled" value="0xFF" />
+            <option id="module.driver.uart.pin_control_pin.PIN_00" display="00" value="00" />
+            <option id="module.driver.uart.pin_control_pin.PIN_01" display="01" value="01" />
+            <option id="module.driver.uart.pin_control_pin.PIN_02" display="02" value="02" />
+            <option id="module.driver.uart.pin_control_pin.PIN_03" display="03" value="03" />
+            <option id="module.driver.uart.pin_control_pin.PIN_04" display="04" value="04" />
+            <option id="module.driver.uart.pin_control_pin.PIN_05" display="05" value="05" />
+            <option id="module.driver.uart.pin_control_pin.PIN_06" display="06" value="06" />
+            <option id="module.driver.uart.pin_control_pin.PIN_07" display="07" value="07" />
+            <option id="module.driver.uart.pin_control_pin.PIN_08" display="08" value="08" />
+            <option id="module.driver.uart.pin_control_pin.PIN_09" display="09" value="09" />
+            <option id="module.driver.uart.pin_control_pin.PIN_10" display="10" value="10" />
+            <option id="module.driver.uart.pin_control_pin.PIN_11" display="11" value="11" />
+            <option id="module.driver.uart.pin_control_pin.PIN_12" display="12" value="12" />
+            <option id="module.driver.uart.pin_control_pin.PIN_13" display="13" value="13" />
+            <option id="module.driver.uart.pin_control_pin.PIN_14" display="14" value="14" />
+            <option id="module.driver.uart.pin_control_pin.PIN_15" display="15" value="15" />
+        </property>
+
+        <!-- UART Extended configuration -->
+        <property default="module.driver.uart.clk_src.int_clk" display="Extra|Clock Source" id="module.driver.uart.clk_src" description="Selection of the clock source to be used in the baud-rate clock generator. When internal clock is used the baud rate can be output on the SCK pin.">
+            <option display="Internal Clock" id="module.driver.uart.clk_src.int_clk" value="SCI_UART_CLOCK_INT"/>
+            <option display="Internal Clock With Output on SCK" id="module.driver.uart.clk_src.int_clk_with_output" value="SCI_UART_CLOCK_INT_WITH_BAUDRATE_OUTPUT"/>
+            <option display="External Clock 8x baud rate" id="module.driver.uart.clk_src.ext_clk_8x" value="SCI_UART_CLOCK_EXT8X"/>
+            <option display="External Clock 16x baud rate" id="module.driver.uart.clk_src.ext_clk_16x" value="SCI_UART_CLOCK_EXT16X"/>
+        </property>
+        <property default="module.driver.uart.rx_edge_start.falling_edge" display="Extra|Start bit detection" id="module.driver.uart.rx_edge_start" description="Start bit detected as falling edge or low level.">
+            <option display="Falling Edge" id="module.driver.uart.rx_edge_start.falling_edge" value="SCI_UART_START_BIT_FALLING_EDGE"/>
+            <option display="Low Level" id="module.driver.uart.rx_edge_start.low_level" value="SCI_UART_START_BIT_LOW_LEVEL"/>
+        </property>
+        <property default="module.driver.uart.noisecancel_en.disabled" display="Extra|Noise Filter" id="module.driver.uart.noisecancel_en" description="Enable the digital noise filter on RXDn pin. The digital noise filter block in SCI consists of two-stage flipflop circuits.">
+            <option display="Enable" id="module.driver.uart.noisecancel_en.enabled" value="SCI_UART_NOISE_CANCELLATION_ENABLE"/>
+            <option display="Disable" id="module.driver.uart.noisecancel_en.disabled" value="SCI_UART_NOISE_CANCELLATION_DISABLE"/>
+        </property>
+        <property default="module.driver.uart.rx_fifo_trigger.max" display="Extra|Receive FIFO Trigger Level" id="module.driver.uart.rx_fifo_trigger" description="Unused if the channel has no FIFO or if DTC is used for reception.  Set to One to get a callback immediately when each byte is received.  Set to Max to get a callback when FIFO is full or after 15 bit times with no data (fewer interrupts).">
+            <option display="One" id="module.driver.uart.rx_fifo_trigger.one" value="SCI_UART_RX_FIFO_TRIGGER_1"/>
+            <option display="Two" id="module.driver.uart.rx_fifo_trigger.two" value="SCI_UART_RX_FIFO_TRIGGER_2"/>
+            <option display="Three" id="module.driver.uart.rx_fifo_trigger.three" value="SCI_UART_RX_FIFO_TRIGGER_3"/>
+            <option display="Four" id="module.driver.uart.rx_fifo_trigger.four" value="SCI_UART_RX_FIFO_TRIGGER_4"/>
+            <option display="Five" id="module.driver.uart.rx_fifo_trigger.five" value="SCI_UART_RX_FIFO_TRIGGER_5"/>
+            <option display="Six" id="module.driver.uart.rx_fifo_trigger.six" value="SCI_UART_RX_FIFO_TRIGGER_6"/>
+            <option display="Seven" id="module.driver.uart.rx_fifo_trigger.seven" value="SCI_UART_RX_FIFO_TRIGGER_7"/>
+            <option display="Eight" id="module.driver.uart.rx_fifo_trigger.eight" value="SCI_UART_RX_FIFO_TRIGGER_8"/>
+            <option display="Nine" id="module.driver.uart.rx_fifo_trigger.nine" value="SCI_UART_RX_FIFO_TRIGGER_9"/>
+            <option display="Ten" id="module.driver.uart.rx_fifo_trigger.ten" value="SCI_UART_RX_FIFO_TRIGGER_10"/>
+            <option display="Eleven" id="module.driver.uart.rx_fifo_trigger.eleven" value="SCI_UART_RX_FIFO_TRIGGER_11"/>
+            <option display="Twelve" id="module.driver.uart.rx_fifo_trigger.twelve" value="SCI_UART_RX_FIFO_TRIGGER_12"/>
+            <option display="Thirteen" id="module.driver.uart.rx_fifo_trigger.thirteen" value="SCI_UART_RX_FIFO_TRIGGER_13"/>
+            <option display="Fourteen" id="module.driver.uart.rx_fifo_trigger.fourteen" value="SCI_UART_RX_FIFO_TRIGGER_14"/>
+            <option display="Max" id="module.driver.uart.rx_fifo_trigger.max" value="SCI_UART_RX_FIFO_TRIGGER_MAX"/>
+        </property>
+        <property default="module.driver.uart.irda.ire.disabled" display="Extra|IrDA|Enable" id="module.driver.uart.irda.ire" description="Enable IrDA on this channel.">
+            <option display="Disabled" id="module.driver.uart.irda.ire.disabled" value="0"/>
+            <option display="Enabled" id="module.driver.uart.irda.ire.enabled" value="1"/>
+        </property>
+        <property default="module.driver.uart.irda.irrxinv.disabled" display="Extra|IrDA|RXD Polarity Switching" id="module.driver.uart.irda.irrxinv" description="IRRXD Pulse polarity (Normal: High Pulse=0) and (Inverted: Low Pulse=0)..">
+            <option display="Normal" id="module.driver.uart.irda.irrxinv.disabled" value="0"/>
+            <option display="Inverted" id="module.driver.uart.irda.irrxinv.enabled" value="1"/>
+        </property>
+        <property default="module.driver.uart.irda.irtxinv.disabled" display="Extra|IrDA|TXD Polarity Switching" id="module.driver.uart.irda.irtxinv" description="IRTXD Pulse polarity (Normal: High Pulse 0) and (Inverted: Low Pulse=0).">
+            <option display="Normal" id="module.driver.uart.irda.irtxinv.disabled" value="0"/>
+            <option display="Inverted" id="module.driver.uart.irda.irtxinv.enabled" value="1"/>
+        </property>
+        <property default="module.driver.uart.rs485.de_enable.disabled" display="Extra|RS-485|DE Pin" id="module.driver.uart.rs485.de_enable" description="Enable or disable the DE pin for use in RS-485 half-duplex mode.">
+            <option display="Disable" id="module.driver.uart.rs485.de_enable.disabled" value="SCI_UART_RS485_DISABLE"/>
+            <option display="Enable" id="module.driver.uart.rs485.de_enable.enabled" value="SCI_UART_RS485_ENABLE"/>
+        </property>
+        <property default="module.driver.uart.rs485.de_polarity.high" display="Extra|RS-485|DE Pin Polarity" id="module.driver.uart.rs485.de_polarity" description="Select the polarity of the DE pin.">
+            <option display="Active Low" id="module.driver.uart.rs485.de_polarity.low" value="SCI_UART_RS485_DE_POLARITY_LOW"/>
+            <option display="Active High" id="module.driver.uart.rs485.de_polarity.high" value="SCI_UART_RS485_DE_POLARITY_HIGH"/>
+        </property>
+        <property default="module.driver.uart.rs485.de_port_number.PORT_DISABLE" display="Extra|RS-485|DE Port Number" id="module.driver.uart.rs485.de_port_number" description="GPIO output port number to use for generating the DE signal.">
+            <option id="module.driver.uart.rs485.de_port_number.PORT_DISABLE" display="Disabled" value="FF" />
+            <option id="module.driver.uart.rs485.de_port_number.PORT_00" display="00" value="00" />
+            <option id="module.driver.uart.rs485.de_port_number.PORT_01" display="01" value="01" />
+            <option id="module.driver.uart.rs485.de_port_number.PORT_02" display="02" value="02" />
+            <option id="module.driver.uart.rs485.de_port_number.PORT_03" display="03" value="03" />
+            <option id="module.driver.uart.rs485.de_port_number.PORT_04" display="04" value="04" />
+            <option id="module.driver.uart.rs485.de_port_number.PORT_05" display="05" value="05" />
+            <option id="module.driver.uart.rs485.de_port_number.PORT_06" display="06" value="06" />
+            <option id="module.driver.uart.rs485.de_port_number.PORT_07" display="07" value="07" />
+            <option id="module.driver.uart.rs485.de_port_number.PORT_08" display="08" value="08" />
+            <option id="module.driver.uart.rs485.de_port_number.PORT_09" display="09" value="09" />
+            <option id="module.driver.uart.rs485.de_port_number.PORT_10" display="10" value="10" />
+            <option id="module.driver.uart.rs485.de_port_number.PORT_11" display="11" value="11" />
+        </property>
+        <property default="module.driver.uart.rs485.de_pin_number.PIN_DISABLE" display="Extra|RS-485|DE Pin Number" id="module.driver.uart.rs485.de_pin_number" description="GPIO output pin number to use for generating the DE signal.">
+            <option id="module.driver.uart.rs485.de_pin_number.PIN_DISABLE" display="Disabled" value="0xFF" />
+            <option id="module.driver.uart.rs485.de_pin_number.PIN_00" display="00" value="00" />
+            <option id="module.driver.uart.rs485.de_pin_number.PIN_01" display="01" value="01" />
+            <option id="module.driver.uart.rs485.de_pin_number.PIN_02" display="02" value="02" />
+            <option id="module.driver.uart.rs485.de_pin_number.PIN_03" display="03" value="03" />
+            <option id="module.driver.uart.rs485.de_pin_number.PIN_04" display="04" value="04" />
+            <option id="module.driver.uart.rs485.de_pin_number.PIN_05" display="05" value="05" />
+            <option id="module.driver.uart.rs485.de_pin_number.PIN_06" display="06" value="06" />
+            <option id="module.driver.uart.rs485.de_pin_number.PIN_07" display="07" value="07" />
+            <option id="module.driver.uart.rs485.de_pin_number.PIN_08" display="08" value="08" />
+            <option id="module.driver.uart.rs485.de_pin_number.PIN_09" display="09" value="09" />
+            <option id="module.driver.uart.rs485.de_pin_number.PIN_10" display="10" value="10" />
+            <option id="module.driver.uart.rs485.de_pin_number.PIN_11" display="11" value="11" />
+            <option id="module.driver.uart.rs485.de_pin_number.PIN_12" display="12" value="12" />
+            <option id="module.driver.uart.rs485.de_pin_number.PIN_13" display="13" value="13" />
+            <option id="module.driver.uart.rs485.de_pin_number.PIN_14" display="14" value="14" />
+            <option id="module.driver.uart.rs485.de_pin_number.PIN_15" display="15" value="15" />
+        </property>
+        <!-- External defined callback function -->
+        <property default="NULL" display="Interrupts|Callback" id="module.driver.uart.callback" description="A user callback function can be provided. If this callback function is provided, it will be called from the interrupt service routine (ISR).">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.uart.callback}")</constraint>
+        </property>
+        <property default="" display="Interrupts|Receive Interrupt Priority" id="module.driver.uart.rxi_ipl" description="Select the receive interrupt priority.">
+            <select enum="enum.mcu.nvic.priorities.mandatory"/>
+            <interrupt event="event.sci${module.driver.uart.channel}.rxi" isr="sci_uart_rxi_isr"/>
+        </property>
+        <property default="" display="Interrupts|Transmit Data Empty Interrupt Priority" id="module.driver.uart.txi_ipl" description="Select the transmit interrupt priority.">
+            <select enum="enum.mcu.nvic.priorities.mandatory"/>
+            <interrupt event="event.sci${module.driver.uart.channel}.txi" isr="sci_uart_txi_isr"/>
+        </property>
+        <property default="" display="Interrupts|Transmit End Interrupt Priority" id="module.driver.uart.tei_ipl" description="Select the transmit end interrupt priority.">
+            <select enum="enum.mcu.nvic.priorities.mandatory"/>
+            <interrupt event="event.sci${module.driver.uart.channel}.tei" isr="sci_uart_tei_isr"/>
+        </property>
+        <property default="" display="Interrupts|Error Interrupt Priority" id="module.driver.uart.eri_ipl" description="Select the error interrupt priority.">
+            <select enum="enum.mcu.nvic.priorities.mandatory"/>
+            <interrupt event="event.sci${module.driver.uart.channel}.eri" isr="sci_uart_eri_isr"/>
+        </property>
+        <peripheral name="SCI${module.driver.uart.channel}" component="sci${module.driver.uart.channel}" pin="sci${module.driver.uart.channel}.rxd" />
+        <peripheral name="SCI${module.driver.uart.channel}" component="sci${module.driver.uart.channel}" pin="sci${module.driver.uart.channel}.txd" />
+        <peripheral name="SCI${module.driver.uart.channel}" component="sci${module.driver.uart.channel}" pin="sci${module.driver.uart.channel}.ctsrts" />
+        <peripheral name="SCI${module.driver.uart.channel}" component="sci${module.driver.uart.channel}" pin="sci${module.driver.uart.channel}.cts" />
+        <!-- For MCU's whose pinmapping files have been generated with MPC Designer Tool -->
+        <peripheral name="SCI${module.driver.uart.channel}" component="sci${module.driver.uart.channel}" pin="sci${module.driver.uart.channel}.rxd${module.driver.uart.channel}" />
+        <peripheral name="SCI${module.driver.uart.channel}" component="sci${module.driver.uart.channel}" pin="sci${module.driver.uart.channel}.txd${module.driver.uart.channel}" />
+        <peripheral name="SCI${module.driver.uart.channel}" component="sci${module.driver.uart.channel}" pin="sci${module.driver.uart.channel}.cts${module.driver.uart.channel}" />
+        <peripheral name="SCI${module.driver.uart.channel}" component="sci${module.driver.uart.channel}" pin="sci${module.driver.uart.channel}.cts_rts${module.driver.uart.channel}" />
+        <peripheral name="SCI${module.driver.uart.channel}" component="sci${module.driver.uart.channel}" pin="sci${module.driver.uart.channel}.ss_cts_rts${module.driver.uart.channel}" />
+        <symbol id="symbol.driver.uart.name" value="${module.driver.uart.name}"/>
+        <symbol id="symbol.driver.uart.guard.open" value="${module.driver.uart.name}_open_guard"/>
+        <symbol id="symbol.driver.uart.guard.macro.open" value="FSP_GUARD_${module.driver.uart.name}_R_SCI_UART_Open"/>
+        <symbol id="symbol.driver.uart.guard.read" value="${module.driver.uart.name}_read_guard"/>
+        <symbol id="symbol.driver.uart.guard.macro.read" value="FSP_GUARD_${module.driver.uart.name}_R_SCI_UART_Read"/>
+        <symbol id="symbol.driver.uart.guard.write" value="${module.driver.uart.name}_write_guard"/>
+        <symbol id="symbol.driver.uart.guard.macro.write" value="FSP_GUARD_${module.driver.uart.name}_R_SCI_UART_Write"/>
+        <symbol id="symbol.driver.uart.guard.baud_set" value="${module.driver.uart.name}_baud_set_guard"/>
+        <symbol id="symbol.driver.uart.guard.macro.baud_set" value="FSP_GUARD_${module.driver.uart.name}_R_SCI_UART_BaudSet"/>
+        <symbol id="symbol.driver.uart.guard.info_get" value="${module.driver.uart.name}_info_get_guard"/>
+        <symbol id="symbol.driver.uart.guard.macro.info_get" value="FSP_GUARD_${module.driver.uart.name}_R_SCI_UART_InfoGet"/>
+        <symbol id="symbol.driver.uart.guard.close" value="${module.driver.uart.name}_close_guard"/>
+        <symbol id="symbol.driver.uart.guard.macro.close" value="FSP_GUARD_${module.driver.uart.name}_R_SCI_UART_Close"/>
+        <symbol id="symbol.driver.uart.guard.abort" value="${module.driver.uart.name}_abort_guard"/>
+        <symbol id="symbol.driver.uart.guard.macro.abort" value="FSP_GUARD_${module.driver.uart.name}_R_SCI_UART_Abort"/>
+        <symbol id="symbol.driver.uart.guard.baud_calculate" value="${module.driver.uart.name}_baud_calculate_guard"/>
+        <symbol id="symbol.driver.uart.guard.macro.baud_calculate" value="FSP_GUARD_${module.driver.uart.name}_R_SCI_UART_BaudCalculate"/>
+        <symbol id="symbol.driver.uart.guard.callback_set" value="${module.driver.uart.name}_callback_set_guard"/>
+        <symbol id="symbol.driver.uart.guard.macro.callback_set" value="FSP_GUARD_${module.driver.uart.name}_R_SCI_UART_CallbackSet"/>
+        <symbol id="symbol.driver.uart.guard.read_stop" value="${module.driver.uart.name}_read_stop_guard"/>
+        <symbol id="symbol.driver.uart.guard.macro.read_stop" value="FSP_GUARD_${module.driver.uart.name}_R_SCI_UART_ReadStop"/>
+        <symbol id="symbol.driver.uart.nsc_api" value="${module.driver.uart.name}_nsc_api"/>
+        <symbol id="symbol.driver.uart.baud_setting" value="${module.driver.uart.name}_baud_setting"/>
+        <symbol id="symbol.driver.uart.cfg" value="${module.driver.uart.name}_cfg"/>
+        <symbol id="symbol.driver.uart.cfg_extend" value="${module.driver.uart.name}_cfg_extend"/>
+        <symbol id="symbol.driver.uart.ctrl" value="${module.driver.uart.name}_ctrl"/>
+        <header>
+            /** UART on SCI Instance. */
+            extern const uart_instance_t      ${module.driver.uart.name};
+
+            /** Access the UART instance using these structures when calling API functions directly (::p_api is not used). */
+            extern sci_uart_instance_ctrl_t     ${module.driver.uart.name}_ctrl;
+            extern const uart_cfg_t ${module.driver.uart.name}_cfg;
+            extern const sci_uart_extended_cfg_t ${module.driver.uart.name}_cfg_extend;
+
+            #ifndef ${module.driver.uart.callback}
+            void ${module.driver.uart.callback}(uart_callback_args_t * p_args);
+            #endif
+        </header>
+        <includes>
+            #include &quot;r_sci_uart.h&quot;
+            #include &quot;r_uart_api.h&quot;
+        </includes>
+        <declarations>
+            sci_uart_instance_ctrl_t     ${module.driver.uart.name}_ctrl;
+
+            baud_setting_t               ${module.driver.uart.name}_baud_setting =
+            {
+                ${module.driver.uart.baud}
+            };
+
+            /** UART extended configuration for UARTonSCI HAL driver */
+            const sci_uart_extended_cfg_t ${module.driver.uart.name}_cfg_extend =
+            {
+                .clock                = ${module.driver.uart.clk_src},
+                .rx_edge_start          = ${module.driver.uart.rx_edge_start},
+                .noise_cancel         = ${module.driver.uart.noisecancel_en},
+                .rx_fifo_trigger        = ${module.driver.uart.rx_fifo_trigger},
+                .p_baud_setting         = &amp;${module.driver.uart.name}_baud_setting,
+                .flow_control           = ${module.driver.uart.flow_control},
+                #if 0xFF != 0x${module.driver.uart.pin_control_port}
+                .flow_control_pin       = BSP_IO_PORT_${module.driver.uart.pin_control_port}_PIN_${module.driver.uart.pin_control_pin},
+                #else
+                .flow_control_pin       = (bsp_io_port_pin_t) UINT16_MAX,
+                #endif
+                .rs485_setting = {
+                    .enable = ${module.driver.uart.rs485.de_enable},
+                    .polarity = ${module.driver.uart.rs485.de_polarity},
+                #if 0xFF != 0x${module.driver.uart.rs485.de_port_number}
+                    .de_control_pin = BSP_IO_PORT_${module.driver.uart.rs485.de_port_number}_PIN_${module.driver.uart.rs485.de_pin_number},
+                #else
+                    .de_control_pin       = (bsp_io_port_pin_t) UINT16_MAX,
+                #endif
+                },
+                .irda_setting = {
+                    .ircr_bits_b.ire = ${module.driver.uart.irda.ire},
+                    .ircr_bits_b.irrxinv = ${module.driver.uart.irda.irrxinv},
+                    .ircr_bits_b.irtxinv = ${module.driver.uart.irda.irtxinv},
+                },
+            };
+
+            /** UART interface configuration */
+            const uart_cfg_t ${module.driver.uart.name}_cfg =
+            {
+                .channel             = ${module.driver.uart.channel},
+                .data_bits           = ${module.driver.uart.data_bits},
+                .parity              = ${module.driver.uart.parity},
+                .stop_bits           = ${module.driver.uart.stop_bits},
+                .p_callback          = ${module.driver.uart.callback},
+                .p_context           = NULL,
+                .p_extend            = &amp;${module.driver.uart.name}_cfg_extend,
+#define RA_NOT_DEFINED (1)
+#if (RA_NOT_DEFINED == ${module.driver.uart_on_sci_uart.requires.transfer_tx::module.driver.transfer.name})
+                .p_transfer_tx       = NULL,
+#else
+                .p_transfer_tx       = &amp;${module.driver.uart_on_sci_uart.requires.transfer_tx::module.driver.transfer.name},
+#endif
+#if (RA_NOT_DEFINED == ${module.driver.uart_on_sci_uart.requires.transfer_rx::module.driver.transfer.name})
+                .p_transfer_rx       = NULL,
+#else
+                .p_transfer_rx       = &amp;${module.driver.uart_on_sci_uart.requires.transfer_rx::module.driver.transfer.name},
+#endif
+#undef RA_NOT_DEFINED
+                .rxi_ipl             = ${module.driver.uart.rxi_ipl},
+                .txi_ipl             = ${module.driver.uart.txi_ipl},
+                .tei_ipl             = ${module.driver.uart.tei_ipl},
+                .eri_ipl             = ${module.driver.uart.eri_ipl},
+#if defined(VECTOR_NUMBER_SCI${module.driver.uart.channel}_RXI)
+                .rxi_irq             = VECTOR_NUMBER_SCI${module.driver.uart.channel}_RXI,
+#else
+                .rxi_irq             = FSP_INVALID_VECTOR,
+#endif
+#if defined(VECTOR_NUMBER_SCI${module.driver.uart.channel}_TXI)
+                .txi_irq             = VECTOR_NUMBER_SCI${module.driver.uart.channel}_TXI,
+#else
+                .txi_irq             = FSP_INVALID_VECTOR,
+#endif
+#if defined(VECTOR_NUMBER_SCI${module.driver.uart.channel}_TEI)
+                .tei_irq             = VECTOR_NUMBER_SCI${module.driver.uart.channel}_TEI,
+#else
+                .tei_irq             = FSP_INVALID_VECTOR,
+#endif
+#if defined(VECTOR_NUMBER_SCI${module.driver.uart.channel}_ERI)
+                .eri_irq             = VECTOR_NUMBER_SCI${module.driver.uart.channel}_ERI,
+#else
+                .eri_irq             = FSP_INVALID_VECTOR,
+#endif
+            };
+
+/* Instance structure to use this module. */
+const uart_instance_t ${module.driver.uart.name} =
+{
+    .p_ctrl        = &amp;${module.driver.uart.name}_ctrl,
+    .p_cfg         = &amp;${module.driver.uart.name}_cfg,
+    .p_api         = &amp;g_uart_on_sci
+};
+        </declarations>
+        <guard>
+            <header>
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.uart.name}_open_guard(uart_ctrl_t *const p_api_ctrl, uart_cfg_t const *const p_cfg);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.uart.name}_read_guard(uart_ctrl_t *const p_api_ctrl, uint8_t *const p_dest, uint32_t const bytes);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.uart.name}_write_guard(uart_ctrl_t *const p_api_ctrl, uint8_t const *const p_src, uint32_t const bytes);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.uart.name}_baud_set_guard(uart_ctrl_t *const p_api_ctrl, void const *const p_baud_setting);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.uart.name}_info_get_guard(uart_ctrl_t *const p_api_ctrl, uart_info_t *const p_info);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.uart.name}_close_guard(uart_ctrl_t *const p_api_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.uart.name}_abort_guard(uart_ctrl_t *const p_api_ctrl, uart_dir_t communication_to_abort);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.uart.name}_baud_calculate_guard(uint32_t baudrate, bool bitrate_modulation, uint32_t baud_rate_error_x_1000, baud_setting_t *const p_baud_setting);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.uart.name}_callback_set_guard(uart_ctrl_t *const p_api_ctrl, void(*p_callback)(uart_callback_args_t *), void const *const p_context, uart_callback_args_t *const p_callback_memory);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.uart.name}_read_stop_guard(uart_ctrl_t *const p_api_ctrl, uint32_t *remaining_bytes);
+
+            </header>
+            <template name="${module.driver.uart.name}_guard.c">
+                <![CDATA[
+                    #include "guard.h"
+
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.uart.name}_open_guard (uart_ctrl_t *const p_api_ctrl, uart_cfg_t const *const p_cfg)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+    FSP_PARAMETER_NOT_USED(p_cfg);
+
+    return R_SCI_UART_Open(&${module.driver.uart.name}_ctrl, &${module.driver.uart.name}_cfg);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.uart.name}_read_guard (uart_ctrl_t *const p_api_ctrl, uint8_t *const p_dest, uint32_t const bytes)
+{
+    /* Verify all pointers are in non-secure memory. */
+    uint8_t *const p_dest_checked = cmse_check_address_range((void *) p_dest, bytes, CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_dest_checked != NULL);
+
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+
+    return R_SCI_UART_Read(&${module.driver.uart.name}_ctrl, p_dest_checked, bytes);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.uart.name}_write_guard (uart_ctrl_t *const p_api_ctrl, uint8_t const *const p_src, uint32_t const bytes)
+{
+    /* Verify all pointers are in non-secure memory. */
+    uint8_t const *const p_src_checked = cmse_check_address_range((void *) p_src, bytes, CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_src_checked != NULL);
+
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+
+    return R_SCI_UART_Write(&${module.driver.uart.name}_ctrl, p_src_checked, bytes);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.uart.name}_baud_set_guard (uart_ctrl_t *const p_api_ctrl, void const *const p_baud_setting)
+{
+    /* Verify all pointers are in non-secure memory. */
+    void const *const p_baud_setting_checked = cmse_check_address_range((void *) p_baud_setting, sizeof(baud_setting_t), CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_baud_setting_checked != NULL);
+
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+
+    return R_SCI_UART_BaudSet(&${module.driver.uart.name}_ctrl, p_baud_setting_checked);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.uart.name}_info_get_guard (uart_ctrl_t *const p_api_ctrl, uart_info_t *const p_info)
+{
+    /* Verify all pointers are in non-secure memory. */
+    uart_info_t *const p_info_checked = cmse_check_pointed_object(p_info, CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_info_checked != NULL);
+
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+
+    return R_SCI_UART_InfoGet(&${module.driver.uart.name}_ctrl, p_info_checked);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.uart.name}_close_guard (uart_ctrl_t *const p_api_ctrl)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+
+    return R_SCI_UART_Close(&${module.driver.uart.name}_ctrl);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.uart.name}_abort_guard (uart_ctrl_t *const p_api_ctrl, uart_dir_t communication_to_abort)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+
+    return R_SCI_UART_Abort(&${module.driver.uart.name}_ctrl, communication_to_abort);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.uart.name}_baud_calculate_guard (uint32_t baudrate, bool bitrate_modulation, uint32_t baud_rate_error_x_1000, baud_setting_t *const p_baud_setting)
+{
+    /* Verify all pointers are in non-secure memory. */
+    baud_setting_t *const p_baud_setting_checked = cmse_check_pointed_object(p_baud_setting, CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_baud_setting_checked != NULL);
+
+    /* TODO: add your own security checks here */
+
+    return R_SCI_UART_BaudCalculate(baudrate, bitrate_modulation, baud_rate_error_x_1000, p_baud_setting_checked);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.uart.name}_callback_set_guard (uart_ctrl_t *const p_api_ctrl, void(*p_callback)(uart_callback_args_t *), void const *const p_context, uart_callback_args_t *const p_callback_memory)
+{
+    /* Verify all pointers are in non-secure memory. */
+    void(*p_callback_checked)(uart_callback_args_t *) = (void(*)(uart_callback_args_t *)) cmse_check_address_range((void *) p_callback, sizeof(void *), CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_callback_checked != NULL);
+    uart_callback_args_t *const p_callback_memory_checked = cmse_check_pointed_object(p_callback_memory, CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_callback_memory_checked != NULL);
+
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+    FSP_PARAMETER_NOT_USED(p_context);
+
+    return R_SCI_UART_CallbackSet(&${module.driver.uart.name}_ctrl, p_callback_checked, p_context, p_callback_memory_checked);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.uart.name}_read_stop_guard (uart_ctrl_t *const p_api_ctrl, uint32_t *remaining_bytes)
+{
+    /* Verify all pointers are in non-secure memory. */
+    uint32_t * remaining_bytes_checked = cmse_check_address_range((void *) remaining_bytes, sizeof(uint32_t), CMSE_AU_NONSECURE);
+    FSP_ASSERT(remaining_bytes_checked != NULL);
+
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+
+    return R_SCI_UART_ReadStop(&${module.driver.uart.name}_ctrl, remaining_bytes_checked);
+}
+
+                ]]>
+            </template>
+        </guard>
+        <nsc>
+            <header>
+
+#define FSP_GUARD_${module.driver.uart.name}_R_SCI_UART_Open() ${module.driver.uart.name}_open_guard(FSP_SECURE_ARGUMENT, FSP_SECURE_ARGUMENT)
+
+#define FSP_GUARD_${module.driver.uart.name}_R_SCI_UART_Read(p_dest, bytes) ${module.driver.uart.name}_read_guard(FSP_SECURE_ARGUMENT, p_dest, bytes)
+
+#define FSP_GUARD_${module.driver.uart.name}_R_SCI_UART_Write(p_src, bytes) ${module.driver.uart.name}_write_guard(FSP_SECURE_ARGUMENT, p_src, bytes)
+
+#define FSP_GUARD_${module.driver.uart.name}_R_SCI_UART_BaudSet(p_baud_setting) ${module.driver.uart.name}_baud_set_guard(FSP_SECURE_ARGUMENT, p_baud_setting)
+
+#define FSP_GUARD_${module.driver.uart.name}_R_SCI_UART_InfoGet(p_info) ${module.driver.uart.name}_info_get_guard(FSP_SECURE_ARGUMENT, p_info)
+
+#define FSP_GUARD_${module.driver.uart.name}_R_SCI_UART_Close() ${module.driver.uart.name}_close_guard(FSP_SECURE_ARGUMENT)
+
+#define FSP_GUARD_${module.driver.uart.name}_R_SCI_UART_Abort(communication_to_abort) ${module.driver.uart.name}_abort_guard(FSP_SECURE_ARGUMENT, communication_to_abort)
+
+#define FSP_GUARD_${module.driver.uart.name}_R_SCI_UART_BaudCalculate(baudrate, bitrate_modulation, baud_rate_error_x_1000, p_baud_setting) ${module.driver.uart.name}_baud_calculate_guard(baudrate, bitrate_modulation, baud_rate_error_x_1000, p_baud_setting)
+
+#define FSP_GUARD_${module.driver.uart.name}_R_SCI_UART_CallbackSet(p_callback, p_context, p_callback_memory) ${module.driver.uart.name}_callback_set_guard(FSP_SECURE_ARGUMENT, p_callback, p_context, p_callback_memory)
+
+#define FSP_GUARD_${module.driver.uart.name}_R_SCI_UART_ReadStop(remaining_bytes) ${module.driver.uart.name}_read_stop_guard(FSP_SECURE_ARGUMENT, remaining_bytes)
+
+
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.uart.name}_open_guard(uart_ctrl_t *const p_api_ctrl, uart_cfg_t const *const p_cfg);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.uart.name}_read_guard(uart_ctrl_t *const p_api_ctrl, uint8_t *const p_dest, uint32_t const bytes);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.uart.name}_write_guard(uart_ctrl_t *const p_api_ctrl, uint8_t const *const p_src, uint32_t const bytes);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.uart.name}_baud_set_guard(uart_ctrl_t *const p_api_ctrl, void const *const p_baud_setting);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.uart.name}_info_get_guard(uart_ctrl_t *const p_api_ctrl, uart_info_t *const p_info);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.uart.name}_close_guard(uart_ctrl_t *const p_api_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.uart.name}_abort_guard(uart_ctrl_t *const p_api_ctrl, uart_dir_t communication_to_abort);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.uart.name}_baud_calculate_guard(uint32_t baudrate, bool bitrate_modulation, uint32_t baud_rate_error_x_1000, baud_setting_t *const p_baud_setting);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.uart.name}_callback_set_guard(uart_ctrl_t *const p_api_ctrl, void(*p_callback)(uart_callback_args_t *), void const *const p_context, uart_callback_args_t *const p_callback_memory);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.uart.name}_read_stop_guard(uart_ctrl_t *const p_api_ctrl, uint32_t *remaining_bytes);
+
+
+extern const uart_instance_t ${module.driver.uart.name};
+            </header>
+            <declarations>
+                <![CDATA[
+static const uart_api_t ${module.driver.uart.name}_nsc_api =
+{
+    .open = ${module.driver.uart.name}_open_guard,
+    .read = ${module.driver.uart.name}_read_guard,
+    .write = ${module.driver.uart.name}_write_guard,
+    .baudSet = ${module.driver.uart.name}_baud_set_guard,
+    .infoGet = ${module.driver.uart.name}_info_get_guard,
+    .close = ${module.driver.uart.name}_close_guard,
+    .communicationAbort = ${module.driver.uart.name}_abort_guard,
+    .callbackSet = ${module.driver.uart.name}_callback_set_guard,
+    .readStop = ${module.driver.uart.name}_read_stop_guard,
+};
+const uart_instance_t ${module.driver.uart.name} =
+{
+    .p_api = &${module.driver.uart.name}_nsc_api,
+    .p_ctrl = FSP_SECURE_ARGUMENT,
+    .p_cfg = FSP_SECURE_ARGUMENT,
+};
+                ]]>
+            </declarations>
+        </nsc>
+        <api configurable="true">
+            <file>ra/fsp/inc/instances/r_sci_uart.h</file>
+            <file>ra/fsp/inc/api/r_transfer_api.h</file>
+            <file>ra/fsp/inc/api/r_uart_api.h</file>
+        </api>
+    </module>
+</raModuleDescription>

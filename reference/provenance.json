@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "purpose": "Challenge inputs only: untouched FSP 5.9.0 baseline and original metadata; no reference solution supplied.",
+  "baseline": {
+    "version": "5.9.0",
+    "revision": "5e8fbb10c752e16272790bd3a2587485d0377835",
+    "source_path": "baseline",
+    "source_url": "https://github.com/renesas/fsp.git",
+    "tracked_source_files": 3135,
+    "metadata_path": "baseline/module_descriptions",
+    "metadata_files": 1019,
+    "metadata_note": "Includes 1018 module-description XML files and the original main-pack toolingSupport.xml; untracked additions to the public Git source checkout.",
+    "archive": {
+      "path": "reference/vendor/FSP_Packs_v5.9.0.zip",
+      "url": "https://github.com/renesas/fsp/releases/download/v5.9.0/FSP_Packs_v5.9.0.zip",
+      "sha256": "99c4abae6239a68171fcbff86070971f591f0a8945e90a50eb07d87843bee363",
+      "size": 144521144
+    }
+  }
+}

@@ -1,0 +1,1337 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!--
+IMPORTANT NOTE:
+Do not modify this file directly.
+
+This file is generated using: scripts/jinja/mdf_render.sh
+-->
+<raModuleDescription>
+    <config id="config.bsp.ra6t1.fsp" path="fsp_cfg/bsp/bsp_mcu_family_cfg.h" version="0">
+        <property default="config.bsp.common.inline_irq_functions.enabled" display="Enable inline BSP IRQ functions" id="config.bsp.fsp.inline_irq_functions" description="Using static inline functions will slightly increase code size, but will slightly decrease cycles taken in ISRs in return.">
+            <option display="Enabled" id="config.bsp.common.inline_irq_functions.enabled" value="1"/>
+            <option display="Disabled" id="config.bsp.common.inline_irq_functions.disabled" value="0"/>
+        </property>
+        <property default="config.bsp.fsp.OFS0.iwdt_start_mode.disabled" display="OFS0 register settings|Independent WDT|Start Mode" id="config.bsp.fsp.OFS0.iwdt_start_mode">
+            <option display="IWDT is stopped after a reset" id="config.bsp.fsp.OFS0.iwdt_start_mode.disabled" value="1 &lt;&lt; 1"/>
+            <option display="IWDT is automatically activated after a reset (Autostart mode)" id="config.bsp.fsp.OFS0.iwdt_start_mode.enabled" value="0 &lt;&lt; 1"/>
+        </property>
+        <property default="config.bsp.fsp.OFS0.iwdt_timeout.2048" display="OFS0 register settings|Independent WDT|Timeout Period" id="config.bsp.fsp.OFS0.iwdt_timeout">
+            <option display="128 cycles" id="config.bsp.fsp.OFS0.iwdt_timeout.128" value="0 &lt;&lt; 2"/>
+            <option display="512 cycles" id="config.bsp.fsp.OFS0.iwdt_timeout.512" value="1 &lt;&lt; 2"/>
+            <option display="1024 cycles" id="config.bsp.fsp.OFS0.iwdt_timeout.1024" value="2 &lt;&lt; 2"/>
+            <option display="2048 cycles" id="config.bsp.fsp.OFS0.iwdt_timeout.2048" value="3 &lt;&lt; 2"/>
+        </property>
+        <property default="config.bsp.fsp.OFS0.iwdt_divisor.128" display="OFS0 register settings|Independent WDT|Dedicated Clock Frequency Divisor" id="config.bsp.fsp.OFS0.iwdt_divisor">
+            <option display="1" id="config.bsp.fsp.OFS0.iwdt_divisor.1" value="0 &lt;&lt; 4"/>
+            <option display="16" id="config.bsp.fsp.OFS0.iwdt_divisor.16" value="2 &lt;&lt; 4"/>
+            <option display="32" id="config.bsp.fsp.OFS0.iwdt_divisor.32" value="3 &lt;&lt; 4"/>
+            <option display="64" id="config.bsp.fsp.OFS0.iwdt_divisor.64" value="4 &lt;&lt; 4"/>
+            <option display="128" id="config.bsp.fsp.OFS0.iwdt_divisor.128" value="15 &lt;&lt; 4"/>
+            <option display="256" id="config.bsp.fsp.OFS0.iwdt_divisor.256" value="5 &lt;&lt; 4"/>
+        </property>
+        <property default="config.bsp.fsp.OFS0.iwdt_window_end.0" display="OFS0 register settings|Independent WDT|Window End Position" id="config.bsp.fsp.OFS0.iwdt_window_end">
+            <option display="75%" id="config.bsp.fsp.OFS0.iwdt_window_end.75" value="0 &lt;&lt; 8"/>
+            <option display="50%" id="config.bsp.fsp.OFS0.iwdt_window_end.50" value="1 &lt;&lt; 8"/>
+            <option display="25%" id="config.bsp.fsp.OFS0.iwdt_window_end.25" value="2 &lt;&lt; 8"/>
+            <option display=" 0% (no window end position)" id="config.bsp.fsp.OFS0.iwdt_window_end.0" value="3 &lt;&lt; 8"/>
+        </property>
+        <property default="config.bsp.fsp.OFS0.iwdt_window_start.100" display="OFS0 register settings|Independent WDT|Window Start Position" id="config.bsp.fsp.OFS0.iwdt_window_start">
+            <option display="25%" id="config.bsp.fsp.OFS0.iwdt_window_start.25" value="0 &lt;&lt; 10"/>
+            <option display="50%" id="config.bsp.fsp.OFS0.iwdt_window_start.50" value="1 &lt;&lt; 10"/>
+            <option display="75%" id="config.bsp.fsp.OFS0.iwdt_window_start.75" value="2 &lt;&lt; 10"/>
+            <option display="100% (no window start position)" id="config.bsp.fsp.OFS0.iwdt_window_start.100" value="3 &lt;&lt; 10"/>
+        </property>
+        <property default="config.bsp.fsp.OFS0.iwdt_reset_interrupt.Reset" display="OFS0 register settings|Independent WDT|Reset Interrupt Request Select" id="config.bsp.fsp.OFS0.iwdt_reset_interrupt">
+            <option display="NMI request or interrupt request is enabled" id="config.bsp.fsp.OFS0.iwdt_reset_interrupt.NMI" value="0 &lt;&lt; 12"/>
+            <option display="Reset is enabled" id="config.bsp.fsp.OFS0.iwdt_reset_interrupt.Reset" value="1 &lt;&lt; 12"/>
+        </property>
+        <property default="config.bsp.fsp.OFS0.iwdt_stop_control.stops" display="OFS0 register settings|Independent WDT|Stop Control" id="config.bsp.fsp.OFS0.iwdt_stop_control">
+            <option display="Counting continues (Note: Device will not enter Deep Standby Mode when selected. Device will enter Software Standby Mode)" id="config.bsp.fsp.OFS0.iwdt_stop_control.continues" value="0 &lt;&lt; 14"/>
+            <option display="Stop counting when in Sleep, Snooze mode, or Software Standby" id="config.bsp.fsp.OFS0.iwdt_stop_control.stops" value="1 &lt;&lt; 14"/>
+        </property>
+        <property default="config.bsp.fsp.OFS0.wdt_start_mode.register" display="OFS0 register settings|WDT|Start Mode Select" id="config.bsp.fsp.OFS0.wdt_start_mode">
+            <option display="Automatically activate WDT after a reset (auto-start mode)" id="config.bsp.fsp.OFS0.wdt_start_mode.auto" value="0 &lt;&lt; 17"/>
+            <option display="Stop WDT after a reset (register-start mode)" id="config.bsp.fsp.OFS0.wdt_start_mode.register" value="1 &lt;&lt; 17"/>
+        </property>
+        <property default="config.bsp.fsp.OFS0.wdt_timeout.16384" display="OFS0 register settings|WDT|Timeout Period" id="config.bsp.fsp.OFS0.wdt_timeout">
+            <option display="1024 cycles" id="config.bsp.fsp.OFS0.wdt_timeout.1024" value="0 &lt;&lt; 18"/>
+            <option display="4096 cycles" id="config.bsp.fsp.OFS0.wdt_timeout.4096" value="1 &lt;&lt; 18"/>
+            <option display="8192 cycles" id="config.bsp.fsp.OFS0.wdt_timeout.8192" value="2 &lt;&lt; 18"/>
+            <option display="16384 cycles" id="config.bsp.fsp.OFS0.wdt_timeout.16384" value="3 &lt;&lt; 18"/>
+        </property>
+        <property default="config.bsp.fsp.OFS0.wdt_divisor.128" display="OFS0 register settings|WDT|Clock Frequency Division Ratio" id="config.bsp.fsp.OFS0.wdt_divisor">
+            <option display="4" id="config.bsp.fsp.OFS0.wdt_divisor.4" value="1 &lt;&lt; 20"/>
+            <option display="64" id="config.bsp.fsp.OFS0.wdt_divisor.64" value="4 &lt;&lt; 20"/>
+            <option display="128" id="config.bsp.fsp.OFS0.wdt_divisor.128" value="15 &lt;&lt; 20"/>
+            <option display="512" id="config.bsp.fsp.OFS0.wdt_divisor.512" value="6 &lt;&lt; 20"/>
+            <option display="2048" id="config.bsp.fsp.OFS0.wdt_divisor.2048" value="7 &lt;&lt; 20"/>
+            <option display="8192" id="config.bsp.fsp.OFS0.wdt_divisor.8192" value="8 &lt;&lt; 20"/>
+        </property>
+        <property default="config.bsp.fsp.OFS0.wdt_window_end.0" display="OFS0 register settings|WDT|Window End Position" id="config.bsp.fsp.OFS0.wdt_window_end">
+            <option display="75%" id="config.bsp.fsp.OFS0.wdt_window_end.75" value="0 &lt;&lt; 24"/>
+            <option display="50%" id="config.bsp.fsp.OFS0.wdt_window_end.50" value="1 &lt;&lt; 24"/>
+            <option display="25%" id="config.bsp.fsp.OFS0.wdt_window_end.25" value="2 &lt;&lt; 24"/>
+            <option display=" 0% (no window end position)" id="config.bsp.fsp.OFS0.wdt_window_end.0" value="3 &lt;&lt; 24"/>
+        </property>
+        <property default="config.bsp.fsp.OFS0.wdt_window_start.100" display="OFS0 register settings|WDT|Window Start Position" id="config.bsp.fsp.OFS0.wdt_window_start">
+            <option display="25%" id="config.bsp.fsp.OFS0.wdt_window_start.25" value="0 &lt;&lt; 26"/>
+            <option display="50%" id="config.bsp.fsp.OFS0.wdt_window_start.50" value="1 &lt;&lt; 26"/>
+            <option display="75%" id="config.bsp.fsp.OFS0.wdt_window_start.75" value="2 &lt;&lt; 26"/>
+            <option display="100% (no window start position)" id="config.bsp.fsp.OFS0.wdt_window_start.100" value="3 &lt;&lt; 26"/>
+        </property>
+        <property default="config.bsp.fsp.OFS0.wdt_reset_interrupt.Reset" display="OFS0 register settings|WDT|Reset Interrupt Request" id="config.bsp.fsp.OFS0.wdt_reset_interrupt">
+            <option display="NMI" id="config.bsp.fsp.OFS0.wdt_reset_interrupt.NMI" value="0 &lt;&lt; 28"/>
+            <option display="Reset" id="config.bsp.fsp.OFS0.wdt_reset_interrupt.Reset" value="1 &lt;&lt; 28"/>
+        </property>
+        <property default="config.bsp.fsp.OFS0.wdt_stop_control.stops" display="OFS0 register settings|WDT|Stop Control" id="config.bsp.fsp.OFS0.wdt_stop_control">
+            <option display="Counting continues" id="config.bsp.fsp.OFS0.wdt_stop_control.continues" value="0 &lt;&lt; 30"/>
+            <option display="Stop counting when entering Sleep mode" id="config.bsp.fsp.OFS0.wdt_stop_control.stops" value="1 &lt;&lt; 30"/>
+        </property>
+
+        <property default="config.bsp.fsp.OFS1.voltage_detection0.start.disabled" display="OFS1 register settings|Voltage Detection 0 Circuit Start" id="config.bsp.fsp.OFS1.voltage_detection0.start">
+            <option display="Voltage monitor 0 reset is enabled after reset" id="config.bsp.fsp.OFS1.voltage_detection0.start.enabled" value="0 &lt;&lt; 2"/>
+            <option display="Voltage monitor 0 reset is disabled after reset" id="config.bsp.fsp.OFS1.voltage_detection0.start.disabled" value="1 &lt;&lt; 2"/>
+        </property>
+
+        <property default="config.bsp.fsp.OFS1.voltage_detection0_level.280" display="OFS1 register settings|Voltage Detection 0 Level" id="config.bsp.fsp.OFS1.voltage_detection0_level">
+            <option display="2.94 V" id="config.bsp.fsp.OFS1.voltage_detection0_level.294" value="1"/>
+            <option display="2.87 V" id="config.bsp.fsp.OFS1.voltage_detection0_level.287" value="2"/>
+            <option display="2.80 V" id="config.bsp.fsp.OFS1.voltage_detection0_level.280" value="3"/>
+        </property>
+
+        <property default="config.bsp.fsp.OFS1.hoco_osc.disabled" display="OFS1 register settings|HOCO Oscillation Enable" id="config.bsp.fsp.OFS1.hoco_osc">
+            <option display="HOCO oscillation is enabled after reset" id="config.bsp.fsp.OFS1.hoco_osc.enabled" value="0 &lt;&lt; 8"/>
+            <option display="HOCO oscillation is disabled after reset" id="config.bsp.fsp.OFS1.hoco_osc.disabled" value="1 &lt;&lt; 8"/>
+        </property>
+        <property id="config.bsp.fsp.mpu_pc0_enable" display="MPU|Enable or disable PC Region 0" default="config.bsp.fsp.mpu_pc0_enable.disabled">
+            <option id="config.bsp.fsp.mpu_pc0_enable.enabled" display="Enabled" value="0" />
+            <option id="config.bsp.fsp.mpu_pc0_enable.disabled" display="Disabled" value="1" />
+        </property>
+        <property id="config.bsp.fsp.mpu_pc0_start" display="MPU|PC0 Start" default="0xFFFFFFFC" macro="BSP_CFG_ROM_REG_MPU_PC0_START">
+            <constraint display="Value must be an integer between 0 and 0xFFFFFFFC">testInteger("${config.bsp.fsp.mpu_pc0_start}") &amp;&amp;
+            (("${config.bsp.fsp.mpu_pc0_start}" &gt;= 0) &amp;&amp;("${config.bsp.fsp.mpu_pc0_start}" &lt;= 0xFFFFFFFC))
+            </constraint>
+        </property>
+        <property id="config.bsp.fsp.mpu_pc0_end" display="MPU|PC0 End" default="0xFFFFFFFF" macro="BSP_CFG_ROM_REG_MPU_PC0_END">
+            <constraint display="Value must be an integer between 0x00000003 and 0xFFFFFFFF">testInteger("${config.bsp.fsp.mpu_pc0_end}") &amp;&amp;
+            (("${config.bsp.fsp.mpu_pc0_end}" &gt;= 0x00000003) &amp;&amp;("${config.bsp.fsp.mpu_pc0_end}" &lt;= 0xFFFFFFFF))
+            </constraint>
+        </property>
+        <property id="config.bsp.fsp.mpu_pc1_enable" display="MPU|Enable or disable PC Region 1" default="config.bsp.fsp.mpu_pc1_enable.disabled">
+            <option id="config.bsp.fsp.mpu_pc1_enable.enabled" display="Enabled" value="0" />
+            <option id="config.bsp.fsp.mpu_pc1_enable.disabled" display="Disabled" value="1" />
+        </property>
+        <property id="config.bsp.fsp.mpu_pc1_start" display="MPU|PC1 Start" default="0xFFFFFFFC" macro="BSP_CFG_ROM_REG_MPU_PC1_START">
+            <constraint display="Value must be an integer between 0 and 0xFFFFFFFC">testInteger("${config.bsp.fsp.mpu_pc1_start}") &amp;&amp;
+            (("${config.bsp.fsp.mpu_pc1_start}" &gt;= 0) &amp;&amp;("${config.bsp.fsp.mpu_pc1_start}" &lt;= 0xFFFFFFFC))
+            </constraint>
+        </property>
+        <property id="config.bsp.fsp.mpu_pc1_end" display="MPU|PC1 End" default="0xFFFFFFFF" macro="BSP_CFG_ROM_REG_MPU_PC1_END">
+            <constraint display="Value must be an integer between 0x00000003 and 0xFFFFFFFF">testInteger("${config.bsp.fsp.mpu_pc1_end}") &amp;&amp;
+            (("${config.bsp.fsp.mpu_pc1_end}" &gt;= 0x00000003) &amp;&amp;("${config.bsp.fsp.mpu_pc1_end}" &lt;= 0xFFFFFFFF))
+            </constraint>
+        </property>
+        <property id="config.bsp.fsp.mpu_reg0_enable" display="MPU|Enable or disable Memory Region 0" default="config.bsp.fsp.mpu_reg0_enable.disabled">
+            <option id="config.bsp.fsp.mpu_reg0_enable.enabled" display="Enabled" value="0" />
+            <option id="config.bsp.fsp.mpu_reg0_enable.disabled" display="Disabled" value="1" />
+        </property>
+        <property id="config.bsp.fsp.mpu_reg0_start" display="MPU|Memory Region 0 Start" default="0x00FFFFFC" macro="BSP_CFG_ROM_REG_MPU_REGION0_START">
+            <constraint display="Value must be an integer between 0 and 0x00FFFFFC">testInteger("${config.bsp.fsp.mpu_reg0_start}") &amp;&amp;
+            (("${config.bsp.fsp.mpu_reg0_start}" &gt;= 0) &amp;&amp;("${config.bsp.fsp.mpu_reg0_start}" &lt;= 0x00FFFFFC))
+            </constraint>
+        </property>
+        <property id="config.bsp.fsp.mpu_reg0_end" display="MPU|Memory Region 0 End" default="0x00FFFFFF" macro="BSP_CFG_ROM_REG_MPU_REGION0_END">
+            <constraint display="Value must be an integer between 0x00000003 and 0x00FFFFFF">testInteger("${config.bsp.fsp.mpu_reg0_end}") &amp;&amp;
+            (("${config.bsp.fsp.mpu_reg0_end}" &gt;= 0x00000003) &amp;&amp;("${config.bsp.fsp.mpu_reg0_end}" &lt;= 0x00FFFFFF))
+            </constraint>
+        </property>
+        <property id="config.bsp.fsp.mpu_reg1_enable" display="MPU|Enable or disable Memory Region 1" default="config.bsp.fsp.mpu_reg1_enable.disabled">
+            <option id="config.bsp.fsp.mpu_reg1_enable.enabled" display="Enabled" value="0" />
+            <option id="config.bsp.fsp.mpu_reg1_enable.disabled" display="Disabled" value="1" />
+        </property>
+        <property id="config.bsp.fsp.mpu_reg1_start" display="MPU|Memory Region 1 Start" default="0x200FFFFC" macro="BSP_CFG_ROM_REG_MPU_REGION1_START">
+            <constraint display="Value must be an integer between 0x1FF00000 and 0x200FFFFC">testInteger("${config.bsp.fsp.mpu_reg1_start}") &amp;&amp;
+            (("${config.bsp.fsp.mpu_reg1_start}" &gt;= 0x1FF00000) &amp;&amp;("${config.bsp.fsp.mpu_reg1_start}" &lt;= 0x200FFFFC))
+            </constraint>
+        </property>
+        <property id="config.bsp.fsp.mpu_reg1_end" display="MPU|Memory Region 1 End" default="0x200FFFFF" macro="BSP_CFG_ROM_REG_MPU_REGION1_END">
+            <constraint display="Value must be an integer between 0x1FF00003 and 0x200FFFFF">testInteger("${config.bsp.fsp.mpu_reg1_end}") &amp;&amp;
+            (("${config.bsp.fsp.mpu_reg1_end}" &gt;= 0x1FF00003) &amp;&amp;("${config.bsp.fsp.mpu_reg1_end}" &lt;= 0x200FFFFF))
+            </constraint>
+        </property>
+        <property id="config.bsp.fsp.mpu_reg2_enable" display="MPU|Enable or disable Memory Region 2" default="config.bsp.fsp.mpu_reg2_enable.disabled">
+            <option id="config.bsp.fsp.mpu_reg2_enable.enabled" display="Enabled" value="0" />
+            <option id="config.bsp.fsp.mpu_reg2_enable.disabled" display="Disabled" value="1" />
+        </property>
+        <property id="config.bsp.fsp.mpu_reg2_start" display="MPU|Memory Region 2 Start" default="0x407FFFFC" macro="BSP_CFG_ROM_REG_MPU_REGION2_START">
+            <constraint display="Value must be an integer between 0x400C0000 and 0x400DFFFC or between 0x40100000 and 0x407FFFFC">testInteger("${config.bsp.fsp.mpu_reg2_start}") &amp;&amp;
+            (("${config.bsp.fsp.mpu_reg2_start}" &gt;= 0x400C0000) &amp;&amp;("${config.bsp.fsp.mpu_reg2_start}" &lt;= 0x400DFFFC)) ||
+            (("${config.bsp.fsp.mpu_reg2_start}" &gt;= 0x40100000) &amp;&amp;("${config.bsp.fsp.mpu_reg2_start}" &lt;= 0x407FFFFC))
+            </constraint>
+        </property>
+        <property id="config.bsp.fsp.mpu_reg2_end" display="MPU|Memory Region 2 End" default="0x407FFFFF" macro="BSP_CFG_ROM_REG_MPU_REGION2_END">
+            <constraint display="Value must be an integer between 0x400C0003 and 0x400DFFFF or between 0x40100003 and 0x407FFFFF">testInteger("${config.bsp.fsp.mpu_reg2_end}") &amp;&amp;
+            (("${config.bsp.fsp.mpu_reg2_end}" &gt;= 0x400C0003) &amp;&amp;("${config.bsp.fsp.mpu_reg2_end}" &lt;= 0x400DFFFF)) ||
+            (("${config.bsp.fsp.mpu_reg2_end}" &gt;= 0x40100003) &amp;&amp;("${config.bsp.fsp.mpu_reg2_end}" &lt;= 0x407FFFFF))
+            </constraint>
+        </property>
+        <property id="config.bsp.fsp.mpu_reg3_enable" display="MPU|Enable or disable Memory Region 3" default="config.bsp.fsp.mpu_reg3_enable.disabled">
+            <option id="config.bsp.fsp.mpu_reg3_enable.enabled" display="Enabled" value="0" />
+            <option id="config.bsp.fsp.mpu_reg3_enable.disabled" display="Disabled" value="1" />
+        </property>
+        <property id="config.bsp.fsp.mpu_reg3_start" display="MPU|Memory Region 3 Start" default="0x400DFFFC" macro="BSP_CFG_ROM_REG_MPU_REGION3_START">
+            <constraint display="Value must be an integer between 0x400C0000 and 0x400DFFFC or between 0x40100000 and 0x407FFFFC">testInteger("${config.bsp.fsp.mpu_reg3_start}") &amp;&amp;
+            (("${config.bsp.fsp.mpu_reg3_start}" &gt;= 0x400C0000) &amp;&amp;("${config.bsp.fsp.mpu_reg3_start}" &lt;= 0x400DFFFC)) ||
+            (("${config.bsp.fsp.mpu_reg3_start}" &gt;= 0x40100000) &amp;&amp;("${config.bsp.fsp.mpu_reg3_start}" &lt;= 0x407FFFFC))
+            </constraint>
+        </property>
+        <property id="config.bsp.fsp.mpu_reg3_end" display="MPU|Memory Region 3 End" default="0x400DFFFF" macro="BSP_CFG_ROM_REG_MPU_REGION3_END">
+            <constraint display="Value must be an integer between 0x400C0003 and 0x400DFFFF or between 0x40100003 and 0x407FFFFF">testInteger("${config.bsp.fsp.mpu_reg3_end}") &amp;&amp;
+            (("${config.bsp.fsp.mpu_reg3_end}" &gt;= 0x400C0003) &amp;&amp;("${config.bsp.fsp.mpu_reg3_end}" &lt;= 0x400DFFFF)) ||
+            (("${config.bsp.fsp.mpu_reg3_end}" &gt;= 0x40100003) &amp;&amp;("${config.bsp.fsp.mpu_reg3_end}" &lt;= 0x407FFFFF))
+            </constraint>
+        </property>
+        <property id="config.bsp.fsp.hoco_fll" display="Clocks|HOCO FLL Function" default="config.bsp.fsp.hoco_fll.disabled" description="Setting this option to Enabled improves HOCO accuracy significantly by using the subclock, but incurs certain restrictions.\n\nThe FLL function requires the subclock oscillator to be running and stabilized. When enabled and running the PLL or system clock from HOCO, the BSP will wait for both the Subclock Stabilization Time as well as the FLL Stabilization Time when setting up clocks at startup.\n\nWhen FLL is enabled Software Standby and Deep Software Standby modes are not available.">
+            <option id="config.bsp.fsp.hoco_fll.enabled" display="Enabled" value="1" />
+            <option id="config.bsp.fsp.hoco_fll.disabled" display="Disabled" value="0" />
+        </property>
+        <property id="config.bsp.fsp.autodrven" display="Clocks|MOSC Drive Capability Auto Switching" default="config.bsp.fsp.autodrven.disabled" description="When enabled, the drive capability auto switching function lowers the MOSC drive capability automatically after the MOSC starts and suppresses the EMI associated with the MOSC.">
+            <option id="config.bsp.fsp.autodrven.enabled" display="Enabled" value="1" />
+            <option id="config.bsp.fsp.autodrven.disabled" display="Disabled" value="0" />
+        </property>
+        <property id="config.bsp.common.main_osc_wait" display="Clocks|Main Oscillator Wait Time" default="config.bsp.common.main_osc_wait.wait_8163" description="Number of cycles to wait for the main oscillator clock to stabilize.">
+            <option id="config.bsp.common.main_osc_wait.wait_35" display="35 cycles" value="1"/>
+            <option id="config.bsp.common.main_osc_wait.wait_67" display="67 cycles" value="2"/>
+            <option id="config.bsp.common.main_osc_wait.wait_131" display="131 cycles" value="3"/>
+            <option id="config.bsp.common.main_osc_wait.wait_259" display="259 cycles" value="4"/>
+            <option id="config.bsp.common.main_osc_wait.wait_547" display="547 cycles" value="5"/>
+            <option id="config.bsp.common.main_osc_wait.wait_1059" display="1059 cycles" value="6"/>
+            <option id="config.bsp.common.main_osc_wait.wait_2147" display="2147 cycles" value="7"/>
+            <option id="config.bsp.common.main_osc_wait.wait_4291" display="4291 cycles" value="8"/>
+            <option id="config.bsp.common.main_osc_wait.wait_8163" display="8163 cycles" value="9"/>
+        </property>
+        <property id="config.bsp.fsp.mcu.adc.max_freq_hz" default="60000000"/>
+        <property id="config.bsp.fsp.mcu.sci_uart.max_baud" default="20000000"/>
+        <property id="config.bsp.fsp.mcu.spi.max_bitrate" default="30000000"/>
+        <property id="config.bsp.fsp.mcu.adc.sample_and_hold" default="1"/>
+        <!-- This ID is used to throw the constraint to make sure user does not select simultaneously Temperature Sensor and Internal Reference Voltage, also when Temperature Sensor or Internal Reference Voltage is selected any other analog channel should not be selected for specific MCUs -->
+        <!-- This property ID is not used for MCUs that are not applicable -->
+        <property id="config.bsp.fsp.mcu.adc.sensors_are_exclusive" default="0"/>
+        <property id="config.bsp.fsp.mcu.sci_spi.max_bitrate" default="30000000"/>
+        <property id="config.bsp.fsp.mcu.iic_master.rate.rate_fastplus" default="1"/>
+        <property id="config.bsp.fsp.mcu.iic_master.fastplus_channels" default="0x1"/>
+        <property id="config.bsp.fsp.mcu.iic_slave.rate.rate_fastplus" default="1"/>
+        <property id="config.bsp.fsp.mcu.iic_slave.fastplus_channels" default="0x1"/>
+        <property id="config.bsp.fsp.mcu.sci_uart.cstpen_channels" default="0x0" />
+        <property id="config.bsp.fsp.mcu.gpt.pin_count_source_channels" default="0xFFFF" />
+        <property id="config.bsp.common.id_mode" default="config.bsp.common.id_mode.unlocked" display="ID Code Mode" description="When set to 'Locked with All Erase support', the ID Code must be set in the debugger to read or write data to the MCU, but the All Erase command is still accepted regardless. When set to 'Locked', all erase/download/debug access is disabled unless the ID Code is provided.">
+            <option id="config.bsp.common.id_mode.unlocked" display="Unlocked (Ignore ID)" value="0xFFFFFFFF" />
+            <option id="config.bsp.common.id_mode.enabled_all_erase" display="Locked with All Erase support" value="0xC0000000" />
+            <option id="config.bsp.common.id_mode.enabled_no_all_erase" display="Locked" value="0x80000000" />
+        </property>
+        <property id="config.bsp.common.id_code" display="ID Code (32 Hex Characters)" default="FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF" description="Set the ID Code for locking debug access. This setting is only used when the ID Code Mode is not set to Unlocked.">
+            <constraint display="Value must be a 32 character long hex string">"${config.bsp.common.id_code}".length == 32</constraint>
+        </property>
+        <property id="config.bsp.common.id1" default="" macro="BSP_CFG_ID_CODE_LONG_1">
+            <export>eval(' \
+            value = ("${config.bsp.common.id_mode}" == "0xFFFFFFFF") ? "FFFFFFFF" : ("${config.bsp.common.id_code}" + "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF").substring(0, 8), \
+            /* convert to little endian */ \
+            value.substring(6, 8) + value.substring(4, 6) + value.substring(2, 4) + value.substring(0, 2) \
+            ')</export>
+        </property>
+        <property id="config.bsp.common.id2" default="" macro="BSP_CFG_ID_CODE_LONG_2">
+            <export>eval(' \
+            value = ("${config.bsp.common.id_mode}" == "0xFFFFFFFF") ? "FFFFFFFF" : ("${config.bsp.common.id_code}" + "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF").substring(8, 16), \
+            /* convert to little endian */ \
+            value.substring(6, 8) + value.substring(4, 6) + value.substring(2, 4) + value.substring(0, 2) \
+            ')</export>
+        </property>
+        <property id="config.bsp.common.id3" default="" macro="BSP_CFG_ID_CODE_LONG_3">
+            <export>eval(' \
+            value = ("${config.bsp.common.id_mode}" == "0xFFFFFFFF") ? "FFFFFFFF" : ("${config.bsp.common.id_code}" + "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF").substring(16, 24), \
+            /* convert to little endian */ \
+            value.substring(6, 8) + value.substring(4, 6) + value.substring(2, 4) + value.substring(0, 2) \
+            ')</export>
+        </property>
+        <property id="config.bsp.common.id4" default="" macro="BSP_CFG_ID_CODE_LONG_4">
+            <export>eval(' \
+            value = ("${config.bsp.common.id_mode}" == "0xFFFFFFFF") ? "FFFFFFFF" : ("${config.bsp.common.id_code}" + "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF").substring(24, 32), \
+            high_id_byte = parseInt(value.substring(6, 8), 16), \
+            high_mode_byte = parseInt(("${config.bsp.common.id_mode}").substring(2, 4), 16), \
+            high_byte = ((high_id_byte &amp; 0x3F) | high_mode_byte).toString(16), \
+            /* convert to little endian */ \
+            high_byte + value.substring(4, 6) + value.substring(2, 4) + value.substring(0, 2)')</export>
+        </property>
+        <property id="config.bsp.common.id_fixed" default="">
+            <export>eval(' \
+                value = ("${config.bsp.common.id_code}" + "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"), \
+                low_bytes = value.substring(0,30), \
+                high_id_byte = parseInt(value.substring(29, 32), 16), \
+                high_mode_byte = parseInt(("${config.bsp.common.id_mode}").substring(2, 4), 16), \
+                /* add 0x100 to force string to be padded */ \
+                high_byte = (0x100 + ((high_id_byte &amp; 0x3F) | high_mode_byte)).toString(16).substring(1,3), \
+                ("${config.bsp.common.id_mode}" == "0xFFFFFFFF") ? "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF" : low_bytes + high_byte')</export>
+        </property>
+        <content>
+            #ifdef __cplusplus
+            extern "C" {
+            #endif
+
+            #include "bsp_mcu_device_pn_cfg.h"
+            #include "bsp_mcu_device_cfg.h"
+            #include "../../../ra/fsp/src/bsp/mcu/ra6t1/bsp_mcu_info.h"
+            #include "bsp_clock_cfg.h"
+            #define BSP_MCU_GROUP_RA6T1 (1)
+            #define BSP_LOCO_HZ                 (32768)
+            #define BSP_MOCO_HZ                 (8000000)
+            #define BSP_SUB_CLOCK_HZ            (32768)
+            #if   BSP_CFG_HOCO_FREQUENCY == 0
+                #define BSP_HOCO_HZ                 (16000000)
+            #elif BSP_CFG_HOCO_FREQUENCY == 1
+                #define BSP_HOCO_HZ                 (18000000)
+            #elif BSP_CFG_HOCO_FREQUENCY == 2
+                #define BSP_HOCO_HZ                 (20000000)
+            #else
+                #error "Invalid HOCO frequency chosen (BSP_CFG_HOCO_FREQUENCY) in bsp_clock_cfg.h"
+            #endif
+
+            #define BSP_CFG_FLL_ENABLE                 (${config.bsp.fsp.hoco_fll})
+            #ifndef BSP_CLOCK_CFG_AUTODRVEN
+                #define BSP_CLOCK_CFG_AUTODRVEN            (${config.bsp.fsp.autodrven})
+            #endif
+            #ifndef BSP_CLOCK_CFG_MAIN_OSC_WAIT
+                #define BSP_CLOCK_CFG_MAIN_OSC_WAIT        (${config.bsp.common.main_osc_wait})
+            #endif
+
+            #define BSP_CORTEX_VECTOR_TABLE_ENTRIES    (16U)
+            #define BSP_VECTOR_TABLE_MAX_ENTRIES       (112U)
+            #define BSP_CFG_INLINE_IRQ_FUNCTIONS       (${config.bsp.fsp.inline_irq_functions})
+
+            #define OFS_SEQ1 0xA001A001 | (${config.bsp.fsp.OFS0.iwdt_start_mode}) | (${config.bsp.fsp.OFS0.iwdt_timeout})
+            #define OFS_SEQ2 (${config.bsp.fsp.OFS0.iwdt_divisor}) | (${config.bsp.fsp.OFS0.iwdt_window_end}) | (${config.bsp.fsp.OFS0.iwdt_window_start})
+            #define OFS_SEQ3 (${config.bsp.fsp.OFS0.iwdt_reset_interrupt}) | (${config.bsp.fsp.OFS0.iwdt_stop_control}) | (${config.bsp.fsp.OFS0.wdt_start_mode})
+            #define OFS_SEQ4 (${config.bsp.fsp.OFS0.wdt_timeout}) |(${config.bsp.fsp.OFS0.wdt_divisor}) | (${config.bsp.fsp.OFS0.wdt_window_end}) | (${config.bsp.fsp.OFS0.wdt_window_start})
+            #define OFS_SEQ5 (${config.bsp.fsp.OFS0.wdt_reset_interrupt}) | (${config.bsp.fsp.OFS0.wdt_stop_control})
+            #define BSP_CFG_ROM_REG_OFS0 (OFS_SEQ1 | OFS_SEQ2 | OFS_SEQ3 | OFS_SEQ4 | OFS_SEQ5)
+            #define BSP_CFG_ROM_REG_OFS1 (0xFFFFFEF8 | (${config.bsp.fsp.OFS1.voltage_detection0.start}) | (${config.bsp.fsp.OFS1.voltage_detection0_level}) |  (${config.bsp.fsp.OFS1.hoco_osc}))
+            #define BSP_CFG_ROM_REG_MPU_PC0_ENABLE (${config.bsp.fsp.mpu_pc0_enable})
+            #define BSP_CFG_ROM_REG_MPU_PC0_START (${config.bsp.fsp.mpu_pc0_start})
+            #define BSP_CFG_ROM_REG_MPU_PC0_END (${config.bsp.fsp.mpu_pc0_end})
+            #define BSP_CFG_ROM_REG_MPU_PC1_ENABLE (${config.bsp.fsp.mpu_pc1_enable})
+            #define BSP_CFG_ROM_REG_MPU_PC1_START (${config.bsp.fsp.mpu_pc1_start})
+            #define BSP_CFG_ROM_REG_MPU_PC1_END (${config.bsp.fsp.mpu_pc1_end})
+            #define BSP_CFG_ROM_REG_MPU_REGION0_ENABLE (${config.bsp.fsp.mpu_reg0_enable})
+            #define BSP_CFG_ROM_REG_MPU_REGION0_START (${config.bsp.fsp.mpu_reg0_start})
+            #define BSP_CFG_ROM_REG_MPU_REGION0_END (${config.bsp.fsp.mpu_reg0_end})
+            #define BSP_CFG_ROM_REG_MPU_REGION1_ENABLE (${config.bsp.fsp.mpu_reg1_enable})
+            #define BSP_CFG_ROM_REG_MPU_REGION1_START (${config.bsp.fsp.mpu_reg1_start})
+            #define BSP_CFG_ROM_REG_MPU_REGION1_END (${config.bsp.fsp.mpu_reg1_end})
+            #define BSP_CFG_ROM_REG_MPU_REGION2_ENABLE (${config.bsp.fsp.mpu_reg2_enable})
+            #define BSP_CFG_ROM_REG_MPU_REGION2_START (${config.bsp.fsp.mpu_reg2_start})
+            #define BSP_CFG_ROM_REG_MPU_REGION2_END (${config.bsp.fsp.mpu_reg2_end})
+            #define BSP_CFG_ROM_REG_MPU_REGION3_ENABLE (${config.bsp.fsp.mpu_reg3_enable})
+            #define BSP_CFG_ROM_REG_MPU_REGION3_START (${config.bsp.fsp.mpu_reg3_start})
+            #define BSP_CFG_ROM_REG_MPU_REGION3_END (${config.bsp.fsp.mpu_reg3_end})
+
+            /* Used to create IELS values for the interrupt initialization table g_interrupt_event_link_select. */
+            #define BSP_PRV_IELS_ENUM(vector)    (ELC_ ## vector)
+            /*
+            ID Code
+            Note: To lock and disable the debug interface define BSP_ID_CODE_LOCKED in compiler settings.
+            WARNING: This will disable debug access to the part. However, ALeRASE command will be accepted, which will clear (reset) the ID code. After clearing ID code, debug access will be enabled.
+            Please read the HWM for full details of the clearing process.
+            */
+            #if defined(BSP_ID_CODE_LOCKED)
+            #define BSP_CFG_ID_CODE_LONG_1 (0x00000000)
+            #define BSP_CFG_ID_CODE_LONG_2 (0x00000000)
+            #define BSP_CFG_ID_CODE_LONG_3 (0x00000000)
+            #define BSP_CFG_ID_CODE_LONG_4 (0x00000000)
+            #else
+            /* ID CODE: ${config.bsp.common.id_fixed} */
+            #define BSP_CFG_ID_CODE_LONG_1 (0x${config.bsp.common.id1})
+            #define BSP_CFG_ID_CODE_LONG_2 (0x${config.bsp.common.id2})
+            #define BSP_CFG_ID_CODE_LONG_3 (0x${config.bsp.common.id3})
+            #define BSP_CFG_ID_CODE_LONG_4 (0x${config.bsp.common.id4})
+            #endif
+
+            #ifdef __cplusplus
+            }
+            #endif
+        </content>
+    </config>
+    <bsp id="bsp.ra6t1.fsp" config="config.bsp.ra6t1.fsp" display="RA6T1 Family" version="0">
+        <provides interface="interface.mcu.flash_rv40f" />
+
+        <enum id="enum.mcu.nvic.priorities.mandatory" default="board.icu.common.irq.priority12">
+            <option display="Priority 0 (highest)" id="board.icu.common.irq.priority0" value="(0)" />
+            <option display="Priority 1" id="board.icu.common.irq.priority1" value="(1)" />
+            <option display="Priority 2" id="board.icu.common.irq.priority2" value="(2)" />
+            <option display="Priority 3" id="board.icu.common.irq.priority3" value="(3)" />
+            <option display="Priority 4" id="board.icu.common.irq.priority4" value="(4)" />
+            <option display="Priority 5" id="board.icu.common.irq.priority5" value="(5)" />
+            <option display="Priority 6" id="board.icu.common.irq.priority6" value="(6)" />
+            <option display="Priority 7" id="board.icu.common.irq.priority7" value="(7)" />
+            <option display="Priority 8" id="board.icu.common.irq.priority8" value="(8)" />
+            <option display="Priority 9" id="board.icu.common.irq.priority9" value="(9)" />
+            <option display="Priority 10" id="board.icu.common.irq.priority10" value="(10)" />
+            <option display="Priority 11" id="board.icu.common.irq.priority11" value="(11)" />
+            <option display="Priority 12" id="board.icu.common.irq.priority12" value="(12)" />
+            <option display="Priority 13" id="board.icu.common.irq.priority13" value="(13)" />
+            <option display="Priority 14" id="board.icu.common.irq.priority14" value="(14)" />
+            <option display="Priority 15" id="board.icu.common.irq.priority15" value="(15)" />
+        </enum>
+        <enum id="enum.mcu.nvic.priorities.optional" default="_disabled">
+            <option display="Priority 0 (highest)" id="board.icu.common.irq.priority0" value="(0)" />
+            <option display="Priority 1" id="board.icu.common.irq.priority1" value="(1)" />
+            <option display="Priority 2" id="board.icu.common.irq.priority2" value="(2)" />
+            <option display="Priority 3" id="board.icu.common.irq.priority3" value="(3)" />
+            <option display="Priority 4" id="board.icu.common.irq.priority4" value="(4)" />
+            <option display="Priority 5" id="board.icu.common.irq.priority5" value="(5)" />
+            <option display="Priority 6" id="board.icu.common.irq.priority6" value="(6)" />
+            <option display="Priority 7" id="board.icu.common.irq.priority7" value="(7)" />
+            <option display="Priority 8" id="board.icu.common.irq.priority8" value="(8)" />
+            <option display="Priority 9" id="board.icu.common.irq.priority9" value="(9)" />
+            <option display="Priority 10" id="board.icu.common.irq.priority10" value="(10)" />
+            <option display="Priority 11" id="board.icu.common.irq.priority11" value="(11)" />
+            <option display="Priority 12" id="board.icu.common.irq.priority12" value="(12)" />
+            <option display="Priority 13" id="board.icu.common.irq.priority13" value="(13)" />
+            <option display="Priority 14" id="board.icu.common.irq.priority14" value="(14)" />
+            <option display="Priority 15" id="board.icu.common.irq.priority15" value="(15)" />
+            <option display="Disabled" id="_disabled" value="(BSP_IRQ_DISABLED)" />
+        </enum>
+        <enum id="enum.mcu.hw_stack_monitoring" default="config.mcu.hw_stack_monitoring.enabled">
+            <option id="config.mcu.hw_stack_monitoring.enabled" display="Enabled" value="1" />
+            <option id="config.mcu.hw_stack_monitoring.disabled" display="Disabled" value="0" />
+        </enum>
+        <enum id="enum.mcu.lpm.mode" default="module.driver.lpm.mode.sleep">
+            <option display="Sleep mode" id="module.driver.lpm.mode.sleep" value="LPM_MODE_SLEEP" />
+            <option display="Software Standby mode" id="module.driver.lpm.mode.standby" value="LPM_MODE_STANDBY" />
+            <option display="Snooze mode" id="module.driver.lpm.mode.standby_snooze" value="LPM_MODE_STANDBY_SNOOZE" />
+            <option display="Deep Software Standby mode" id="module.driver.lpm.mode.deep" value="LPM_MODE_DEEP" />
+        </enum>
+        <enum id="enum.mcu.lpm.output_port_enable_standby" default="module.driver.lpm.output_port_enable_standby.no_change">
+            <option display="High impedance state" id="module.driver.lpm.output_port_enable_standby.high_impedance" value="LPM_OUTPUT_PORT_ENABLE_HIGH_IMPEDANCE"/>
+            <option display="No change" id="module.driver.lpm.output_port_enable_standby.no_change" value="LPM_OUTPUT_PORT_ENABLE_RETAIN"/>
+        </enum>
+        <enum id="enum.mcu.lpm.standby_wake_sources" default="">
+            <option display="IRQ0" id="module.driver.lpm.standby_wake_irq0" value="IRQ0"/>
+            <option display="IRQ1" id="module.driver.lpm.standby_wake_irq1" value="IRQ1"/>
+            <option display="IRQ2" id="module.driver.lpm.standby_wake_irq2" value="IRQ2"/>
+            <option display="IRQ3" id="module.driver.lpm.standby_wake_irq3" value="IRQ3"/>
+            <option display="IRQ4" id="module.driver.lpm.standby_wake_irq4" value="IRQ4"/>
+            <option display="IRQ5" id="module.driver.lpm.standby_wake_irq5" value="IRQ5"/>
+            <option display="IRQ6" id="module.driver.lpm.standby_wake_irq6" value="IRQ6"/>
+            <option display="IRQ7" id="module.driver.lpm.standby_wake_irq7" value="IRQ7"/>
+            <option display="IRQ8" id="module.driver.lpm.standby_wake_irq8" value="IRQ8"/>
+            <option display="IRQ9" id="module.driver.lpm.standby_wake_irq9" value="IRQ9"/>
+            <option display="IRQ10" id="module.driver.lpm.standby_wake_irq10" value="IRQ10"/>
+            <option display="IRQ11" id="module.driver.lpm.standby_wake_irq11" value="IRQ11"/>
+            <option display="IRQ12" id="module.driver.lpm.standby_wake_irq12" value="IRQ12"/>
+            <option display="IRQ13" id="module.driver.lpm.standby_wake_irq13" value="IRQ13"/>
+            <option display="IWDT" id="module.driver.lpm.standby_wake_iwdt" value="IWDT"/>
+            <option display="Key Interrupt" id="module.driver.lpm.standby_wake_key" value="KEY"/>
+            <option display="LVD1 Interrupt" id="module.driver.lpm.standby_wake_lvd1" value="LVD1"/>
+            <option display="LVD2 Interrupt" id="module.driver.lpm.standby_wake_lvd2" value="LVD2"/>
+            <option display="Analog Comparator High-speed 0 Interrupt" id="module.driver.lpm.standby_wake_acmphs0" value="ACMPHS0"/>
+            <option display="AGT1 Underflow" id="module.driver.lpm.standby_wake_agt1ud" value="AGT1UD"/>
+            <option display="AGT1 Compare Match A" id="module.driver.lpm.standby_wake_agt1ca" value="AGT1CA"/>
+            <option display="AGT1 Compare Match B" id="module.driver.lpm.standby_wake_agt1cb" value="AGT1CB"/>
+            <option display="I2C 0" id="module.driver.lpm.standby_wake_iic0" value="IIC0"/>
+        </enum>
+        <enum id="enum.mcu.lpm.standby_wake_sources_2" default="">
+            <!-- Wake Source 2 is unsupported on this MCU. -->
+        </enum>
+        <enum id="enum.mcu.lpm.snooze_request" default="module.driver.lpm.snooze_request_rxd0_falling">
+            <option display="RXD0 falling edge" id="module.driver.lpm.snooze_request_rxd0_falling" value="LPM_SNOOZE_REQUEST_RXD0_FALLING"/>
+            <option display="IRQ0" id="module.driver.lpm.snooze_request_irq0" value="LPM_SNOOZE_REQUEST_IRQ0"/>
+            <option display="IRQ1" id="module.driver.lpm.snooze_request_irq1" value="LPM_SNOOZE_REQUEST_IRQ1"/>
+            <option display="IRQ2" id="module.driver.lpm.snooze_request_irq2" value="LPM_SNOOZE_REQUEST_IRQ2"/>
+            <option display="IRQ3" id="module.driver.lpm.snooze_request_irq3" value="LPM_SNOOZE_REQUEST_IRQ3"/>
+            <option display="IRQ4" id="module.driver.lpm.snooze_request_irq4" value="LPM_SNOOZE_REQUEST_IRQ4"/>
+            <option display="IRQ5" id="module.driver.lpm.snooze_request_irq5" value="LPM_SNOOZE_REQUEST_IRQ5"/>
+            <option display="IRQ6" id="module.driver.lpm.snooze_request_irq6" value="LPM_SNOOZE_REQUEST_IRQ6"/>
+            <option display="IRQ7" id="module.driver.lpm.snooze_request_irq7" value="LPM_SNOOZE_REQUEST_IRQ7"/>
+            <option display="IRQ8" id="module.driver.lpm.snooze_request_irq8" value="LPM_SNOOZE_REQUEST_IRQ8"/>
+            <option display="IRQ9" id="module.driver.lpm.snooze_request_irq9" value="LPM_SNOOZE_REQUEST_IRQ9"/>
+            <option display="IRQ10" id="module.driver.lpm.snooze_request_irq10" value="LPM_SNOOZE_REQUEST_IRQ10"/>
+            <option display="IRQ11" id="module.driver.lpm.snooze_request_irq11" value="LPM_SNOOZE_REQUEST_IRQ11"/>
+            <option display="IRQ12" id="module.driver.lpm.snooze_request_irq12" value="LPM_SNOOZE_REQUEST_IRQ12"/>
+            <option display="IRQ13" id="module.driver.lpm.snooze_request_irq13" value="LPM_SNOOZE_REQUEST_IRQ13"/>
+            <option display="KINT (Key Interrupt)" id="module.driver.lpm.snooze_request_key" value="LPM_SNOOZE_REQUEST_KEY"/>
+            <option display="ACMPHS0 (High-speed Analog Comparator 0)" id="module.driver.lpm.snooze_request_acmphs0" value="LPM_SNOOZE_REQUEST_ACMPHS0"/>
+            <option display="AGT1 Underflow" id="module.driver.lpm.snooze_request_agt1_underflow" value="LPM_SNOOZE_REQUEST_AGT1_UNDERFLOW"/>
+            <option display="AGT1 Compare Match A" id="module.driver.lpm.snooze_request_agt1_compare_a" value="LPM_SNOOZE_REQUEST_AGT1_COMPARE_A"/>
+            <option display="AGT1 Compare Match B" id="module.driver.lpm.snooze_request_agt1_compare_b" value="LPM_SNOOZE_REQUEST_AGT1_COMPARE_B"/>
+        </enum>
+        <enum id="enum.mcu.lpm.snooze_end_sources" default="">
+            <option display="AGT1 Underflow" id="module.driver.lpm.snooze_end_agt1_underflow" value="AGT1_UNDERFLOW"/>
+            <option display="DTC Transfer Completion" id="module.driver.lpm.snooze_end_dtc_complete" value="DTC_TRANS_COMPLETE"/>
+            <option display="DTC Transfer Completion Negated signal" id="module.driver.lpm.snooze_end_dtc_complete_negated" value="DTC_TRANS_COMPLETE_NEGATED"/>
+            <option display="ADC0 Compare Match" id="module.driver.lpm.snooze_end_adc0_compare_match" value="ADC0_COMPARE_MATCH"/>
+            <option display="ADC0 Compare Mismatch" id="module.driver.lpm.snooze_end_adc0_compare_mismatch" value="ADC0_COMPARE_MISMATCH"/>
+            <option display="ADC1 Compare Match" id="module.driver.lpm.snooze_end_adc1_compare_match" value="ADC1_COMPARE_MATCH"/>
+            <option display="ADC1 Compare Mismatch" id="module.driver.lpm.snooze_end_adc1_compare_mismatch" value="ADC1_COMPARE_MISMATCH"/>
+            <option display="SCI0 Address Match" id="module.driver.lpm.snooze_end_sci0_compare_mismatch" value="SCI0_ADDRESS_MATCH"/>
+        </enum>
+        <enum id="enum.mcu.lpm.snooze_cancel_source" default="enum.mcu.lpm.snooze_cancel_source.none">
+            <option display="None" id="enum.mcu.lpm.snooze_cancel_source.none" value="LPM_SNOOZE_CANCEL_SOURCE_NONE"/>
+            <option display="ADC Unit 0 Compare Match" id="enum.mcu.lpm.snooze_cancel_source.adc0_wcmpm" value="LPM_SNOOZE_CANCEL_SOURCE_ADC0_WCMPM"/>
+            <option display="ADC Unit 0 Compare Mismatch" id="enum.mcu.lpm.snooze_cancel_source.adc0_wcmpum" value="LPM_SNOOZE_CANCEL_SOURCE_ADC0_WCMPUM"/>
+            <option display="ADC Unit 1 Compare Match" id="enum.mcu.lpm.snooze_cancel_source.adc1_wcmpm" value="LPM_SNOOZE_CANCEL_SOURCE_ADC1_WCMPM"/>
+            <option display="ADC Unit 1 Compare Mismatch" id="enum.mcu.lpm.snooze_cancel_source.adc1_wcmpum" value="LPM_SNOOZE_CANCEL_SOURCE_ADC1_WCMPUM"/>
+            <option display="SCI0 Address Match" id="enum.mcu.lpm.snooze_cancel_source.sci0_am" value="LPM_SNOOZE_CANCEL_SOURCE_SCI0_AM"/>
+            <option display="SCI0 Receive or Error" id="enum.mcu.lpm.snooze_cancel_source.sci0_rxi_or_eri" value="LPM_SNOOZE_CANCEL_SOURCE_SCI0_RXI_OR_ERI"/>
+            <option display="DTC Transfer Complete" id="enum.mcu.lpm.snooze_cancel_source.dtc_complete" value="LPM_SNOOZE_CANCEL_SOURCE_DTC_COMPLETE"/>
+            <option display="DOC Interrupt" id="enum.mcu.lpm.snooze_cancel_source.doc_int" value="LPM_SNOOZE_CANCEL_SOURCE_DOC_DOPCI"/>
+        </enum>
+        <enum id="enum.mcu.lpm.snooze_dtc" default="module.driver.lpm.snooze_dtc.lpm_snooze_dtc_disable">
+            <option display="Disabled" id="module.driver.lpm.snooze_dtc.lpm_snooze_dtc_disable" value="LPM_SNOOZE_DTC_DISABLE"/>
+            <option display="Enabled" id="module.driver.lpm.snooze_dtc.lpm_snooze_dtc_enable" value="LPM_SNOOZE_DTC_ENABLE"/>
+        </enum>
+        <enum id="enum.mcu.lpm.deep_standby_cancel_sources" default="">
+            <option display="IRQ0" id="module.driver.lpm.deep_standby_cancel_irq0" value="IRQ0"/>
+            <option display="IRQ1" id="module.driver.lpm.deep_standby_cancel_irq1" value="IRQ1"/>
+            <option display="IRQ4" id="module.driver.lpm.deep_standby_cancel_irq4" value="IRQ4"/>
+            <option display="IRQ5" id="module.driver.lpm.deep_standby_cancel_irq5" value="IRQ5"/>
+            <option display="IRQ6" id="module.driver.lpm.deep_standby_cancel_irq6" value="IRQ6"/>
+            <option display="IRQ7" id="module.driver.lpm.deep_standby_cancel_irq7" value="IRQ7"/>
+            <option display="IRQ8" id="module.driver.lpm.deep_standby_cancel_irq8" value="IRQ8"/>
+            <option display="IRQ9" id="module.driver.lpm.deep_standby_cancel_irq9" value="IRQ9"/>
+            <option display="IRQ10" id="module.driver.lpm.deep_standby_cancel_irq10" value="IRQ10"/>
+            <option display="IRQ11" id="module.driver.lpm.deep_standby_cancel_irq11" value="IRQ11"/>
+            <option display="IRQ12" id="module.driver.lpm.deep_standby_cancel_irq12" value="IRQ12"/>
+            <option display="LVD1" id="module.driver.lpm.deep_standby_cancel_lvd1" value="LVD1"/>
+            <option display="LVD2" id="module.driver.lpm.deep_standby_cancel_lvd2" value="LVD2"/>
+            <option display="NMI" id="module.driver.lpm.deep_standby_cancel_nmi" value="NMI"/>
+            <option display="AGT1 Underflow" id="module.driver.lpm.deep_standby_cancel_agt1" value="AGT1"/>
+        </enum>
+        <enum id="enum.mcu.lpm.deep_standby_cancel_edges" default="">
+            <option display="IRQ0 Rising Edge" id="module.driver.lpm.deep_standby_cancel_irq0.edge" value="IRQ0_RISING"/>
+            <option display="IRQ1 Rising Edge" id="module.driver.lpm.deep_standby_cancel_irq1.edge" value="IRQ1_RISING"/>
+            <option display="IRQ4 Rising Edge" id="module.driver.lpm.deep_standby_cancel_irq4.edge" value="IRQ4_RISING"/>
+            <option display="IRQ5 Rising Edge" id="module.driver.lpm.deep_standby_cancel_irq5.edge" value="IRQ5_RISING"/>
+            <option display="IRQ6 Rising Edge" id="module.driver.lpm.deep_standby_cancel_irq6.edge" value="IRQ6_RISING"/>
+            <option display="IRQ7 Rising Edge" id="module.driver.lpm.deep_standby_cancel_irq7.edge" value="IRQ7_RISING"/>
+            <option display="IRQ8 Rising Edge" id="module.driver.lpm.deep_standby_cancel_irq8.edge" value="IRQ8_RISING"/>
+            <option display="IRQ9 Rising Edge" id="module.driver.lpm.deep_standby_cancel_irq9.edge" value="IRQ9_RISING"/>
+            <option display="IRQ10 Rising Edge" id="module.driver.lpm.deep_standby_cancel_irq10.edge" value="IRQ10_RISING"/>
+            <option display="IRQ11 Rising Edge" id="module.driver.lpm.deep_standby_cancel_irq11.edge" value="IRQ11_RISING"/>
+            <option display="IRQ12 Rising Edge" id="module.driver.lpm.deep_standby_cancel_irq12.edge" value="IRQ12_RISING"/>
+            <option display="LVD1 Rising Edge" id="module.driver.lpm.deep_standby_cancel_lvd1.edge" value="LVD1_RISING"/>
+            <option display="LVD2 Rising Edge" id="module.driver.lpm.deep_standby_cancel_lvd2.edge" value="LVD2_RISING"/>
+            <option display="NMI Rising Edge" id="module.driver.lpm.deep_standby_cancel_nmi.edge" value="NMI_RISING"/>
+        </enum>
+        <!-- IO states on exit from Deep Standby -->
+        <enum id="enum.mcu.lpm.io_port_deep_standby_exit" default="module.driver.lpm.io_port_deep_standby_exit.no_change">
+            <option display="Maintain the IO port states" id="module.driver.lpm.io_port_deep_standby_exit.no_change" value="LPM_IO_PORT_NO_CHANGE"/>
+            <option display="Reset the IO port states" id="module.driver.lpm.io_port_deep_standby_exit.reset" value="LPM_IO_PORT_RESET"/>
+        </enum>
+        <!-- Internal power supply state in deep standby (Deepcut) -->
+        <enum id="enum.mcu.lpm.power_supply_deep_standby" default="module.driver.lpm.power_supply_deep_standby.deepcut0">
+            <option display="Maintain the internal power supply" id="module.driver.lpm.power_supply_deep_standby.deepcut0" value="LPM_POWER_SUPPLY_DEEPCUT0"/>
+            <option display="Cut the power supply to low-speed on-chip oscillator, AGTn" id="module.driver.lpm.power_supply_deep_standby.deepcut1" value="LPM_POWER_SUPPLY_DEEPCUT1"/>
+            <option display="Cut the power supply to LVDn, low-speed on-chip oscillator, AGTn. Enable low power function of power-on reset circuit" id="module.driver.lpm.power_supply_deep_standby.deepcut3" value="LPM_POWER_SUPPLY_DEEPCUT3"/>
+        </enum>
+        <enum id="enum.mcu.lpm.ram_power_enable" default="">
+            <!-- Feature not supported on this MCU. -->
+        </enum>
+        <enum id="enum.mcu.lpm.tcm_power_enable" default="enum.mcu.lpm.tcm_power_enable.disable">
+            <option display="Not Supported" id="enum.mcu.lpm.tcm_power_enable.disable" value="false"/>
+        </enum>
+        <enum id="enum.mcu.lpm.standby_ram_power_enable" default="enum.mcu.lpm.standby_ram_power_enable.disable">
+            <option display="Not Supported" id="enum.mcu.lpm.standby_ram_power_enable.disable" value="false"/>
+        </enum>
+        <enum id="enum.mcu.lpm.oscillator_ldo_state.pll1" default="enum.mcu.lpm.oscillator_ldo_state.pll1.disable">
+            <option display="Not Supported" id="enum.mcu.lpm.oscillator_ldo_state.pll1.disable" value="false"/>
+        </enum>
+        <enum id="enum.mcu.lpm.oscillator_ldo_state.pll2" default="enum.mcu.lpm.oscillator_ldo_state.pll2.disable">
+            <option display="Not Supported" id="enum.mcu.lpm.oscillator_ldo_state.pll2.disable" value="false"/>
+        </enum>
+        <enum id="enum.mcu.lpm.oscillator_ldo_state.hoco" default="enum.mcu.lpm.oscillator_ldo_state.hoco.disable">
+            <option display="Not Supported" id="enum.mcu.lpm.oscillator_ldo_state.hoco.disable" value="false"/>
+        </enum>
+        <enum id="enum.mcu.lpm.supply_sosc_clock" default="module.driver.lpm.supply_sosc_clock.lpm_supply_sosc_clock_enable">
+            <option display="Not Supported" id="module.driver.lpm.supply_sosc_clock.lpm_supply_sosc_clock_enable" value="false"/>
+        </enum>
+        <enum id="enum.mcu.lpm.hsoco_speed" default="module.driver.lpm.hsoco_speed.lpm_hsoco_speed_normal_speed">
+            <option display="Not Supported" id="module.driver.lpm.hsoco_speed.lpm_hsoco_speed_normal_speed" value="false"/>
+        </enum>
+        <enum id="enum.mcu.lpm.flash_mode" default="module.driver.lpm.flash_mode.lpm_flash_mode_flash_active">
+            <option display="Not Supported" id="module.driver.lpm.flash_mode.lpm_flash_mode_flash_active" value="false"/>
+        </enum>
+        <enum id="enum.mcu.lvd.monitor" default="module.driver.lvd.voltage_threshold.LVD_THRESHOLD_MONITOR_1_LEVEL_2_99V">
+            <option display="Monitor 1 (2.99V)" id="module.driver.lvd.voltage_threshold.LVD_THRESHOLD_MONITOR_1_LEVEL_2_99V" value="LVD_THRESHOLD_MONITOR_1_LEVEL_2_99V"/>
+            <option display="Monitor 1 (2.92V)" id="module.driver.lvd.voltage_threshold.LVD_THRESHOLD_MONITOR_1_LEVEL_2_92V" value="LVD_THRESHOLD_MONITOR_1_LEVEL_2_92V"/>
+            <option display="Monitor 1 (2.85V)" id="module.driver.lvd.voltage_threshold.LVD_THRESHOLD_MONITOR_1_LEVEL_2_85V" value="LVD_THRESHOLD_MONITOR_1_LEVEL_2_85V"/>
+            <option display="Monitor 2 (2.99V)" id="module.driver.lvd.voltage_threshold.LVD_THRESHOLD_MONITOR_2_LEVEL_2_99V" value="LVD_THRESHOLD_MONITOR_2_LEVEL_2_99V"/>
+            <option display="Monitor 2 (2.92V)" id="module.driver.lvd.voltage_threshold.LVD_THRESHOLD_MONITOR_2_LEVEL_2_92V" value="LVD_THRESHOLD_MONITOR_2_LEVEL_2_92V"/>
+            <option display="Monitor 2 (2.85V)" id="module.driver.lvd.voltage_threshold.LVD_THRESHOLD_MONITOR_2_LEVEL_2_85V" value="LVD_THRESHOLD_MONITOR_2_LEVEL_2_85V"/>
+        </enum>
+        <enum id="enum.mcu.lvd.detection_response" default="module.driver.lvd.detection_response.LVD_RESPONSE_NONE">
+            <option display="Maskable interrupt" id="module.driver.lvd.detection_response.LVD_RESPONSE_INTERRUPT" value="LVD_RESPONSE_INTERRUPT"/>
+            <option display="Non-maskable interrupt" id="module.driver.lvd.detection_response.LVD_RESPONSE_NMI" value="LVD_RESPONSE_NMI"/>
+            <option display="Reset MCU on falling edge" id="module.driver.lvd.detection_response.LVD_RESPONSE_RESET" value="LVD_RESPONSE_RESET"/>
+            <option display="No response (Voltage monitor status will be polled)" id="module.driver.lvd.detection_response.LVD_RESPONSE_NONE" value="LVD_RESPONSE_NONE"/>
+        </enum>
+        <enum id="enum.mcu.lvd.sample_clock_divisor" default="module.driver.lvd.sample_clock_divisor.LVD_SAMPLE_CLOCK_DISABLED">
+            <option display="Disabled" id="module.driver.lvd.sample_clock_divisor.LVD_SAMPLE_CLOCK_DISABLED" value="LVD_SAMPLE_CLOCK_DISABLED"/>
+            <option display="Sampling clock is LOCO/2" id="module.driver.lvd.sample_clock_divisor.LVD_SAMPLE_CLOCK_LOCO_DIV_2" value="LVD_SAMPLE_CLOCK_LOCO_DIV_2"/>
+            <option display="Sampling clock is LOCO/4" id="module.driver.lvd.sample_clock_divisor.LVD_SAMPLE_CLOCK_LOCO_DIV_4" value="LVD_SAMPLE_CLOCK_LOCO_DIV_4"/>
+            <option display="Sampling clock is LOCO/8" id="module.driver.lvd.sample_clock_divisor.LVD_SAMPLE_CLOCK_LOCO_DIV_8" value="LVD_SAMPLE_CLOCK_LOCO_DIV_8"/>
+            <option display="Sampling clock is LOCO/16" id="module.driver.lvd.sample_clock_divisor.LVD_SAMPLE_CLOCK_LOCO_DIV_16" value="LVD_SAMPLE_CLOCK_LOCO_DIV_16"/>
+        </enum>
+        <enum id="enum.mcu.lvd.monitor_number" default="module.driver.lvd.monitor_number.MONITOR_1">
+            <option display="1" id="module.driver.lvd.monitor_number.MONITOR_1" value="1"/>
+            <option display="2" id="module.driver.lvd.monitor_number.MONITOR_2" value="2"/>
+        </enum>
+        <enum id="enum.mcu.lvd.voltage_slope" default="module.driver.lvd.voltage_slope.LVD_VOLTAGE_SLOPE_FALLING">
+            <option display="Falling voltage" id="module.driver.lvd.voltage_slope.LVD_VOLTAGE_SLOPE_FALLING" value="LVD_VOLTAGE_SLOPE_FALLING"/>
+            <option display="Rising voltage" id="module.driver.lvd.voltage_slope.LVD_VOLTAGE_SLOPE_RISING" value="LVD_VOLTAGE_SLOPE_RISING"/>
+            <option display="Rising and falling voltage" id="module.driver.lvd.voltage_slope.LVD_VOLTAGE_SLOPE_BOTH" value="LVD_VOLTAGE_SLOPE_BOTH"/>
+        </enum>
+        <enum id="enum.mcu.lvd.negation_delay" default="module.driver.lvd.negation_delay.LVD_NEGATION_DELAY_FROM_RESET">
+            <option display="Delay from reset" id="module.driver.lvd.negation_delay.LVD_NEGATION_DELAY_FROM_RESET" value="LVD_NEGATION_DELAY_FROM_RESET"/>
+            <option display="Delay from voltage returning to normal range" id="module.driver.lvd.negation_delay.LVD_NEGATION_DELAY_FROM_VOLTAGE" value="LVD_NEGATION_DELAY_FROM_VOLTAGE"/>
+        </enum>
+        <enum id="enum.mcu.keymatrix.channels" default="module.driver.keymatrix.channel0">
+            <option display="Channel 0" id="module.driver.keymatrix.channel0" value="(1U &lt;&lt; 0)"/>
+            <option display="Channel 1" id="module.driver.keymatrix.channel1" value="(1U &lt;&lt; 1)"/>
+            <option display="Channel 2" id="module.driver.keymatrix.channel2" value="(1U &lt;&lt; 2)"/>
+            <option display="Channel 3" id="module.driver.keymatrix.channel3" value="(1U &lt;&lt; 3)"/>
+            <option display="Channel 4" id="module.driver.keymatrix.channel4" value="(1U &lt;&lt; 4)"/>
+            <option display="Channel 5" id="module.driver.keymatrix.channel5" value="(1U &lt;&lt; 5)"/>
+            <option display="Channel 6" id="module.driver.keymatrix.channel6" value="(1U &lt;&lt; 6)"/>
+            <option display="Channel 7" id="module.driver.keymatrix.channel7" value="(1U &lt;&lt; 7)"/>
+        </enum>
+        <enum id="enum.mcu.can.clock_source" default="module.driver.can.clock_source.canmclk">
+            <option display="PCLKB" id="module.driver.can.clock_source.pclkb" value="CAN_CLOCK_SOURCE_PCLKB"/>
+            <option display="Main oscillator (CANMCLK)" id="module.driver.can.clock_source.canmclk" value="CAN_CLOCK_SOURCE_CANMCLK"/>
+        </enum>
+        <enum id="enum.mcu.sdhi.bus_width" default="module.driver.sdmmc.bus_width.bus_width_4_bits">
+            <option display="1 Bit" id="module.driver.sdmmc.bus_width.bus_width_1_bit" value="SDMMC_BUS_WIDTH_1_BIT"/>
+            <option display="4 Bits" id="module.driver.sdmmc.bus_width.bus_width_4_bits" value="SDMMC_BUS_WIDTH_4_BITS"/>
+        </enum>
+        <enum id="enum.driver.adc.trigger" default="enum.driver.adc.trigger.trigger_software">
+            <option display="External Trigger (ADTRGn, n = unit)" id="enum.driver.adc.trigger.trigger_async_external" value="ASYNC_EXTERNAL"/>
+            <option display="Software" id="enum.driver.adc.trigger.trigger_software" value="SOFTWARE"/>
+        </enum>
+        <enum id="enum.mcu.adc.resolution" default="module.driver.adc.resolution.resolution_12_bit">
+            <option display="12-Bit" id="module.driver.adc.resolution.resolution_12_bit" value="ADC_RESOLUTION_12_BIT" />
+            <option display="10-Bit" id="module.driver.adc.resolution.resolution_10_bit" value="ADC_RESOLUTION_10_BIT" />
+            <option display="8-Bit" id="module.driver.adc.resolution.resolution_8_bit" value="ADC_RESOLUTION_8_BIT" />
+        </enum>
+        <enum id="enum.mcu.adc.adc_vref_control" default="module.driver.adc.adc_vref_control.vrefh">
+            <option display="VREFH0/VREFH" id="module.driver.adc.adc_vref_control.vrefh" value="ADC_VREF_CONTROL_VREFH"/>
+        </enum>
+        <enum id="enum.mcu.adc.alignment" default="module.driver.adc.alignment.alignment_right">
+            <option display="Right" id="module.driver.adc.alignment.alignment_right" value="ADC_ALIGNMENT_RIGHT"/>
+            <option display="Left" id="module.driver.adc.alignment.alignment_left" value="ADC_ALIGNMENT_LEFT"/>
+        </enum>
+        <enum id="enum.mcu.adc.add_average_count" default="module.driver.adc.add_average_count.add_off">
+            <option display="Disabled" id="module.driver.adc.add_average_count.add_off" value="ADC_ADD_OFF"/>
+            <option display="Add two samples" id="module.driver.adc.add_average_count.add_two" value="ADC_ADD_TWO"/>
+            <option display="Add three samples" id="module.driver.adc.add_average_count.add_three" value="ADC_ADD_THREE"/>
+            <option display="Add four samples" id="module.driver.adc.add_average_count.add_four" value="ADC_ADD_FOUR"/>
+            <option display="Add sixteen samples(supported only for ADC 12-bit resolution)" id="module.driver.adc.add_average_count.add_sixteen" value="ADC_ADD_SIXTEEN"/>
+            <option display="Average two samples" id="module.driver.adc.add_average_count.add_average_two" value="ADC_ADD_AVERAGE_TWO"/>
+            <option display="Average four samples" id="module.driver.adc.add_average_count.add_average_four" value="ADC_ADD_AVERAGE_FOUR"/>
+        </enum>
+        <enum id="enum.mcu.dmac.transfer_mode" default="module.driver.transfer.mode.mode_normal">
+            <option display="Normal" id="module.driver.transfer.mode.mode_normal" value="TRANSFER_MODE_NORMAL"/>
+            <option display="Repeat" id="module.driver.transfer.mode.mode_repeat" value="TRANSFER_MODE_REPEAT"/>
+            <option display="Block" id="module.driver.transfer.mode.mode_block" value="TRANSFER_MODE_BLOCK"/>
+        </enum>
+        <enum id="enum.mcu.flash.min_write_size" default="enum.mcu.flash.min_write_size.128">
+            <option id="enum.mcu.flash.min_write_size.128" display="128" value="128" />
+        </enum>
+        <enum id="enum.mcu.flash.min_erase_size" default="enum.mcu.flash.min_erase_size.8000">
+            <option id="enum.mcu.flash.min_erase_size.8000" display="0x8000" value="0x8000" />
+        </enum>
+        <enum id="enum.mcu.flash_lp.dual_bank" default="enum.mcu.flash_lp.dual_bank.disabled">
+            <option id="enum.mcu.flash_lp.dual_bank.disabled" display="Not Supported" value="0" />
+        </enum>
+        <enum id="enum.mcu.flash.bank_programming" default="enum.mcu.flash.bank_programming.disabled">
+            <option id="enum.mcu.flash.bank_programming.disabled" display="Not Supported" value="0" />
+        </enum>
+        <enum id="enum.mcu.flash.instant_bank_swap" default="enum.mcu.flash.instant_bank_swap.disabled">
+            <option id="enum.mcu.flash.instant_bank_swap.disabled" display="Not Supported" value="0" />
+        </enum>
+        <enum default="module.driver.cac.cac_meas_clock.hoco" id="enum.mcu.cac.cac_meas_clock.clock">
+            <option display="Main Oscillator" id="module.driver.cac.cac_meas_clock.main" value="CAC_CLOCK_SOURCE_MAIN_OSC"/>
+            <option display="Sub-clock" id="module.driver.cac.cac_meas_clock.sub" value="CAC_CLOCK_SOURCE_SUBCLOCK"/>
+            <option display="HOCO" id="module.driver.cac.cac_meas_clock.hoco" value="CAC_CLOCK_SOURCE_HOCO"/>
+            <option display="MOCO" id="module.driver.cac.cac_meas_clock.moco" value="CAC_CLOCK_SOURCE_MOCO"/>
+            <option display="LOCO" id="module.driver.cac.cac_meas_clock.loco" value="CAC_CLOCK_SOURCE_LOCO"/>
+            <option display="PCLKB" id="module.driver.cac.cac_meas_clock.pclkb" value="CAC_CLOCK_SOURCE_PCLKB"/>
+            <option display="IWDT" id="module.driver.cac.cac_meas_clock.iwdt" value="CAC_CLOCK_SOURCE_IWDT"/>
+        </enum>
+        <enum default="module.driver.cac.cac_ref_clock.main" id="enum.mcu.cac.cac_ref_clock.clock">
+            <option display="Main Oscillator" id="module.driver.cac.cac_ref_clock.main" value="CAC_CLOCK_SOURCE_MAIN_OSC"/>
+            <option display="Sub-clock" id="module.driver.cac.cac_ref_clock.sub" value="CAC_CLOCK_SOURCE_SUBCLOCK"/>
+            <option display="HOCO" id="module.driver.cac.cac_ref_clock.hoco" value="CAC_CLOCK_SOURCE_HOCO"/>
+            <option display="MOCO" id="module.driver.cac.cac_ref_clock.moco" value="CAC_CLOCK_SOURCE_MOCO"/>
+            <option display="LOCO" id="module.driver.cac.cac_ref_clock.loco" value="CAC_CLOCK_SOURCE_LOCO"/>
+            <option display="PCLKB" id="module.driver.cac.cac_ref_clock.pclkb" value="CAC_CLOCK_SOURCE_PCLKB"/>
+            <option display="IWDT" id="module.driver.cac.cac_ref_clock.iwdt" value="CAC_CLOCK_SOURCE_IWDT"/>
+            <option display="External" id="module.driver.cac.cac_ref_clock.ext" value="CAC_CLOCK_SOURCE_EXTERNAL"/>
+        </enum>
+        <enum id="enum.driver.cgc.main_osc_wait" default="config.driver.cgc.main_osc_wait.wait_547">
+            <option display="134 us (35 cycles)" id="config.driver.cgc.main_osc_wait.wait_35" value="(1)"/>
+            <option display="256 us (67 cycles)" id="config.driver.cgc.main_osc_wait.wait_67" value="(2)"/>
+            <option display="500 us (131 cycles)" id="config.driver.cgc.main_osc_wait.wait_131" value="(3)"/>
+            <option display="988 us (259 cycles)" id="config.driver.cgc.main_osc_wait.wait_259" value="(4)"/>
+            <option display="2087 us (547 cycles)" id="config.driver.cgc.main_osc_wait.wait_547" value="(5)"/>
+            <option display="4040 us (1059 cycles)" id="config.driver.cgc.main_osc_wait.wait_1059" value="(6)"/>
+            <option display="8190 us (2147 cycles)" id="config.driver.cgc.main_osc_wait.wait_2147" value="(7)"/>
+            <option display="16369 us (4291 cycles)" id="config.driver.cgc.main_osc_wait.wait_4291" value="(8)"/>
+            <option display="31139 us (8163 cycles)" id="config.driver.cgc.main_osc_wait.wait_8163" value="(9)"/>
+        </enum>
+        <enum id="enum.driver.cgc.pll_state" default="module.driver.cgc_cfg.subosc_state.pll_state_clock_change_none">
+            <option display="None" id="module.driver.cgc_cfg.pll_state.pll_state_clock_change_none" value="CGC_CLOCK_CHANGE_NONE"/>
+            <option display="Stop" id="module.driver.cgc_cfg.pll_state.pll_state_clock_change_stop" value="CGC_CLOCK_CHANGE_STOP"/>
+            <option display="Start" id="module.driver.cgc_cfg.pll_state.pll_state_clock_change_start" value="CGC_CLOCK_CHANGE_START"/>
+        </enum>
+        <enum id="enum.driver.cgc.pll_clock_source" default="module.driver.cgc_cfg.source_clock.source_clock_main_osc">
+            <option display="HOCO" id="module.driver.cgc_cfg.source_clock.source_clock_hoco" value="CGC_CLOCK_HOCO"/>
+            <option display="Main Oscillator" id="module.driver.cgc_cfg.source_clock.source_clock_main_osc" value="CGC_CLOCK_MAIN_OSC"/>
+        </enum>
+        <enum id="enum.driver.cgc.pll_divisor" default="module.driver.cgc_cfg.divider.divider_div_1">
+            <option display="1" id="module.driver.cgc_cfg.divider.divider_div_1" value="CGC_PLL_DIV_1"/>
+            <option display="2" id="module.driver.cgc_cfg.divider.divider_div_2" value="CGC_PLL_DIV_2"/>
+            <option display="3" id="module.driver.cgc_cfg.divider.divider_div_3" value="CGC_PLL_DIV_3"/>
+        </enum>
+        <enum id="enum.driver.cgc.pclka_div" default="module.driver.cgc_cfg.pclka_div.pclka_div_div_2">
+            <option display="1" id="module.driver.cgc_cfg.pclka_div.pclka_div_div_1" value="BSP_CLOCKS_SYS_CLOCK_DIV_1"/>
+            <option display="2" id="module.driver.cgc_cfg.pclka_div.pclka_div_div_2" value="BSP_CLOCKS_SYS_CLOCK_DIV_2"/>
+            <option display="4" id="module.driver.cgc_cfg.pclka_div.pclka_div_div_4" value="BSP_CLOCKS_SYS_CLOCK_DIV_4"/>
+            <option display="8" id="module.driver.cgc_cfg.pclka_div.pclka_div_div_8" value="BSP_CLOCKS_SYS_CLOCK_DIV_8"/>
+            <option display="16" id="module.driver.cgc_cfg.pclka_div.pclka_div_div_16" value="BSP_CLOCKS_SYS_CLOCK_DIV_16"/>
+            <option display="32" id="module.driver.cgc_cfg.pclka_div.pclka_div_div_32" value="BSP_CLOCKS_SYS_CLOCK_DIV_32"/>
+            <option display="64" id="module.driver.cgc_cfg.pclka_div.pclka_div_div_64" value="BSP_CLOCKS_SYS_CLOCK_DIV_64"/>
+        </enum>
+        <enum id="enum.driver.cgc.pclkb_div" default="module.driver.cgc_cfg.pclkb_div.pclkb_div_div_4">
+            <option display="1" id="module.driver.cgc_cfg.pclkb_div.pclkb_div_div_1" value="BSP_CLOCKS_SYS_CLOCK_DIV_1"/>
+            <option display="2" id="module.driver.cgc_cfg.pclkb_div.pclkb_div_div_2" value="BSP_CLOCKS_SYS_CLOCK_DIV_2"/>
+            <option display="4" id="module.driver.cgc_cfg.pclkb_div.pclkb_div_div_4" value="BSP_CLOCKS_SYS_CLOCK_DIV_4"/>
+            <option display="8" id="module.driver.cgc_cfg.pclkb_div.pclkb_div_div_8" value="BSP_CLOCKS_SYS_CLOCK_DIV_8"/>
+            <option display="16" id="module.driver.cgc_cfg.pclkb_div.pclkb_div_div_16" value="BSP_CLOCKS_SYS_CLOCK_DIV_16"/>
+            <option display="32" id="module.driver.cgc_cfg.pclkb_div.pclkb_div_div_32" value="BSP_CLOCKS_SYS_CLOCK_DIV_32"/>
+            <option display="64" id="module.driver.cgc_cfg.pclkb_div.pclkb_div_div_64" value="BSP_CLOCKS_SYS_CLOCK_DIV_64"/>
+        </enum>
+        <enum id="enum.driver.cgc.pclkc_div" default="module.driver.cgc_cfg.pclkc_div.pclkc_div_div_4">
+            <option display="1" id="module.driver.cgc_cfg.pclkc_div.pclkc_div_div_1" value="BSP_CLOCKS_SYS_CLOCK_DIV_1"/>
+            <option display="2" id="module.driver.cgc_cfg.pclkc_div.pclkc_div_div_2" value="BSP_CLOCKS_SYS_CLOCK_DIV_2"/>
+            <option display="4" id="module.driver.cgc_cfg.pclkc_div.pclkc_div_div_4" value="BSP_CLOCKS_SYS_CLOCK_DIV_4"/>
+            <option display="8" id="module.driver.cgc_cfg.pclkc_div.pclkc_div_div_8" value="BSP_CLOCKS_SYS_CLOCK_DIV_8"/>
+            <option display="16" id="module.driver.cgc_cfg.pclkc_div.pclkc_div_div_16" value="BSP_CLOCKS_SYS_CLOCK_DIV_16"/>
+            <option display="32" id="module.driver.cgc_cfg.pclkc_div.pclkc_div_div_32" value="BSP_CLOCKS_SYS_CLOCK_DIV_32"/>
+            <option display="64" id="module.driver.cgc_cfg.pclkc_div.pclkc_div_div_64" value="BSP_CLOCKS_SYS_CLOCK_DIV_64"/>
+        </enum>
+        <enum id="enum.driver.cgc.pclkd_div" default="module.driver.cgc_cfg.pclkd_div.bclk_div_div_2">
+            <option display="1" id="module.driver.cgc_cfg.pclkd_div.pclkd_div_div_1" value="BSP_CLOCKS_SYS_CLOCK_DIV_1"/>
+            <option display="2" id="module.driver.cgc_cfg.pclkd_div.pclkd_div_div_2" value="BSP_CLOCKS_SYS_CLOCK_DIV_2"/>
+            <option display="4" id="module.driver.cgc_cfg.pclkd_div.pclkd_div_div_4" value="BSP_CLOCKS_SYS_CLOCK_DIV_4"/>
+            <option display="8" id="module.driver.cgc_cfg.pclkd_div.pclkd_div_div_8" value="BSP_CLOCKS_SYS_CLOCK_DIV_8"/>
+            <option display="16" id="module.driver.cgc_cfg.pclkd_div.pclkd_div_div_16" value="BSP_CLOCKS_SYS_CLOCK_DIV_16"/>
+            <option display="32" id="module.driver.cgc_cfg.pclkd_div.pclkd_div_div_32" value="BSP_CLOCKS_SYS_CLOCK_DIV_32"/>
+            <option display="64" id="module.driver.cgc_cfg.pclkd_div.pclkd_div_div_64" value="BSP_CLOCKS_SYS_CLOCK_DIV_64"/>
+        </enum>
+        <enum id="enum.driver.cgc.bclk_div" default="module.driver.cgc_cfg.bclk_div.bclk_div_div_2">
+            <option display="1" id="module.driver.cgc_cfg.bclk_div.bclk_div_div_1" value="BSP_CLOCKS_SYS_CLOCK_DIV_1"/>
+            <option display="2" id="module.driver.cgc_cfg.bclk_div.bclk_div_div_2" value="BSP_CLOCKS_SYS_CLOCK_DIV_2"/>
+            <option display="4" id="module.driver.cgc_cfg.bclk_div.bclk_div_div_4" value="BSP_CLOCKS_SYS_CLOCK_DIV_4"/>
+            <option display="8" id="module.driver.cgc_cfg.bclk_div.bclk_div_div_8" value="BSP_CLOCKS_SYS_CLOCK_DIV_8"/>
+            <option display="16" id="module.driver.cgc_cfg.bclk_div.bclk_div_div_16" value="BSP_CLOCKS_SYS_CLOCK_DIV_16"/>
+            <option display="32" id="module.driver.cgc_cfg.bclk_div.bclk_div_div_32" value="BSP_CLOCKS_SYS_CLOCK_DIV_32"/>
+            <option display="64" id="module.driver.cgc_cfg.bclk_div.bclk_div_div_64" value="BSP_CLOCKS_SYS_CLOCK_DIV_64"/>
+        </enum>
+        <enum id="enum.driver.cgc.fclk_div" default="module.driver.cgc_cfg.fclk_div.fclk_div_div_4">
+            <option display="1" id="module.driver.cgc_cfg.fclk_div.fclk_div_div_1" value="BSP_CLOCKS_SYS_CLOCK_DIV_1"/>
+            <option display="2" id="module.driver.cgc_cfg.fclk_div.fclk_div_div_2" value="BSP_CLOCKS_SYS_CLOCK_DIV_2"/>
+            <option display="4" id="module.driver.cgc_cfg.fclk_div.fclk_div_div_4" value="BSP_CLOCKS_SYS_CLOCK_DIV_4"/>
+            <option display="8" id="module.driver.cgc_cfg.fclk_div.fclk_div_div_8" value="BSP_CLOCKS_SYS_CLOCK_DIV_8"/>
+            <option display="16" id="module.driver.cgc_cfg.fclk_div.fclk_div_div_16" value="BSP_CLOCKS_SYS_CLOCK_DIV_16"/>
+            <option display="32" id="module.driver.cgc_cfg.fclk_div.fclk_div_div_32" value="BSP_CLOCKS_SYS_CLOCK_DIV_32"/>
+            <option display="64" id="module.driver.cgc_cfg.fclk_div.fclk_div_div_64" value="BSP_CLOCKS_SYS_CLOCK_DIV_64"/>
+        </enum>
+        <enum id="enum.driver.cgc.system_clock_source" default="module.driver.cgc_cfg.system_clock.system_clock_hoco">
+            <option display="HOCO" id="module.driver.cgc_cfg.system_clock.system_clock_hoco" value="CGC_CLOCK_HOCO"/>
+            <option display="MOCO" id="module.driver.cgc_cfg.system_clock.system_clock_moco" value="CGC_CLOCK_MOCO"/>
+            <option display="LOCO" id="module.driver.cgc_cfg.system_clock.system_clock_loco" value="CGC_CLOCK_LOCO"/>
+            <option display="Main Oscillator" id="module.driver.cgc_cfg.system_clock.system_clock_main_osc" value="CGC_CLOCK_MAIN_OSC"/>
+            <option display="Sub-Clock" id="module.driver.cgc_cfg.system_clock.system_clock_sub_clk" value="CGC_CLOCK_SUBCLOCK"/>
+            <option display="PLL" id="module.driver.cgc_cfg.system_clock.system_clock_pll" value="CGC_CLOCK_PLL"/>
+        </enum>
+        <enum id="enum.driver.gpt.sources" default="">
+            <option display="GTETRGA Rising Edge" id="module.driver.gpt.source_gtetrga_rising" value="GTETRGA_RISING"/>
+            <option display="GTETRGA Falling Edge" id="module.driver.gpt.source_gtetrga_falling" value="GTETRGA_FALLING"/>
+            <option display="GTETRGB Rising Edge" id="module.driver.gpt.source_gtetrgb_rising" value="GTETRGB_RISING"/>
+            <option display="GTETRGB Falling Edge" id="module.driver.gpt.source_gtetrgb_falling" value="GTETRGB_FALLING"/>
+            <option display="GTETRGC Rising Edge" id="module.driver.gpt.source_gtetrgc_rising" value="GTETRGC_RISING"/>
+            <option display="GTETRGC Falling Edge" id="module.driver.gpt.source_gtetrgc_falling" value="GTETRGC_FALLING"/>
+            <option display="GTETRGD Rising Edge" id="module.driver.gpt.source_gtetrgd_rising" value="GTETRGD_RISING"/>
+            <option display="GTETRGD Falling Edge" id="module.driver.gpt.source_gtetrgd_falling" value="GTETRGD_FALLING"/>
+            <option display="GTIOCA Rising Edge While GTIOCB Low" id="module.driver.gpt.source_gtioca_rising_gtiocb_low" value="GTIOCA_RISING_WHILE_GTIOCB_LOW"/>
+            <option display="GTIOCA Rising Edge While GTIOCB High" id="module.driver.gpt.source_gtioca_rising_gtiocb_high" value="GTIOCA_RISING_WHILE_GTIOCB_HIGH"/>
+            <option display="GTIOCA Falling Edge While GTIOCB Low" id="module.driver.gpt.source_gtioca_falling_gtiocb_low" value="GTIOCA_FALLING_WHILE_GTIOCB_LOW"/>
+            <option display="GTIOCA Falling Edge While GTIOCB High" id="module.driver.gpt.source_gtioca_falling_gtiocb_high" value="GTIOCA_FALLING_WHILE_GTIOCB_HIGH"/>
+            <option display="GTIOCB Rising Edge While GTIOCA Low" id="module.driver.gpt.source_gtiocb_rising_gtioca_low" value="GTIOCB_RISING_WHILE_GTIOCA_LOW"/>
+            <option display="GTIOCB Rising Edge While GTIOCA High" id="module.driver.gpt.source_gtiocb_rising_gtioca_high" value="GTIOCB_RISING_WHILE_GTIOCA_HIGH"/>
+            <option display="GTIOCB Falling Edge While GTIOCA Low" id="module.driver.gpt.source_gtiocb_falling_gtioca_low" value="GTIOCB_FALLING_WHILE_GTIOCA_LOW"/>
+            <option display="GTIOCB Falling Edge While GTIOCA High" id="module.driver.gpt.source_gtiocb_falling_gtioca_high" value="GTIOCB_FALLING_WHILE_GTIOCA_HIGH"/>
+        </enum>
+        <enum id="enum.mcu.crc.crc_polynomial" default="module.driver.crc.crc_polynomial.gps_crc_32">
+            <option display="CRC-8" id="module.driver.crc.crc_polynomial.gps_crc_8" value="CRC_POLYNOMIAL_CRC_8"/>
+            <option display="CRC-16" id="module.driver.crc.crc_polynomial.gps_crc_16" value="CRC_POLYNOMIAL_CRC_16"/>
+            <option display="CRC-CCITT" id="module.driver.crc.crc_polynomial.gps_crc_ccitt" value="CRC_POLYNOMIAL_CRC_CCITT"/>
+            <option display="CRC-32" id="module.driver.crc.crc_polynomial.gps_crc_32" value="CRC_POLYNOMIAL_CRC_32"/>
+            <option display="CRC-32C" id="module.driver.crc.crc_polynomial.gps_crc_32c" value="CRC_POLYNOMIAL_CRC_32C"/>
+        </enum>
+        <enum id="enum.mcu.crc.crc_bit_order" default="module.driver.crc.crc_polynomial.lms_lsb">
+            <option display="LSB" id="module.driver.crc.crc_bit_order.lms_lsb" value="CRC_BIT_ORDER_LMS_LSB"/>
+            <option display="MSB" id="module.driver.crc.crc_bit_order.lms_msb" value="CRC_BIT_ORDER_LMS_MSB"/>
+        </enum>
+        <enum id="enum.mcu.crc.snoop_address" default="module.driver.crc.snoop_address.SCI0_tdr">
+            <option display="SCI0_TDR" id="module.driver.crc.snoop_address.SCI0_tdr" value="0x003"/>
+            <option display="SCI1_TDR" id="module.driver.crc.snoop_address.SCI1_tdr" value="0x023"/>
+            <option display="SCI2_TDR" id="module.driver.crc.snoop_address.SCI2_tdr" value="0x043"/>
+            <option display="SCI3_TDR" id="module.driver.crc.snoop_address.SCI3_tdr" value="0x063"/>
+            <option display="SCI4_TDR" id="module.driver.crc.snoop_address.SCI4_tdr" value="0x083"/>
+            <option display="SCI8_TDR" id="module.driver.crc.snoop_address.SCI8_tdr" value="0x103"/>
+            <option display="SCI9_TDR" id="module.driver.crc.snoop_address.SCI9_tdr" value="0x123"/>
+            <option display="SCI0_FTDRL" id="module.driver.crc.snoop_address.SCI0_ftdr" value="0x00F"/>
+            <option display="SCI1_FTDRL" id="module.driver.crc.snoop_address.SCI1_ftdr" value="0x02F"/>
+            <option display="SCI2_FTDRL" id="module.driver.crc.snoop_address.SCI2_ftdr" value="0x04F"/>
+            <option display="SCI3_FTDRL" id="module.driver.crc.snoop_address.SCI3_ftdr" value="0x06F"/>
+            <option display="SCI4_FTDRL" id="module.driver.crc.snoop_address.SCI4_ftdr" value="0x08F"/>
+            <option display="SCI8_FTDRL" id="module.driver.crc.snoop_address.SCI8_ftdr" value="0x10F"/>
+            <option display="SCI9_FTDRL" id="module.driver.crc.snoop_address.SCI9_ftdr" value="0x12F"/>
+            <option display="SCI0_RDR" id="module.driver.crc.snoop_address.SCI0_rdr" value="0x005"/>
+            <option display="SCI1_RDR" id="module.driver.crc.snoop_address.SCI1_rdr" value="0x025"/>
+            <option display="SCI2_RDR" id="module.driver.crc.snoop_address.SCI2_rdr" value="0x045"/>
+            <option display="SCI3_RDR" id="module.driver.crc.snoop_address.SCI3_rdr" value="0x065"/>
+            <option display="SCI4_RDR" id="module.driver.crc.snoop_address.SCI4_rdr" value="0x085"/>
+            <option display="SCI8_RDR" id="module.driver.crc.snoop_address.SCI8_rdr" value="0x105"/>
+            <option display="SCI9_RDR" id="module.driver.crc.snoop_address.SCI9_rdr" value="0x125"/>
+            <option display="SCI0_FRDRL" id="module.driver.crc.snoop_address.SCI0_frdr" value="0x011"/>
+            <option display="SCI1_FRDRL" id="module.driver.crc.snoop_address.SCI1_frdr" value="0x031"/>
+            <option display="SCI2_FRDRL" id="module.driver.crc.snoop_address.SCI2_frdr" value="0x051"/>
+            <option display="SCI3_FRDRL" id="module.driver.crc.snoop_address.SCI3_frdr" value="0x071"/>
+            <option display="SCI4_FRDRL" id="module.driver.crc.snoop_address.SCI4_frdr" value="0x091"/>
+            <option display="SCI8_FRDRL" id="module.driver.crc.snoop_address.SCI8_frdr" value="0x111"/>
+            <option display="SCI9_FRDRL" id="module.driver.crc.snoop_address.SCI9_frdr" value="0x131"/>
+        </enum>
+        <enum id="enum.mcu.dac.output_amplifier" default="module.driver.dac.output_amplifier.disabled">
+            <option display="Enabled" id="module.driver.dac.output_amplifier.enabled" value="1"/>
+            <option display="Disabled" id="module.driver.dac.output_amplifier.disabled" value="0"/>
+        </enum>
+        <enum id="enum.mcu.dac.charge_pump" default="enum.mcu.dac.charge_pump.disabled">
+            <option id="enum.mcu.dac.charge_pump.disabled" display="Not Supported" value="0" />
+        </enum>
+        <enum id="enum.mcu.dac.internal_output" default="enum.mcu.dac.internal_output.disabled">
+            <option id="enum.mcu.dac.internal_output.disabled" display="Not Supported" value="false" />
+        </enum>
+        <enum id="enum.mcu.dac.ad_da_synchronized" default="module.driver.dac.ad_da_synchronized.disabled">
+            <option display="Disabled" id="module.driver.dac.ad_da_synchronized.disabled" value="false" />
+            <option display="Enabled" id="module.driver.dac.ad_da_synchronized.enabled" value="true" />
+        </enum>
+        <enum default="module.driver.dac.ref_volt_sel.disable" id="enum.driver.dac.ref_volt_sel">
+            <option display="Not supported" id="module.driver.dac.ref_volt_sel.disable" value="(0)"/>
+        </enum>
+        <enum id="enum.mcu.dac8.present" default="enum.mcu.dac8.not_present">
+          <option id="enum.mcu.dac8.not_present" display="dac8 is not available on the RA6T1" value="0" />
+        </enum>
+        <enum id="enum.mcu.dac8.unit.count" default="enum.mcu.dac8.unit.count.0">
+          <option id="enum.mcu.dac8.unit.count.0" display="DAC8 CHANNEL COUNT" value="0" />
+        </enum>
+        <enum id="enum.mcu.dac8.channels_per_unit" default="enum.mcu.dac8.channels_per_unit.0">
+          <option id="enum.mcu.dac8.channels_per_unit.0" display="DAC8 CHANNELS_PER_UNIT" value="0" />
+        </enum>
+        <enum id="enum.mcu.dac12.present" default="enum.mcu.dac12.is_present">
+          <option id="enum.mcu.dac12.is_present" display="dac12 is available on the RA6T1" value="1" />
+        </enum>
+        <enum id="enum.mcu.dac12.unit.count" default="enum.mcu.dac12.unit.count.1">
+          <option id="enum.mcu.dac12.unit.count.1" display="DAC12 CHANNEL COUNT" value="1" />
+        </enum>
+        <enum id="enum.mcu.dac12.channels_per_unit" default="enum.mcu.dac12.channels_per_unit.2">
+          <option id="enum.mcu.dac12.channels_per_unit.2" display="DAC12 CHANNELS_PER_UNIT" value="2" />
+        </enum>
+        <enum id="enum.mcu.dac_b.present" default="enum.mcu.dac_b.not_present">
+          <option id="enum.mcu.dac_b.not_present" display="dac_b is not available" value="0" />
+        </enum>
+        <enum id="enum.mcu.dac_b.unit.count" default="enum.mcu.dac_b.unit.count.0">
+          <option id="enum.mcu.dac_b.unit.count.0" display="DAC_B CHANNEL COUNT" value="0" />
+        </enum>
+        <enum id="enum.mcu.dac_b.channels_per_unit" default="enum.mcu.dac_b.channels_per_unit.0">
+          <option id="enum.mcu.dac_b.channels_per_unit.0" display="DAC_B CHANNELS_PER_UNIT" value="0" />
+        </enum>
+        <enum id="enum.driver.acmphs.ivcmp" default="module.driver.acmphs.ivcmp_no_connection">
+            <option display="No Connection" id="module.driver.acmphs.ivcmp_no_connection" value="ACMPHS_INPUT_NONE"/>
+            <option display="AN017 (any channel)" id="module.driver.acmphs.ivcmp_an017_p502" value="ACMPHS_INPUT_IVCMP0"/>
+            <option display="DA1 (any channel)" id="module.driver.acmphs.ivcmp_dac121_da" value="ACMPHS_INPUT_IVCMP1"/>
+            <option display="AN000 (channel 0 only)" id="module.driver.acmphs.ivcmp_an000_p000" value="ACMPHS_INPUT_IVCMP2"/>
+            <option display="PGA0 (channel 0 only)" id="module.driver.acmphs0.ivcmp_adc0_pga0" value="ACMPHS_INPUT_IVCMP3"/>
+            <option display="AN001 (channel 1 only)" id="module.driver.acmphs.ivcmp_an001_p001" value="ACMPHS_INPUT_IVCMP2"/>
+            <option display="PGA1 (channel 1 only)" id="module.driver.acmphs.ivcmp_adc0_pga1" value="ACMPHS_INPUT_IVCMP3"/>
+            <option display="AN002 (channel 2 only)" id="module.driver.acmphs.ivcmp_an002_p002" value="ACMPHS_INPUT_IVCMP2"/>
+            <option display="PGA2 (channel 2 only)" id="module.driver.acmphs.ivcmp_adc0_pga2" value="ACMPHS_INPUT_IVCMP3"/>
+            <option display="AN100 (channel 3 only)" id="module.driver.acmphs.ivcmp_an101_p004" value="ACMPHS_INPUT_IVCMP2"/>
+            <option display="PGA3 (channel 3 only)" id="module.driver.acmphs.ivcmp_adc1_pga3" value="ACMPHS_INPUT_IVCMP3"/>
+            <option display="AN101 (channel 4 only)" id="module.driver.acmphs.ivcmp_an102_p005" value="ACMPHS_INPUT_IVCMP2"/>
+            <option display="PGA4 (channel 4 only)" id="module.driver.acmphs.ivcmp_adc1_pga4" value="ACMPHS_INPUT_IVCMP3"/>
+            <option display="AN102 (channel 5 only)" id="module.driver.acmphs.ivcmp_an103_p006" value="ACMPHS_INPUT_IVCMP2"/>
+            <option display="PGA5 (channel 5 only)" id="module.driver.acmphs.ivcmp_adc1_pga5" value="ACMPHS_INPUT_IVCMP3"/>
+        </enum>
+        <enum id="enum.driver.acmphs.ivref" default="module.driver.acmphs0.ivref_no_connection">
+            <option display="No Connection" id="module.driver.acmphs.ivref_no_connection" value="ACMPHS_REFERENCE_NONE"/>
+            <option display="AN016 (any channel)" id="module.driver.acmphs.ivref.port5_p500" value="ACMPHS_REFERENCE_IVREF0"/>
+            <option display="AN116 (any channel)" id="module.driver.acmphs.ivref.port5_p501" value="ACMPHS_REFERENCE_IVREF1"/>
+            <option display="ANALOG0 VREF (any channel)" id="module.driver.acmphs.ivref.analog0_vref" value="ACMPHS_REFERENCE_IVREF2"/>
+            <option display="DA0 (any channel)" id="module.driver.acmphs.ivref.dac120_da" value="ACMPHS_REFERENCE_IVREF3"/>
+        </enum>
+        <enum id="enum.mcu.psa_crypto.aes_alt" default="config.driver.psa_crypto.aes_alt.enabled">
+            <option display="Use Hardware" id="config.driver.psa_crypto.aes_alt.enabled" value="1"/>
+            <option display="Use Software" id="config.driver.psa_crypto.aes_alt.disabled" value="0"/>
+        </enum>
+        <enum id="enum.mcu.psa_crypto.cmac_alt" default="config.driver.psa_crypto.mbedtls_cmac_alt.enabled">
+            <option display="Define" id="config.driver.psa_crypto.mbedtls_cmac_alt.enabled" value="1"/>
+            <option display="Undefine" id="config.driver.psa_crypto.mbedtls_cmac_alt.disabled" value="0"/>
+        </enum>
+        <enum id="enum.mcu.psa_crypto.aes_gcm_alt" default="config.driver.psa_crypto.aes_gcm_alt.enabled">
+            <option display="Define" id="config.driver.psa_crypto.aes_gcm_alt.enabled" value="1"/>
+            <option display="Undefine" id="config.driver.psa_crypto.aes_gcm_alt.disabled" value="0"/>
+        </enum>
+        <enum id="enum.mcu.psa_crypto.aes_ccm_alt" default="config.driver.psa_crypto.aes_ccm_alt.enabled">
+            <option display="Define" id="config.driver.psa_crypto.aes_ccm_alt.enabled" value="1"/>
+            <option display="Undefine" id="config.driver.psa_crypto.aes_ccm_alt.disabled" value="0"/>
+        </enum>
+        <enum id="enum.mcu.psa_crypto.ecp_alt" default="config.driver.psa_crypto.ecp_alt.enabled">
+            <option display="Use Hardware" id="config.driver.psa_crypto.ecp_alt.enabled" value="1"/>
+            <option display="Use Software" id="config.driver.psa_crypto.ecp_alt.disabled" value="0"/>
+        </enum>
+        <enum id="enum.mcu.psa_crypto.ecdsa_alt" default="config.driver.psa_crypto.ecdsa_alt.enabled">
+            <option display="Use Hardware" id="config.driver.psa_crypto.ecdsa_alt.enabled" value="1"/>
+            <option display="Use Software" id="config.driver.psa_crypto.ecdsa_alt.disabled" value="0"/>
+        </enum>
+        <enum id="enum.mcu.psa_crypto.ecdh_alt" default="config.driver.psa_crypto.ecdh_alt.enabled">
+            <option display="Use Hardware" id="config.driver.psa_crypto.ecdh_alt.enabled" value="1"/>
+            <option display="Use Software" id="config.driver.psa_crypto.ecdh_alt.disabled" value="0"/>
+        </enum>
+        <enum id="enum.mcu.psa_crypto.rsa_1024_alt" default="config.driver.psa_crypto.rsa_1024_alt.disabled">
+            <option display="Use Software" id="config.driver.psa_crypto.rsa_1024_alt.disabled" value="0"/>
+        </enum>
+        <enum id="enum.mcu.psa_crypto.rsa_alt" default="config.driver.psa_crypto.rsa_alt.enabled">
+            <option display="Use Hardware" id="config.driver.psa_crypto.rsa_alt.enabled" value="1"/>
+            <option display="Use Software" id="config.driver.psa_crypto.rsa_alt.disabled" value="0"/>
+        </enum>
+        <enum id="enum.mcu.psa_crypto.rsa_3072_keygen" default="config.driver.psa_crypto.rsa_3072_keygen.disabled">
+            <option display="Disabled" id="config.driver.psa_crypto.rsa_3072_keygen.disabled" value="0"/>
+        </enum>
+        <enum id="enum.mcu.psa_crypto.rsa_3072_signing" default="config.driver.psa_crypto.rsa_3072_signing.disabled">
+            <option display="Disabled" id="config.driver.psa_crypto.rsa_3072_signing.disabled" value="0"/>
+        </enum>
+        <enum id="enum.mcu.psa_crypto.rsa_3072" default="config.driver.psa_crypto.rsa_3072.disabled">
+            <option display="Disabled" id="config.driver.psa_crypto.rsa_3072.disabled" value="0"/>
+        </enum>
+        <enum id="enum.mcu.psa_crypto.rsa_4096_keygen" default="config.driver.psa_crypto.rsa_4096_keygen.disabled">
+            <option display="Disabled" id="config.driver.psa_crypto.rsa_4096_keygen.disabled" value="0"/>
+        </enum>
+        <enum id="enum.mcu.psa_crypto.rsa_4096_signing" default="config.driver.psa_crypto.rsa_4096_signing.disabled">
+            <option display="Disabled" id="config.driver.psa_crypto.rsa_4096_signing.disabled" value="0"/>
+        </enum>
+        <enum id="enum.mcu.psa_crypto.rsa_4096" default="config.driver.psa_crypto.rsa_4096.disabled">
+            <option display="Disabled" id="config.driver.psa_crypto.rsa_4096.disabled" value="0"/>
+        </enum>
+        <enum id="enum.mcu.psa_crypto.sha256_alt" default="config.driver.psa_crypto.sha256_alt.enabled">
+            <option display="Use Hardware" id="config.driver.psa_crypto.sha256_alt.enabled" value="1"/>
+            <option display="Use Software" id="config.driver.psa_crypto.sha256_alt.disabled" value="0"/>
+        </enum>
+        <enum id="enum.mcu.psa_crypto.sha512_alt" default="config.driver.psa_crypto.sha512_alt.disabled">
+            <option display="Use Software" id="config.driver.psa_crypto.sha512_alt.disabled" value="0"/>
+        </enum>
+        <enum id="enum.mcu.psa_crypto.aes_format" default="config.driver.psa_crypto.aes_format.plaintext">
+            <option display="Plaintext Only" id="config.driver.psa_crypto.aes_format.plaintext" value="1"/>
+            <option display="Plaintext and Wrapped (Vendor)" id="config.driver.psa_crypto.aes_format.vendor_plaintext" value="3"/>
+        </enum>
+        <enum id="enum.mcu.psa_crypto.ecc_format" default="config.driver.psa_crypto.ecc_format.vendor_plaintext">
+            <option display="Plaintext Only" id="config.driver.psa_crypto.ecc_format.plaintext" value="1"/>
+            <option display="Wrapped (Vendor) Only" id="config.driver.psa_crypto.ecc_format.vendor" value="2"/>
+            <option display="Plaintext and Wrapped (Vendor)" id="config.driver.psa_crypto.ecc_format.vendor_plaintext" value="3"/>
+        </enum>
+        <enum id="enum.mcu.psa_crypto.rsa_format" default="config.driver.psa_crypto.rsa_format.vendor_plaintext">
+            <option display="Plaintext Only" id="config.driver.psa_crypto.rsa_format.plaintext" value="1"/>
+            <option display="Wrapped (Vendor) Only" id="config.driver.psa_crypto.rsa_format.vendor" value="2"/>
+            <option display="Plaintext and Wrapped (Vendor)" id="config.driver.psa_crypto.rsa_format.vendor_plaintext" value="3"/>
+        </enum>
+        <enum id="enum.mcu.netx_secure_crypto.aes_alt" default="config.driver.psa_crypto.aes_alt.enabled">
+            <option display="Use Software" id="config.driver.psa_crypto.aes_alt.enabled" value="1"/>
+            <option display="Use Software" id="config.driver.psa_crypto.aes_alt.disabled" value="0"/>
+        </enum>
+        <enum id="enum.mcu.netx_secure_crypto.sha256_alt" default="config.driver.psa_crypto.sha256_alt.enabled">
+            <option display="Use Hardware" id="config.driver.psa_crypto.sha256_alt.enabled" value="1"/>
+            <option display="Use Software" id="config.driver.psa_crypto.sha256_alt.disabled" value="0"/>
+        </enum>
+        <enum id="enum.mcu.netx_secure_crypto.ecp_alt" default="config.driver.psa_crypto.ecp_alt.enabled">
+            <option display="Use Hardware" id="config.driver.psa_crypto.ecp_alt.enabled" value="1"/>
+            <option display="Use Software" id="config.driver.psa_crypto.ecp_alt.disabled" value="0"/>
+        </enum>
+        <enum id="enum.mcu.netx_secure_crypto.rsa_alt" default="config.driver.psa_crypto.rsa_alt.enabled">
+            <option display="Use Hardware" id="config.driver.psa_crypto.rsa_alt.enabled" value="1"/>
+            <option display="Use Software" id="config.driver.psa_crypto.rsa_alt.disabled" value="0"/>
+        </enum>
+        <enum id="enum.mcu.netx_secure_crypto.rsa_1024_alt" default="config.driver.psa_crypto.rsa_1024_alt.disabled">
+            <option display="Disabled" id="config.driver.psa_crypto.rsa_1024_alt.disabled" value="0"/>
+        </enum>
+        <enum id="enum.mcu.netx_secure_crypto.rsa_2048_alt" default="config.middleware.rm_netx_secure_crypto.rsa_2048_alt.enabled">
+            <option display="Enabled" id="config.middleware.rm_netx_secure_crypto.rsa_2048_alt.enabled" value="1"/>
+            <option display="Disabled" id="config.middleware.rm_netx_secure_crypto.rsa_2048_alt.disabled" value="0"/>
+        </enum>
+        <enum id="enum.mcu.netx_secure_crypto.rsa_3072" default="config.driver.psa_crypto.rsa_3072.disabled">
+            <option display="Disabled" id="config.driver.psa_crypto.rsa_3072.disabled" value="0"/>
+        </enum>
+        <enum id="enum.mcu.netx_secure_crypto.rsa_4096" default="config.driver.psa_crypto.rsa_4096.disabled">
+            <option display="Disabled" id="config.driver.psa_crypto.rsa_4096.disabled" value="0"/>
+        </enum>
+        <enum id="enum.mcu.netx_secure_crypto.rsa.scratch_buffer_size" default="config.middleware.rm_netx_secure_crypto.rsa.scratch_buffer_size.disabled">
+            <option display="Disabled (HW)" id="config.middleware.rm_netx_secure_crypto.rsa.scratch_buffer_size.disabled" value="4"/>
+            <option display="1304 (Modulus: 1024bits) (SW)" id="config.middleware.rm_netx_secure_crypto.rsa.scratch_buffer_size.b1024" value="1024"/>
+            <option display="2584 (Modulus: 2048bits) (SW)" id="config.middleware.rm_netx_secure_crypto.rsa.scratch_buffer_size.b2048" value="2048"/>
+            <option display="3864 (Modulus: 3072bits) (SW)" id="config.middleware.rm_netx_secure_crypto.rsa.scratch_buffer_size.b3072" value="3072"/>
+            <option display="5144 (Modulus: 4096bits) (SW)" id="config.middleware.rm_netx_secure_crypto.rsa.scratch_buffer_size.b4096" value="4096"/>
+        </enum>
+        <enum id="enum.driver.poeg.trigger" default="">
+            <option display="GTETRG Pin" id="module.driver.poeg.trigger.trigger_pin" value="POEG_TRIGGER_PIN"/>
+            <option display="GPT Output Level" id="module.driver.poeg.trigger.trigger_gpt_output_level" value="POEG_TRIGGER_GPT_OUTPUT_LEVEL"/>
+            <option display="Oscillation Stop" id="module.driver.poeg.trigger.trigger_oscillation_stop" value="POEG_TRIGGER_OSCILLATION_STOP"/>
+            <option display="ACMPHS0" id="module.driver.poeg.trigger.trigger_acmphs0" value="POEG_TRIGGER_ACMPHS0"/>
+            <option display="ACMPHS1" id="module.driver.poeg.trigger.trigger_acmphs1" value="POEG_TRIGGER_ACMPHS1"/>
+            <option display="ACMPHS2" id="module.driver.poeg.trigger.trigger_acmphs2" value="POEG_TRIGGER_ACMPHS2"/>
+            <option display="ACMPHS3" id="module.driver.poeg.trigger.trigger_acmphs3" value="POEG_TRIGGER_ACMPHS3"/>
+            <option display="ACMPHS4" id="module.driver.poeg.trigger.trigger_acmphs4" value="POEG_TRIGGER_ACMPHS4"/>
+            <option display="ACMPHS5" id="module.driver.poeg.trigger.trigger_acmphs5" value="POEG_TRIGGER_ACMPHS5"/>
+        </enum>
+        <enum id ="enum.driver.poeg.channels" default = "enum.driver.poeg.channels.poeg_link_poeg0">
+            <option display="POEG Channel 0" id="enum.driver.poeg.channels.poeg_link_poeg0" value="GPT_POEG_LINK_POEG0"/>
+            <option display="POEG Channel 1" id="enum.driver.poeg.channels.poeg_link_poeg1" value="GPT_POEG_LINK_POEG1"/>
+            <option display="POEG Channel 2" id="enum.driver.poeg.channels.poeg_link_poeg2" value="GPT_POEG_LINK_POEG2"/>
+            <option display="POEG Channel 3" id="enum.driver.poeg.channels.poeg_link_poeg3" value="GPT_POEG_LINK_POEG3"/>
+        </enum>
+        <enum id="enum.driver.adc.adbuf" default="module.driver.adc.adbuf.disabled">
+            <option display="Not Supported" id="module.driver.adc.adbuf.disabled" value="0"/>
+        </enum>
+        <enum id="enum.driver.uart.flow_control" default="module.driver.uart.flow_control.rts">
+            <option display="Hardware CTS" id="module.driver.uart.flow_control.cts" value="SCI_UART_FLOW_CONTROL_CTS"/>
+            <option display="Hardware RTS" id="module.driver.uart.flow_control.rts" value="SCI_UART_FLOW_CONTROL_RTS"/>
+            <option display="Hardware CTS and Software RTS" id="module.driver.uart.flow_control.ctsrts" value="SCI_UART_FLOW_CONTROL_CTSRTS"/>
+        </enum>
+        <enum id="enum.driver.timer.divider_step_size" default="module.driver.timer.divider_step_size.4">
+            <option display="4" id="module.driver.timer.divider_step_size.4" value="4"/>
+        </enum>
+        <enum id="enum.driver.timer.divider_valid_value_7_9" default="module.driver.timer.divider_value.7_9">
+            <option display="2" id="module.driver.timer.divider_value.7_9" value="0"/>
+        </enum>
+        <enum id="enum.driver.timer.count_source" default="module.driver.timer.count_source.clock_pclkb">
+            <option display="PCLKB" id="module.driver.timer.count_source.clock_pclkb" value="AGT_CLOCK_PCLKB"/>
+            <option display="LOCO" id="module.driver.timer.count_source.clock_loco" value="AGT_CLOCK_LOCO"/>
+            <option display="SUBCLOCK" id="module.driver.timer.count_source.clock_fsub" value="AGT_CLOCK_SUBCLOCK"/>
+            <option display="AGT Underflow" id="module.driver.timer.count_source.clock_agt_underflow" value="AGT_CLOCK_AGT_UNDERFLOW"/>
+            <option display="P402 Input" id="module.driver.timer.count_source.clock_p402_input" value="AGT_CLOCK_P402"/>
+            <option display="P403 Input" id="module.driver.timer.count_source.clock_p403_input" value="AGT_CLOCK_P403"/>
+            <option display="AGTIO Input" id="module.driver.timer.count_source.clock_agtio_input" value="AGT_CLOCK_AGTIO"/>
+        </enum>
+        <enum id="enum.driver.timer.bit_width" default="module.driver.timer.bit_width.16">
+            <option display="AGT 16-bit" id="module.driver.timer.bit_width.16" value="AGT_COUNTER_BIT_WIDTH_16"/>
+        </enum>
+        <!-- This enum is not used for this MCU but must be defined. -->
+        <enum id="enum.driver.agtw.id" default="enum.driver.agtw.id.blank">
+            <option display="AGTW" id="enum.driver.agtw.id.blank" value=""/>
+        </enum>
+        <enum id="enum.driver.doc.doc_event" default="module.driver.doc.doc_event.comparison_mismatch">
+            <option display="Comparison mismatch" id="module.driver.doc.doc_event.comparison_mismatch" value="DOC_EVENT_COMPARISON_MISMATCH"/>
+            <option display="Comparison match" id="module.driver.doc.doc_event.comparison_match" value="DOC_EVENT_COMPARISON_MATCH"/>
+            <option display="Addition overflow" id="module.driver.doc.doc_event.addition" value="DOC_EVENT_ADDITION"/>
+            <option display="Subtraction underflow" id="module.driver.doc.doc_event.subtraction" value="DOC_EVENT_SUBTRACTION"/>
+        </enum>
+        <enum id="enum.driver.doc.doc_bit_width" default="module.driver.doc.doc_bit_width.16">
+            <option display="16-Bit" id="module.driver.doc.doc_bit_width.16" value="DOC_BIT_WIDTH_16"/>
+        </enum>
+        <enum id="enum.driver.iwdt.register_start_nmi_supported" default="enum.driver.iwdt.register_start_nmi_supported.disabled">
+            <option id="enum.driver.iwdt.register_start_nmi_supported.disabled" display="Disabled" value="(0)" />
+        </enum>
+        <enum id="enum.driver.iwdt.timeout" default="enum.driver.iwdt.timeout.disabled">
+            <option id="enum.driver.iwdt.timeout.disabled" display="Not available for selected MCU" value="0" />
+        </enum>
+        <enum id="enum.driver.iwdt.clock_division" default="enum.driver.iwdt.clock_division.disabled">
+            <option id="enum.driver.iwdt.clock_division.disabled" display="Not available for selected MCU" value="0" />
+        </enum>
+        <enum id="enum.driver.iwdt.window_start" default="enum.driver.iwdt.window_start.disabled">
+            <option id="enum.driver.iwdt.window_start.disabled" display="Not available for selected MCU" value="0" />
+        </enum>
+        <enum id="enum.driver.iwdt.window_end" default="enum.driver.iwdt.window_end.disabled">
+            <option id="enum.driver.iwdt.window_end.disabled" display="Not available for selected MCU" value="0" />
+        </enum>
+        <enum id="enum.driver.iwdt.reset_control" default="enum.driver.iwdt.reset_control.disabled">
+            <option id="enum.driver.iwdt.reset_control.disabled" display="Not available for selected MCU" value="0" />
+        </enum>
+        <enum id="enum.driver.iwdt.stop_control" default="enum.driver.iwdt.stop_control.disabled">
+            <option id="enum.driver.iwdt.stop_control.disabled" display="Not available for selected MCU" value="0" />
+        </enum>
+        <enum id="enum.driver.spi.ssl_select" default="module.driver.spi.ssl_select.zero">
+            <option display="SSL0" id="module.driver.spi.ssl_select.zero" value="SPI_SSL_SELECT_SSL0"/>
+            <option display="SSL1" id="module.driver.spi.ssl_select.one" value="SPI_SSL_SELECT_SSL1"/>
+            <option display="SSL2" id="module.driver.spi.ssl_select.two" value="SPI_SSL_SELECT_SSL2"/>
+            <option display="SSL3" id="module.driver.spi.ssl_select.three" value="SPI_SSL_SELECT_SSL3"/>
+        </enum>
+        <enum id="enum.mcu.external_irq.trigger" default="module.driver.external_irq.trigger.trig_rising">
+            <option display="Falling" id="module.driver.external_irq.trigger.trig_falling" value="EXTERNAL_IRQ_TRIG_FALLING"/>
+            <option display="Rising" id="module.driver.external_irq.trigger.trig_rising" value="EXTERNAL_IRQ_TRIG_RISING"/>
+            <option display="Both Edges" id="module.driver.external_irq.trigger.trig_both_edge" value="EXTERNAL_IRQ_TRIG_BOTH_EDGE"/>
+            <option display="Low Level" id="module.driver.external_irq.trigger.trig_lowlev" value="EXTERNAL_IRQ_TRIG_LEVEL_LOW"/>
+        </enum>
+        <enum id="enum.mcu.external_irq.filter_enable" default="module.driver.external_irq.filter_enable.false">
+            <option display="Enabled" id="module.driver.external_irq.filter_enable.true" value="true"/>
+            <option display="Disabled" id="module.driver.external_irq.filter_enable.false" value="false"/>
+        </enum>
+        <enum id="enum.mcu.external_irq.filter_source" default="module.driver.external_irq.filter_source.pclk">
+			<option display="PCLK filter" id="module.driver.external_irq.filter_source.pclk" value="EXTERNAL_IRQ_DIGITAL_FILTER_PCLK_DIV"/>
+        </enum>
+        <enum id="enum.mcu.external_irq.clock_source_div" default="module.driver.external_irq.clock_source_div.clock_source_div_by_64">
+            <option display="PCLK / 1" id="module.driver.external_irq.clock_source_div.clock_source_div_by_1" value="EXTERNAL_IRQ_CLOCK_SOURCE_DIV_1"/>
+            <option display="PCLK / 8" id="module.driver.external_irq.clock_source_div.clock_source_div_by_8" value="EXTERNAL_IRQ_CLOCK_SOURCE_DIV_8"/>
+            <option display="PCLK / 32" id="module.driver.external_irq.clock_source_div.clock_source_div_by_32" value="EXTERNAL_IRQ_CLOCK_SOURCE_DIV_32"/>
+            <option display="PCLK / 64" id="module.driver.external_irq.clock_source_div.clock_source_div_by_64" value="EXTERNAL_IRQ_CLOCK_SOURCE_DIV_64"/>
+        </enum>
+        <enum id="enum.mcu.mmf.state" default="enum.mcu.mmf.state.disabled">
+            <option id="enum.mcu.mmf.state.disabled" display="Disabled" value="0"/>
+            <option id="enum.mcu.mmf.state.enabled" display="Enabled" value="1"/>
+        </enum>
+        <enum id="enum.mmf.mmf_address" default="">
+            <!-- If MMF is not supported, this property should have value 0. Otherwise, the value of this property is the start address of MMF region. -->
+            <option id="enum.mmf.mmf_address.start_address" display="0x02000000" value="0x02000000"/>
+        </enum>
+        <clock>
+            <constraint display="The system clock source must be greater than 0.">
+                ${value:board.clock.iclk.display} &gt; 0
+            </constraint>
+            <constraint display="ICLK must not be less than PCLKA or PCLKB">
+                (${value:board.clock.iclk.display} &gt;= ${value:board.clock.pclka.display}) &amp;&amp;
+                (${value:board.clock.iclk.display} &gt;= ${value:board.clock.pclkb.display})
+            </constraint>
+            <constraint display="ICLK must not be less than FCLK">
+                (${value:board.clock.iclk.display} &gt;= ${value:board.clock.fclk.display})
+            </constraint>
+            <constraint display="PCKLA must not be less than PCLKB">
+                (${value:board.clock.pclka.display} &gt;= ${value:board.clock.pclkb.display})
+            </constraint>
+            <constraint display="PCLKD must not be less than PCLKA or PCLKB">
+                (${value:board.clock.pclkd.display} &gt;= ${value:board.clock.pclka.display}) &amp;&amp;
+                (${value:board.clock.pclkd.display} &gt;= ${value:board.clock.pclkb.display})
+            </constraint>
+            <constraint display="PCLKB:PCLKC ratio must equal 1:1, 1:2, 1:4, 2:1, 4:1, or 8:1">
+                ((${value:board.clock.pclkc.display} / ${value:board.clock.pclkb.display}) &lt;= 4)
+                &amp;&amp;
+                ((${value:board.clock.pclkb.display} / ${value:board.clock.pclkc.display}) &lt;= 8)
+            </constraint>
+            <constraint display="Maximum allowed XTAL frequency for RA6T1 is 24MHz">
+                (${value:board.clock.xtal.freq} &lt;= "24000000")
+            </constraint>
+            <node id="board.clock.xtal.freq" xhint="0" yhint="0" default="10000000" tooltip="Click to edit the XTAL frequency.">
+                <peripheral id="board.clock.peripheral.canmclk" />
+                <peripheral id="board.clock.peripheral.cgc.mosc" />
+                <option id="_edit" display="XTAL ${value}Hz" macroName="BSP_CFG_XTAL_HZ" macroValue="(${value})" />
+            </node>
+            <node id="board.clock.pll.source" xhint="1" yhint="1" default="board.clock.pll.source.xtal">
+                <option id="board.clock.pll.source.disabled" display="PLL Src: Disabled" input="0" mul="0" macroName="BSP_CFG_PLL_SOURCE" macroValue="(BSP_CLOCKS_CLOCK_DISABLED)" />
+                <option id="board.clock.pll.source.xtal" display="PLL Src: XTAL" input="board.clock.xtal.freq" macroName="BSP_CFG_PLL_SOURCE" macroValue="(BSP_CLOCKS_SOURCE_CLOCK_MAIN_OSC)" />
+                <option id="board.clock.pll.source.hoco" display="PLL Src: HOCO" input="board.clock.hoco.freq" macroName="BSP_CFG_PLL_SOURCE" macroValue="(BSP_CLOCKS_SOURCE_CLOCK_HOCO)" />
+            </node>
+            <node id="board.clock.hoco.freq" xhint="0" yhint="5" default="board.clock.hoco.freq.20m">
+                <peripheral id="board.clock.peripheral.cgc.hoco" />
+                <option id="board.clock.hoco.freq.16m" display="HOCO 16MHz" mul="16000000" macroName="BSP_CFG_HOCO_FREQUENCY" macroValue="(0)" />
+                <option id="board.clock.hoco.freq.18m" display="HOCO 18MHz" mul="18000000" macroName="BSP_CFG_HOCO_FREQUENCY" macroValue="(1)" />
+                <option id="board.clock.hoco.freq.20m" display="HOCO 20MHz" mul="20000000" macroName="BSP_CFG_HOCO_FREQUENCY" macroValue="(2)" />
+            </node>
+            <node id="board.clock.loco.freq" xhint="0" yhint="6" default="board.clock.loco.freq.32768">
+                <option id="board.clock.loco.freq.32768" display="LOCO 32768Hz" mul="32768" />
+            </node>
+            <node id="board.clock.moco.freq" xhint="0" yhint="7" default="board.clock.moco.freq.8m">
+                <option id="board.clock.moco.freq.8m" display="MOCO 8MHz" mul="8000000" />
+            </node>
+            <node id="board.clock.subclk.freq" xhint="0" yhint="8" default="board.clock.subclk.freq.32768">
+                <option id="board.clock.subclk.freq.32768" display="SUBCLK 32768Hz" mul="32768" />
+            </node>
+            <node id="board.clock.pll.div" xhint="1" yhint="2" default="board.clock.pll.div.1">
+                <option id="board.clock.pll.div.1" display="PLL Div /1" div="1" input="board.clock.pll.source" macroName="BSP_CFG_PLL_DIV" macroValue="(BSP_CLOCKS_PLL_DIV_1)" />
+                <option id="board.clock.pll.div.2" display="PLL Div /2" div="2" input="board.clock.pll.source" macroName="BSP_CFG_PLL_DIV" macroValue="(BSP_CLOCKS_PLL_DIV_2)" />
+                <option id="board.clock.pll.div.3" display="PLL Div /3" div="3" input="board.clock.pll.source" macroName="BSP_CFG_PLL_DIV" macroValue="(BSP_CLOCKS_PLL_DIV_3)" />
+            </node>
+            <node id="board.clock.pll.mul" xhint="1" yhint="3" default="board.clock.pll.mul.240">
+                <option id="board.clock.pll.mul.100" display="PLL Mul x10.0" mul="100" div="10" input="board.clock.pll.div" macroName="BSP_CFG_PLL_MUL" macroValue="BSP_CLOCKS_PLL_MUL(10U,0U)" />
+                <option id="board.clock.pll.mul.105" display="PLL Mul x10.5" mul="105" div="10" input="board.clock.pll.div" macroName="BSP_CFG_PLL_MUL" macroValue="BSP_CLOCKS_PLL_MUL(10U,50U)" />
+                <option id="board.clock.pll.mul.110" display="PLL Mul x11.0" mul="110" div="10" input="board.clock.pll.div" macroName="BSP_CFG_PLL_MUL" macroValue="BSP_CLOCKS_PLL_MUL(11U,0U)" />
+                <option id="board.clock.pll.mul.115" display="PLL Mul x11.5" mul="115" div="10" input="board.clock.pll.div" macroName="BSP_CFG_PLL_MUL" macroValue="BSP_CLOCKS_PLL_MUL(11U,50U)" />
+                <option id="board.clock.pll.mul.120" display="PLL Mul x12.0" mul="120" div="10" input="board.clock.pll.div" macroName="BSP_CFG_PLL_MUL" macroValue="BSP_CLOCKS_PLL_MUL(12U,0U)" />
+                <option id="board.clock.pll.mul.125" display="PLL Mul x12.5" mul="125" div="10" input="board.clock.pll.div" macroName="BSP_CFG_PLL_MUL" macroValue="BSP_CLOCKS_PLL_MUL(12U,50U)" />
+                <option id="board.clock.pll.mul.130" display="PLL Mul x13.0" mul="130" div="10" input="board.clock.pll.div" macroName="BSP_CFG_PLL_MUL" macroValue="BSP_CLOCKS_PLL_MUL(13U,0U)" />
+                <option id="board.clock.pll.mul.135" display="PLL Mul x13.5" mul="135" div="10" input="board.clock.pll.div" macroName="BSP_CFG_PLL_MUL" macroValue="BSP_CLOCKS_PLL_MUL(13U,50U)" />
+                <option id="board.clock.pll.mul.140" display="PLL Mul x14.0" mul="140" div="10" input="board.clock.pll.div" macroName="BSP_CFG_PLL_MUL" macroValue="BSP_CLOCKS_PLL_MUL(14U,0U)" />
+                <option id="board.clock.pll.mul.145" display="PLL Mul x14.5" mul="145" div="10" input="board.clock.pll.div" macroName="BSP_CFG_PLL_MUL" macroValue="BSP_CLOCKS_PLL_MUL(14U,50U)" />
+                <option id="board.clock.pll.mul.150" display="PLL Mul x15.0" mul="150" div="10" input="board.clock.pll.div" macroName="BSP_CFG_PLL_MUL" macroValue="BSP_CLOCKS_PLL_MUL(15U,0U)" />
+                <option id="board.clock.pll.mul.155" display="PLL Mul x15.5" mul="155" div="10" input="board.clock.pll.div" macroName="BSP_CFG_PLL_MUL" macroValue="BSP_CLOCKS_PLL_MUL(15U,50U)" />
+                <option id="board.clock.pll.mul.160" display="PLL Mul x16.0" mul="160" div="10" input="board.clock.pll.div" macroName="BSP_CFG_PLL_MUL" macroValue="BSP_CLOCKS_PLL_MUL(16U,0U)" />
+                <option id="board.clock.pll.mul.165" display="PLL Mul x16.5" mul="165" div="10" input="board.clock.pll.div" macroName="BSP_CFG_PLL_MUL" macroValue="BSP_CLOCKS_PLL_MUL(16U,50U)" />
+                <option id="board.clock.pll.mul.170" display="PLL Mul x17.0" mul="170" div="10" input="board.clock.pll.div" macroName="BSP_CFG_PLL_MUL" macroValue="BSP_CLOCKS_PLL_MUL(17U,0U)" />
+                <option id="board.clock.pll.mul.175" display="PLL Mul x17.5" mul="175" div="10" input="board.clock.pll.div" macroName="BSP_CFG_PLL_MUL" macroValue="BSP_CLOCKS_PLL_MUL(17U,50U)" />
+                <option id="board.clock.pll.mul.180" display="PLL Mul x18.0" mul="180" div="10" input="board.clock.pll.div" macroName="BSP_CFG_PLL_MUL" macroValue="BSP_CLOCKS_PLL_MUL(18U,0U)" />
+                <option id="board.clock.pll.mul.185" display="PLL Mul x18.5" mul="185" div="10" input="board.clock.pll.div" macroName="BSP_CFG_PLL_MUL" macroValue="BSP_CLOCKS_PLL_MUL(18U,50U)" />
+                <option id="board.clock.pll.mul.190" display="PLL Mul x19.0" mul="190" div="10" input="board.clock.pll.div" macroName="BSP_CFG_PLL_MUL" macroValue="BSP_CLOCKS_PLL_MUL(19U,0U)" />
+                <option id="board.clock.pll.mul.195" display="PLL Mul x19.5" mul="195" div="10" input="board.clock.pll.div" macroName="BSP_CFG_PLL_MUL" macroValue="BSP_CLOCKS_PLL_MUL(19U,50U)" />
+                <option id="board.clock.pll.mul.200" display="PLL Mul x20.0" mul="200" div="10" input="board.clock.pll.div" macroName="BSP_CFG_PLL_MUL" macroValue="BSP_CLOCKS_PLL_MUL(20U,0U)" />
+                <option id="board.clock.pll.mul.205" display="PLL Mul x20.5" mul="205" div="10" input="board.clock.pll.div" macroName="BSP_CFG_PLL_MUL" macroValue="BSP_CLOCKS_PLL_MUL(20U,50U)" />
+                <option id="board.clock.pll.mul.210" display="PLL Mul x21.0" mul="210" div="10" input="board.clock.pll.div" macroName="BSP_CFG_PLL_MUL" macroValue="BSP_CLOCKS_PLL_MUL(21U,0U)" />
+                <option id="board.clock.pll.mul.215" display="PLL Mul x21.5" mul="215" div="10" input="board.clock.pll.div" macroName="BSP_CFG_PLL_MUL" macroValue="BSP_CLOCKS_PLL_MUL(21U,50U)" />
+                <option id="board.clock.pll.mul.220" display="PLL Mul x22.0" mul="220" div="10" input="board.clock.pll.div" macroName="BSP_CFG_PLL_MUL" macroValue="BSP_CLOCKS_PLL_MUL(22U,0U)" />
+                <option id="board.clock.pll.mul.225" display="PLL Mul x22.5" mul="225" div="10" input="board.clock.pll.div" macroName="BSP_CFG_PLL_MUL" macroValue="BSP_CLOCKS_PLL_MUL(22U,50U)" />
+                <option id="board.clock.pll.mul.230" display="PLL Mul x23.0" mul="230" div="10" input="board.clock.pll.div" macroName="BSP_CFG_PLL_MUL" macroValue="BSP_CLOCKS_PLL_MUL(23U,0U)" />
+                <option id="board.clock.pll.mul.235" display="PLL Mul x23.5" mul="235" div="10" input="board.clock.pll.div" macroName="BSP_CFG_PLL_MUL" macroValue="BSP_CLOCKS_PLL_MUL(23U,50U)" />
+                <option id="board.clock.pll.mul.240" display="PLL Mul x24.0" mul="240" div="10" input="board.clock.pll.div" macroName="BSP_CFG_PLL_MUL" macroValue="BSP_CLOCKS_PLL_MUL(24U,0U)" />
+                <option id="board.clock.pll.mul.245" display="PLL Mul x24.5" mul="245" div="10" input="board.clock.pll.div" macroName="BSP_CFG_PLL_MUL" macroValue="BSP_CLOCKS_PLL_MUL(24U,50U)" />
+                <option id="board.clock.pll.mul.250" display="PLL Mul x25.0" mul="250" div="10" input="board.clock.pll.div" macroName="BSP_CFG_PLL_MUL" macroValue="BSP_CLOCKS_PLL_MUL(25U,0U)" />
+                <option id="board.clock.pll.mul.255" display="PLL Mul x25.5" mul="255" div="10" input="board.clock.pll.div" macroName="BSP_CFG_PLL_MUL" macroValue="BSP_CLOCKS_PLL_MUL(25U,50U)" />
+                <option id="board.clock.pll.mul.260" display="PLL Mul x26.0" mul="260" div="10" input="board.clock.pll.div" macroName="BSP_CFG_PLL_MUL" macroValue="BSP_CLOCKS_PLL_MUL(26U,0U)" />
+                <option id="board.clock.pll.mul.265" display="PLL Mul x26.5" mul="265" div="10" input="board.clock.pll.div" macroName="BSP_CFG_PLL_MUL" macroValue="BSP_CLOCKS_PLL_MUL(26U,50U)" />
+                <option id="board.clock.pll.mul.270" display="PLL Mul x27.0" mul="270" div="10" input="board.clock.pll.div" macroName="BSP_CFG_PLL_MUL" macroValue="BSP_CLOCKS_PLL_MUL(27U,0U)" />
+                <option id="board.clock.pll.mul.275" display="PLL Mul x27.5" mul="275" div="10" input="board.clock.pll.div" macroName="BSP_CFG_PLL_MUL" macroValue="BSP_CLOCKS_PLL_MUL(27U,50U)" />
+                <option id="board.clock.pll.mul.280" display="PLL Mul x28.0" mul="280" div="10" input="board.clock.pll.div" macroName="BSP_CFG_PLL_MUL" macroValue="BSP_CLOCKS_PLL_MUL(28U,0U)" />
+                <option id="board.clock.pll.mul.285" display="PLL Mul x28.5" mul="285" div="10" input="board.clock.pll.div" macroName="BSP_CFG_PLL_MUL" macroValue="BSP_CLOCKS_PLL_MUL(28U,50U)" />
+                <option id="board.clock.pll.mul.290" display="PLL Mul x29.0" mul="290" div="10" input="board.clock.pll.div" macroName="BSP_CFG_PLL_MUL" macroValue="BSP_CLOCKS_PLL_MUL(29U,0U)" />
+                <option id="board.clock.pll.mul.295" display="PLL Mul x29.5" mul="295" div="10" input="board.clock.pll.div" macroName="BSP_CFG_PLL_MUL" macroValue="BSP_CLOCKS_PLL_MUL(29U,50U)" />
+                <option id="board.clock.pll.mul.300" display="PLL Mul x30.0" mul="300" div="10" input="board.clock.pll.div" macroName="BSP_CFG_PLL_MUL" macroValue="BSP_CLOCKS_PLL_MUL(30U,0U)" />
+            </node>
+            <node id="board.clock.pll.display" xhint="1" yhint="4" tooltip="PLL output frequency must be between 120 MHz and 240 MHz.">
+                <option id="board.clock.pll.display.value" input="board.clock.pll.mul" display="PLL ${value}Hz" minValue="120000000" maxValue="240000000" />
+            </node>
+            <node id="board.clock.clock.source" xhint="2" yhint="4" default="board.clock.clock.source.pll">
+                <option id="board.clock.clock.source.hoco" display="Clock Src: HOCO" input="board.clock.hoco.freq" macroName="BSP_CFG_CLOCK_SOURCE" macroValue="(BSP_CLOCKS_SOURCE_CLOCK_HOCO)" />
+                <option id="board.clock.clock.source.moco" display="Clock Src: MOCO" input="board.clock.moco.freq" macroName="BSP_CFG_CLOCK_SOURCE" macroValue="(BSP_CLOCKS_SOURCE_CLOCK_MOCO)" />
+                <option id="board.clock.clock.source.loco" display="Clock Src: LOCO" input="board.clock.loco.freq" macroName="BSP_CFG_CLOCK_SOURCE" macroValue="(BSP_CLOCKS_SOURCE_CLOCK_LOCO)" />
+                <option id="board.clock.clock.source.xtal" display="Clock Src: XTAL" input="board.clock.xtal.freq" macroName="BSP_CFG_CLOCK_SOURCE" macroValue="(BSP_CLOCKS_SOURCE_CLOCK_MAIN_OSC)" />
+                <option id="board.clock.clock.source.subclk" display="Clock Src: SUBCLK" input="board.clock.subclk.freq" macroName="BSP_CFG_CLOCK_SOURCE" macroValue="(BSP_CLOCKS_SOURCE_CLOCK_SUBCLOCK)" />
+                <option id="board.clock.clock.source.pll" display="Clock Src: PLL" input="board.clock.pll.display" macroName="BSP_CFG_CLOCK_SOURCE" macroValue="(BSP_CLOCKS_SOURCE_CLOCK_PLL)" />
+            </node>
+            <node id="board.clock.iclk.div" xhint="3" yhint="0" default="board.clock.iclk.div.2">
+                <option id="board.clock.iclk.div.1" display="ICLK Div /1" div="1" input="board.clock.clock.source" macroName="BSP_CFG_ICLK_DIV" macroValue="(BSP_CLOCKS_SYS_CLOCK_DIV_1)" />
+                <option id="board.clock.iclk.div.2" display="ICLK Div /2" div="2" input="board.clock.clock.source" macroName="BSP_CFG_ICLK_DIV" macroValue="(BSP_CLOCKS_SYS_CLOCK_DIV_2)" />
+                <option id="board.clock.iclk.div.4" display="ICLK Div /4" div="4" input="board.clock.clock.source" macroName="BSP_CFG_ICLK_DIV" macroValue="(BSP_CLOCKS_SYS_CLOCK_DIV_4)" />
+                <option id="board.clock.iclk.div.8" display="ICLK Div /8" div="8" input="board.clock.clock.source" macroName="BSP_CFG_ICLK_DIV" macroValue="(BSP_CLOCKS_SYS_CLOCK_DIV_8)" />
+                <option id="board.clock.iclk.div.16" display="ICLK Div /16" div="16" input="board.clock.clock.source" macroName="BSP_CFG_ICLK_DIV" macroValue="(BSP_CLOCKS_SYS_CLOCK_DIV_16)" />
+                <option id="board.clock.iclk.div.32" display="ICLK Div /32" div="32" input="board.clock.clock.source" macroName="BSP_CFG_ICLK_DIV" macroValue="(BSP_CLOCKS_SYS_CLOCK_DIV_32)" />
+                <option id="board.clock.iclk.div.64" display="ICLK Div /64" div="64" input="board.clock.clock.source" macroName="BSP_CFG_ICLK_DIV" macroValue="(BSP_CLOCKS_SYS_CLOCK_DIV_64)" />
+            </node>
+            <node id="board.clock.iclk.display" xhint="4" yhint="0" tooltip="The system clock (ICLK) is used as the operating clock of the CPU, DMAC, DTC, ROM and RAM. \nMaximum frequency is 120 MHz.">
+                <peripheral id="board.clock.peripheral.can.iclk" />
+                <option id="board.clock.iclk.display.value" input="board.clock.iclk.div" display="ICLK ${value}Hz" maxValue="120000000" />
+            </node>
+            <node id="board.clock.pclka.div" xhint="3" yhint="1" default="board.clock.pclka.div.2">
+                <option id="board.clock.pclka.div.1" display="PCLKA Div /1" div="1" input="board.clock.clock.source" macroName="BSP_CFG_PCLKA_DIV" macroValue="(BSP_CLOCKS_SYS_CLOCK_DIV_1)" />
+                <option id="board.clock.pclka.div.2" display="PCLKA Div /2" div="2" input="board.clock.clock.source" macroName="BSP_CFG_PCLKA_DIV" macroValue="(BSP_CLOCKS_SYS_CLOCK_DIV_2)" />
+                <option id="board.clock.pclka.div.4" display="PCLKA Div /4" div="4" input="board.clock.clock.source" macroName="BSP_CFG_PCLKA_DIV" macroValue="(BSP_CLOCKS_SYS_CLOCK_DIV_4)" />
+                <option id="board.clock.pclka.div.8" display="PCLKA Div /8" div="8" input="board.clock.clock.source" macroName="BSP_CFG_PCLKA_DIV" macroValue="(BSP_CLOCKS_SYS_CLOCK_DIV_8)" />
+                <option id="board.clock.pclka.div.16" display="PCLKA Div /16" div="16" input="board.clock.clock.source" macroName="BSP_CFG_PCLKA_DIV" macroValue="(BSP_CLOCKS_SYS_CLOCK_DIV_16)" />
+                <option id="board.clock.pclka.div.32" display="PCLKA Div /32" div="32" input="board.clock.clock.source" macroName="BSP_CFG_PCLKA_DIV" macroValue="(BSP_CLOCKS_SYS_CLOCK_DIV_32)" />
+                <option id="board.clock.pclka.div.64" display="PCLKA Div /64" div="64" input="board.clock.clock.source" macroName="BSP_CFG_PCLKA_DIV" macroValue="(BSP_CLOCKS_SYS_CLOCK_DIV_64)" />
+            </node>
+            <node id="board.clock.pclka.display" xhint="4" yhint="1" tooltip="The Peripheral clock A (PCLKA) is used as the operating clock for the SPI, SCI, SCE7, SDHI, CRC, IrDA, GPT (bus clock). \nMaximum frequency is 120 MHz.">
+                <peripheral id="board.clock.peripheral.sci" />
+                <peripheral id="board.clock.peripheral.spi" />
+                <peripheral id="board.clock.peripheral.can.pclka" />
+                <option id="board.clock.pclka.display.value" input="board.clock.pclka.div" display="PCLKA ${value}Hz" maxValue="120000000" />
+            </node>
+            <node id="board.clock.pclkb.div" xhint="3" yhint="2" default="board.clock.pclkb.div.4">
+                <option id="board.clock.pclkb.div.1" display="PCLKB Div /1" div="1" input="board.clock.clock.source" macroName="BSP_CFG_PCLKB_DIV" macroValue="(BSP_CLOCKS_SYS_CLOCK_DIV_1)" />
+                <option id="board.clock.pclkb.div.2" display="PCLKB Div /2" div="2" input="board.clock.clock.source" macroName="BSP_CFG_PCLKB_DIV" macroValue="(BSP_CLOCKS_SYS_CLOCK_DIV_2)" />
+                <option id="board.clock.pclkb.div.4" display="PCLKB Div /4" div="4" input="board.clock.clock.source" macroName="BSP_CFG_PCLKB_DIV" macroValue="(BSP_CLOCKS_SYS_CLOCK_DIV_4)" />
+                <option id="board.clock.pclkb.div.8" display="PCLKB Div /8" div="8" input="board.clock.clock.source" macroName="BSP_CFG_PCLKB_DIV" macroValue="(BSP_CLOCKS_SYS_CLOCK_DIV_8)" />
+                <option id="board.clock.pclkb.div.16" display="PCLKB Div /16" div="16" input="board.clock.clock.source" macroName="BSP_CFG_PCLKB_DIV" macroValue="(BSP_CLOCKS_SYS_CLOCK_DIV_16)" />
+                <option id="board.clock.pclkb.div.32" display="PCLKB Div /32" div="32" input="board.clock.clock.source" macroName="BSP_CFG_PCLKB_DIV" macroValue="(BSP_CLOCKS_SYS_CLOCK_DIV_32)" />
+                <option id="board.clock.pclkb.div.64" display="PCLKB Div /64" div="64" input="board.clock.clock.source" macroName="BSP_CFG_PCLKB_DIV" macroValue="(BSP_CLOCKS_SYS_CLOCK_DIV_64)" />
+            </node>
+            <node id="board.clock.pclkb.display" xhint="4" yhint="2" tooltip="The Peripheral clock B (PCLKB) is used as the operating clock for all other modules not supported by PCLKA, PCLKC and PCLKD. \nMaximum frequency is 60 MHz.">
+                <peripheral id="board.clock.peripheral.agt" />
+                <peripheral id="board.clock.peripheral.iic" />
+                <peripheral id="board.clock.peripheral.can" />
+                <peripheral id="board.clock.peripheral.can.pclkb" />
+                <option id="board.clock.pclkb.display.value" input="board.clock.pclkb.div" display="PCLKB ${value}Hz" maxValue="60000000" />
+            </node>
+            <node id="board.clock.pclkc.div" xhint="3" yhint="3" default="board.clock.pclkc.div.4">
+                <option id="board.clock.pclkc.div.1" display="PCLKC Div /1" div="1" input="board.clock.clock.source" macroName="BSP_CFG_PCLKC_DIV" macroValue="(BSP_CLOCKS_SYS_CLOCK_DIV_1)" />
+                <option id="board.clock.pclkc.div.2" display="PCLKC Div /2" div="2" input="board.clock.clock.source" macroName="BSP_CFG_PCLKC_DIV" macroValue="(BSP_CLOCKS_SYS_CLOCK_DIV_2)" />
+                <option id="board.clock.pclkc.div.4" display="PCLKC Div /4" div="4" input="board.clock.clock.source" macroName="BSP_CFG_PCLKC_DIV" macroValue="(BSP_CLOCKS_SYS_CLOCK_DIV_4)" />
+                <option id="board.clock.pclkc.div.8" display="PCLKC Div /8" div="8" input="board.clock.clock.source" macroName="BSP_CFG_PCLKC_DIV" macroValue="(BSP_CLOCKS_SYS_CLOCK_DIV_8)" />
+                <option id="board.clock.pclkc.div.16" display="PCLKC Div /16" div="16" input="board.clock.clock.source" macroName="BSP_CFG_PCLKC_DIV" macroValue="(BSP_CLOCKS_SYS_CLOCK_DIV_16)" />
+                <option id="board.clock.pclkc.div.32" display="PCLKC Div /32" div="32" input="board.clock.clock.source" macroName="BSP_CFG_PCLKC_DIV" macroValue="(BSP_CLOCKS_SYS_CLOCK_DIV_32)" />
+                <option id="board.clock.pclkc.div.64" display="PCLKC Div /64" div="64" input="board.clock.clock.source" macroName="BSP_CFG_PCLKC_DIV" macroValue="(BSP_CLOCKS_SYS_CLOCK_DIV_64)" />
+            </node>
+            <node id="board.clock.pclkc.display" xhint="4" yhint="3" tooltip="The Peripheral clock C (PCLKC) is used as the operating clock for the ADC module. \nMaximum frequency is 60 MHz.">
+                <peripheral id="board.clock.peripheral.adc" />
+                <option id="board.clock.pclkc.display.value" input="board.clock.pclkc.div" display="PCLKC ${value}Hz" maxValue="60000000" />
+            </node>
+            <node id="board.clock.pclkd.div" xhint="3" yhint="4" default="board.clock.pclkd.div.2">
+                <option id="board.clock.pclkd.div.1" display="PCLKD Div /1" div="1" input="board.clock.clock.source" macroName="BSP_CFG_PCLKD_DIV" macroValue="(BSP_CLOCKS_SYS_CLOCK_DIV_1)" />
+                <option id="board.clock.pclkd.div.2" display="PCLKD Div /2" div="2" input="board.clock.clock.source" macroName="BSP_CFG_PCLKD_DIV" macroValue="(BSP_CLOCKS_SYS_CLOCK_DIV_2)" />
+                <option id="board.clock.pclkd.div.4" display="PCLKD Div /4" div="4" input="board.clock.clock.source" macroName="BSP_CFG_PCLKD_DIV" macroValue="(BSP_CLOCKS_SYS_CLOCK_DIV_4)" />
+                <option id="board.clock.pclkd.div.8" display="PCLKD Div /8" div="8" input="board.clock.clock.source" macroName="BSP_CFG_PCLKD_DIV" macroValue="(BSP_CLOCKS_SYS_CLOCK_DIV_8)" />
+                <option id="board.clock.pclkd.div.16" display="PCLKD Div /16" div="16" input="board.clock.clock.source" macroName="BSP_CFG_PCLKD_DIV" macroValue="(BSP_CLOCKS_SYS_CLOCK_DIV_16)" />
+                <option id="board.clock.pclkd.div.32" display="PCLKD Div /32" div="32" input="board.clock.clock.source" macroName="BSP_CFG_PCLKD_DIV" macroValue="(BSP_CLOCKS_SYS_CLOCK_DIV_32)" />
+                <option id="board.clock.pclkd.div.64" display="PCLKD Div /64" div="64" input="board.clock.clock.source" macroName="BSP_CFG_PCLKD_DIV" macroValue="(BSP_CLOCKS_SYS_CLOCK_DIV_64)" />
+            </node>
+            <node id="board.clock.pclkd.display" xhint="4" yhint="4" tooltip="The Peripheral clock D (PCLKD) is used as the operating clock for the GPT (count clock) module. \nMaximum frequency is 120 MHz.">
+                <peripheral id="board.clock.peripheral.gptclk" /> <!-- GPTCLK is before GPT clock selection. GTCLK is after selection -->
+                <peripheral id="board.clock.peripheral.gtclk" /> <!-- GPTCLK is before GPT clock selection. GTCLK is after selection -->
+                <option id="board.clock.pclkd.display.value" input="board.clock.pclkd.div" display="PCLKD ${value}Hz" maxValue="120000000" />
+            </node>
+            <node id="board.clock.uclk.div" xhint="3" yhint="5" default="board.clock.uclk.div.5">
+                <option id="board.clock.uclk.div.3" display="UCLK Div /3" div="3" input="board.clock.clock.source" macroName="BSP_CFG_UCK_DIV" macroValue="(BSP_CLOCKS_USB_CLOCK_DIV_3)" />
+                <option id="board.clock.uclk.div.4" display="UCLK Div /4" div="4" input="board.clock.clock.source" macroName="BSP_CFG_UCK_DIV" macroValue="(BSP_CLOCKS_USB_CLOCK_DIV_4)" />
+                <option id="board.clock.uclk.div.5" display="UCLK Div /5" div="5" input="board.clock.clock.source" macroName="BSP_CFG_UCK_DIV" macroValue="(BSP_CLOCKS_USB_CLOCK_DIV_5)" />
+            </node>
+            <node id="board.clock.uclk.display" xhint="4" yhint="5" tooltip="The USB clock (UCLK) is an operating clock for the USBFS module.\nA 48-MHz clock must be supplied to the USB module.\nWhen the USB module is used, setting must be made so that UCLK is 48 MHz.">
+                <peripheral id="board.clock.peripheral.usb" />
+                <option id="board.clock.uclk.display.value" input="board.clock.uclk.div" display="UCLK ${value}Hz" minValue="48000000" maxValue="48000000" />
+            </node>
+            <node id="board.clock.fclk.div" xhint="3" yhint="6" default="board.clock.fclk.div.4">
+                <option id="board.clock.fclk.div.1" display="FCLK Div /1" div="1" input="board.clock.clock.source" macroName="BSP_CFG_FCLK_DIV" macroValue="(BSP_CLOCKS_SYS_CLOCK_DIV_1)" />
+                <option id="board.clock.fclk.div.2" display="FCLK Div /2" div="2" input="board.clock.clock.source" macroName="BSP_CFG_FCLK_DIV" macroValue="(BSP_CLOCKS_SYS_CLOCK_DIV_2)" />
+                <option id="board.clock.fclk.div.4" display="FCLK Div /4" div="4" input="board.clock.clock.source" macroName="BSP_CFG_FCLK_DIV" macroValue="(BSP_CLOCKS_SYS_CLOCK_DIV_4)" />
+                <option id="board.clock.fclk.div.8" display="FCLK Div /8" div="8" input="board.clock.clock.source" macroName="BSP_CFG_FCLK_DIV" macroValue="(BSP_CLOCKS_SYS_CLOCK_DIV_8)" />
+                <option id="board.clock.fclk.div.16" display="FCLK Div /16" div="16" input="board.clock.clock.source" macroName="BSP_CFG_FCLK_DIV" macroValue="(BSP_CLOCKS_SYS_CLOCK_DIV_16)" />
+                <option id="board.clock.fclk.div.32" display="FCLK Div /32" div="32" input="board.clock.clock.source" macroName="BSP_CFG_FCLK_DIV" macroValue="(BSP_CLOCKS_SYS_CLOCK_DIV_32)" />
+                <option id="board.clock.fclk.div.64" display="FCLK Div /64" div="64" input="board.clock.clock.source" macroName="BSP_CFG_FCLK_DIV" macroValue="(BSP_CLOCKS_SYS_CLOCK_DIV_64)" />
+            </node>
+            <node id="board.clock.fclk.display" xhint="4" yhint="6" tooltip="The flash-interface clock (FCLK) is used as the operating clock for the flash-memory interfaces.\nThat is, FCLK is used for programming and erasure of the ROM and E2 DataFlash, and reading from the E2 DataFlash. \nFrequency must be between 4 MHz and 60 MHz when any of these features are used.">
+                <option id="board.clock.fclk.display.value" input="board.clock.fclk.div" display="FCLK ${value}Hz" minValue="4000000" maxValue="60000000" />
+            </node>
+            <node id="board.clock.clkout.source" xhint="2" yhint="8" default="board.clock.clkout.source.disabled">
+                <option id="board.clock.clkout.source.disabled" display="CLKOUT Disabled" input="0" mul="0" macroName="BSP_CFG_CLKOUT_SOURCE" macroValue="(BSP_CLOCKS_CLOCK_DISABLED)" />
+                <option id="board.clock.clkout.source.hoco" display="CLKOUT Src: HOCO" input="board.clock.hoco.freq" macroName="BSP_CFG_CLKOUT_SOURCE" macroValue="(BSP_CLOCKS_SOURCE_CLOCK_HOCO)" />
+                <option id="board.clock.clkout.source.moco" display="CLKOUT Src: MOCO" input="board.clock.moco.freq" macroName="BSP_CFG_CLKOUT_SOURCE" macroValue="(BSP_CLOCKS_SOURCE_CLOCK_MOCO)" />
+                <option id="board.clock.clkout.source.loco" display="CLKOUT Src: LOCO" input="board.clock.loco.freq" macroName="BSP_CFG_CLKOUT_SOURCE" macroValue="(BSP_CLOCKS_SOURCE_CLOCK_LOCO)" />
+                <option id="board.clock.clkout.source.xtal" display="CLKOUT Src: XTAL" input="board.clock.xtal.freq" macroName="BSP_CFG_CLKOUT_SOURCE" macroValue="(BSP_CLOCKS_SOURCE_CLOCK_MAIN_OSC)" />
+                <option id="board.clock.clkout.source.subclk" display="CLKOUT Src: SUBCLK" input="board.clock.subclk.freq" macroName="BSP_CFG_CLKOUT_SOURCE" macroValue="(BSP_CLOCKS_SOURCE_CLOCK_SUBCLOCK)" />
+            </node>
+            <node id="board.clock.clkout.div" xhint="3" yhint="8" default="board.clock.clkout.div.1">
+                <option id="board.clock.clkout.div.1" display="CLKOUT Div /1" div="1" input="board.clock.clkout.source" macroName="BSP_CFG_CLKOUT_DIV" macroValue="(BSP_CLOCKS_SYS_CLOCK_DIV_1)" />
+                <option id="board.clock.clkout.div.2" display="CLKOUT Div /2" div="2" input="board.clock.clkout.source" macroName="BSP_CFG_CLKOUT_DIV" macroValue="(BSP_CLOCKS_SYS_CLOCK_DIV_2)" />
+                <option id="board.clock.clkout.div.4" display="CLKOUT Div /4" div="4" input="board.clock.clkout.source" macroName="BSP_CFG_CLKOUT_DIV" macroValue="(BSP_CLOCKS_SYS_CLOCK_DIV_4)" />
+                <option id="board.clock.clkout.div.8" display="CLKOUT Div /8" div="8" input="board.clock.clkout.source" macroName="BSP_CFG_CLKOUT_DIV" macroValue="(BSP_CLOCKS_SYS_CLOCK_DIV_8)" />
+                <option id="board.clock.clkout.div.16" display="CLKOUT Div /16" div="16" input="board.clock.clkout.source" macroName="BSP_CFG_CLKOUT_DIV" macroValue="(BSP_CLOCKS_SYS_CLOCK_DIV_16)" />
+                <option id="board.clock.clkout.div.32" display="CLKOUT Div /32" div="32" input="board.clock.clkout.source" macroName="BSP_CFG_CLKOUT_DIV" macroValue="(BSP_CLOCKS_SYS_CLOCK_DIV_32)" />
+                <option id="board.clock.clkout.div.64" display="CLKOUT Div /64" div="64" input="board.clock.clkout.source" macroName="BSP_CFG_CLKOUT_DIV" macroValue="(BSP_CLOCKS_SYS_CLOCK_DIV_64)" />
+                <option id="board.clock.clkout.div.128" display="CLKOUT Div /128" div="128" input="board.clock.clkout.source" macroName="BSP_CFG_CLKOUT_DIV" macroValue="(BSP_CLOCKS_SYS_CLOCK_DIV_128)" />
+            </node>
+            <node id="board.clock.clkout.display" xhint="4" yhint="8" tooltip="Frequency output on the CLKOUT pin if CLKOUT is enabled. \nMaximum frequency is 24 MHz.">
+                <option id="board.clock.clkout.display.value" input="board.clock.clkout.div" display="CLKOUT ${value}Hz" maxValue="24000000" />
+            </node>
+        </clock>
+    </bsp>
+</raModuleDescription>

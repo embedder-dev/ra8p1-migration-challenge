@@ -1,0 +1,133 @@
+﻿<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.middleware.rm_filex_block_media" path="fsp_cfg/middleware/rm_filex_block_media_cfg.h" version="0">
+        <property default="config.middleware.rm_filex_block_media.param_checking_enable.bsp" display="Parameter Checking" id="config.middleware.rm_filex_block_media.param_checking_enable" description="Selects if code for parameter checking is to be included in the build.">
+            <option display="Default (BSP)" id="config.middleware.rm_filex_block_media.param_checking_enable.bsp" value="(BSP_CFG_PARAM_CHECKING_ENABLE)"/>
+            <option display="Enabled" id="config.middleware.rm_filex_block_media.param_checking_enable.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.rm_filex_block_media.param_checking_enable.disabled" value="(0)"/>
+        </property>
+        <content>
+        #ifdef __cplusplus
+        extern "C" {
+        #endif
+
+        #define RM_FILEX_BLOCK_MEDIA_CFG_PARAM_CHECKING_ENABLE ${config.middleware.rm_filex_block_media.param_checking_enable}
+
+        #ifdef __cplusplus
+        }
+        #endif
+        </content>
+    </config>
+    <module config="config.middleware.rm_filex_block_media" display="Storage|${module.middleware.rm_filex_block_media.name} FileX I/O (rm_filex_block_media)" visible="false" id="module.middleware.rm_filex_block_media" version="1" url="group___r_m___f_i_l_e_x___b_l_o_c_k___m_e_d_i_a.html">
+        <constraint display="Requires lower level block media driver">
+            testExists("${module.middleware.rm_filex_block_media.requires.block_media::module.driver.rm_block_media.name}")
+        </constraint>
+        <requires id="module.middleware.rm_filex_block_media.requires.block_media" interface="interface.driver.rm_block_media_no_usb" display="Add Block Media Driver">
+            <override property="module.driver.rm_block_media.callback" value="rm_filex_block_media_memory_callback"/>
+            <override property="module.driver.rm_block_media.p_context" value="&amp;${module.middleware.rm_filex_block_media.name}_ctrl"/>
+        </requires>
+        <provides interface="interface.middleware.rm_filex_block_media" />
+        <provides interface="interface.azure.fx.driver" />
+        <property default="g_rm_filex_block_media_${_instance}" display="Name" id="module.middleware.rm_filex_block_media.name" description="Module name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.middleware.rm_filex_block_media.name}")</constraint>
+        </property>
+        <property default="g_rm_filex_block_media_${_instance}_callback" display="Callback" id="module.middleware.rm_filex_block_media.callback" description="A user callback function can be provided. If this callback function is provided, it will be called when media is inserted or removed. It will also be called during operations by the lower level block media as a way for the user to provide their desired waiting functionality.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.middleware.rm_filex_block_media.callback}")</constraint>
+        </property>
+        <property default="module.middleware.rm_filex_block_media.partition.0" display="Partition Number" id="module.middleware.rm_filex_block_media.partition" description="The partition to use for partitioned media. This partition will only be used if a Master Boot Record with partition table exists at block 0 of the media, otherwise the FileX FAT boot record should exist or be formatted to block 0.">
+            <option id="module.middleware.rm_filex_block_media.partition.0" display="0" value="RM_FILEX_BLOCK_MEDIA_PARTITION0" />
+            <option id="module.middleware.rm_filex_block_media.partition.1" display="1" value="RM_FILEX_BLOCK_MEDIA_PARTITION1" />
+            <option id="module.middleware.rm_filex_block_media.partition.2" display="2" value="RM_FILEX_BLOCK_MEDIA_PARTITION2" />
+            <option id="module.middleware.rm_filex_block_media.partition.3" display="3" value="RM_FILEX_BLOCK_MEDIA_PARTITION3" />
+        </property>
+        <property default="" id="module.middleware.rm_filex_block_media.name_upper">
+            <export>"${module.middleware.rm_filex_block_media.name}".toUpperCase()</export>
+        </property>
+        <header>
+extern const rm_filex_block_media_instance_t ${module.middleware.rm_filex_block_media.name}_instance;
+
+/** Access the FileX Block Media instance using these structures when calling API functions directly (::p_api is not used). */
+extern rm_filex_block_media_instance_ctrl_t ${module.middleware.rm_filex_block_media.name}_ctrl;
+extern const rm_filex_block_media_cfg_t ${module.middleware.rm_filex_block_media.name}_cfg;
+
+#ifndef ${module.middleware.rm_filex_block_media.callback}
+void ${module.middleware.rm_filex_block_media.callback}(rm_filex_block_media_callback_args_t * p_args);
+#endif
+        </header>
+        <includes>
+#include "rm_filex_block_media.h"
+        </includes>
+        <declarations>
+rm_filex_block_media_instance_ctrl_t ${module.middleware.rm_filex_block_media.name}_ctrl;
+
+const rm_filex_block_media_cfg_t ${module.middleware.rm_filex_block_media.name}_cfg =
+{
+    .p_lower_lvl_block_media = (rm_block_media_instance_t *) &amp;${module.middleware.rm_filex_block_media.requires.block_media::module.driver.rm_block_media.name},
+    .partition               = ${module.middleware.rm_filex_block_media.partition},
+    .p_callback              = ${module.middleware.rm_filex_block_media.callback}
+};
+
+const rm_filex_block_media_instance_t ${module.middleware.rm_filex_block_media.name}_instance =
+{
+    .p_ctrl = &amp;${module.middleware.rm_filex_block_media.name}_ctrl,
+    .p_cfg  = &amp;${module.middleware.rm_filex_block_media.name}_cfg,
+    .p_api  = &amp;g_filex_on_block_media
+};
+        </declarations>
+    </module>
+    <developerSupport>
+        <api version="1">
+            <platform id="fsp" max="" min="1.1.0"/>
+            <moduleRef id="module.middleware.rm_filex_block_media"/>
+            <description><![CDATA[<form><p><span color="header" font="header">Overview</span></p><p>The FileX Block Media I/O driver provides snippets of code for operating the FileX I/O driver.</p></form>]]></description>
+            <function display="Quick Setup" id="rm_filex_block_media_quick_setup">
+                <description><![CDATA[<form><p>This function provides quick setup for the FileX Block Media I/O driver instance using the properties from the RA configurator.</p></form>]]></description>
+            </function>
+        </api>
+        <template category="function_call" display="Call Quick Setup" id="module.middleware.rm_filex_block_media.quick_setup" version="1">
+            <platform id="fsp" max="" min="1.1.0"/>
+            <moduleRef id="module.middleware.rm_filex_block_media">
+                <function id="rm_filex_block_media_quick_setup"/>
+            </moduleRef>
+            <content>
+/* TODO: Enable if you want to wait for removable media to be inserted */
+#define ${rm_filex_block_media_name_upper:raProperty(module.middleware.rm_filex_block_media.name_upper)}_WAIT_FOR_REMOVABLE_MEDIA (0)
+
+#if ${rm_filex_block_media_name_upper}_WAIT_FOR_REMOVABLE_MEDIA
+volatile bool g_media_inserted = false;
+#endif
+
+void ${rm_filex_block_media_callback:raProperty(module.middleware.rm_filex_block_media.callback)}(rm_filex_block_media_callback_args_t * p_args)
+{
+#if ${rm_filex_block_media_name_upper}_WAIT_FOR_REMOVABLE_MEDIA
+    if (p_args->event &amp; RM_BLOCK_MEDIA_EVENT_MEDIA_INSERTED)
+    {
+        g_media_inserted = true;
+    }
+#else
+    FSP_PARAMETER_NOT_USED(p_args);
+#endif
+}
+
+void ${rm_filex_block_media_name:raProperty(module.middleware.rm_filex_block_media.name)}_quick_setup();
+
+/* Quick setup for ${rm_filex_block_media_name}. */
+void ${rm_filex_block_media_name}_quick_setup()
+{
+    fsp_err_t err;
+
+    /* Open block media instance, this must be done before calling any FileX API */
+    err = ${rm_filex_block_media_name}_instance.p_api->open(${rm_filex_block_media_name}_instance.p_ctrl, ${rm_filex_block_media_name}_instance.p_cfg);
+    assert(FSP_SUCCESS == err);
+
+#if ${rm_filex_block_media_name_upper}_WAIT_FOR_REMOVABLE_MEDIA
+    while (!g_media_inserted)
+    {
+        ;
+    }
+#endif
+}
+            </content>
+        </template>
+    </developerSupport>
+</raModuleDescription>

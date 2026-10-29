@@ -1,0 +1,547 @@
+<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.driver.ble_abs" path="fsp_cfg/rm_ble_abs_cfg.h" version="0">
+        <property id="config.driver.ble_abs.parameter_checking_enable" display="Parameter Checking" default="config.driver.ble_abs.parameter_checking_enable.bsp" description="Specify whether to include code for API parameter checking. Valid settings include.">
+            <option id="config.driver.ble_abs.parameter_checking_enable.bsp" display="Default (BSP)" value="BSP_CFG_PARAM_CHECKING_ENABLE" />
+            <option id="config.driver.ble_abs.parameter_checking_enable.enabled" display="Enable" value="1" />
+            <option id="config.driver.ble_abs.parameter_checking_enable.disabled" display="Disable" value="0" />
+        </property>
+        <property id="config.driver.ble_abs.rf_debug_public_address" display="Debug Public Address" default="FF:FF:FF:50:90:74" description="Public Address of firmware initial value." >
+            <constraint display="Must be a valid device address">eval('' +
+            'var input = "${config.driver.ble_abs.rf_debug_public_address}";' +
+            'var regex_mac = RegExp("^[0-9A-F]\{2\}\(:[0-9A-F]\{2\}\)\{5\}$","i");' +
+            'var regex_old = RegExp("^{(0x[0-9A-F]\{2\})\(\,0x[0-9A-F]\{2\}\)\{5\}}$","i");' +
+            ' ((regex_mac.test(input) &amp;&amp; ( 17 === input.length)) || (regex_old.test(input)  &amp;&amp; ( 31 === input.length)))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${config.driver.ble_abs.rf_debug_public_address}";' +
+            'var regex_mac = RegExp("^[0-9A-F]\{2\}\(:[0-9A-F]\{2\}\)\{5\}$","i");' +
+            'if (regex_mac.test(output)){' +
+            'output = "0x" + output.replace(/\:/g,",0x");' +
+            '}else{' +
+            'output = output.slice(1,-1)' +
+            '}' +
+            'output'
+            )</export>            <!-- replace all colons with commas on export and add 0x to mark as hex -->
+        </property>
+        <property id="config.driver.ble_abs.rf_debug_random_address" display="Debug Random Address" default="FF:FF:FF:FF:FF:FF" description="Random Address of firmware initial value." >
+            <constraint display="Must be a valid device address">eval('' +
+            'var input = "${config.driver.ble_abs.rf_debug_random_address}";' +
+            'var regex_mac = RegExp("^[0-9A-F]\{2\}\(:[0-9A-F]\{2\}\)\{5\}$","i");' +
+            'var regex_old = RegExp("^{(0x[0-9A-F]\{2\})\(\,0x[0-9A-F]\{2\}\)\{5\}}$","i");' +
+            ' ((regex_mac.test(input) &amp;&amp; ( 17 === input.length)) || (regex_old.test(input)  &amp;&amp; ( 31 === input.length)))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${config.driver.ble_abs.rf_debug_random_address}";' +
+            'var regex_mac = RegExp("^[0-9A-F]\{2\}\(:[0-9A-F]\{2\}\)\{5\}$","i");' +
+            'if (regex_mac.test(output)){' +
+            'output = "0x" + output.replace(/\:/g,",0x");' +
+            '}else{' +
+            'output = output.slice(1,-1)' +
+            '}' +
+            'output'
+            )</export>            <!-- replace all colons with commas on export and add 0x to mark as hex -->
+        </property>
+        <property id="config.driver.ble_abs.rf_connection_maximum" display="Maximum number of connections" default="7" description="Maximum number of connections.">
+            <constraint display="Value must be an integer between 1 and 7, and lower than the value defined in ble module.">testInteger("${config.driver.ble_abs.rf_connection_maximum}") &amp;&amp; ("${config.driver.ble_abs.rf_connection_maximum}" &gt;=1)  &amp;&amp; ("${config.driver.ble_abs.rf_connection_maximum}" &lt;=7)</constraint>
+        </property>
+        <property id="config.driver.ble_abs.rf_connection_data_maximum" display="Maximum connection data length" default="251" description="Maximum connection data length.">
+            <constraint display="Value must be an integer between 27 and 251, and lower than the value defined in ble module.">testInteger("${config.driver.ble_abs.rf_connection_data_maximum}") &amp;&amp; ("${config.driver.ble_abs.rf_connection_data_maximum}" &gt;=27) &amp;&amp; ("${config.driver.ble_abs.rf_connection_data_maximum}" &lt;=251)</constraint>
+        </property>
+        <property id="config.driver.ble_abs.rf_advertising_data_maximum" display="Maximum advertising data length" default="1650" description="Maximum advertising data length.">
+            <constraint display="Value must be an integer between 31 and 1650, and lower than the value defined in ble module.">testInteger("${config.driver.ble_abs.rf_advertising_data_maximum}") &amp;&amp; ("${config.driver.ble_abs.rf_advertising_data_maximum}" &gt;=31) &amp;&amp; ("${config.driver.ble_abs.rf_advertising_data_maximum}" &lt;=1650)</constraint>
+        </property>
+        <property id="config.driver.ble_abs.rf_advertising_set_maximum" display="Maximum advertising set number" default="4" description="Maximum advertising set number.">
+            <constraint display="Value must be an integer between 1 and 4, and lower than the value defined in ble module.">testInteger("${config.driver.ble_abs.rf_advertising_set_maximum}") &amp;&amp; ("${config.driver.ble_abs.rf_advertising_set_maximum}" &gt;=1) &amp;&amp; ("${config.driver.ble_abs.rf_advertising_set_maximum}" &lt;=4)</constraint>
+        </property>
+        <property id="config.driver.ble_abs.rf_periodic_sync_set_maximum" display="Maximum periodic sync set number." default="2" description="Maximum periodic sync set number.">
+            <constraint display="Value must be an integer between 1 and 2, and lower than the value defined in ble module.">testInteger("${config.driver.ble_abs.rf_periodic_sync_set_maximum}") &amp;&amp; ("${config.driver.ble_abs.rf_periodic_sync_set_maximum}" &gt;=1) &amp;&amp; ("${config.driver.ble_abs.rf_periodic_sync_set_maximum}" &lt;=2)</constraint>
+        </property>
+        <property id="config.driver.ble_abs.enable_secure_data" display="Store Security Data" default="config.driver.ble_abs.enable_secure_data.0" description="Store Security Data in DataFlash.">
+            <option id="config.driver.ble_abs.enable_secure_data.0" display="Disable" value="0" />
+            <option id="config.driver.ble_abs.enable_secure_data.1" display="Enable" value="1" />
+        </property>
+        <property id="config.driver.ble_abs.secure_data_dataflash_block" display="Data Flash Block for Security Data" default="0" description="Data Flash Block for Security Data Management.">
+            <constraint display="Value must be an integer between 0 and 7, and lower than the value defined in ble module.">testInteger("${config.driver.ble_abs.secure_data_dataflash_block}") &amp;&amp; ("${config.driver.ble_abs.secure_data_dataflash_block}" &gt;=0) &amp;&amp; ("${config.driver.ble_abs.secure_data_dataflash_block}" &lt;=7)</constraint>
+        </property>
+        <property id="config.driver.ble_abs.remote_device_bonding_number" display="Remote Device Bonding Number" default="7" description="Number of remote device bonding information.">
+            <constraint display="Value must be an integer between 1 and 7, and lower than the value defined in ble module.">testInteger("${config.driver.ble_abs.remote_device_bonding_number}") &amp;&amp; ("${config.driver.ble_abs.remote_device_bonding_number}" &gt;=1) &amp;&amp; ("${config.driver.ble_abs.remote_device_bonding_number}" &lt;=7)</constraint>
+        </property>
+        <property id="config.driver.ble_abs.event_notify_connection_start" display="Connection Event Start Notify" default="config.driver.ble_abs.event_notify_connection_start.0" description="Set Connection event start notify enable/disable.">
+            <option id="config.driver.ble_abs.event_notify_connection_start.0" display="Disable" value="0" />
+            <option id="config.driver.ble_abs.event_notify_connection_start.1" display="Enable" value="1" />
+        </property>
+        <property id="config.driver.ble_abs.event_notify_connection_close" display="Connection Event Close Notify" default="config.driver.ble_abs.event_notify_connection_close.0" description="Set Connection event close notify enable/disable.">
+            <option id="config.driver.ble_abs.event_notify_connection_close.0" display="Disable" value="0" />
+            <option id="config.driver.ble_abs.event_notify_connection_close.1" display="Enable" value="1" />
+        </property>
+        <property id="config.driver.ble_abs.event_notify_advertising_start" display="Advertising Event Start Notify" default="config.driver.ble_abs.event_notify_advertising_start.0" description="Set Advertising event start notify enable/disable.">
+            <option id="config.driver.ble_abs.event_notify_advertising_start.0" display="Disable" value="0" />
+            <option id="config.driver.ble_abs.event_notify_advertising_start.1" display="Enable" value="1" />
+        </property>
+        <property id="config.driver.ble_abs.event_notify_advertising_close" display="Advertising Event Close Notify" default="config.driver.ble_abs.event_notify_advertising_close.0" description="Set Advertising event close notify enable/disable.">
+            <option id="config.driver.ble_abs.event_notify_advertising_close.0" display="Disable" value="0" />
+            <option id="config.driver.ble_abs.event_notify_advertising_close.1" display="Enable" value="1" />
+        </property>
+        <property id="config.driver.ble_abs.event_notify_scanning_start" display="Scanning Event Start Notify" default="config.driver.ble_abs.event_notify_scanning_start.0" description="Set Scanning event start notify enable/disable.">
+            <option id="config.driver.ble_abs.event_notify_scanning_start.0" display="Disable" value="0" />
+            <option id="config.driver.ble_abs.event_notify_scanning_start.1" display="Enable" value="1" />
+        </property>
+        <property id="config.driver.ble_abs.event_notify_scanning_close" display="Scanning Event Close Notify" default="config.driver.ble_abs.event_notify_scanning_close.0" description="Set Scanning event close notify enable/disable.">
+            <option id="config.driver.ble_abs.event_notify_scanning_close.0" display="Disable" value="0" />
+            <option id="config.driver.ble_abs.event_notify_scanning_close.1" display="Enable" value="1" />
+        </property>
+        <property id="config.driver.ble_abs.event_notify_initiating_start" display="Initiating Event Start Notify" default="config.driver.ble_abs.event_notify_initiating_start.0" description="Set Initiating event start notify enable/disable.">
+            <option id="config.driver.ble_abs.event_notify_initiating_start.0" display="Disable" value="0" />
+            <option id="config.driver.ble_abs.event_notify_initiating_start.1" display="Enable" value="1" />
+        </property>
+        <property id="config.driver.ble_abs.event_notify_initiating_close" display="Initiating Event Close Notify" default="config.driver.ble_abs.event_notify_initiating_close.0" description="Set Initiating event close notify enable/disable.">
+            <option id="config.driver.ble_abs.event_notify_initiating_close.0" display="Disable" value="0" />
+            <option id="config.driver.ble_abs.event_notify_initiating_close.1" display="Enable" value="1" />
+        </property>
+        <property id="config.driver.ble_abs.event_notify_deep_sleep_start" display="RF Deep Sleep Start Notify" default="config.driver.ble_abs.event_notify_deep_sleep_start.0" description="Set RF_DEEP_SLEEP start notify enable/disable.">
+            <option id="config.driver.ble_abs.event_notify_deep_sleep_start.0" display="Disable" value="0" />
+            <option id="config.driver.ble_abs.event_notify_deep_sleep_start.1" display="Enable" value="1" />
+        </property>
+        <property id="config.driver.ble_abs.event_notify_deep_sleep_wakeup" display="RF Deep Sleep Wakeup Notify" default="config.driver.ble_abs.event_notify_deep_sleep_wakeup.0" description="Set RF_DEEP_SLEEP wakeup notify enable/disable.">
+            <option id="config.driver.ble_abs.event_notify_deep_sleep_wakeup.0" display="Disable" value="0" />
+            <option id="config.driver.ble_abs.event_notify_deep_sleep_wakeup.1" display="Enable" value="1" />
+        </property>
+        <property id="config.driver.ble_abs.rf_clval" display="Bluetooth dedicated clock" default="6" description="Load capacitance adjustment.">
+            <constraint display="Value must be an integer between 0 and 15, and lower than the value defined in ble module.">testInteger("${config.driver.ble_abs.rf_clval}") &amp;&amp; ("${config.driver.ble_abs.rf_clval}" &gt;=0)  &amp;&amp; ("${config.driver.ble_abs.rf_clval}" &lt;=15)</constraint>
+        </property>
+        <property id="config.driver.ble_abs.rf_dcdc_converter_enabele" display="DC-DC converter" default="config.driver.ble_abs.rf_dcdc_converter_enabele.0" description="Set DC-DC converter for RF part.">
+            <option id="config.driver.ble_abs.rf_dcdc_converter_enabele.0" display="Disable" value="0" />
+            <option id="config.driver.ble_abs.rf_dcdc_converter_enabele.1" display="Enable" value="1" />
+        </property>
+        <property id="config.driver.ble_abs.rf_external_32k_enable" display="Slow Clock Source" default="config.driver.ble_abs.rf_external_32k_enable.0" description="Set slow clock source for RF part.">
+            <option id="config.driver.ble_abs.rf_external_32k_enable.0" display="Use RF_LOCO" value="0" />
+            <option id="config.driver.ble_abs.rf_external_32k_enable.1" display="Use External 32.768kHz" value="1" />
+        </property>
+        <property id="config.driver.ble_abs.rf_mcu_clkout_port" display="MCU CLKOUT Port" default="config.driver.ble_abs.rf_mcu_clkout_port.0" description="When BLE_ABS_CFG_RF_EXTERNAL_32K_ENABLE = 1, Set port of MCU CLKOUT.">
+            <option id="config.driver.ble_abs.rf_mcu_clkout_port.0" display="P109" value="0" />
+            <option id="config.driver.ble_abs.rf_mcu_clkout_port.1" display="P205" value="1" />
+        </property>
+        <property id="config.driver.ble_abs.rf_mcu_clkout_frequency" display="MCU CLKOUT Frequency Output" default="config.driver.ble_abs.rf_mcu_clkout_frequency.0" description="When BLE_ABS_CFG_RF_EXTERNAL_32K_ENABLE = 1, set frequency output from CLKOUT of MCU part.">
+            <option id="config.driver.ble_abs.rf_mcu_clkout_frequency.0" display="MCU CLKOUT frequency 32.768kHz" value="0" />
+            <option id="config.driver.ble_abs.rf_mcu_clkout_frequency.1" display="MCU CLKOUT frequency 16.384kHz" value="1" />
+        </property>
+        <property id="config.driver.ble_abs.rf_sleep_clock_accuracy" display="Sleep Clock Accuracy(SCA)" default="250" description="When BLE_ABS_CFG_RF_EXTERNAL_32K_ENABLE = 1, set Sleep Clock Accuracy(SCA) for RF slow clock.">
+            <constraint display="Value must be an integer between 0 and 500, and lower than the value defined in ble module.">testInteger("${config.driver.ble_abs.rf_sleep_clock_accuracy}") &amp;&amp; ("${config.driver.ble_abs.rf_sleep_clock_accuracy}" &gt;=0) &amp;&amp; ("${config.driver.ble_abs.rf_sleep_clock_accuracy}" &lt;=500)</constraint>
+        </property>
+        <property id="config.driver.ble_abs.rf_maximum_tx_power" display="Transmission Power Maximum Value" default="config.driver.ble_abs.rf_maximum_tx_power.1" description="Set transmission power maximum value.">
+            <option id="config.driver.ble_abs.rf_maximum_tx_power.0" display="max +0dBm" value="0" />
+            <option id="config.driver.ble_abs.rf_maximum_tx_power.1" display="max +4dBm" value="1" />
+        </property>
+        <property id="config.driver.ble_abs.rf_default_tx_power" display="Transmission Power Default Value" default="config.driver.ble_abs.rf_default_tx_power.0" description="Set default transmit power. Default transmit power is dependent on the configuration of Maximum transmission power(BLE_ABS_CFG_RF_DEF_TX_POW).">
+            <option id="config.driver.ble_abs.rf_default_tx_power.0" display="High  0dBm(Transmission Power Maximum Value = +0dBm)  /  +4dBm(Transmission Power Maximum Value = +4dBm)" value="0"/>
+            <option id="config.driver.ble_abs.rf_default_tx_power.1" display="Mid   0dBm(Transmission Power Maximum Value = +0dBm)  /   0dBm(Transmission Power Maximum Value = +4dBm)" value="1"/>
+            <option id="config.driver.ble_abs.rf_default_tx_power.2" display="Low -18dBm(Transmission Power Maximum Value = +0dBm)  / -20dBm(Transmission Power Maximum Value = +4dBm)" value="2"/>
+        </property>
+        <property id="config.driver.ble_abs.rf_clkout_enable" display="CLKOUT_RF Output" default="config.driver.ble_abs.rf_clkout_enable.0" description="Set CLKOUT_RF output setting.">
+            <option id="config.driver.ble_abs.rf_clkout_enable.0" display="No output" value="0"/>
+            <option id="config.driver.ble_abs.rf_clkout_enable.5" display="4MHz output" value="5"/>
+            <option id="config.driver.ble_abs.rf_clkout_enable.6" display="2MHz output" value="6"/>
+            <option id="config.driver.ble_abs.rf_clkout_enable.7" display="1MHz output" value="7"/>
+        </property>
+        <property id="config.driver.ble_abs.rf_deep_sleep_enable" display="RF_DEEP_SLEEP Transition" default="config.driver.ble_abs.rf_deep_sleep_enable.1" description="Set RF_DEEP_SLEEP transition.">
+            <option id="config.driver.ble_abs.rf_deep_sleep_enable.0" display="Disable" value="0" />
+            <option id="config.driver.ble_abs.rf_deep_sleep_enable.1" display="Enable" value="1" />
+        </property>
+        <property id="config.driver.ble_abs.mcu_main_clock_khz" display="MCU Main Clock Frequency" default="8000" description="Set MCU Main Clock Frequency (kHz). Set clock source according to your board environment. HOCO: don't care. / Main Clock: 1000 to 20000 kHz / PLL Circuit: 4000 to 12500 kHz ">
+            <constraint display="Value must be an integer between 1000 and 20000, and lower than the value defined in ble module.">testInteger("${config.driver.ble_abs.mcu_main_clock_khz}") &amp;&amp; ("${config.driver.ble_abs.mcu_main_clock_khz}" &gt;=1000) &amp;&amp; ("${config.driver.ble_abs.mcu_main_clock_khz}" &lt;=20000)</constraint>
+        </property>
+        <property id="config.driver.ble_abs.device_data_code_flash_block" display="Code Flash(ROM) Device Data Block" default="255" description="Device specific data block on Code Flash (ROM).">
+            <constraint display="Value must be an integer between -1 and 255, and lower than the value defined in ble module.">testInteger("${config.driver.ble_abs.device_data_code_flash_block}") &amp;&amp; ("${config.driver.ble_abs.device_data_code_flash_block}" &gt;=-1) &amp;&amp; ("${config.driver.ble_abs.device_data_code_flash_block}" &lt;=255)</constraint>
+        </property>
+        <property id="config.driver.ble_abs.device_data_data_flash_block" display="Device Specific Data Flash Block" default="-1" description="Device specific data block on E2 Data Flash.">
+            <constraint display="Value must be an integer between -1 and 7, and lower than the value defined in ble module.">testInteger("${config.driver.ble_abs.device_data_data_flash_block}") &amp;&amp; ("${config.driver.ble_abs.device_data_data_flash_block}" &gt;=-1) &amp;&amp; ("${config.driver.ble_abs.device_data_data_flash_block}" &lt;=7)</constraint>
+        </property>
+        <property id="config.driver.ble_abs.gatt_mtu_size" display="MTU Size Configured" default="247" description="MTU Size configured by GATT MTU exchange procedure.">
+            <constraint display="Value must be an integer between 23 and 247, and lower than the value defined in ble module.">testInteger("${config.driver.ble_abs.gatt_mtu_size}") &amp;&amp; ("${config.driver.ble_abs.gatt_mtu_size}" &gt;=23)  &amp;&amp; ("${config.driver.ble_abs.gatt_mtu_size}" &lt;=247)</constraint>
+        </property>
+        <property id="config.driver.ble_abs.timer_number_of_slot" display="Timer Slot Maximum Number" default="10" description="The maximum number of timer slot." >
+            <constraint display="Value must be an integer between 1 and 10, and lower than the value defined in ble module.">testInteger("${config.driver.ble_abs.timer_number_of_slot}") &amp;&amp; ("${config.driver.ble_abs.timer_number_of_slot}" &gt;=1)  &amp;&amp; ("${config.driver.ble_abs.timer_number_of_slot}" &lt;=10)</constraint>
+        </property>
+        <content>
+            #ifdef __cplusplus
+            extern "C" {
+            #endif
+
+            #define BLE_ABS_CFG_RF_DEBUG_PUBLIC_ADDRESS BLE_CFG_RF_DEBUG_PUBLIC_ADDRESS
+            #define BLE_ABS_CFG_RF_DEBUG_RANDOM_ADDRESS BLE_CFG_RF_DEBUG_RANDOM_ADDRESS
+            #define BLE_ABS_CFG_RF_CONNECTION_MAXIMUM (${config.driver.ble_abs.rf_connection_maximum})
+            #define BLE_ABS_CFG_RF_CONNECTION_DATA_MAXIMUM (${config.driver.ble_abs.rf_connection_data_maximum})
+            #define BLE_ABS_CFG_RF_ADVERTISING_DATA_MAXIMUM (${config.driver.ble_abs.rf_advertising_data_maximum})
+            #define BLE_ABS_CFG_RF_ADVERTISING_SET_MAXIMUM (${config.driver.ble_abs.rf_advertising_set_maximum})
+            #define BLE_ABS_CFG_RF_SYNC_SET_MAXIMUM (${config.driver.ble_abs.rf_periodic_sync_set_maximum})
+            #define BLE_ABS_CFG_ENABLE_SECURE_DATA BLE_CFG_ENABLE_SECURE_DATA
+            #define BLE_ABS_CFG_SECURE_DATA_DATAFLASH_BLOCK (${config.driver.ble_abs.secure_data_dataflash_block})
+            #define BLE_ABS_CFG_NUMBER_BONDING (${config.driver.ble_abs.remote_device_bonding_number})
+            #define BLE_ABS_CFG_EVENT_NOTIFY_CONNECTION_START BLE_CFG_EVENT_NOTIFY_CONNECTION_START
+            #define BLE_ABS_CFG_EVENT_NOTIFY_CONNECTION_CLOSE BLE_CFG_EVENT_NOTIFY_CONNECTION_CLOSE
+            #define BLE_ABS_CFG_EVENT_NOTIFY_ADVERTISING_START BLE_CFG_EVENT_NOTIFY_ADVERTISING_START
+            #define BLE_ABS_CFG_EVENT_NOTIFY_ADVERTISING_CLOSE BLE_CFG_EVENT_NOTIFY_ADVERTISING_CLOSE
+            #define BLE_ABS_CFG_EVENT_NOTIFY_SCANNING_START BLE_CFG_EVENT_NOTIFY_SCANNING_START
+            #define BLE_ABS_CFG_EVENT_NOTIFY_SCANNING_CLOSE BLE_CFG_EVENT_NOTIFY_SCANNING_CLOSE
+            #define BLE_ABS_CFG_EVENT_NOTIFY_INITIATING_START BLE_CFG_EVENT_NOTIFY_INITIATING_START
+            #define BLE_ABS_CFG_EVENT_NOTIFY_INITIATING_CLOSE BLE_CFG_EVENT_NOTIFY_INITIATING_CLOSE
+            #define BLE_ABS_CFG_EVENT_NOTIFY_DEEP_SLEEP_START BLE_CFG_EVENT_NOTIFY_DEEP_SLEEP_START
+            #define BLE_ABS_CFG_EVENT_NOTIFY_DEEP_SLEEP_WAKEUP BLE_CFG_EVENT_NOTIFY_DEEP_SLEEP_WAKEUP
+            #define BLE_ABS_CFG_RF_CLVAL (${config.driver.ble_abs.rf_clval})
+            #define BLE_ABS_CFG_RF_DCDC_CONVERTER_ENABLE BLE_CFG_RF_DCDC_CONVERTER_ENABLE
+            #define BLE_ABS_CFG_RF_EXT32K_EN BLE_CFG_RF_EXT32K_EN
+            #define BLE_ABS_CFG_RF_MCU_CLKOUT_PORT BLE_CFG_RF_MCU_CLKOUT_PORT
+            #define BLE_ABS_CFG_RF_MCU_CLKOUT_FREQ BLE_CFG_RF_MCU_CLKOUT_FREQ
+            #define BLE_ABS_CFG_RF_SCA (${config.driver.ble_abs.rf_sleep_clock_accuracy})
+            #define BLE_ABS_CFG_RF_MAX_TX_POW BLE_CFG_RF_MAX_TX_POW
+            #define BLE_ABS_CFG_RF_DEF_TX_POW BLE_CFG_RF_DEF_TX_POW
+            #define BLE_ABS_CFG_RF_CLKOUT_EN BLE_CFG_RF_CLKOUT_EN
+            #define BLE_ABS_CFG_RF_DEEP_SLEEP_EN BLE_CFG_RF_DEEP_SLEEP_EN
+            #define BLE_ABS_CFG_MCU_MAIN_CLK_KHZ (${config.driver.ble_abs.mcu_main_clock_khz})
+            #define BLE_ABS_CFG_DEV_DATA_CF_BLOCK (${config.driver.ble_abs.device_data_code_flash_block})
+            #define BLE_ABS_CFG_DEV_DATA_DF_BLOCK (${config.driver.ble_abs.device_data_data_flash_block})
+            #define BLE_ABS_CFG_GATT_MTU_SIZE (${config.driver.ble_abs.gatt_mtu_size})
+            #define BLE_ABS_CFG_TIMER_NUMBER_OF_SLOT (${config.driver.ble_abs.timer_number_of_slot})
+            #define BLE_ABS_CFG_PARAM_CHECKING_ENABLE (${config.driver.ble_abs.parameter_checking_enable})
+
+            #ifdef __cplusplus
+            }
+            #endif
+        </content>
+    </config>
+    <module id="module.driver.ble_abs_on_ble" config="config.driver.ble_abs" display="Networking|BLE Abstraction (rm_ble_abs)" version="0" url="group___b_l_e___a_b_s.html">
+        <constraint display="Requires lower level library implementation">
+          "${interface.driver.network_on_ble}" === "1"
+        </constraint>
+        <constraint display="Requires lower level timer implementation">
+            testExists("${module.driver.ble_abs_on_ble.requires.agt::module.driver.timer.name}")
+        </constraint>
+        <constraint display="Requires the heap area to 0x1000 or more.">
+          ("${config.bsp.common.heap}" &gt;= 0x1000)
+        </constraint>
+        <constraint display="Requires the stack size to 0x1000 or more.">
+          ("${config.bsp.common.main}" &gt;= 0x1000)
+        </constraint>
+        <constraint display="Number of connections must be the value defined in ble module or lower.">
+            testExists("${interface.driver.ble_on_extended}") &amp;&amp; (${config.driver.ble_abs.rf_connection_maximum} &lt;= ${config.driver.ble_a.rf_connection_maximum}) ||
+            testExists("${interface.driver.ble_on_balance}") &amp;&amp; (${config.driver.ble_abs.rf_connection_maximum} &lt;= ${config.driver.ble_b.rf_connection_maximum}) ||
+            testExists("${interface.driver.ble_on_compact}") &amp;&amp; (${config.driver.ble_abs.rf_connection_maximum} &lt;= ${config.driver.ble_c.rf_connection_maximum}) ||
+            testExists("${interface.driver.ble_on_extended_freertos}") &amp;&amp; (${config.driver.ble_abs.rf_connection_maximum} &lt;= ${config.driver.ble_a_freertos.rf_connection_maximum}) ||
+            testExists("${interface.driver.ble_on_balance_freertos}") &amp;&amp; (${config.driver.ble_abs.rf_connection_maximum} &lt;= ${config.driver.ble_b_freertos.rf_connection_maximum}) ||
+            testExists("${interface.driver.ble_on_compact_freertos}") &amp;&amp; (${config.driver.ble_abs.rf_connection_maximum} &lt;= ${config.driver.ble_c_freertos.rf_connection_maximum}) ||
+            testExists("${interface.driver.ble_on_extended_threadx}") &amp;&amp; (${config.driver.ble_abs.rf_connection_maximum} &lt;= ${config.driver.ble_a_threadx.rf_connection_maximum}) ||
+            testExists("${interface.driver.ble_on_balance_threadx}") &amp;&amp; (${config.driver.ble_abs.rf_connection_maximum} &lt;= ${config.driver.ble_b_threadx.rf_connection_maximum}) ||
+            testExists("${interface.driver.ble_on_compact_threadx}") &amp;&amp; (${config.driver.ble_abs.rf_connection_maximum} &lt;= ${config.driver.ble_c_threadx.rf_connection_maximum})
+        </constraint>
+        <constraint display="Connection data length must be the value defined in ble module or lower.">
+            testExists("${interface.driver.ble_on_extended}") &amp;&amp; (${config.driver.ble_abs.rf_connection_data_maximum} &lt;= ${config.driver.ble_a.rf_connection_data_maximum}) ||
+            testExists("${interface.driver.ble_on_balance}") &amp;&amp; (${config.driver.ble_abs.rf_connection_data_maximum} &lt;= ${config.driver.ble_b.rf_connection_data_maximum}) ||
+            testExists("${interface.driver.ble_on_compact}") &amp;&amp; (${config.driver.ble_abs.rf_connection_data_maximum} &lt;= ${config.driver.ble_c.rf_connection_data_maximum}) ||
+            testExists("${interface.driver.ble_on_extended_freertos}") &amp;&amp; (${config.driver.ble_abs.rf_connection_data_maximum} &lt;= ${config.driver.ble_a_freertos.rf_connection_data_maximum}) ||
+            testExists("${interface.driver.ble_on_balance_freertos}") &amp;&amp; (${config.driver.ble_abs.rf_connection_data_maximum} &lt;= ${config.driver.ble_b_freertos.rf_connection_data_maximum}) ||
+            testExists("${interface.driver.ble_on_compact_freertos}") &amp;&amp; (${config.driver.ble_abs.rf_connection_data_maximum} &lt;= ${config.driver.ble_c_freertos.rf_connection_data_maximum}) ||
+            testExists("${interface.driver.ble_on_extended_threadx}") &amp;&amp; (${config.driver.ble_abs.rf_connection_data_maximum} &lt;= ${config.driver.ble_a_threadx.rf_connection_data_maximum}) ||
+            testExists("${interface.driver.ble_on_balance_threadx}") &amp;&amp; (${config.driver.ble_abs.rf_connection_data_maximum} &lt;= ${config.driver.ble_b_threadx.rf_connection_data_maximum}) ||
+            testExists("${interface.driver.ble_on_compact_threadx}") &amp;&amp; (${config.driver.ble_abs.rf_connection_data_maximum} &lt;= ${config.driver.ble_c_threadx.rf_connection_data_maximum})
+        </constraint>
+        <constraint display="Advertising data length must be the value defined in ble module or lower.">
+            testExists("${interface.driver.ble_on_extended}") &amp;&amp; (${config.driver.ble_abs.rf_advertising_data_maximum} &lt;= ${config.driver.ble_a.rf_advertising_data_maximum}) ||
+            testExists("${interface.driver.ble_on_balance}") &amp;&amp; (${config.driver.ble_abs.rf_advertising_data_maximum} &lt;= ${config.driver.ble_b.rf_advertising_data_maximum}) ||
+            testExists("${interface.driver.ble_on_compact}") &amp;&amp; (${config.driver.ble_abs.rf_advertising_data_maximum} &lt;= ${config.driver.ble_c.rf_advertising_data_maximum}) ||
+            testExists("${interface.driver.ble_on_extended_freertos}") &amp;&amp; (${config.driver.ble_abs.rf_advertising_data_maximum} &lt;= ${config.driver.ble_a_freertos.rf_advertising_data_maximum}) ||
+            testExists("${interface.driver.ble_on_balance_freertos}") &amp;&amp; (${config.driver.ble_abs.rf_advertising_data_maximum} &lt;= ${config.driver.ble_b_freertos.rf_advertising_data_maximum}) ||
+            testExists("${interface.driver.ble_on_compact_freertos}") &amp;&amp; (${config.driver.ble_abs.rf_advertising_data_maximum} &lt;= ${config.driver.ble_c_freertos.rf_advertising_data_maximum}) ||
+            testExists("${interface.driver.ble_on_extended_threadx}") &amp;&amp; (${config.driver.ble_abs.rf_advertising_data_maximum} &lt;= ${config.driver.ble_a_threadx.rf_advertising_data_maximum}) ||
+            testExists("${interface.driver.ble_on_balance_threadx}") &amp;&amp; (${config.driver.ble_abs.rf_advertising_data_maximum} &lt;= ${config.driver.ble_b_threadx.rf_advertising_data_maximum}) ||
+            testExists("${interface.driver.ble_on_compact_threadx}") &amp;&amp; (${config.driver.ble_abs.rf_advertising_data_maximum} &lt;= ${config.driver.ble_c_threadx.rf_advertising_data_maximum})
+        </constraint>
+        <constraint display="Advertising set number must be the value defined in ble module or lower.">
+            testExists("${interface.driver.ble_on_extended}") &amp;&amp; (${config.driver.ble_abs.rf_advertising_set_maximum} &lt;= ${config.driver.ble_a.rf_advertising_set_maximum}) ||
+            testExists("${interface.driver.ble_on_balance}") &amp;&amp; (${config.driver.ble_abs.rf_advertising_set_maximum} &lt;= ${config.driver.ble_b.rf_advertising_set_maximum}) ||
+            testExists("${interface.driver.ble_on_compact}") &amp;&amp; (${config.driver.ble_abs.rf_advertising_set_maximum} &lt;= ${config.driver.ble_c.rf_advertising_set_maximum}) ||
+            testExists("${interface.driver.ble_on_extended_freertos}") &amp;&amp; (${config.driver.ble_abs.rf_advertising_set_maximum} &lt;= ${config.driver.ble_a_freertos.rf_advertising_set_maximum}) ||
+            testExists("${interface.driver.ble_on_balance_freertos}") &amp;&amp; (${config.driver.ble_abs.rf_advertising_set_maximum} &lt;= ${config.driver.ble_b_freertos.rf_advertising_set_maximum}) ||
+            testExists("${interface.driver.ble_on_compact_freertos}") &amp;&amp; (${config.driver.ble_abs.rf_advertising_set_maximum} &lt;= ${config.driver.ble_c_freertos.rf_advertising_set_maximum}) ||
+            testExists("${interface.driver.ble_on_extended_threadx}") &amp;&amp; (${config.driver.ble_abs.rf_advertising_set_maximum} &lt;= ${config.driver.ble_a_threadx.rf_advertising_set_maximum}) ||
+            testExists("${interface.driver.ble_on_balance_threadx}") &amp;&amp; (${config.driver.ble_abs.rf_advertising_set_maximum} &lt;= ${config.driver.ble_b_threadx.rf_advertising_set_maximum}) ||
+            testExists("${interface.driver.ble_on_compact_threadx}") &amp;&amp; (${config.driver.ble_abs.rf_advertising_set_maximum} &lt;= ${config.driver.ble_c_threadx.rf_advertising_set_maximum})
+        </constraint>
+        <constraint display="Periodic sync set number must be the value defined in ble module or lower.">
+            testExists("${interface.driver.ble_on_extended}") &amp;&amp; (${config.driver.ble_abs.rf_periodic_sync_set_maximum} &lt;= ${config.driver.ble_a.rf_periodic_sync_set_maximum}) ||
+            testExists("${interface.driver.ble_on_balance}") &amp;&amp; (${config.driver.ble_abs.rf_periodic_sync_set_maximum} &lt;= ${config.driver.ble_b.rf_periodic_sync_set_maximum}) ||
+            testExists("${interface.driver.ble_on_compact}") &amp;&amp; (${config.driver.ble_abs.rf_periodic_sync_set_maximum} &lt;= ${config.driver.ble_c.rf_periodic_sync_set_maximum}) ||
+            testExists("${interface.driver.ble_on_extended_freertos}") &amp;&amp; (${config.driver.ble_abs.rf_periodic_sync_set_maximum} &lt;= ${config.driver.ble_a_freertos.rf_periodic_sync_set_maximum}) ||
+            testExists("${interface.driver.ble_on_balance_freertos}") &amp;&amp; (${config.driver.ble_abs.rf_periodic_sync_set_maximum} &lt;= ${config.driver.ble_b_freertos.rf_periodic_sync_set_maximum}) ||
+            testExists("${interface.driver.ble_on_compact_freertos}") &amp;&amp; (${config.driver.ble_abs.rf_periodic_sync_set_maximum} &lt;= ${config.driver.ble_c_freertos.rf_periodic_sync_set_maximum}) ||
+            testExists("${interface.driver.ble_on_extended_threadx}") &amp;&amp; (${config.driver.ble_abs.rf_periodic_sync_set_maximum} &lt;= ${config.driver.ble_a_threadx.rf_periodic_sync_set_maximum}) ||
+            testExists("${interface.driver.ble_on_balance_threadx}") &amp;&amp; (${config.driver.ble_abs.rf_periodic_sync_set_maximum} &lt;= ${config.driver.ble_b_threadx.rf_periodic_sync_set_maximum}) ||
+            testExists("${interface.driver.ble_on_compact_threadx}") &amp;&amp; (${config.driver.ble_abs.rf_periodic_sync_set_maximum} &lt;= ${config.driver.ble_c_threadx.rf_periodic_sync_set_maximum})
+        </constraint>
+        <constraint display="Data flash block for security data must be the value defined in ble module or lower.">
+            testExists("${interface.driver.ble_on_extended}") &amp;&amp; (${config.driver.ble_abs.secure_data_dataflash_block} &lt;= ${config.driver.ble_a.secure_data_dataflash_block}) ||
+            testExists("${interface.driver.ble_on_balance}") &amp;&amp; (${config.driver.ble_abs.secure_data_dataflash_block} &lt;= ${config.driver.ble_b.secure_data_dataflash_block}) ||
+            testExists("${interface.driver.ble_on_compact}") &amp;&amp; (${config.driver.ble_abs.secure_data_dataflash_block} &lt;= ${config.driver.ble_c.secure_data_dataflash_block}) ||
+            testExists("${interface.driver.ble_on_extended_freertos}") &amp;&amp; (${config.driver.ble_abs.secure_data_dataflash_block} &lt;= ${config.driver.ble_a_freertos.secure_data_dataflash_block}) ||
+            testExists("${interface.driver.ble_on_balance_freertos}") &amp;&amp; (${config.driver.ble_abs.secure_data_dataflash_block} &lt;= ${config.driver.ble_b_freertos.secure_data_dataflash_block}) ||
+            testExists("${interface.driver.ble_on_compact_freertos}") &amp;&amp; (${config.driver.ble_abs.secure_data_dataflash_block} &lt;= ${config.driver.ble_c_freertos.secure_data_dataflash_block}) ||
+            testExists("${interface.driver.ble_on_extended_threadx}") &amp;&amp; (${config.driver.ble_abs.secure_data_dataflash_block} &lt;= ${config.driver.ble_a_threadx.secure_data_dataflash_block}) ||
+            testExists("${interface.driver.ble_on_balance_threadx}") &amp;&amp; (${config.driver.ble_abs.secure_data_dataflash_block} &lt;= ${config.driver.ble_b_threadx.secure_data_dataflash_block}) ||
+            testExists("${interface.driver.ble_on_compact_threadx}") &amp;&amp; (${config.driver.ble_abs.secure_data_dataflash_block} &lt;= ${config.driver.ble_c_threadx.secure_data_dataflash_block})
+        </constraint>
+        <constraint display="Remote device bonding number must be the value defined in ble module or lower.">
+            testExists("${interface.driver.ble_on_extended}") &amp;&amp; (${config.driver.ble_abs.remote_device_bonding_number} &lt;= ${config.driver.ble_a.remote_device_bonding_number}) ||
+            testExists("${interface.driver.ble_on_balance}") &amp;&amp; (${config.driver.ble_abs.remote_device_bonding_number} &lt;= ${config.driver.ble_b.remote_device_bonding_number}) ||
+            testExists("${interface.driver.ble_on_compact}") &amp;&amp; (${config.driver.ble_abs.remote_device_bonding_number} &lt;= ${config.driver.ble_c.remote_device_bonding_number}) ||
+            testExists("${interface.driver.ble_on_extended_freertos}") &amp;&amp; (${config.driver.ble_abs.remote_device_bonding_number} &lt;= ${config.driver.ble_a_freertos.remote_device_bonding_number}) ||
+            testExists("${interface.driver.ble_on_balance_freertos}") &amp;&amp; (${config.driver.ble_abs.remote_device_bonding_number} &lt;= ${config.driver.ble_b_freertos.remote_device_bonding_number}) ||
+            testExists("${interface.driver.ble_on_compact_freertos}") &amp;&amp; (${config.driver.ble_abs.remote_device_bonding_number} &lt;= ${config.driver.ble_c_freertos.remote_device_bonding_number}) ||
+            testExists("${interface.driver.ble_on_extended_threadx}") &amp;&amp; (${config.driver.ble_abs.remote_device_bonding_number} &lt;= ${config.driver.ble_a_threadx.remote_device_bonding_number}) ||
+            testExists("${interface.driver.ble_on_balance_threadx}") &amp;&amp; (${config.driver.ble_abs.remote_device_bonding_number} &lt;= ${config.driver.ble_b_threadx.remote_device_bonding_number}) ||
+            testExists("${interface.driver.ble_on_compact_threadx}") &amp;&amp; (${config.driver.ble_abs.remote_device_bonding_number} &lt;= ${config.driver.ble_c_threadx.remote_device_bonding_number})
+        </constraint>
+        <constraint display="Bluetooth dedicated clock must be the value defined in ble module or lower.">
+            testExists("${interface.driver.ble_on_extended}") &amp;&amp; (${config.driver.ble_abs.rf_clval} &lt;= ${config.driver.ble_a.rf_clval}) ||
+            testExists("${interface.driver.ble_on_balance}") &amp;&amp; (${config.driver.ble_abs.rf_clval} &lt;= ${config.driver.ble_b.rf_clval}) ||
+            testExists("${interface.driver.ble_on_compact}") &amp;&amp; (${config.driver.ble_abs.rf_clval} &lt;= ${config.driver.ble_c.rf_clval}) ||
+            testExists("${interface.driver.ble_on_extended_freertos}") &amp;&amp; (${config.driver.ble_abs.rf_clval} &lt;= ${config.driver.ble_a_freertos.rf_clval}) ||
+            testExists("${interface.driver.ble_on_balance_freertos}") &amp;&amp; (${config.driver.ble_abs.rf_clval} &lt;= ${config.driver.ble_b_freertos.rf_clval}) ||
+            testExists("${interface.driver.ble_on_compact_freertos}") &amp;&amp; (${config.driver.ble_abs.rf_clval} &lt;= ${config.driver.ble_c_freertos.rf_clval}) ||
+            testExists("${interface.driver.ble_on_extended_threadx}") &amp;&amp; (${config.driver.ble_abs.rf_clval} &lt;= ${config.driver.ble_a_threadx.rf_clval}) ||
+            testExists("${interface.driver.ble_on_balance_threadx}") &amp;&amp; (${config.driver.ble_abs.rf_clval} &lt;= ${config.driver.ble_b_threadx.rf_clval}) ||
+            testExists("${interface.driver.ble_on_compact_threadx}") &amp;&amp; (${config.driver.ble_abs.rf_clval} &lt;= ${config.driver.ble_c_threadx.rf_clval})
+        </constraint>
+        <constraint display="Sleep clock accuracy(SCA) must be the value defined in ble module or lower.">
+            testExists("${interface.driver.ble_on_extended}") &amp;&amp; (${config.driver.ble_abs.rf_sleep_clock_accuracy} &lt;= ${config.driver.ble_a.rf_sleep_clock_accuracy}) ||
+            testExists("${interface.driver.ble_on_balance}") &amp;&amp; (${config.driver.ble_abs.rf_sleep_clock_accuracy} &lt;= ${config.driver.ble_b.rf_sleep_clock_accuracy}) ||
+            testExists("${interface.driver.ble_on_compact}") &amp;&amp; (${config.driver.ble_abs.rf_sleep_clock_accuracy} &lt;= ${config.driver.ble_c.rf_sleep_clock_accuracy}) ||
+            testExists("${interface.driver.ble_on_extended_freertos}") &amp;&amp; (${config.driver.ble_abs.rf_sleep_clock_accuracy} &lt;= ${config.driver.ble_a_freertos.rf_sleep_clock_accuracy}) ||
+            testExists("${interface.driver.ble_on_balance_freertos}") &amp;&amp; (${config.driver.ble_abs.rf_sleep_clock_accuracy} &lt;= ${config.driver.ble_b_freertos.rf_sleep_clock_accuracy}) ||
+            testExists("${interface.driver.ble_on_compact_freertos}") &amp;&amp; (${config.driver.ble_abs.rf_sleep_clock_accuracy} &lt;= ${config.driver.ble_c_freertos.rf_sleep_clock_accuracy}) ||
+            testExists("${interface.driver.ble_on_extended_threadx}") &amp;&amp; (${config.driver.ble_abs.rf_sleep_clock_accuracy} &lt;= ${config.driver.ble_a_threadx.rf_sleep_clock_accuracy}) ||
+            testExists("${interface.driver.ble_on_balance_threadx}") &amp;&amp; (${config.driver.ble_abs.rf_sleep_clock_accuracy} &lt;= ${config.driver.ble_b_threadx.rf_sleep_clock_accuracy}) ||
+            testExists("${interface.driver.ble_on_compact_threadx}") &amp;&amp; (${config.driver.ble_abs.rf_sleep_clock_accuracy} &lt;= ${config.driver.ble_c_threadx.rf_sleep_clock_accuracy})
+        </constraint>
+        <constraint display="MCU main clock frequency must be the value defined in ble module or lower.">
+            testExists("${interface.driver.ble_on_extended}") &amp;&amp; (${config.driver.ble_abs.mcu_main_clock_khz} &lt;= ${config.driver.ble_a.mcu_main_clock_khz}) ||
+            testExists("${interface.driver.ble_on_balance}") &amp;&amp; (${config.driver.ble_abs.mcu_main_clock_khz} &lt;= ${config.driver.ble_b.mcu_main_clock_khz}) ||
+            testExists("${interface.driver.ble_on_compact}") &amp;&amp; (${config.driver.ble_abs.mcu_main_clock_khz} &lt;= ${config.driver.ble_c.mcu_main_clock_khz}) ||
+            testExists("${interface.driver.ble_on_extended_freertos}") &amp;&amp; (${config.driver.ble_abs.mcu_main_clock_khz} &lt;= ${config.driver.ble_a_freertos.mcu_main_clock_khz}) ||
+            testExists("${interface.driver.ble_on_balance_freertos}") &amp;&amp; (${config.driver.ble_abs.mcu_main_clock_khz} &lt;= ${config.driver.ble_b_freertos.mcu_main_clock_khz}) ||
+            testExists("${interface.driver.ble_on_compact_freertos}") &amp;&amp; (${config.driver.ble_abs.mcu_main_clock_khz} &lt;= ${config.driver.ble_c_freertos.mcu_main_clock_khz}) ||
+            testExists("${interface.driver.ble_on_extended_threadx}") &amp;&amp; (${config.driver.ble_abs.mcu_main_clock_khz} &lt;= ${config.driver.ble_a_threadx.mcu_main_clock_khz}) ||
+            testExists("${interface.driver.ble_on_balance_threadx}") &amp;&amp; (${config.driver.ble_abs.mcu_main_clock_khz} &lt;= ${config.driver.ble_b_threadx.mcu_main_clock_khz}) ||
+            testExists("${interface.driver.ble_on_compact_threadx}") &amp;&amp; (${config.driver.ble_abs.mcu_main_clock_khz} &lt;= ${config.driver.ble_c_threadx.mcu_main_clock_khz})
+        </constraint>
+        <constraint display="Code flash(ROM) device data block must be the value defined in ble module or lower.">
+            testExists("${interface.driver.ble_on_extended}") &amp;&amp; (${config.driver.ble_abs.device_data_code_flash_block} &lt;= ${config.driver.ble_a.device_data_code_flash_block}) ||
+            testExists("${interface.driver.ble_on_balance}") &amp;&amp; (${config.driver.ble_abs.device_data_code_flash_block} &lt;= ${config.driver.ble_b.device_data_code_flash_block}) ||
+            testExists("${interface.driver.ble_on_compact}") &amp;&amp; (${config.driver.ble_abs.device_data_code_flash_block} &lt;= ${config.driver.ble_c.device_data_code_flash_block}) ||
+            testExists("${interface.driver.ble_on_extended_freertos}") &amp;&amp; (${config.driver.ble_abs.device_data_code_flash_block} &lt;= ${config.driver.ble_a_freertos.device_data_code_flash_block}) ||
+            testExists("${interface.driver.ble_on_balance_freertos}") &amp;&amp; (${config.driver.ble_abs.device_data_code_flash_block} &lt;= ${config.driver.ble_b_freertos.device_data_code_flash_block}) ||
+            testExists("${interface.driver.ble_on_compact_freertos}") &amp;&amp; (${config.driver.ble_abs.device_data_code_flash_block} &lt;= ${config.driver.ble_c_freertos.device_data_code_flash_block}) ||
+            testExists("${interface.driver.ble_on_extended_threadx}") &amp;&amp; (${config.driver.ble_abs.device_data_code_flash_block} &lt;= ${config.driver.ble_a_threadx.device_data_code_flash_block}) ||
+            testExists("${interface.driver.ble_on_balance_threadx}") &amp;&amp; (${config.driver.ble_abs.device_data_code_flash_block} &lt;= ${config.driver.ble_b_threadx.device_data_code_flash_block}) ||
+            testExists("${interface.driver.ble_on_compact_threadx}") &amp;&amp; (${config.driver.ble_abs.device_data_code_flash_block} &lt;= ${config.driver.ble_c_threadx.device_data_code_flash_block})
+        </constraint>
+        <constraint display="Device specific data flash block must be the value defined in ble module or lower.">
+            testExists("${interface.driver.ble_on_extended}") &amp;&amp; (${config.driver.ble_abs.device_data_data_flash_block} &lt;= ${config.driver.ble_a.device_data_data_flash_block}) ||
+            testExists("${interface.driver.ble_on_balance}") &amp;&amp; (${config.driver.ble_abs.device_data_data_flash_block} &lt;= ${config.driver.ble_b.device_data_data_flash_block}) ||
+            testExists("${interface.driver.ble_on_compact}") &amp;&amp; (${config.driver.ble_abs.device_data_data_flash_block} &lt;= ${config.driver.ble_c.device_data_data_flash_block}) ||
+            testExists("${interface.driver.ble_on_extended_freertos}") &amp;&amp; (${config.driver.ble_abs.device_data_data_flash_block} &lt;= ${config.driver.ble_a_freertos.device_data_data_flash_block}) ||
+            testExists("${interface.driver.ble_on_balance_freertos}") &amp;&amp; (${config.driver.ble_abs.device_data_data_flash_block} &lt;= ${config.driver.ble_b_freertos.device_data_data_flash_block}) ||
+            testExists("${interface.driver.ble_on_compact_freertos}") &amp;&amp; (${config.driver.ble_abs.device_data_data_flash_block} &lt;= ${config.driver.ble_c_freertos.device_data_data_flash_block}) ||
+            testExists("${interface.driver.ble_on_extended_threadx}") &amp;&amp; (${config.driver.ble_abs.device_data_data_flash_block} &lt;= ${config.driver.ble_a_threadx.device_data_data_flash_block}) ||
+            testExists("${interface.driver.ble_on_balance_threadx}") &amp;&amp; (${config.driver.ble_abs.device_data_data_flash_block} &lt;= ${config.driver.ble_b_threadx.device_data_data_flash_block}) ||
+            testExists("${interface.driver.ble_on_compact_threadx}") &amp;&amp; (${config.driver.ble_abs.device_data_data_flash_block} &lt;= ${config.driver.ble_c_threadx.device_data_data_flash_block})
+        </constraint>
+        <constraint display="MTU size configured must be the value defined in ble module or lower.">
+            testExists("${interface.driver.ble_on_extended}") &amp;&amp; (${config.driver.ble_abs.gatt_mtu_size} &lt;= ${config.driver.ble_a.gatt_mtu_size}) ||
+            testExists("${interface.driver.ble_on_balance}") &amp;&amp; (${config.driver.ble_abs.gatt_mtu_size} &lt;= ${config.driver.ble_b.gatt_mtu_size}) ||
+            testExists("${interface.driver.ble_on_compact}") &amp;&amp; (${config.driver.ble_abs.gatt_mtu_size} &lt;= ${config.driver.ble_c.gatt_mtu_size}) ||
+            testExists("${interface.driver.ble_on_extended_freertos}") &amp;&amp; (${config.driver.ble_abs.gatt_mtu_size} &lt;= ${config.driver.ble_a_freertos.gatt_mtu_size}) ||
+            testExists("${interface.driver.ble_on_balance_freertos}") &amp;&amp; (${config.driver.ble_abs.gatt_mtu_size} &lt;= ${config.driver.ble_b_freertos.gatt_mtu_size}) ||
+            testExists("${interface.driver.ble_on_compact_freertos}") &amp;&amp; (${config.driver.ble_abs.gatt_mtu_size} &lt;= ${config.driver.ble_c_freertos.gatt_mtu_size}) ||
+            testExists("${interface.driver.ble_on_extended_threadx}") &amp;&amp; (${config.driver.ble_abs.gatt_mtu_size} &lt;= ${config.driver.ble_a_threadx.gatt_mtu_size}) ||
+            testExists("${interface.driver.ble_on_balance_threadx}") &amp;&amp; (${config.driver.ble_abs.gatt_mtu_size} &lt;= ${config.driver.ble_b_threadx.gatt_mtu_size}) ||
+            testExists("${interface.driver.ble_on_compact_threadx}") &amp;&amp; (${config.driver.ble_abs.gatt_mtu_size} &lt;= ${config.driver.ble_c_threadx.gatt_mtu_size})
+        </constraint>
+        <constraint display="Timer slot maximum number must be the value defined in ble module or lower.">
+            testExists("${interface.driver.ble_on_extended}") &amp;&amp; (${config.driver.ble_abs.timer_number_of_slot} &lt;= ${config.driver.ble_a.timer_number_of_slot}) ||
+            testExists("${interface.driver.ble_on_balance}") &amp;&amp; (${config.driver.ble_abs.timer_number_of_slot} &lt;= ${config.driver.ble_b.timer_number_of_slot}) ||
+            testExists("${interface.driver.ble_on_compact}") &amp;&amp; (${config.driver.ble_abs.timer_number_of_slot} &lt;= ${config.driver.ble_c.timer_number_of_slot}) ||
+            testExists("${interface.driver.ble_on_extended_freertos}") &amp;&amp; (${config.driver.ble_abs.timer_number_of_slot} &lt;= ${config.driver.ble_a_freertos.timer_number_of_slot}) ||
+            testExists("${interface.driver.ble_on_balance_freertos}") &amp;&amp; (${config.driver.ble_abs.timer_number_of_slot} &lt;= ${config.driver.ble_b_freertos.timer_number_of_slot}) ||
+            testExists("${interface.driver.ble_on_compact_freertos}") &amp;&amp; (${config.driver.ble_abs.timer_number_of_slot} &lt;= ${config.driver.ble_c_freertos.timer_number_of_slot}) ||
+            testExists("${interface.driver.ble_on_extended_threadx}") &amp;&amp; (${config.driver.ble_abs.timer_number_of_slot} &lt;= ${config.driver.ble_a_threadx.timer_number_of_slot}) ||
+            testExists("${interface.driver.ble_on_balance_threadx}") &amp;&amp; (${config.driver.ble_abs.timer_number_of_slot} &lt;= ${config.driver.ble_b_threadx.timer_number_of_slot}) ||
+            testExists("${interface.driver.ble_on_compact_threadx}") &amp;&amp; (${config.driver.ble_abs.timer_number_of_slot} &lt;= ${config.driver.ble_c_threadx.timer_number_of_slot})
+        </constraint>
+        <requires id="module.driver.ble_abs_on_ble.requires.ble" interface="interface.driver.network_on_ble" visible="false" display="Add BLE Library for Network" find="false"/>
+        <requires id="module.driver.ble_abs_on_ble.requires.agt" interface="interface.driver.timer" display="Add Timer Driver">
+          <override property="module.driver.timer.count_source" value="module.driver.timer.count_source.clock_loco"/>
+          <override property="module.driver.timer.p_callback" value="ble_abs_hw_timer_callback"/>
+          <override property="module.driver.timer.p_context" value="${module.driver.ble_abs.name}"/>
+        </requires>
+        <provides interface="interface.driver.ble_abs" />
+        <provides interface="interface.driver.ble_abs_on_ble" />
+        <provides interface="interface.driver.ble_abs.${module.driver.ble_abs.name}" />
+        <property default="g_ble_abs${_instance}" display="General|Name" id="module.driver.ble_abs.name" description="Module name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.ble_abs.name}")</constraint>
+        </property>
+        <property display="General|Gap callback" id="module.driver.ble_abs.gap_callback" default="gap_cb" description="A user callback function must be provided if the BLE_ABS is configured to generate a GAP. If QE is used, set to NULL.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.ble_abs.gap_callback}")</constraint>
+        </property>
+        <property display="General|Vendor specific callback" id="module.driver.ble_abs.vendor_specific_callback" default="vs_cb" description="A user callback function must be provided if the BLE_ABS is configured to generate a Vendor Specific. If QE is used, set to NULL.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.ble_abs.vendor_specific_callback}")</constraint>
+        </property>
+        <property display="General|GATT server callback parameter" id="module.driver.ble_abs.server_cb_list" default="gs_abs_gatts_cb_param" description="Set GATT server callback parameter. If QE is used, set to NULL.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.ble_abs.server_cb_list}")</constraint>
+        </property>
+        <property display="General|GATT server callback number" id="module.driver.ble_abs.gatt_server_init_callback_number" default="2" description="The number of GATT Server callback functions.">
+            <constraint display="Must be a valid number">testInteger("${module.driver.ble_abs.gatt_server_init_callback_number}") &amp;&amp; ("${module.driver.ble_abs.gatt_server_init_callback_number}" &gt;= 0) </constraint>
+        </property>
+        <property display="General|GATT client callback parameter" id="module.driver.ble_abs.client_cb_list" default="gs_abs_gattc_cb_param" description="Set GATT client callback parameter. If QE is used, set to NULL.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.ble_abs.client_cb_list}")</constraint>
+        </property>
+        <property display="General|GATT client callback number" id="module.driver.ble_abs.gatt_client_init_callback_number" default="2" description="The number of GATT Server callback functions.">
+            <constraint display="Must be a valid number">testInteger("${module.driver.ble_abs.gatt_client_init_callback_number}") &amp;&amp; ("${module.driver.ble_abs.gatt_client_init_callback_number}" &gt;= 0) </constraint>
+        </property>
+        <property id="module.driver.ble_abs.p_context" default="NULL">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.ble_abs.p_context}")</constraint>
+            <export>eval('' +
+            'var output = "${module.driver.ble_abs.p_context}";' +
+            'if ("NULL" !== output){' +
+            'output = "&amp;" + output  ;' +
+            '}' +
+            'output')
+            </export>
+        </property>
+        <property id="module.driver.ble_abs.p_extend" default="NULL">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.ble_abs.p_extend}")</constraint>
+            <export>eval('' +
+            'var output = "${module.driver.ble_abs.p_extend}";' +
+            'if ("NULL" !== output){' +
+            'output = "&amp;" + output  ;' +
+            '}' +
+            'output')
+            </export>
+        </property>
+        <property display="Security|Pairing parameters" id="module.driver.ble_abs.p_pairing_parameter" default="gs_abs_pairing_param" description="Set pairing parameters.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.ble_abs.p_pairing_parameter}")</constraint>
+        </property>
+        <property id="module.driver.ble_abs.iocap" display="Security|IO capabilities of local device." default="module.driver.ble_abs.iocap.3" description="Select IO capabilities of local device.">
+            <option id="module.driver.ble_abs.iocap.0" display="BLE_GAP_IOCAP_DISPLAY_ONLY" value="BLE_GAP_IOCAP_DISPLAY_ONLY" />
+            <option id="module.driver.ble_abs.iocap.1" display="BLE_GAP_IOCAP_DISPLAY_YESNO" value="BLE_GAP_IOCAP_DISPLAY_YESNO" />
+            <option id="module.driver.ble_abs.iocap.2" display="BLE_GAP_IOCAP_KEYBOARD_ONLY" value="BLE_GAP_IOCAP_KEYBOARD_ONLY" />
+            <option id="module.driver.ble_abs.iocap.3" display="BLE_GAP_IOCAP_NOINPUT_NOOUTPUT" value="BLE_GAP_IOCAP_NOINPUT_NOOUTPUT" />
+            <option id="module.driver.ble_abs.iocap.4" display="BLE_GAP_IOCAP_KEYBOARD_DISPLAY" value="BLE_GAP_IOCAP_KEYBOARD_DISPLAY" />
+        </property>
+        <property id="module.driver.ble_abs.mitm" display="Security|MITM protection policy." default="module.driver.ble_abs.mitm.0" description="Select MITM protection policy.">
+            <option id="module.driver.ble_abs.mitm.0" display="BLE_GAP_SEC_MITM_BEST_EFFORT" value="BLE_GAP_SEC_MITM_BEST_EFFORT" />
+            <option id="module.driver.ble_abs.mitm.1" display="BLE_GAP_SEC_MITM_STRICT" value="BLE_GAP_SEC_MITM_STRICT" />
+        </property>
+        <property id="module.driver.ble_abs.secure_connection" display="Security|Determine whether to accept only Secure Connections or not." default="module.driver.ble_abs.secure_connection.0" description="Select determine whether to accept only Secure Connections or not.">
+            <option id="module.driver.ble_abs.secure_connection.0" display="BLE_GAP_SC_BEST_EFFORT" value="BLE_GAP_SC_BEST_EFFORT" />
+            <option id="module.driver.ble_abs.secure_connection.1" display="BLE_GAP_SC_STRICT" value="BLE_GAP_SC_STRICT" />
+        </property>
+        <property bitmapPrefix="BLE_GAP_KEY_DIST_" id="module.driver.ble_abs.local_key" display="Security|Type of keys to be distributed from local device." default="" description="Select type of keys to be distributed from local device.">
+            <option id="module.driver.ble_abs.local_key.0" display="BLE_GAP_KEY_DIST_ENCKEY" value="ENCKEY" />
+            <option id="module.driver.ble_abs.local_key.1" display="BLE_GAP_KEY_DIST_IDKEY" value="IDKEY" />
+            <option id="module.driver.ble_abs.local_key.2" display="BLE_GAP_KEY_DIST_SIGNKEY" value="SIGNKEY" />
+        </property>
+        <property bitmapPrefix="BLE_GAP_KEY_DIST_" display="Security|Type of keys which local device requests a remote device to distribute." id="module.driver.ble_abs.remote_key" default="" description="Set type of keys which local device requests a remote device to distribute.">
+            <option id="module.driver.ble_abs.remote_key.0" display="BLE_GAP_KEY_DIST_ENCKEY" value="ENCKEY" />
+            <option id="module.driver.ble_abs.remote_key.1" display="BLE_GAP_KEY_DIST_IDKEY" value="IDKEY" />
+            <option id="module.driver.ble_abs.remote_key.2" display="BLE_GAP_KEY_DIST_SIGNKEY" value="SIGNKEY" />
+        </property>
+        <property display="Security|Maximum LTK size." id="module.driver.ble_abs.key_size" default="16" description="Set Maximum LTK size.">
+            <constraint display="Valid range is 7 - 16">testInteger("${module.driver.ble_abs.key_size}") &amp;&amp; ("${module.driver.ble_abs.key_size}" &gt;=7) &amp;&amp; ("${module.driver.ble_abs.key_size}" &lt;=16)</constraint>
+        </property>
+        <property display="Interrupts|Callback provided when an ISR occurs" id="module.driver.ble_abs.p_callback" default="NULL" description="Callback provided when BLE ABS ISR occurs">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.ble_abs.p_callback}")</constraint>
+        </property>
+        <header>
+void r_ble_rf_notify_event_start(uint32_t param);
+void r_ble_rf_notify_event_close(uint32_t param);
+void r_ble_rf_notify_deep_sleep(uint32_t param);
+
+/** BLE_ABS on BLE Instance. */
+extern const ble_abs_instance_t ${module.driver.ble_abs.name};
+
+/** Access the BLE_ABS instance using these structures when calling API functions directly (::p_api is not used). */
+extern ble_abs_instance_ctrl_t ${module.driver.ble_abs.name}_ctrl;
+extern const ble_abs_cfg_t ${module.driver.ble_abs.name}_cfg;
+
+/** Callback used by ble_abs Instance. */
+#ifndef ${module.driver.ble_abs.gap_callback}
+void ${module.driver.ble_abs.gap_callback}(uint16_t type, ble_status_t result, st_ble_evt_data_t *p_data);
+#endif
+
+#ifndef ${module.driver.ble_abs.vendor_specific_callback}
+void ${module.driver.ble_abs.vendor_specific_callback}(uint16_t type, ble_status_t result, st_ble_vs_evt_data_t *p_data);
+#endif
+
+#ifndef ${module.driver.ble_abs.server_cb_list}
+extern ble_abs_gatt_server_callback_set_t ${module.driver.ble_abs.server_cb_list}[];
+#else
+ble_abs_gatt_server_callback_set_t ${module.driver.ble_abs.server_cb_list}[];
+#endif
+
+#ifndef ${module.driver.ble_abs.client_cb_list}
+extern ble_abs_gatt_client_callback_set_t ${module.driver.ble_abs.client_cb_list}[];
+#else
+ble_abs_gatt_client_callback_set_t ${module.driver.ble_abs.client_cb_list}[];
+#endif
+
+#ifndef ${module.driver.ble_abs.p_callback}
+void ${module.driver.ble_abs.p_callback}(ble_abs_callback_args_t * p_args);
+#endif
+        </header>
+        <includes>
+#include "rm_ble_abs.h"
+#include "rm_ble_abs_api.h"
+        </includes>
+        <declarations>
+static ble_abs_pairing_parameter_t gs_abs_pairing_param =
+{
+ .io_capabilitie_local_device = ${module.driver.ble_abs.iocap},
+ .mitm_protection_policy      = ${module.driver.ble_abs.mitm},
+ .secure_connection_only      = ${module.driver.ble_abs.secure_connection},
+ .local_key_distribute        = (uint8_t)(${module.driver.ble_abs.local_key} 0),
+ .remote_key_distribute       = (uint8_t)(${module.driver.ble_abs.remote_key} 0),
+ .maximum_key_size            = ${module.driver.ble_abs.key_size},
+};
+
+ble_abs_instance_ctrl_t ${module.driver.ble_abs.name}_ctrl;
+
+const ble_abs_cfg_t ${module.driver.ble_abs.name}_cfg =
+{
+    .gap_callback = ${module.driver.ble_abs.gap_callback},
+    .vendor_specific_callback = ${module.driver.ble_abs.vendor_specific_callback},
+    .p_pairing_parameter = &amp;${module.driver.ble_abs.p_pairing_parameter},
+    .p_gatt_server_callback_list = ${module.driver.ble_abs.server_cb_list},
+    .gatt_server_callback_list_number = ${module.driver.ble_abs.gatt_server_init_callback_number},
+    .p_gatt_client_callback_list = ${module.driver.ble_abs.client_cb_list},
+    .gatt_client_callback_list_number = ${module.driver.ble_abs.gatt_client_init_callback_number},
+    .p_flash_instance = &amp;${module.driver.ble_abs_on_ble.requires.ble::module.driver.ble.flash.name},
+    .p_timer_instance = &amp;${module.driver.ble_abs_on_ble.requires.agt::module.driver.timer.name},
+    .p_callback = ${module.driver.ble_abs.p_callback},
+    .p_context = ${module.driver.ble_abs.p_context},
+    .p_extend = ${module.driver.ble_abs.p_extend},
+};
+
+/* Instance structure to use this module. */
+const ble_abs_instance_t ${module.driver.ble_abs.name} =
+{
+    .p_ctrl        = &amp;${module.driver.ble_abs.name}_ctrl,
+    .p_cfg         = &amp;${module.driver.ble_abs.name}_cfg,
+    .p_api         = &amp;g_ble_abs_on_ble
+};
+        </declarations>
+        <functions>
+        </functions>
+    </module>
+</raModuleDescription>

@@ -1,0 +1,39 @@
+<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.middleware.rm_ble_mesh_timer_baremetal" path="fsp_cfg/rm_ble_mesh_timer_baremetal_cfg.h" version="0" >
+        <content>
+            #ifdef __cplusplus
+            extern "C" {
+            #endif
+
+            #ifdef __cplusplus
+            }
+            #endif
+        </content>
+    </config>
+    <module config="config.middleware.rm_ble_mesh_timer_baremetal" display="Networking|BLE Mesh Timer on Baremetal (rm_mesh_timer_baremetal)" id="module.middleware.rm_ble_mesh_timer_on_rm_ble_mesh_timer_baremetal" common="1" visible="false" version="0" url="group___m_e_s_h___t_i_m_e_r___b_a_r_e_m_e_t_a_l.html">
+        <constraint display="Requires Low Level Library Implementation">
+			"${interface.middleware.rm_mesh_bearer_platform_on_rm_mesh_bearer_platform}" === "1"
+		</constraint>
+
+        <constraint display="Only supports Baremetal project.">
+            !testExists("${interface.rtos.rtos}")
+        </constraint>
+
+        <constraint display="Bearer Platform Must Be Added">
+			testExists("${interface.middleware.rm_mesh_bearer_platform_on_rm_mesh_bearer_platform}")
+		</constraint>
+
+        <provides interface="interface.middleware.rm_ble_mesh_timer" />
+        <provides interface="interface.middleware.rm_ble_mesh_timer_on_rm_ble_mesh_timer_baremetal" />
+
+        <header>
+        </header>
+        <includes>
+        </includes>
+        <declarations>
+
+        </declarations>
+    </module>
+</raModuleDescription>
+

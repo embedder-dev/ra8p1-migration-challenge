@@ -1,0 +1,138 @@
+<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.driver.usb_usbcc" path="fsp_cfg/r_usb_typec_cfg.h" version="0">
+        <property id="config.driver.usb_usbcc.param_checking_enable" display="Parameter Checking" default="config.driver.usb_usbcc.param_checking_enable.bsp" description="If selected code for parameter checking is included in the build.">
+            <option id="config.driver.usb_usbcc.param_checking_enable.bsp" display="Default (BSP)" value="BSP_CFG_PARAM_CHECKING_ENABLE" />
+            <option id="config.driver.usb_usbcc.param_checking_enable.enabled" display="Enabled" value="(1)" />
+            <option id="config.driver.usb_usbcc.param_checking_enable.disabled" display="Disabled" value="(0)" />
+        </property>
+        <content>
+            #ifdef __cplusplus
+            extern "C" {
+            #endif
+
+            #define USB_TYPEC_CFG_PARAM_CHECKING_ENABLE (${config.driver.usb_usbcc.param_checking_enable})
+
+            #ifdef __cplusplus
+            }
+            #endif
+        </content>
+    </config>
+
+    <module config="config.driver.usb_usbcc" display="Connectivity|${module.driver.usbcc.name} USB Type C (r_usb_typec)" id="module.driver.usbcc_on_usb_typec" version="0" url="group___u_s_b___t_y_p_e_c.html">
+        <constraint display="Unique name required for each instance">
+          "${interface.driver.usbcc.${module.driver.usbcc.name}}" === "1"
+        </constraint>
+        <constraint display="USBCC Module 1 does not exist in this MCU.">
+          "${module.driver.usbcc.usbcc_modulenumber}" === "module.driver.usbcc.usbcc_modulenumber.0"
+        </constraint>
+        <constraint display="USB 2.0 Only Sink Mode is Only Detect Default USB Source.">
+          !(("${module.driver.usbcc.usb_typec_mode}" === "module.driver.usbcc.usb_typec_mode.usb20only_sink") &amp;&amp;
+          ("${module.driver.usbcc.usb_typec_pmode}" !== "module.driver.usbcc.usb_typec_pmode.default"))
+        </constraint>
+        <!-- <constraint display="USB Type-C CCI Priority must be lower than the max syscall priority.">
+            (("1" != "${interface.rtos.awsfreertos}") || (("${module.driver.usb_usbcc.ipl_typec_cci}" == "_disabled") ||
+            (Number("${config.awsfreertos.thread.configlibrary_max_syscall_interrupt_priority}".replace("board.icu.common.irq.priority","")) &lt;= Number("${module.driver.usb_usbcc.ipl_typec_cci}".replace("board.icu.common.irq.priority","")))))
+        </constraint>
+        <constraint display="USB Type-C CCS Priority must be lower than the max syscall priority.">
+            (("1" != "${interface.rtos.awsfreertos}") || (("${module.driver.usb_usbcc.ipl_typec_ccs}" == "_disabled") ||
+            (Number("${config.awsfreertos.thread.configlibrary_max_syscall_interrupt_priority}".replace("board.icu.common.irq.priority","")) &lt;= Number("${module.driver.usb_usbcc.ipl_typec_ccs}".replace("board.icu.common.irq.priority","")))))
+        </constraint> -->
+        <!-- Will need to update this if other MCUs are released that have USB Type-C -->
+        <requires id="module.driver.usbcc_on_usb.requires.typec" interface="interface.mcu.usb.type_c" visible="false" display="Requires MCU USB Type-C peripheral" />
+        <provides interface="interface.driver.usbcc.${module.driver.usbcc.name}" />
+        <provides interface="interface.driver.usbcc" />
+        <provides interface="interface.driver.usbcc_on_usb_typec" />
+        <property default="usbcc" id="module.driver.usbcc.usbcc_interface" description=""/>
+        <property default="g_usbcc${_instance}" display="Name" id="module.driver.usbcc.name" description="Module name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.usbcc.name}")</constraint>
+        </property>
+        <property display="USBCC Module Number" id="module.driver.usbcc.usbcc_modulenumber" default="module.driver.usbcc.usbcc_modulenumber.0" description="Specify the USB Type-C module number to be used.">
+            <option id="module.driver.usbcc.usbcc_modulenumber.0" display="USBCC Module 0" value="0" />
+            <!--<option id="module.driver.usbcc.usbcc_modulenumber.1" display="USBCC Module 1 Port" value="1" /> -->
+        </property>
+        <property display="USBCC Connection State Mode" id="module.driver.usbcc.usb_typec_mode" default="module.driver.usbcc.usb_typec_mode.sink" description="Select the Connection State Mode.">
+            <option id="module.driver.usbcc.usb_typec_mode.sink" display="Sink Only Mode" value="USB_TYPEC_MODE_SINK" />
+            <option id="module.driver.usbcc.usb_typec_mode.usb20only_sink" display="USB 2.0 Only Sink Mode" value="USB_TYPEC_MODE_USB20_ONLY_SINK" />
+        </property>
+        <property display="USBCC Source Current Detection Mode" id="module.driver.usbcc.usb_typec_pmode" default="module.driver.usbcc.usb_typec_pmode.default_15a_30a" description="Select the Source Current Detection Mode.">
+            <option id="module.driver.usbcc.usb_typec_pmode.default" display="Detect Default USB Source" value="USB_TYPEC_PMODE_DEFAULT" />
+            <option id="module.driver.usbcc.usb_typec_pmode.default_15a" display="Detect Default USB and 1.5A Source" value="USB_TYPEC_PMODE_DEFAULT_1_5A" />
+            <option id="module.driver.usbcc.usb_typec_pmode.default_15a_30a" display="Detect Default USB, 1.5A and 3.0A Source" value="USB_TYPEC_PMODE_DEFAULT_1_5A_3_0A" />
+        </property>
+        <property display="USBCC CCI Interrupt Priority" id="module.driver.usb_usbcc.ipl_typec_cci" default="" description="Select the interrupt priority used by the main USB Type-C Status change ISR.">
+            <select enum="enum.driver.usb.typecpriorities.mandatory"/>
+            <interrupt event="event.usbcc.cci" isr="usb_typec_int_isr"/>
+        </property>
+        <property display="USBCC CCS Interrupt Priority" id="module.driver.usb_usbcc.ipl_typec_ccs" default="" description="Select the interrupt priority used by the main USB Type-C Rp detection ISR.">
+            <select enum="enum.driver.usb.typecpriorities.mandatory"/>
+            <interrupt event="event.usbcc.ccs" isr="usb_typec_ccs_int_isr"/>
+        </property>
+        <property display="USBCC Callback" id="module.driver.usb_usbcc.callback" default="NULL" description="A user callback function can be defined here.">
+            <constraint display="Enter the address of the function.">testSymbol("${module.driver.usb_usbcc.callback}")</constraint>
+        </property>
+
+        <!-- symbol id -->
+        <symbol id="symbol.driver.usbcc.name" value="${module.driver.usbcc.name}"/>
+        <symbol id="symbol.driver.usbcc.cfg" value="${module.driver.usbcc.name}_cfg"/>
+        <symbol id="symbol.driver.usbcc.ctrl" value="${module.driver.usbcc.name}_ctrl"/>
+
+        <header>
+/* usbcc on USB Instance. */
+extern const usb_typec_instance_t ${module.driver.usbcc.name};
+
+/** Access the USB instance using these structures when calling API functions directly (::p_api is not used). */
+extern usb_typec_instance_ctrl_t ${module.driver.usbcc.name}_ctrl;
+extern const usb_typec_cfg_t ${module.driver.usbcc.name}_cfg;
+
+#ifndef ${module.driver.usb_usbcc.callback}
+void ${module.driver.usb_usbcc.callback}(usb_typec_callback_args_t *);
+#endif
+
+        </header>
+        <includes>
+#include "r_usb_typec.h"
+#include "r_usb_typec_api.h"
+        </includes>
+        <declarations>
+
+usb_typec_instance_ctrl_t ${module.driver.usbcc.name}_ctrl;
+
+#define RA_NOT_DEFINED (1)
+            const usb_typec_cfg_t ${module.driver.usbcc.name}_cfg =
+            {
+                .module_number = ${module.driver.usbcc.usbcc_modulenumber},
+                .usb_typec_mode = ${module.driver.usbcc.usb_typec_mode},
+                .usb_typec_pmode = ${module.driver.usbcc.usb_typec_pmode},
+#if defined(VECTOR_NUMBER_USBCC_CCI)
+                .irq_typec_cci = VECTOR_NUMBER_USBCC_CCI,
+#else
+                .irq_typec_cci = FSP_INVALID_VECTOR,
+#endif
+
+#if defined(VECTOR_NUMBER_USBCC_CCS)
+                .irq_typec_ccs = VECTOR_NUMBER_USBCC_CCS,
+#else
+                .irq_typec_ccs = FSP_INVALID_VECTOR,
+#endif
+                .ipl_typec_cci = ${module.driver.usb_usbcc.ipl_typec_cci},
+                .ipl_typec_ccs = ${module.driver.usb_usbcc.ipl_typec_ccs},
+                .p_callback = ${module.driver.usb_usbcc.callback},
+                .p_context = NULL, // Unused
+                .p_extend = NULL, // Unused
+            };
+#undef RA_NOT_DEFINED
+
+/* Instance structure to use this module. */
+const usb_typec_instance_t ${module.driver.usbcc.name} =
+{
+    .p_ctrl        = &amp;${module.driver.usbcc.name}_ctrl,
+    .p_cfg         = &amp;${module.driver.usbcc.name}_cfg,
+    .p_api         = &amp;g_typec_on_typec,
+};
+        </declarations>
+        <api configurable="true">
+            <file>ra/fsp/inc/api/r_usb_typec_api.h</file>
+        </api>
+    </module>
+</raModuleDescription>

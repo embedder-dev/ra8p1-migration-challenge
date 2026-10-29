@@ -1,0 +1,12 @@
+<?xml version="1.0" ?>
+<raModuleDescription>
+    <module id="module.freertos.heap.2" display="RTOS|FreeRTOS Heap 2" common="1" version="0" url="https://www.freertos.org/a00111.html#heap_2">
+        <constraint display="configSUPPORT_DYNAMIC_ALLOCATION must be Enabled to use a FreeRTOS Heap. Set in FreeRTOS Memory Allocation properties.">
+            (&quot;${config.awsfreertos.thread.configsupport_dynamic_allocation}&quot; == &quot;config.awsfreertos.thread.configsupport_dynamic_allocation.enabled&quot;)
+        </constraint>
+        <requires id="module.freertos.heap.2.requires.awsfreertos" interface="interface.rtos.awsfreertos" visible="false" display="Requires FreeRTOS"/>
+        <provides interface="interface.heap" />
+        <provides interface="interface.freertos.heap" />
+        <provides interface="interface.freertos.heap.2" />
+    </module>
+</raModuleDescription>

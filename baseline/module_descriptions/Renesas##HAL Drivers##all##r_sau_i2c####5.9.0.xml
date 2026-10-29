@@ -1,0 +1,487 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+IMPORTANT NOTE:
+Do not modify this file directly.
+
+This file is generated using: scripts/jinja/mdf_render.sh
+-->
+<raModuleDescription>
+    <config id="config.driver.sau_i2c" path="fsp_cfg/r_sau_i2c_cfg.h" version="0">
+        <property default="config.driver.sau_i2c.param_checking_enable.bsp" display="Parameter Checking" id="config.driver.sau_i2c.param_checking_enable" description="If selected code for parameter checking is included in the build.">
+            <option display="Default (BSP)" id="config.driver.sau_i2c.param_checking_enable.bsp" value="(BSP_CFG_PARAM_CHECKING_ENABLE)"/>
+            <option display="Enabled" id="config.driver.sau_i2c.param_checking_enable.enabled" value="(1)"/>
+            <option display="Disabled" id="config.driver.sau_i2c.param_checking_enable.disabled" value="(0)"/>
+        </property>
+        <property default="config.driver.sau_i2c.critical_section_enable.disabled" display="Enable Critical Section" id="config.driver.sau_i2c.critical_section_enable" description="Critical section needs to be enabled if multiple channels on the same SAU unit are configured for I2C">
+            <option display="Enabled" id="config.driver.sau_i2c.critical_section_enable.enabled" value="(1)"/>
+            <option display="Disabled" id="config.driver.sau_i2c.critical_section_enable.disabled" value="(0)"/>
+        </property>
+        <property default="config.driver.sau_i2c.manual_start-stop_enable.disabled" display="Manual Start-Stop" id="config.driver.sau_i2c.manual_start-stop_enable" description="If enabled, users need to manually call the R_SAU_I2C_Start/R_SAU_I2C_Stop functions to generate the I2C start and stop conditions.">
+            <option display="Enabled" id="config.driver.sau_i2c.manual_start-stop_enable.enabled" value="(1)"/>
+            <option display="Disabled" id="config.driver.sau_i2c.manual_start-stop_enable.disabled" value="(0)"/>
+        </property>
+        <property default="config.driver.sau_i2c.single_channel_enable.disabled" display="Enable Single Channel" id="config.driver.sau_i2c.single_channel_enable" description="Enable single channel to reduce code size if only one channel is to be configured for SAU I2C.">
+            <select enum="enum.config.driver.sau_i2c.single_channel_enable"/>
+        </property>
+        <property default="config.driver.sau_i2c.i2c_restart_enable.enabled" display="I2C Restart" id="config.driver.sau_i2c.i2c_restart_enable" description="Select whether to include code for the I2C restart (repeated start) condition in the build. Set to 'Disable' to reduce code size when all I2C slaves used by all SAU instances do not use I2C restart. ">
+            <option display="Enable" id="config.driver.sau_i2c.i2c_restart_enable.enabled" value="(1)"/>
+            <option display="Disable" id="config.driver.sau_i2c.i2c_restart_enable.disabled" value="(0)"/>
+        </property>
+        <property default="config.driver.sau_i2c.dtc_support.disabled" display="DTC Support" id="config.driver.sau_i2c.dtc_support" description="Enable DTC support for the SAU I2C module.">
+            <option display="Enable" id="config.driver.sau_i2c.dtc_support.enabled" value="(1)"/>
+            <option display="Disable" id="config.driver.sau_i2c.dtc_support.disabled" value="(0)"/>
+        </property>
+        <content>
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#define SAU_I2C_CFG_PARAM_CHECKING_ENABLE ${config.driver.sau_i2c.param_checking_enable}
+#define SAU_I2C_CFG_CRITICAL_SECTION_ENABLE ${config.driver.sau_i2c.critical_section_enable}
+#define SAU_I2C_CFG_MANUAL_START_STOP_ENABLE ${config.driver.sau_i2c.manual_start-stop_enable}
+#define SAU_I2C_CFG_SINGLE_CHANNEL_ENABLE ${config.driver.sau_i2c.single_channel_enable}
+#define SAU_I2C_CFG_RESTART_ENABLE ${config.driver.sau_i2c.i2c_restart_enable}
+#define SAU_I2C_CFG_DTC_SUPPORT_ENABLE      ${config.driver.sau_i2c.dtc_support}
+
+#ifdef __cplusplus
+}
+#endif
+        </content>
+    </config>
+    <module config="config.driver.sau_i2c" display="Connectivity|${module.driver.sau.name} I2C Master (r_sau_i2c)" id="module.driver.i2c_on_sau_i2c" version="1" url="group___s_a_u___i2_c.html">
+        <constraint display="Unique name required for each instance">
+            "${interface.driver.i2c.${module.driver.sau.name}}" === "1"
+        </constraint>
+        <constraint display="DTC support must be enabled to use DTC">
+            ("${config.driver.sau_i2c.dtc_support}" === "config.driver.sau_i2c.dtc_support.enabled") ||
+            (!testExists("${module.driver.sau_i2c.requires.transfer_rx_tx::module.driver.transfer.name}"))
+        </constraint>
+        <constraint display="Add DTC stack if DTC support is enabled">
+            ("${config.driver.sau_i2c.dtc_support}" !== "config.driver.sau_i2c.dtc_support.enabled") ||
+            (testExists("${module.driver.sau_i2c.requires.transfer_rx_tx::module.driver.transfer.name}"))
+        </constraint>
+        <constraint display="Requires SAU Peripheral">
+            "${interface.mcu.sau.external}" === "1"
+        </constraint>
+        <constraint display="Channel not available on selected MCU">
+            ((("${interface.mcu.sau_i2c.external.00}" === "1") &amp;&amp; ("${module.driver.i2c.channel}" === "module.driver.sau.i2c_channel.sau_i2c00"))
+            || (("${interface.mcu.sau_i2c.external.01}" === "1") &amp;&amp; ("${module.driver.i2c.channel}" === "module.driver.sau.i2c_channel.sau_i2c01"))
+            || (("${interface.mcu.sau_i2c.external.10}" === "1") &amp;&amp; ("${module.driver.i2c.channel}" === "module.driver.sau.i2c_channel.sau_i2c10"))
+            || (("${interface.mcu.sau_i2c.external.11}" === "1") &amp;&amp; ("${module.driver.i2c.channel}" === "module.driver.sau.i2c_channel.sau_i2c11"))
+            || (("${interface.mcu.sau_i2c.external.20}" === "1") &amp;&amp; ("${module.driver.i2c.channel}" === "module.driver.sau.i2c_channel.sau_i2c20"))
+            || (("${interface.mcu.sau_i2c.external.21}" === "1") &amp;&amp; ("${module.driver.i2c.channel}" === "module.driver.sau.i2c_channel.sau_i2c21")))
+        </constraint>
+        <constraint display="Single Channel is enabled on channel 00, please change Channel setting to 00">
+            (("${config.driver.sau_i2c.single_channel_enable}" !== "config.driver.sau_i2c.single_channel_enable.sau_i2c00") || ("${module.driver.i2c.channel}" === "module.driver.sau.i2c_channel.sau_i2c00"))
+        </constraint>
+        <constraint display="Single Channel is enabled on channel 01, please change Channel setting to 01">
+            (("${config.driver.sau_i2c.single_channel_enable}" !== "config.driver.sau_i2c.single_channel_enable.sau_i2c01") || ("${module.driver.i2c.channel}" === "module.driver.sau.i2c_channel.sau_i2c01"))
+        </constraint>
+        <constraint display="Single Channel is enabled on channel 10, please change Channel setting to 10">
+            (("${config.driver.sau_i2c.single_channel_enable}" !== "config.driver.sau_i2c.single_channel_enable.sau_i2c10") || ("${module.driver.i2c.channel}" === "module.driver.sau.i2c_channel.sau_i2c10"))
+        </constraint>
+        <constraint display="Single Channel is enabled on channel 11, please change Channel setting to 11">
+            (("${config.driver.sau_i2c.single_channel_enable}" !== "config.driver.sau_i2c.single_channel_enable.sau_i2c11") || ("${module.driver.i2c.channel}" === "module.driver.sau.i2c_channel.sau_i2c11"))
+        </constraint>
+        <constraint display="Single Channel is enabled on channel 20, please change Channel setting to 20">
+            (("${config.driver.sau_i2c.single_channel_enable}" !== "config.driver.sau_i2c.single_channel_enable.sau_i2c20") || ("${module.driver.i2c.channel}" === "module.driver.sau.i2c_channel.sau_i2c20"))
+        </constraint>
+        <constraint display="Single Channel is enabled on channel 21, please change Channel setting to 21">
+            (("${config.driver.sau_i2c.single_channel_enable}" !== "config.driver.sau_i2c.single_channel_enable.sau_i2c21") || ("${module.driver.i2c.channel}" === "module.driver.sau.i2c_channel.sau_i2c21"))
+        </constraint>
+        <constraint display="Rate value must be a valid non-negative integer with a maximum configurable value of 100kbps in Standard mode">
+            (("${module.driver.i2c.rate_value}" &lt;= 100000) || ("${module.driver.i2c.rate}" != "module.driver.i2c.rate.rate_standard"))
+        </constraint>
+        <constraint display="Rate value must be a valid non-negative integer with a maximum configurable value of 400kbps in Fast-mode">
+            (("${module.driver.i2c.rate_value}" &lt;= 400000) || ("${module.driver.i2c.rate}" != "module.driver.i2c.rate.rate_fast"))
+        </constraint>
+        <constraint display="Rate value must be a valid non-negative integer with a maximum configurable value of 1Mbps in Fast-mode plus">
+            (("${module.driver.i2c.rate_value}" &lt;= 1000000) || ("${module.driver.i2c.rate}" != "module.driver.i2c.rate.rate_fast_plus"))
+        </constraint>
+        <constraint display="Maximum configurable value for 7 bit address mode is 0x7F">
+            (testInteger("${module.driver.i2c.slave}")  &amp;&amp; ("${module.driver.i2c.slave}" &gt;= 0) &amp;&amp; ("${module.driver.i2c.slave}" &lt;= 127))
+        </constraint>
+        <constraint id="module.driver.sau_i2c.constraint.bitrate">
+            <![CDATA[eval('/* Converter for SAU unit to configured operation clock frequency */' +
+'var fclk_freq_by_unit_get = {' +
+'    "0": function (operation_clock) { return operation_clock === "0" ? ${board.clock.peripheral.sau.ck00} : ${board.clock.peripheral.sau.ck01}; },' +
+'    "1": function (operation_clock) { return operation_clock === "0" ? ${board.clock.peripheral.sau.ck10} : ${board.clock.peripheral.sau.ck11}; },' +
+'};' +
+'' +
+'/* Function to calculate SDR.STCLK register value. Note: This function does not check whether the value is in range. */' +
+'function stclk_calculate(f_mck, bitrate)' +
+'{' +
+'    return Math.round(f_mck / (2 * bitrate)) - 1;' +
+'}' +
+'' +
+'/* Function to calculate SAU unit value */' +
+'function sau_unit_calculate(channel) {' +
+'    return Math.floor(channel / 2);' +
+'}' +
+'' +
+'/* Function to calculate and validate bitrate */' +
+'function validate_stclk(f_mck, bitrate, stclk_limits)' +
+'{' +
+'    /* Calculate SDR.STCLK register value */' +
+'    var stclk = stclk_calculate(f_mck, bitrate);' +
+'' +
+'    return ((stclk <= stclk_limits.max) && (stclk >= stclk_limits.min));' +
+'}' +
+'/* Function to validate the operation clock divisor */' +
+'function validate_divisor(divisor, bitrate, stclk_limits)' +
+'{' +
+'    var f_pclk = ${board.clock.peripheral.sau};' +
+'    var best_f_mck = f_pclk / (1 << divisor);' +
+'    var is_valid = validate_stclk(best_f_mck, bitrate, stclk_limits);' +
+'' +
+'    return is_valid;' +
+'}' +
+'' +
+'/* Function to validate bitrate, generating a constraint message if invalid */' +
+'function validate_bitrate(f_mck, bitrate, stclk_limits)' +
+'{' +
+'    constraint_message = null;' +
+'    if (false === validate_stclk(f_mck, bitrate, stclk_limits)){' +
+'        constraint_message = "bitrate of " + bitrate.toString();' +
+'    }' +
+'' +
+'    return constraint_message;' +
+'}' +
+'/* Converter for i2c rate enumeration to I2C Bitrate (constraint context) */' +
+'var enum_to_bitrate_convert = {' +
+'    "module.driver.i2c.rate.rate_standard":100000,' +
+'    "module.driver.i2c.rate.rate_fast":400000,' +
+'    "module.driver.i2c.rate.rate_fast_plus":1000000,' +
+'};' +
+'var i2c_rate = "${module.driver.i2c.rate}";' +
+'' +
+'' +
+'function check_bitrate_valid(bitrate, sau_unit, operation_clock, stclk_limits) {' +
+'    /* Look up SAU operation clock frequency */' +
+'    var f_mck = fclk_freq_by_unit_get[sau_unit](operation_clock);' +
+'' +
+'    /* Get operation source clock frequency (PCLKB/ICLK) */' +
+'    var f_pclk = ${board.clock.peripheral.sau};' +
+'' +
+'    /* Validate bitrate, if not valid will generate constraint message */' +
+'    var constraint_message = validate_bitrate(f_mck, bitrate, stclk_limits);' +
+'' +
+'    if (constraint_message != null)' +
+'    {' +
+'        var ck_str = "SAU CK" + sau_unit + operation_clock;' +
+'        constraint_message = "SAU I2C " + constraint_message + " is not achievable with selected operation clock settings.\\n" +' +
+'            "Change the Operation clock in the SAU I2C properties, or adjust operation clock frequency on the Clocks tab.";' +
+'' +
+'        /* Search for best valid divisor setting. Valid divisor is 0-0xF */' +
+'        for (var divisor = 0; divisor <= 15; divisor++)' +
+'        {' +
+'            /* Add recommendation to constraint message if valid combination found and exit loop, since the smallest valid divisor will have the lowest error. */' +
+'            if (validate_divisor(divisor, bitrate, stclk_limits)){' +
+'                var best_f_mck = f_pclk / (1 << divisor);' +
+'                constraint_message += "\\nRecommended frequency: " + best_f_mck.toString() + " Hz (" + ck_str + " Div /" + (1 << divisor).toString() + ")";' +
+'                break;' +
+'            }' +
+'        }' +
+'    }' +
+'' +
+'    return constraint_message;' +
+'}' +
+'' +
+'var rate_value = "${module.driver.i2c.rate_value}";' +
+'var bitrate = 0;' +
+'if ( 0 == rate_value)' +
+'{' +
+'    bitrate = enum_to_bitrate_convert[i2c_rate];' +
+'}' +
+'else' +
+'{' +
+'    bitrate = rate_value;' +
+'}' +
+'var sau_unit = sau_unit_calculate("${module.driver.i2c.channel}".slice(-2, -1));' +
+'var operation_clock = "${module.driver.i2c.operation_clock}".slice(-1);' +
+'var stclk_limits = { min : 1, max : 127 };' +
+'' +
+'check_bitrate_valid(bitrate, sau_unit, operation_clock, stclk_limits)')]]>
+        </constraint>
+        <requires id="module.driver.i2c_on_sau_i2c.requires.sau" interface="interface.mcu.sau.external" visible="false" display="Requires SAU Peripheral" />
+        <requires id="module.driver.sau_i2c.requires.transfer_rx_tx" interface="interface.driver.transfer_on_dtc" display="Add DTC Driver for Transmission and Reception [Optional]" find="false" optional="true" >
+            <override property="module.driver.transfer.size" value="module.driver.transfer.size.size_1_byte"/>
+            <override property="module.driver.transfer.mode" value="module.driver.transfer.mode.mode_normal"/>
+            <override property="module.driver.transfer.dest_addr_mode" value="module.driver.transfer.dest_addr_mode.addr_mode_fixed"/>
+            <override property="module.driver.transfer.src_addr_mode" value="module.driver.transfer.src_addr_mode.addr_mode_incremented"/>
+            <override property="module.driver.transfer.repeat_area" value="module.driver.transfer.repeat_area.repeat_area_source"/>
+            <override property="module.driver.transfer.p_dest" value="NULL"/>
+            <override property="module.driver.transfer.p_src" value="NULL"/>
+            <override property="module.driver.transfer.length" value="0"/>
+            <override property="module.driver.transfer.interrupt" value="module.driver.transfer.interrupt.interrupt_end"/>
+            <override property="module.driver.transfer.num_blocks" value="0"/>
+            <override property="module.driver.transfer.auto_enable" value="module.driver.transfer.auto_enable.false"/>
+            <override property="module.driver.transfer.p_callback" value="NULL"/>
+            <override property="module.driver.transfer.number_of_descriptors" value="0"/>
+            <override property="module.driver.transfer.activation_source" value="_interrupt.event.sau${module.driver.sau.unit.number}.iic.txrxi${module.driver.i2c.channel.number}"/>
+        </requires>
+        <provides interface="interface.driver.i2c" />
+        <provides interface="interface.driver.i2c_master" />
+        <provides interface="interface.driver.i2c_on_sau_i2c" />
+        <provides interface="interface.driver.i2c.${module.driver.sau.name}" />
+        <provides interface="interface.peripheral.sau${module.driver.i2c.channel}" />
+        <property default="g_i2c${_instance}" display="General|Name" id="module.driver.sau.name" description="Module name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.sau.name}")</constraint>
+        </property>
+        <property default="" display="General|Channel" id="module.driver.i2c.channel" description="Select the SAU channel.">
+            <select enum="enum.driver.sau.i2c_channel"/>
+            <signal event="event.sau${module.driver.sau.unit.number}.iic.txrxi${module.driver.i2c.channel}"/>
+        </property>
+
+        <property default="0" id="module.driver.sau.unit.number" description="">
+            <export><![CDATA[eval('var channel = "${module.driver.i2c.channel}";' +
+'    var unit = "INVALID /* Unknown channel selected */";' +
+'    if (channel.indexOf("00") >= 0) {' +
+'        unit = "0";' +
+'    } else if (channel.indexOf("01") >= 0) {' +
+'        unit = "0";' +
+'    } else if (channel.indexOf("10") >= 0) {' +
+'        unit = "0";' +
+'    } else if (channel.indexOf("11") >= 0) {' +
+'        unit = "0";' +
+'    } else if (channel.indexOf("20") >= 0) {' +
+'        unit = "1";' +
+'    } else if (channel.indexOf("21") >= 0) {' +
+'        unit = "1";' +
+'    }' +
+'    unit')]]>
+            </export>
+        </property>
+
+        <property default="0" id="module.driver.sau.channel.number" description="">
+            <export><![CDATA[eval('var channel = "${module.driver.i2c.channel}";' +
+'    var sau_channel_number = "INVALID /* Unknown channel selected */";' +
+'    if ("00" == channel) {' +
+'        sau_channel_number = "0";' +
+'    } else if ("01" == channel) {' +
+'        sau_channel_number = "1";' +
+'    } else if ("10" == channel) {' +
+'        sau_channel_number = "2";' +
+'    } else if ("11" == channel) {' +
+'        sau_channel_number = "3";' +
+'    } else if ("20" == channel) {' +
+'        sau_channel_number = "0";' +
+'    } else if ("21" == channel) {' +
+'        sau_channel_number = "1";' +
+'    }' +
+'    sau_channel_number')]]>
+            </export>
+        </property>
+
+        <property default="00" id="module.driver.i2c.channel.number" description="">
+            <export><![CDATA[eval('var channel = "${module.driver.i2c.channel}";' +
+'    var i2c_channel_number = "INVALID /* Unknown channel selected */";' +
+'    if (channel.indexOf("00") >= 0) {' +
+'        i2c_channel_number = "00";' +
+'    } else if (channel.indexOf("01") >= 0) {' +
+'        i2c_channel_number = "01";' +
+'    } else if (channel.indexOf("10") >= 0) {' +
+'        i2c_channel_number = "10";' +
+'    } else if (channel.indexOf("11") >= 0) {' +
+'        i2c_channel_number = "11";' +
+'    } else if (channel.indexOf("20") >= 0) {' +
+'        i2c_channel_number = "20";' +
+'    } else if (channel.indexOf("21") >= 0) {' +
+'        i2c_channel_number = "21";' +
+'    }' +
+'    i2c_channel_number')]]>
+            </export>
+        </property>
+        <property default="module.driver.i2c.operation_clock.ck0" display="General|Operation clock" id="module.driver.i2c.operation_clock" description="Select the I2C operation clock. Use the Clocks tab to set the operation clock divider.">
+            <option display="CKm0" id="module.driver.i2c.operation_clock.ck0" value="SAU_I2C_MASTER_OPERATION_CLOCK_CK0"/>
+            <option display="CKm1" id="module.driver.i2c.operation_clock.ck1" value="SAU_I2C_MASTER_OPERATION_CLOCK_CK1"/>
+        </property>
+        <property default="0x00" display="General|Slave Address" id="module.driver.i2c.slave" description="Specify the slave address.">
+            <constraint display="Value must be a non-negative integer">testInteger("${module.driver.i2c.slave}")  &amp;&amp; ("${module.driver.i2c.slave}" &gt;= 0)</constraint>
+        </property>
+        <property default="module.driver.i2c.rate.rate_standard" display="General|Rate" id="module.driver.i2c.rate" description="Select the I2C data rate.\n\nIf the requested rate cannot be achieved, adjust the operation clock frequency until the rate is achievable. The calculated rate is printed in a comment in the generated sau_i2c_extended_cfg_t structure.">
+            <option display="Standard" id="module.driver.i2c.rate.rate_standard" value="I2C_MASTER_RATE_STANDARD"/>
+            <option display="Fast mode" id="module.driver.i2c.rate.rate_fast" value="I2C_MASTER_RATE_FAST"/>
+            <option display="Fast mode plus" id="module.driver.i2c.rate.rate_fast_plus" value="I2C_MASTER_RATE_FASTPLUS"/>
+        </property>
+        <property default="0" display="Custom Rate (bps)" id="module.driver.i2c.rate_value" description="Set a custom bitrate (bps). Set to 0 to use the maximum bitrate for the selected mode.\n\nStandard-mode: up to 100000; Fast-mode: up to 400000; Fast-mode plus: up to 1000000">
+            <constraint display="Value must be a non-negative integer">testInteger("${module.driver.i2c.rate_value}")  &amp;&amp; ("${module.driver.i2c.rate_value}" &gt;= 0) </constraint>
+        </property>
+        <property default="0" id="module.driver.i2c.bitrate">
+            <export><![CDATA[eval('/* Converter for SAU unit to configured operation clock frequency */' +
+'var fclk_freq_by_unit_get = {' +
+'    "0": function (operation_clock) { return operation_clock === "0" ? ${board.clock.peripheral.sau.ck00} : ${board.clock.peripheral.sau.ck01}; },' +
+'    "1": function (operation_clock) { return operation_clock === "0" ? ${board.clock.peripheral.sau.ck10} : ${board.clock.peripheral.sau.ck11}; },' +
+'};' +
+'' +
+'/* Function to calculate SDR.STCLK register value. Note: This function does not check whether the value is in range. */' +
+'function stclk_calculate(f_mck, bitrate)' +
+'{' +
+'    return Math.round(f_mck / (2 * bitrate)) - 1;' +
+'}' +
+'' +
+'/* Function to calculate SAU unit value */' +
+'function sau_unit_calculate(channel) {' +
+'    return Math.floor(channel / 2);' +
+'}/* Converter for i2c rate enumeration to I2C Bitrate (property context) */' +
+'var enum_to_bitrate_convert = {' +
+'    "I2C_MASTER_RATE_STANDARD":100000,' +
+'    "I2C_MASTER_RATE_FAST":400000,' +
+'    "I2C_MASTER_RATE_FASTPLUS":1000000,' +
+'};' +
+'var i2c_rate = "${module.driver.i2c.rate}";' +
+'' +
+'' +
+'function bitrate_calculate(bitrate, sau_unit, operation_clock, stclk_limits) {' +
+'    /* Look up SAU operation clock frequency */' +
+'    var f_mck = fclk_freq_by_unit_get[sau_unit](operation_clock);' +
+'' +
+'    /* Calculate SDR.STCLK register value */' +
+'    var stclk = stclk_calculate(f_mck, bitrate);' +
+'' +
+'    /* Cap the setting within the valid register range */' +
+'    stclk = Math.min(stclk, stclk_limits.max);' +
+'    stclk = Math.max(stclk, stclk_limits.min);' +
+'' +
+'   /* Calculate actual bitrate with this SDR.STCLK value for printing in the comment */' +
+'    var actual_bitrate = f_mck / (2 * (stclk + 1));' +
+'' +
+'    return "/* Actual calculated bitrate: " + actual_bitrate.toFixed(0) + " */\\n" +' +
+'        ".clock_settings.stclk = " + stclk.toString();' +
+'}' +
+'' +
+'var rate_value = "${module.driver.i2c.rate_value}";' +
+'var bitrate = 0;' +
+'if ( 0 == rate_value)' +
+'{' +
+'    bitrate = enum_to_bitrate_convert[i2c_rate];' +
+'}' +
+'else' +
+'{' +
+'    bitrate = rate_value;' +
+'}' +
+'var sau_unit = sau_unit_calculate("${module.driver.i2c.channel}".slice(-2, -1));' +
+'var operation_clock = "${module.driver.i2c.operation_clock}".slice(-1);' +
+'var stclk_limits = { min : 1, max : 127 };' +
+'' +
+'bitrate_calculate(bitrate, sau_unit, operation_clock, stclk_limits)')]]></export>
+        </property>
+        <property default="5" display="General|Delay time (Microseconds)" id="module.driver.i2c.delay_time" description="Hold SDA (or SCK) for delay time to meet the I2C start (or stop) condition. Needs to be specified according to slave devices.">
+            <constraint display="Value must be a non-negative integer">testInteger("${module.driver.i2c.delay_time}") &amp;&amp; ("${module.driver.i2c.delay_time}" &gt;= 0)</constraint>
+        </property>
+        <property default="sau_i2c_master_callback" display="General|Callback" id="module.driver.i2c.p_callback" description="A user callback function can be provided. If this callback function is provided, it will be called from the interrupt service routine (ISR).">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.i2c.p_callback}")</constraint>
+        </property>
+        <property default="" display="General|Transfer end interrupt priority" id="module.driver.i2c.tei" description="Select transfer end interrupt priority. This is set for TEI interrupt.">
+            <select enum="enum.mcu.nvic.priorities.mandatory"/>
+           <interrupt event="event.sau${module.driver.sau.unit.number}.iic.txrxi${module.driver.i2c.channel}" isr="sau_i2c_tei_isr"/>
+        </property>
+        <peripheral name="sau${module.driver.i2c.channel}" component="sau_i2c${module.driver.i2c.channel}" pin="sau_i2c${module.driver.i2c.channel}.sda${module.driver.i2c.channel}" />
+        <peripheral name="sau${module.driver.i2c.channel}" component="sau_i2c${module.driver.i2c.channel}" pin="sau_i2c${module.driver.i2c.channel}.scl${module.driver.i2c.channel}" />
+        <header>
+extern const i2c_master_cfg_t ${module.driver.sau.name}_cfg;
+/* I2C on SAU Instance. */
+extern const i2c_master_instance_t ${module.driver.sau.name};
+#ifndef ${module.driver.i2c.p_callback}
+void ${module.driver.i2c.p_callback}(i2c_master_callback_args_t * p_args);
+#endif
+
+extern const sau_i2c_extended_cfg_t ${module.driver.sau.name}_cfg_extend;
+extern sau_i2c_instance_ctrl_t ${module.driver.sau.name}_ctrl;
+        </header>
+        <includes>
+#include &quot;r_sau_i2c.h&quot;
+#include &quot;r_i2c_master_api.h&quot;
+        </includes>
+        <declarations>
+#include &quot;r_sau_i2c_cfg.h&quot;
+sau_i2c_instance_ctrl_t ${module.driver.sau.name}_ctrl;
+
+#if SAU_I2C_CFG_DTC_SUPPORT_ENABLE
+transfer_info_t ${module.driver.sau_i2c.requires.transfer_rx_tx::module.driver.transfer.name}_info[2] DTC_TRANSFER_INFO_ALIGNMENT =
+{
+    { .transfer_settings_word_b.dest_addr_mode = TRANSFER_ADDR_MODE_INCREMENTED,
+      .transfer_settings_word_b.repeat_area = TRANSFER_REPEAT_AREA_DESTINATION,
+      .transfer_settings_word_b.irq = TRANSFER_IRQ_END,
+      .transfer_settings_word_b.chain_mode = TRANSFER_CHAIN_MODE_EACH,
+      .transfer_settings_word_b.src_addr_mode = TRANSFER_ADDR_MODE_FIXED,
+      .transfer_settings_word_b.size = TRANSFER_SIZE_1_BYTE,
+      .transfer_settings_word_b.mode = TRANSFER_MODE_NORMAL,
+      .p_dest = (void*) NULL,
+      .p_src = (void const*) NULL,
+      .num_blocks = 0,
+      .length = 0, },
+    { .transfer_settings_word_b.dest_addr_mode = TRANSFER_ADDR_MODE_FIXED,
+      .transfer_settings_word_b.repeat_area = TRANSFER_REPEAT_AREA_DESTINATION,
+      .transfer_settings_word_b.irq = TRANSFER_IRQ_END,
+      .transfer_settings_word_b.chain_mode = TRANSFER_CHAIN_MODE_DISABLED,
+      .transfer_settings_word_b.src_addr_mode = TRANSFER_ADDR_MODE_FIXED,
+      .transfer_settings_word_b.size = TRANSFER_SIZE_1_BYTE,
+      .transfer_settings_word_b.mode = TRANSFER_MODE_NORMAL,
+      .p_dest = (void*) NULL,
+      .p_src = (void const*) NULL,
+      .num_blocks = 0,
+      .length = 0, }
+};
+
+const transfer_cfg_t ${module.driver.sau_i2c.requires.transfer_rx_tx::module.driver.transfer.name}_cfg_sau_i2c =
+{
+  .p_info              = ${module.driver.sau_i2c.requires.transfer_rx_tx::module.driver.transfer.name}_info,
+  .p_extend = &amp;${module.driver.sau_i2c.requires.transfer_rx_tx::module.driver.transfer.name}_cfg_extend, };
+
+/* Instance structure to use this module. */
+const transfer_instance_t ${module.driver.sau_i2c.requires.transfer_rx_tx::module.driver.transfer.name}_sau_i2c =
+{
+    .p_ctrl        = &amp;${module.driver.sau_i2c.requires.transfer_rx_tx::module.driver.transfer.name}_ctrl,
+    .p_cfg         = &amp;${module.driver.sau_i2c.requires.transfer_rx_tx::module.driver.transfer.name}_cfg_sau_i2c,
+    .p_api         = &amp;g_transfer_on_dtc
+};
+
+#endif
+
+const sau_i2c_extended_cfg_t ${module.driver.sau.name}_cfg_extend =
+{
+    ${module.driver.i2c.bitrate},
+    .clock_settings.operation_clock     = ${module.driver.i2c.operation_clock},
+    .i2c_unit                           = ${module.driver.sau.unit.number},
+    .delay_time                         = ${module.driver.i2c.delay_time},
+};
+
+const i2c_master_cfg_t ${module.driver.sau.name}_cfg =
+{
+    .channel             = ${module.driver.sau.channel.number},
+    .rate                = ${module.driver.i2c.rate},
+    .slave               = ${module.driver.i2c.slave},
+    .p_callback          = ${module.driver.i2c.p_callback},
+    .p_context           = NULL,
+#if defined(VECTOR_NUMBER_SAU${module.driver.sau.unit.number}_IIC_TXRXI${module.driver.i2c.channel})
+    .tei_irq             = VECTOR_NUMBER_SAU${module.driver.sau.unit.number}_IIC_TXRXI${module.driver.i2c.channel},
+#else
+    .tei_irq             = FSP_INVALID_VECTOR,
+#endif
+    .ipl                 = ${module.driver.i2c.tei},
+    .p_extend            = &amp;${module.driver.sau.name}_cfg_extend,
+#define RA_NOT_DEFINED (1)
+#if (RA_NOT_DEFINED == ${module.driver.sau_i2c.requires.transfer_rx_tx::module.driver.transfer.name})
+                .p_transfer_tx   = NULL,
+#else
+                .p_transfer_tx   = &amp;${module.driver.sau_i2c.requires.transfer_rx_tx::module.driver.transfer.name}_sau_i2c,
+#endif
+#undef RA_NOT_DEFINED
+};
+/* Instance structure to use this module. */
+const i2c_master_instance_t ${module.driver.sau.name} =
+{
+    .p_ctrl        = &amp;${module.driver.sau.name}_ctrl,
+    .p_cfg         = &amp;${module.driver.sau.name}_cfg,
+    .p_api         = &amp;g_i2c_master_on_sau
+};
+
+        </declarations>
+        <api configurable="true">
+            <file>ra/fsp/inc/instances/r_sau_i2c.h</file>
+            <file>ra/fsp/inc/api/r_i2c_master_api.h</file>
+            <file>ra/fsp/inc/api/r_transfer_api.h</file>
+        </api>
+    </module>
+</raModuleDescription>

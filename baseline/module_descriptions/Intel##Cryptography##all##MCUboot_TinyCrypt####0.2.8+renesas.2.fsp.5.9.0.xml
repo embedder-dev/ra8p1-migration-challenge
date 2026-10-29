@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<raModuleDescription>
+    <config id="config.middleware.mcuboot_tinycrypt" path="fsp_cfg/rm_tinycrypt_port_cfg.h" version="0">
+        <property default="config.middleware.mcuboot_tinycrypt.param_checking_enable.bsp" display="Parameter Checking" id="config.middleware.mcuboot_tinycrypt.param_checking_enable" description="If selected code for parameter checking is included in the build.">
+            <option display="Default (BSP)" id="config.middleware.mcuboot_tinycrypt.param_checking_enable.bsp" value="(BSP_CFG_PARAM_CHECKING_ENABLE)"/>
+            <option display="Enabled" id="config.middleware.mcuboot_tinycrypt.param_checking_enable.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.mcuboot_tinycrypt.param_checking_enable.disabled" value="(0)"/>
+        </property>
+        <content>
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+    #define RM_TINYCRYPT_PORT_CFG_PARAM_CHECKING_ENABLE ${config.middleware.mcuboot_tinycrypt.param_checking_enable}
+
+#ifdef __cplusplus
+}
+#endif
+        </content>
+    </config>
+    <module config="config.middleware.mcuboot_tinycrypt" display="Security|MCUboot TinyCrypt (S/W Only)" id="module.middleware.mcuboot_tinycrypt" visible="false" common="1" version="1" url="https://github.com/01org/tinycrypt/blob/master/documentation/tinycrypt.rst">
+        <!-- uECC documentation (http://kmackay.ca/micro-ecc/) requires only 672 bytes of stack but the mcuboot application requires about 1000 bytes of stack -->
+        <constraint display="A minimum stack of 2K (0x800) is required. If used in an RTOS thread, the thread stack should instead be at least 0x800.">(("${config.bsp.common.main}" &gt;= 0x800)) || (testExists("${interface.rtos.rtos}") )
+        </constraint>
+        <provides interface="interface.driver.mcuboot_tinycrypt" />
+        <provides interface="interface.driver.mcuboot_crypto" />
+        <includes>
+        #include "tinycrypt/cbc_mode.h"
+        #include "tinycrypt/ccm_mode.h"
+        #include "tinycrypt/gcm_mode.h"
+        #include "tinycrypt/cmac_mode.h"
+        #include "tinycrypt/constants.h"
+        #include "tinycrypt/ctr_mode.h"
+        #include "tinycrypt/ctr_prng.h"
+        #include "tinycrypt/ecc_dh.h"
+        #include "tinycrypt/ecc_dsa.h"
+        #include "tinycrypt/ecc_platform_specific.h"
+        #include "tinycrypt/ecc.h"
+        #include "tinycrypt/hmac_prng.h"
+        #include "tinycrypt/hmac.h"
+        #include "tinycrypt/sha256.h"
+        #include "tinycrypt/utils.h"
+        </includes>
+        <declarations>
+        </declarations>
+    </module>
+</raModuleDescription>

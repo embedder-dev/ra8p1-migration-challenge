@@ -1,0 +1,569 @@
+<?xml version="1.0" encoding="utf-8"?>
+<raModuleDescription>
+    <config id="config.bsp.ra" path="fsp_cfg/bsp/bsp_cfg.h" version="0">
+        <property id="config.bsp.common.main" display="Main stack size (bytes)" default="0x400" macro="BSP_CFG_STACK_MAIN_BYTES" description="Set the size of the main program stack.\n\nNOTE: This entry is for the main stack. When using an RTOS, thread stacks can be configured in the properties for each thread.">
+            <constraint display="Value must be an integer multiple of 8 and between 8 and 0xFFFFFFFF">testInteger("${config.bsp.common.main}")  &amp;&amp; ("${config.bsp.common.main}" &gt; 0) &amp;&amp; ("${config.bsp.common.main}" % 8 == 0)&amp;&amp;
+            ("${config.bsp.common.main}" &lt;= 0xFFFFFFFF)</constraint>
+        </property>
+        <property id="config.bsp.common.heap" display="Heap size (bytes)" default="0" macro="BSP_CFG_HEAP_BYTES" description="The main heap is disabled by default. Set the heap size to a positive integer divisible by 8 to enable it.\n\nA minimum of 4K (0x1000) is recommended if standard library functions are to be used.">
+            <constraint display="Value must be 0 or an integer multiple of 8 between 8 and 0xFFFFFFFF.">testInteger("${config.bsp.common.heap}")  &amp;&amp; ("${config.bsp.common.heap}" &gt;= 0) &amp;&amp; ("${config.bsp.common.heap}" % 8 == 0)&amp;&amp;
+            ("${config.bsp.common.heap}" &lt;= 0xFFFFFFFF)</constraint>
+        </property>
+        <property id="config.bsp.common.vcc" display="MCU Vcc (mV)" default="3300" macro="BSP_CFG_MCU_VCC_MV" description="Some peripherals require different settings based on the supplied voltage. Entering Vcc here (in mV) allows the relevant driver modules to configure the associated peripherals accordingly.">
+            <constraint display="Value must between 0 and 5500 (5.5V)">testInteger("${config.bsp.common.vcc}") &amp;&amp; (${config.bsp.common.vcc} &gt;= 0) &amp;&amp; (${config.bsp.common.vcc} &lt;= 5500)</constraint>
+        </property>
+        <property id="config.bsp.common.checking" display="Parameter checking" default="config.bsp.common.checking.disabled" description="When enabled, parameter checking for the BSP is turned on. In addition, any modules whose parameter checking configuration is set to 'Default (BSP)' will perform parameter checking as well.">
+            <option id="config.bsp.common.checking.enabled" display="Enabled" value="1" />
+            <option id="config.bsp.common.checking.disabled" display="Disabled" value="0" />
+        </property>
+        <property id="config.bsp.common.assert" display="Assert Failures" default="config.bsp.common.assert.none" description="Define the behavior of the FSP_ASSERT() macro.">
+            <option id="config.bsp.common.assert.none" display="Return FSP_ERR_ASSERTION" value="0" />
+            <option id="config.bsp.common.assert.fsp_error_log" display="Call fsp_error_log then Return FSP_ERR_ASSERTION" value="1" />
+            <option id="config.bsp.common.assert.assert" display="Use assert() to Halt Execution" value="2" />
+            <option id="config.bsp.common.assert.skip" display="Disable checks that would return FSP_ERR_ASSERTION" value="3" />
+        </property>
+        <property default="config.bsp.common.soft_reset.disabled" display="Clock Registers not Reset Values during Startup" id="config.bsp.common.soft_reset" description="If enabled, registers are assumed to be set to their reset value during startup. Enable this if another application such as a bootloader or Secure project has already configured the clocks before the startup code runs.">
+            <option display="Disabled" id="config.bsp.common.soft_reset.disabled" value="(0)"/>
+            <option display="Enabled" id="config.bsp.common.soft_reset.enabled" value="(1)"/>
+        </property>
+        <property default="config.bsp.common.main_osc_populated.enabled" display="Main Oscillator Populated" id="config.bsp.common.main_osc_populated" description="Select whether or not there is a main oscillator (XTAL) on the board. This setting can be overridden in board_cfg.h.">
+            <option display="Populated" id="config.bsp.common.main_osc_populated.enabled" value="(1)"/>
+            <option display="Not Populated" id="config.bsp.common.main_osc_populated.disabled" value="(0)"/>
+        </property>
+        <property default="config.bsp.common.pfs_protect.enabled" display="PFS Protect" id="config.bsp.common.pfs_protect" description="Keep the PFS registers locked when they are not being modified. If disabled they will be unlocked during startup.">
+            <option display="Disabled" id="config.bsp.common.pfs_protect.disabled" value="(0)"/>
+            <option display="Enabled" id="config.bsp.common.pfs_protect.enabled" value="(1)"/>
+        </property>
+        <property default="config.bsp.common.c_runtime_init.enabled" display="C Runtime Initialization " id="config.bsp.common.c_runtime_init" description="Select if the C runtime initialization in the BSP is to be used. If disabled, use the BSP_WARM_START_POST_CLOCK event to run user defined equivalent.">
+            <option display="Enabled" id="config.bsp.common.c_runtime_init.enabled" value="(1)"/>
+            <option display="Disabled" id="config.bsp.common.c_runtime_init.disabled" value="(0)"/>
+        </property>
+        <property default="config.bsp.common.early_init.disabled" display="Early BSP Initialization " id="config.bsp.common.early_init" description="Enable this option to use BSP functions before C runtime initialization (BSP_WARM_START_RESET or BSP_WARM_START_POST_CLOCK).">
+            <option display="Enabled" id="config.bsp.common.early_init.enabled" value="(1)"/>
+            <option display="Disabled" id="config.bsp.common.early_init.disabled" value="(0)"/>
+        </property>
+
+        <property default="config.bsp.common.main_osc_clock_source.crystal" display="Main Oscillator Clock Source" id="config.bsp.common.main_osc_clock_source" description="Select the main oscillator clock source. This setting can be overridden in board_cfg.h">
+            <option display="External Oscillator" id="config.bsp.common.main_osc_clock_source.external_osc" value="(1)"/>
+            <option display="Crystal or Resonator" id="config.bsp.common.main_osc_clock_source.crystal" value="(0)"/>
+        </property>
+        <property default="config.bsp.common.subclock_populated.enabled" display="Subclock Populated" id="config.bsp.common.subclock_populated" description="Select whether or not there is a subclock crystal on the board. This setting can be overridden in board_cfg.h.">
+            <option display="Populated" id="config.bsp.common.subclock_populated.enabled" value="(1)"/>
+            <option display="Not Populated" id="config.bsp.common.subclock_populated.disabled" value="(0)"/>
+        </property>
+        <property default="config.bsp.common.subclock_drive.standard" display="Subclock Drive (Drive capacitance availability varies by MCU)" id="config.bsp.common.subclock_drive" description="Select the subclock oscillator drive capacitance. This setting can be overridden in board_cfg.h">
+            <option display="Standard/Normal mode" id="config.bsp.common.subclock_drive.standard" value="(0)"/>
+            <option display="Low/Low power mode 1" id="config.bsp.common.subclock_drive.low" value="(1)"/>
+            <option display="Low power mode 2" id="config.bsp.common.subclock_drive.lpm2" value="(2)"/>
+            <option display="Low power mode 3" id="config.bsp.common.subclock_drive.lpm3" value="(3)"/>
+        </property>
+        <property default="1000" display="Subclock Stabilization Time (ms)" id="config.bsp.common.subclock_stabilization_ms" description="Select the subclock oscillator stabilization time.  This is only used in the startup code if the subclock is selected as the system clock on the Clocks tab or if the HOCO FLL function is enabled. This setting can be overridden in board_cfg.h">
+            <constraint display="Value must between 0 and 10000">testInteger("${config.bsp.common.subclock_stabilization_ms}") &amp;&amp; ("${config.bsp.common.subclock_stabilization_ms}" &gt;= 0) &amp;&amp; ("${config.bsp.common.subclock_stabilization_ms}" &lt;= 10000)</constraint>
+        </property>
+        <content>
+            #ifdef __cplusplus
+            extern "C" {
+            #endif
+
+            #include "bsp_clock_cfg.h"
+            #include "bsp_mcu_family_cfg.h"
+            #include "board_cfg.h"
+            #include "vector_data.h"
+            #define RA_NOT_DEFINED 0
+            #ifndef BSP_CFG_RTOS
+             #if (RA_NOT_DEFINED) != (${interface.rtos.awsfreertos})
+              #define BSP_CFG_RTOS (2)
+             #elif (RA_NOT_DEFINED) != (${interface.rtos.tx})
+              #define BSP_CFG_RTOS (1)
+             #else
+              #define BSP_CFG_RTOS (0)
+             #endif
+            #endif
+            #ifndef BSP_CFG_RTC_USED
+             #define BSP_CFG_RTC_USED (${interface.driver.rtc})
+            #endif
+            #undef RA_NOT_DEFINED
+            #if defined(_RA_BOOT_IMAGE)
+             #define BSP_CFG_BOOT_IMAGE (1)
+            #endif
+            #define BSP_CFG_MCU_VCC_MV (${config.bsp.common.vcc})
+            #define BSP_CFG_STACK_MAIN_BYTES (${config.bsp.common.main})
+            #define BSP_CFG_HEAP_BYTES (${config.bsp.common.heap})
+            #define BSP_CFG_PARAM_CHECKING_ENABLE (${config.bsp.common.checking})
+            #define BSP_CFG_ASSERT (${config.bsp.common.assert})
+
+            #define BSP_CFG_PFS_PROTECT (${config.bsp.common.pfs_protect})
+
+            #define BSP_CFG_C_RUNTIME_INIT (${config.bsp.common.c_runtime_init})
+            #define BSP_CFG_EARLY_INIT     (${config.bsp.common.early_init})
+
+            #define BSP_CFG_STARTUP_CLOCK_REG_NOT_RESET (${config.bsp.common.soft_reset})
+
+            #ifndef BSP_CLOCK_CFG_MAIN_OSC_POPULATED
+            #define BSP_CLOCK_CFG_MAIN_OSC_POPULATED ${config.bsp.common.main_osc_populated}
+            #endif
+
+            #ifndef BSP_CLOCK_CFG_MAIN_OSC_CLOCK_SOURCE
+            #define BSP_CLOCK_CFG_MAIN_OSC_CLOCK_SOURCE ${config.bsp.common.main_osc_clock_source}
+            #endif
+            #ifndef BSP_CLOCK_CFG_SUBCLOCK_DRIVE
+            #define BSP_CLOCK_CFG_SUBCLOCK_DRIVE ${config.bsp.common.subclock_drive}
+            #endif
+            #ifndef BSP_CLOCK_CFG_SUBCLOCK_POPULATED
+            #define BSP_CLOCK_CFG_SUBCLOCK_POPULATED ${config.bsp.common.subclock_populated}
+            #endif
+            #ifndef BSP_CLOCK_CFG_SUBCLOCK_STABILIZATION_MS
+            #define BSP_CLOCK_CFG_SUBCLOCK_STABILIZATION_MS ${config.bsp.common.subclock_stabilization_ms}
+            #endif
+
+            #ifdef __cplusplus
+            }
+            #endif
+        </content>
+    </config>
+    <config id="config.bsp.pin" path="fsp_cfg/bsp/bsp_pin_cfg.h" version="0">
+        <content>
+/* generated configuration header file - do not edit */
+#ifndef BSP_PIN_CFG_H_
+#define BSP_PIN_CFG_H_
+#include "r_ioport.h"
+
+/* Common macro for FSP header files. There is also a corresponding FSP_FOOTER macro at the end of this file. */
+FSP_HEADER
+
+[#list pins as pin]
+#define ${pin.name} (BSP_IO_PORT_${pin.port}_PIN_${pin.pin})[#if pin.comment??] /* ${pin.comment} */[/#if]
+[/#list]
+[#assign peripherals = {"SAU_SPI": ["SO", "SCK"], "IICA": ["All"]}] <!--{"module1": ["function1", "function2", ...], "module2": ["All"]}-->
+[#list configs as config]
+    [#list config.components as component]
+        [#assign module = component.name]
+        [#assign function = component.channel]
+        [#list peripherals as perName, perPinList]
+            [#if module?starts_with(perName)]
+                [#list perPinList as perPin]
+                    [#if function?starts_with(perPin) || perPin == "All"]
+                        [#list config.pins as pin]
+                            [#assign formatted_port = pin.port?number]
+                            [#assign formatted_port_sub = pin.port?number - 10]
+                            [#if formatted_port_sub > 0 || formatted_port_sub == 0]
+                                [#assign formatted_port = "ABCDEF"[formatted_port_sub]]
+                            [/#if]
+                            [#assign name_pin = "P" + formatted_port + pin.pin]
+                            [#if component.port == name_pin]
+#define PIN_${component.channel} (BSP_IO_PORT_${pin.port}_PIN_${pin.pin})
+#define CFG_${component.channel} ([#list pin.masks?sort as mask](uint32_t) ${mask}[#if mask_has_next] | [/#if][/#list])
+                                [#break]
+                            [/#if]
+                        [/#list]
+                    [/#if]
+                [/#list]
+            [/#if]
+        [/#list]
+    [/#list]
+
+extern const ioport_cfg_t ${config.symbol}; /* ${config.name} */
+[/#list]
+
+void BSP_PinConfigSecurityInit();
+
+/* Common macro for FSP header files. There is also a corresponding FSP_HEADER macro at the top of this file. */
+FSP_FOOTER
+#endif /* BSP_PIN_CFG_H_ */
+        </content>
+    </config>
+    <bsp id="bsp.ra" config="config.bsp.ra" display="RA Common" version="0">
+        <enum default="_disabled" id="enum.disabled">
+            <option display="Disabled" id="_disabled" value="NULL"/>
+        </enum>
+        <enum default="enum.elc_none.none" id="enum.elc_none">
+            <!-- This enum is used for providing ELC_EVENT_NONE to DMAC activation source in case SW start is used. -->
+            <option display="No ELC Trigger" id="enum.elc_none.none" value="NONE"/>
+        </enum>
+        <enum default="enum.driver.sdadc.trigger.trigger_software" id="enum.driver.sdadc.trigger">
+            <option display="Software" id="module.driver.sdadc.trigger.trigger_software" value="SOFTWARE"/>
+        </enum>
+        <enum default="enum.driver.ctsu.trigger.trigger_software" id="enum.driver.ctsu.trigger">
+            <option display="Software" id="enum.driver.ctsu.trigger.trigger_software" value="SOFTWARE"/>
+        </enum>
+        <enum default="enum.driver.canfd.fifo.int_mode.every_frame" id="enum.driver.canfd.fifo.int_mode">
+            <option display="Disabled" id="enum.driver.canfd.fifo.int_mode.disabled" value="(0)"/>
+            <option display="At Threshold Value" id="enum.driver.canfd.fifo.int_mode.threshold" value="(R_CANFD_CFDRFCC_RFIE_Msk)"/>
+            <option display="Every Frame" id="enum.driver.canfd.fifo.int_mode.every_frame" value="(R_CANFD_CFDRFCC_RFIE_Msk | R_CANFD_CFDRFCC_RFIM_Msk)"/>
+        </enum>
+        <enum default="enum.driver.canfd.fifo.int_threshold.1_2" id="enum.driver.canfd.fifo.int_threshold">
+            <option display="1/8 full" id="enum.driver.canfd.fifo.int_threshold.1_8" value="(0U)"/>
+            <option display="1/4 full" id="enum.driver.canfd.fifo.int_threshold.1_4" value="(1U)"/>
+            <option display="3/8 full" id="enum.driver.canfd.fifo.int_threshold.3_8" value="(2U)"/>
+            <option display="1/2 full" id="enum.driver.canfd.fifo.int_threshold.1_2" value="(3U)"/>
+            <option display="5/8 full" id="enum.driver.canfd.fifo.int_threshold.5_8" value="(4U)"/>
+            <option display="3/4 full" id="enum.driver.canfd.fifo.int_threshold.3_4" value="(5U)"/>
+            <option display="7/8 full" id="enum.driver.canfd.fifo.int_threshold.7_8" value="(6U)"/>
+            <option display="Full" id="enum.driver.canfd.fifo.int_threshold.full" value="(7U)"/>
+        </enum>
+        <enum default="enum.driver.canfd.fifo.payload.8" id="enum.driver.canfd.fifo.payload">
+            <option display="8 bytes" id="enum.driver.canfd.fifo.payload.8" value="(0)"/>
+            <option display="12 bytes" id="enum.driver.canfd.fifo.payload.12" value="(1)"/>
+            <option display="16 bytes" id="enum.driver.canfd.fifo.payload.16" value="(2)"/>
+            <option display="20 bytes" id="enum.driver.canfd.fifo.payload.20" value="(3)"/>
+            <option display="24 bytes" id="enum.driver.canfd.fifo.payload.24" value="(4)"/>
+            <option display="32 bytes" id="enum.driver.canfd.fifo.payload.32" value="(5)"/>
+            <option display="48 bytes" id="enum.driver.canfd.fifo.payload.48" value="(6)"/>
+            <option display="64 bytes" id="enum.driver.canfd.fifo.payload.64" value="(7)"/>
+        </enum>
+        <enum default="enum.driver.fsp_common.data_type.uint8" id="enum.driver.fsp_common.data_type">
+            <option display="8-bit Signed" id="enum.driver.fsp_common.data_type.int8" value="int8_t"/>
+            <option display="8-bit Unsigned" id="enum.driver.fsp_common.data_type.uint8" value="uint8_t"/>
+            <option display="16-bit Signed" id="enum.driver.fsp_common.data_type.int16" value="int16_t"/>
+            <option display="16-bit Unsigned" id="enum.driver.fsp_common.data_type.uint16" value="uint16_t"/>
+            <option display="32-bit Signed" id="enum.driver.fsp_common.data_type.int32" value="int32_t"/>
+            <option display="32-bit Unsigned" id="enum.driver.fsp_common.data_type.uint32" value="uint32_t"/>
+            <option display="Single Float" id="enum.driver.fsp_common.data_type.float" value="float"/>
+            <option display="Double" id="enum.driver.fsp_common.data_type.double" value="double"/>
+        </enum>
+        <linker compiler="GCC" file="memory_regions.ld" type="generated">
+            /* generated memory regions file - do not edit */
+            [#list regions as region]
+                ${region.name}_START  = ${region.base};
+                ${region.name}_LENGTH = ${region.size};
+            [/#list]
+            [#if accumulators??]
+                [#list accumulators as accumulator]
+                    ${accumulator.name} = ${accumulator.value};
+                [/#list]
+            [/#if]
+            [#if project??]
+                [#if project == "secure"]
+                    PROJECT_SECURE = 1;
+                [/#if]
+                [#if project == "nonsecure"]
+                    PROJECT_NONSECURE = 1;
+                [/#if]
+            [/#if]
+        </linker>
+        <linker compiler="LLVMARM" file="memory_regions.lld" type="generated">
+            /* generated memory regions file - do not edit */
+            [#list regions as region]
+                ${region.name}_START  = ${region.base};
+                ${region.name}_LENGTH = ${region.size};
+            [/#list]
+            [#if accumulators??]
+                [#list accumulators as accumulator]
+                    ${accumulator.name} = ${accumulator.value};
+                [/#list]
+            [/#if]
+            [#if project??]
+                [#if project == "secure"]
+                    PROJECT_SECURE = 1;
+                [/#if]
+                [#if project == "nonsecure"]
+                    PROJECT_NONSECURE = 1;
+                [/#if]
+            [/#if]
+        </linker>
+        <linker compiler="ARMv6" file="memory_regions.scat" type="generated">
+            /* generated memory regions file - do not edit */
+            [#list regions as region]
+                #define ${region.name}_START  ${region.base}
+                #define ${region.name}_LENGTH ${region.size}
+            [/#list]
+            [#if accumulators??]
+                [#list accumulators as accumulator]
+                    #define ${accumulator.name} ${accumulator.value}
+                [/#list]
+            [/#if]
+            [#if project??]
+                [#if project == "secure"]
+                    #define PROJECT_SECURE    (1)
+                [/#if]
+                [#if project == "nonsecure"]
+                    #define PROJECT_NONSECURE    (1)
+                [/#if]
+            [/#if]
+        </linker>
+        <linker compiler="IAR" file="memory_regions.icf" type="generated">
+            /* generated memory regions file - do not edit */
+            [#list regions as region]
+                define symbol ${region.name}_START = ${region.base};
+                define symbol ${region.name}_LENGTH   = ${region.size};
+            [/#list]
+            [#if accumulators??]
+                [#list accumulators as accumulator]
+                    define symbol ${accumulator.name} = ${accumulator.value};
+                [/#list]
+            [/#if]
+            [#if project??]
+                [#if project == "secure"]
+                    define symbol PROJECT_SECURE = 1;
+                [/#if]
+                [#if project == "nonsecure"]
+                    define symbol PROJECT_NONSECURE = 1;
+                [/#if]
+            [/#if]
+        </linker>
+    </bsp>
+    <rtos id="_none" display="No RTOS">        <!-- used for RTOS selection in wizard (id must be "_none") -->
+        <thread id="_hal" display="HAL/Common" version="0">            <!-- used for context name in Threads tree (id must be "_hal") -->
+            <provides interface="interface.rtos.bare_metal" />
+            <!-- FileX and LevelX have standalone options. -->
+            <provides interface="interface.rtos.supports.filex" />
+            <!-- EWF can compile for bare metal -->
+            <provides interface="interface.rtos.supports.ewf" />
+            <!-- For Azure RTOS projects, use USBX -->
+            <provides interface="interface.rtos.supports.renesas_usb" />
+            <!-- No RTOS and FreeRTOS can use emWin. Azure projects should use GUIX. -->
+            <provides interface="interface.rtos.supports.emwin" />
+            <!-- No RTOS and FreeRTOS can use FreeRTOS+FAT. Azure projects should use FileX. -->
+            <provides interface="interface.rtos.supports.freertos_plus_fat" />
+            <!-- No RTOS and FreeRTOS can use MbedTLS and PSA Crypto. Azure projects should use NetX Secure. -->
+            <provides interface="interface.rtos.supports.mbedtls" />
+            <entry>
+#include "hal_data.h"
+
+FSP_CPP_HEADER
+void R_BSP_WarmStart(bsp_warm_start_event_t event);
+FSP_CPP_FOOTER
+
+/*******************************************************************************************************************//**
+ * main() is generated by the RA Configuration editor and is used to generate threads if an RTOS is used.  This function
+ * is called by main() when no RTOS is used.
+ **********************************************************************************************************************/
+void hal_entry(void)
+{
+    /* TODO: add your own code here */
+
+#if BSP_TZ_SECURE_BUILD
+    /* Enter non-secure code */
+    R_BSP_NonSecureEnter();
+#endif
+}
+
+/*******************************************************************************************************************//**
+ * This function is called at various points during the startup process.  This implementation uses the event that is
+ * called right before main() to set up the pins.
+ *
+ * @param[in]  event    Where at in the start up process the code is currently at
+ **********************************************************************************************************************/
+void R_BSP_WarmStart (bsp_warm_start_event_t event)
+{
+    if (BSP_WARM_START_RESET == event)
+    {
+#if BSP_FEATURE_FLASH_LP_VERSION != 0
+
+        /* Enable reading from data flash. */
+        R_FACI_LP->DFLCTL = 1U;
+
+        /* Would normally have to wait tDSTOP(6us) for data flash recovery. Placing the enable here, before clock and
+         * C runtime initialization, should negate the need for a delay since the initialization will typically take more than 6us. */
+#endif
+    }
+
+    if (BSP_WARM_START_POST_C == event)
+    {
+        /* C runtime environment and system clocks are setup. */
+
+        /* Configure pins. */
+        R_IOPORT_Open(&amp;IOPORT_CFG_CTRL, &amp;IOPORT_CFG_NAME);
+
+#if BSP_CFG_SDRAM_ENABLED
+
+        /* Setup SDRAM and initialize it. Must configure pins first. */
+        R_BSP_SdramInit(true);
+#endif
+    }
+}
+
+#if BSP_TZ_SECURE_BUILD
+
+FSP_CPP_HEADER
+BSP_CMSE_NONSECURE_ENTRY void template_nonsecure_callable ();
+
+/* Trustzone Secure Projects require at least one nonsecure callable function in order to build (Remove this if it is not required to build). */
+BSP_CMSE_NONSECURE_ENTRY void template_nonsecure_callable ()
+{
+
+}
+FSP_CPP_FOOTER
+
+#endif
+            </entry>
+            <start>
+            #include "hal_data.h"
+            int main(void) {
+              hal_entry();
+              return 0;
+            }
+            </start>
+        </thread>
+    </rtos>
+    <pin config="config.bsp.pin" id="pin.data" path="pin_data.c" version="0">
+        <declarations>
+/* generated pin source file - do not edit */
+#include "bsp_api.h"
+#include "r_ioport.h"
+
+[#list configs as config]
+
+[#if config.pins?size > 0]
+const ioport_pin_cfg_t ${config.symbol}_data[] = {
+    [#list config.pins?sort_by("pin")?sort_by("port") as pin]
+    {
+        .pin = BSP_IO_PORT_${pin.port}_PIN_${pin.pin},
+        .pin_cfg = ([#list pin.masks?sort as mask](uint32_t) ${mask}[#if mask_has_next] | [/#if][/#list])
+    },
+    [/#list]
+};
+[/#if]
+
+[#if config.pins?size > 0]
+const ioport_cfg_t ${config.symbol} = {
+    .number_of_pins = sizeof(${config.symbol}_data)/sizeof(ioport_pin_cfg_t),
+    .p_pin_cfg_data = &amp;${config.symbol}_data[0],
+};
+[#else]
+const ioport_cfg_t ${config.symbol} = {
+    .number_of_pins = 0,
+    .p_pin_cfg_data = NULL
+};
+[/#if]
+[/#list]
+
+#if BSP_TZ_SECURE_BUILD
+
+void R_BSP_PinCfgSecurityInit(void);
+
+/* Initialize SAR registers for secure pins. */
+void R_BSP_PinCfgSecurityInit(void)
+{
+ #if (2U == BSP_FEATURE_IOPORT_VERSION)
+    uint32_t pmsar[BSP_FEATURE_BSP_NUM_PMSAR];
+ #else
+    uint16_t pmsar[BSP_FEATURE_BSP_NUM_PMSAR];
+ #endif
+    memset(pmsar, 0xFF, BSP_FEATURE_BSP_NUM_PMSAR * sizeof(R_PMISC->PMSAR[0]));
+
+[#list configs as config]
+
+    for(uint32_t i = 0; i &lt; ${config.symbol}.number_of_pins; i++)
+    {
+        uint32_t port_pin = ${config.symbol}.p_pin_cfg_data[i].pin;
+        uint32_t port = port_pin &gt;&gt; 8U;
+        uint32_t pin = port_pin &amp; 0xFFU;
+        pmsar[port] &amp;= (uint16_t) ~(1U &lt;&lt; pin);
+    }
+
+    for(uint32_t i = 0; i &lt; BSP_FEATURE_BSP_NUM_PMSAR; i++)
+    {
+ #if (2U == BSP_FEATURE_IOPORT_VERSION)
+        R_PMISC->PMSAR[i].PMSAR = (uint16_t) pmsar[i];
+ #else
+        R_PMISC->PMSAR[i].PMSAR = pmsar[i];
+ #endif
+    }
+
+[/#list]
+}
+#endif
+
+        </declarations>
+    </pin>
+    <template id="_vector_data_c">
+        /* generated vector source file - do not edit */
+        #include "bsp_api.h"
+        /* Do not build these data structures if no interrupts are currently allocated because IAR will have build errors. */
+        #if VECTOR_DATA_IRQ_COUNT > 0
+        BSP_DONT_REMOVE const fsp_vector_t g_vector_table[BSP_ICU_VECTOR_NUM_ENTRIES] BSP_PLACE_IN_SECTION(BSP_SECTION_APPLICATION_VECTORS) =
+        {
+            [#list allocations as allocation]
+            [${allocation.slot}] = ${allocation.isr}, /* ${allocation.display} */
+            [/#list]
+        };
+        #if BSP_FEATURE_ICU_HAS_IELSR
+        const bsp_interrupt_event_t g_interrupt_event_link_select[BSP_ICU_VECTOR_NUM_ENTRIES] =
+        {
+            [#list allocations as allocation]
+            [${allocation.slot}] = BSP_PRV_VECT_ENUM(EVENT_${allocation.value},[#if allocation.slot lt 32]GROUP${allocation.slot%8}[#else]FIXED[/#if]), /* ${allocation.display} */
+            [/#list]
+        };
+        #endif
+        #endif
+    </template>
+    <template id="_vector_data_h">
+        /* generated vector header file - do not edit */
+        #ifndef VECTOR_DATA_H
+        #define VECTOR_DATA_H
+        #ifdef __cplusplus
+        extern "C" {
+        #endif
+        [#assign num_vectors= allocations?size]
+        /* Number of interrupts allocated */
+        #ifndef VECTOR_DATA_IRQ_COUNT
+        #define VECTOR_DATA_IRQ_COUNT    (${num_vectors})
+        #endif
+        /* ISR prototypes */
+        [#list isrs as isr]
+        void ${isr}(void);
+        [/#list]
+
+        /* Vector table allocations */
+        [#assign max_slot= 0]
+        [#list allocations as allocation]
+        #define VECTOR_NUMBER_${allocation.value} ((IRQn_Type) ${allocation.slot}) /* ${allocation.display} */
+        #define ${allocation.value}_IRQn          ((IRQn_Type) ${allocation.slot}) /* ${allocation.display} */
+        [#if allocation.slot?number &gt; max_slot?number]
+            [#assign max_slot = allocation.slot]
+        [/#if]
+        [/#list]
+        /* The number of entries required for the ICU vector table. */
+        #define BSP_ICU_VECTOR_NUM_ENTRIES (${max_slot + 1})
+
+        #ifdef __cplusplus
+        }
+        #endif
+        #endif /* VECTOR_DATA_H */
+    </template>
+    <template id="_elc_data_c">
+        /* generated ELC source file - do not edit */
+        #include "r_elc_api.h"
+        const elc_cfg_t g_elc_cfg = {
+            [#list allocations as allocation]
+            .link[ELC_PERIPHERAL_${allocation.link}] = ELC_EVENT_${allocation.value}, /* ${allocation.display} */
+            [/#list]
+        };
+
+#if BSP_TZ_SECURE_BUILD
+
+        void R_BSP_ElcCfgSecurityInit(void);
+
+        /* Configure ELC Security Attribution. */
+        void R_BSP_ElcCfgSecurityInit(void)
+        {
+ #if (2U == BSP_FEATURE_ELC_VERSION)
+            uint32_t elcsarbc = UINT32_MAX;
+
+            [#list allocations as allocation]
+            [#if allocation.value != "NONE"]
+            elcsarbc &amp;=  ~(1U &lt;&lt; ELC_PERIPHERAL_${allocation.link});
+            [/#if]
+            [/#list]
+
+            /* Write the settings to ELCSARn Registers. */
+            R_ELC->ELCSARA = 0xFFFFFFFEU;
+            R_ELC->ELCSARB = elcsarbc;
+ #else
+            uint16_t elcsarbc[2] = {0xFFFFU, 0xFFFFU};
+            [#list allocations as allocation]
+            [#if allocation.value != "NONE"]
+            elcsarbc[ELC_PERIPHERAL_${allocation.link} / 16U] &amp;= (uint16_t) ~(1U &lt;&lt; (ELC_PERIPHERAL_${allocation.link} % 16U));
+            [/#if]
+            [/#list]
+
+            /* Write the settins to ELCSARn Registers. */
+            R_ELC->ELCSARA = 0xFFFEU;
+            R_ELC->ELCSARB = elcsarbc[0];
+            R_ELC->ELCSARC = elcsarbc[1];
+ #endif
+        }
+#endif
+    </template>
+</raModuleDescription>

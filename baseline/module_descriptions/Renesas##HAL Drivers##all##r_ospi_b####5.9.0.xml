@@ -1,0 +1,525 @@
+<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.driver.ospi_b" path="fsp_cfg/r_ospi_b_cfg.h" version="0">
+        <property default="config.driver.ospi_b.param_checking_enable.bsp" display="Parameter Checking" id="config.driver.ospi_b.param_checking_enable" description="If selected code for parameter checking is included in the build.">
+            <option display="Default (BSP)" id="config.driver.ospi_b.param_checking_enable.bsp" value="(BSP_CFG_PARAM_CHECKING_ENABLE)"/>
+            <option display="Enabled" id="config.driver.ospi_b.param_checking_enable.enabled" value="(1)"/>
+            <option display="Disabled" id="config.driver.ospi_b.param_checking_enable.disabled" value="(0)"/>
+        </property>
+        <property default="config.driver.ospi_b.dmac_support.disabled" display="DMAC Support" id= "config.driver.ospi_b.dmac_support" description="Enable DMAC support for the OSPI module.">
+            <option display="Enable" id="config.driver.ospi_b.dmac_support.enabled" value="(1)" />
+            <option display="Disable" id="config.driver.ospi_b.dmac_support.disabled" value="(0)" />
+        </property>
+        <property default="config.driver.ospi_b.autocalibration_support.disabled" display="Autocalibration Support" id="config.driver.ospi_b.autocalibration_support" description="Enable DS autocalibration for dual-data-rate modes.">
+            <option display="Enable" id="config.driver.ospi_b.autocalibration_support.enabled" value="(1)" />
+            <option display="Disable" id="config.driver.ospi_b.autocalibration_support.disabled" value="(0)" />
+        </property>
+        <property default="config.driver.ospi_b.prefetch_function.enabled" display="Memory-mapping Support|Prefetch Function" id="config.driver.ospi_b.prefetch_function" description="Enable prefetch function on memory-mapped reads.">
+            <option display="Enable" id="config.driver.ospi_b.prefetch_function.enabled" value="(1)" />
+            <option display="Disable" id="config.driver.ospi_b.prefetch_function.disabled" value="(0)" />
+        </property>
+        <property default="config.driver.ospi_b.combination_function.64_BYTE" display="Memory-mapping Support|Combination Function" id="config.driver.ospi_b.combination_function" description="Enable combination function on memory-mapped writes.">
+            <option display="Disable" id="config.driver.ospi_b.combination_function.disable" value="OSPI_B_COMBINATION_FUNCTION_DISABLE"/>
+            <option display="2 Byte" id="config.driver.ospi_b.combination_function.2_BYTE" value="OSPI_B_COMBINATION_FUNCTION_2BYTE"/>
+            <option display="4 Byte" id="config.driver.ospi_b.combination_function.4_BYTE" value="OSPI_B_COMBINATION_FUNCTION_4BYTE"/>
+            <option display="8 Byte" id="config.driver.ospi_b.combination_function.8_BYTE" value="OSPI_B_COMBINATION_FUNCTION_8BYTE"/>
+            <option display="12 Byte" id="config.driver.ospi_b.combination_function.12_BYTE" value="OSPI_B_COMBINATION_FUNCTION_12BYTE"/>
+            <option display="16 Byte" id="config.driver.ospi_b.combination_function.16_BYTE" value="OSPI_B_COMBINATION_FUNCTION_16BYTE"/>
+            <option display="20 Byte" id="config.driver.ospi_b.combination_function.20_BYTE" value="OSPI_B_COMBINATION_FUNCTION_20BYTE"/>
+            <option display="24 Byte" id="config.driver.ospi_b.combination_function.24_BYTE" value="OSPI_B_COMBINATION_FUNCTION_24BYTE"/>
+            <option display="28 Byte" id="config.driver.ospi_b.combination_function.28_BYTE" value="OSPI_B_COMBINATION_FUNCTION_28BYTE"/>
+            <option display="32 Byte" id="config.driver.ospi_b.combination_function.32_BYTE" value="OSPI_B_COMBINATION_FUNCTION_32BYTE"/>
+            <option display="36 Byte" id="config.driver.ospi_b.combination_function.36_BYTE" value="OSPI_B_COMBINATION_FUNCTION_36BYTE"/>
+            <option display="40 Byte" id="config.driver.ospi_b.combination_function.40_BYTE" value="OSPI_B_COMBINATION_FUNCTION_40BYTE"/>
+            <option display="44 Byte" id="config.driver.ospi_b.combination_function.44_BYTE" value="OSPI_B_COMBINATION_FUNCTION_44BYTE"/>
+            <option display="48 Byte" id="config.driver.ospi_b.combination_function.48_BYTE" value="OSPI_B_COMBINATION_FUNCTION_48BYTE"/>
+            <option display="52 Byte" id="config.driver.ospi_b.combination_function.52_BYTE" value="OSPI_B_COMBINATION_FUNCTION_52BYTE"/>
+            <option display="56 Byte" id="config.driver.ospi_b.combination_function.56_BYTE" value="OSPI_B_COMBINATION_FUNCTION_56BYTE"/>
+            <option display="60 Byte" id="config.driver.ospi_b.combination_function.60_BYTE" value="OSPI_B_COMBINATION_FUNCTION_60BYTE"/>
+            <option display="64 Byte" id="config.driver.ospi_b.combination_function.64_BYTE" value="OSPI_B_COMBINATION_FUNCTION_64BYTE"/>
+        </property>
+        <property default="config.driver.ospi_b.xip_support.disabled" display="Memory-mapping Support|XiP Support" id="config.driver.ospi_b.xip_support" description="Enable the use of XiP enter and exit codes.">
+            <option display="Enable" id="config.driver.ospi_b.xip_support.enabled" value="(1)" />
+            <option display="Disable" id="config.driver.ospi_b.xip_support.disabled" value="(0)" />
+        </property>
+        <property default="config.driver.ospi_b.dotf_support.disabled" display="DOTF Support" id= "config.driver.ospi_b.dotf_support" description="Enable DOTF support for the OSPI module.">
+            <option display="Enable (Protected Mode)" id="config.driver.ospi_b.dotf_support.protected_enabled" value="(2)" />
+            <option display="Enable (Compatibility Mode)" id="config.driver.ospi_b.dotf_support.enabled" value="(1)" />
+            <option display="Disable" id="config.driver.ospi_b.dotf_support.disabled" value="(0)" />
+        </property>
+        <content>
+            #ifdef __cplusplus
+            extern "C" {
+            #endif
+
+            #define OSPI_B_CFG_PARAM_CHECKING_ENABLE          ${config.driver.ospi_b.param_checking_enable}
+            #define OSPI_B_CFG_DMAC_SUPPORT_ENABLE            ${config.driver.ospi_b.dmac_support}
+            #define OSPI_B_CFG_XIP_SUPPORT_ENABLE             ${config.driver.ospi_b.xip_support}
+            #define OSPI_B_CFG_AUTOCALIBRATION_SUPPORT_ENABLE ${config.driver.ospi_b.autocalibration_support}
+            #define OSPI_B_CFG_PREFETCH_FUNCTION              ${config.driver.ospi_b.prefetch_function}
+            #define OSPI_B_CFG_COMBINATION_FUNCTION           ${config.driver.ospi_b.combination_function}
+
+            #if (2 == ${config.driver.ospi_b.dotf_support})
+                #define OSPI_B_CFG_DOTF_SUPPORT_ENABLE            1
+                #define OSPI_B_CFG_DOTF_PROTECTED_MODE_SUPPORT_ENABLE
+            #else
+                #define OSPI_B_CFG_DOTF_SUPPORT_ENABLE            ${config.driver.ospi_b.dotf_support}
+            #endif
+
+            #ifdef __cplusplus
+            }
+            #endif
+        </content>
+    </config>
+    <module config="config.driver.ospi_b" display="Storage|${module.driver.ospi_b.name} OSPI Flash (r_ospi_b)" id="module.driver.ospi_on_ospi_b" version="1" url="group___o_s_p_i___b.html">
+        <constraint display="Unique name required for each instance">
+            "${interface.driver.ospi_b.${module.driver.ospi_b.name}}" === "1"
+        </constraint>
+        <constraint display="Requires OSPI peripheral">
+          "${interface.mcu.ospi_b.external}" === "1"
+        </constraint>
+        <constraint display="Requires OCTASPICLK to be enabled on the Clocks tab.">
+             testExists("${board.clock.peripheral.ospi}") &amp;&amp; (Number("${board.clock.peripheral.ospi}") &gt; 0)
+        </constraint>
+        <constraint display="OCTASPICLK should not be greater than clock frequency mentioned in Hardware User Manual for SPI (1S-1S-1S), DSPI (1S-2S-2S), DSPI (2S-2S-2S), QSPI (1S-4S-4S) and QSPI (4S-4S-4S) mode.">
+             ((("${module.driver.ospi_b.spi_protocol}" === "module.driver.ospi_b.protocol_mode.protocol_1S_1S_1S") ||
+             ("${module.driver.ospi_b.spi_protocol}" === "module.driver.ospi_b.protocol_mode.protocol_1S_2S_2S") ||
+             ("${module.driver.ospi_b.spi_protocol}" === "module.driver.ospi_b.protocol_mode.protocol_2S_2S_2S") ||
+             ("${module.driver.ospi_b.spi_protocol}" === "module.driver.ospi_b.protocol_mode.protocol_1S_4S_4S") ||
+             ("${module.driver.ospi_b.spi_protocol}" === "module.driver.ospi_b.protocol_mode.protocol_4S_4S_4S")) &amp;&amp;
+             (Number("${board.clock.peripheral.ospi}") &lt;= (Number("${config.bsp.fsp.mcu.ospi_b.spi_dspi_qspi_mode_max_freq_hz}")))) ||
+             ("${module.driver.ospi_b.spi_protocol}" === "module.driver.ospi_b.protocol_mode.protocol_4S_4D_4D") ||
+             ("${module.driver.ospi_b.spi_protocol}" === "module.driver.ospi_b.protocol_mode.protocol_8D_8D_8D")
+        </constraint>
+        <constraint display="OCTASPICLK should not be greater than clock frequency mentioned in Hardware User Manual for QSPI (4S-4D-4D) and DOPI (8D-8D-8D) mode.">
+             ((("${module.driver.ospi_b.spi_protocol}" === "module.driver.ospi_b.protocol_mode.protocol_4S_4D_4D") ||
+             ("${module.driver.ospi_b.spi_protocol}" === "module.driver.ospi_b.protocol_mode.protocol_8D_8D_8D")) &amp;&amp;
+             (Number("${board.clock.peripheral.ospi}") &lt;= (Number("${config.bsp.fsp.mcu.ospi_b.qspi_dopi_mode_max_freq_hz}")))) ||
+             ("${module.driver.ospi_b.spi_protocol}" === "module.driver.ospi_b.protocol_mode.protocol_1S_1S_1S") ||
+             ("${module.driver.ospi_b.spi_protocol}" === "module.driver.ospi_b.protocol_mode.protocol_1S_2S_2S") ||
+             ("${module.driver.ospi_b.spi_protocol}" === "module.driver.ospi_b.protocol_mode.protocol_2S_2S_2S") ||
+             ("${module.driver.ospi_b.spi_protocol}" === "module.driver.ospi_b.protocol_mode.protocol_1S_4S_4S") ||
+             ("${module.driver.ospi_b.spi_protocol}" === "module.driver.ospi_b.protocol_mode.protocol_4S_4S_4S")
+        </constraint>
+        <!-- 3B addressing only permitted in SPI mode -->
+        <constraint display="3 Address Bytes can be selected only with SPI mode"> ((("${module.driver.ospi_b.spi_protocol}" != "module.driver.ospi_b.protocol_mode.protocol_8D_8D_8D")) || ("${module.driver.ospi_b.address_bytes}" != "module.driver.ospi_b.address_bytes.address_bytes_3"))</constraint>
+        <!-- A non-zero data_latch_delay_setting enables autocalibration which requires a valid device address to store preamble pattern  -->
+        <!-- Do not add OPI restriction here to allow user to start in SPI, write the preamble pattern and then switch to OPI -->
+        <constraint display="Auto-calibration support is enabled, enter valid OctaFlash address used for calibration">
+            ("${config.driver.ospi_b.autocalibration_support}" === "config.driver.ospi_b.autocalibration_support.disabled") || (("${module.driver.ospi_b.data_latch_delay_setting}" != 0x00) || ("${module.driver.ospi_b.auto_callibration_address}" != 0x00))
+        </constraint>
+        <constraint display="DMAC support must be enabled to use DMAC.">
+            ("${config.driver.ospi_b.dmac_support}" === "config.driver.ospi_b.dmac_support.enabled") || !testExists("${module.driver.ospi_on_ospi_b.requires.transfer::module.driver.transfer.name}")
+        </constraint>
+
+        <constraint display="DMAC Driver must be included if DMAC support is enabled.">
+            ("${config.driver.ospi_b.dmac_support}" === "config.driver.ospi_b.dmac_support.disabled") || testExists("${module.driver.ospi_on_ospi_b.requires.transfer::module.driver.transfer.name}")
+        </constraint>
+        <constraint display="RSIP7 Compatibility Mode crypto engine must be added if DOTF Compatibility is enabled.">
+            !("${config.driver.ospi_b.dotf_support}" === "config.driver.ospi_b.dotf_support.enabled") || testExists("${interface.driver.rsip.plaintext}")
+        </constraint>
+        <constraint display="RSIP7 Protected Mode crypto engine must be added if DOTF Protected is enabled.">
+            !("${config.driver.ospi_b.dotf_support}" === "config.driver.ospi_b.dotf_support.protected_enabled") || testExists("${interface.driver.rsip_on_rsip_protected}")
+        </constraint>
+        <constraint display="XiP support must be enabled to use XiP codes.">
+            ("${config.driver.ospi_b.xip_support}" === "config.driver.ospi_b.xip_support.enabled") || ((Number("${module.driver.ospi_b.xip.enter_code}") == 0) &amp;&amp; (Number("${module.driver.ospi_b.xip.exit_code}") == 0))
+        </constraint>
+        <constraint display="The length of the high-speed command set table must be provided.">
+            "${module.driver.ospi_b.command_set_table}".trim().length == 0 || ${module.driver.ospi_b.command_set_table_length} &gt; 0
+        </constraint>
+        <constraint display="The length of the high-speed command set table must be zero if no table is provided.">
+            !((${module.driver.ospi_b.command_set_table_length} &gt; 0) &amp;&amp; ("${module.driver.ospi_b.command_set_table}".trim().length == 0))
+        </constraint>
+        <constraint display="DOTF end address must be larger than start address">
+            testInteger("${module.driver.ospi_b.dotf.start_address}") &amp;&amp; testInteger("${module.driver.ospi_b.dotf.end_address}") &amp;&amp; (${module.driver.ospi_b.dotf.end_address} &gt; ${module.driver.ospi_b.dotf.start_address})
+        </constraint>
+        <requires id="module.driver.ospi_on_ospi_b.requires.ospi_b" interface="interface.mcu.ospi_b.external" visible="false" display="Requires OSPI peripheral"/>
+        <requires id="module.driver.ospi_on_ospi_b.requires.rsip7" interface="interface.driver.rsip.dotf" visible="true" display="[Optional] Add crypto engine for DOTF" find="false" optional="true"/>
+        <requires id="module.driver.ospi_on_ospi_b.requires.transfer" interface="interface.driver.transfer_on_dmac" display="Add DMAC Driver for Transmission [Recommended but optional]" find="false" optional="true">
+            <override property="module.driver.transfer.mode" value="module.driver.transfer.mode.mode_block"/>
+            <override property="module.driver.transfer.size" value="module.driver.transfer.size.size_1_byte"/>
+            <override property="module.driver.transfer.dest_addr_mode" value="module.driver.transfer.dest_addr_mode.addr_mode_incremented"/>
+            <override property="module.driver.transfer.src_addr_mode" value="module.driver.transfer.src_addr_mode.addr_mode_incremented"/>
+            <override property="module.driver.transfer.repeat_area" value="module.driver.transfer.repeat_area.repeat_area_source"/>
+            <override property="module.driver.transfer.p_dest" value="NULL"/>
+            <override property="module.driver.transfer.p_src" value="NULL"/>
+            <!-- The transfer length is set to max transfer length supported by xSPI for Memory Mapped Write. This value updated in the memory mapped write function as per byte_count-->
+            <override property="module.driver.transfer.length" value="64"/>
+            <override property="module.driver.transfer.num_blocks" value="1"/>
+            <override property="module.driver.transfer.activation_event" value="enum.elc_none"/>
+            <override property="module.driver.transfer.offset" value="0"/>
+            <override property="module.driver.transfer.src.buffer" value="0"/>
+        </requires>
+        <provides interface="interface.driver.ospi_b" />
+        <provides interface="interface.driver.ospi_on_ospi_b" />
+        <provides interface="interface.driver.ospi_b.${module.driver.ospi_b.name}" />
+        <provides interface="interface.driver.spi_flash" />
+        <provides interface="interface.driver.rm_mcuboot_external_memory_ospi" />
+        <property default="g_ospi${_instance}" display="General|Name" id="module.driver.ospi_b.name" description="Module name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.ospi_b.name}")</constraint>
+        </property>
+        <property default="module.driver.ospi_b.unit.0" display="General|Unit" id="module.driver.ospi_b.unit" description="Specify the OSPI peripheral to use.">
+            <select enum="enum.mcu.ospi_b.units" />
+        </property>
+        <property default="module.driver.ospi_b.channel.1" display="General|Channel" id="module.driver.ospi_b.channel" description="Specify the OSPI chip select line to use.">
+            <option display="CS0" id="module.driver.ospi_b.channel.0" value="0" />
+            <option display="CS1" id="module.driver.ospi_b.channel.1" value="1" />
+        </property>
+        <property default="module.driver.ospi_b.protocol_mode.protocol_1S_1S_1S" display="General|Initial Protocol Mode" id="module.driver.ospi_b.spi_protocol" description="Select the initial protocol mode of the xSPI target device. Please see the documentation for examples of changing the protocol mode.">
+            <option display="SPI (1S-1S-1S)" id="module.driver.ospi_b.protocol_mode.protocol_1S_1S_1S" value="SPI_FLASH_PROTOCOL_1S_1S_1S"/>
+            <option display="DSPI (1S-2S-2S)" id="module.driver.ospi_b.protocol_mode.protocol_1S_2S_2S" value="SPI_FLASH_PROTOCOL_1S_2S_2S"/>
+            <option display="DSPI (2S-2S-2S)" id="module.driver.ospi_b.protocol_mode.protocol_2S_2S_2S" value="SPI_FLASH_PROTOCOL_2S_2S_2S"/>
+            <option display="QSPI (1S-4S-4S)" id="module.driver.ospi_b.protocol_mode.protocol_1S_4S_4S" value="SPI_FLASH_PROTOCOL_1S_4S_4S"/>
+            <option display="QSPI (4S-4S-4S)" id="module.driver.ospi_b.protocol_mode.protocol_4S_4S_4S" value="SPI_FLASH_PROTOCOL_4S_4S_4S"/>
+            <option display="QSPI (4S-4D-4D)" id="module.driver.ospi_b.protocol_mode.protocol_4S_4D_4D" value="SPI_FLASH_PROTOCOL_4S_4D_4D"/>
+            <option display="Dual data rate OPI (8D-8D-8D)" id="module.driver.ospi_b.protocol_mode.protocol_8D_8D_8D" value="SPI_FLASH_PROTOCOL_8D_8D_8D"/>
+        </property>
+        <property default="module.driver.ospi_b.address_bytes.address_bytes_4" display="General|Initial Address Bytes" id="module.driver.ospi_b.address_bytes" description="Select the number of address bytes.">
+            <option display="3" id="module.driver.ospi_b.address_bytes.address_bytes_3" value="SPI_FLASH_ADDRESS_BYTES_3"/>
+            <option display="4" id="module.driver.ospi_b.address_bytes.address_bytes_4" value="SPI_FLASH_ADDRESS_BYTES_4"/>
+        </property>
+        <property default="64" id="module.driver.ospi_b.page_size_bytes" description="The maximum number of bytes allowed for a single continuous write.">
+            <!-- Don't display this property. If set incorrectly or too low it can cause performance issues. -->
+            <constraint display="Must be an integer greater than 0">testInteger("${module.driver.ospi_b.page_size_bytes}") &amp;&amp; ${module.driver.ospi_b.page_size_bytes} &gt; 0</constraint>
+        </property>
+        <property default="0" display="General|Write Status Bit" id="module.driver.ospi_b.write_status_bit" description="Which bit contains the write in progress status returned from the Write Status Command.">
+            <constraint display="Must be an integer between 0 and 7">testInteger("${module.driver.ospi_b.write_status_bit}") &amp;&amp; ${module.driver.ospi_b.write_status_bit} &gt;= 0 &amp;&amp; ${module.driver.ospi_b.write_status_bit} &lt; 8</constraint>
+        </property>
+        <property default="1" display="General|Write Enable Bit" id="module.driver.ospi_b.write_enable_bit" description="Which bit contains the write enable status returned from the Write Enable Command.">
+            <constraint display="Must be an integer between 0 and 7">testInteger("${module.driver.ospi_b.write_enable_bit}") &amp;&amp; ${module.driver.ospi_b.write_enable_bit} &gt;= 0 &amp;&amp; ${module.driver.ospi_b.write_enable_bit} &lt; 8</constraint>
+        </property>
+        <property default="4096" display="General|Sector Erase Size" id="module.driver.ospi_b.sector_erase_size" description="The sector erase size.  Set Sector Erase Size to 0 if Sector Erase is not supported.">
+            <constraint display="Must be an integer greater than or equal to 0 and less than 4294967296">testInteger("${module.driver.ospi_b.sector_erase_size}") &amp;&amp; ${module.driver.ospi_b.sector_erase_size} &gt;= 0 &amp;&amp; ${module.driver.ospi_b.sector_erase_size} &lt; 4294967296</constraint>
+        </property>
+        <property default="262144" display="General|Block Erase Size" id="module.driver.ospi_b.block_erase_size" description="The block erase size.  Set Block Erase Size to 0 if Block Erase is not supported.">
+            <constraint display="Must be an integer greater than or equal to 0 and less than 4294967296">testInteger("${module.driver.ospi_b.block_erase_size}") &amp;&amp; ${module.driver.ospi_b.block_erase_size} &gt;= 0 &amp;&amp; ${module.driver.ospi_b.block_erase_size} &lt; 4294967296</constraint>
+        </property>
+
+        <!-- Default Definitions -->
+        <property default="0x12" display="Defaults|Command Definitions|Page Program Command" id="module.driver.ospi_b.spi_page_program_command" description="Default command to program a page.">
+            <constraint display="Must be a 8-bit OSPI Page Program Command under SPI Mode|Command Definitions">(testInteger("${module.driver.ospi_b.spi_page_program_command}") &amp;&amp; ${module.driver.ospi_b.spi_page_program_command} &gt;= 0 &amp;&amp; ${module.driver.ospi_b.spi_page_program_command} &lt;= 0xFF)</constraint>
+        </property>
+        <property default="0x13" display="Defaults|Command Definitions|Read Command" id="module.driver.ospi_b.spi_read_command" description="Default command to read.">
+            <constraint display="Must be a 8-bit OSPI Read Command under SPI Mode|Command Definitions">(testInteger("${module.driver.ospi_b.spi_read_command}") &amp;&amp; ${module.driver.ospi_b.spi_read_command} &gt;= 0 &amp;&amp; ${module.driver.ospi_b.spi_read_command} &lt;= 0xFF)</constraint>
+        </property>
+        <property default="0x06" display="Defaults|Command Definitions|Write Enable Command" id="module.driver.ospi_b.spi_write_enable_command" description="Default command to enable write.">
+            <constraint display="Must be a 16-bit OSPI Write Enable Command under SPI Mode|Command Definitions">(testInteger("${module.driver.ospi_b.spi_write_enable_command}") &amp;&amp; ${module.driver.ospi_b.spi_write_enable_command} &gt;= 0 &amp;&amp; ${module.driver.ospi_b.spi_write_enable_command} &lt;= 0xFFFF)</constraint>
+        </property>
+        <property default="0x05" display="Defaults|Command Definitions|Status Command" id="module.driver.ospi_b.spi_status_command" description="Default command to query the status of a write or erase command.">
+            <constraint display="Must be a 16-bit OSPI Status Command under SPI Mode|Command Definitions">(testInteger("${module.driver.ospi_b.spi_status_command}") &amp;&amp; ${module.driver.ospi_b.spi_status_command} &gt;= 0 &amp;&amp; ${module.driver.ospi_b.spi_status_command} &lt;= 0xFFFF)</constraint>
+        </property>
+        <property default="0x2121" display="Defaults|Erase Command Definitions|Sector Erase Command" id="module.driver.ospi_b.sector_erase_command" description="Default command to erase a sector. The lowwer byte will be used for 1-byte commands. Set to 0 if unused.">
+            <constraint display="Must be an integer between 0x01 and 0xFFFF, inclusive.">testInteger("${module.driver.ospi_b.sector_erase_command}") &amp;&amp; (${module.driver.ospi_b.sector_erase_command} &gt;= 0 &amp;&amp; ${module.driver.ospi_b.sector_erase_command} &lt;= 0xFFFF)</constraint>
+        </property>
+        <property default="0xDCDC" display="Defaults|Erase Command Definitions|Block Erase Command" id="module.driver.ospi_b.block_erase_command" description="Default command to erase a block. The lowwer byte will be used for 1-byte commands. Set to 0 if unused.">
+            <constraint display="Must be an integer between 0x01 and 0xFFFF, inclusive.">testInteger("${module.driver.ospi_b.block_erase_command}") &amp;&amp; (${module.driver.ospi_b.block_erase_command} &gt;= 0 &amp;&amp; ${module.driver.ospi_b.block_erase_command} &lt;= 0xFFFF)</constraint>
+        </property>
+        <property default="0x6060" display="Defaults|Erase Command Definitions|Chip Erase Command" id="module.driver.ospi_b.chip_erase_command" description="Default command to erase the entire chip. The lowwer byte will be used for 1-byte commands. Set to 0 if unused.">
+            <constraint display="Must be an integer between 0x01 and 0xFFFF, inclusive.">testInteger("${module.driver.ospi_b.chip_erase_command}") &amp;&amp; (${module.driver.ospi_b.chip_erase_command} &gt;= 0 &amp;&amp; ${module.driver.ospi_b.chip_erase_command} &lt;= 0xFFFF)</constraint>
+        </property>
+        <property default="0" display="Defaults|Dummy Cycles|Memory Read Dummy Cycles" id="module.driver.ospi_b.default_mem_read_dummy_cycles" description="Default memory read dummy cycles">
+            <constraint display="Must be an integer between 0 and 31">testInteger("${module.driver.ospi_b.default_mem_read_dummy_cycles}") &amp;&amp; ${module.driver.ospi_b.default_mem_read_dummy_cycles} &gt;= 0 &amp;&amp; ${module.driver.ospi_b.default_mem_read_dummy_cycles} &lt;= 31</constraint>
+        </property>
+        <property default="0" display="Defaults|Dummy Cycles|Status Read Dummy Cycles" id="module.driver.ospi_b.default_status_read_dummy_cycles" description="Default status read dummy cycles">
+            <constraint display="Must be an integer between 0 and 31">testInteger("${module.driver.ospi_b.default_mem_read_dummy_cycles}") &amp;&amp; ${module.driver.ospi_b.default_mem_read_dummy_cycles} &gt;= 0 &amp;&amp; ${module.driver.ospi_b.default_mem_read_dummy_cycles} &lt;= 31</constraint>
+        </property>
+
+
+        <property default="" id="module.driver.ospi_b.command_set_table" display="General|Command Set Table" description="Specify the custom command set table (ospi_b_xspi_command_set_t[]) to use. If provided, all properties for High-speed Mode will be ignored.">
+            <constraint display="Must be a vaild C symbol">"${module.driver.ospi_b.command_set_table}".trim().length == 0 || testSymbol("${module.driver.ospi_b.command_set_table}")</constraint>
+        </property>
+        <property default="0" id="module.driver.ospi_b.has_command_set_table">
+            <export>("${module.driver.ospi_b.command_set_table}".trim().length &gt; 0) ? 1 : 0</export>
+        </property>
+        <property default="0" id="module.driver.ospi_b.command_set_table_length" display="General|Command Set Table Length" description="Length of the custom command set table.">
+            <constraint display="Length must be an integer greater than or equal to zero.">testInteger("${module.driver.ospi_b.command_set_table_length}") &amp;&amp; ${module.driver.ospi_b.command_set_table_length} &gt;= 0</constraint>
+        </property>
+
+        <!-- High-speed Mode settings -->
+        <property default="module.driver.ospi_b.protocol_mode.protocol_8D_8D_8D" display="High-speed Mode|Protocol" id="module.driver.ospi_b.high_speed_protocol" description="Select the High-Speed xSPI protocol.">
+            <option display="SPI (1S-1S-1S)" id="module.driver.ospi_b.protocol_mode.protocol_1S_1S_1S" value="SPI_FLASH_PROTOCOL_1S_1S_1S"/>
+            <option display="DSPI (1S-2S-2S)" id="module.driver.ospi_b.protocol_mode.protocol_1S_2S_2S" value="SPI_FLASH_PROTOCOL_1S_2S_2S"/>
+            <option display="DSPI (2S-2S-2S)" id="module.driver.ospi_b.protocol_mode.protocol_2S_2S_2S" value="SPI_FLASH_PROTOCOL_2S_2S_2S"/>
+            <option display="QSPI (1S-4S-4S)" id="module.driver.ospi_b.protocol_mode.protocol_1S_4S_4S" value="SPI_FLASH_PROTOCOL_1S_4S_4S"/>
+            <option display="QSPI (4S-4S-4S)" id="module.driver.ospi_b.protocol_mode.protocol_4S_4S_4S" value="SPI_FLASH_PROTOCOL_4S_4S_4S"/>
+            <option display="QSPI (4S-4D-4D)" id="module.driver.ospi_b.protocol_mode.protocol_4S_4D_4D" value="SPI_FLASH_PROTOCOL_4S_4D_4D"/>
+            <option display="Dual data rate OPI (8D-8D-8D)" id="module.driver.ospi_b.protocol_mode.protocol_8D_8D_8D" value="SPI_FLASH_PROTOCOL_8D_8D_8D"/>
+        </property>
+        <property default="module.driver.opi.high_speed_command_length.2" display="High-speed Mode|Command Length Bytes" id="module.driver.ospi_b.high_speed_command_length" description="Command length in bytes">
+            <option display="1" id="module.driver.opi.high_speed_command_length.1" value="OSPI_B_COMMAND_BYTES_1" />
+            <option display="2" id="module.driver.opi.high_speed_command_length.2" value="OSPI_B_COMMAND_BYTES_2" />
+        </property>
+        <property default="0x08" display="High-speed Mode|Auto-Calibration|Data latching delay" id="module.driver.ospi_b.data_latch_delay_setting" description="If auto-calibration support is enabled, set this to 0 to trigger auto-calibration when appropriate.">
+            <constraint display="Must be a valid non-negative integer with maximum configurable value of 0x1F">testInteger("${module.driver.ospi_b.data_latch_delay_setting}") &amp;&amp; ${module.driver.ospi_b.data_latch_delay_setting} &gt;= 0 &amp;&amp; ${module.driver.ospi_b.data_latch_delay_setting} &lt;= 0x1F</constraint>
+        </property>
+        <property default="0x00" display="High-speed Mode|Auto-Calibration|Auto-Calibration Address" id="module.driver.ospi_b.auto_callibration_address" description="Set the address of the read/write destination to be performed for auto-calibration.">
+            <constraint display="Must be a valid non-negative integer with maximum configurable value of 0xFFFFFFFF">testInteger("${module.driver.ospi_b.auto_callibration_address}") &amp;&amp; ${module.driver.ospi_b.auto_callibration_address} &gt;= 0 &amp;&amp; ${module.driver.ospi_b.auto_callibration_address} &lt;= 0xFFFFFFFF</constraint>
+        </property>
+        <property default="0x1212" display="High-speed Mode|Command Definitions|Page Program Command" id="module.driver.ospi_b.high_speed_page_program_command" description="The command to program a page in OPI mode.">
+            <constraint display="Must be a 16-bit OSPI Page Program Command under High-speed Mode|Command Definitions">(testInteger("${module.driver.ospi_b.high_speed_page_program_command}") &amp;&amp; ${module.driver.ospi_b.high_speed_page_program_command} &gt;= 0 &amp;&amp; ${module.driver.ospi_b.high_speed_page_program_command} &lt;= 0xFFFF)</constraint>
+        </property>
+        <property default="0xEEEE" display="High-speed Mode|Command Definitions|Dual Read Command" id="module.driver.ospi_b.high_speed_read_command" description="The command to read in High-speed mode (8DTRD).">
+            <constraint display="Must be a 16-bit OSPI Dual Read Command under High-speed Mode|Command Definitions">(testInteger("${module.driver.ospi_b.high_speed_read_command}") &amp;&amp; ${module.driver.ospi_b.high_speed_read_command} &gt;= 0 &amp;&amp; ${module.driver.ospi_b.high_speed_read_command} &lt;= 0xFFFF)</constraint>
+        </property>
+        <property default="0x0606" display="High-speed Mode|Command Definitions|Write Enable Command" id="module.driver.ospi_b.high_speed_write_enable_command" description="The command to enable write in OPI mode. Set to 0 to ignore.">
+            <constraint display="Must be a 16-bit OSPI Write Enable Command under High-speed Mode|Command Definitions">(testInteger("${module.driver.ospi_b.high_speed_write_enable_command}") &amp;&amp; ${module.driver.ospi_b.high_speed_write_enable_command} &gt;= 0 &amp;&amp; ${module.driver.ospi_b.high_speed_write_enable_command} &lt;= 0xFFFF)</constraint>
+        </property>
+        <property default="0x0505" display="High-speed Mode|Command Definitions|Status Command" id="module.driver.ospi_b.high_speed_status_command" description="The command to query the status of a write or erase command in OPI mode. Set to 0 to ignore.">
+            <constraint display="Must be a 16-bit OSPI Status Command under High-speed Mode|Command Definitions">(testInteger("${module.driver.ospi_b.high_speed_status_command}") &amp;&amp; ${module.driver.ospi_b.high_speed_status_command} &gt;= 0 &amp;&amp; ${module.driver.ospi_b.high_speed_status_command} &lt;= 0xFFFF)</constraint>
+        </property>
+        <property default="0" display="High-speed Mode|Command Definitions|Sector Erase Command" id="module.driver.ospi_b.high_speed_sector_erase_command" description="The command to erase a sector for high-speed mode. Set to 0 if unused.">
+            <constraint display="Must be an integer between 0x01 and 0xFFFF, inclusive.">testInteger("${module.driver.ospi_b.high_speed_sector_erase_command}") &amp;&amp; (${module.driver.ospi_b.high_speed_sector_erase_command} &gt;= 0 &amp;&amp; ${module.driver.ospi_b.high_speed_sector_erase_command} &lt;= 0xFFFF)</constraint>
+        </property>
+        <property default="0" display="High-speed Mode|Command Definitions|Block Erase Command" id="module.driver.ospi_b.high_speed_block_erase_command" description="The command to erase a block for high-speed mode. Set to 0 if unused.">
+            <constraint display="Must be an integer between 0x01 and 0xFFFF, inclusive.">testInteger("${module.driver.ospi_b.high_speed_block_erase_command}") &amp;&amp; (${module.driver.ospi_b.high_speed_block_erase_command} &gt;= 0 &amp;&amp; ${module.driver.ospi_b.high_speed_block_erase_command} &lt;= 0xFFFF)</constraint>
+        </property>
+        <property default="0" display="High-speed Mode|Command Definitions|Chip Erase Command" id="module.driver.ospi_b.high_speed_chip_erase_command" description="The command to erase the entire chip for high-speed mode. Set to 0 if unused.">
+            <constraint display="Must be an integer between 0x01 and 0xFFFF, inclusive.">testInteger("${module.driver.ospi_b.high_speed_chip_erase_command}") &amp;&amp; (${module.driver.ospi_b.high_speed_chip_erase_command} &gt;= 0 &amp;&amp; ${module.driver.ospi_b.high_speed_chip_erase_command} &lt;= 0xFFFF)</constraint>
+        </property>
+        <property default="0" id="module.driver.ospi_b.high_speed_has_erase_commands">
+            <export>((${module.driver.ospi_b.high_speed_sector_erase_command} &gt; 0) || (${module.driver.ospi_b.high_speed_block_erase_command} &gt; 0) || (${module.driver.ospi_b.high_speed_chip_erase_command} &gt; 0)) ? 1 : 0</export>
+        </property>
+        <property default="20" display="High-speed Mode|Memory Read Dummy Cycles" id="module.driver.ospi_b.mem_read_dummy_cycles" description="Memory read dummy cycles">
+            <constraint display="Must be an integer between 0 and 31">testInteger("${module.driver.ospi_b.mem_read_dummy_cycles}") &amp;&amp; ${module.driver.ospi_b.mem_read_dummy_cycles} &gt;= 0 &amp;&amp; ${module.driver.ospi_b.mem_read_dummy_cycles} &lt;= 31</constraint>
+        </property>
+        <property default="3" display="High-speed Mode|Status Read Dummy Cycles" id="module.driver.ospi_b.status_read_dummy_cycles" description="Status read dummy cycles">
+            <constraint display="Must be an integer between 0 and 31">testInteger("${module.driver.ospi_b.status_read_dummy_cycles}") &amp;&amp; ${module.driver.ospi_b.status_read_dummy_cycles} &gt;= 0 &amp;&amp; ${module.driver.ospi_b.status_read_dummy_cycles} &lt;= 31</constraint>
+        </property>
+
+        <property default="module.driver.ospi_b.command_interval_clocks.clocks_2" display="Chip Select Timing Setting|Command Interval" id="module.driver.ospi_b.command_interval_clocks" description="Command execution interval setting in OCTACLK units">
+            <option display="1" id="module.driver.ospi_b.command_interval_clocks.clocks_1" value="OSPI_B_COMMAND_INTERVAL_CLOCKS_1"/>
+            <option display="2" id="module.driver.ospi_b.command_interval_clocks.clocks_2" value="OSPI_B_COMMAND_INTERVAL_CLOCKS_2"/>
+            <option display="3" id="module.driver.ospi_b.command_interval_clocks.clocks_3" value="OSPI_B_COMMAND_INTERVAL_CLOCKS_3"/>
+            <option display="4" id="module.driver.ospi_b.command_interval_clocks.clocks_4" value="OSPI_B_COMMAND_INTERVAL_CLOCKS_4"/>
+            <option display="5" id="module.driver.ospi_b.command_interval_clocks.clocks_5" value="OSPI_B_COMMAND_INTERVAL_CLOCKS_5"/>
+            <option display="6" id="module.driver.ospi_b.command_interval_clocks.clocks_6" value="OSPI_B_COMMAND_INTERVAL_CLOCKS_6"/>
+            <option display="7" id="module.driver.ospi_b.command_interval_clocks.clocks_7" value="OSPI_B_COMMAND_INTERVAL_CLOCKS_7"/>
+            <option display="8" id="module.driver.ospi_b.command_interval_clocks.clocks_8" value="OSPI_B_COMMAND_INTERVAL_CLOCKS_8"/>
+            <option display="9" id="module.driver.ospi_b.command_interval_clocks.clocks_9" value="OSPI_B_COMMAND_INTERVAL_CLOCKS_9"/>
+            <option display="10" id="module.driver.ospi_b.command_interval_clocks.clocks_10" value="OSPI_B_COMMAND_INTERVAL_CLOCKS_10"/>
+            <option display="11" id="module.driver.ospi_b.command_interval_clocks.clocks_11" value="OSPI_B_COMMAND_INTERVAL_CLOCKS_11"/>
+            <option display="12" id="module.driver.ospi_b.command_interval_clocks.clocks_12" value="OSPI_B_COMMAND_INTERVAL_CLOCKS_12"/>
+            <option display="13" id="module.driver.ospi_b.command_interval_clocks.clocks_13" value="OSPI_B_COMMAND_INTERVAL_CLOCKS_13"/>
+            <option display="14" id="module.driver.ospi_b.command_interval_clocks.clocks_14" value="OSPI_B_COMMAND_INTERVAL_CLOCKS_14"/>
+            <option display="15" id="module.driver.ospi_b.command_interval_clocks.clocks_15" value="OSPI_B_COMMAND_INTERVAL_CLOCKS_15"/>
+            <option display="16" id="module.driver.ospi_b.command_interval_clocks.clocks_16" value="OSPI_B_COMMAND_INTERVAL_CLOCKS_16"/>
+        </property>
+        <property default="module.driver.ospi_b.pull_up_timing.clocks_5" display="Chip Select Timing Setting|Pull-up Timing" id="module.driver.ospi_b.pull_up_timing" description="Signal pull-up timing (CS asserting extention) setting in OCTACLK units">
+            <option display="No Extension" id="module.driver.ospi_b.pull_up_timing.clocks_5" value="OSPI_B_COMMAND_CS_PULLUP_CLOCKS_NO_EXTENSION"/>
+            <option display="1 Cycle" id="module.driver.ospi_b.pull_up_timing.clocks_6" value="OSPI_B_COMMAND_CS_PULLUP_CLOCKS_1"/>
+        </property>
+        <property default="module.driver.ospi_b.pull_down_timing.clocks_3" display="Chip Select Timing Setting|Pull-down Timing" id="module.driver.ospi_b.pull_down_timing" description="Signal pull-down timing (CS negating extention) setting in OCTACLK units">
+            <option display="No Extension" id="module.driver.ospi_b.pull_down_timing.clocks_3" value="OSPI_B_COMMAND_CS_PULLDOWN_CLOCKS_NO_EXTENSION"/>
+            <option display="1 Cycle" id="module.driver.ospi_b.pull_down_timing.clocks_4" value="OSPI_B_COMMAND_CS_PULLDOWN_CLOCKS_1"/>
+        </property>
+
+        <property default="0" display="XiP Mode|XiP Enter Code" id="module.driver.ospi_b.xip.enter_code" description="XiP enter code.">
+            <constraint display="Must be an integer between 0 and 255">testInteger("${module.driver.ospi_b.xip.enter_code}") &amp;&amp; ${module.driver.ospi_b.xip.enter_code} &gt;= 0 &amp;&amp; ${module.driver.ospi_b.xip.enter_code} &lt;= 255</constraint>
+        </property>
+        <property default="0" display="XiP Mode|XiP Exit Code" id="module.driver.ospi_b.xip.exit_code" description="XiP exit code.">
+            <constraint display="Must be an integer between 0 and 255">testInteger("${module.driver.ospi_b.xip.exit_code}") &amp;&amp; ${module.driver.ospi_b.xip.exit_code} &gt;= 0 &amp;&amp; ${module.driver.ospi_b.xip.exit_code} &lt;= 255</constraint>
+        </property>
+
+        <property default="g_ospi_dotf" display="DOTF|Name" id="module.driver.ospi_b.dotf.name" description="DOTF Configuration name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.ospi_b.dotf.name}")</constraint>
+        </property>
+        <property default="g_ospi_dotf_key" display="DOTF|AES Key" id="module.driver.ospi_b.dotf.key" description="Name of Key variable.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.ospi_b.dotf.key}")</constraint>
+        </property>
+        <property default="g_ospi_dotf_iv" display="DOTF|AES IV" id="module.driver.ospi_b.dotf.iv" description="Name of IV variable">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.ospi_b.dotf.iv}")</constraint>
+        </property>
+        <property default="" display="DOTF|AES Key Length" id="module.driver.ospi_b.dotf.aes_key_length" description="Select AES key length">
+            <select enum="enum.mcu.dotf.aes_key_length" />
+        </property>
+        <property default="" display="DOTF|Key Format" id="module.driver.ospi_b.dotf.key_format" description="Select key format">
+            <select enum="enum.mcu.dotf.key_format" />
+        </property>
+        <property default="0x90000000" description="OSPI decryption start address" display="DOTF|Decryption start address" id="module.driver.ospi_b.dotf.start_address">
+            <constraint display="Value must be an integer between 0x80000000 and 0x9FFFFFFF">testInteger("${module.driver.ospi_b.dotf.start_address}") &amp;&amp;
+            (("${module.driver.ospi_b.dotf.start_address}" &gt;= 0x80000000) &amp;&amp;("${module.driver.ospi_b.dotf.start_address}" &lt;= 0x9FFFFFFF))
+            </constraint>
+            <constraint display="Value must be an integer multiple of 4096 bytes">testInteger("${module.driver.ospi_b.dotf.start_address}") &amp;&amp;
+            ((${module.driver.ospi_b.dotf.start_address}) % 4096 == 0)
+            </constraint>
+        </property>
+        <property default="0x90001FFF" description="OSPI decryption end address" display="DOTF|Decryption end address" id="module.driver.ospi_b.dotf.end_address">
+            <constraint display="Value must be an integer between 0x80000000 and 0x9FFFFFFF">testInteger("${module.driver.ospi_b.dotf.end_address}") &amp;&amp;
+            (("${module.driver.ospi_b.dotf.end_address}" &gt;= 0x80000000) &amp;&amp;("${module.driver.ospi_b.dotf.end_address}" &lt;= 0x9FFFFFFF))
+            </constraint>
+            <constraint display="Value must be an integer multiple of 4095 bytes. ">testInteger("${module.driver.ospi_b.dotf.end_address}") &amp;&amp;
+            ((${module.driver.ospi_b.dotf.end_address}) % 4095 == 0)
+            </constraint>
+        </property>
+
+        <peripheral name="OSPI Flash" component="ospi0" />
+        <!-- For MCU's whose pinmapping files have been generated with MPC Designer Tool -->
+        <peripheral name="OSPI Flash" component="ospi" />
+        <header>
+            #if OSPI_B_CFG_DMAC_SUPPORT_ENABLE
+              #include "r_dmac.h"
+            #endif
+            #if OSPI_CFG_DOTF_SUPPORT_ENABLE
+              #include "r_sce_if.h"
+            #endif
+            extern const spi_flash_instance_t ${module.driver.ospi_b.name};
+            extern ospi_b_instance_ctrl_t ${module.driver.ospi_b.name}_ctrl;
+            extern const spi_flash_cfg_t ${module.driver.ospi_b.name}_cfg;
+        </header>
+        <includes>
+            #include &quot;r_ospi_b.h&quot;
+            #include &quot;r_spi_flash_api.h&quot;
+        </includes>
+        <declarations>
+            ospi_b_instance_ctrl_t ${module.driver.ospi_b.name}_ctrl;
+
+            static const spi_flash_erase_command_t ${module.driver.ospi_b.name}_erase_command_list[] =
+            {
+            #if ((${module.driver.ospi_b.sector_erase_command} &gt; 0) &amp;&amp; (${module.driver.ospi_b.sector_erase_size} &gt; 0))
+                {.command = ${module.driver.ospi_b.sector_erase_command},     .size = ${module.driver.ospi_b.sector_erase_size} },
+            #endif
+            #if ((${module.driver.ospi_b.block_erase_command} &gt; 0) &amp;&amp; (${module.driver.ospi_b.block_erase_size} &gt; 0))
+                {.command = ${module.driver.ospi_b.block_erase_command},      .size = ${module.driver.ospi_b.block_erase_size}  },
+            #endif
+            #if (${module.driver.ospi_b.chip_erase_command} &gt; 0)
+                {.command = ${module.driver.ospi_b.chip_erase_command},       .size  = SPI_FLASH_ERASE_SIZE_CHIP_ERASE        },
+            #endif
+            };
+
+            static ospi_b_timing_setting_t ${module.driver.ospi_b.name}_timing_settings =
+            {
+                .command_to_command_interval = ${module.driver.ospi_b.command_interval_clocks},
+                .cs_pullup_lag               = ${module.driver.ospi_b.pull_up_timing},
+                .cs_pulldown_lead            = ${module.driver.ospi_b.pull_down_timing}
+            };
+
+            #if !(${module.driver.ospi_b.has_command_set_table})
+
+             #if (${module.driver.ospi_b.high_speed_has_erase_commands})
+            static const spi_flash_erase_command_t ${module.driver.ospi_b.name}_high_speed_erase_command_list[] =
+            {
+              #if ((${module.driver.ospi_b.high_speed_sector_erase_command} &gt; 0) &amp;&amp; (${module.driver.ospi_b.sector_erase_size} &gt; 0))
+                {.command = ${module.driver.ospi_b.high_speed_sector_erase_command},     .size = ${module.driver.ospi_b.sector_erase_size} },
+              #endif
+              #if ((${module.driver.ospi_b.high_speed_block_erase_command} &gt; 0) &amp;&amp; (${module.driver.ospi_b.sector_erase_size} &gt; 0))
+                {.command = ${module.driver.ospi_b.high_speed_block_erase_command},      .size = ${module.driver.ospi_b.block_erase_size}  },
+              #endif
+              #if (${module.driver.ospi_b.high_speed_chip_erase_command} &gt; 0)
+                {.command = ${module.driver.ospi_b.high_speed_chip_erase_command},       .size  = SPI_FLASH_ERASE_SIZE_CHIP_ERASE        },
+              #endif
+            };
+
+            static const ospi_b_table_t ${module.driver.ospi_b.name}_high_speed_erase_command_table = {
+                .p_table = (void *)${module.driver.ospi_b.name}_high_speed_erase_command_list,
+                .length = (uint8_t)(sizeof(${module.driver.ospi_b.name}_high_speed_erase_command_list) / sizeof(${module.driver.ospi_b.name}_high_speed_erase_command_list[0])),
+            };
+             #endif
+
+            const ospi_b_xspi_command_set_t ${module.driver.ospi_b.name}_high_speed_command_set =
+            {
+                .protocol             = ${module.driver.ospi_b.high_speed_protocol},
+                .command_bytes        = ${module.driver.ospi_b.high_speed_command_length},
+                .read_command         = ${module.driver.ospi_b.high_speed_read_command},
+                .page_program_command = ${module.driver.ospi_b.high_speed_page_program_command},
+                .write_enable_command = ${module.driver.ospi_b.high_speed_write_enable_command},
+                .status_command       = ${module.driver.ospi_b.high_speed_status_command},
+                .read_dummy_cycles    = ${module.driver.ospi_b.mem_read_dummy_cycles},
+                .program_dummy_cycles = 0, /* Unused by OSPI Flash */
+                .status_dummy_cycles  = ${module.driver.ospi_b.status_read_dummy_cycles},
+             #if (${module.driver.ospi_b.high_speed_has_erase_commands})
+                .p_erase_commands     = &amp;${module.driver.ospi_b.name}_high_speed_erase_command_table,
+             #else
+                .p_erase_commands = NULL, /* Use the erase commands specified in spi_flash_cfg_t */
+             #endif
+            };
+            #else
+            extern ospi_b_xspi_command_set_t ${module.driver.ospi_b.command_set_table}[];
+            #endif
+
+            const ospi_b_table_t ${module.driver.ospi_b.name}_command_set = {
+            #if (${module.driver.ospi_b.has_command_set_table})
+                .p_table = (void *)${module.driver.ospi_b.command_set_table},
+                .length = ${module.driver.ospi_b.command_set_table_length},
+            #else
+                .p_table = (void *)&amp;${module.driver.ospi_b.name}_high_speed_command_set,
+                .length = 1,
+            #endif
+            };
+
+            #if OSPI_B_CFG_DOTF_SUPPORT_ENABLE
+            extern uint8_t ${module.driver.ospi_b.dotf.iv}[];
+            extern uint8_t ${module.driver.ospi_b.dotf.key}[];
+
+            static ospi_b_dotf_cfg_t ${module.driver.ospi_b.dotf.name}_cfg=
+            {
+                .key_type       = ${module.driver.ospi_b.dotf.aes_key_length},
+                .format         = ${module.driver.ospi_b.dotf.key_format},
+                .p_start_addr   = (uint32_t *)${module.driver.ospi_b.dotf.start_address},
+                .p_end_addr     = (uint32_t *)${module.driver.ospi_b.dotf.end_address},
+                .p_key          = (uint32_t *)${module.driver.ospi_b.dotf.key},
+                .p_iv           = (uint32_t *)${module.driver.ospi_b.dotf.iv},
+            };
+            #endif
+
+            static const ospi_b_extended_cfg_t ${module.driver.ospi_b.name}_extended_cfg =
+            {
+                .ospi_b_unit                             = ${module.driver.ospi_b.unit},
+                .channel                                 = (ospi_b_device_number_t) ${module.driver.ospi_b.channel},
+                .data_latch_delay_clocks                 = ${module.driver.ospi_b.data_latch_delay_setting},
+                .p_timing_settings                       = &amp;${module.driver.ospi_b.name}_timing_settings,
+                .p_xspi_command_set                      = &amp;${module.driver.ospi_b.name}_command_set,
+                .p_autocalibration_preamble_pattern_addr = (uint8_t *) ${module.driver.ospi_b.auto_callibration_address},
+            #if OSPI_B_CFG_DMAC_SUPPORT_ENABLE
+                .p_lower_lvl_transfer                    = &amp;${module.driver.ospi_on_ospi_b.requires.transfer::module.driver.transfer.name},
+            #endif
+            #if OSPI_B_CFG_DOTF_SUPPORT_ENABLE
+                .p_dotf_cfg                              = &amp;${module.driver.ospi_b.dotf.name}_cfg,
+            #endif
+                .read_dummy_cycles                       = ${module.driver.ospi_b.default_mem_read_dummy_cycles},
+                .program_dummy_cycles                    = 0, /* Unused by OSPI Flash */
+                .status_dummy_cycles                     = ${module.driver.ospi_b.default_status_read_dummy_cycles},
+            };
+            const spi_flash_cfg_t ${module.driver.ospi_b.name}_cfg =
+            {
+                .spi_protocol                = ${module.driver.ospi_b.spi_protocol},
+                .read_mode                   = SPI_FLASH_READ_MODE_STANDARD, /* Unused by OSPI Flash */
+                .address_bytes               = ${module.driver.ospi_b.address_bytes},
+                .dummy_clocks                = SPI_FLASH_DUMMY_CLOCKS_DEFAULT, /* Unused by OSPI Flash */
+                .page_program_address_lines  = (spi_flash_data_lines_t) 0U, /* Unused by OSPI Flash */
+                .page_size_bytes             = ${module.driver.ospi_b.page_size_bytes},
+                .write_status_bit            = ${module.driver.ospi_b.write_status_bit},
+                .write_enable_bit            = ${module.driver.ospi_b.write_enable_bit},
+                .page_program_command        = ${module.driver.ospi_b.spi_page_program_command},
+                .write_enable_command        = ${module.driver.ospi_b.spi_write_enable_command},
+                .status_command              = ${module.driver.ospi_b.spi_status_command},
+                .read_command                = ${module.driver.ospi_b.spi_read_command},
+            #if OSPI_B_CFG_XIP_SUPPORT_ENABLE
+                .xip_enter_command           = ${module.driver.ospi_b.xip.enter_code},
+                .xip_exit_command            = ${module.driver.ospi_b.xip.exit_code},
+            #else
+                .xip_enter_command           = 0U,
+                .xip_exit_command            = 0U,
+            #endif
+                .erase_command_list_length   = sizeof(${module.driver.ospi_b.name}_erase_command_list) / sizeof(${module.driver.ospi_b.name}_erase_command_list[0]),
+                .p_erase_command_list        = &amp;${module.driver.ospi_b.name}_erase_command_list[0],
+                .p_extend                    = &amp;${module.driver.ospi_b.name}_extended_cfg,
+            };
+            /** This structure encompasses everything that is needed to use an instance of this interface. */
+            const spi_flash_instance_t ${module.driver.ospi_b.name} =
+            {
+                .p_ctrl = &amp;${module.driver.ospi_b.name}_ctrl,
+                .p_cfg =  &amp;${module.driver.ospi_b.name}_cfg,
+                .p_api =  &amp;g_ospi_b_on_spi_flash,
+            };
+
+            #if defined OSPI_B_CFG_DOTF_PROTECTED_MODE_SUPPORT_ENABLE
+            rsip_instance_t const * const gp_rsip_instance = &amp;${module.driver.ospi_on_ospi_b.requires.rsip7::module.driver.rsip_protected.name};
+            #endif
+        </declarations>
+        <api configurable="true">
+            <file>ra/fsp/inc/instances/r_ospi_b.h</file>
+            <file>ra/fsp/inc/api/r_spi_flash_api.h</file>
+            <file>ra/fsp/inc/api/r_transfer_api.h</file>
+        </api>
+    </module>
+</raModuleDescription>

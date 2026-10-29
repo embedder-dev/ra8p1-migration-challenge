@@ -1,0 +1,671 @@
+﻿<?xml version="1.0" ?>
+<raModuleDescription>
+    <module config="config.driver.mipi_phy" display="Graphics|${module.driver.mipi_phy.name} MIPI Physical Layer (r_mipi_phy)" common="1" id="module.driver.mipi_phy" visible="false" version="1" url="group___m_i_p_i___d_s_i.html">
+        <constraint display="Only one instance of MIPI PHY is permitted">
+            "${interface.driver.mipi_phy}" === "1"
+        </constraint>
+        <constraint display="Requires MIPI DSI peripheral">
+            "${interface.mcu.mipi_dsi.external}" === "1" &amp;&amp; ("${interface.mcu.feature_set.b}" === "1")
+        </constraint>
+        <constraint display="Requires frequency of PCLKA to be 40 MHz or more.">
+          testExists("${board.clock.peripheral.mipi_phy}") &amp;&amp; (Number("${board.clock.peripheral.mipi_phy}") &gt;= 40000000)
+        </constraint>
+
+        <!-- Some displays require higher LP clock speeds -->
+        <constraint display="(Timing|PLL Frequency) divided by (16 * Timing|LP Clock Divider) must be greater than or equal to 2 MHz.">
+                 (("${module.driver.mipi_phy.pll_mhz}"/(16 * "${module.driver.mipi_phy.lp_divisor}")) &gt;= (2.00))
+        </constraint>
+
+        <!-- Timing constraints -->
+        <constraint id="module.driver.mipi_phy.constraint.ns_ui_settings">
+            eval("" +
+            "                //    id_ui,                                    id_ns,                                 max, message modifier \n" +
+            "var property_list = [[${module.driver.mipi_phy.t_clk_post_ui},  ${module.driver.mipi_phy.t_clk_post_ns},  255, \"TCLK_POST\"], \n" +
+            "                     [${module.driver.mipi_phy.t_clk_pre_ui},   ${module.driver.mipi_phy.t_clk_pre_ns},   255, \"TCLKPRE\"], \n" +
+            "                     [${module.driver.mipi_phy.t_hs_trail_ui},  ${module.driver.mipi_phy.t_hs_trail_ns},  255, \"THSTRAIL\"], \n" +
+            "                     [${module.driver.mipi_phy.t_hs_zero_ui},   ${module.driver.mipi_phy.t_hs_zero_ns},   255, \"THSZERO\"], \n" +
+            "                     [${module.driver.mipi_phy.t_hs_prep_ui},   ${module.driver.mipi_phy.t_hs_prep_ns},   255, \"THSPREP\"], \n" +
+            "                     [${module.driver.mipi_phy.t_clk_prep_ui},  ${module.driver.mipi_phy.t_clk_prep_ns},  255, \"TCLKPREP\"], \n" +
+            "                     [${module.driver.mipi_phy.t_clk_trail_ui}, ${module.driver.mipi_phy.t_clk_trail_ns}, 255, \"TCLKTRL\"], \n" +
+            "                     [${module.driver.mipi_phy.t_clk_zero_ui},  ${module.driver.mipi_phy.t_clk_zero_ns},  255, \"TCLKZERO\"], \n" +
+            "                     [${module.driver.mipi_phy.t_hs_exit_ui},   ${module.driver.mipi_phy.t_hs_exit_ns},   255, \"THSEXIT\"], \n" +
+            "                     [${module.driver.mipi_phy.t_lp_exit_ui},   ${module.driver.mipi_phy.t_lp_exit_ns},   255, \"TLPX\"]];\n" +
+            "\n" +
+            "var error_cnt = 0; \n" +
+            "var output = null; \n" +
+            "for(var i = 0; i &lt; property_list.length; i++){ \n" +
+            "   var dsi_clk_ns = 1000 / ${module.driver.mipi_phy.pll_mhz}; // This is approximate, but should be close. We don't currently have access to 'export' output. \n" +
+            "   var dsi_ui_ns  = dsi_clk_ns * 2; \n" +
+            "   var ui_cnt     = property_list[i][0]; \n" +
+            "   var ui_ns      = dsi_ui_ns * ui_cnt; \n" +
+            "   var ns         = property_list[i][1]; \n" +
+            "   var total_ns   = ns + ui_ns; \n" +
+            "   \n" +
+            "   // Note: pclk != dsi_clk \n" +
+            "   var pclk_ns    = 1000000000 / ${board.clock.peripheral.mipi_phy}; \n" +
+            "   var max_ns     = pclk_ns * property_list[i][2]; \n" +
+            "   var error      = (total_ns > max_ns) || (0 > total_ns); \n" +
+            "   if(error &amp;&amp; output == null){\n" +
+            "       var output = \"Timing| \" + property_list[i][3] + \" is \" + ns + \" ns + \" + ui_cnt + \" UI (Total: \" + (ns + ui_ns.toFixed(3)) + \" ns), but their sum must be less than \" + max_ns.toFixed(3) + \" ns (\" + property_list[i][2] + \" PCLKA cycles).\"; \n" +
+            "   }\n" +
+            "   error_cnt = error_cnt + error;\n" +
+            "}   \n" +
+            "if(error_cnt > 1){\n" +
+            " output = \"(1 of \" + error_cnt + \") \" + output; \n"+
+            "}\n" +
+            "output")
+        </constraint>
+        <constraint id="module.driver.mipi_phy.constraint.ns_settings">
+            eval("" +
+            "                //    id_ns,                                   max,  message modifier \n" +
+            "var property_list = [[${module.driver.mipi_phy.t_init},      524287, \"TINIT\"]];\n" +
+            "\n" +
+            "var error_cnt = 0; \n" +
+            "var output = null; \n" +
+            "for(var i = 0; i &lt; property_list.length; i++){ \n" +
+            "   var ns         = property_list[i][0]; \n" +
+            "   var total_ns   = ns; \n" +
+            "   \n" +
+            "   // Note: pclk != dsi_clk \n" +
+            "   var pclk_ns    = 1000000000 / ${board.clock.peripheral.mipi_phy}; \n" +
+            "   var max_ns     = pclk_ns * property_list[i][1]; \n" +
+            "   var error      = (total_ns > max_ns || 0 > total_ns); \n" +
+            "   if(error &amp;&amp; output == null){\n" +
+            "       var output = \"Timing| \" + property_list[i][2] + \" is \" + ns + \" ns, but it must be less than \" + max_ns.toFixed(2) + \" ns (\" + property_list[i][1] + \" PCLKA cycles).\"; \n" +
+            "   }\n" +
+            "   error_cnt = error_cnt + error;\n" +
+            "}   \n" +
+            "if(error_cnt > 1){\n" +
+            " output = \"(1 of \" + error_cnt + \") \" + output; \n"+
+            "}\n" +
+            "output")
+        </constraint>
+        <constraint id="module.driver.mipi_phy.constraint.t_clkstpt" >
+            eval('\n' +
+                 ' // Line rate is PLL MHz div 2 - See RA8 UM 58.2.66 (R01UH0995EJ0060) \n' +
+                 'var pll_mhz = ${module.driver.mipi_phy.pll_mhz}; // This is approximate, but should be close. We don\'t currently have access to \'export\' output. \n' +
+                 'var line_rate_mhz = (pll_mhz / 2);  \n' +
+                 'var dsi_ui_mhz = (2 * pll_mhz); \n' +
+                 'var dsi_clk_ns = 1000 / pll_mhz; \n' +
+                 'var dsi_ui_ns  = dsi_clk_ns * 2; \n' +
+                 'var t_hs_trail = ${module.driver.mipi_phy.t_hs_trail_ns} + ${module.driver.mipi_phy.t_hs_trail_ui} * dsi_ui_ns; \n' +
+                 'var t_clk_post = ${module.driver.mipi_phy.t_clk_post_ns} + ${module.driver.mipi_phy.t_clk_post_ui} * dsi_ui_ns; \n' +
+                 'var t_clk_trail = ${module.driver.mipi_phy.t_clk_trail_ns} + ${module.driver.mipi_phy.t_clk_trail_ui} * dsi_ui_ns; \n' +
+                 'var t_hs_exit = ${module.driver.mipi_phy.t_hs_exit_ns} + ${module.driver.mipi_phy.t_hs_exit_ui} * dsi_ui_ns; \n' +
+                 'var t_lp_exit = ${module.driver.mipi_phy.t_lp_exit_ns} + ${module.driver.mipi_phy.t_lp_exit_ui} * dsi_ui_ns; \n' +
+                 'var t_clk_prep = ${module.driver.mipi_phy.t_clk_prep_ns} + ${module.driver.mipi_phy.t_clk_prep_ui} * dsi_ui_ns; ; \n' +
+                 'var t_clk_zero = ${module.driver.mipi_phy.t_clk_zero_ns} + ${module.driver.mipi_phy.t_clk_zero_ui} * dsi_ui_ns; ; \n' +
+                 'var t_clk_pre = ${module.driver.mipi_phy.t_clk_pre_ns} + ${module.driver.mipi_phy.t_clk_pre_ui} * dsi_ui_ns; \n' +
+                 'var t_hs_prep = ${module.driver.mipi_phy.t_hs_prep_ns} + ${module.driver.mipi_phy.t_hs_prep_ui} * dsi_ui_ns; \n' +
+                 'var t_hs_zero = ${module.driver.mipi_phy.t_hs_zero_ns} + ${module.driver.mipi_phy.t_hs_zero_ui} * dsi_ui_ns; \n' +
+                 'var clkstpt_ns = (t_hs_trail + t_clk_post + t_clk_trail + t_hs_exit + (4 * t_lp_exit) + t_clk_prep + t_clk_zero + t_clk_pre + t_hs_prep + t_hs_zero + (8*dsi_ui_ns)); \n' +
+                 '// Result + 4 - See Note 3, RA8 UM 58.2.38 (R01UH0995EJ0060) \n' +
+                 'var max_val    = (1023 - 4) * 32 / line_rate_mhz; \n' +
+                 'var error      = clkstpt_ns &gt; max_val; \n' +
+                 'error ? null : "Clock Stop Time is " + clkstpt_ns + " (us) must be less than " + max_val.toFixed(4) + " us. See RA8D1 UM 58.2.38 (R01UH0995EJ0060) for additional information about how configured properties determine this value."' )
+        </constraint>
+        <constraint id="module.driver.mipi_phy.constraint.t_clkbfht" >
+            eval('\n' +
+                 ' // Line rate is PLL MHz div 2 - See RA8 UM 58.2.66 (R01UH0995EJ0060) \n' +
+                 'var pll_mhz = ${module.driver.mipi_phy.pll_mhz}; // This is approximate, but should be close. We don\'t currently have access to \'export\' output. \n' +
+                 'var line_rate_mhz = (pll_mhz / 2);  \n' +
+                 'var dsi_ui_mhz = (2 * pll_mhz); \n' +
+                 'var dsi_clk_ns = 1000 / pll_mhz; \n' +
+                 'var dsi_ui_ns  = dsi_clk_ns * 2; \n' +
+                 'var t_hs_trail = ${module.driver.mipi_phy.t_hs_trail_ns} + ${module.driver.mipi_phy.t_hs_trail_ui} * dsi_ui_ns; \n' +
+                 'var t_clk_post = ${module.driver.mipi_phy.t_clk_post_ns} + ${module.driver.mipi_phy.t_clk_post_ui} * dsi_ui_ns; \n' +
+                 'var t_clk_trail = ${module.driver.mipi_phy.t_clk_trail_ns} + ${module.driver.mipi_phy.t_clk_trail_ui} * dsi_ui_ns; \n' +
+                 'var t_hs_exit = ${module.driver.mipi_phy.t_hs_exit_ns} + ${module.driver.mipi_phy.t_hs_exit_ui} * dsi_ui_ns; \n' +
+                 'var t_lp_exit = ${module.driver.mipi_phy.t_lp_exit_ns} + ${module.driver.mipi_phy.t_lp_exit_ui} * dsi_ui_ns; \n' +
+                 'var t_clk_prep = ${module.driver.mipi_phy.t_clk_prep_ns} + ${module.driver.mipi_phy.t_clk_prep_ui} * dsi_ui_ns; ; \n' +
+                 'var t_clk_zero = ${module.driver.mipi_phy.t_clk_zero_ns} + ${module.driver.mipi_phy.t_clk_zero_ui} * dsi_ui_ns; ; \n' +
+                 'var t_clk_pre = ${module.driver.mipi_phy.t_clk_pre_ns} + ${module.driver.mipi_phy.t_clk_pre_ui} * dsi_ui_ns; \n' +
+                 'var t_hs_prep = ${module.driver.mipi_phy.t_hs_prep_ns} + ${module.driver.mipi_phy.t_hs_prep_ui} * dsi_ui_ns; \n' +
+                 'var t_hs_zero = ${module.driver.mipi_phy.t_hs_zero_ns} + ${module.driver.mipi_phy.t_hs_zero_ui} * dsi_ui_ns; \n' +
+                 'var clkbfht_ns = (t_lp_exit + t_clk_prep + t_clk_zero); \n' +
+                 '// Result + 4 - See Note 3, RA8 UM 58.2.38 (R01UH0995EJ0060) \n' +
+                 'var max_val    = (255 - 4) * 32 / dsi_ui_mhz; \n' +
+                 'var error      = clkbfht_ns &gt; max_val; \n' +
+                 'error ? null : "Clock Beforehand Time is " + clkbfht_ns + " (us) must be less than " + max_val.toFixed(4) + " us. See RA8D1 UM 58.2.38 (R01UH0995EJ0060) for additional information about how configured properties determine this value."' )
+        </constraint>
+        <constraint id="module.driver.mipi_phy.constraint.t_clkkpt" >
+            eval('\n' +
+                 ' // Line rate is PLL MHz div 2 - See RA8 UM 58.2.66 (R01UH0995EJ0060) \n' +
+                 'var pll_mhz = ${module.driver.mipi_phy.pll_mhz}; // This is approximate, but should be close. We don\'t currently have access to \'export\' output. \n' +
+                 'var line_rate_mhz = (pll_mhz / 2);  \n' +
+                 'var dsi_ui_mhz = (2 * pll_mhz); \n' +
+                 'var dsi_clk_ns = 1000 / pll_mhz; \n' +
+                 'var dsi_ui_ns  = dsi_clk_ns * 2; \n' +
+                 'var t_hs_trail = ${module.driver.mipi_phy.t_hs_trail_ns} + ${module.driver.mipi_phy.t_hs_trail_ui} * dsi_ui_ns; \n' +
+                 'var t_clk_post = ${module.driver.mipi_phy.t_clk_post_ns} + ${module.driver.mipi_phy.t_clk_post_ui} * dsi_ui_ns; \n' +
+                 'var t_clk_trail = ${module.driver.mipi_phy.t_clk_trail_ns} + ${module.driver.mipi_phy.t_clk_trail_ui} * dsi_ui_ns; \n' +
+                 'var t_hs_exit = ${module.driver.mipi_phy.t_hs_exit_ns} + ${module.driver.mipi_phy.t_hs_exit_ui} * dsi_ui_ns; \n' +
+                 'var t_lp_exit = ${module.driver.mipi_phy.t_lp_exit_ns} + ${module.driver.mipi_phy.t_lp_exit_ui} * dsi_ui_ns; \n' +
+                 'var t_clk_prep = ${module.driver.mipi_phy.t_clk_prep_ns} + ${module.driver.mipi_phy.t_clk_prep_ui} * dsi_ui_ns; ; \n' +
+                 'var t_clk_zero = ${module.driver.mipi_phy.t_clk_zero_ns} + ${module.driver.mipi_phy.t_clk_zero_ui} * dsi_ui_ns; ; \n' +
+                 'var t_clk_pre = ${module.driver.mipi_phy.t_clk_pre_ns} + ${module.driver.mipi_phy.t_clk_pre_ui} * dsi_ui_ns; \n' +
+                 'var t_hs_prep = ${module.driver.mipi_phy.t_hs_prep_ns} + ${module.driver.mipi_phy.t_hs_prep_ui} * dsi_ui_ns; \n' +
+                 'var t_hs_zero = ${module.driver.mipi_phy.t_hs_zero_ns} + ${module.driver.mipi_phy.t_hs_zero_ui} * dsi_ui_ns; \n' +
+                 'var clkkpt_ns = (t_hs_trail + t_clk_post + t_clk_trail + t_hs_exit + 3 * t_lp_exit + t_clk_prep + t_clk_zero + t_clk_pre + t_hs_prep + t_hs_zero + (8*dsi_ui_ns)); \n' +
+                 '// Result + 4 - See Note 3, RA8 UM 58.2.38 (R01UH0995EJ0060) \n' +
+                 'var max_val    = (255 - 4) * 32 / dsi_ui_mhz; \n' +
+                 'var error      = clkkpt_ns &gt; max_val; \n' +
+                 'error ? null : "Clock Keep Time is " + clkkpt_ns + " (us) must be less than " + max_val.toFixed(4) + " us. See RA8D1 UM 58.2.38 (R01UH0995EJ0060) for additional information about how configured properties determine this value."' )
+        </constraint>
+        <constraint id="module.driver.mipi_phy.constraint.t_golpbkt" >
+            eval('\n' +
+                 ' // Line rate is PLL MHz div 2 - See RA8 UM 58.2.66 (R01UH0995EJ0060) \n' +
+                 'var pll_mhz = ${module.driver.mipi_phy.pll_mhz}; // This is approximate, but should be close. We don\'t currently have access to \'export\' output. \n' +
+                 'var line_rate_mhz = (pll_mhz / 2);  \n' +
+                 'var dsi_ui_mhz = (2 * pll_mhz); \n' +
+                 'var dsi_clk_ns = 1000 / pll_mhz; \n' +
+                 'var dsi_ui_ns   = dsi_clk_ns * 2; \n' +
+                 'var t_hs_trail  = ${module.driver.mipi_phy.t_hs_trail_ns} + ${module.driver.mipi_phy.t_hs_trail_ui} * dsi_ui_ns; \n' +
+                 'var t_clk_post  = ${module.driver.mipi_phy.t_clk_post_ns} + ${module.driver.mipi_phy.t_clk_post_ui} * dsi_ui_ns; \n' +
+                 'var t_clk_trail = ${module.driver.mipi_phy.t_clk_trail_ns} + ${module.driver.mipi_phy.t_clk_trail_ui} * dsi_ui_ns; \n' +
+                 'var t_hs_exit = ${module.driver.mipi_phy.t_hs_exit_ns} + ${module.driver.mipi_phy.t_hs_exit_ui} * dsi_ui_ns; \n' +
+                 'var t_lp_exit = ${module.driver.mipi_phy.t_lp_exit_ns} + ${module.driver.mipi_phy.t_lp_exit_ui} * dsi_ui_ns; \n' +
+                 'var t_clk_prep = ${module.driver.mipi_phy.t_clk_prep_ns} + ${module.driver.mipi_phy.t_clk_prep_ui} * dsi_ui_ns; ; \n' +
+                 'var t_clk_zero = ${module.driver.mipi_phy.t_clk_zero_ns} + ${module.driver.mipi_phy.t_clk_zero_ui} * dsi_ui_ns; ; \n' +
+                 'var t_clk_pre   = ${module.driver.mipi_phy.t_clk_pre_ns} + ${module.driver.mipi_phy.t_clk_pre_ui} * dsi_ui_ns; \n' +
+                 'var t_hs_prep   = ${module.driver.mipi_phy.t_hs_prep_ns} + ${module.driver.mipi_phy.t_hs_prep_ui} * dsi_ui_ns; \n' +
+                 'var t_hs_zero   = ${module.driver.mipi_phy.t_hs_zero_ns} + ${module.driver.mipi_phy.t_hs_zero_ui} * dsi_ui_ns; \n' +
+                 'var golpbkt_units = 8 * dsi_ui_ns; \n' +
+                 'var golpbkt_ns = t_hs_trail + t_hs_exit + 3 * t_lp_exit + t_hs_prep + t_hs_zero + (8*dsi_ui_ns); \n' +
+                 ' // Units of 8, rounded up - See RA8 UM 58.2.39 (R01UH0995EJ0060) \n' +
+                 'golpbkt_ns = golpbkt_ns + golpbkt_units - (golpbkt_ns % golpbkt_units) ;\n' +
+                 '\n' +
+                 ' // Result + 3 - See RA8 UM 58.2.39 (R01UH0995EJ0060) \n' +
+                 'var max_val    = (1023 - 3) * 32 / dsi_ui_mhz; \n' +
+                 '\n' +
+                 'var error      = golpbkt_ns &gt; max_val; \n' +
+                 'error ? null : "Clock Keep Time is " + golpbkt_ns + " (us) must be less than " + max_val.toFixed(4) + " us. See RA8D1 UM 58.2.39 (R01UH0995EJ0060) for additional information about how configured properties determine this value."' )
+        </constraint>
+        <constraint id="module.driver.mipi_phy.constraint.pll_config">
+            eval('\n' +
+                    '// Check every possible Multiplier (Int/Frac) and divider combination - Best result is considered lowest multiplier \n' +
+                    'pll_target_hz  = ${module.driver.mipi_phy.pll_mhz} * 1E6;\n' +
+                    'mipimclk_hz = ${board.clock.peripheral.mipimclk};\n' +
+                    'var best_mipi_clk_error = pll_target_hz; \n' +
+                    'var best_div = 1; \n' +
+                    'var best_mul = 1; \n' +
+                    'var best_fmul = 0; \n' +
+                    ' \n' +
+                    'var mul_frac_reg = [0, 1, 2, 3]; \n' +
+                    'var mul_frac_values = [0, 0.33, 0.66, 0.5]; \n' +
+                    'var max_mul = 180; // This is actual - Register value is 1 less than actual \n' +
+                    'var max_div = 4; // This is actual - Register value is 1 less than actual \n' +
+                    'for (var mul_int = max_mul; mul_int &gt;= 1; mul_int--) { // Reverse to find lowest mul for desired result \n' +
+                    '    for (var mul_frac_idx = 0; mul_frac_idx &lt; mul_frac_values.length; mul_frac_idx++) { \n' +
+                    '        for (var div = 1; div &lt; max_div; div++) { \n' +
+                    '            var mul_frac = mul_frac_values[mul_frac_idx] \n' +
+                    '            var mul_result = (mul_int + mul_frac) / div; \n' +
+                    '            var dphy_pll_actual = mipimclk_hz * mul_result; \n' +
+                    ' \n' +
+                    '            /* Clock divided by IDIV must be between 8 and 24 MHz, unless target PLL output is between 160 and 320, then the range is 5 to 24 MHz. Note 1, 57.2.2 of R01UH0995EJ0100 */ \n' +
+                    '            var mipimclk_div = mipimclk_hz / div; \n' +
+                    '            var mipimclk_div_min = 8000000; \n' +
+                    '            if ((dphy_pll_actual &gt;= 160000000) &amp;&amp; (dphy_pll_actual &lt;= 320000000)) \n' +
+                    '                mipimclk_div_min = 5000000; \n' +
+                    '            var note_1_req = ((mipimclk_div &gt;= mipimclk_div_min) &amp;&amp; (mipimclk_div &lt;= 24000000)); \n' +
+                    ' \n' +
+                    '            /* Update Best clock selection as appropriate */ \n' +
+                    '            var this_mipi_clk_error = Math.abs(dphy_pll_actual - pll_target_hz); \n' +
+                    '            if (!note_1_req || (this_mipi_clk_error &gt; best_mipi_clk_error)) \n' +
+                    '                continue; \n' +
+                    ' \n' +
+                    ' \n' +
+                    '            best_mipi_clk_error = this_mipi_clk_error; \n' +
+                    '            best_div = div; \n' +
+                    '            best_mul = mul_int; \n' +
+                    '            best_fmul = mul_frac_reg[mul_frac_idx]; \n' +
+                    '        }; \n' +
+                    '    }; \n' +
+                    '}; \n' +
+                    ' \n' +
+                    'var best_pll_mul = best_mul + mul_frac_values[best_fmul]; \n' +
+                    'dphy_pll_actual = mipimclk_hz / best_div * best_pll_mul; \n' +
+                 '/*====================================================================================================================================*/\n' +
+                 '/*=========================================           Above is identical to property         =========================================*/\n' +
+                 '/*====================================================================================================================================*/\n' +
+                 'var diff = Math.abs(dphy_pll_actual - pll_target_hz) / pll_target_hz;\n' +
+                 'var output = null;\n' +
+                 'if ((diff &gt; 0.01)) {\n' +
+                 '    output = "/* Calculated MIPI PHY PLL frequency: " + dphy_pll_actual.toLocaleString() + " Hz (error " + ((dphy_pll_actual - pll_target_hz) / pll_target_hz * 100.0).toFixed(2).toString() + "%)" + " = " + mipimclk_hz.toLocaleString() + " Hz / " + best_div.toString() + " * " + best_pll_mul.toFixed(2).toString() + " */"; \n' +
+                 '}\n' +
+                 'output\n' +
+                 '')
+        </constraint>
+        <requires id="module.driver.mipi_dsi.requires.mipi_phy_hw" interface="interface.mcu.mipi_dsi.external" visible="false" display="MIPI DSI capable MCU"/>
+        <requires id="module.driver.mipi_dsi.requires.mipi_feature_set_hw" interface="interface.mcu.feature_set.b" visible="false" display="MIPI DSI capable MCU"/>
+        <provides interface="interface.driver.mipi_phy" />
+
+        <!-- Name and Channel -->
+        <provides interface="interface.peripheral.mipi_phy" />
+        <property default="g_mipi_phy${_instance}" display="General|Name" id="module.driver.mipi_phy.name" description="Module name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.mipi_phy.name}")</constraint>
+        </property>
+
+        <!-- MIPI PHY PLL configuration -->
+        <property default="1000.00" id="module.driver.mipi_phy.pll_mhz" display="DSI PLL Frequency (MHz)" description="Specify the MIPI PHY PLL frequency in MHz.">
+            <constraint display="Value must be between 160 MHz and 1440.0 MHz.">("${module.driver.mipi_phy.pll_mhz}" &gt;= 160.00) &amp;&amp; ("${module.driver.mipi_phy.pll_mhz}" &lt;= 1440.00)</constraint>
+        </property>
+        <property default="" id="module.driver.mipi_phy.pll_config">
+            <export><![CDATA[eval('\n' +
+                    '// Check every possible Multiplier (Int/Frac) and divider combination - Best result is considered lowest multiplier \n' +
+                    'pll_target_hz  = ${module.driver.mipi_phy.pll_mhz} * 1E6;\n' +
+                    'mipimclk_hz = ${board.clock.peripheral.mipimclk};\n' +
+                    'var best_mipi_clk_error = pll_target_hz; \n' +
+                    'var best_div = 1; \n' +
+                    'var best_mul = 1; \n' +
+                    'var best_fmul = 0; \n' +
+                    ' \n' +
+                    'var mul_frac_reg = [0, 1, 2, 3]; \n' +
+                    'var mul_frac_values = [0, 0.33, 0.66, 0.5]; \n' +
+                    'var max_mul = 180; // This is actual - Register value is 1 less than actual \n' +
+                    'var max_div = 4; // This is actual - Register value is 1 less than actual \n' +
+                    'for (var mul_int = max_mul; mul_int >= 1; mul_int--) { // Reverse to find lowest mul for desired result \n' +
+                    '    for (var mul_frac_idx = 0; mul_frac_idx < mul_frac_values.length; mul_frac_idx++) { \n' +
+                    '        for (var div = 1; div < max_div; div++) { \n' +
+                    '            var mul_frac = mul_frac_values[mul_frac_idx] \n' +
+                    '            var mul_result = (mul_int + mul_frac) / div; \n' +
+                    '            var dphy_pll_actual = mipimclk_hz * mul_result; \n' +
+                    ' \n' +
+                    '            /* Clock divided by IDIV must be between 8 and 24 MHz, unless target PLL output is between 160 and 320, then the range is 5 to 24 MHz. Note 1, 57.2.2 of R01UH0995EJ0100 */ \n' +
+                    '            var mipimclk_div = mipimclk_hz / div; \n' +
+                    '            var mipimclk_div_min = 8000000; \n' +
+                    '            if ((dphy_pll_actual >= 160000000) && (dphy_pll_actual <= 320000000)) \n' +
+                    '                mipimclk_div_min = 5000000; \n' +
+                    '            var note_1_req = ((mipimclk_div >= mipimclk_div_min) && (mipimclk_div <= 24000000)); \n' +
+                    ' \n' +
+                    '            /* Update Best clock selection as appropriate */ \n' +
+                    '            var this_mipi_clk_error = Math.abs(dphy_pll_actual - pll_target_hz); \n' +
+                    '            if (!note_1_req || (this_mipi_clk_error > best_mipi_clk_error)) \n' +
+                    '                continue; \n' +
+                    ' \n' +
+                    ' \n' +
+                    '            best_mipi_clk_error = this_mipi_clk_error; \n' +
+                    '            best_div = div; \n' +
+                    '            best_mul = mul_int; \n' +
+                    '            best_fmul = mul_frac_reg[mul_frac_idx]; \n' +
+                    '        }; \n' +
+                    '    }; \n' +
+                    '}; \n' +
+                    ' \n' +
+                    'var best_pll_mul = best_mul + mul_frac_values[best_fmul]; \n' +
+                    'dphy_pll_actual = mipimclk_hz / best_div * best_pll_mul; \n' +
+                    '/*====================================================================================================================================*/\n' +
+                    '/*=========================================          Above is identical to constraint        =========================================*/\n' +
+                    '/*====================================================================================================================================*/\n' +
+                    'var output = "/* Calculated MIPI PHY PLL frequency: " + dphy_pll_actual.toLocaleString() + " Hz (error " + ((dphy_pll_actual - pll_target_hz) / pll_target_hz * 100.0).toFixed(2).toString() + "%)" + " = " + mipimclk_hz.toLocaleString() + " Hz / " + best_div.toString() + " * " + best_pll_mul.toFixed(2).toString() + " */"; \n' +
+                    'output += "{"; \n' +
+                    'output += ".div      = " + best_div.toString() + " - 1,"; \n' +
+                    'output += ".mul_int  = " + best_mul.toString() + " - 1,"; \n' +
+                    'output += ".mul_frac = " + best_fmul.toString() + " /* Value: " + mul_frac_values[best_fmul] + " */"; \n' +
+                    'output += "}"; \n' +
+                    'output\n' +
+                    '')]]>
+            </export>
+        </property>
+        <property default="" id="module.driver.mipi_phy.phy_hz"> <export><![CDATA[eval('output = Math.ceil(("${module.driver.mipi_phy.pll_mhz}" * 1000000')]]></export> </property>
+        <property default="" id="module.driver.mipi_phy.t_ui_ns"> <export><![CDATA[eval('output = Math.ceil(("500000000 / ${module.driver.mipi_phy.phy_hz}"')]]></export> </property>
+
+        <property default="5" id="module.driver.mipi_phy.lp_divisor" display="Timing|LP Clock Divider" description="Specify the MIPI PHY LP clock division ratio (Resulting frequency must be from 2-17 MHz)">
+            <constraint display="Value must be an integer.">testInteger("${module.driver.mipi_phy.lp_divisor}")</constraint>
+            <constraint display="Value must be between 1 and 32."> ("${module.driver.mipi_phy.lp_divisor}" &gt; 0) &amp;&amp; ("${module.driver.mipi_phy.lp_divisor}" &lt;= 32) </constraint>
+        </property>
+
+        <!-- Timing parameters -->
+        <property default="600000" id="module.driver.mipi_phy.t_init" display="Timing|TINIT (ns)" description="Minimum duration of the TINIT state (ns)">
+            <constraint display="Value must be a number, greater than or equal to zero.">Number("${module.driver.mipi_phy.t_init}") === ${module.driver.mipi_phy.t_init} &amp;&amp; ${module.driver.mipi_phy.t_init} &gt;= 0</constraint>
+            <export><![CDATA[eval('\n' +
+                    'output = Math.ceil(("${module.driver.mipi_phy.t_init}" / 1000000000 * "${board.clock.peripheral.mipi_phy}") - 1);\n' +
+                    'output')]]>
+            </export>
+        </property>
+        <property default="40" id="module.driver.mipi_phy.t_hs_prep_ns" display="Timing|THSPREP|ns" description="(Nanosecond portion) Duration of the data lane LP-00 state, immediately before entry to the HS-0 state (ns)">
+            <constraint display="Value must be a number, greater than or equal to zero.">Number("${module.driver.mipi_phy.t_hs_prep_ns}") === ${module.driver.mipi_phy.t_hs_prep_ns} &amp;&amp; ${module.driver.mipi_phy.t_hs_prep_ns} &gt;= 0</constraint>
+        </property>
+        <property default="5"  id="module.driver.mipi_phy.t_hs_prep_ui" display="Timing|THSPREP|UI" description="(UI portion) Duration of the data lane LP-00 state, immediately before entry to the HS-0 state (UI)">
+            <constraint display="Value must be a number, greater than or equal to zero.">Number("${module.driver.mipi_phy.t_hs_prep_ui}") === ${module.driver.mipi_phy.t_hs_prep_ui} &amp;&amp; ${module.driver.mipi_phy.t_hs_prep_ui} &gt;= 0</constraint>
+        </property>
+        <property default="" id="module.driver.mipi_phy.t_hs_prep" >
+            <export><![CDATA[eval('\n' +
+                    'var dsi_clk_ns  = 1000 / ${module.driver.mipi_phy.pll_mhz}; // This is approximate, but should be close. We don\'t currently have access to \'export\' output. \n' +
+                    'var dsi_ui_ns   = dsi_clk_ns * 2; \n' +
+                    'var time_ns     = ${module.driver.mipi_phy.t_hs_prep_ns} + ${module.driver.mipi_phy.t_hs_prep_ui} * dsi_ui_ns; \n' +
+                    'var pclk_ns     = 1000000000 / ${board.clock.peripheral.mipi_phy}; \n' +
+                    'var time_cycles = Math.ceil(time_ns / pclk_ns - 1); \n' +
+                    'time_cycles')]]>
+            </export>
+        </property>
+
+        <property default="140" id="module.driver.mipi_phy.t_hs_zero_ns" display="Timing|THSZERO|ns" description="(Nanosecond portion) Specify the data lane zero time before sending data (ns).">
+            <constraint display="Value must be a number, greater than or equal to zero.">Number("${module.driver.mipi_phy.t_hs_zero_ns}") === ${module.driver.mipi_phy.t_hs_zero_ns} &amp;&amp; ${module.driver.mipi_phy.t_hs_zero_ns} &gt;= 0</constraint>
+        </property>
+        <property default="10"  id="module.driver.mipi_phy.t_hs_zero_ui" display="Timing|THSZERO|UI" description="(UI portion) Specify the data lane zero time before sending data (UI).">
+            <constraint display="Value must be a number, greater than or equal to zero.">Number("${module.driver.mipi_phy.t_hs_zero_ui}") === ${module.driver.mipi_phy.t_hs_zero_ui} &amp;&amp; ${module.driver.mipi_phy.t_hs_zero_ui} &gt;= 0</constraint>
+        </property>
+        <property default="" id="module.driver.mipi_phy.t_hs_zero">
+            <export><![CDATA[eval('\n' +
+                    'var dsi_clk_ns  = 1000 / ${module.driver.mipi_phy.pll_mhz}; // This is approximate, but should be close. We don\'t currently have access to \'export\' output. \n' +
+                    'var dsi_ui_ns   = dsi_clk_ns * 2; \n' +
+                    'var time_ns     = ${module.driver.mipi_phy.t_hs_zero_ns} + ${module.driver.mipi_phy.t_hs_zero_ui} * dsi_ui_ns; \n' +
+                    'var pclk_ns     = 1000000000 / ${board.clock.peripheral.mipi_phy}; \n' +
+                    'var time_cycles = Math.ceil(time_ns / pclk_ns - 1); \n' +
+                    'time_cycles')]]>
+            </export>
+        </property>
+
+        <property default="60" id="module.driver.mipi_phy.t_hs_trail_ns" display="Timing|THSTRAIL|ns" description="(Nanosecond portion) Specify the data lane trail time before exiting HS mode (ns).">
+            <constraint display="Value must be a number, greater than or equal to zero.">Number("${module.driver.mipi_phy.t_hs_trail_ns}") === ${module.driver.mipi_phy.t_hs_trail_ns} &amp;&amp; ${module.driver.mipi_phy.t_hs_trail_ns} &gt;= 0</constraint>
+        </property>
+        <property default="4" id="module.driver.mipi_phy.t_hs_trail_ui" display="Timing|THSTRAIL|UI" description="(UI portion) Specify the data lane trail time before exiting HS mode (UI).">
+            <constraint display="Value must be a number, greater than or equal to zero.">Number("${module.driver.mipi_phy.t_hs_trail_ui}") === ${module.driver.mipi_phy.t_hs_trail_ui} &amp;&amp; ${module.driver.mipi_phy.t_hs_trail_ui} &gt;= 0</constraint>
+        </property>
+        <property default="" id="module.driver.mipi_phy.t_hs_trail">
+            <export><![CDATA[eval('\n' +
+                    'var dsi_clk_ns  = 1000 / ${module.driver.mipi_phy.pll_mhz}; // This is approximate, but should be close. We don\'t currently have access to \'export\' output. \n' +
+                    'var dsi_ui_ns   = dsi_clk_ns * 2; \n' +
+                    'var time_ns     = ${module.driver.mipi_phy.t_hs_trail_ns} + ${module.driver.mipi_phy.t_hs_trail_ui} * dsi_ui_ns; \n' +
+                    'var pclk_ns     = 1000000000 / ${board.clock.peripheral.mipi_phy}; \n' +
+                    'var time_cycles = Math.ceil(time_ns / pclk_ns - 1); \n' +
+                    'time_cycles')]]>
+            </export>
+        </property>
+
+        <property default="60" id="module.driver.mipi_phy.t_clk_post_ns" display="Timing|TCLKPOST|ns" description="(Nanosecond portion) Specify the duration after HS data lane trail time elapses before stopping the clock lane (ns).">
+            <constraint display="Value must be a number, greater than or equal to zero.">Number("${module.driver.mipi_phy.t_clk_post_ns}") === ${module.driver.mipi_phy.t_clk_post_ns} &amp;&amp; ${module.driver.mipi_phy.t_clk_post_ns} &gt;= 0</constraint>
+        </property>
+        <property default="52" id="module.driver.mipi_phy.t_clk_post_ui" display="Timing|TCLKPOST|UI" description="(UI portion) Specify the duration after HS data lane trail time elapses before stopping the clock lane (UI).">
+            <constraint display="Value must be a number, greater than or equal to zero.">Number("${module.driver.mipi_phy.t_clk_post_ui}") === ${module.driver.mipi_phy.t_clk_post_ui} &amp;&amp; ${module.driver.mipi_phy.t_clk_post_ui} &gt;= 0</constraint>
+        </property>
+        <property default="" id="module.driver.mipi_phy.t_clk_post">
+            <export><![CDATA[eval('\n' +
+                    'var dsi_clk_ns = 1000 / ${module.driver.mipi_phy.pll_mhz}; // This is approximate, but should be close. We don\'t currently have access to \'export\' output. \n' +
+                    'var dsi_ui_ns  = dsi_clk_ns * 2; \n' +
+                    'var time_ns = ${module.driver.mipi_phy.t_clk_post_ns} + ${module.driver.mipi_phy.t_clk_post_ui} * dsi_ui_ns; \n' +
+                    'var pclk_ns    = 1000000000 / ${board.clock.peripheral.mipi_phy}; \n' +
+                    'var time_cycles = Math.ceil(time_ns / pclk_ns - 1); \n' +
+                    'time_cycles')]]>
+            </export>
+        </property>
+
+        <property default="0" id="module.driver.mipi_phy.t_clk_pre_ns" display="Timing|TCLKPRE|ns" description="(Nanosecond portion) Specify the time clock is active before transitioning data lane into HS mode (ns).">
+            <constraint display="Value must be a number, greater than or equal to zero.">Number("${module.driver.mipi_phy.t_clk_pre_ns}") === ${module.driver.mipi_phy.t_clk_pre_ns} &amp;&amp; ${module.driver.mipi_phy.t_clk_pre_ns} &gt;= 0</constraint>
+        </property>
+        <property default="8" id="module.driver.mipi_phy.t_clk_pre_ui" display="Timing|TCLKPRE|UI" description="(UI portion) Specify the time clock is active before transitioning data lane into HS mode (UI).">
+            <constraint display="Value must be a number, greater than or equal to zero.">Number("${module.driver.mipi_phy.t_clk_pre_ui}") === ${module.driver.mipi_phy.t_clk_pre_ui} &amp;&amp; ${module.driver.mipi_phy.t_clk_pre_ui} &gt;= 0</constraint>
+        </property>
+        <property default="" id="module.driver.mipi_phy.t_clk_pre">
+            <export><![CDATA[eval('\n' +
+                    'var dsi_clk_ns = 1000 / ${module.driver.mipi_phy.pll_mhz}; // This is approximate, but should be close. We don\'t currently have access to \'export\' output. \n' +
+                    'var dsi_ui_ns  = dsi_clk_ns * 2; \n' +
+                    'var time_ns = ${module.driver.mipi_phy.t_clk_pre_ns} + ${module.driver.mipi_phy.t_clk_pre_ui} * dsi_ui_ns; \n' +
+                    'var pclk_ns    = 1000000000 / ${board.clock.peripheral.mipi_phy}; \n' +
+                    'var time_cycles = Math.ceil(time_ns / pclk_ns - 1); \n' +
+                    'time_cycles')]]>
+            </export>
+        </property>
+        <property default="75" id="module.driver.mipi_phy.t_clk_prep_ns" display="Timing|TCLKPREP|ns" description="(Nanosecond portion) Duration of the clock lane LP-00 state, immediately before entry to the HS-0 state (ns)">
+            <constraint display="Value must be a number, greater than or equal to zero.">Number("${module.driver.mipi_phy.t_clk_prep_ns}") === ${module.driver.mipi_phy.t_clk_prep_ns} &amp;&amp; ${module.driver.mipi_phy.t_clk_prep_ns} &gt;= 0</constraint>
+        </property>
+        <property default="0" id="module.driver.mipi_phy.t_clk_prep_ui" display="Timing|TCLKPREP|UI" description="(UI portion) Duration of the clock lane LP-00 state, immediately before entry to the HS-0 state (UI)">
+            <constraint display="Value must be a number, greater than or equal to zero.">Number("${module.driver.mipi_phy.t_clk_prep_ui}") === ${module.driver.mipi_phy.t_clk_prep_ui} &amp;&amp; ${module.driver.mipi_phy.t_clk_prep_ui} &gt;= 0</constraint>
+        </property>
+        <property default="" id="module.driver.mipi_phy.t_clk_prep">
+            <export><![CDATA[eval('\n' +
+                    'var dsi_clk_ns = 1000 / ${module.driver.mipi_phy.pll_mhz}; // This is approximate, but should be close. We don\'t currently have access to \'export\' output. \n' +
+                    'var dsi_ui_ns  = dsi_clk_ns * 2; \n' +
+                    'var time_ns = ${module.driver.mipi_phy.t_clk_prep_ns} + ${module.driver.mipi_phy.t_clk_prep_ui} * dsi_ui_ns; \n' +
+                    'var pclk_ns    = 1000000000 / ${board.clock.peripheral.mipi_phy}; \n' +
+                    'var time_cycles = Math.ceil(time_ns / pclk_ns - 1); \n' +
+                    'time_cycles')]]>
+            </export>
+        </property>
+
+        <property default="60" id="module.driver.mipi_phy.t_lp_exit_ns" display="Timing|TLPX|ns" description="(Nanosecond portion) Specify the time for the clock lane to exit low power mode (ns).">
+            <constraint display="Value must be a number, greater than or equal to zero.">Number("${module.driver.mipi_phy.t_lp_exit_ns}") === ${module.driver.mipi_phy.t_lp_exit_ns} &amp;&amp; ${module.driver.mipi_phy.t_lp_exit_ns} &gt;= 0</constraint>
+        </property>
+        <property default="0" id="module.driver.mipi_phy.t_lp_exit_ui" display="Timing|TLPX|UI" description="(UI portion) Specify the time for the clock lane to exit low power mode (UI).">
+            <constraint display="Value must be a number, greater than or equal to zero.">Number("${module.driver.mipi_phy.t_lp_exit_ui}") === ${module.driver.mipi_phy.t_lp_exit_ui} &amp;&amp; ${module.driver.mipi_phy.t_lp_exit_ui} &gt;= 0</constraint>
+        </property>
+        <property default="" id="module.driver.mipi_phy.t_lp_exit">
+            <export><![CDATA[eval('\n' +
+                    'var dsi_clk_ns = 1000 / ${module.driver.mipi_phy.pll_mhz}; // This is approximate, but should be close. We don\'t currently have access to \'export\' output. \n' +
+                    'var dsi_ui_ns  = dsi_clk_ns * 2; \n' +
+                    'var time_ns = ${module.driver.mipi_phy.t_lp_exit_ns} + ${module.driver.mipi_phy.t_lp_exit_ui} * dsi_ui_ns; \n' +
+                    'var pclk_ns    = 1000000000 / ${board.clock.peripheral.mipi_phy}; \n' +
+                    'var time_cycles = Math.ceil(time_ns / pclk_ns - 1); \n' +
+                    'time_cycles')]]>
+            </export>
+        </property>
+
+        <property default="60" id="module.driver.mipi_phy.t_clk_trail_ns" display="Timing|TCLKTRL|ns" description="(Nanosecond portion) Specify the time after clock lane stop before exiting HS mode (ns).">
+            <constraint display="Value must be a number, greater than or equal to zero.">Number("${module.driver.mipi_phy.t_clk_trail_ns}") === ${module.driver.mipi_phy.t_clk_trail_ns} &amp;&amp; ${module.driver.mipi_phy.t_clk_trail_ns} &gt;= 0</constraint>
+        </property>
+        <property default="0" id="module.driver.mipi_phy.t_clk_trail_ui" display="Timing|TCLKTRL|UI" description="(UI portion) Specify the time after clock lane stop before exiting HS mode (UI).">
+            <constraint display="Value must be a number, greater than or equal to zero.">Number("${module.driver.mipi_phy.t_clk_trail_ui}") === ${module.driver.mipi_phy.t_clk_trail_ui} &amp;&amp; ${module.driver.mipi_phy.t_clk_trail_ui} &gt;= 0</constraint>
+        </property>
+        <property default="" id="module.driver.mipi_phy.t_clk_trail">
+            <export><![CDATA[eval('\n' +
+                    'var dsi_clk_ns = 1000 / ${module.driver.mipi_phy.pll_mhz}; // This is approximate, but should be close. We don\'t currently have access to \'export\' output. \n' +
+                    'var dsi_ui_ns  = dsi_clk_ns * 2; \n' +
+                    'var time_ns = ${module.driver.mipi_phy.t_clk_trail_ns} + ${module.driver.mipi_phy.t_clk_trail_ui} * dsi_ui_ns; \n' +
+                    'var pclk_ns    = 1000000000 / ${board.clock.peripheral.mipi_phy}; \n' +
+                    'var time_cycles = Math.ceil(time_ns / pclk_ns - 1); \n' +
+                    'time_cycles')]]>
+            </export>
+        </property>
+
+        <property default="230" id="module.driver.mipi_phy.t_clk_zero_ns" display="Timing|TCLKZERO|ns" description="(Nanosecond portion) Specify the time clock lane is zero before starting in HS mode (ns).">
+            <constraint display="Value must be a number, greater than or equal to zero.">Number("${module.driver.mipi_phy.t_clk_zero_ns}") === ${module.driver.mipi_phy.t_clk_zero_ns} &amp;&amp; ${module.driver.mipi_phy.t_clk_zero_ns} &gt;= 0</constraint>
+        </property>
+        <property default="0" id="module.driver.mipi_phy.t_clk_zero_ui" display="Timing|TCLKZERO|UI" description="(UI portion) Specify the time clock lane is zero before starting in HS mode (UI)">
+            <constraint display="Value must be a number, greater than or equal to zero.">Number("${module.driver.mipi_phy.t_clk_zero_ui}") === ${module.driver.mipi_phy.t_clk_zero_ui} &amp;&amp; ${module.driver.mipi_phy.t_clk_zero_ui} &gt;= 0</constraint>
+        </property>
+        <property default="" id="module.driver.mipi_phy.t_clk_zero">
+            <export><![CDATA[eval('\n' +
+                    'var dsi_clk_ns = 1000 / ${module.driver.mipi_phy.pll_mhz}; // This is approximate, but should be close. We don\'t currently have access to \'export\' output. \n' +
+                    'var dsi_ui_ns  = dsi_clk_ns * 2; \n' +
+                    'var time_ns = ${module.driver.mipi_phy.t_clk_zero_ns} + ${module.driver.mipi_phy.t_clk_zero_ui} * dsi_ui_ns; \n' +
+                    'var pclk_ns    = 1000000000 / ${board.clock.peripheral.mipi_phy}; \n' +
+                    'var time_cycles = Math.ceil(time_ns / pclk_ns - 1); \n' +
+                    'time_cycles')]]>
+            </export>
+        </property>
+
+        <property default="100" id="module.driver.mipi_phy.t_hs_exit_ns" display="Timing|THSEXIT|ns" description="(Nanosecond portion) Specify the data lane HS mode exit time (ns).">
+            <constraint display="Value must be a number, greater than or equal to zero.">Number("${module.driver.mipi_phy.t_hs_exit_ns}") === ${module.driver.mipi_phy.t_hs_exit_ns} &amp;&amp; ${module.driver.mipi_phy.t_hs_exit_ns} &gt;= 0</constraint>
+        </property>
+        <property default="0" id="module.driver.mipi_phy.t_hs_exit_ui" display="Timing|THSEXIT|UI" description="(UI portion) Specify the data lane HS mode exit time (UI)">
+            <constraint display="Value must be a number, greater than or equal to zero.">Number("${module.driver.mipi_phy.t_hs_exit_ui}") === ${module.driver.mipi_phy.t_hs_exit_ui} &amp;&amp; ${module.driver.mipi_phy.t_hs_exit_ui} &gt;= 0</constraint>
+        </property>
+        <property default="" id="module.driver.mipi_phy.t_hs_exit">
+            <export><![CDATA[eval('\n' +
+                    'var dsi_clk_ns = 1000 / ${module.driver.mipi_phy.pll_mhz}; // This is approximate, but should be close. We don\'t currently have access to \'export\' output. \n' +
+                    'var dsi_ui_ns  = dsi_clk_ns * 2; \n' +
+                    'var time_ns = ${module.driver.mipi_phy.t_hs_exit_ns} + ${module.driver.mipi_phy.t_hs_exit_ui} * dsi_ui_ns; \n' +
+                    'var pclk_ns    = 1000000000 / ${board.clock.peripheral.mipi_phy}; \n' +
+                    'var time_cycles = Math.ceil(time_ns / pclk_ns - 1); \n' +
+                    'time_cycles')]]>
+            </export>
+        </property>
+
+        <property default="" id="module.driver.mipi_phy.t_clkstpt" >
+            <export><![CDATA[eval('\n' +
+                    'var dsi_clk_ns = 1000 / ${module.driver.mipi_phy.pll_mhz}; // This is approximate, but should be close. We don\'t currently have access to \'export\' output. \n' +
+                    'var dsi_ui_ns  = dsi_clk_ns * 2; \n' +
+                    'var t_hs_trail = ${module.driver.mipi_phy.t_hs_trail_ns} + ${module.driver.mipi_phy.t_hs_trail_ui} * dsi_ui_ns; \n' +
+                    'var t_clk_post = ${module.driver.mipi_phy.t_clk_post_ns} + ${module.driver.mipi_phy.t_clk_post_ui} * dsi_ui_ns; \n' +
+                    'var t_clk_trail = ${module.driver.mipi_phy.t_clk_trail_ns} + ${module.driver.mipi_phy.t_clk_trail_ui} * dsi_ui_ns; \n' +
+                    'var t_hs_exit = ${module.driver.mipi_phy.t_hs_exit_ns} + ${module.driver.mipi_phy.t_hs_exit_ui} * dsi_ui_ns; \n' +
+                    'var t_lp_exit = ${module.driver.mipi_phy.t_lp_exit_ns} + ${module.driver.mipi_phy.t_lp_exit_ui} * dsi_ui_ns; \n' +
+                    'var t_clk_prep = ${module.driver.mipi_phy.t_clk_prep_ns} + ${module.driver.mipi_phy.t_clk_prep_ui} * dsi_ui_ns; ; \n' +
+                    'var t_clk_zero = ${module.driver.mipi_phy.t_clk_zero_ns} + ${module.driver.mipi_phy.t_clk_zero_ui} * dsi_ui_ns; ; \n' +
+                    'var t_clk_pre = ${module.driver.mipi_phy.t_clk_pre_ns} + ${module.driver.mipi_phy.t_clk_pre_ui} * dsi_ui_ns; \n' +
+                    'var t_hs_prep = ${module.driver.mipi_phy.t_hs_prep_ns} + ${module.driver.mipi_phy.t_hs_prep_ui} * dsi_ui_ns; \n' +
+                    'var t_hs_zero = ${module.driver.mipi_phy.t_hs_zero_ns} + ${module.driver.mipi_phy.t_hs_zero_ui} * dsi_ui_ns; \n' +
+                    ' // Line rate is PLL MHz div 2 - See RA8 UM 58.2.66 (R01UH0995EJ0060) \n' +
+                    'var line_rate_mhz = (${module.driver.mipi_phy.pll_mhz}/2); \n' +
+                    'var clkstpt_ns = (t_hs_trail + t_clk_post + t_clk_trail + t_hs_exit + (4 * t_lp_exit) + t_clk_prep + t_clk_zero + t_clk_pre + t_hs_prep + t_hs_zero + (8*dsi_ui_ns)); \n' +
+                    '\n' +
+                    '// Line rate is PLL MHz div 2 - See RA8 UM 57.2.3 (R01UH0995EJ0060)     \n' +
+                    'output = Math.ceil(clkstpt_ns * line_rate_mhz / 32000); \n' +
+                    '\n' +
+                    '// Result + 4 - See Note 3, RA8 UM 58.2.38 (R01UH0995EJ0060) \n' +
+                    'output = clkstpt_ns + 4; \n' +
+                    '\n' +
+                    'output')]]>
+            </export>
+        </property>
+        <property default="" id="module.driver.mipi_phy.t_clkbfht" >
+            <export><![CDATA[eval('\n' +
+                    'var dsi_clk_ns = 1000 / ${module.driver.mipi_phy.pll_mhz}; // This is approximate, but should be close. We don\'t currently have access to \'export\' output. \n' +
+                    'var dsi_ui_ns  = dsi_clk_ns * 2; \n' +
+                    'var t_hs_trail = ${module.driver.mipi_phy.t_hs_trail_ns} + ${module.driver.mipi_phy.t_hs_trail_ui} * dsi_ui_ns; \n' +
+                    'var t_clk_post = ${module.driver.mipi_phy.t_clk_post_ns} + ${module.driver.mipi_phy.t_clk_post_ui} * dsi_ui_ns; \n' +
+                    'var t_clk_trail = ${module.driver.mipi_phy.t_clk_trail_ns} + ${module.driver.mipi_phy.t_clk_trail_ui} * dsi_ui_ns; \n' +
+                    'var t_hs_exit = ${module.driver.mipi_phy.t_hs_exit_ns} + ${module.driver.mipi_phy.t_hs_exit_ui} * dsi_ui_ns; \n' +
+                    'var t_lp_exit = ${module.driver.mipi_phy.t_lp_exit_ns} + ${module.driver.mipi_phy.t_lp_exit_ui} * dsi_ui_ns; \n' +
+                    'var t_clk_prep = ${module.driver.mipi_phy.t_clk_prep_ns} + ${module.driver.mipi_phy.t_clk_prep_ui} * dsi_ui_ns; ; \n' +
+                    'var t_clk_zero = ${module.driver.mipi_phy.t_clk_zero_ns} + ${module.driver.mipi_phy.t_clk_zero_ui} * dsi_ui_ns; ; \n' +
+                    'var t_clk_pre = ${module.driver.mipi_phy.t_clk_pre_ns} + ${module.driver.mipi_phy.t_clk_pre_ui} * dsi_ui_ns; \n' +
+                    'var t_hs_prep = ${module.driver.mipi_phy.t_hs_prep_ns} + ${module.driver.mipi_phy.t_hs_prep_ui} * dsi_ui_ns; \n' +
+                    'var t_hs_zero = ${module.driver.mipi_phy.t_hs_zero_ns} + ${module.driver.mipi_phy.t_hs_zero_ui} * dsi_ui_ns; \n' +
+                    ' // Line rate is PLL MHz div 2 - See RA8 UM 58.2.66 (R01UH0995EJ0060) \n' +
+                    'var line_rate_mhz = (${module.driver.mipi_phy.pll_mhz}/2); \n' +
+                    'var clkbfht_ns = (t_lp_exit + t_clk_prep + t_clk_zero); \n' +
+                    '\n' +
+                    'output = Math.ceil(clkbfht_ns * line_rate_mhz / 32000); \n' +
+                    '\n' +
+                    '// Result + 4 - See Note 3, RA8 UM 58.2.38 (R01UH0995EJ0060) \n' +
+                    'output = output + 4; \n' +
+                    '\n' +
+                    'output')]]>
+            </export>
+        </property>
+        <property default="" id="module.driver.mipi_phy.t_clkkpt" >
+            <export><![CDATA[eval('\n' +
+                    'var dsi_clk_ns = 1000 / ${module.driver.mipi_phy.pll_mhz}; // This is approximate, but should be close. We don\'t currently have access to \'export\' output. \n' +
+                    'var dsi_ui_ns  = dsi_clk_ns * 2; \n' +
+                    'var t_hs_trail = ${module.driver.mipi_phy.t_hs_trail_ns} + ${module.driver.mipi_phy.t_hs_trail_ui} * dsi_ui_ns; \n' +
+                    'var t_clk_post = ${module.driver.mipi_phy.t_clk_post_ns} + ${module.driver.mipi_phy.t_clk_post_ui} * dsi_ui_ns; \n' +
+                    'var t_clk_trail = ${module.driver.mipi_phy.t_clk_trail_ns} + ${module.driver.mipi_phy.t_clk_trail_ui} * dsi_ui_ns; \n' +
+                    'var t_hs_exit = ${module.driver.mipi_phy.t_hs_exit_ns} + ${module.driver.mipi_phy.t_hs_exit_ui} * dsi_ui_ns; \n' +
+                    'var t_lp_exit = ${module.driver.mipi_phy.t_lp_exit_ns} + ${module.driver.mipi_phy.t_lp_exit_ui} * dsi_ui_ns; \n' +
+                    'var t_clk_prep = ${module.driver.mipi_phy.t_clk_prep_ns} + ${module.driver.mipi_phy.t_clk_prep_ui} * dsi_ui_ns; ; \n' +
+                    'var t_clk_zero = ${module.driver.mipi_phy.t_clk_zero_ns} + ${module.driver.mipi_phy.t_clk_zero_ui} * dsi_ui_ns; ; \n' +
+                    'var t_clk_pre = ${module.driver.mipi_phy.t_clk_pre_ns} + ${module.driver.mipi_phy.t_clk_pre_ui} * dsi_ui_ns; \n' +
+                    'var t_hs_prep = ${module.driver.mipi_phy.t_hs_prep_ns} + ${module.driver.mipi_phy.t_hs_prep_ui} * dsi_ui_ns; \n' +
+                    'var t_hs_zero = ${module.driver.mipi_phy.t_hs_zero_ns} + ${module.driver.mipi_phy.t_hs_zero_ui} * dsi_ui_ns; \n' +
+                    ' // Line rate is PLL MHz div 2 - See RA8 UM 58.2.66 (R01UH0995EJ0060) \n' +
+                    'var line_rate_mhz = (${module.driver.mipi_phy.pll_mhz}/2); \n' +
+                    'var clkkpt_ns = (t_hs_trail + t_clk_post + t_clk_trail + t_hs_exit + 3 * t_lp_exit + t_clk_prep + t_clk_zero + t_clk_pre + t_hs_prep + t_hs_zero + (8*dsi_ui_ns)); \n' +
+                    '\n' +
+                    'output = Math.ceil(clkkpt_ns * line_rate_mhz / 32000); \n' +
+                    '\n' +
+                    '// Result + 4 - See Note 3, RA8 UM 58.2.38 (R01UH0995EJ0060) \n' +
+                    'output = output + 4; \n' +
+                    '\n' +
+                    'output')]]>
+            </export>
+        </property>
+        <property default="" id="module.driver.mipi_phy.t_golpbkt" >
+            <export><![CDATA[eval('\n' +
+                    'var dsi_clk_ns  = 1000 / ${module.driver.mipi_phy.pll_mhz}; // This is approximate, but should be close. We don\'t currently have access to \'export\' output. \n' +
+                    'var dsi_ui_ns   = dsi_clk_ns * 2; \n' +
+                    'var t_hs_trail  = ${module.driver.mipi_phy.t_hs_trail_ns} + ${module.driver.mipi_phy.t_hs_trail_ui} * dsi_ui_ns; \n' +
+                    'var t_clk_post  = ${module.driver.mipi_phy.t_clk_post_ns} + ${module.driver.mipi_phy.t_clk_post_ui} * dsi_ui_ns; \n' +
+                    'var t_clk_trail = ${module.driver.mipi_phy.t_clk_trail_ns} + ${module.driver.mipi_phy.t_clk_trail_ui} * dsi_ui_ns; \n' +
+                    'var t_hs_exit = ${module.driver.mipi_phy.t_hs_exit_ns} + ${module.driver.mipi_phy.t_hs_exit_ui} * dsi_ui_ns; \n' +
+                    'var t_lp_exit = ${module.driver.mipi_phy.t_lp_exit_ns} + ${module.driver.mipi_phy.t_lp_exit_ui} * dsi_ui_ns; \n' +
+                    'var t_clk_prep = ${module.driver.mipi_phy.t_clk_prep_ns} + ${module.driver.mipi_phy.t_clk_prep_ui} * dsi_ui_ns; ; \n' +
+                    'var t_clk_zero = ${module.driver.mipi_phy.t_clk_zero_ns} + ${module.driver.mipi_phy.t_clk_zero_ui} * dsi_ui_ns; ; \n' +
+                    'var t_clk_pre   = ${module.driver.mipi_phy.t_clk_pre_ns} + ${module.driver.mipi_phy.t_clk_pre_ui} * dsi_ui_ns; \n' +
+                    'var t_hs_prep   = ${module.driver.mipi_phy.t_hs_prep_ns} + ${module.driver.mipi_phy.t_hs_prep_ui} * dsi_ui_ns; \n' +
+                    'var t_hs_zero   = ${module.driver.mipi_phy.t_hs_zero_ns} + ${module.driver.mipi_phy.t_hs_zero_ui} * dsi_ui_ns; \n' +
+                    'var golpbkt_units = 8 * dsi_ui_ns; \n' +
+                    ' // Line rate is PLL MHz div 2 - See RA8 UM 58.2.66 (R01UH0995EJ0060) \n' +
+                    'var line_rate_mhz = (${module.driver.mipi_phy.pll_mhz}/2); \n' +
+                    'var golpbkt_ns = t_hs_trail + t_hs_exit + 3 * t_lp_exit + t_hs_prep + t_hs_zero + (8*dsi_ui_ns); \n' +
+                    '\n' +
+                    ' // Units of 8, rounded up - See RA8 UM 58.2.39 (R01UH0995EJ0060) \n' +
+                    'golpbkt_ns = golpbkt_ns + golpbkt_units - (golpbkt_ns % golpbkt_units) + 3;\n' +
+                    '\n' +
+                    'output =  Math.ceil(golpbkt_ns * line_rate_mhz / 8000); \n' +
+                    '\n' +
+                    ' // Result + 3 - See RA8 UM 58.2.39 (R01UH0995EJ0060) \n' +
+                    'output = output + 3;\n' +
+                    '\n' +
+                    'output')]]>
+            </export>
+        </property>
+
+        <!-- TODO: TZ -->
+
+        <header>
+        /* MIPI PHY on MIPI PHY Instance. */
+
+        extern const mipi_phy_instance_t ${module.driver.mipi_phy.name};
+
+        /* Access the MIPI DSI instance using these structures when calling API functions directly (::p_api is not used). */
+        extern mipi_phy_ctrl_t ${module.driver.mipi_phy.name}_ctrl;
+        extern const mipi_phy_cfg_t ${module.driver.mipi_phy.name}_cfg;
+
+        </header>
+
+        <declarations>
+        /* MIPI PHY Macros */
+        #define MIPI_PHY_CLKSTPT   (${module.driver.mipi_phy.t_clkstpt})
+        #define MIPI_PHY_CLKBFHT   (${module.driver.mipi_phy.t_clkbfht} + 1)
+        #define MIPI_PHY_CLKKPT    (${module.driver.mipi_phy.t_clkkpt} + 4)
+        #define MIPI_PHY_GOLPBKT   (${module.driver.mipi_phy.t_golpbkt})
+
+        #define MIPI_PHY_TINIT     (${module.driver.mipi_phy.t_init})
+        #define MIPI_PHY_TCLKPREP  (${module.driver.mipi_phy.t_clk_prep})
+        #define MIPI_PHY_THSPREP   (${module.driver.mipi_phy.t_hs_prep})
+        #define MIPI_PHY_TCLKTRAIL (${module.driver.mipi_phy.t_clk_trail})
+        #define MIPI_PHY_TCLKPOST  (${module.driver.mipi_phy.t_clk_post})
+        #define MIPI_PHY_TCLKPRE   (${module.driver.mipi_phy.t_clk_pre})
+        #define MIPI_PHY_TCLKZERO  (${module.driver.mipi_phy.t_clk_zero})
+        #define MIPI_PHY_THSEXIT   (${module.driver.mipi_phy.t_hs_exit})
+        #define MIPI_PHY_THSTRAIL  (${module.driver.mipi_phy.t_hs_trail})
+        #define MIPI_PHY_THSZERO   (${module.driver.mipi_phy.t_hs_zero})
+        #define MIPI_PHY_TLPEXIT   (${module.driver.mipi_phy.t_lp_exit})
+
+
+        /* MIPI PHY Structures */
+        const mipi_phy_timing_t ${module.driver.mipi_phy.name}_timing =
+        {
+            .t_init                   = 0x3FFFF &amp; (uint32_t)MIPI_PHY_TINIT,
+            .t_clk_prep               = (uint8_t)MIPI_PHY_TCLKPREP,
+            .t_hs_prep                = (uint8_t)MIPI_PHY_THSPREP,
+            .dphytim4_b.t_clk_trail   = (uint32_t)MIPI_PHY_TCLKTRAIL,
+            .dphytim4_b.t_clk_post    = (uint32_t)MIPI_PHY_TCLKPOST,
+            .dphytim4_b.t_clk_pre     = (uint32_t)MIPI_PHY_TCLKPRE,
+            .dphytim4_b.t_clk_zero    = (uint32_t)MIPI_PHY_TCLKZERO,
+            .dphytim5_b.t_hs_exit     = (uint32_t)MIPI_PHY_THSEXIT,
+            .dphytim5_b.t_hs_trail    = (uint32_t)MIPI_PHY_THSTRAIL,
+            .dphytim5_b.t_hs_zero     = (uint32_t)MIPI_PHY_THSZERO,
+            .t_lp_exit                = (uint32_t)MIPI_PHY_TLPEXIT,
+        };
+
+        mipi_phy_ctrl_t ${module.driver.mipi_phy.name}_ctrl;
+        const mipi_phy_cfg_t ${module.driver.mipi_phy.name}_cfg =
+        {
+            .pll_settings = ${module.driver.mipi_phy.pll_config},
+            .lp_divisor   = ${module.driver.mipi_phy.lp_divisor} - 1,
+            .p_timing     = &amp;${module.driver.mipi_phy.name}_timing,
+        };
+        /* Instance structure to use this module. */
+        const mipi_phy_instance_t ${module.driver.mipi_phy.name} =
+        {
+            .p_ctrl       = &amp;${module.driver.mipi_phy.name}_ctrl,
+            .p_cfg        = &amp;${module.driver.mipi_phy.name}_cfg,
+            .p_api        = &amp;g_mipi_phy
+        };
+
+        </declarations>
+    </module>
+</raModuleDescription>

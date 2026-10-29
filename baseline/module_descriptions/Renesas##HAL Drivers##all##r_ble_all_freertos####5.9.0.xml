@@ -1,0 +1,597 @@
+<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.driver.ble_a_freertos" path="fsp_cfg/r_ble_cfg.h" version="0" >
+        <property id="config.driver.ble_a_freertos.rf_debug_public_address" display="Debug Public Address" default="FF:FF:FF:50:90:74" description="Public Address of firmware initial value." >
+            <constraint display="Must be a valid device address">eval('' +
+            'var input = "${config.driver.ble_a_freertos.rf_debug_public_address}";' +
+            'var regex_mac = RegExp("^[0-9A-F]\{2\}\(:[0-9A-F]\{2\}\)\{5\}$","i");' +
+            'var regex_old = RegExp("^{(0x[0-9A-F]\{2\})\(\,0x[0-9A-F]\{2\}\)\{5\}}$","i");' +
+            ' ((regex_mac.test(input) &amp;&amp; ( 17 === input.length)) || (regex_old.test(input)  &amp;&amp; ( 31 === input.length)))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${config.driver.ble_a_freertos.rf_debug_public_address}";' +
+            'var regex_mac = RegExp("^[0-9A-F]\{2\}\(:[0-9A-F]\{2\}\)\{5\}$","i");' +
+            'if (regex_mac.test(output)){' +
+            'output = "0x" + output.replace(/\:/g,",0x");' +
+            '}else{' +
+            'output = output.slice(1,-1)' +
+            '}' +
+            'output'
+            )</export>            <!-- replace all colons with commas on export and add 0x to mark as hex -->
+        </property>
+        <property id="config.driver.ble_a_freertos.rf_debug_random_address" display="Debug Random Address" default="FF:FF:FF:FF:FF:FF" description="Random Address of firmware initial value." >
+            <constraint display="Must be a valid device address">eval('' +
+            'var input = "${config.driver.ble_a_freertos.rf_debug_random_address}";' +
+            'var regex_mac = RegExp("^[0-9A-F]\{2\}\(:[0-9A-F]\{2\}\)\{5\}$","i");' +
+            'var regex_old = RegExp("^{(0x[0-9A-F]\{2\})\(\,0x[0-9A-F]\{2\}\)\{5\}}$","i");' +
+            ' ((regex_mac.test(input) &amp;&amp; ( 17 === input.length)) || (regex_old.test(input)  &amp;&amp; ( 31 === input.length)))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${config.driver.ble_a_freertos.rf_debug_random_address}";' +
+            'var regex_mac = RegExp("^[0-9A-F]\{2\}\(:[0-9A-F]\{2\}\)\{5\}$","i");' +
+            'if (regex_mac.test(output)){' +
+            'output = "0x" + output.replace(/\:/g,",0x");' +
+            '}else{' +
+            'output = output.slice(1,-1)' +
+            '}' +
+            'output'
+            )</export>            <!-- replace all colons with commas on export and add 0x to mark as hex -->
+        </property>
+        <property id="config.driver.ble_a_freertos.rf_connection_maximum" display="Maximum number of connections" default="7" description="Maximum number of connections.">
+            <constraint display="Value must be an integer between 1 and 7">testInteger("${config.driver.ble_a_freertos.rf_connection_maximum}") &amp;&amp; ("${config.driver.ble_a_freertos.rf_connection_maximum}" &gt;=1)  &amp;&amp; ("${config.driver.ble_a_freertos.rf_connection_maximum}" &lt;=7)</constraint>
+        </property>
+        <property id="config.driver.ble_a_freertos.rf_connection_data_maximum" display="Maximum connection data length" default="251" description="Maximum connection data length.">
+            <constraint display="Value must be an integer between 27 and 251">testInteger("${config.driver.ble_a_freertos.rf_connection_data_maximum}") &amp;&amp; ("${config.driver.ble_a_freertos.rf_connection_data_maximum}" &gt;=27) &amp;&amp; ("${config.driver.ble_a_freertos.rf_connection_data_maximum}" &lt;=251)</constraint>
+        </property>
+        <property id="config.driver.ble_a_freertos.rf_advertising_data_maximum" display="Maximum advertising data length" default="1650" description="Maximum advertising data length.">
+            <constraint display="Value must be an integer between 31 and 1650">testInteger("${config.driver.ble_a_freertos.rf_advertising_data_maximum}") &amp;&amp; ("${config.driver.ble_a_freertos.rf_advertising_data_maximum}" &gt;=31) &amp;&amp; ("${config.driver.ble_a_freertos.rf_advertising_data_maximum}" &lt;=1650)</constraint>
+        </property>
+        <property id="config.driver.ble_a_freertos.rf_advertising_set_maximum" display="Maximum advertising set number" default="4" description="Maximum advertising set number.">
+            <constraint display="Value must be an integer between 1 and 4">testInteger("${config.driver.ble_a_freertos.rf_advertising_set_maximum}") &amp;&amp; ("${config.driver.ble_a_freertos.rf_advertising_set_maximum}" &gt;=1) &amp;&amp; ("${config.driver.ble_a_freertos.rf_advertising_set_maximum}" &lt;=4)</constraint>
+        </property>
+        <property id="config.driver.ble_a_freertos.rf_periodic_sync_set_maximum" display="Maximum periodic sync set number." default="2" description="Maximum periodic sync set number.">
+            <constraint display="Value must be an integer between 1 and 2">testInteger("${config.driver.ble_a_freertos.rf_periodic_sync_set_maximum}") &amp;&amp; ("${config.driver.ble_a_freertos.rf_periodic_sync_set_maximum}" &gt;=1) &amp;&amp; ("${config.driver.ble_a_freertos.rf_periodic_sync_set_maximum}" &lt;=2)</constraint>
+        </property>
+        <property id="config.driver.ble_a_freertos.enable_secure_data" display="Store Security Data" default="config.driver.ble_a_freertos.enable_secure_data.0" description="Store Security Data in DataFlash.">
+            <option id="config.driver.ble_a_freertos.enable_secure_data.0" display="Disable" value="0" />
+            <option id="config.driver.ble_a_freertos.enable_secure_data.1" display="Enable" value="1" />
+        </property>
+        <property id="config.driver.ble_a_freertos.secure_data_dataflash_block" display="Data Flash Block for Security Data" default="0" description="Data Flash Block for Security Data Management.">
+            <constraint display="Value must be an integer between 0 and 7">testInteger("${config.driver.ble_a_freertos.secure_data_dataflash_block}") &amp;&amp; ("${config.driver.ble_a_freertos.secure_data_dataflash_block}" &gt;=0) &amp;&amp; ("${config.driver.ble_a_freertos.secure_data_dataflash_block}" &lt;=7)</constraint>
+        </property>
+        <property id="config.driver.ble_a_freertos.remote_device_bonding_number" display="Remote Device Bonding Number" default="7" description="Number of remote device bonding information.">
+            <constraint display="Value must be an integer between 1 and 7">testInteger("${config.driver.ble_a_freertos.remote_device_bonding_number}") &amp;&amp; ("${config.driver.ble_a_freertos.remote_device_bonding_number}" &gt;=1) &amp;&amp; ("${config.driver.ble_a_freertos.remote_device_bonding_number}" &lt;=7)</constraint>
+        </property>
+        <property id="config.driver.ble_a_freertos.event_notify_connection_start" display="Connection Event Start Notify" default="config.driver.ble_a_freertos.event_notify_connection_start.0" description="Set Connection event start notify enable/disable.">
+            <option id="config.driver.ble_a_freertos.event_notify_connection_start.0" display="Disable" value="0" />
+            <option id="config.driver.ble_a_freertos.event_notify_connection_start.1" display="Enable" value="1" />
+        </property>
+        <property id="config.driver.ble_a_freertos.event_notify_connection_close" display="Connection Event Close Notify" default="config.driver.ble_a_freertos.event_notify_connection_close.0" description="Set Connection event close notify enable/disable.">
+            <option id="config.driver.ble_a_freertos.event_notify_connection_close.0" display="Disable" value="0" />
+            <option id="config.driver.ble_a_freertos.event_notify_connection_close.1" display="Enable" value="1" />
+        </property>
+        <property id="config.driver.ble_a_freertos.event_notify_advertising_start" display="Advertising Event Start Notify" default="config.driver.ble_a_freertos.event_notify_advertising_start.0" description="Set Advertising event start notify enable/disable.">
+            <option id="config.driver.ble_a_freertos.event_notify_advertising_start.0" display="Disable" value="0" />
+            <option id="config.driver.ble_a_freertos.event_notify_advertising_start.1" display="Enable" value="1" />
+        </property>
+        <property id="config.driver.ble_a_freertos.event_notify_advertising_close" display="Advertising Event Close Notify" default="config.driver.ble_a_freertos.event_notify_advertising_close.0" description="Set Advertising event close notify enable/disable.">
+            <option id="config.driver.ble_a_freertos.event_notify_advertising_close.0" display="Disable" value="0" />
+            <option id="config.driver.ble_a_freertos.event_notify_advertising_close.1" display="Enable" value="1" />
+        </property>
+        <property id="config.driver.ble_a_freertos.event_notify_scanning_start" display="Scanning Event Start Notify" default="config.driver.ble_a_freertos.event_notify_scanning_start.0" description="Set Scanning event start notify enable/disable.">
+            <option id="config.driver.ble_a_freertos.event_notify_scanning_start.0" display="Disable" value="0" />
+            <option id="config.driver.ble_a_freertos.event_notify_scanning_start.1" display="Enable" value="1" />
+        </property>
+        <property id="config.driver.ble_a_freertos.event_notify_scanning_close" display="Scanning Event Close Notify" default="config.driver.ble_a_freertos.event_notify_scanning_close.0" description="Set Scanning event close notify enable/disable.">
+            <option id="config.driver.ble_a_freertos.event_notify_scanning_close.0" display="Disable" value="0" />
+            <option id="config.driver.ble_a_freertos.event_notify_scanning_close.1" display="Enable" value="1" />
+        </property>
+        <property id="config.driver.ble_a_freertos.event_notify_initiating_start" display="Initiating Event Start Notify" default="config.driver.ble_a_freertos.event_notify_initiating_start.0" description="Set Initiating event start notify enable/disable.">
+            <option id="config.driver.ble_a_freertos.event_notify_initiating_start.0" display="Disable" value="0" />
+            <option id="config.driver.ble_a_freertos.event_notify_initiating_start.1" display="Enable" value="1" />
+        </property>
+        <property id="config.driver.ble_a_freertos.event_notify_initiating_close" display="Initiating Event Close Notify" default="config.driver.ble_a_freertos.event_notify_initiating_close.0" description="Set Initiating event close notify enable/disable.">
+            <option id="config.driver.ble_a_freertos.event_notify_initiating_close.0" display="Disable" value="0" />
+            <option id="config.driver.ble_a_freertos.event_notify_initiating_close.1" display="Enable" value="1" />
+        </property>
+        <property id="config.driver.ble_a_freertos.event_notify_deep_sleep_start" display="RF Deep Sleep Start Notify" default="config.driver.ble_a_freertos.event_notify_deep_sleep_start.0" description="Set RF_DEEP_SLEEP start notify enable/disable.">
+            <option id="config.driver.ble_a_freertos.event_notify_deep_sleep_start.0" display="Disable" value="0" />
+            <option id="config.driver.ble_a_freertos.event_notify_deep_sleep_start.1" display="Enable" value="1" />
+        </property>
+        <property id="config.driver.ble_a_freertos.event_notify_deep_sleep_wakeup" display="RF Deep Sleep Wakeup Notify" default="config.driver.ble_a_freertos.event_notify_deep_sleep_wakeup.0" description="Set RF_DEEP_SLEEP wakeup notify enable/disable.">
+            <option id="config.driver.ble_a_freertos.event_notify_deep_sleep_wakeup.0" display="Disable" value="0" />
+            <option id="config.driver.ble_a_freertos.event_notify_deep_sleep_wakeup.1" display="Enable" value="1" />
+        </property>
+        <property id="config.driver.ble_a_freertos.rf_clval" display="Bluetooth dedicated clock" default="6" description="Load capacitance adjustment.">
+            <constraint display="Value must be an integer between 0 and 15">testInteger("${config.driver.ble_a_freertos.rf_clval}") &amp;&amp; ("${config.driver.ble_a_freertos.rf_clval}" &gt;=0)  &amp;&amp; ("${config.driver.ble_a_freertos.rf_clval}" &lt;=15)</constraint>
+        </property>
+        <property id="config.driver.ble_a_freertos.rf_dcdc_converter_enabele" display="DC-DC converter" default="config.driver.ble_a_freertos.rf_dcdc_converter_enabele.0" description="Set DC-DC converter for RF part.">
+            <option id="config.driver.ble_a_freertos.rf_dcdc_converter_enabele.0" display="Disable" value="0" />
+            <option id="config.driver.ble_a_freertos.rf_dcdc_converter_enabele.1" display="Enable" value="1" />
+        </property>
+        <property id="config.driver.ble_a_freertos.rf_external_32k_enable" display="Slow Clock Source" default="config.driver.ble_a_freertos.rf_external_32k_enable.0" description="Set slow clock source for RF part.">
+            <option id="config.driver.ble_a_freertos.rf_external_32k_enable.0" display="Use RF_LOCO" value="0" />
+            <option id="config.driver.ble_a_freertos.rf_external_32k_enable.1" display="Use External 32.768kHz" value="1" />
+        </property>
+        <property id="config.driver.ble_a_freertos.rf_mcu_clkout_port" display="MCU CLKOUT Port" default="config.driver.ble_a_freertos.rf_mcu_clkout_port.0" description="When BLE_CFG_RF_EXTERNAL_32K_ENABLE = 1, Set port of MCU CLKOUT.">
+            <option id="config.driver.ble_a_freertos.rf_mcu_clkout_port.0" display="P109" value="0" />
+            <option id="config.driver.ble_a_freertos.rf_mcu_clkout_port.1" display="P205" value="1" />
+        </property>
+        <property id="config.driver.ble_a_freertos.rf_mcu_clkout_frequency" display="MCU CLKOUT Frequency Output" default="config.driver.ble_a_freertos.rf_mcu_clkout_frequency.0" description="When BLE_CFG_RF_EXTERNAL_32K_ENABLE = 1, set frequency output from CLKOUT of MCU part.">
+            <option id="config.driver.ble_a_freertos.rf_mcu_clkout_frequency.0" display="MCU CLKOUT frequency 32.768kHz" value="0" />
+            <option id="config.driver.ble_a_freertos.rf_mcu_clkout_frequency.1" display="MCU CLKOUT frequency 16.384kHz" value="1" />
+        </property>
+        <property id="config.driver.ble_a_freertos.rf_sleep_clock_accuracy" display="Sleep Clock Accuracy(SCA)" default="250" description="When BLE_CFG_RF_EXTERNAL_32K_ENABLE = 1, set Sleep Clock Accuracy(SCA) for RF slow clock.">
+            <constraint display="Value must be an integer between 0 and 500">testInteger("${config.driver.ble_a_freertos.rf_sleep_clock_accuracy}") &amp;&amp; ("${config.driver.ble_a_freertos.rf_sleep_clock_accuracy}" &gt;=0) &amp;&amp; ("${config.driver.ble_a_freertos.rf_sleep_clock_accuracy}" &lt;=500)</constraint>
+        </property>
+        <property id="config.driver.ble_a_freertos.rf_maximum_tx_power" display="Transmission Power Maximum Value" default="config.driver.ble_a_freertos.rf_maximum_tx_power.1" description="Set transmission power maximum value.">
+            <option id="config.driver.ble_a_freertos.rf_maximum_tx_power.0" display="max +0dBm" value="0" />
+            <option id="config.driver.ble_a_freertos.rf_maximum_tx_power.1" display="max +4dBm" value="1" />
+        </property>
+        <property id="config.driver.ble_a_freertos.rf_default_tx_power" display="Transmission Power Default Value" default="config.driver.ble_a_freertos.rf_default_tx_power.0" description="Set default transmit power. Default transmit power is dependent on the configuration of Maximum transmission power(BLE_CFG_RF_DEF_TX_POW).">
+            <option id="config.driver.ble_a_freertos.rf_default_tx_power.0" display="High  0dBm(Transmission Power Maximum Value = +0dBm)  /  +4dBm(Transmission Power Maximum Value = +4dBm)" value="0"/>
+            <option id="config.driver.ble_a_freertos.rf_default_tx_power.1" display="Mid   0dBm(Transmission Power Maximum Value = +0dBm)  /   0dBm(Transmission Power Maximum Value = +4dBm)" value="1"/>
+            <option id="config.driver.ble_a_freertos.rf_default_tx_power.2" display="Low -18dBm(Transmission Power Maximum Value = +0dBm)  / -20dBm(Transmission Power Maximum Value = +4dBm)" value="2"/>
+        </property>
+        <property id="config.driver.ble_a_freertos.rf_clkout_enable" display="CLKOUT_RF Output" default="config.driver.ble_a_freertos.rf_clkout_enable.0" description="Set CLKOUT_RF output setting.">
+            <option id="config.driver.ble_a_freertos.rf_clkout_enable.0" display="No output" value="0"/>
+            <option id="config.driver.ble_a_freertos.rf_clkout_enable.5" display="4MHz output" value="5"/>
+            <option id="config.driver.ble_a_freertos.rf_clkout_enable.6" display="2MHz output" value="6"/>
+            <option id="config.driver.ble_a_freertos.rf_clkout_enable.7" display="1MHz output" value="7"/>
+        </property>
+        <property id="config.driver.ble_a_freertos.rf_deep_sleep_enable" display="RF_DEEP_SLEEP Transition" default="config.driver.ble_a_freertos.rf_deep_sleep_enable.1" description="Set RF_DEEP_SLEEP transition.">
+            <option id="config.driver.ble_a_freertos.rf_deep_sleep_enable.0" display="Disable" value="0" />
+            <option id="config.driver.ble_a_freertos.rf_deep_sleep_enable.1" display="Enable" value="1" />
+        </property>
+        <property id="config.driver.ble_a_freertos.mcu_main_clock_khz" display="MCU Main Clock Frequency" default="8000" description="Set MCU Main Clock Frequency (kHz). Set clock source according to your board environment. HOCO: don't care. / Main Clock: 1000 to 20000 kHz / PLL Circuit: 4000 to 12500 kHz ">
+            <constraint display="Value must be an integer between 1000 and 20000">testInteger("${config.driver.ble_a_freertos.mcu_main_clock_khz}") &amp;&amp; ("${config.driver.ble_a_freertos.mcu_main_clock_khz}" &gt;=1000) &amp;&amp; ("${config.driver.ble_a_freertos.mcu_main_clock_khz}" &lt;=20000)</constraint>
+        </property>
+        <property id="config.driver.ble_a_freertos.device_data_code_flash_block" display="Code Flash(ROM) Device Data Block" default="255" description="Device specific data block on Code Flash (ROM).">
+            <constraint display="Value must be an integer between -1 and 255">testInteger("${config.driver.ble_a_freertos.device_data_code_flash_block}") &amp;&amp; ("${config.driver.ble_a_freertos.device_data_code_flash_block}" &gt;=-1) &amp;&amp; ("${config.driver.ble_a_freertos.device_data_code_flash_block}" &lt;=255)</constraint>
+        </property>
+        <property id="config.driver.ble_a_freertos.device_data_data_flash_block" display="Device Specific Data Flash Block" default="-1" description="Device specific data block on E2 Data Flash.">
+            <constraint display="Value must be an integer between -1 and 7">testInteger("${config.driver.ble_a_freertos.device_data_data_flash_block}") &amp;&amp; ("${config.driver.ble_a_freertos.device_data_data_flash_block}" &gt;=-1) &amp;&amp; ("${config.driver.ble_a_freertos.device_data_data_flash_block}" &lt;=7)</constraint>
+        </property>
+        <property id="config.driver.ble_a_freertos.gatt_mtu_size" display="MTU Size Configured" default="247" description="MTU Size configured by GATT MTU exchange procedure.">
+            <constraint display="Value must be an integer between 23 and 247">testInteger("${config.driver.ble_a_freertos.gatt_mtu_size}") &amp;&amp; ("${config.driver.ble_a_freertos.gatt_mtu_size}" &gt;=23)  &amp;&amp; ("${config.driver.ble_a_freertos.gatt_mtu_size}" &lt;=247)</constraint>
+        </property>
+        <property id="config.driver.ble_a_freertos.timer_number_of_slot" display="Timer Slot Maximum Number" default="10" description="The maximum number of timer slot." >
+            <constraint display="Value must be an integer between 1 and 10">testInteger("${config.driver.ble_a_freertos.timer_number_of_slot}") &amp;&amp; ("${config.driver.ble_a_freertos.timer_number_of_slot}" &gt;=1)  &amp;&amp; ("${config.driver.ble_a_freertos.timer_number_of_slot}" &lt;=10)</constraint>
+        </property>
+        <property id="config.driver.ble_a_freertos.event_notify_enable_value" default="0">
+            <export>
+            eval('' +
+            'var connection_start  = (${config.driver.ble_a_freertos.event_notify_connection_start} &amp; 0x1) &lt;&lt; 0;' +
+            'var connection_close  = (${config.driver.ble_a_freertos.event_notify_connection_close} &amp; 0x1) &lt;&lt; 1;' +
+            'var advertising_start = (${config.driver.ble_a_freertos.event_notify_advertising_start} &amp; 0x1) &lt;&lt; 2;' +
+            'var advertising_close = (${config.driver.ble_a_freertos.event_notify_advertising_close} &amp; 0x1) &lt;&lt; 3;' +
+            'var scanning_start    = (${config.driver.ble_a_freertos.event_notify_scanning_start} &amp; 0x1) &lt;&lt; 4;' +
+            'var scanning_close    = (${config.driver.ble_a_freertos.event_notify_scanning_close} &amp; 0x1) &lt;&lt; 5;' +
+            'var initiating_start  = (${config.driver.ble_a_freertos.event_notify_initiating_start} &amp; 0x1) &lt;&lt; 6;' +
+            'var initiating_close  = (${config.driver.ble_a_freertos.event_notify_initiating_close} &amp; 0x1) &lt;&lt; 7;' +
+            'var deep_sleep_start  = (${config.driver.ble_a_freertos.event_notify_deep_sleep_start} &amp; 0x1) &lt;&lt; 8;' +
+            'var deep_sleep_wakeup = (${config.driver.ble_a_freertos.event_notify_deep_sleep_wakeup} &amp; 0x1) &lt;&lt; 9;' +
+            'var value             = (connection_start | connection_close | advertising_start | advertising_close | scanning_start | scanning_close | initiating_start | initiating_close | deep_sleep_start | deep_sleep_wakeup | 0x0);' +
+            'value'
+            )</export>
+        </property>
+        <property default="config.driver.ble_a_freertos.synchronization_type.event_groups" display="Synchronization Type" id="config.driver.ble_a_freertos.synchronization_type" description="Specify which synchronaization method use when use FreeRTOS.">
+            <option display="Semaphore" id="config.driver.ble_a_freertos.synchronization_type.semaphore" value="(0)"/>
+            <option display="Event groups" id="config.driver.ble_a_freertos.synchronization_type.event_groups" value="(1)"/>
+        </property>
+        <content>
+            #ifdef __cplusplus
+            extern "C" {
+            #endif
+
+            #define BLE_CFG_LIBRARY_TYPE 0
+            #define BLE_CFG_RF_DEBUG_PUBLIC_ADDRESS {${config.driver.ble_a_freertos.rf_debug_public_address}}
+            #define BLE_CFG_RF_DEBUG_RANDOM_ADDRESS {${config.driver.ble_a_freertos.rf_debug_random_address}}
+            #define BLE_CFG_RF_CONNECTION_MAXIMUM (${config.driver.ble_a_freertos.rf_connection_maximum})
+            #define BLE_CFG_RF_CONNECTION_DATA_MAXIMUM (${config.driver.ble_a_freertos.rf_connection_data_maximum})
+            #define BLE_CFG_RF_ADVERTISING_DATA_MAXIMUM (${config.driver.ble_a_freertos.rf_advertising_data_maximum})
+            #define BLE_CFG_RF_ADVERTISING_SET_MAXIMUM (${config.driver.ble_a_freertos.rf_advertising_set_maximum})
+            #define BLE_CFG_RF_SYNC_SET_MAXIMUM (${config.driver.ble_a_freertos.rf_periodic_sync_set_maximum})
+            #define BLE_CFG_ENABLE_SECURE_DATA (${config.driver.ble_a_freertos.enable_secure_data})
+            #define BLE_CFG_SECURE_DATA_DATAFLASH_BLOCK (${config.driver.ble_a_freertos.secure_data_dataflash_block})
+            #define BLE_CFG_NUMBER_BONDING (${config.driver.ble_a_freertos.remote_device_bonding_number})
+            #define BLE_CFG_EVENT_NOTIFY_CONNECTION_START (${config.driver.ble_a_freertos.event_notify_connection_start})
+            #define BLE_CFG_EVENT_NOTIFY_CONNECTION_CLOSE (${config.driver.ble_a_freertos.event_notify_connection_close})
+            #define BLE_CFG_EVENT_NOTIFY_ADVERTISING_START (${config.driver.ble_a_freertos.event_notify_advertising_start})
+            #define BLE_CFG_EVENT_NOTIFY_ADVERTISING_CLOSE (${config.driver.ble_a_freertos.event_notify_advertising_close})
+            #define BLE_CFG_EVENT_NOTIFY_SCANNING_START (${config.driver.ble_a_freertos.event_notify_scanning_start})
+            #define BLE_CFG_EVENT_NOTIFY_SCANNING_CLOSE (${config.driver.ble_a_freertos.event_notify_scanning_close})
+            #define BLE_CFG_EVENT_NOTIFY_INITIATING_START (${config.driver.ble_a_freertos.event_notify_initiating_start})
+            #define BLE_CFG_EVENT_NOTIFY_INITIATING_CLOSE (${config.driver.ble_a_freertos.event_notify_initiating_close})
+            #define BLE_CFG_EVENT_NOTIFY_DEEP_SLEEP_START (${config.driver.ble_a_freertos.event_notify_deep_sleep_start})
+            #define BLE_CFG_EVENT_NOTIFY_DEEP_SLEEP_WAKEUP (${config.driver.ble_a_freertos.event_notify_deep_sleep_wakeup})
+            #define BLE_CFG_RF_CLVAL (${config.driver.ble_a_freertos.rf_clval})
+            #define BLE_CFG_RF_DCDC_CONVERTER_ENABLE (${config.driver.ble_a_freertos.rf_dcdc_converter_enabele})
+            #define BLE_CFG_RF_EXT32K_EN (${config.driver.ble_a_freertos.rf_external_32k_enable})
+            #define BLE_CFG_RF_MCU_CLKOUT_PORT (${config.driver.ble_a_freertos.rf_mcu_clkout_port})
+            #define BLE_CFG_RF_MCU_CLKOUT_FREQ (${config.driver.ble_a_freertos.rf_mcu_clkout_frequency})
+            #define BLE_CFG_RF_SCA (${config.driver.ble_a_freertos.rf_sleep_clock_accuracy})
+            #define BLE_CFG_RF_MAX_TX_POW (${config.driver.ble_a_freertos.rf_maximum_tx_power})
+            #define BLE_CFG_RF_DEF_TX_POW (${config.driver.ble_a_freertos.rf_default_tx_power})
+            #define BLE_CFG_RF_CLKOUT_EN (${config.driver.ble_a_freertos.rf_clkout_enable})
+            #define BLE_CFG_RF_DEEP_SLEEP_EN (${config.driver.ble_a_freertos.rf_deep_sleep_enable})
+            #define BLE_CFG_MCU_MAIN_CLK_KHZ (${config.driver.ble_a_freertos.mcu_main_clock_khz})
+            #define BLE_CFG_DEV_DATA_CF_BLOCK (${config.driver.ble_a_freertos.device_data_code_flash_block})
+            #define BLE_CFG_DEV_DATA_DF_BLOCK (${config.driver.ble_a_freertos.device_data_data_flash_block})
+            #define BLE_CFG_GATT_MTU_SIZE (${config.driver.ble_a_freertos.gatt_mtu_size})
+            #define BLE_CFG_TIMER_NUMBER_OF_SLOT (${config.driver.ble_a_freertos.timer_number_of_slot})
+            #define BLE_CFG_EVENT_NOTIFY_ENABLE_VAL (${config.driver.ble_a_freertos.event_notify_enable_value})
+            #define BLE_CFG_SYNCHRONIZATION_TYPE    ${config.driver.ble_a_freertos.synchronization_type}
+
+            #ifdef __cplusplus
+            }
+            #endif
+        </content>
+    </config>
+    <module config="config.driver.ble_a_freertos" display="Networking|BLE Driver (r_ble_extended_freertos)" id="module.network_on_ble_a_freertos" visible="false" version="1" url="group___b_l_e___e_x_t_e_n_d_e_d.html">
+        <constraint display="Requires Radio peripheral">
+          "${interface.mcu.radio}" === "1"
+        </constraint>
+        <constraint display="Requires Radio peripheral clock 8MHz minimum">
+          testExists("${board.clock.peripheral.sci}") &amp;&amp; (Number("${board.clock.peripheral.sci}") &gt;= 8000000)
+        </constraint>
+        <constraint display="The BLE Interrupt Priority must be lower than the max syscall priority.">
+            ((Number("${module.driver.ble_on_radio.requires.irq::module.driver.external_irq.ipl}".replace("board.icu.common.irq.priority","")) &gt;= Number("${config.awsfreertos.thread.configlibrary_max_syscall_interrupt_priority}".replace("board.icu.common.irq.priority",""))) &amp;&amp;
+            (Number("${module.driver.ble_on_radio.requires.irq::module.driver.external_irq.ipl}".replace("board.icu.common.irq.priority","")) != "0"))
+        </constraint>
+        <requires id="module.driver.ble_on_radio.requires.awsfreertos" interface="interface.rtos.awsfreertos" visible="false" display="Requires FreeRTOS"/>
+        <requires id="module.driver.ble_on_radio.requires.radio" interface="interface.mcu.radio" visible="false" display="Requires BLE peripheral" />
+        <requires id="module.driver.ble_on_radio.requires.flash" interface="interface.driver.flash" display="Add Flash Driver">
+            <override property="module.driver.flash.data_flash_bgo" value="module.driver.flash.data_flash_bgo.disabled"/>
+          </requires>
+        <requires id="module.driver.ble_on_radio.requires.irq" interface="interface.driver.external_irq" display="Add ICU Driver">
+            <override property="module.driver.external_irq.channel" value="8"/>
+            <override property="module.driver.external_irq.trigger" value="module.driver.external_irq.trigger.trig_falling"/>
+            <override property="module.driver.external_irq.p_callback" value="r_rf_ble_interrupt"/>
+        </requires>
+        <requires id="module.driver.ble_on_radio.requires.gpt" interface="interface.driver.timer" display="Add GPT Driver">
+            <override property="module.driver.timer.channel" value="1"/>
+            <override property="module.driver.timer.mode" value="module.driver.timer.mode.mode_periodic"/>
+            <override property="module.driver.timer.period" value="10"/>
+            <override property="module.driver.timer.unit" value="module.driver.timer.unit.unit_period_msec"/>
+            <override property="module.driver.timer.p_callback" value="r_rf_host_timer_interrupt"/>
+        </requires>
+        <provides interface="interface.driver.network" />
+        <provides interface="interface.driver.network_on_ble" />
+        <provides interface="interface.driver.ble_on_extended_freertos" />
+        <property id="module.driver.ble.flash.name" default="${module.driver.ble_on_radio.requires.flash::module.driver.flash.name}"/>
+        <header>
+        </header>
+        <includes>
+        </includes>
+        <declarations>
+external_irq_instance_t const *g_ble_external_irq = &amp;${module.driver.ble_on_radio.requires.irq::module.driver.external_irq.name};
+flash_instance_t const *g_ble_flash = &amp;${module.driver.ble_on_radio.requires.flash::module.driver.flash.name};
+
+#ifndef ENABLE_HCI_MODE
+timer_instance_t const *g_ble_pl_timer = &amp;${module.driver.ble_on_radio.requires.gpt::module.driver.timer.name};
+#endif
+
+const st_ble_rf_notify_t g_ble_rf_notify = {
+    .enable = BLE_CFG_EVENT_NOTIFY_ENABLE_VAL,
+
+    #if ((BLE_CFG_EVENT_NOTIFY_ENABLE_VAL &amp; BLE_EVENT_NOTIFY_START_MASK) != 0)
+    .start_cb = r_ble_rf_notify_event_start,
+    #endif /* ((BLE_CFG_EVENT_NOTIFY_ENABLE_VAL &amp; BLE_EVENT_NOTIFY_START_MASK) != 0) */
+    #if ((BLE_CFG_EVENT_NOTIFY_ENABLE_VAL &amp; BLE_EVENT_NOTIFY_CLOSE_MASK) != 0)
+    .close_cb = r_ble_rf_notify_event_close,
+    #endif
+    #if ((BLE_CFG_EVENT_NOTIFY_ENABLE_VAL &amp; BLE_EVENT_NOTIFY_DS_MASK) != 0)
+    .dsleep_cb = r_ble_rf_notify_deep_sleep,
+    #endif
+};
+
+const uint8_t  g_ble_dbg_pub_addr[6]  = BLE_CFG_RF_DEBUG_PUBLIC_ADDRESS;
+const uint8_t  g_ble_dbg_rand_addr[6] = BLE_CFG_RF_DEBUG_RANDOM_ADDRESS;
+
+void ble_host_conn_config(uint32_t ** pp_host_conn_config_table);
+
+/****************************/
+/*** Memory customization ***/
+/****************************/
+#if (BLE_CFG_RF_CONNECTION_MAXIMUM &gt;= 1) &amp;&amp; (BLE_CFG_RF_CONNECTION_MAXIMUM &lt;= 7)
+const uint16_t g_ble_conn_max = BLE_CFG_RF_CONNECTION_MAXIMUM;
+#endif
+
+#if (BLE_CFG_RF_CONNECTION_DATA_MAXIMUM &gt;= 27) &amp;&amp; (BLE_CFG_RF_CONNECTION_DATA_MAXIMUM &lt;= 251)
+const uint16_t g_ble_conn_data_max = BLE_CFG_RF_CONNECTION_DATA_MAXIMUM;
+#endif
+
+#if (BLE_CFG_LIBRARY_TYPE == 0)
+#if (BLE_CFG_RF_ADVERTISING_DATA_MAXIMUM &gt;= 31) &amp;&amp; (BLE_CFG_RF_ADVERTISING_DATA_MAXIMUM &lt;= 1650)
+const uint16_t g_ble_adv_data_max = BLE_CFG_RF_ADVERTISING_DATA_MAXIMUM;
+#endif
+
+#if (BLE_CFG_RF_ADVERTISING_SET_MAXIMUM &gt;= 1) &amp;&amp; (BLE_CFG_RF_ADVERTISING_SET_MAXIMUM &lt;= 4)
+const uint16_t g_ble_adv_set_max = BLE_CFG_RF_ADVERTISING_SET_MAXIMUM;
+#endif
+
+#if (BLE_CFG_RF_SYNC_SET_MAXIMUM &gt;= 1) &amp;&amp; (BLE_CFG_RF_SYNC_SET_MAXIMUM &lt;= 2)
+const uint16_t g_ble_sync_set_max = BLE_CFG_RF_SYNC_SET_MAXIMUM;
+#endif
+#endif /* (BLE_CFG_LIBRARY_TYPE == 0) */
+
+
+/******************************************/
+/**** LL management data area (2bytes) ****/
+/******************************************/
+#if (BLE_CFG_LIBRARY_TYPE != 0)
+#define BLE_CNTL_DATA_MIN           (392)
+#define BLE_CNTL_DATA_CONN          (65)
+#define BLE_CNTL_DATA_ADV           (0)
+#define BLE_CNTL_DATA_SYNC          (0)
+#else /* (BLE_CFG_LIBRARY_TYPE != 0) */
+#define BLE_CNTL_DATA_MIN           (279)
+#define BLE_CNTL_DATA_CONN          (65)
+#define BLE_CNTL_DATA_ADV           (78)
+#define BLE_CNTL_DATA_SYNC          (33)
+#endif /* (BLE_CFG_LIBRARY_TYPE != 0) */
+#define BLE_CNTL_DATA_MAX                           \
+(                                                   \
+    (BLE_CNTL_DATA_MIN) +                           \
+    (BLE_CNTL_DATA_CONN * BLE_CFG_RF_CONNECTION_MAXIMUM) +    \
+    (BLE_CNTL_DATA_ADV  * BLE_CFG_RF_ADVERTISING_SET_MAXIMUM) + \
+    (BLE_CNTL_DATA_SYNC * BLE_CFG_RF_SYNC_SET_MAXIMUM) +\
+    (0)                                             \
+)
+
+/******************************************/
+/**** BLE stack event heap area (1byte)****/
+/******************************************/
+#ifdef ENABLE_HCI_MODE
+#define BLE_HOST_HEAP_MIN         (0)
+#else /* ENABLE_HCI_MODE */
+#define BLE_HOST_HEAP_MIN         (3032)
+#endif /* ENABLE_HCI_MODE */
+#if (BLE_CFG_LIBRARY_TYPE != 0)
+#define BLE_CNTL_HEAP_MIN         (88)
+#define BLE_CNTL_HEAP_EVENT       (720)
+#else /* (BLE_CFG_LIBRARY_TYPE != 0) */
+#define BLE_CNTL_HEAP_MIN         (280)
+#define BLE_CNTL_HEAP_EVENT       (3784)
+#endif /* (BLE_CFG_LIBRARY_TYPE != 0) */
+#define BLE_CNTL_HEAP_CONN        (388)
+#define _ALIGN_4BYTE(base)        ((((base)+3)&gt;&gt;2)&lt;&lt;2)
+#define BLE_CNTL_HEAP_TX_DATA     (_ALIGN_4BYTE(BLE_CFG_RF_CONNECTION_DATA_MAXIMUM+4)+20)
+#define BLE_CNTL_HEAP_RX_DATA     (_ALIGN_4BYTE(BLE_CFG_RF_CONNECTION_DATA_MAXIMUM+8)+4)
+#define BLE_CNTL_HEAP_TX2_DATA    (BLE_CFG_RF_CONNECTION_DATA_MAXIMUM+8)
+#define BLE_CNTL_TXRX_MAX         (4)
+
+#if (BLE_CFG_LIBRARY_TYPE != 0)
+#define BLE_CNTL_ADV_DATA_MAX     (0)
+#else /* (BLE_CFG_LIBRARY_TYPE != 0) */
+#define BLE_ADV_DATA_BLOCKS_LIMIT (36)
+#define BLE_ADV_DATA_BLOCKS       ((((BLE_CFG_RF_ADVERTISING_DATA_MAXIMUM + 251)/252) * BLE_CFG_RF_ADVERTISING_SET_MAXIMUM) * 2)
+#if (BLE_ADV_DATA_BLOCKS &gt; BLE_ADV_DATA_BLOCKS_LIMIT)
+#define BLE_CNTL_ADV_DATA_MAX     (BLE_ADV_DATA_BLOCKS_LIMIT * 256)
+#else /* (BLE_ADV_DATA_BLOCKS &gt; BLE_ADV_DATA_BLOCKS_LIMIT) */
+#define BLE_CNTL_ADV_DATA_MAX     (BLE_ADV_DATA_BLOCKS * 256)
+#endif /* (BLE_ADV_DATA_BLOCKS &gt; BLE_ADV_DATA_BLOCKS_LIMIT) */
+#endif /* (BLE_CFG_LIBRARY_TYPE != 0) */
+
+#define BLE_CNTL_HEAP_MAX                           \
+(                                                   \
+    (BLE_CNTL_HEAP_MIN) +                           \
+    (BLE_HOST_HEAP_MIN) +                           \
+    (BLE_CNTL_HEAP_EVENT) +                         \
+    (BLE_CNTL_HEAP_CONN * BLE_CFG_RF_CONNECTION_MAXIMUM) +    \
+    (BLE_CNTL_HEAP_TX_DATA * BLE_CNTL_TXRX_MAX) +   \
+    (BLE_CNTL_HEAP_RX_DATA * BLE_CNTL_TXRX_MAX) +   \
+    (BLE_CNTL_ADV_DATA_MAX) +                       \
+    (0)                                             \
+)
+
+
+/******************************************/
+/**** LL connection entry area (1byte) ****/
+/******************************************/
+#if (BLE_CFG_LIBRARY_TYPE == 1)
+#define BLE_CNTL_CONN_ENT         (328)
+#elif (BLE_CFG_LIBRARY_TYPE == 2)
+#define BLE_CNTL_CONN_ENT         (316)
+#else /* (BLE_CFG_LIBRARY_TYPE == x) */
+#define BLE_CNTL_CONN_ENT         (336)
+#endif /* (BLE_CFG_LIBRARY_TYPE == x) */
+#define BLE_CNTL_CONN_ENT_MAX                       \
+(                                                   \
+    (BLE_CNTL_CONN_ENT * BLE_CFG_RF_CONNECTION_MAXIMUM) +     \
+    (0)                                             \
+)
+
+/******************************************/
+/**** LL Advertising set area (1byte)  ****/
+/******************************************/
+#define BLE_CNTL_ADV_SET          (152)
+#define BLE_CNTL_ADV_SET_MAX                        \
+(                                                   \
+    (BLE_CNTL_ADV_SET * BLE_CFG_RF_ADVERTISING_SET_MAXIMUM) +   \
+    (0)                                             \
+)
+
+uint16_t g_ble_cntl_data[BLE_CNTL_DATA_MAX];
+uint32_t g_ble_cntl_heap[(BLE_CNTL_HEAP_MAX+3)/4];
+uint32_t g_ble_cntl_heap2[(BLE_CNTL_HEAP_TX2_DATA+3)/4];
+uint32_t g_ble_cntl_conn_ent[(BLE_CNTL_CONN_ENT_MAX+3)/4];
+#if (BLE_CFG_LIBRARY_TYPE == 0)
+uint32_t g_ble_cntl_adv_set[(BLE_CNTL_ADV_SET_MAX+3)/4];
+const uint16_t g_ble_adv_block         = (uint16_t)(BLE_CNTL_ADV_DATA_MAX/256);
+#endif /* (BLE_CFG_LIBRARY_TYPE == 0) */
+
+#ifdef NO_USE_BSP
+const uint16_t g_ble_main_clk_khz      = (uint16_t)BLE_CFG_MCU_MAIN_CLK_KHZ;
+const ble_mcu_clock_change_cb_t g_ble_mcu_clock_change_fp = NULL;
+#else /* NO_USE_BSP */
+
+#include "bsp_cfg.h"
+#if (BSP_CFG_CLKOUT_RF_MAIN == 1) &amp;&amp; (BSP_CFG_XTAL_HZ == 4000000) &amp;&amp; (BLE_CFG_RF_CLKOUT_EN == 5)
+extern void R_BSP_ConfigClockSetting(void);
+const uint16_t g_ble_main_clk_khz      = (uint16_t)(BSP_CFG_XTAL_HZ/1000);
+const ble_mcu_clock_change_cb_t g_ble_mcu_clock_change_fp = R_BSP_ConfigClockSetting;
+#elif (BSP_CFG_CLKOUT_RF_MAIN == 0)
+const uint16_t g_ble_main_clk_khz      = (uint16_t)BLE_CFG_MCU_MAIN_CLK_KHZ;
+const ble_mcu_clock_change_cb_t g_ble_mcu_clock_change_fp = NULL;
+
+#endif /* (BSP_CFG_CLKOUT_RF_MAIN == 1) &amp;&amp; (BSP_CFG_XTAL_HZ == 4000000) &amp;&amp; (BLE_CFG_RF_CLKOUT_EN == 5)  */
+#endif /* NO_USE_BSP */
+
+#define BLE_DEVICE_DATA_CF_BLOCK_BASE                         (0x00000000)
+#define BLE_DEVICE_DATA_DF_BLOCK_BASE                         (0x40100000)
+
+#if (BSP_FEATURE_FLASH_HP_DF_BLOCK_SIZE != 0)
+ #define BLE_DEVICE_DATA_CF_BLOCK_SIZE                        (BSP_FEATURE_FLASH_HP_CF_BLOCK_SIZE)
+ #define BLE_DEVICE_DATA_DF_BLOCK_SIZE                        (BSP_FEATURE_FLASH_HP_DF_BLOCK_SIZE)
+#elif (BSP_FEATURE_FLASH_LP_DF_BLOCK_SIZE != 0)
+ #define BLE_DEVICE_DATA_CF_BLOCK_SIZE                        (BSP_FEATURE_FLASH_LP_CF_BLOCK_SIZE)
+ #define BLE_DEVICE_DATA_DF_BLOCK_SIZE                        (BSP_FEATURE_FLASH_LP_DF_BLOCK_SIZE)
+#endif
+
+#if (BLE_CFG_DEV_DATA_CF_BLOCK &gt;= 0) &amp;&amp; (BLE_CFG_DEV_DATA_CF_BLOCK &lt;= 255)
+const uint32_t  g_ble_dev_data_cf_addr = BLE_DEVICE_DATA_CF_BLOCK_BASE + BLE_DEVICE_DATA_CF_BLOCK_SIZE * BLE_CFG_DEV_DATA_CF_BLOCK;
+#else /* (BLE_CFG_DEV_DATA_CF_BLOCK &gt;= 0) &amp;&amp; (BLE_CFG_DEV_DATA_CF_BLOCK &lt;= 255) */
+const uint32_t  g_ble_dev_data_cf_addr = 0U;
+#endif /* (BLE_CFG_DEV_DATA_CF_BLOCK &gt;= 0) &amp;&amp; (BLE_CFG_DEV_DATA_CF_BLOCK &lt;= 255) */
+
+#if (BLE_CFG_DEV_DATA_DF_BLOCK &gt;= 0) &amp;&amp; (BLE_CFG_DEV_DATA_DF_BLOCK &lt;= 7)
+const uint32_t  g_ble_dev_data_df_addr = BLE_DEVICE_DATA_DF_BLOCK_BASE + BLE_DEVICE_DATA_DF_BLOCK_SIZE * BLE_CFG_DEV_DATA_DF_BLOCK;
+#else /* (BLE_CFG_DEV_DATA_DF_BLOCK &gt;= 0) &amp;&amp; (BLE_CFG_DEV_DATA_DF_BLOCK &lt;= 7) */
+const uint32_t  g_ble_dev_data_df_addr = 0U;
+#endif /* (BLE_CFG_DEV_DATA_DF_BLOCK &gt;= 0) &amp;&amp; (BLE_CFG_DEV_DATA_DF_BLOCK &lt;= 7) */
+
+const uint8_t g_ble_rf_config[] =
+{
+/***************************************/
+/**** CLVAL setting                 ****/
+/***************************************/
+#if (BLE_CFG_RF_CLVAL &gt;= 0) &amp;&amp; (BLE_CFG_RF_CLVAL &lt;= 15)
+    (BLE_CFG_RF_CLVAL &lt;&lt; 0) |
+#endif /* BLE_CFG_RF_CLVAL */
+    0x00, /* base value */
+
+/***************************************/
+/**** RF Slow Clock setting         ****/
+/***************************************/
+#if (BLE_CFG_RF_EXT32K_EN &gt;= 0) &amp;&amp; (BLE_CFG_RF_EXT32K_EN &lt;= 1)
+    /**** External 32kHz setting ****/
+    (BLE_CFG_RF_EXT32K_EN &lt;&lt; 0) |
+#endif /* BLE_CFG_RF_EXT32K_EN */
+
+#if (BLE_CFG_RF_MCU_CLKOUT_FREQ &gt;= 0) &amp;&amp; (BLE_CFG_RF_MCU_CLKOUT_FREQ &lt;= 1)
+    /**** MCU CLKOUT setting ****/
+    (BLE_CFG_RF_MCU_CLKOUT_FREQ &lt;&lt; 1) |
+#endif /* BLE_CFG_RF_MCU_CLKOUT_FREQ */
+
+#if (BLE_CFG_RF_MCU_CLKOUT_PORT &gt;= 0) &amp;&amp; (BLE_CFG_RF_MCU_CLKOUT_PORT &lt;= 1)
+    /**** RF_LOCO setting ****/
+    (BLE_CFG_RF_MCU_CLKOUT_PORT &lt;&lt; 2) |
+#endif /* BLE_RF_CONF_RF_LOCO */
+
+/**** Sleep Clock Accuracy (SCA) setting ****/
+#if   (BLE_CFG_RF_SCA&gt;=251) &amp;&amp; (BLE_CFG_RF_SCA&lt;=500)
+    (0x00 &lt;&lt; 4) |
+#elif (BLE_CFG_RF_SCA&gt;=151) &amp;&amp; (BLE_CFG_RF_SCA&lt;=250)
+    (0x01 &lt;&lt; 4) |
+#elif (BLE_CFG_RF_SCA&gt;=101) &amp;&amp; (BLE_CFG_RF_SCA&lt;=150)
+    (0x02 &lt;&lt; 4) |
+#elif (BLE_CFG_RF_SCA&gt;=76 ) &amp;&amp; (BLE_CFG_RF_SCA&lt;=100)
+    (0x03 &lt;&lt; 4) |
+#elif (BLE_CFG_RF_SCA&gt;=51 ) &amp;&amp; (BLE_CFG_RF_SCA&lt;=75 )
+    (0x04 &lt;&lt; 4) |
+#elif (BLE_CFG_RF_SCA&gt;=31 ) &amp;&amp; (BLE_CFG_RF_SCA&lt;=50 )
+    (0x05 &lt;&lt; 4) |
+#elif (BLE_CFG_RF_SCA&gt;=21 ) &amp;&amp; (BLE_CFG_RF_SCA&lt;=30 )
+    (0x06 &lt;&lt; 4) |
+#elif (BLE_CFG_RF_SCA&gt;=0  ) &amp;&amp; (BLE_CFG_RF_SCA&lt;=20 )
+    (0x07 &lt;&lt; 4) |
+#endif /* BLE_CFG_RF_SCA */
+    0x00, /* base value */
+
+/***************************************/
+/**** Tx Power setting              ****/
+/***************************************/
+#if (BLE_CFG_RF_MAX_TX_POW &gt;= 0) &amp;&amp; (BLE_CFG_RF_MAX_TX_POW &lt;= 2)
+    /**** Defalut Tx Power Setting ****/
+    (BLE_CFG_RF_MAX_TX_POW &lt;&lt; 0) |
+#endif /* BLE_CFG_RF_MAX_TX_POW */
+    0x00, /* base value */
+
+/***************************************/
+/**** RF option setting             ****/
+/***************************************/
+#if (BLE_CFG_RF_DCDC_CONVERTER_ENABLE &gt;= 0) &amp;&amp; (BLE_CFG_RF_DCDC_CONVERTER_ENABLE &lt;= 1 )
+
+    /**** DC-DC converter setting ****/
+    (BLE_CFG_RF_DCDC_CONVERTER_ENABLE &lt;&lt; 0) |
+
+#endif /* BLE_CFG_RF_DCDC_CONVERTER_ENABLE */
+#if (BLE_CFG_RF_DEF_TX_POW &gt;= 0) &amp;&amp; (BLE_CFG_RF_DEF_TX_POW &lt;= 1)
+    /**** Max Tx Power Setting ****/
+    (BLE_CFG_RF_DEF_TX_POW &lt;&lt; 1) |
+#endif /* BLE_CFG_RF_DEF_TX_POW */
+#if (BLE_CFG_RF_CLKOUT_EN &gt;= 0) &amp;&amp; (BLE_CFG_RF_CLKOUT_EN &lt;= 7)
+    /**** RF clock output settng ****/
+    (BLE_CFG_RF_CLKOUT_EN &lt;&lt; 4) |
+#endif /* BLE_CFG_RF_CLKOUT_EN */
+
+    0x00 /* base value */
+};
+
+/***************************************/
+/**** Host Stack settings           ****/
+/***************************************/
+#ifndef ENABLE_HCI_MODE
+#define BLE_HOST_L2_SIG_TBL_LEN                  24
+#define BLE_HOST_L2_CH_PARAM_TBL_LEN              2
+#define BLE_HOST_HCI_REM_TBL_LEN                  6
+#define BLE_HOST_SMP_CONFIG_LEN                 108
+#define BLE_HOST_GAP_CONN_TBL_LEN                12
+#define BLE_HOST_DEV_Q_TBL_LEN                   14
+#define BLE_HOST_ATT_CONN_TBL_LEN                16
+#define BLE_HOST_GATTS_CNF_TBL_LEN                2
+
+uint32_t g_ble_host_dev_q_tbl[(BLE_CFG_RF_CONNECTION_MAXIMUM * BLE_HOST_DEV_Q_TBL_LEN + 3)/4];
+uint32_t g_ble_host_hci_rem_tbl[(BLE_CFG_RF_CONNECTION_MAXIMUM * BLE_HOST_HCI_REM_TBL_LEN + 3)/4];
+uint32_t g_ble_host_l2_sig_tbl[(BLE_CFG_RF_CONNECTION_MAXIMUM * BLE_HOST_L2_SIG_TBL_LEN + 3)/4];
+uint32_t g_ble_host_l2_ch_param_tbl[(BLE_CFG_RF_CONNECTION_MAXIMUM * BLE_HOST_L2_CH_PARAM_TBL_LEN + 3)/4];
+uint32_t g_ble_host_smp_config_tbl[(BLE_CFG_RF_CONNECTION_MAXIMUM * BLE_HOST_SMP_CONFIG_LEN + 3)/4];
+uint32_t g_ble_host_att_conn_tbl[(BLE_CFG_RF_CONNECTION_MAXIMUM * BLE_HOST_ATT_CONN_TBL_LEN + 3)/4];
+uint32_t g_ble_host_gap_conn_tbl[(BLE_CFG_RF_CONNECTION_MAXIMUM * BLE_HOST_GAP_CONN_TBL_LEN + 3)/4];
+uint32_t g_ble_host_gatts_cnf_tbl[(BLE_CFG_RF_CONNECTION_MAXIMUM * BLE_HOST_GATTS_CNF_TBL_LEN + 3)/4];
+
+const uint32_t g_p_ble_host_config_tbls[] = {
+    (uint32_t)g_ble_host_dev_q_tbl,
+    (uint32_t)g_ble_host_hci_rem_tbl,
+    (uint32_t)g_ble_host_l2_sig_tbl,
+    (uint32_t)g_ble_host_l2_ch_param_tbl,
+    (uint32_t)g_ble_host_smp_config_tbl,
+    (uint32_t)g_ble_host_att_conn_tbl,
+    (uint32_t)g_ble_host_gap_conn_tbl,
+    (uint32_t)g_ble_host_gatts_cnf_tbl
+};
+
+void ble_host_conn_config(uint32_t ** pp_host_conn_config_table)
+{
+    * pp_host_conn_config_table = (uint32_t*)g_p_ble_host_config_tbls;
+}
+#endif /* !ENABLE_HCI_MODE */
+
+/***************************************/
+/**** Data Flash Usage              ****/
+/***************************************/
+
+#if (BLE_CFG_DEV_DATA_DF_BLOCK &gt;= 0) || \
+    ( (BLE_CFG_EN_SEC_DATA != 0) &amp;&amp; (BLE_CFG_SECD_DATA_DF_BLOCK &gt;= 0) )
+uint32_t    g_ble_flash_enable = 1;
+#else
+uint32_t    g_ble_flash_enable = 0;
+#endif
+        </declarations>
+    </module>
+</raModuleDescription>
+

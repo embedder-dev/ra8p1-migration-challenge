@@ -1,0 +1,566 @@
+﻿<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.driver.rtc" path="fsp_cfg/r_rtc_cfg.h" version="0">
+        <property default="config.driver.rtc.param_checking_enable.bsp" display="Parameter Checking" id="config.driver.rtc.param_checking_enable" description="If selected code for parameter checking is included in the build.">
+            <option display="Default (BSP)" id="config.driver.rtc.param_checking_enable.bsp" value="(BSP_CFG_PARAM_CHECKING_ENABLE)"/>
+            <option display="Enabled" id="config.driver.rtc.param_checking_enable.enabled" value="(1)"/>
+            <option display="Disabled" id="config.driver.rtc.param_checking_enable.disabled" value="(0)"/>
+        </property>
+        <property default="config.driver.rtc.open_set_source_clock.enabled" display="Set Source Clock in Open" id="config.driver.rtc.open_set_source_clock" description="If enabled RTC source clock is initialized in R_RTC_Open. If disabled, R_RTC_ClockSourceSet must be called to set the RTC source clock. Disable if user wants to control the setting of RTC source clock after warm start.">
+            <option display="Enabled" id="config.driver.rtc.open_set_source_clock.enabled" value="(1)"/>
+            <option display="Disabled" id="config.driver.rtc.open_set_source_clock.disabled" value="(0)"/>
+        </property>
+        <content>
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#define RTC_CFG_PARAM_CHECKING_ENABLE ${config.driver.rtc.param_checking_enable}
+#define RTC_CFG_OPEN_SET_CLOCK_SOURCE ${config.driver.rtc.open_set_source_clock}
+
+#ifdef __cplusplus
+}
+#endif
+        </content>
+    </config>
+    <module config="config.driver.rtc" display="Timers|${module.driver.rtc.name} Realtime Clock (r_rtc)" id="module.driver.rtc_on_rtc" version="1" url="group___r_t_c.html">
+        <constraint display="A callback function is required when interrupts are enabled.">
+          ("${module.driver.rtc.p_callback}" != "NULL") || ("${module.driver.rtc.alarm_ipl}" === "_disabled" &amp;&amp; "${module.driver.rtc.periodic_ipl}" === "_disabled")
+        </constraint>
+        <constraint display="Unique name required for each instance">
+            "${interface.driver.rtc.${module.driver.rtc.name}}" === "1"
+        </constraint>
+        <constraint display="Requires RTC Peripheral">
+          "${interface.mcu.rtc}" === "1"
+        </constraint>
+        <constraint display="Error Adjustment Value must be a positive integer less than equal to 127">((testInteger("${module.driver.rtc.err_adjustment_value}") &amp;&amp; ("${module.driver.rtc.err_adjustment_value}" &gt;=0) &amp;&amp; ("${module.driver.rtc.err_adjustment_value}" &lt;=127))
+            &amp;&amp; ("${config.bsp.fsp.mcu.rtc.err_adjustment_value.max_value}" === "127"))
+            || ("${config.bsp.fsp.mcu.rtc.err_adjustment_value.max_value}" === "63")
+        </constraint>
+        <constraint display="Error Adjustment Value must be a positive integer less than equal to 63">((testInteger("${module.driver.rtc.err_adjustment_value}") &amp;&amp; ("${module.driver.rtc.err_adjustment_value}" &gt;=0) &amp;&amp; ("${module.driver.rtc.err_adjustment_value}" &lt;=63))
+            &amp;&amp; ("${config.bsp.fsp.mcu.rtc.err_adjustment_value.max_value}" === "63"))
+            || ("${config.bsp.fsp.mcu.rtc.err_adjustment_value.max_value}" === "127")
+        </constraint>
+        <requires id="module.driver.rtc_on_rtc.requires.rtc" interface="interface.mcu.rtc" visible="false" display="Requires RTC Peripheral" />
+        <provides interface="interface.driver.rtc" />
+        <provides interface="interface.driver.rtc_on_rtc" />
+        <provides interface="interface.driver.rtc.${module.driver.rtc.name}" />
+        <provides interface="interface.peripheral.rtc" />
+        <property default="g_rtc${_instance}" display="Name" id="module.driver.rtc.name" description="Module name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.rtc.name}")</constraint>
+            <signal event="event.rtc.period" />
+        </property>
+        <property default="" display="Clock Source" id="module.driver.rtc.clock_source" description="Select the RTC clock source.">
+            <select enum="enum.mcu.rtc.clock_source"/>
+        </property>
+        <property default="255" display="Frequency Comparision Value (LOCO)" id="module.driver.rtc.freq_cmpr_value_loco" description="Frequency comparison value when using LOCO">
+            <constraint display="Value must be a positive integer between 7 and 511">testInteger("${module.driver.rtc.freq_cmpr_value_loco}")  &amp;&amp; ("${module.driver.rtc.freq_cmpr_value_loco}" &gt;=7) &amp;&amp; ("${module.driver.rtc.freq_cmpr_value_loco}" &lt;=511)</constraint>
+        </property>
+        <property default="module.driver.rtc.err_adjustment_mode.m1" display="Automatic Adjustment Mode" id="module.driver.rtc.err_adjustment_mode" description="Enable/ Disable the Error Adjustment mode">
+            <option display="Enabled" id="module.driver.rtc.err_adjustment_mode.m1" value="RTC_ERROR_ADJUSTMENT_MODE_AUTOMATIC"/>
+            <option display="Disabled" id="module.driver.rtc.err_adjustment_mode.m2" value="RTC_ERROR_ADJUSTMENT_MODE_MANUAL"/>
+        </property>
+        <property default="module.driver.rtc.err_adjustment_period.p1" display="Automatic Adjustment Period" id="module.driver.rtc.err_adjustment_period" description="Select the Error Adjustment Period for Automatic Adjustment">
+            <option display="10 Seconds" id="module.driver.rtc.err_adjustment_period.p1" value="RTC_ERROR_ADJUSTMENT_PERIOD_10_SECOND"/>
+            <option display="1 Minute" id="module.driver.rtc.err_adjustment_period.p2" value="RTC_ERROR_ADJUSTMENT_PERIOD_1_MINUTE"/>
+            <option display="NONE" id="module.driver.rtc.err_adjustment_period.p3" value="RTC_ERROR_ADJUSTMENT_PERIOD_NONE"/>
+        </property>
+        <property default="module.driver.rtc.err_adjustment_type.t1" display="Adjustment Type (Plus-Minus)" id="module.driver.rtc.err_adjustment_type" description="Select the Error Adjustment type">
+            <option display="NONE" id="module.driver.rtc.err_adjustment_type.t1" value="RTC_ERROR_ADJUSTMENT_NONE"/>
+            <option display="Addition" id="module.driver.rtc.err_adjustment_type.t2" value="RTC_ERROR_ADJUSTMENT_ADD_PRESCALER"/>
+            <option display="Subtraction" id="module.driver.rtc.err_adjustment_type.t3" value="RTC_ERROR_ADJUSTMENT_SUBTRACT_PRESCALER"/>
+        </property>
+        <property default="0" display="Error Adjustment Value" id="module.driver.rtc.err_adjustment_value" description="Specify the Adjustment Value (the number of sub-clock cycles) from the prescaler">
+        </property>
+        <property default="NULL" display="Callback" id="module.driver.rtc.p_callback" description="A user callback function can be provided. If this callback function is provided, it will be called from the interrupt service routine (ISR).">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.rtc.p_callback}")</constraint>
+        </property>
+        <property default="" display="Alarm Interrupt Priority" id="module.driver.rtc.alarm_ipl" description="Select the alarm interrupt priority.">
+            <select enum="enum.mcu.nvic.priorities.optional"/>
+            <interrupt event="event.rtc.alarm" isr="rtc_alarm_periodic_isr"/>
+        </property>
+        <property default="" display="Period Interrupt Priority" id="module.driver.rtc.periodic_ipl" description="Select the period interrupt priority.">
+            <select enum="enum.mcu.nvic.priorities.optional"/>
+            <interrupt event="event.rtc.period" isr="rtc_alarm_periodic_isr"/>
+        </property>
+        <property default="" display="Carry Interrupt Priority" id="module.driver.rtc.carry_ipl" description="Select the carry interrupt priority.">
+            <select enum="enum.mcu.nvic.priorities.mandatory"/>
+            <interrupt event="event.rtc.carry" isr="rtc_carry_isr"/>
+        </property>
+        <peripheral name="RTC" component="rtc0" />
+        <!-- For MCU's whose pinmapping files have been generated with MPC Designer Tool -->
+        <peripheral name="RTC" component="rtc" />
+        <symbol id="symbol.driver.rtc.name" value="${module.driver.rtc.name}"/>
+        <symbol id="symbol.driver.rtc.guard.open" value="${module.driver.rtc.name}_open_guard"/>
+        <symbol id="symbol.driver.rtc.guard.macro.open" value="FSP_GUARD_${module.driver.rtc.name}_R_RTC_Open"/>
+        <symbol id="symbol.driver.rtc.guard.close" value="${module.driver.rtc.name}_close_guard"/>
+        <symbol id="symbol.driver.rtc.guard.macro.close" value="FSP_GUARD_${module.driver.rtc.name}_R_RTC_Close"/>
+        <symbol id="symbol.driver.rtc.guard.clock_source_set" value="${module.driver.rtc.name}_clock_source_set_guard"/>
+        <symbol id="symbol.driver.rtc.guard.macro.clock_source_set" value="FSP_GUARD_${module.driver.rtc.name}_R_RTC_ClockSourceSet"/>
+        <symbol id="symbol.driver.rtc.guard.calendar_time_set" value="${module.driver.rtc.name}_calendar_time_set_guard"/>
+        <symbol id="symbol.driver.rtc.guard.macro.calendar_time_set" value="FSP_GUARD_${module.driver.rtc.name}_R_RTC_CalendarTimeSet"/>
+        <symbol id="symbol.driver.rtc.guard.calendar_time_get" value="${module.driver.rtc.name}_calendar_time_get_guard"/>
+        <symbol id="symbol.driver.rtc.guard.macro.calendar_time_get" value="FSP_GUARD_${module.driver.rtc.name}_R_RTC_CalendarTimeGet"/>
+        <symbol id="symbol.driver.rtc.guard.calendar_alarm_set" value="${module.driver.rtc.name}_calendar_alarm_set_guard"/>
+        <symbol id="symbol.driver.rtc.guard.macro.calendar_alarm_set" value="FSP_GUARD_${module.driver.rtc.name}_R_RTC_CalendarAlarmSet"/>
+        <symbol id="symbol.driver.rtc.guard.calendar_alarm_get" value="${module.driver.rtc.name}_calendar_alarm_get_guard"/>
+        <symbol id="symbol.driver.rtc.guard.macro.calendar_alarm_get" value="FSP_GUARD_${module.driver.rtc.name}_R_RTC_CalendarAlarmGet"/>
+        <symbol id="symbol.driver.rtc.guard.periodic_irq_rate_set" value="${module.driver.rtc.name}_periodic_irq_rate_set_guard"/>
+        <symbol id="symbol.driver.rtc.guard.macro.periodic_irq_rate_set" value="FSP_GUARD_${module.driver.rtc.name}_R_RTC_PeriodicIrqRateSet"/>
+        <symbol id="symbol.driver.rtc.guard.error_adjustment_set" value="${module.driver.rtc.name}_error_adjustment_set_guard"/>
+        <symbol id="symbol.driver.rtc.guard.macro.error_adjustment_set" value="FSP_GUARD_${module.driver.rtc.name}_R_RTC_ErrorAdjustmentSet"/>
+        <symbol id="symbol.driver.rtc.guard.info_get" value="${module.driver.rtc.name}_info_get_guard"/>
+        <symbol id="symbol.driver.rtc.guard.macro.info_get" value="FSP_GUARD_${module.driver.rtc.name}_R_RTC_InfoGet"/>
+        <symbol id="symbol.driver.rtc.guard.callback_set" value="${module.driver.rtc.name}_callback_set_guard"/>
+        <symbol id="symbol.driver.rtc.guard.macro.callback_set" value="FSP_GUARD_${module.driver.rtc.name}_R_RTC_CallbackSet"/>
+        <symbol id="symbol.driver.rtc.nsc_api" value="${module.driver.rtc.name}_nsc_api"/>
+        <symbol id="symbol.driver.rtc.cfg" value="${module.driver.rtc.name}_cfg"/>
+        <symbol id="symbol.driver.rtc.ctrl" value="${module.driver.rtc.name}_ctrl"/>
+        <symbol id="symbol.driver.rtc.err_cfg" value="${module.driver.rtc.name}_err_cfg"/>
+        <header>
+/* RTC Instance. */
+extern const rtc_instance_t ${module.driver.rtc.name};
+
+/** Access the RTC instance using these structures when calling API functions directly (::p_api is not used). */
+extern rtc_instance_ctrl_t ${module.driver.rtc.name}_ctrl;
+extern const rtc_cfg_t ${module.driver.rtc.name}_cfg;
+
+#ifndef ${module.driver.rtc.p_callback}
+void ${module.driver.rtc.p_callback}(rtc_callback_args_t * p_args);
+#endif
+        </header>
+        <includes>#include &quot;r_rtc.h&quot;
+#include &quot;r_rtc_api.h&quot;</includes>
+        <declarations>
+rtc_instance_ctrl_t ${module.driver.rtc.name}_ctrl;
+const rtc_error_adjustment_cfg_t ${module.driver.rtc.name}_err_cfg =
+{
+    .adjustment_mode         = ${module.driver.rtc.err_adjustment_mode},
+    .adjustment_period       = ${module.driver.rtc.err_adjustment_period},
+    .adjustment_type         = ${module.driver.rtc.err_adjustment_type},
+    .adjustment_value        = ${module.driver.rtc.err_adjustment_value},
+};
+const rtc_cfg_t ${module.driver.rtc.name}_cfg =
+{
+    .clock_source            = ${module.driver.rtc.clock_source},
+    .freq_compare_value = ${module.driver.rtc.freq_cmpr_value_loco},
+    .p_err_cfg               = &amp;${module.driver.rtc.name}_err_cfg,
+    .p_callback              = ${module.driver.rtc.p_callback},
+    .p_context               = NULL,
+    .p_extend                = NULL,
+    .alarm_ipl               = ${module.driver.rtc.alarm_ipl},
+    .periodic_ipl            = ${module.driver.rtc.periodic_ipl},
+    .carry_ipl               = ${module.driver.rtc.carry_ipl},
+#if defined(VECTOR_NUMBER_RTC_ALARM)
+    .alarm_irq               = VECTOR_NUMBER_RTC_ALARM,
+#else
+    .alarm_irq               = FSP_INVALID_VECTOR,
+#endif
+#if defined(VECTOR_NUMBER_RTC_PERIOD)
+    .periodic_irq            = VECTOR_NUMBER_RTC_PERIOD,
+#else
+    .periodic_irq            = FSP_INVALID_VECTOR,
+#endif
+#if defined(VECTOR_NUMBER_RTC_CARRY)
+    .carry_irq               = VECTOR_NUMBER_RTC_CARRY,
+#else
+    .carry_irq               = FSP_INVALID_VECTOR,
+#endif
+};
+/* Instance structure to use this module. */
+const rtc_instance_t ${module.driver.rtc.name} =
+{
+    .p_ctrl        = &amp;${module.driver.rtc.name}_ctrl,
+    .p_cfg         = &amp;${module.driver.rtc.name}_cfg,
+    .p_api         = &amp;g_rtc_on_rtc
+};
+        </declarations>
+        <guard>
+            <header>
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.rtc.name}_open_guard(rtc_ctrl_t *const p_ctrl, rtc_cfg_t const *const p_cfg);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.rtc.name}_close_guard(rtc_ctrl_t *const p_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.rtc.name}_clock_source_set_guard(rtc_ctrl_t *const p_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.rtc.name}_calendar_time_set_guard(rtc_ctrl_t *const p_ctrl, rtc_time_t *const p_time);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.rtc.name}_calendar_time_get_guard(rtc_ctrl_t *const p_ctrl, rtc_time_t *const p_time);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.rtc.name}_calendar_alarm_set_guard(rtc_ctrl_t *const p_ctrl, rtc_alarm_time_t *const p_alarm);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.rtc.name}_calendar_alarm_get_guard(rtc_ctrl_t *const p_ctrl, rtc_alarm_time_t *const p_alarm);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.rtc.name}_periodic_irq_rate_set_guard(rtc_ctrl_t *const p_ctrl, rtc_periodic_irq_select_t const rate);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.rtc.name}_error_adjustment_set_guard(rtc_ctrl_t *const p_ctrl, rtc_error_adjustment_cfg_t const *const err_adj_cfg);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.rtc.name}_info_get_guard(rtc_ctrl_t *const p_ctrl, rtc_info_t *const p_rtc_info);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.rtc.name}_callback_set_guard(rtc_ctrl_t *const p_ctrl, void(*p_callback)(rtc_callback_args_t *), void const *const p_context, rtc_callback_args_t *const p_callback_memory);
+
+            </header>
+            <template name="${module.driver.rtc.name}_guard.c">
+                <![CDATA[
+                    #include "guard.h"
+
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.rtc.name}_open_guard (rtc_ctrl_t *const p_ctrl, rtc_cfg_t const *const p_cfg)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+    FSP_PARAMETER_NOT_USED(p_cfg);
+
+    return R_RTC_Open(&${module.driver.rtc.name}_ctrl, &${module.driver.rtc.name}_cfg);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.rtc.name}_close_guard (rtc_ctrl_t *const p_ctrl)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+
+    return R_RTC_Close(&${module.driver.rtc.name}_ctrl);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.rtc.name}_clock_source_set_guard (rtc_ctrl_t * const p_ctrl)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+
+    return R_RTC_ClockSourceSet(&${module.driver.rtc.name}_ctrl);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.rtc.name}_calendar_time_set_guard (rtc_ctrl_t *const p_ctrl, rtc_time_t *const p_time)
+{
+    /* Verify all pointers are in non-secure memory. */
+    rtc_time_t *const p_time_checked = cmse_check_pointed_object(p_time, CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_time_checked != NULL);
+
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+
+    return R_RTC_CalendarTimeSet(&${module.driver.rtc.name}_ctrl, p_time_checked);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.rtc.name}_calendar_time_get_guard (rtc_ctrl_t *const p_ctrl, rtc_time_t *const p_time)
+{
+    /* Verify all pointers are in non-secure memory. */
+    rtc_time_t *const p_time_checked = cmse_check_pointed_object(p_time, CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_time_checked != NULL);
+
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+
+    return R_RTC_CalendarTimeGet(&${module.driver.rtc.name}_ctrl, p_time_checked);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.rtc.name}_calendar_alarm_set_guard (rtc_ctrl_t *const p_ctrl, rtc_alarm_time_t *const p_alarm)
+{
+    /* Verify all pointers are in non-secure memory. */
+    rtc_alarm_time_t *const p_alarm_checked = cmse_check_pointed_object(p_alarm, CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_alarm_checked != NULL);
+
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+
+    return R_RTC_CalendarAlarmSet(&${module.driver.rtc.name}_ctrl, p_alarm_checked);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.rtc.name}_calendar_alarm_get_guard (rtc_ctrl_t *const p_ctrl, rtc_alarm_time_t *const p_alarm)
+{
+    /* Verify all pointers are in non-secure memory. */
+    rtc_alarm_time_t *const p_alarm_checked = cmse_check_pointed_object(p_alarm, CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_alarm_checked != NULL);
+
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+
+    return R_RTC_CalendarAlarmGet(&${module.driver.rtc.name}_ctrl, p_alarm_checked);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.rtc.name}_periodic_irq_rate_set_guard (rtc_ctrl_t *const p_ctrl, rtc_periodic_irq_select_t const rate)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+
+    return R_RTC_PeriodicIrqRateSet(&${module.driver.rtc.name}_ctrl, rate);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.rtc.name}_error_adjustment_set_guard (rtc_ctrl_t *const p_ctrl, rtc_error_adjustment_cfg_t const *const err_adj_cfg)
+{
+    /* Verify all pointers are in non-secure memory. */
+    rtc_error_adjustment_cfg_t const *const err_adj_cfg_checked = cmse_check_pointed_object((rtc_error_adjustment_cfg_t *) err_adj_cfg, CMSE_AU_NONSECURE);
+    FSP_ASSERT(err_adj_cfg_checked != NULL);
+
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+
+    return R_RTC_ErrorAdjustmentSet(&${module.driver.rtc.name}_ctrl, err_adj_cfg_checked);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.rtc.name}_info_get_guard (rtc_ctrl_t *const p_ctrl, rtc_info_t *const p_rtc_info)
+{
+    /* Verify all pointers are in non-secure memory. */
+    rtc_info_t *const p_rtc_info_checked = cmse_check_pointed_object(p_rtc_info, CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_rtc_info_checked != NULL);
+
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+
+    return R_RTC_InfoGet(&${module.driver.rtc.name}_ctrl, p_rtc_info_checked);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.rtc.name}_callback_set_guard (rtc_ctrl_t *const p_ctrl, void(*p_callback)(rtc_callback_args_t *), void const *const p_context, rtc_callback_args_t *const p_callback_memory)
+{
+    /* Verify all pointers are in non-secure memory. */
+    void(*p_callback_checked)(rtc_callback_args_t *) = (void(*)(rtc_callback_args_t *)) cmse_check_address_range((void *) p_callback, sizeof(void *), CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_callback_checked != NULL);
+    rtc_callback_args_t *const p_callback_memory_checked = cmse_check_pointed_object(p_callback_memory, CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_callback_memory_checked != NULL);
+
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+    FSP_PARAMETER_NOT_USED(p_context);
+
+    return R_RTC_CallbackSet(&${module.driver.rtc.name}_ctrl, p_callback_checked, p_context, p_callback_memory_checked);
+}
+
+                ]]>
+            </template>
+        </guard>
+        <nsc>
+            <header>
+
+#define FSP_GUARD_${module.driver.rtc.name}_R_RTC_Open() ${module.driver.rtc.name}_open_guard(FSP_SECURE_ARGUMENT, FSP_SECURE_ARGUMENT)
+
+#define FSP_GUARD_${module.driver.rtc.name}_R_RTC_Close() ${module.driver.rtc.name}_close_guard(FSP_SECURE_ARGUMENT)
+
+#define FSP_GUARD_${module.driver.rtc.name}_R_RTC_ClockSourceSet() ${module.driver.rtc.name}_clock_source_set_guard(FSP_SECURE_ARGUMENT)
+
+#define FSP_GUARD_${module.driver.rtc.name}_R_RTC_CalendarTimeSet(p_time) ${module.driver.rtc.name}_calendar_time_set_guard(FSP_SECURE_ARGUMENT, p_time)
+
+#define FSP_GUARD_${module.driver.rtc.name}_R_RTC_CalendarTimeGet(p_time) ${module.driver.rtc.name}_calendar_time_get_guard(FSP_SECURE_ARGUMENT, p_time)
+
+#define FSP_GUARD_${module.driver.rtc.name}_R_RTC_CalendarAlarmSet(p_alarm) ${module.driver.rtc.name}_calendar_alarm_set_guard(FSP_SECURE_ARGUMENT, p_alarm)
+
+#define FSP_GUARD_${module.driver.rtc.name}_R_RTC_CalendarAlarmGet(p_alarm) ${module.driver.rtc.name}_calendar_alarm_get_guard(FSP_SECURE_ARGUMENT, p_alarm)
+
+#define FSP_GUARD_${module.driver.rtc.name}_R_RTC_PeriodicIrqRateSet(rate) ${module.driver.rtc.name}_periodic_irq_rate_set_guard(FSP_SECURE_ARGUMENT, rate)
+
+#define FSP_GUARD_${module.driver.rtc.name}_R_RTC_ErrorAdjustmentSet(err_adj_cfg) ${module.driver.rtc.name}_error_adjustment_set_guard(FSP_SECURE_ARGUMENT, err_adj_cfg)
+
+#define FSP_GUARD_${module.driver.rtc.name}_R_RTC_InfoGet(p_rtc_info) ${module.driver.rtc.name}_info_get_guard(FSP_SECURE_ARGUMENT, p_rtc_info)
+
+#define FSP_GUARD_${module.driver.rtc.name}_R_RTC_CallbackSet(p_callback, p_context, p_callback_memory) ${module.driver.rtc.name}_callback_set_guard(FSP_SECURE_ARGUMENT, p_callback, p_context, p_callback_memory)
+
+
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.rtc.name}_open_guard(rtc_ctrl_t *const p_ctrl, rtc_cfg_t const *const p_cfg);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.rtc.name}_close_guard(rtc_ctrl_t *const p_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.rtc.name}_clock_source_set_guard(rtc_ctrl_t *const p_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.rtc.name}_calendar_time_set_guard(rtc_ctrl_t *const p_ctrl, rtc_time_t *const p_time);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.rtc.name}_calendar_time_get_guard(rtc_ctrl_t *const p_ctrl, rtc_time_t *const p_time);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.rtc.name}_calendar_alarm_set_guard(rtc_ctrl_t *const p_ctrl, rtc_alarm_time_t *const p_alarm);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.rtc.name}_calendar_alarm_get_guard(rtc_ctrl_t *const p_ctrl, rtc_alarm_time_t *const p_alarm);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.rtc.name}_periodic_irq_rate_set_guard(rtc_ctrl_t *const p_ctrl, rtc_periodic_irq_select_t const rate);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.rtc.name}_error_adjustment_set_guard(rtc_ctrl_t *const p_ctrl, rtc_error_adjustment_cfg_t const *const err_adj_cfg);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.rtc.name}_info_get_guard(rtc_ctrl_t *const p_ctrl, rtc_info_t *const p_rtc_info);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.rtc.name}_callback_set_guard(rtc_ctrl_t *const p_ctrl, void(*p_callback)(rtc_callback_args_t *), void const *const p_context, rtc_callback_args_t *const p_callback_memory);
+
+
+extern const rtc_instance_t ${module.driver.rtc.name};
+            </header>
+            <declarations>
+                <![CDATA[
+static const rtc_api_t ${module.driver.rtc.name}_nsc_api =
+{
+    .open = ${module.driver.rtc.name}_open_guard,
+    .close = ${module.driver.rtc.name}_close_guard,
+    .clockSourceSet = ${module.driver.rtc.name}_clock_source_set_guard,
+    .calendarTimeSet = ${module.driver.rtc.name}_calendar_time_set_guard,
+    .calendarTimeGet = ${module.driver.rtc.name}_calendar_time_get_guard,
+    .calendarAlarmSet = ${module.driver.rtc.name}_calendar_alarm_set_guard,
+    .calendarAlarmGet = ${module.driver.rtc.name}_calendar_alarm_get_guard,
+    .periodicIrqRateSet = ${module.driver.rtc.name}_periodic_irq_rate_set_guard,
+    .errorAdjustmentSet = ${module.driver.rtc.name}_error_adjustment_set_guard,
+    .infoGet = ${module.driver.rtc.name}_info_get_guard,
+    .callbackSet = ${module.driver.rtc.name}_callback_set_guard,
+};
+const rtc_instance_t ${module.driver.rtc.name} =
+{
+    .p_api = &${module.driver.rtc.name}_nsc_api,
+    .p_ctrl = FSP_SECURE_ARGUMENT,
+    .p_cfg = FSP_SECURE_ARGUMENT,
+};
+                ]]>
+            </declarations>
+        </nsc>
+        <api configurable="true">
+            <file>ra/fsp/inc/instances/r_rtc.h</file>
+            <file>ra/fsp/inc/api/r_cgc_api.h</file>
+            <file>ra/fsp/inc/api/r_rtc_api.h</file>
+        </api>
+    </module>
+
+    <module config="config.driver.rtc" display="Timers|${module.driver.rtc.name} Realtime Clock with Independent Power Supply (r_rtc)" id="module.driver.irtc_on_rtc" version="1" url="group___r_t_c.html">
+        <constraint display="A callback function is required when interrupts are enabled.">
+          ("${module.driver.rtc.p_callback}" != "NULL") || ("${module.driver.rtc.alarm_ipl}" === "_disabled" &amp;&amp; "${module.driver.rtc.alarm1_ipl}" === "_disabled" &amp;&amp; "${module.driver.rtc.periodic_ipl}" === "_disabled")
+        </constraint>
+        <constraint display="Unique name required for each instance">
+            "${interface.driver.rtc.${module.driver.rtc.name}}" === "1"
+        </constraint>
+        <constraint display="Requires IRTC Peripheral">
+          "${interface.mcu.irtc}" === "1"
+        </constraint>
+        <constraint display="Error Adjustment Value must be a positive integer less than equal to 127">((testInteger("${module.driver.rtc.err_adjustment_value}") &amp;&amp; ("${module.driver.rtc.err_adjustment_value}" &gt;=0) &amp;&amp; ("${module.driver.rtc.err_adjustment_value}" &lt;=127))
+            &amp;&amp; ("${config.bsp.fsp.mcu.rtc.err_adjustment_value.max_value}" === "127"))
+            || ("${config.bsp.fsp.mcu.rtc.err_adjustment_value.max_value}" === "63")
+        </constraint>
+        <constraint display="Error Adjustment Value must be a positive integer less than equal to 63">((testInteger("${module.driver.rtc.err_adjustment_value}") &amp;&amp; ("${module.driver.rtc.err_adjustment_value}" &gt;=0) &amp;&amp; ("${module.driver.rtc.err_adjustment_value}" &lt;=63))
+            &amp;&amp; ("${config.bsp.fsp.mcu.rtc.err_adjustment_value.max_value}" === "63"))
+            || ("${config.bsp.fsp.mcu.rtc.err_adjustment_value.max_value}" === "127")
+        </constraint>
+        <requires id="module.driver.irtc_on_rtc.requires.rtc" interface="interface.mcu.irtc" visible="false" display="Requires IRTC Peripheral" />
+        <provides interface="interface.driver.rtc" />
+        <provides interface="interface.driver.rtc_on_rtc" />
+        <provides interface="interface.driver.rtc.${module.driver.rtc.name}" />
+        <provides interface="interface.peripheral.rtc" />
+        <property default="g_rtc${_instance}" display="Name" id="module.driver.rtc.name" description="Module name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.rtc.name}")</constraint>
+            <signal event="event.rtc.period" />
+        </property>
+        <property default="" display="Clock Source" id="module.driver.rtc.clock_source" description="Select the rtc clock source.">
+            <select enum="enum.mcu.irtc.clock_source"/>
+        </property>
+        <property default="module.driver.rtc.err_adjustment_mode.m1" display="Automatic Adjustment Mode" id="module.driver.rtc.err_adjustment_mode" description="Enable/ Disable the Error Adjustment mode">
+            <option display="Enabled" id="module.driver.rtc.err_adjustment_mode.m1" value="RTC_ERROR_ADJUSTMENT_MODE_AUTOMATIC"/>
+            <option display="Disabled" id="module.driver.rtc.err_adjustment_mode.m2" value="RTC_ERROR_ADJUSTMENT_MODE_MANUAL"/>
+        </property>
+        <property default="module.driver.rtc.err_adjustment_period.p1" display="Automatic Adjustment Period" id="module.driver.rtc.err_adjustment_period" description="Select the Error Adjustment Period for Automatic Adjustment">
+            <option display="10 Seconds" id="module.driver.rtc.err_adjustment_period.p1" value="RTC_ERROR_ADJUSTMENT_PERIOD_10_SECOND"/>
+            <option display="1 Minute" id="module.driver.rtc.err_adjustment_period.p2" value="RTC_ERROR_ADJUSTMENT_PERIOD_1_MINUTE"/>
+            <option display="NONE" id="module.driver.rtc.err_adjustment_period.p3" value="RTC_ERROR_ADJUSTMENT_PERIOD_NONE"/>
+        </property>
+        <property default="module.driver.rtc.err_adjustment_type.t1" display="Adjustment Type (Plus-Minus)" id="module.driver.rtc.err_adjustment_type" description="Select the Error Adjustment type">
+            <option display="NONE" id="module.driver.rtc.err_adjustment_type.t1" value="RTC_ERROR_ADJUSTMENT_NONE"/>
+            <option display="Addition" id="module.driver.rtc.err_adjustment_type.t2" value="RTC_ERROR_ADJUSTMENT_ADD_PRESCALER"/>
+            <option display="Subtraction" id="module.driver.rtc.err_adjustment_type.t3" value="RTC_ERROR_ADJUSTMENT_SUBTRACT_PRESCALER"/>
+        </property>
+        <property default="0" display="Error Adjustment Value" id="module.driver.rtc.err_adjustment_value" description="Specify the Adjustment Value (the number of sub-clock cycles) from the prescaler">
+        </property>
+        <property default="NULL" display="Callback" id="module.driver.rtc.p_callback" description="A user callback function can be provided. If this callback function is provided, it will be called from the interrupt service routine (ISR).">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.rtc.p_callback}")</constraint>
+        </property>
+
+        <property default="" display="Alarm 0 Interrupt Priority" id="module.driver.rtc.alarm_ipl" description="Select the alarm interrupt priority.">
+            <select enum="enum.mcu.nvic.priorities.optional"/>
+            <interrupt event="event.rtc.alarm.0" isr="rtc_alarm_periodic_isr"/>
+        </property>
+        <property default="" display="Alarm 1 Interrupt Priority" id="module.driver.rtc.alarm1_ipl" description="Select the alarm interrupt priority.">
+            <select enum="enum.mcu.nvic.priorities.optional"/>
+            <interrupt event="event.rtc.alarm.1" isr="rtc_alarm_periodic_isr"/>
+        </property>
+        <property default="" display="Period Interrupt Priority" id="module.driver.rtc.periodic_ipl" description="Select the period interrupt priority.">
+            <select enum="enum.mcu.nvic.priorities.optional"/>
+            <interrupt event="event.rtc.period" isr="rtc_alarm_periodic_isr"/>
+        </property>
+        <property default="" display="Carry Interrupt Priority" id="module.driver.rtc.carry_ipl" description="Select the carry interrupt priority.">
+            <select enum="enum.mcu.nvic.priorities.mandatory"/>
+            <interrupt event="event.rtc.carry" isr="rtc_carry_isr"/>
+        </property>
+        <peripheral name="RTC" component="rtc" />
+        <!-- For MCU's whose pinmapping files have been generated with MPC Designer Tool -->
+        <peripheral name="RTC" component="rtc0" />
+        <peripheral name="RTC" component="rtc1" />
+        <peripheral name="RTC" component="rtc2" />
+        <header>
+/* rtc Instance. */
+extern const rtc_instance_t ${module.driver.rtc.name};
+
+/** Access the rtc instance using these structures when calling API functions directly (::p_api is not used). */
+extern rtc_instance_ctrl_t ${module.driver.rtc.name}_ctrl;
+extern const rtc_cfg_t ${module.driver.rtc.name}_cfg;
+
+#ifndef ${module.driver.rtc.p_callback}
+void ${module.driver.rtc.p_callback}(rtc_callback_args_t * p_args);
+#endif
+        </header>
+        <includes>#include &quot;r_rtc.h&quot;
+#include &quot;r_rtc_api.h&quot;</includes>
+        <declarations>
+rtc_instance_ctrl_t ${module.driver.rtc.name}_ctrl;
+const rtc_error_adjustment_cfg_t ${module.driver.rtc.name}_err_cfg =
+{
+    .adjustment_mode         = ${module.driver.rtc.err_adjustment_mode},
+    .adjustment_period       = ${module.driver.rtc.err_adjustment_period},
+    .adjustment_type         = ${module.driver.rtc.err_adjustment_type},
+    .adjustment_value        = ${module.driver.rtc.err_adjustment_value},
+};
+const rtc_extended_cfg_t ${module.driver.rtc.name}_cfg_extend =
+{
+    .alarm1_ipl              = ${module.driver.rtc.alarm1_ipl},
+#if defined(VECTOR_NUMBER_RTC_ALARM_1)
+    .alarm1_irq               = VECTOR_NUMBER_RTC_ALARM_1,
+#else
+    .alarm1_irq               = FSP_INVALID_VECTOR,
+#endif
+};
+
+const rtc_cfg_t ${module.driver.rtc.name}_cfg =
+{
+    .clock_source            = ${module.driver.rtc.clock_source},
+    .p_err_cfg               = &amp;${module.driver.rtc.name}_err_cfg,
+    .p_callback              = ${module.driver.rtc.p_callback},
+    .p_context               = NULL,
+    .p_extend                = &amp;${module.driver.rtc.name}_cfg_extend,
+    .alarm_ipl               = ${module.driver.rtc.alarm_ipl},
+    .periodic_ipl            = ${module.driver.rtc.periodic_ipl},
+    .carry_ipl               = ${module.driver.rtc.carry_ipl},
+#if defined(VECTOR_NUMBER_RTC_ALARM_0)
+    .alarm_irq               = VECTOR_NUMBER_RTC_ALARM_0,
+#else
+    .alarm_irq               = FSP_INVALID_VECTOR,
+#endif
+#if defined(VECTOR_NUMBER_RTC_PERIOD)
+    .periodic_irq            = VECTOR_NUMBER_RTC_PERIOD,
+#else
+    .periodic_irq            = FSP_INVALID_VECTOR,
+#endif
+#if defined(VECTOR_NUMBER_RTC_CARRY)
+    .carry_irq               = VECTOR_NUMBER_RTC_CARRY,
+#else
+    .carry_irq               = FSP_INVALID_VECTOR,
+#endif
+};
+/* Instance structure to use this module. */
+const rtc_instance_t ${module.driver.rtc.name} =
+{
+    .p_ctrl        = &amp;${module.driver.rtc.name}_ctrl,
+    .p_cfg         = &amp;${module.driver.rtc.name}_cfg,
+    .p_api         = &amp;g_rtc_on_rtc
+};
+        </declarations>
+    </module>
+</raModuleDescription>

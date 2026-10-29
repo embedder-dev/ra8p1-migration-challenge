@@ -1,0 +1,9 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<raModuleDescription>
+    <module config="config.azure.ewf" id="module.azure.ewf.platform.bare_metal" display="Networking|Azure EWF Platform on Bare Metal" common="1" version="0" url="https://azure.github.io/embedded-wireless-framework/html/index.html" visible="false">
+        <requires id="module.azure.ewf.platform.bare_metal.requires.bare_metal" interface="interface.rtos.bare_metal" visible="false" display="Requires Bare Metal"/>
+        <requires id="module.azure.ewf.platform.bare_metal.requires.ewf_allocator" interface="interface.azure.ewf.allocator" find="true" display="Requires EWF Allocator"/>
+        <provides interface="interface.azure.ewf.platform" />
+        <provides interface="interface.azure.ewf.platform.bare_metal" />
+    </module>
+</raModuleDescription>
