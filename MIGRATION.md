@@ -24,20 +24,40 @@ Keep unrelated FSP 5.9.0 functionality intact. Describe the result as a custom, 
 
 The verification materials do not establish firmware correctness, successful builds, configurator support or hardware qualification. No implementation is supplied by this bundle.
 
-## Start in an isolated workspace
+## Start from the clean challenge commit
 
-Copy the entire `fsp-ra8p1-migration/` directory to a standalone location outside the parent checkout, preserving hidden files and the baseline's Git metadata. Open that copy as the workspace and begin a **fresh chat** with this brief.
+Use a clean checkout of the designated challenge-baseline commit, in a standalone workspace outside any checkout containing newer FSP sources. Do not copy a previous run's working directory: untracked files and ignored directories can contain implementations, generated projects, tests, captures and session history even when Git reports no tracked changes.
 
-The old chat contains solution-derived information that cannot be removed by deleting files. The parent checkout contains newer FSP content that can also leak implementation details. Reusing either would undermine the challenge, even if the preserved baseline itself is unchanged. Do not use the old chat or the parent checkout as solution evidence.
+The starting inputs are the original `baseline/` and `reference/` contents, the two baseline-verification scripts in `tools/`, this brief, and the wiring guide and diagrams. No RA8P1 implementation, solution-specific tools, generated tests or prior-run results belong in the starting workspace. Ignoring such files does not remove them; discard previous-run artifacts before reusing a workspace.
 
-Before editing the baseline, run these commands from the copied bundle root:
+The archives under `reference/` are stored with Git LFS. Ensure they are materialized as real archives, not LFS pointer files. If needed, run `git lfs pull` in the clean checkout. A fresh checkout also needs the nested baseline Git metadata restored from the supplied archive:
 
 ```sh
-python3 tools/verify_baseline.py --root . --report reference/verification.json
+if [ ! -d baseline/.git ]; then
+    tar -xzf reference/baseline-git.tar.gz -C baseline .git
+fi
+```
+
+Keep the nested `baseline/` repository at the original FSP v5.9.0 revision. Preparation commits belong in the outer challenge repository, not inside `baseline/`.
+
+Begin a **fresh chat** with this brief. An old chat contains solution-derived information that deleting files cannot remove. Do not use old chats, previous-run artifacts or a parent checkout containing newer FSP sources as solution evidence.
+
+Before editing the baseline, run these commands from the clean workspace root (Python 3.11 or newer):
+
+```sh
+python3 tools/verify_baseline.py --root .
 python3 -m unittest discover -s tools -p 'test_*.py' -v
 ```
 
-Retain the pre-change verification report. An integrity failure after intentional baseline edits does not, by itself, indicate a firmware regression. A failed pre-change check must be resolved before relying on the starting point.
+The committed `reference/verification.json` is the original pre-change report. To record a new run's pre-change check separately, create `validation/` and run `python3 tools/verify_baseline.py --root . --report validation/pre-change-baseline.json` before editing. Retain that report. An integrity failure after intentional baseline edits does not, by itself, indicate a firmware regression. A failed pre-change check must be resolved before relying on the starting point.
+
+## Bench wiring
+
+See [EK-RA8P1 migration: bench wiring and validation](README-RA8P1-MIGRATION.md)
+for the confirmed AD3 D0–D3 connections, the A4 → 1 kΩ → A0 loopback,
+photographic diagrams, optional probes, safety precautions and test limitations.
+The wiring reference does not supply a driver implementation or establish that
+any hardware test has passed.
 
 ## Behavioral acceptance
 
