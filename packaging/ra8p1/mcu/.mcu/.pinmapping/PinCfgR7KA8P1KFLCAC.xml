@@ -1,0 +1,2153 @@
+<?xml version='1.0' encoding='utf-8'?>
+<pinMappings version="2">
+  <device default="true" id="renesas.ra8p1_ac" name="R7KA8P1KFLCAC">
+    <package id="renesas.289bga" name="289BGA" type="bga">
+      <pinLayout portFormat="(P)([0-9A-Z])(\d{2})">
+        <pin name="T13" ref="p001" />
+        <pin name="U11" ref="p008" />
+        <pin name="P11" ref="p009" />
+        <pin name="T8" ref="p014" />
+        <pin name="E8" ref="p111" />
+        <pin name="C7" ref="p208" />
+        <pin name="E7" ref="p209" />
+        <pin name="C6" ref="p210" />
+        <pin name="D6" ref="p211" />
+        <pin name="B6" ref="p303" />
+        <pin name="T7" ref="p502" />
+        <pin name="R14" ref="p514" />
+        <pin name="P3" ref="p600" />
+        <pin name="T14" ref="p806" />
+        <pin name="N11" ref="p807" />
+        <pin name="P8" ref="p812" />
+        <pin name="G4" ref="pa07" />
+        <pin name="B17" ref="pd02" />
+        <pin name="C15" ref="pd03" />
+      </pinLayout>
+    </package>
+    <components id="ports" name="Ports">
+      <components id="p0" name="P0">
+        <component id="p001" name="P001" type="port">
+          <property editable="true" id="p001.symbolic_name" name="Symbolic Name" />
+          <property editable="true" id="p001.comment" name="Comment" style="multiLine" />
+          <property id="p001.capabilitylist" name="Port Capabilities" style="multiLine" value="GPIO; restricted candidate pin support" />
+          <configurations name="P001 Configuration">
+            <configuration id="p001.gpio_mode" name="Mode" type="generic">
+              <alt default="true" id="p001.gpio_mode.disabled" name="Disabled">
+                <connectionSetRef refId="p001.sel.disabled" />
+                <dependencies operator="or">
+                  <dependency altRef="p001.none" configRef="p001" />
+                  <dependency altRef="p001.input" configRef="p001" />
+                  <dependency altRef="p001.output.low" configRef="p001" />
+                  <dependency altRef="p001.output.high" configRef="p001" />
+                </dependencies>
+              </alt>
+              <alt id="p001.gpio_mode.gpio_mode_in" name="Input mode">
+                <connectionSetRef refId="p001.sel.input" />
+                <dependencies operator="or">
+                  <dependency altRef="p001.none" configRef="p001" />
+                  <dependency altRef="p001.input" configRef="p001" />
+                  <dependency altRef="p001.output.low" configRef="p001" />
+                  <dependency altRef="p001.output.high" configRef="p001" />
+                </dependencies>
+              </alt>
+              <alt id="p001.gpio_mode.gpio_mode_out.low" name="Output mode (Initial Low)">
+                <connectionSetRef refId="p001.sel.output.low" />
+                <dependencies operator="or">
+                  <dependency altRef="p001.none" configRef="p001" />
+                  <dependency altRef="p001.input" configRef="p001" />
+                  <dependency altRef="p001.output.low" configRef="p001" />
+                  <dependency altRef="p001.output.high" configRef="p001" />
+                </dependencies>
+              </alt>
+              <alt id="p001.gpio_mode.gpio_mode_out.high" name="Output mode (Initial High)">
+                <connectionSetRef refId="p001.sel.output.high" />
+                <dependencies operator="or">
+                  <dependency altRef="p001.none" configRef="p001" />
+                  <dependency altRef="p001.input" configRef="p001" />
+                  <dependency altRef="p001.output.low" configRef="p001" />
+                  <dependency altRef="p001.output.high" configRef="p001" />
+                </dependencies>
+              </alt>
+              <alt id="p001.gpio_mode.gpio_mode_an" name="Analog mode">
+                <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_ANALOG_ENABLE" />
+                <connectionSetRef refId="p001.sel.disabled" />
+              </alt>
+            </configuration>
+            <configuration id="p001.gpio_pupd" name="Pull up/down" type="generic">
+              <alt default="true" id="p001.gpio_pupd.gpio_pupd_no_ip_pull" name="None" />
+              <alt id="p001.gpio_pupd.gpio_pupd_ip_up" name="Input pull-up">
+                <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_PULLUP_ENABLE" />
+              </alt>
+              <dependencies operator="or">
+                <dependency altRef="p001.gpio_mode.gpio_mode_in" configRef="p001.gpio_mode" />
+              </dependencies>
+            </configuration>
+            <configuration id="p001.gpio_otype" name="Output Type" type="generic">
+              <alt default="true" id="p001.gpio_otype.gpio_otype.gpio_otype_none" name="CMOS" />
+              <alt id="p001.gpio_otype.gpio_otype_n_ch_od" name="n-ch open drain">
+                <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_NMOS_ENABLE" />
+              </alt>
+              <dependencies operator="or">
+                <dependency altRef="p001.gpio_mode.gpio_mode_out.low" configRef="p001.gpio_mode" />
+                <dependency altRef="p001.gpio_mode.gpio_mode_out.high" configRef="p001.gpio_mode" />
+              </dependencies>
+            </configuration>
+          </configurations>
+          <pins>
+            <pin direction="inout" id="p001" name="P001">
+              <configurations>
+                <configuration id="p001" name="P001" type="connection">
+                  <alt default="true" id="p001.none" name="None" type="none" />
+                  <alt id="p001.input" name="GPIO" type="gpio">
+                    <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_PORT_DIRECTION_INPUT" />
+                  </alt>
+                  <alt id="p001.output.low" name="GPIO" type="gpio">
+                    <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_PORT_DIRECTION_OUTPUT" />
+                    <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_PORT_OUTPUT_LOW" />
+                  </alt>
+                  <alt id="p001.output.high" name="GPIO" type="gpio">
+                    <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_PORT_DIRECTION_OUTPUT" />
+                    <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_PORT_OUTPUT_HIGH" />
+                  </alt>
+                </configuration>
+              </configurations>
+            </pin>
+          </pins>
+        </component>
+        <component id="p008" name="P008" type="port">
+          <property editable="true" id="p008.symbolic_name" name="Symbolic Name" />
+          <property editable="true" id="p008.comment" name="Comment" style="multiLine" />
+          <property id="p008.capabilitylist" name="Port Capabilities" style="multiLine" value="GPIO; restricted candidate pin support" />
+          <configurations name="P008 Configuration">
+            <configuration id="p008.gpio_mode" name="Mode" type="generic">
+              <alt default="true" id="p008.gpio_mode.disabled" name="Disabled">
+                <connectionSetRef refId="p008.sel.disabled" />
+                <dependencies operator="or">
+                  <dependency altRef="p008.none" configRef="p008" />
+                  <dependency altRef="p008.input" configRef="p008" />
+                  <dependency altRef="p008.output.low" configRef="p008" />
+                  <dependency altRef="p008.output.high" configRef="p008" />
+                </dependencies>
+              </alt>
+              <alt id="p008.gpio_mode.gpio_mode_in" name="Input mode">
+                <connectionSetRef refId="p008.sel.input" />
+                <dependencies operator="or">
+                  <dependency altRef="p008.none" configRef="p008" />
+                  <dependency altRef="p008.input" configRef="p008" />
+                  <dependency altRef="p008.output.low" configRef="p008" />
+                  <dependency altRef="p008.output.high" configRef="p008" />
+                </dependencies>
+              </alt>
+              <alt id="p008.gpio_mode.gpio_mode_out.low" name="Output mode (Initial Low)">
+                <connectionSetRef refId="p008.sel.output.low" />
+                <dependencies operator="or">
+                  <dependency altRef="p008.none" configRef="p008" />
+                  <dependency altRef="p008.input" configRef="p008" />
+                  <dependency altRef="p008.output.low" configRef="p008" />
+                  <dependency altRef="p008.output.high" configRef="p008" />
+                </dependencies>
+              </alt>
+              <alt id="p008.gpio_mode.gpio_mode_out.high" name="Output mode (Initial High)">
+                <connectionSetRef refId="p008.sel.output.high" />
+                <dependencies operator="or">
+                  <dependency altRef="p008.none" configRef="p008" />
+                  <dependency altRef="p008.input" configRef="p008" />
+                  <dependency altRef="p008.output.low" configRef="p008" />
+                  <dependency altRef="p008.output.high" configRef="p008" />
+                </dependencies>
+              </alt>
+            </configuration>
+            <configuration id="p008.gpio_pupd" name="Pull up/down" type="generic">
+              <alt default="true" id="p008.gpio_pupd.gpio_pupd_no_ip_pull" name="None" />
+              <alt id="p008.gpio_pupd.gpio_pupd_ip_up" name="Input pull-up">
+                <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_PULLUP_ENABLE" />
+              </alt>
+              <dependencies operator="or">
+                <dependency altRef="p008.gpio_mode.gpio_mode_in" configRef="p008.gpio_mode" />
+              </dependencies>
+            </configuration>
+            <configuration id="p008.gpio_otype" name="Output Type" type="generic">
+              <alt default="true" id="p008.gpio_otype.gpio_otype.gpio_otype_none" name="CMOS" />
+              <alt id="p008.gpio_otype.gpio_otype_n_ch_od" name="n-ch open drain">
+                <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_NMOS_ENABLE" />
+              </alt>
+              <dependencies operator="or">
+                <dependency altRef="p008.gpio_mode.gpio_mode_out.low" configRef="p008.gpio_mode" />
+                <dependency altRef="p008.gpio_mode.gpio_mode_out.high" configRef="p008.gpio_mode" />
+              </dependencies>
+            </configuration>
+          </configurations>
+          <pins>
+            <pin direction="inout" id="p008" name="P008">
+              <configurations>
+                <configuration id="p008" name="P008" type="connection">
+                  <alt default="true" id="p008.none" name="None" type="none" />
+                  <alt id="p008.input" name="GPIO" type="gpio">
+                    <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_PORT_DIRECTION_INPUT" />
+                  </alt>
+                  <alt id="p008.output.low" name="GPIO" type="gpio">
+                    <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_PORT_DIRECTION_OUTPUT" />
+                    <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_PORT_OUTPUT_LOW" />
+                  </alt>
+                  <alt id="p008.output.high" name="GPIO" type="gpio">
+                    <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_PORT_DIRECTION_OUTPUT" />
+                    <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_PORT_OUTPUT_HIGH" />
+                  </alt>
+                </configuration>
+              </configurations>
+            </pin>
+          </pins>
+        </component>
+        <component id="p009" name="P009" type="port">
+          <property editable="true" id="p009.symbolic_name" name="Symbolic Name" />
+          <property editable="true" id="p009.comment" name="Comment" style="multiLine" />
+          <property id="p009.capabilitylist" name="Port Capabilities" style="multiLine" value="GPIO; restricted candidate pin support" />
+          <configurations name="P009 Configuration">
+            <configuration id="p009.gpio_mode" name="Mode" type="generic">
+              <alt default="true" id="p009.gpio_mode.disabled" name="Disabled">
+                <connectionSetRef refId="p009.sel.disabled" />
+                <dependencies operator="or">
+                  <dependency altRef="p009.none" configRef="p009" />
+                  <dependency altRef="p009.input" configRef="p009" />
+                  <dependency altRef="p009.output.low" configRef="p009" />
+                  <dependency altRef="p009.output.high" configRef="p009" />
+                </dependencies>
+              </alt>
+              <alt id="p009.gpio_mode.gpio_mode_in" name="Input mode">
+                <connectionSetRef refId="p009.sel.input" />
+                <dependencies operator="or">
+                  <dependency altRef="p009.none" configRef="p009" />
+                  <dependency altRef="p009.input" configRef="p009" />
+                  <dependency altRef="p009.output.low" configRef="p009" />
+                  <dependency altRef="p009.output.high" configRef="p009" />
+                </dependencies>
+              </alt>
+              <alt id="p009.gpio_mode.gpio_mode_out.low" name="Output mode (Initial Low)">
+                <connectionSetRef refId="p009.sel.output.low" />
+                <dependencies operator="or">
+                  <dependency altRef="p009.none" configRef="p009" />
+                  <dependency altRef="p009.input" configRef="p009" />
+                  <dependency altRef="p009.output.low" configRef="p009" />
+                  <dependency altRef="p009.output.high" configRef="p009" />
+                </dependencies>
+              </alt>
+              <alt id="p009.gpio_mode.gpio_mode_out.high" name="Output mode (Initial High)">
+                <connectionSetRef refId="p009.sel.output.high" />
+                <dependencies operator="or">
+                  <dependency altRef="p009.none" configRef="p009" />
+                  <dependency altRef="p009.input" configRef="p009" />
+                  <dependency altRef="p009.output.low" configRef="p009" />
+                  <dependency altRef="p009.output.high" configRef="p009" />
+                </dependencies>
+              </alt>
+            </configuration>
+            <configuration id="p009.gpio_pupd" name="Pull up/down" type="generic">
+              <alt default="true" id="p009.gpio_pupd.gpio_pupd_no_ip_pull" name="None" />
+              <alt id="p009.gpio_pupd.gpio_pupd_ip_up" name="Input pull-up">
+                <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_PULLUP_ENABLE" />
+              </alt>
+              <dependencies operator="or">
+                <dependency altRef="p009.gpio_mode.gpio_mode_in" configRef="p009.gpio_mode" />
+              </dependencies>
+            </configuration>
+            <configuration id="p009.gpio_otype" name="Output Type" type="generic">
+              <alt default="true" id="p009.gpio_otype.gpio_otype.gpio_otype_none" name="CMOS" />
+              <alt id="p009.gpio_otype.gpio_otype_n_ch_od" name="n-ch open drain">
+                <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_NMOS_ENABLE" />
+              </alt>
+              <dependencies operator="or">
+                <dependency altRef="p009.gpio_mode.gpio_mode_out.low" configRef="p009.gpio_mode" />
+                <dependency altRef="p009.gpio_mode.gpio_mode_out.high" configRef="p009.gpio_mode" />
+              </dependencies>
+            </configuration>
+          </configurations>
+          <pins>
+            <pin direction="inout" id="p009" name="P009">
+              <configurations>
+                <configuration id="p009" name="P009" type="connection">
+                  <alt default="true" id="p009.none" name="None" type="none" />
+                  <alt id="p009.input" name="GPIO" type="gpio">
+                    <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_PORT_DIRECTION_INPUT" />
+                  </alt>
+                  <alt id="p009.output.low" name="GPIO" type="gpio">
+                    <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_PORT_DIRECTION_OUTPUT" />
+                    <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_PORT_OUTPUT_LOW" />
+                  </alt>
+                  <alt id="p009.output.high" name="GPIO" type="gpio">
+                    <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_PORT_DIRECTION_OUTPUT" />
+                    <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_PORT_OUTPUT_HIGH" />
+                  </alt>
+                </configuration>
+              </configurations>
+            </pin>
+          </pins>
+        </component>
+        <component id="p014" name="P014" type="port">
+          <property editable="true" id="p014.symbolic_name" name="Symbolic Name" />
+          <property editable="true" id="p014.comment" name="Comment" style="multiLine" />
+          <property id="p014.capabilitylist" name="Port Capabilities" style="multiLine" value="GPIO; restricted candidate pin support" />
+          <configurations name="P014 Configuration">
+            <configuration id="p014.gpio_mode" name="Mode" type="generic">
+              <alt default="true" id="p014.gpio_mode.disabled" name="Disabled">
+                <connectionSetRef refId="p014.sel.disabled" />
+                <dependencies operator="or">
+                  <dependency altRef="p014.none" configRef="p014" />
+                  <dependency altRef="p014.input" configRef="p014" />
+                  <dependency altRef="p014.output.low" configRef="p014" />
+                  <dependency altRef="p014.output.high" configRef="p014" />
+                </dependencies>
+              </alt>
+              <alt id="p014.gpio_mode.gpio_mode_in" name="Input mode">
+                <connectionSetRef refId="p014.sel.input" />
+                <dependencies operator="or">
+                  <dependency altRef="p014.none" configRef="p014" />
+                  <dependency altRef="p014.input" configRef="p014" />
+                  <dependency altRef="p014.output.low" configRef="p014" />
+                  <dependency altRef="p014.output.high" configRef="p014" />
+                </dependencies>
+              </alt>
+              <alt id="p014.gpio_mode.gpio_mode_out.low" name="Output mode (Initial Low)">
+                <connectionSetRef refId="p014.sel.output.low" />
+                <dependencies operator="or">
+                  <dependency altRef="p014.none" configRef="p014" />
+                  <dependency altRef="p014.input" configRef="p014" />
+                  <dependency altRef="p014.output.low" configRef="p014" />
+                  <dependency altRef="p014.output.high" configRef="p014" />
+                </dependencies>
+              </alt>
+              <alt id="p014.gpio_mode.gpio_mode_out.high" name="Output mode (Initial High)">
+                <connectionSetRef refId="p014.sel.output.high" />
+                <dependencies operator="or">
+                  <dependency altRef="p014.none" configRef="p014" />
+                  <dependency altRef="p014.input" configRef="p014" />
+                  <dependency altRef="p014.output.low" configRef="p014" />
+                  <dependency altRef="p014.output.high" configRef="p014" />
+                </dependencies>
+              </alt>
+              <alt id="p014.gpio_mode.gpio_mode_an" name="Analog mode">
+                <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_ANALOG_ENABLE" />
+                <connectionSetRef refId="p014.sel.disabled" />
+              </alt>
+            </configuration>
+            <configuration id="p014.gpio_pupd" name="Pull up/down" type="generic">
+              <alt default="true" id="p014.gpio_pupd.gpio_pupd_no_ip_pull" name="None" />
+              <alt id="p014.gpio_pupd.gpio_pupd_ip_up" name="Input pull-up">
+                <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_PULLUP_ENABLE" />
+              </alt>
+              <dependencies operator="or">
+                <dependency altRef="p014.gpio_mode.gpio_mode_in" configRef="p014.gpio_mode" />
+              </dependencies>
+            </configuration>
+            <configuration id="p014.gpio_otype" name="Output Type" type="generic">
+              <alt default="true" id="p014.gpio_otype.gpio_otype.gpio_otype_none" name="CMOS" />
+              <alt id="p014.gpio_otype.gpio_otype_n_ch_od" name="n-ch open drain">
+                <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_NMOS_ENABLE" />
+              </alt>
+              <dependencies operator="or">
+                <dependency altRef="p014.gpio_mode.gpio_mode_out.low" configRef="p014.gpio_mode" />
+                <dependency altRef="p014.gpio_mode.gpio_mode_out.high" configRef="p014.gpio_mode" />
+              </dependencies>
+            </configuration>
+          </configurations>
+          <pins>
+            <pin direction="inout" id="p014" name="P014">
+              <configurations>
+                <configuration id="p014" name="P014" type="connection">
+                  <alt default="true" id="p014.none" name="None" type="none" />
+                  <alt id="p014.input" name="GPIO" type="gpio">
+                    <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_PORT_DIRECTION_INPUT" />
+                  </alt>
+                  <alt id="p014.output.low" name="GPIO" type="gpio">
+                    <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_PORT_DIRECTION_OUTPUT" />
+                    <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_PORT_OUTPUT_LOW" />
+                  </alt>
+                  <alt id="p014.output.high" name="GPIO" type="gpio">
+                    <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_PORT_DIRECTION_OUTPUT" />
+                    <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_PORT_OUTPUT_HIGH" />
+                  </alt>
+                </configuration>
+              </configurations>
+            </pin>
+          </pins>
+        </component>
+      </components>
+      <components id="p1" name="P1">
+        <component id="p111" name="P111" type="port">
+          <property editable="true" id="p111.symbolic_name" name="Symbolic Name" />
+          <property editable="true" id="p111.comment" name="Comment" style="multiLine" />
+          <property id="p111.capabilitylist" name="Port Capabilities" style="multiLine" value="GPIO; restricted candidate pin support" />
+          <configurations name="P111 Configuration">
+            <configuration id="p111.gpio_mode" name="Mode" type="generic">
+              <alt default="true" id="p111.gpio_mode.disabled" name="Disabled">
+                <connectionSetRef refId="p111.sel.disabled" />
+                <dependencies operator="or">
+                  <dependency altRef="p111.none" configRef="p111" />
+                  <dependency altRef="p111.input" configRef="p111" />
+                  <dependency altRef="p111.output.low" configRef="p111" />
+                  <dependency altRef="p111.output.high" configRef="p111" />
+                </dependencies>
+              </alt>
+              <alt id="p111.gpio_mode.gpio_mode_in" name="Input mode">
+                <connectionSetRef refId="p111.sel.input" />
+                <dependencies operator="or">
+                  <dependency altRef="p111.none" configRef="p111" />
+                  <dependency altRef="p111.input" configRef="p111" />
+                  <dependency altRef="p111.output.low" configRef="p111" />
+                  <dependency altRef="p111.output.high" configRef="p111" />
+                </dependencies>
+              </alt>
+              <alt id="p111.gpio_mode.gpio_mode_out.low" name="Output mode (Initial Low)">
+                <connectionSetRef refId="p111.sel.output.low" />
+                <dependencies operator="or">
+                  <dependency altRef="p111.none" configRef="p111" />
+                  <dependency altRef="p111.input" configRef="p111" />
+                  <dependency altRef="p111.output.low" configRef="p111" />
+                  <dependency altRef="p111.output.high" configRef="p111" />
+                </dependencies>
+              </alt>
+              <alt id="p111.gpio_mode.gpio_mode_out.high" name="Output mode (Initial High)">
+                <connectionSetRef refId="p111.sel.output.high" />
+                <dependencies operator="or">
+                  <dependency altRef="p111.none" configRef="p111" />
+                  <dependency altRef="p111.input" configRef="p111" />
+                  <dependency altRef="p111.output.low" configRef="p111" />
+                  <dependency altRef="p111.output.high" configRef="p111" />
+                </dependencies>
+              </alt>
+            </configuration>
+            <configuration id="p111.gpio_pupd" name="Pull up/down" type="generic">
+              <alt default="true" id="p111.gpio_pupd.gpio_pupd_no_ip_pull" name="None" />
+              <alt id="p111.gpio_pupd.gpio_pupd_ip_up" name="Input pull-up">
+                <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_PULLUP_ENABLE" />
+              </alt>
+              <dependencies operator="or">
+                <dependency altRef="p111.gpio_mode.gpio_mode_in" configRef="p111.gpio_mode" />
+              </dependencies>
+            </configuration>
+            <configuration id="p111.gpio_otype" name="Output Type" type="generic">
+              <alt default="true" id="p111.gpio_otype.gpio_otype.gpio_otype_none" name="CMOS" />
+              <alt id="p111.gpio_otype.gpio_otype_n_ch_od" name="n-ch open drain">
+                <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_NMOS_ENABLE" />
+              </alt>
+              <dependencies operator="or">
+                <dependency altRef="p111.gpio_mode.gpio_mode_out.low" configRef="p111.gpio_mode" />
+                <dependency altRef="p111.gpio_mode.gpio_mode_out.high" configRef="p111.gpio_mode" />
+              </dependencies>
+            </configuration>
+          </configurations>
+          <pins>
+            <pin direction="inout" id="p111" name="P111">
+              <configurations>
+                <configuration id="p111" name="P111" type="connection">
+                  <alt default="true" id="p111.none" name="None" type="none" />
+                  <alt id="p111.input" name="GPIO" type="gpio">
+                    <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_PORT_DIRECTION_INPUT" />
+                  </alt>
+                  <alt id="p111.output.low" name="GPIO" type="gpio">
+                    <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_PORT_DIRECTION_OUTPUT" />
+                    <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_PORT_OUTPUT_LOW" />
+                  </alt>
+                  <alt id="p111.output.high" name="GPIO" type="gpio">
+                    <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_PORT_DIRECTION_OUTPUT" />
+                    <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_PORT_OUTPUT_HIGH" />
+                  </alt>
+                </configuration>
+              </configurations>
+            </pin>
+          </pins>
+        </component>
+      </components>
+      <components id="p2" name="P2">
+        <component id="p208" name="P208" type="port">
+          <property editable="true" id="p208.symbolic_name" name="Symbolic Name" />
+          <property editable="true" id="p208.comment" name="Comment" style="multiLine" />
+          <property id="p208.capabilitylist" name="Port Capabilities" style="multiLine" value="GPIO; restricted candidate pin support" />
+          <configurations name="P208 Configuration">
+            <configuration id="p208.gpio_mode" name="Mode" type="generic">
+              <alt default="true" id="p208.gpio_mode.disabled" name="Disabled">
+                <connectionSetRef refId="p208.sel.disabled" />
+                <dependencies operator="or">
+                  <dependency altRef="p208.none" configRef="p208" />
+                  <dependency altRef="p208.input" configRef="p208" />
+                  <dependency altRef="p208.output.low" configRef="p208" />
+                  <dependency altRef="p208.output.high" configRef="p208" />
+                </dependencies>
+              </alt>
+              <alt id="p208.gpio_mode.gpio_mode_in" name="Input mode">
+                <connectionSetRef refId="p208.sel.input" />
+                <dependencies operator="or">
+                  <dependency altRef="p208.none" configRef="p208" />
+                  <dependency altRef="p208.input" configRef="p208" />
+                  <dependency altRef="p208.output.low" configRef="p208" />
+                  <dependency altRef="p208.output.high" configRef="p208" />
+                </dependencies>
+              </alt>
+              <alt id="p208.gpio_mode.gpio_mode_out.low" name="Output mode (Initial Low)">
+                <connectionSetRef refId="p208.sel.output.low" />
+                <dependencies operator="or">
+                  <dependency altRef="p208.none" configRef="p208" />
+                  <dependency altRef="p208.input" configRef="p208" />
+                  <dependency altRef="p208.output.low" configRef="p208" />
+                  <dependency altRef="p208.output.high" configRef="p208" />
+                </dependencies>
+              </alt>
+              <alt id="p208.gpio_mode.gpio_mode_out.high" name="Output mode (Initial High)">
+                <connectionSetRef refId="p208.sel.output.high" />
+                <dependencies operator="or">
+                  <dependency altRef="p208.none" configRef="p208" />
+                  <dependency altRef="p208.input" configRef="p208" />
+                  <dependency altRef="p208.output.low" configRef="p208" />
+                  <dependency altRef="p208.output.high" configRef="p208" />
+                </dependencies>
+              </alt>
+              <alt id="p208.gpio_mode.gpio_mode_peripheral" name="Peripheral mode">
+                <dependencies operator="or">
+                  <dependency altRef="p208.jtag_fslash_swd.tdi" configRef="p208" />
+                </dependencies>
+                <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_PERIPHERAL_PIN" />
+              </alt>
+            </configuration>
+            <configuration id="p208.gpio_pupd" name="Pull up/down" type="generic">
+              <alt default="true" id="p208.gpio_pupd.gpio_pupd_no_ip_pull" name="None" />
+              <alt id="p208.gpio_pupd.gpio_pupd_ip_up" name="Input pull-up">
+                <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_PULLUP_ENABLE" />
+              </alt>
+              <dependencies operator="or">
+                <dependency altRef="p208.gpio_mode.gpio_mode_in" configRef="p208.gpio_mode" />
+                <dependency altRef="p208.gpio_mode.gpio_mode_peripheral" configRef="p208.gpio_mode" />
+              </dependencies>
+            </configuration>
+            <configuration id="p208.gpio_otype" name="Output Type" type="generic">
+              <alt default="true" id="p208.gpio_otype.gpio_otype.gpio_otype_none" name="CMOS" />
+              <alt id="p208.gpio_otype.gpio_otype_n_ch_od" name="n-ch open drain">
+                <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_NMOS_ENABLE" />
+              </alt>
+              <dependencies operator="or">
+                <dependency altRef="p208.gpio_mode.gpio_mode_out.low" configRef="p208.gpio_mode" />
+                <dependency altRef="p208.gpio_mode.gpio_mode_out.high" configRef="p208.gpio_mode" />
+                <dependency altRef="p208.gpio_mode.gpio_mode_peripheral" configRef="p208.gpio_mode" />
+              </dependencies>
+            </configuration>
+          </configurations>
+          <pins>
+            <pin direction="inout" id="p208" name="P208">
+              <configurations>
+                <configuration id="p208" name="P208" type="connection">
+                  <alt default="true" id="p208.none" name="None" type="none" />
+                  <alt id="p208.input" name="GPIO" type="gpio">
+                    <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_PORT_DIRECTION_INPUT" />
+                  </alt>
+                  <alt id="p208.output.low" name="GPIO" type="gpio">
+                    <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_PORT_DIRECTION_OUTPUT" />
+                    <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_PORT_OUTPUT_LOW" />
+                  </alt>
+                  <alt id="p208.output.high" name="GPIO" type="gpio">
+                    <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_PORT_DIRECTION_OUTPUT" />
+                    <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_PORT_OUTPUT_HIGH" />
+                  </alt>
+                  <alt id="p208.jtag_fslash_swd.tdi" name="JTAG/SWD_TDI">
+                    <portConfigSetRef refId="mode.peripheral.speed.none" />
+                    <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_PERIPHERAL_DEBUG" />
+                  </alt>
+                </configuration>
+              </configurations>
+            </pin>
+          </pins>
+        </component>
+        <component id="p209" name="P209" type="port">
+          <property editable="true" id="p209.symbolic_name" name="Symbolic Name" />
+          <property editable="true" id="p209.comment" name="Comment" style="multiLine" />
+          <property id="p209.capabilitylist" name="Port Capabilities" style="multiLine" value="GPIO; restricted candidate pin support" />
+          <configurations name="P209 Configuration">
+            <configuration id="p209.gpio_mode" name="Mode" type="generic">
+              <alt default="true" id="p209.gpio_mode.disabled" name="Disabled">
+                <connectionSetRef refId="p209.sel.disabled" />
+                <dependencies operator="or">
+                  <dependency altRef="p209.none" configRef="p209" />
+                  <dependency altRef="p209.input" configRef="p209" />
+                  <dependency altRef="p209.output.low" configRef="p209" />
+                  <dependency altRef="p209.output.high" configRef="p209" />
+                </dependencies>
+              </alt>
+              <alt id="p209.gpio_mode.gpio_mode_in" name="Input mode">
+                <connectionSetRef refId="p209.sel.input" />
+                <dependencies operator="or">
+                  <dependency altRef="p209.none" configRef="p209" />
+                  <dependency altRef="p209.input" configRef="p209" />
+                  <dependency altRef="p209.output.low" configRef="p209" />
+                  <dependency altRef="p209.output.high" configRef="p209" />
+                </dependencies>
+              </alt>
+              <alt id="p209.gpio_mode.gpio_mode_out.low" name="Output mode (Initial Low)">
+                <connectionSetRef refId="p209.sel.output.low" />
+                <dependencies operator="or">
+                  <dependency altRef="p209.none" configRef="p209" />
+                  <dependency altRef="p209.input" configRef="p209" />
+                  <dependency altRef="p209.output.low" configRef="p209" />
+                  <dependency altRef="p209.output.high" configRef="p209" />
+                </dependencies>
+              </alt>
+              <alt id="p209.gpio_mode.gpio_mode_out.high" name="Output mode (Initial High)">
+                <connectionSetRef refId="p209.sel.output.high" />
+                <dependencies operator="or">
+                  <dependency altRef="p209.none" configRef="p209" />
+                  <dependency altRef="p209.input" configRef="p209" />
+                  <dependency altRef="p209.output.low" configRef="p209" />
+                  <dependency altRef="p209.output.high" configRef="p209" />
+                </dependencies>
+              </alt>
+              <alt id="p209.gpio_mode.gpio_mode_peripheral" name="Peripheral mode">
+                <dependencies operator="or">
+                  <dependency altRef="p209.jtag_fslash_swd.tdo" configRef="p209" />
+                </dependencies>
+                <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_PERIPHERAL_PIN" />
+              </alt>
+            </configuration>
+            <configuration id="p209.gpio_pupd" name="Pull up/down" type="generic">
+              <alt default="true" id="p209.gpio_pupd.gpio_pupd_no_ip_pull" name="None" />
+              <alt id="p209.gpio_pupd.gpio_pupd_ip_up" name="Input pull-up">
+                <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_PULLUP_ENABLE" />
+              </alt>
+              <dependencies operator="or">
+                <dependency altRef="p209.gpio_mode.gpio_mode_in" configRef="p209.gpio_mode" />
+                <dependency altRef="p209.gpio_mode.gpio_mode_peripheral" configRef="p209.gpio_mode" />
+              </dependencies>
+            </configuration>
+            <configuration id="p209.gpio_otype" name="Output Type" type="generic">
+              <alt default="true" id="p209.gpio_otype.gpio_otype.gpio_otype_none" name="CMOS" />
+              <alt id="p209.gpio_otype.gpio_otype_n_ch_od" name="n-ch open drain">
+                <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_NMOS_ENABLE" />
+              </alt>
+              <dependencies operator="or">
+                <dependency altRef="p209.gpio_mode.gpio_mode_out.low" configRef="p209.gpio_mode" />
+                <dependency altRef="p209.gpio_mode.gpio_mode_out.high" configRef="p209.gpio_mode" />
+                <dependency altRef="p209.gpio_mode.gpio_mode_peripheral" configRef="p209.gpio_mode" />
+              </dependencies>
+            </configuration>
+          </configurations>
+          <pins>
+            <pin direction="inout" id="p209" name="P209">
+              <configurations>
+                <configuration id="p209" name="P209" type="connection">
+                  <alt default="true" id="p209.none" name="None" type="none" />
+                  <alt id="p209.input" name="GPIO" type="gpio">
+                    <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_PORT_DIRECTION_INPUT" />
+                  </alt>
+                  <alt id="p209.output.low" name="GPIO" type="gpio">
+                    <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_PORT_DIRECTION_OUTPUT" />
+                    <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_PORT_OUTPUT_LOW" />
+                  </alt>
+                  <alt id="p209.output.high" name="GPIO" type="gpio">
+                    <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_PORT_DIRECTION_OUTPUT" />
+                    <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_PORT_OUTPUT_HIGH" />
+                  </alt>
+                  <alt id="p209.jtag_fslash_swd.tdo" name="JTAG/SWD_TDO">
+                    <portConfigSetRef refId="mode.peripheral.speed.none" />
+                    <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_PERIPHERAL_DEBUG" />
+                  </alt>
+                </configuration>
+              </configurations>
+            </pin>
+          </pins>
+        </component>
+        <component id="p210" name="P210" type="port">
+          <property editable="true" id="p210.symbolic_name" name="Symbolic Name" />
+          <property editable="true" id="p210.comment" name="Comment" style="multiLine" />
+          <property id="p210.capabilitylist" name="Port Capabilities" style="multiLine" value="GPIO; restricted candidate pin support" />
+          <configurations name="P210 Configuration">
+            <configuration id="p210.gpio_mode" name="Mode" type="generic">
+              <alt default="true" id="p210.gpio_mode.disabled" name="Disabled">
+                <connectionSetRef refId="p210.sel.disabled" />
+                <dependencies operator="or">
+                  <dependency altRef="p210.none" configRef="p210" />
+                  <dependency altRef="p210.input" configRef="p210" />
+                  <dependency altRef="p210.output.low" configRef="p210" />
+                  <dependency altRef="p210.output.high" configRef="p210" />
+                </dependencies>
+              </alt>
+              <alt id="p210.gpio_mode.gpio_mode_in" name="Input mode">
+                <connectionSetRef refId="p210.sel.input" />
+                <dependencies operator="or">
+                  <dependency altRef="p210.none" configRef="p210" />
+                  <dependency altRef="p210.input" configRef="p210" />
+                  <dependency altRef="p210.output.low" configRef="p210" />
+                  <dependency altRef="p210.output.high" configRef="p210" />
+                </dependencies>
+              </alt>
+              <alt id="p210.gpio_mode.gpio_mode_out.low" name="Output mode (Initial Low)">
+                <connectionSetRef refId="p210.sel.output.low" />
+                <dependencies operator="or">
+                  <dependency altRef="p210.none" configRef="p210" />
+                  <dependency altRef="p210.input" configRef="p210" />
+                  <dependency altRef="p210.output.low" configRef="p210" />
+                  <dependency altRef="p210.output.high" configRef="p210" />
+                </dependencies>
+              </alt>
+              <alt id="p210.gpio_mode.gpio_mode_out.high" name="Output mode (Initial High)">
+                <connectionSetRef refId="p210.sel.output.high" />
+                <dependencies operator="or">
+                  <dependency altRef="p210.none" configRef="p210" />
+                  <dependency altRef="p210.input" configRef="p210" />
+                  <dependency altRef="p210.output.low" configRef="p210" />
+                  <dependency altRef="p210.output.high" configRef="p210" />
+                </dependencies>
+              </alt>
+              <alt id="p210.gpio_mode.gpio_mode_peripheral" name="Peripheral mode">
+                <dependencies operator="or">
+                  <dependency altRef="p210.jtag_fslash_swd.swdio" configRef="p210" />
+                  <dependency altRef="p210.jtag_fslash_swd.tms" configRef="p210" />
+                </dependencies>
+                <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_PERIPHERAL_PIN" />
+              </alt>
+            </configuration>
+            <configuration id="p210.gpio_pupd" name="Pull up/down" type="generic">
+              <alt default="true" id="p210.gpio_pupd.gpio_pupd_no_ip_pull" name="None" />
+              <alt id="p210.gpio_pupd.gpio_pupd_ip_up" name="Input pull-up">
+                <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_PULLUP_ENABLE" />
+              </alt>
+              <dependencies operator="or">
+                <dependency altRef="p210.gpio_mode.gpio_mode_in" configRef="p210.gpio_mode" />
+                <dependency altRef="p210.gpio_mode.gpio_mode_peripheral" configRef="p210.gpio_mode" />
+              </dependencies>
+            </configuration>
+            <configuration id="p210.gpio_otype" name="Output Type" type="generic">
+              <alt default="true" id="p210.gpio_otype.gpio_otype.gpio_otype_none" name="CMOS" />
+              <alt id="p210.gpio_otype.gpio_otype_n_ch_od" name="n-ch open drain">
+                <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_NMOS_ENABLE" />
+              </alt>
+              <dependencies operator="or">
+                <dependency altRef="p210.gpio_mode.gpio_mode_out.low" configRef="p210.gpio_mode" />
+                <dependency altRef="p210.gpio_mode.gpio_mode_out.high" configRef="p210.gpio_mode" />
+                <dependency altRef="p210.gpio_mode.gpio_mode_peripheral" configRef="p210.gpio_mode" />
+              </dependencies>
+            </configuration>
+          </configurations>
+          <pins>
+            <pin direction="inout" id="p210" name="P210">
+              <configurations>
+                <configuration id="p210" name="P210" type="connection">
+                  <alt default="true" id="p210.none" name="None" type="none" />
+                  <alt id="p210.input" name="GPIO" type="gpio">
+                    <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_PORT_DIRECTION_INPUT" />
+                  </alt>
+                  <alt id="p210.output.low" name="GPIO" type="gpio">
+                    <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_PORT_DIRECTION_OUTPUT" />
+                    <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_PORT_OUTPUT_LOW" />
+                  </alt>
+                  <alt id="p210.output.high" name="GPIO" type="gpio">
+                    <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_PORT_DIRECTION_OUTPUT" />
+                    <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_PORT_OUTPUT_HIGH" />
+                  </alt>
+                  <alt id="p210.jtag_fslash_swd.swdio" name="JTAG/SWD_SWDIO">
+                    <portConfigSetRef refId="mode.peripheral.speed.none" />
+                    <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_PERIPHERAL_DEBUG" />
+                  </alt>
+                  <alt id="p210.jtag_fslash_swd.tms" name="JTAG/SWD_TMS">
+                    <portConfigSetRef refId="mode.peripheral.speed.none" />
+                    <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_PERIPHERAL_DEBUG" />
+                  </alt>
+                </configuration>
+              </configurations>
+            </pin>
+          </pins>
+        </component>
+        <component id="p211" name="P211" type="port">
+          <property editable="true" id="p211.symbolic_name" name="Symbolic Name" />
+          <property editable="true" id="p211.comment" name="Comment" style="multiLine" />
+          <property id="p211.capabilitylist" name="Port Capabilities" style="multiLine" value="GPIO; restricted candidate pin support" />
+          <configurations name="P211 Configuration">
+            <configuration id="p211.gpio_mode" name="Mode" type="generic">
+              <alt default="true" id="p211.gpio_mode.disabled" name="Disabled">
+                <connectionSetRef refId="p211.sel.disabled" />
+                <dependencies operator="or">
+                  <dependency altRef="p211.none" configRef="p211" />
+                  <dependency altRef="p211.input" configRef="p211" />
+                  <dependency altRef="p211.output.low" configRef="p211" />
+                  <dependency altRef="p211.output.high" configRef="p211" />
+                </dependencies>
+              </alt>
+              <alt id="p211.gpio_mode.gpio_mode_in" name="Input mode">
+                <connectionSetRef refId="p211.sel.input" />
+                <dependencies operator="or">
+                  <dependency altRef="p211.none" configRef="p211" />
+                  <dependency altRef="p211.input" configRef="p211" />
+                  <dependency altRef="p211.output.low" configRef="p211" />
+                  <dependency altRef="p211.output.high" configRef="p211" />
+                </dependencies>
+              </alt>
+              <alt id="p211.gpio_mode.gpio_mode_out.low" name="Output mode (Initial Low)">
+                <connectionSetRef refId="p211.sel.output.low" />
+                <dependencies operator="or">
+                  <dependency altRef="p211.none" configRef="p211" />
+                  <dependency altRef="p211.input" configRef="p211" />
+                  <dependency altRef="p211.output.low" configRef="p211" />
+                  <dependency altRef="p211.output.high" configRef="p211" />
+                </dependencies>
+              </alt>
+              <alt id="p211.gpio_mode.gpio_mode_out.high" name="Output mode (Initial High)">
+                <connectionSetRef refId="p211.sel.output.high" />
+                <dependencies operator="or">
+                  <dependency altRef="p211.none" configRef="p211" />
+                  <dependency altRef="p211.input" configRef="p211" />
+                  <dependency altRef="p211.output.low" configRef="p211" />
+                  <dependency altRef="p211.output.high" configRef="p211" />
+                </dependencies>
+              </alt>
+              <alt id="p211.gpio_mode.gpio_mode_peripheral" name="Peripheral mode">
+                <dependencies operator="or">
+                  <dependency altRef="p211.jtag_fslash_swd.swclk" configRef="p211" />
+                  <dependency altRef="p211.jtag_fslash_swd.tck" configRef="p211" />
+                </dependencies>
+                <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_PERIPHERAL_PIN" />
+              </alt>
+            </configuration>
+            <configuration id="p211.gpio_pupd" name="Pull up/down" type="generic">
+              <alt default="true" id="p211.gpio_pupd.gpio_pupd_no_ip_pull" name="None" />
+              <alt id="p211.gpio_pupd.gpio_pupd_ip_up" name="Input pull-up">
+                <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_PULLUP_ENABLE" />
+              </alt>
+              <dependencies operator="or">
+                <dependency altRef="p211.gpio_mode.gpio_mode_in" configRef="p211.gpio_mode" />
+                <dependency altRef="p211.gpio_mode.gpio_mode_peripheral" configRef="p211.gpio_mode" />
+              </dependencies>
+            </configuration>
+            <configuration id="p211.gpio_otype" name="Output Type" type="generic">
+              <alt default="true" id="p211.gpio_otype.gpio_otype.gpio_otype_none" name="CMOS" />
+              <alt id="p211.gpio_otype.gpio_otype_n_ch_od" name="n-ch open drain">
+                <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_NMOS_ENABLE" />
+              </alt>
+              <dependencies operator="or">
+                <dependency altRef="p211.gpio_mode.gpio_mode_out.low" configRef="p211.gpio_mode" />
+                <dependency altRef="p211.gpio_mode.gpio_mode_out.high" configRef="p211.gpio_mode" />
+                <dependency altRef="p211.gpio_mode.gpio_mode_peripheral" configRef="p211.gpio_mode" />
+              </dependencies>
+            </configuration>
+          </configurations>
+          <pins>
+            <pin direction="inout" id="p211" name="P211">
+              <configurations>
+                <configuration id="p211" name="P211" type="connection">
+                  <alt default="true" id="p211.none" name="None" type="none" />
+                  <alt id="p211.input" name="GPIO" type="gpio">
+                    <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_PORT_DIRECTION_INPUT" />
+                  </alt>
+                  <alt id="p211.output.low" name="GPIO" type="gpio">
+                    <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_PORT_DIRECTION_OUTPUT" />
+                    <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_PORT_OUTPUT_LOW" />
+                  </alt>
+                  <alt id="p211.output.high" name="GPIO" type="gpio">
+                    <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_PORT_DIRECTION_OUTPUT" />
+                    <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_PORT_OUTPUT_HIGH" />
+                  </alt>
+                  <alt id="p211.jtag_fslash_swd.swclk" name="JTAG/SWD_SWCLK">
+                    <portConfigSetRef refId="mode.peripheral.speed.none" />
+                    <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_PERIPHERAL_DEBUG" />
+                  </alt>
+                  <alt id="p211.jtag_fslash_swd.tck" name="JTAG/SWD_TCK">
+                    <portConfigSetRef refId="mode.peripheral.speed.none" />
+                    <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_PERIPHERAL_DEBUG" />
+                  </alt>
+                </configuration>
+              </configurations>
+            </pin>
+          </pins>
+        </component>
+      </components>
+      <components id="p3" name="P3">
+        <component id="p303" name="P303" type="port">
+          <property editable="true" id="p303.symbolic_name" name="Symbolic Name" />
+          <property editable="true" id="p303.comment" name="Comment" style="multiLine" />
+          <property id="p303.capabilitylist" name="Port Capabilities" style="multiLine" value="GPIO; restricted candidate pin support" />
+          <configurations name="P303 Configuration">
+            <configuration id="p303.gpio_mode" name="Mode" type="generic">
+              <alt default="true" id="p303.gpio_mode.disabled" name="Disabled">
+                <connectionSetRef refId="p303.sel.disabled" />
+                <dependencies operator="or">
+                  <dependency altRef="p303.none" configRef="p303" />
+                  <dependency altRef="p303.input" configRef="p303" />
+                  <dependency altRef="p303.output.low" configRef="p303" />
+                  <dependency altRef="p303.output.high" configRef="p303" />
+                </dependencies>
+              </alt>
+              <alt id="p303.gpio_mode.gpio_mode_in" name="Input mode">
+                <connectionSetRef refId="p303.sel.input" />
+                <dependencies operator="or">
+                  <dependency altRef="p303.none" configRef="p303" />
+                  <dependency altRef="p303.input" configRef="p303" />
+                  <dependency altRef="p303.output.low" configRef="p303" />
+                  <dependency altRef="p303.output.high" configRef="p303" />
+                </dependencies>
+              </alt>
+              <alt id="p303.gpio_mode.gpio_mode_out.low" name="Output mode (Initial Low)">
+                <connectionSetRef refId="p303.sel.output.low" />
+                <dependencies operator="or">
+                  <dependency altRef="p303.none" configRef="p303" />
+                  <dependency altRef="p303.input" configRef="p303" />
+                  <dependency altRef="p303.output.low" configRef="p303" />
+                  <dependency altRef="p303.output.high" configRef="p303" />
+                </dependencies>
+              </alt>
+              <alt id="p303.gpio_mode.gpio_mode_out.high" name="Output mode (Initial High)">
+                <connectionSetRef refId="p303.sel.output.high" />
+                <dependencies operator="or">
+                  <dependency altRef="p303.none" configRef="p303" />
+                  <dependency altRef="p303.input" configRef="p303" />
+                  <dependency altRef="p303.output.low" configRef="p303" />
+                  <dependency altRef="p303.output.high" configRef="p303" />
+                </dependencies>
+              </alt>
+            </configuration>
+            <configuration id="p303.gpio_pupd" name="Pull up/down" type="generic">
+              <alt default="true" id="p303.gpio_pupd.gpio_pupd_no_ip_pull" name="None" />
+              <alt id="p303.gpio_pupd.gpio_pupd_ip_up" name="Input pull-up">
+                <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_PULLUP_ENABLE" />
+              </alt>
+              <dependencies operator="or">
+                <dependency altRef="p303.gpio_mode.gpio_mode_in" configRef="p303.gpio_mode" />
+              </dependencies>
+            </configuration>
+            <configuration id="p303.gpio_otype" name="Output Type" type="generic">
+              <alt default="true" id="p303.gpio_otype.gpio_otype.gpio_otype_none" name="CMOS" />
+              <alt id="p303.gpio_otype.gpio_otype_n_ch_od" name="n-ch open drain">
+                <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_NMOS_ENABLE" />
+              </alt>
+              <dependencies operator="or">
+                <dependency altRef="p303.gpio_mode.gpio_mode_out.low" configRef="p303.gpio_mode" />
+                <dependency altRef="p303.gpio_mode.gpio_mode_out.high" configRef="p303.gpio_mode" />
+              </dependencies>
+            </configuration>
+          </configurations>
+          <pins>
+            <pin direction="inout" id="p303" name="P303">
+              <configurations>
+                <configuration id="p303" name="P303" type="connection">
+                  <alt default="true" id="p303.none" name="None" type="none" />
+                  <alt id="p303.input" name="GPIO" type="gpio">
+                    <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_PORT_DIRECTION_INPUT" />
+                  </alt>
+                  <alt id="p303.output.low" name="GPIO" type="gpio">
+                    <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_PORT_DIRECTION_OUTPUT" />
+                    <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_PORT_OUTPUT_LOW" />
+                  </alt>
+                  <alt id="p303.output.high" name="GPIO" type="gpio">
+                    <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_PORT_DIRECTION_OUTPUT" />
+                    <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_PORT_OUTPUT_HIGH" />
+                  </alt>
+                </configuration>
+              </configurations>
+            </pin>
+          </pins>
+        </component>
+      </components>
+      <components id="p5" name="P5">
+        <component id="p502" name="P502" type="port">
+          <property editable="true" id="p502.symbolic_name" name="Symbolic Name" />
+          <property editable="true" id="p502.comment" name="Comment" style="multiLine" />
+          <property id="p502.capabilitylist" name="Port Capabilities" style="multiLine" value="GPIO; PDM2_PDMDAT2; restricted candidate pin support" />
+          <configurations name="P502 Configuration">
+            <configuration id="p502.gpio_mode" name="Mode" type="generic">
+              <alt default="true" id="p502.gpio_mode.disabled" name="Disabled">
+                <connectionSetRef refId="p502.sel.disabled" />
+                <dependencies operator="or">
+                  <dependency altRef="p502.none" configRef="p502" />
+                  <dependency altRef="p502.input" configRef="p502" />
+                  <dependency altRef="p502.output.low" configRef="p502" />
+                  <dependency altRef="p502.output.high" configRef="p502" />
+                </dependencies>
+              </alt>
+              <alt id="p502.gpio_mode.gpio_mode_in" name="Input mode">
+                <connectionSetRef refId="p502.sel.input" />
+                <dependencies operator="or">
+                  <dependency altRef="p502.none" configRef="p502" />
+                  <dependency altRef="p502.input" configRef="p502" />
+                  <dependency altRef="p502.output.low" configRef="p502" />
+                  <dependency altRef="p502.output.high" configRef="p502" />
+                </dependencies>
+              </alt>
+              <alt id="p502.gpio_mode.gpio_mode_out.low" name="Output mode (Initial Low)">
+                <connectionSetRef refId="p502.sel.output.low" />
+                <dependencies operator="or">
+                  <dependency altRef="p502.none" configRef="p502" />
+                  <dependency altRef="p502.input" configRef="p502" />
+                  <dependency altRef="p502.output.low" configRef="p502" />
+                  <dependency altRef="p502.output.high" configRef="p502" />
+                </dependencies>
+              </alt>
+              <alt id="p502.gpio_mode.gpio_mode_out.high" name="Output mode (Initial High)">
+                <connectionSetRef refId="p502.sel.output.high" />
+                <dependencies operator="or">
+                  <dependency altRef="p502.none" configRef="p502" />
+                  <dependency altRef="p502.input" configRef="p502" />
+                  <dependency altRef="p502.output.low" configRef="p502" />
+                  <dependency altRef="p502.output.high" configRef="p502" />
+                </dependencies>
+              </alt>
+              <alt id="p502.gpio_mode.gpio_mode_peripheral" name="Peripheral mode">
+                <dependencies operator="or">
+                  <dependency altRef="p502.pdm2.pdmdat2" configRef="p502" />
+                </dependencies>
+                <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_PERIPHERAL_PIN" />
+              </alt>
+            </configuration>
+            <configuration id="p502.gpio_pupd" name="Pull up/down" type="generic">
+              <alt default="true" id="p502.gpio_pupd.gpio_pupd_no_ip_pull" name="None" />
+              <alt id="p502.gpio_pupd.gpio_pupd_ip_up" name="Input pull-up">
+                <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_PULLUP_ENABLE" />
+              </alt>
+              <dependencies operator="or">
+                <dependency altRef="p502.gpio_mode.gpio_mode_in" configRef="p502.gpio_mode" />
+              </dependencies>
+            </configuration>
+            <configuration id="p502.gpio_otype" name="Output Type" type="generic">
+              <alt default="true" id="p502.gpio_otype.gpio_otype.gpio_otype_none" name="CMOS" />
+              <alt id="p502.gpio_otype.gpio_otype_n_ch_od" name="n-ch open drain">
+                <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_NMOS_ENABLE" />
+              </alt>
+              <dependencies operator="or">
+                <dependency altRef="p502.gpio_mode.gpio_mode_out.low" configRef="p502.gpio_mode" />
+                <dependency altRef="p502.gpio_mode.gpio_mode_out.high" configRef="p502.gpio_mode" />
+              </dependencies>
+            </configuration>
+          </configurations>
+          <pins>
+            <pin direction="inout" id="p502" name="P502">
+              <configurations>
+                <configuration id="p502" name="P502" type="connection">
+                  <alt default="true" id="p502.none" name="None" type="none" />
+                  <alt id="p502.input" name="GPIO" type="gpio">
+                    <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_PORT_DIRECTION_INPUT" />
+                  </alt>
+                  <alt id="p502.output.low" name="GPIO" type="gpio">
+                    <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_PORT_DIRECTION_OUTPUT" />
+                    <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_PORT_OUTPUT_LOW" />
+                  </alt>
+                  <alt id="p502.output.high" name="GPIO" type="gpio">
+                    <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_PORT_DIRECTION_OUTPUT" />
+                    <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_PORT_OUTPUT_HIGH" />
+                  </alt>
+                  <alt id="p502.pdm2.pdmdat2" name="PDM2_PDMDAT2">
+                    <portConfigSetRef refId="mode.peripheral.speed.none" />
+                    <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="0x1B000000" />
+                  </alt>
+                </configuration>
+              </configurations>
+            </pin>
+          </pins>
+        </component>
+        <component id="p514" name="P514" type="port">
+          <property editable="true" id="p514.symbolic_name" name="Symbolic Name" />
+          <property editable="true" id="p514.comment" name="Comment" style="multiLine" />
+          <property id="p514.capabilitylist" name="Port Capabilities" style="multiLine" value="GPIO; restricted candidate pin support" />
+          <configurations name="P514 Configuration">
+            <configuration id="p514.gpio_mode" name="Mode" type="generic">
+              <alt default="true" id="p514.gpio_mode.disabled" name="Disabled">
+                <connectionSetRef refId="p514.sel.disabled" />
+                <dependencies operator="or">
+                  <dependency altRef="p514.none" configRef="p514" />
+                  <dependency altRef="p514.input" configRef="p514" />
+                  <dependency altRef="p514.output.low" configRef="p514" />
+                  <dependency altRef="p514.output.high" configRef="p514" />
+                </dependencies>
+              </alt>
+              <alt id="p514.gpio_mode.gpio_mode_in" name="Input mode">
+                <connectionSetRef refId="p514.sel.input" />
+                <dependencies operator="or">
+                  <dependency altRef="p514.none" configRef="p514" />
+                  <dependency altRef="p514.input" configRef="p514" />
+                  <dependency altRef="p514.output.low" configRef="p514" />
+                  <dependency altRef="p514.output.high" configRef="p514" />
+                </dependencies>
+              </alt>
+              <alt id="p514.gpio_mode.gpio_mode_out.low" name="Output mode (Initial Low)">
+                <connectionSetRef refId="p514.sel.output.low" />
+                <dependencies operator="or">
+                  <dependency altRef="p514.none" configRef="p514" />
+                  <dependency altRef="p514.input" configRef="p514" />
+                  <dependency altRef="p514.output.low" configRef="p514" />
+                  <dependency altRef="p514.output.high" configRef="p514" />
+                </dependencies>
+              </alt>
+              <alt id="p514.gpio_mode.gpio_mode_out.high" name="Output mode (Initial High)">
+                <connectionSetRef refId="p514.sel.output.high" />
+                <dependencies operator="or">
+                  <dependency altRef="p514.none" configRef="p514" />
+                  <dependency altRef="p514.input" configRef="p514" />
+                  <dependency altRef="p514.output.low" configRef="p514" />
+                  <dependency altRef="p514.output.high" configRef="p514" />
+                </dependencies>
+              </alt>
+            </configuration>
+            <configuration id="p514.gpio_pupd" name="Pull up/down" type="generic">
+              <alt default="true" id="p514.gpio_pupd.gpio_pupd_no_ip_pull" name="None" />
+              <alt id="p514.gpio_pupd.gpio_pupd_ip_up" name="Input pull-up">
+                <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_PULLUP_ENABLE" />
+              </alt>
+              <dependencies operator="or">
+                <dependency altRef="p514.gpio_mode.gpio_mode_in" configRef="p514.gpio_mode" />
+              </dependencies>
+            </configuration>
+            <configuration id="p514.gpio_otype" name="Output Type" type="generic">
+              <alt default="true" id="p514.gpio_otype.gpio_otype.gpio_otype_none" name="CMOS" />
+              <alt id="p514.gpio_otype.gpio_otype_n_ch_od" name="n-ch open drain">
+                <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_NMOS_ENABLE" />
+              </alt>
+              <dependencies operator="or">
+                <dependency altRef="p514.gpio_mode.gpio_mode_out.low" configRef="p514.gpio_mode" />
+                <dependency altRef="p514.gpio_mode.gpio_mode_out.high" configRef="p514.gpio_mode" />
+              </dependencies>
+            </configuration>
+          </configurations>
+          <pins>
+            <pin direction="inout" id="p514" name="P514">
+              <configurations>
+                <configuration id="p514" name="P514" type="connection">
+                  <alt default="true" id="p514.none" name="None" type="none" />
+                  <alt id="p514.input" name="GPIO" type="gpio">
+                    <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_PORT_DIRECTION_INPUT" />
+                  </alt>
+                  <alt id="p514.output.low" name="GPIO" type="gpio">
+                    <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_PORT_DIRECTION_OUTPUT" />
+                    <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_PORT_OUTPUT_LOW" />
+                  </alt>
+                  <alt id="p514.output.high" name="GPIO" type="gpio">
+                    <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_PORT_DIRECTION_OUTPUT" />
+                    <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_PORT_OUTPUT_HIGH" />
+                  </alt>
+                </configuration>
+              </configurations>
+            </pin>
+          </pins>
+        </component>
+      </components>
+      <components id="p6" name="P6">
+        <component id="p600" name="P600" type="port">
+          <property editable="true" id="p600.symbolic_name" name="Symbolic Name" />
+          <property editable="true" id="p600.comment" name="Comment" style="multiLine" />
+          <property id="p600.capabilitylist" name="Port Capabilities" style="multiLine" value="GPIO; restricted candidate pin support" />
+          <configurations name="P600 Configuration">
+            <configuration id="p600.gpio_mode" name="Mode" type="generic">
+              <alt default="true" id="p600.gpio_mode.disabled" name="Disabled">
+                <connectionSetRef refId="p600.sel.disabled" />
+                <dependencies operator="or">
+                  <dependency altRef="p600.none" configRef="p600" />
+                  <dependency altRef="p600.input" configRef="p600" />
+                  <dependency altRef="p600.output.low" configRef="p600" />
+                  <dependency altRef="p600.output.high" configRef="p600" />
+                </dependencies>
+              </alt>
+              <alt id="p600.gpio_mode.gpio_mode_in" name="Input mode">
+                <connectionSetRef refId="p600.sel.input" />
+                <dependencies operator="or">
+                  <dependency altRef="p600.none" configRef="p600" />
+                  <dependency altRef="p600.input" configRef="p600" />
+                  <dependency altRef="p600.output.low" configRef="p600" />
+                  <dependency altRef="p600.output.high" configRef="p600" />
+                </dependencies>
+              </alt>
+              <alt id="p600.gpio_mode.gpio_mode_out.low" name="Output mode (Initial Low)">
+                <connectionSetRef refId="p600.sel.output.low" />
+                <dependencies operator="or">
+                  <dependency altRef="p600.none" configRef="p600" />
+                  <dependency altRef="p600.input" configRef="p600" />
+                  <dependency altRef="p600.output.low" configRef="p600" />
+                  <dependency altRef="p600.output.high" configRef="p600" />
+                </dependencies>
+              </alt>
+              <alt id="p600.gpio_mode.gpio_mode_out.high" name="Output mode (Initial High)">
+                <connectionSetRef refId="p600.sel.output.high" />
+                <dependencies operator="or">
+                  <dependency altRef="p600.none" configRef="p600" />
+                  <dependency altRef="p600.input" configRef="p600" />
+                  <dependency altRef="p600.output.low" configRef="p600" />
+                  <dependency altRef="p600.output.high" configRef="p600" />
+                </dependencies>
+              </alt>
+            </configuration>
+            <configuration id="p600.gpio_pupd" name="Pull up/down" type="generic">
+              <alt default="true" id="p600.gpio_pupd.gpio_pupd_no_ip_pull" name="None" />
+              <alt id="p600.gpio_pupd.gpio_pupd_ip_up" name="Input pull-up">
+                <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_PULLUP_ENABLE" />
+              </alt>
+              <dependencies operator="or">
+                <dependency altRef="p600.gpio_mode.gpio_mode_in" configRef="p600.gpio_mode" />
+              </dependencies>
+            </configuration>
+            <configuration id="p600.gpio_otype" name="Output Type" type="generic">
+              <alt default="true" id="p600.gpio_otype.gpio_otype.gpio_otype_none" name="CMOS" />
+              <alt id="p600.gpio_otype.gpio_otype_n_ch_od" name="n-ch open drain">
+                <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_NMOS_ENABLE" />
+              </alt>
+              <dependencies operator="or">
+                <dependency altRef="p600.gpio_mode.gpio_mode_out.low" configRef="p600.gpio_mode" />
+                <dependency altRef="p600.gpio_mode.gpio_mode_out.high" configRef="p600.gpio_mode" />
+              </dependencies>
+            </configuration>
+          </configurations>
+          <pins>
+            <pin direction="inout" id="p600" name="P600">
+              <configurations>
+                <configuration id="p600" name="P600" type="connection">
+                  <alt default="true" id="p600.none" name="None" type="none" />
+                  <alt id="p600.input" name="GPIO" type="gpio">
+                    <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_PORT_DIRECTION_INPUT" />
+                  </alt>
+                  <alt id="p600.output.low" name="GPIO" type="gpio">
+                    <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_PORT_DIRECTION_OUTPUT" />
+                    <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_PORT_OUTPUT_LOW" />
+                  </alt>
+                  <alt id="p600.output.high" name="GPIO" type="gpio">
+                    <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_PORT_DIRECTION_OUTPUT" />
+                    <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_PORT_OUTPUT_HIGH" />
+                  </alt>
+                </configuration>
+              </configurations>
+            </pin>
+          </pins>
+        </component>
+      </components>
+      <components id="p8" name="P8">
+        <component id="p806" name="P806" type="port">
+          <property editable="true" id="p806.symbolic_name" name="Symbolic Name" />
+          <property editable="true" id="p806.comment" name="Comment" style="multiLine" />
+          <property id="p806.capabilitylist" name="Port Capabilities" style="multiLine" value="GPIO; restricted candidate pin support" />
+          <configurations name="P806 Configuration">
+            <configuration id="p806.gpio_mode" name="Mode" type="generic">
+              <alt default="true" id="p806.gpio_mode.disabled" name="Disabled">
+                <connectionSetRef refId="p806.sel.disabled" />
+                <dependencies operator="or">
+                  <dependency altRef="p806.none" configRef="p806" />
+                  <dependency altRef="p806.input" configRef="p806" />
+                  <dependency altRef="p806.output.low" configRef="p806" />
+                  <dependency altRef="p806.output.high" configRef="p806" />
+                </dependencies>
+              </alt>
+              <alt id="p806.gpio_mode.gpio_mode_in" name="Input mode">
+                <connectionSetRef refId="p806.sel.input" />
+                <dependencies operator="or">
+                  <dependency altRef="p806.none" configRef="p806" />
+                  <dependency altRef="p806.input" configRef="p806" />
+                  <dependency altRef="p806.output.low" configRef="p806" />
+                  <dependency altRef="p806.output.high" configRef="p806" />
+                </dependencies>
+              </alt>
+              <alt id="p806.gpio_mode.gpio_mode_out.low" name="Output mode (Initial Low)">
+                <connectionSetRef refId="p806.sel.output.low" />
+                <dependencies operator="or">
+                  <dependency altRef="p806.none" configRef="p806" />
+                  <dependency altRef="p806.input" configRef="p806" />
+                  <dependency altRef="p806.output.low" configRef="p806" />
+                  <dependency altRef="p806.output.high" configRef="p806" />
+                </dependencies>
+              </alt>
+              <alt id="p806.gpio_mode.gpio_mode_out.high" name="Output mode (Initial High)">
+                <connectionSetRef refId="p806.sel.output.high" />
+                <dependencies operator="or">
+                  <dependency altRef="p806.none" configRef="p806" />
+                  <dependency altRef="p806.input" configRef="p806" />
+                  <dependency altRef="p806.output.low" configRef="p806" />
+                  <dependency altRef="p806.output.high" configRef="p806" />
+                </dependencies>
+              </alt>
+            </configuration>
+            <configuration id="p806.gpio_pupd" name="Pull up/down" type="generic">
+              <alt default="true" id="p806.gpio_pupd.gpio_pupd_no_ip_pull" name="None" />
+              <alt id="p806.gpio_pupd.gpio_pupd_ip_up" name="Input pull-up">
+                <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_PULLUP_ENABLE" />
+              </alt>
+              <dependencies operator="or">
+                <dependency altRef="p806.gpio_mode.gpio_mode_in" configRef="p806.gpio_mode" />
+              </dependencies>
+            </configuration>
+            <configuration id="p806.gpio_otype" name="Output Type" type="generic">
+              <alt default="true" id="p806.gpio_otype.gpio_otype.gpio_otype_none" name="CMOS" />
+              <alt id="p806.gpio_otype.gpio_otype_n_ch_od" name="n-ch open drain">
+                <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_NMOS_ENABLE" />
+              </alt>
+              <dependencies operator="or">
+                <dependency altRef="p806.gpio_mode.gpio_mode_out.low" configRef="p806.gpio_mode" />
+                <dependency altRef="p806.gpio_mode.gpio_mode_out.high" configRef="p806.gpio_mode" />
+              </dependencies>
+            </configuration>
+          </configurations>
+          <pins>
+            <pin direction="inout" id="p806" name="P806">
+              <configurations>
+                <configuration id="p806" name="P806" type="connection">
+                  <alt default="true" id="p806.none" name="None" type="none" />
+                  <alt id="p806.input" name="GPIO" type="gpio">
+                    <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_PORT_DIRECTION_INPUT" />
+                  </alt>
+                  <alt id="p806.output.low" name="GPIO" type="gpio">
+                    <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_PORT_DIRECTION_OUTPUT" />
+                    <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_PORT_OUTPUT_LOW" />
+                  </alt>
+                  <alt id="p806.output.high" name="GPIO" type="gpio">
+                    <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_PORT_DIRECTION_OUTPUT" />
+                    <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_PORT_OUTPUT_HIGH" />
+                  </alt>
+                </configuration>
+              </configurations>
+            </pin>
+          </pins>
+        </component>
+        <component id="p807" name="P807" type="port">
+          <property editable="true" id="p807.symbolic_name" name="Symbolic Name" />
+          <property editable="true" id="p807.comment" name="Comment" style="multiLine" />
+          <property id="p807.capabilitylist" name="Port Capabilities" style="multiLine" value="GPIO; restricted candidate pin support" />
+          <configurations name="P807 Configuration">
+            <configuration id="p807.gpio_mode" name="Mode" type="generic">
+              <alt default="true" id="p807.gpio_mode.disabled" name="Disabled">
+                <connectionSetRef refId="p807.sel.disabled" />
+                <dependencies operator="or">
+                  <dependency altRef="p807.none" configRef="p807" />
+                  <dependency altRef="p807.input" configRef="p807" />
+                  <dependency altRef="p807.output.low" configRef="p807" />
+                  <dependency altRef="p807.output.high" configRef="p807" />
+                </dependencies>
+              </alt>
+              <alt id="p807.gpio_mode.gpio_mode_in" name="Input mode">
+                <connectionSetRef refId="p807.sel.input" />
+                <dependencies operator="or">
+                  <dependency altRef="p807.none" configRef="p807" />
+                  <dependency altRef="p807.input" configRef="p807" />
+                  <dependency altRef="p807.output.low" configRef="p807" />
+                  <dependency altRef="p807.output.high" configRef="p807" />
+                </dependencies>
+              </alt>
+              <alt id="p807.gpio_mode.gpio_mode_out.low" name="Output mode (Initial Low)">
+                <connectionSetRef refId="p807.sel.output.low" />
+                <dependencies operator="or">
+                  <dependency altRef="p807.none" configRef="p807" />
+                  <dependency altRef="p807.input" configRef="p807" />
+                  <dependency altRef="p807.output.low" configRef="p807" />
+                  <dependency altRef="p807.output.high" configRef="p807" />
+                </dependencies>
+              </alt>
+              <alt id="p807.gpio_mode.gpio_mode_out.high" name="Output mode (Initial High)">
+                <connectionSetRef refId="p807.sel.output.high" />
+                <dependencies operator="or">
+                  <dependency altRef="p807.none" configRef="p807" />
+                  <dependency altRef="p807.input" configRef="p807" />
+                  <dependency altRef="p807.output.low" configRef="p807" />
+                  <dependency altRef="p807.output.high" configRef="p807" />
+                </dependencies>
+              </alt>
+            </configuration>
+            <configuration id="p807.gpio_pupd" name="Pull up/down" type="generic">
+              <alt default="true" id="p807.gpio_pupd.gpio_pupd_no_ip_pull" name="None" />
+              <alt id="p807.gpio_pupd.gpio_pupd_ip_up" name="Input pull-up">
+                <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_PULLUP_ENABLE" />
+              </alt>
+              <dependencies operator="or">
+                <dependency altRef="p807.gpio_mode.gpio_mode_in" configRef="p807.gpio_mode" />
+              </dependencies>
+            </configuration>
+            <configuration id="p807.gpio_otype" name="Output Type" type="generic">
+              <alt default="true" id="p807.gpio_otype.gpio_otype.gpio_otype_none" name="CMOS" />
+              <alt id="p807.gpio_otype.gpio_otype_n_ch_od" name="n-ch open drain">
+                <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_NMOS_ENABLE" />
+              </alt>
+              <dependencies operator="or">
+                <dependency altRef="p807.gpio_mode.gpio_mode_out.low" configRef="p807.gpio_mode" />
+                <dependency altRef="p807.gpio_mode.gpio_mode_out.high" configRef="p807.gpio_mode" />
+              </dependencies>
+            </configuration>
+          </configurations>
+          <pins>
+            <pin direction="inout" id="p807" name="P807">
+              <configurations>
+                <configuration id="p807" name="P807" type="connection">
+                  <alt default="true" id="p807.none" name="None" type="none" />
+                  <alt id="p807.input" name="GPIO" type="gpio">
+                    <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_PORT_DIRECTION_INPUT" />
+                  </alt>
+                  <alt id="p807.output.low" name="GPIO" type="gpio">
+                    <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_PORT_DIRECTION_OUTPUT" />
+                    <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_PORT_OUTPUT_LOW" />
+                  </alt>
+                  <alt id="p807.output.high" name="GPIO" type="gpio">
+                    <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_PORT_DIRECTION_OUTPUT" />
+                    <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_PORT_OUTPUT_HIGH" />
+                  </alt>
+                </configuration>
+              </configurations>
+            </pin>
+          </pins>
+        </component>
+        <component id="p812" name="P812" type="port">
+          <property editable="true" id="p812.symbolic_name" name="Symbolic Name" />
+          <property editable="true" id="p812.comment" name="Comment" style="multiLine" />
+          <property id="p812.capabilitylist" name="Port Capabilities" style="multiLine" value="GPIO; PDM2_PDMCLK2; restricted candidate pin support" />
+          <configurations name="P812 Configuration">
+            <configuration id="p812.gpio_mode" name="Mode" type="generic">
+              <alt default="true" id="p812.gpio_mode.disabled" name="Disabled">
+                <connectionSetRef refId="p812.sel.disabled" />
+                <dependencies operator="or">
+                  <dependency altRef="p812.none" configRef="p812" />
+                  <dependency altRef="p812.input" configRef="p812" />
+                  <dependency altRef="p812.output.low" configRef="p812" />
+                  <dependency altRef="p812.output.high" configRef="p812" />
+                </dependencies>
+              </alt>
+              <alt id="p812.gpio_mode.gpio_mode_in" name="Input mode">
+                <connectionSetRef refId="p812.sel.input" />
+                <dependencies operator="or">
+                  <dependency altRef="p812.none" configRef="p812" />
+                  <dependency altRef="p812.input" configRef="p812" />
+                  <dependency altRef="p812.output.low" configRef="p812" />
+                  <dependency altRef="p812.output.high" configRef="p812" />
+                </dependencies>
+              </alt>
+              <alt id="p812.gpio_mode.gpio_mode_out.low" name="Output mode (Initial Low)">
+                <connectionSetRef refId="p812.sel.output.low" />
+                <dependencies operator="or">
+                  <dependency altRef="p812.none" configRef="p812" />
+                  <dependency altRef="p812.input" configRef="p812" />
+                  <dependency altRef="p812.output.low" configRef="p812" />
+                  <dependency altRef="p812.output.high" configRef="p812" />
+                </dependencies>
+              </alt>
+              <alt id="p812.gpio_mode.gpio_mode_out.high" name="Output mode (Initial High)">
+                <connectionSetRef refId="p812.sel.output.high" />
+                <dependencies operator="or">
+                  <dependency altRef="p812.none" configRef="p812" />
+                  <dependency altRef="p812.input" configRef="p812" />
+                  <dependency altRef="p812.output.low" configRef="p812" />
+                  <dependency altRef="p812.output.high" configRef="p812" />
+                </dependencies>
+              </alt>
+              <alt id="p812.gpio_mode.gpio_mode_peripheral" name="Peripheral mode">
+                <dependencies operator="or">
+                  <dependency altRef="p812.pdm2.pdmclk2" configRef="p812" />
+                </dependencies>
+                <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_PERIPHERAL_PIN" />
+              </alt>
+            </configuration>
+            <configuration id="p812.gpio_pupd" name="Pull up/down" type="generic">
+              <alt default="true" id="p812.gpio_pupd.gpio_pupd_no_ip_pull" name="None" />
+              <alt id="p812.gpio_pupd.gpio_pupd_ip_up" name="Input pull-up">
+                <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_PULLUP_ENABLE" />
+              </alt>
+              <dependencies operator="or">
+                <dependency altRef="p812.gpio_mode.gpio_mode_in" configRef="p812.gpio_mode" />
+              </dependencies>
+            </configuration>
+            <configuration id="p812.gpio_otype" name="Output Type" type="generic">
+              <alt default="true" id="p812.gpio_otype.gpio_otype.gpio_otype_none" name="CMOS" />
+              <alt id="p812.gpio_otype.gpio_otype_n_ch_od" name="n-ch open drain">
+                <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_NMOS_ENABLE" />
+              </alt>
+              <dependencies operator="or">
+                <dependency altRef="p812.gpio_mode.gpio_mode_out.low" configRef="p812.gpio_mode" />
+                <dependency altRef="p812.gpio_mode.gpio_mode_out.high" configRef="p812.gpio_mode" />
+              </dependencies>
+            </configuration>
+          </configurations>
+          <pins>
+            <pin direction="inout" id="p812" name="P812">
+              <configurations>
+                <configuration id="p812" name="P812" type="connection">
+                  <alt default="true" id="p812.none" name="None" type="none" />
+                  <alt id="p812.input" name="GPIO" type="gpio">
+                    <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_PORT_DIRECTION_INPUT" />
+                  </alt>
+                  <alt id="p812.output.low" name="GPIO" type="gpio">
+                    <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_PORT_DIRECTION_OUTPUT" />
+                    <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_PORT_OUTPUT_LOW" />
+                  </alt>
+                  <alt id="p812.output.high" name="GPIO" type="gpio">
+                    <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_PORT_DIRECTION_OUTPUT" />
+                    <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_PORT_OUTPUT_HIGH" />
+                  </alt>
+                  <alt id="p812.pdm2.pdmclk2" name="PDM2_PDMCLK2">
+                    <portConfigSetRef refId="mode.peripheral.speed.none" />
+                    <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="0x1B000000" />
+                  </alt>
+                </configuration>
+              </configurations>
+            </pin>
+          </pins>
+        </component>
+      </components>
+      <components id="pa" name="PA">
+        <component id="pa07" name="PA07" type="port">
+          <property editable="true" id="pa07.symbolic_name" name="Symbolic Name" />
+          <property editable="true" id="pa07.comment" name="Comment" style="multiLine" />
+          <property id="pa07.capabilitylist" name="Port Capabilities" style="multiLine" value="GPIO; restricted candidate pin support" />
+          <configurations name="PA07 Configuration">
+            <configuration id="pa07.gpio_mode" name="Mode" type="generic">
+              <alt default="true" id="pa07.gpio_mode.disabled" name="Disabled">
+                <connectionSetRef refId="pa07.sel.disabled" />
+                <dependencies operator="or">
+                  <dependency altRef="pa07.none" configRef="pa07" />
+                  <dependency altRef="pa07.input" configRef="pa07" />
+                  <dependency altRef="pa07.output.low" configRef="pa07" />
+                  <dependency altRef="pa07.output.high" configRef="pa07" />
+                </dependencies>
+              </alt>
+              <alt id="pa07.gpio_mode.gpio_mode_in" name="Input mode">
+                <connectionSetRef refId="pa07.sel.input" />
+                <dependencies operator="or">
+                  <dependency altRef="pa07.none" configRef="pa07" />
+                  <dependency altRef="pa07.input" configRef="pa07" />
+                  <dependency altRef="pa07.output.low" configRef="pa07" />
+                  <dependency altRef="pa07.output.high" configRef="pa07" />
+                </dependencies>
+              </alt>
+              <alt id="pa07.gpio_mode.gpio_mode_out.low" name="Output mode (Initial Low)">
+                <connectionSetRef refId="pa07.sel.output.low" />
+                <dependencies operator="or">
+                  <dependency altRef="pa07.none" configRef="pa07" />
+                  <dependency altRef="pa07.input" configRef="pa07" />
+                  <dependency altRef="pa07.output.low" configRef="pa07" />
+                  <dependency altRef="pa07.output.high" configRef="pa07" />
+                </dependencies>
+              </alt>
+              <alt id="pa07.gpio_mode.gpio_mode_out.high" name="Output mode (Initial High)">
+                <connectionSetRef refId="pa07.sel.output.high" />
+                <dependencies operator="or">
+                  <dependency altRef="pa07.none" configRef="pa07" />
+                  <dependency altRef="pa07.input" configRef="pa07" />
+                  <dependency altRef="pa07.output.low" configRef="pa07" />
+                  <dependency altRef="pa07.output.high" configRef="pa07" />
+                </dependencies>
+              </alt>
+            </configuration>
+            <configuration id="pa07.gpio_pupd" name="Pull up/down" type="generic">
+              <alt default="true" id="pa07.gpio_pupd.gpio_pupd_no_ip_pull" name="None" />
+              <alt id="pa07.gpio_pupd.gpio_pupd_ip_up" name="Input pull-up">
+                <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_PULLUP_ENABLE" />
+              </alt>
+              <dependencies operator="or">
+                <dependency altRef="pa07.gpio_mode.gpio_mode_in" configRef="pa07.gpio_mode" />
+              </dependencies>
+            </configuration>
+            <configuration id="pa07.gpio_otype" name="Output Type" type="generic">
+              <alt default="true" id="pa07.gpio_otype.gpio_otype.gpio_otype_none" name="CMOS" />
+              <alt id="pa07.gpio_otype.gpio_otype_n_ch_od" name="n-ch open drain">
+                <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_NMOS_ENABLE" />
+              </alt>
+              <dependencies operator="or">
+                <dependency altRef="pa07.gpio_mode.gpio_mode_out.low" configRef="pa07.gpio_mode" />
+                <dependency altRef="pa07.gpio_mode.gpio_mode_out.high" configRef="pa07.gpio_mode" />
+              </dependencies>
+            </configuration>
+          </configurations>
+          <pins>
+            <pin direction="inout" id="pa07" name="PA07">
+              <configurations>
+                <configuration id="pa07" name="PA07" type="connection">
+                  <alt default="true" id="pa07.none" name="None" type="none" />
+                  <alt id="pa07.input" name="GPIO" type="gpio">
+                    <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_PORT_DIRECTION_INPUT" />
+                  </alt>
+                  <alt id="pa07.output.low" name="GPIO" type="gpio">
+                    <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_PORT_DIRECTION_OUTPUT" />
+                    <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_PORT_OUTPUT_LOW" />
+                  </alt>
+                  <alt id="pa07.output.high" name="GPIO" type="gpio">
+                    <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_PORT_DIRECTION_OUTPUT" />
+                    <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_PORT_OUTPUT_HIGH" />
+                  </alt>
+                </configuration>
+              </configurations>
+            </pin>
+          </pins>
+        </component>
+      </components>
+      <components id="pd" name="PD">
+        <component id="pd02" name="PD02" type="port">
+          <property editable="true" id="pd02.symbolic_name" name="Symbolic Name" />
+          <property editable="true" id="pd02.comment" name="Comment" style="multiLine" />
+          <property id="pd02.capabilitylist" name="Port Capabilities" style="multiLine" value="GPIO; restricted candidate pin support" />
+          <configurations name="PD02 Configuration">
+            <configuration id="pd02.gpio_mode" name="Mode" type="generic">
+              <alt default="true" id="pd02.gpio_mode.disabled" name="Disabled">
+                <connectionSetRef refId="pd02.sel.disabled" />
+                <dependencies operator="or">
+                  <dependency altRef="pd02.none" configRef="pd02" />
+                  <dependency altRef="pd02.input" configRef="pd02" />
+                  <dependency altRef="pd02.output.low" configRef="pd02" />
+                  <dependency altRef="pd02.output.high" configRef="pd02" />
+                </dependencies>
+              </alt>
+              <alt id="pd02.gpio_mode.gpio_mode_in" name="Input mode">
+                <connectionSetRef refId="pd02.sel.input" />
+                <dependencies operator="or">
+                  <dependency altRef="pd02.none" configRef="pd02" />
+                  <dependency altRef="pd02.input" configRef="pd02" />
+                  <dependency altRef="pd02.output.low" configRef="pd02" />
+                  <dependency altRef="pd02.output.high" configRef="pd02" />
+                </dependencies>
+              </alt>
+              <alt id="pd02.gpio_mode.gpio_mode_out.low" name="Output mode (Initial Low)">
+                <connectionSetRef refId="pd02.sel.output.low" />
+                <dependencies operator="or">
+                  <dependency altRef="pd02.none" configRef="pd02" />
+                  <dependency altRef="pd02.input" configRef="pd02" />
+                  <dependency altRef="pd02.output.low" configRef="pd02" />
+                  <dependency altRef="pd02.output.high" configRef="pd02" />
+                </dependencies>
+              </alt>
+              <alt id="pd02.gpio_mode.gpio_mode_out.high" name="Output mode (Initial High)">
+                <connectionSetRef refId="pd02.sel.output.high" />
+                <dependencies operator="or">
+                  <dependency altRef="pd02.none" configRef="pd02" />
+                  <dependency altRef="pd02.input" configRef="pd02" />
+                  <dependency altRef="pd02.output.low" configRef="pd02" />
+                  <dependency altRef="pd02.output.high" configRef="pd02" />
+                </dependencies>
+              </alt>
+            </configuration>
+            <configuration id="pd02.gpio_pupd" name="Pull up/down" type="generic">
+              <alt default="true" id="pd02.gpio_pupd.gpio_pupd_no_ip_pull" name="None" />
+              <alt id="pd02.gpio_pupd.gpio_pupd_ip_up" name="Input pull-up">
+                <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_PULLUP_ENABLE" />
+              </alt>
+              <dependencies operator="or">
+                <dependency altRef="pd02.gpio_mode.gpio_mode_in" configRef="pd02.gpio_mode" />
+              </dependencies>
+            </configuration>
+            <configuration id="pd02.gpio_otype" name="Output Type" type="generic">
+              <alt default="true" id="pd02.gpio_otype.gpio_otype.gpio_otype_none" name="CMOS" />
+              <alt id="pd02.gpio_otype.gpio_otype_n_ch_od" name="n-ch open drain">
+                <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_NMOS_ENABLE" />
+              </alt>
+              <dependencies operator="or">
+                <dependency altRef="pd02.gpio_mode.gpio_mode_out.low" configRef="pd02.gpio_mode" />
+                <dependency altRef="pd02.gpio_mode.gpio_mode_out.high" configRef="pd02.gpio_mode" />
+              </dependencies>
+            </configuration>
+          </configurations>
+          <pins>
+            <pin direction="inout" id="pd02" name="PD02">
+              <configurations>
+                <configuration id="pd02" name="PD02" type="connection">
+                  <alt default="true" id="pd02.none" name="None" type="none" />
+                  <alt id="pd02.input" name="GPIO" type="gpio">
+                    <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_PORT_DIRECTION_INPUT" />
+                  </alt>
+                  <alt id="pd02.output.low" name="GPIO" type="gpio">
+                    <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_PORT_DIRECTION_OUTPUT" />
+                    <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_PORT_OUTPUT_LOW" />
+                  </alt>
+                  <alt id="pd02.output.high" name="GPIO" type="gpio">
+                    <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_PORT_DIRECTION_OUTPUT" />
+                    <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_PORT_OUTPUT_HIGH" />
+                  </alt>
+                </configuration>
+              </configurations>
+            </pin>
+          </pins>
+        </component>
+        <component id="pd03" name="PD03" type="port">
+          <property editable="true" id="pd03.symbolic_name" name="Symbolic Name" />
+          <property editable="true" id="pd03.comment" name="Comment" style="multiLine" />
+          <property id="pd03.capabilitylist" name="Port Capabilities" style="multiLine" value="GPIO; restricted candidate pin support" />
+          <configurations name="PD03 Configuration">
+            <configuration id="pd03.gpio_mode" name="Mode" type="generic">
+              <alt default="true" id="pd03.gpio_mode.disabled" name="Disabled">
+                <connectionSetRef refId="pd03.sel.disabled" />
+                <dependencies operator="or">
+                  <dependency altRef="pd03.none" configRef="pd03" />
+                  <dependency altRef="pd03.input" configRef="pd03" />
+                  <dependency altRef="pd03.output.low" configRef="pd03" />
+                  <dependency altRef="pd03.output.high" configRef="pd03" />
+                </dependencies>
+              </alt>
+              <alt id="pd03.gpio_mode.gpio_mode_in" name="Input mode">
+                <connectionSetRef refId="pd03.sel.input" />
+                <dependencies operator="or">
+                  <dependency altRef="pd03.none" configRef="pd03" />
+                  <dependency altRef="pd03.input" configRef="pd03" />
+                  <dependency altRef="pd03.output.low" configRef="pd03" />
+                  <dependency altRef="pd03.output.high" configRef="pd03" />
+                </dependencies>
+              </alt>
+              <alt id="pd03.gpio_mode.gpio_mode_out.low" name="Output mode (Initial Low)">
+                <connectionSetRef refId="pd03.sel.output.low" />
+                <dependencies operator="or">
+                  <dependency altRef="pd03.none" configRef="pd03" />
+                  <dependency altRef="pd03.input" configRef="pd03" />
+                  <dependency altRef="pd03.output.low" configRef="pd03" />
+                  <dependency altRef="pd03.output.high" configRef="pd03" />
+                </dependencies>
+              </alt>
+              <alt id="pd03.gpio_mode.gpio_mode_out.high" name="Output mode (Initial High)">
+                <connectionSetRef refId="pd03.sel.output.high" />
+                <dependencies operator="or">
+                  <dependency altRef="pd03.none" configRef="pd03" />
+                  <dependency altRef="pd03.input" configRef="pd03" />
+                  <dependency altRef="pd03.output.low" configRef="pd03" />
+                  <dependency altRef="pd03.output.high" configRef="pd03" />
+                </dependencies>
+              </alt>
+            </configuration>
+            <configuration id="pd03.gpio_pupd" name="Pull up/down" type="generic">
+              <alt default="true" id="pd03.gpio_pupd.gpio_pupd_no_ip_pull" name="None" />
+              <alt id="pd03.gpio_pupd.gpio_pupd_ip_up" name="Input pull-up">
+                <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_PULLUP_ENABLE" />
+              </alt>
+              <dependencies operator="or">
+                <dependency altRef="pd03.gpio_mode.gpio_mode_in" configRef="pd03.gpio_mode" />
+              </dependencies>
+            </configuration>
+            <configuration id="pd03.gpio_otype" name="Output Type" type="generic">
+              <alt default="true" id="pd03.gpio_otype.gpio_otype.gpio_otype_none" name="CMOS" />
+              <alt id="pd03.gpio_otype.gpio_otype_n_ch_od" name="n-ch open drain">
+                <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_NMOS_ENABLE" />
+              </alt>
+              <dependencies operator="or">
+                <dependency altRef="pd03.gpio_mode.gpio_mode_out.low" configRef="pd03.gpio_mode" />
+                <dependency altRef="pd03.gpio_mode.gpio_mode_out.high" configRef="pd03.gpio_mode" />
+              </dependencies>
+            </configuration>
+          </configurations>
+          <pins>
+            <pin direction="inout" id="pd03" name="PD03">
+              <configurations>
+                <configuration id="pd03" name="PD03" type="connection">
+                  <alt default="true" id="pd03.none" name="None" type="none" />
+                  <alt id="pd03.input" name="GPIO" type="gpio">
+                    <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_PORT_DIRECTION_INPUT" />
+                  </alt>
+                  <alt id="pd03.output.low" name="GPIO" type="gpio">
+                    <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_PORT_DIRECTION_OUTPUT" />
+                    <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_PORT_OUTPUT_LOW" />
+                  </alt>
+                  <alt id="pd03.output.high" name="GPIO" type="gpio">
+                    <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_PORT_DIRECTION_OUTPUT" />
+                    <registerSetting mask="PIN_CFG_MODE_MASK" name="PIN_CFG" value="IOPORT_CFG_PORT_OUTPUT_HIGH" />
+                  </alt>
+                </configuration>
+              </configurations>
+            </pin>
+          </pins>
+        </component>
+      </components>
+    </components>
+    <components id="peripherals" name="Peripherals">
+      <components id="pdm" name="Audio:PDM">
+        <component category="audio" id="pdm2" name="PDM2" type="peripheral">
+          <configurations>
+            <configuration id="pdm2.pairing" name="Pin Group Selection" type="generic">
+              <alt default="true" id="pdm2.pairing.free" name="Mixed" />
+            </configuration>
+            <configuration id="pdm2.mode" name="Operation Mode" type="generic">
+              <alt default="true" id="pdm2.mode.disabled" name="Disabled">
+                <connectionSetRef refId="pdm2.disabled" />
+              </alt>
+              <alt id="pdm2.mode.enabled.free" name="Enabled">
+                <connectionSetRef refId="pdm2.enabled.free" />
+                <dependencies>
+                  <dependency altRef="pdm2.pairing.free" configRef="pdm2.pairing" />
+                </dependencies>
+              </alt>
+            </configuration>
+          </configurations>
+          <property id="pdm2.usage" name="Usage" style="multiLine" value="EK-RA8P1 microphones use PDMDAT2 on P502 and PDMCLK2 on P812. Only this physical channel-2 route is supported." />
+          <pins>
+            <pin direction="in" id="pdm2.pdmdat2" name="PDMDAT2">
+              <configurations>
+                <configuration id="pdm2.pdmdat2" name="PDMDAT2" type="connection">
+                  <alt default="true" id="pdm2.pdmdat2.none" name="None" type="none" />
+                  <alt id="pdm2.pdmdat2.p502" name="P502" />
+                </configuration>
+              </configurations>
+            </pin>
+            <pin direction="out" id="pdm2.pdmclk2" name="PDMCLK2">
+              <configurations>
+                <configuration id="pdm2.pdmclk2" name="PDMCLK2" type="connection">
+                  <alt default="true" id="pdm2.pdmclk2.none" name="None" type="none" />
+                  <alt id="pdm2.pdmclk2.p812" name="P812" />
+                </configuration>
+              </configurations>
+            </pin>
+          </pins>
+        </component>
+      </components>
+      <components id="jtag_fslash_swd" name="Debug:JTAG/SWD">
+        <component category="system" id="jtag_fslash_swd" name="JTAG/SWD" type="peripheral">
+          <configurations>
+            <configuration id="jtag_fslash_swd.pairing" name="Pin Group Selection" type="generic">
+              <alt default="true" id="jtag_fslash_swd.pairing.free" name="Mixed" />
+            </configuration>
+            <configuration id="jtag_fslash_swd.mode" name="Operation Mode" type="generic">
+              <alt default="true" id="jtag_fslash_swd.mode.disabled" name="Disabled">
+                <connectionSetRef refId="jtag_fslash_swd.disabled" />
+              </alt>
+              <alt id="jtag_fslash_swd.mode.swd.free" name="SWD">
+                <connectionSetRef refId="jtag_fslash_swd.swd.free" />
+                <dependencies>
+                  <dependency altRef="jtag_fslash_swd.pairing.free" configRef="jtag_fslash_swd.pairing" />
+                </dependencies>
+              </alt>
+              <alt id="jtag_fslash_swd.mode.jtag.free" name="JTAG">
+                <connectionSetRef refId="jtag_fslash_swd.jtag.free" />
+                <dependencies>
+                  <dependency altRef="jtag_fslash_swd.pairing.free" configRef="jtag_fslash_swd.pairing" />
+                </dependencies>
+              </alt>
+            </configuration>
+          </configurations>
+          <property id="jtag_fslash_swd.usage" name="Usage" style="multiLine" value="When switching between modes, first disable." />
+          <pins>
+            <pin direction="inout" id="jtag_fslash_swd.swclk" name="SWCLK">
+              <configurations>
+                <configuration id="jtag_fslash_swd.swclk" name="SWCLK" type="connection">
+                  <alt default="true" id="jtag_fslash_swd.swclk.none" name="None" type="none" />
+                  <alt id="jtag_fslash_swd.swclk.p211" name="P211" />
+                </configuration>
+              </configurations>
+            </pin>
+            <pin direction="inout" id="jtag_fslash_swd.swdio" name="SWDIO">
+              <configurations>
+                <configuration id="jtag_fslash_swd.swdio" name="SWDIO" type="connection">
+                  <alt default="true" id="jtag_fslash_swd.swdio.none" name="None" type="none" />
+                  <alt id="jtag_fslash_swd.swdio.p210" name="P210" />
+                </configuration>
+              </configurations>
+            </pin>
+            <pin direction="inout" id="jtag_fslash_swd.tck" name="TCK">
+              <configurations>
+                <configuration id="jtag_fslash_swd.tck" name="TCK" type="connection">
+                  <alt default="true" id="jtag_fslash_swd.tck.none" name="None" type="none" />
+                  <alt id="jtag_fslash_swd.tck.p211" name="P211" />
+                </configuration>
+              </configurations>
+            </pin>
+            <pin direction="inout" id="jtag_fslash_swd.tdi" name="TDI">
+              <configurations>
+                <configuration id="jtag_fslash_swd.tdi" name="TDI" type="connection">
+                  <alt default="true" id="jtag_fslash_swd.tdi.none" name="None" type="none" />
+                  <alt id="jtag_fslash_swd.tdi.p208" name="P208" />
+                </configuration>
+              </configurations>
+            </pin>
+            <pin direction="inout" id="jtag_fslash_swd.tdo" name="TDO">
+              <configurations>
+                <configuration id="jtag_fslash_swd.tdo" name="TDO" type="connection">
+                  <alt default="true" id="jtag_fslash_swd.tdo.none" name="None" type="none" />
+                  <alt id="jtag_fslash_swd.tdo.p209" name="P209" />
+                </configuration>
+              </configurations>
+            </pin>
+            <pin direction="inout" id="jtag_fslash_swd.tms" name="TMS">
+              <configurations>
+                <configuration id="jtag_fslash_swd.tms" name="TMS" type="connection">
+                  <alt default="true" id="jtag_fslash_swd.tms.none" name="None" type="none" />
+                  <alt id="jtag_fslash_swd.tms.p210" name="P210" />
+                </configuration>
+              </configurations>
+            </pin>
+          </pins>
+        </component>
+      </components>
+    </components>
+    <connections>
+      <connection id="p502.bind.pdm2.pdmdat2" name="P502.BIND.PDM2.PDMDAT2">
+        <altRef refId="p502.pdm2.pdmdat2" />
+        <altRef refId="pdm2.pdmdat2.p502" />
+      </connection>
+      <connection id="p812.bind.pdm2.pdmclk2" name="P812.BIND.PDM2.PDMCLK2">
+        <altRef refId="p812.pdm2.pdmclk2" />
+        <altRef refId="pdm2.pdmclk2.p812" />
+      </connection>
+      <connection id="p208.bind.jtag_fslash_swd.tdi" name="P208.BIND.JTAG_FSLASH_SWD.TDI">
+        <altRef refId="p208.jtag_fslash_swd.tdi" />
+        <altRef refId="jtag_fslash_swd.tdi.p208" />
+      </connection>
+      <connection id="p209.bind.jtag_fslash_swd.tdo" name="P209.BIND.JTAG_FSLASH_SWD.TDO">
+        <altRef refId="p209.jtag_fslash_swd.tdo" />
+        <altRef refId="jtag_fslash_swd.tdo.p209" />
+      </connection>
+      <connection id="p210.bind.jtag_fslash_swd.swdio" name="P210.BIND.JTAG_FSLASH_SWD.SWDIO">
+        <altRef refId="p210.jtag_fslash_swd.swdio" />
+        <altRef refId="jtag_fslash_swd.swdio.p210" />
+      </connection>
+      <connection id="p210.bind.jtag_fslash_swd.tms" name="P210.BIND.JTAG_FSLASH_SWD.TMS">
+        <altRef refId="p210.jtag_fslash_swd.tms" />
+        <altRef refId="jtag_fslash_swd.tms.p210" />
+      </connection>
+      <connection id="p211.bind.jtag_fslash_swd.swclk" name="P211.BIND.JTAG_FSLASH_SWD.SWCLK">
+        <altRef refId="p211.jtag_fslash_swd.swclk" />
+        <altRef refId="jtag_fslash_swd.swclk.p211" />
+      </connection>
+      <connection id="p211.bind.jtag_fslash_swd.tck" name="P211.BIND.JTAG_FSLASH_SWD.TCK">
+        <altRef refId="p211.jtag_fslash_swd.tck" />
+        <altRef refId="jtag_fslash_swd.tck.p211" />
+      </connection>
+    </connections>
+    <portConfigSets>
+      <portConfigSet id="mode.peripheral.speed.none">
+        <altRef refId="@port_id.gpio_mode.gpio_mode_peripheral" />
+      </portConfigSet>
+    </portConfigSets>
+    <connectionSets>
+      <connectionSet id="pdm2.disabled" lock="true" operator="and">
+        <altRef refId="pdm2.pdmdat2.none" />
+        <altRef refId="pdm2.pdmclk2.none" />
+      </connectionSet>
+      <connectionSet id="pdm2.enabled.free" lock="true" operator="and">
+        <altRef refId="pdm2.pdmdat2.p502" />
+        <altRef refId="pdm2.pdmclk2.p812" />
+      </connectionSet>
+      <connectionSet id="p001.sel.disabled">
+        <altRef refId="p001.none" />
+      </connectionSet>
+      <connectionSet id="p001.sel.input">
+        <altRef refId="p001.input" />
+      </connectionSet>
+      <connectionSet id="p001.sel.output.low">
+        <altRef refId="p001.output.low" />
+      </connectionSet>
+      <connectionSet id="p001.sel.output.high">
+        <altRef refId="p001.output.high" />
+      </connectionSet>
+      <connectionSet id="p008.sel.disabled">
+        <altRef refId="p008.none" />
+      </connectionSet>
+      <connectionSet id="p008.sel.input">
+        <altRef refId="p008.input" />
+      </connectionSet>
+      <connectionSet id="p008.sel.output.low">
+        <altRef refId="p008.output.low" />
+      </connectionSet>
+      <connectionSet id="p008.sel.output.high">
+        <altRef refId="p008.output.high" />
+      </connectionSet>
+      <connectionSet id="p009.sel.disabled">
+        <altRef refId="p009.none" />
+      </connectionSet>
+      <connectionSet id="p009.sel.input">
+        <altRef refId="p009.input" />
+      </connectionSet>
+      <connectionSet id="p009.sel.output.low">
+        <altRef refId="p009.output.low" />
+      </connectionSet>
+      <connectionSet id="p009.sel.output.high">
+        <altRef refId="p009.output.high" />
+      </connectionSet>
+      <connectionSet id="p014.sel.disabled">
+        <altRef refId="p014.none" />
+      </connectionSet>
+      <connectionSet id="p014.sel.input">
+        <altRef refId="p014.input" />
+      </connectionSet>
+      <connectionSet id="p014.sel.output.low">
+        <altRef refId="p014.output.low" />
+      </connectionSet>
+      <connectionSet id="p014.sel.output.high">
+        <altRef refId="p014.output.high" />
+      </connectionSet>
+      <connectionSet id="p208.sel.disabled">
+        <altRef refId="p208.none" />
+      </connectionSet>
+      <connectionSet id="p208.sel.input">
+        <altRef refId="p208.input" />
+      </connectionSet>
+      <connectionSet id="p208.sel.output.low">
+        <altRef refId="p208.output.low" />
+      </connectionSet>
+      <connectionSet id="p208.sel.output.high">
+        <altRef refId="p208.output.high" />
+      </connectionSet>
+      <connectionSet id="p209.sel.disabled">
+        <altRef refId="p209.none" />
+      </connectionSet>
+      <connectionSet id="p209.sel.input">
+        <altRef refId="p209.input" />
+      </connectionSet>
+      <connectionSet id="p209.sel.output.low">
+        <altRef refId="p209.output.low" />
+      </connectionSet>
+      <connectionSet id="p209.sel.output.high">
+        <altRef refId="p209.output.high" />
+      </connectionSet>
+      <connectionSet id="p210.sel.disabled">
+        <altRef refId="p210.none" />
+      </connectionSet>
+      <connectionSet id="p210.sel.input">
+        <altRef refId="p210.input" />
+      </connectionSet>
+      <connectionSet id="p210.sel.output.low">
+        <altRef refId="p210.output.low" />
+      </connectionSet>
+      <connectionSet id="p210.sel.output.high">
+        <altRef refId="p210.output.high" />
+      </connectionSet>
+      <connectionSet id="p211.sel.disabled">
+        <altRef refId="p211.none" />
+      </connectionSet>
+      <connectionSet id="p211.sel.input">
+        <altRef refId="p211.input" />
+      </connectionSet>
+      <connectionSet id="p211.sel.output.low">
+        <altRef refId="p211.output.low" />
+      </connectionSet>
+      <connectionSet id="p211.sel.output.high">
+        <altRef refId="p211.output.high" />
+      </connectionSet>
+      <connectionSet id="p303.sel.disabled">
+        <altRef refId="p303.none" />
+      </connectionSet>
+      <connectionSet id="p303.sel.input">
+        <altRef refId="p303.input" />
+      </connectionSet>
+      <connectionSet id="p303.sel.output.low">
+        <altRef refId="p303.output.low" />
+      </connectionSet>
+      <connectionSet id="p303.sel.output.high">
+        <altRef refId="p303.output.high" />
+      </connectionSet>
+      <connectionSet id="p502.sel.disabled">
+        <altRef refId="p502.none" />
+      </connectionSet>
+      <connectionSet id="p502.sel.input">
+        <altRef refId="p502.input" />
+      </connectionSet>
+      <connectionSet id="p502.sel.output.low">
+        <altRef refId="p502.output.low" />
+      </connectionSet>
+      <connectionSet id="p502.sel.output.high">
+        <altRef refId="p502.output.high" />
+      </connectionSet>
+      <connectionSet id="p514.sel.disabled">
+        <altRef refId="p514.none" />
+      </connectionSet>
+      <connectionSet id="p514.sel.input">
+        <altRef refId="p514.input" />
+      </connectionSet>
+      <connectionSet id="p514.sel.output.low">
+        <altRef refId="p514.output.low" />
+      </connectionSet>
+      <connectionSet id="p514.sel.output.high">
+        <altRef refId="p514.output.high" />
+      </connectionSet>
+      <connectionSet id="p600.sel.disabled">
+        <altRef refId="p600.none" />
+      </connectionSet>
+      <connectionSet id="p600.sel.input">
+        <altRef refId="p600.input" />
+      </connectionSet>
+      <connectionSet id="p600.sel.output.low">
+        <altRef refId="p600.output.low" />
+      </connectionSet>
+      <connectionSet id="p600.sel.output.high">
+        <altRef refId="p600.output.high" />
+      </connectionSet>
+      <connectionSet id="p806.sel.disabled">
+        <altRef refId="p806.none" />
+      </connectionSet>
+      <connectionSet id="p806.sel.input">
+        <altRef refId="p806.input" />
+      </connectionSet>
+      <connectionSet id="p806.sel.output.low">
+        <altRef refId="p806.output.low" />
+      </connectionSet>
+      <connectionSet id="p806.sel.output.high">
+        <altRef refId="p806.output.high" />
+      </connectionSet>
+      <connectionSet id="p807.sel.disabled">
+        <altRef refId="p807.none" />
+      </connectionSet>
+      <connectionSet id="p807.sel.input">
+        <altRef refId="p807.input" />
+      </connectionSet>
+      <connectionSet id="p807.sel.output.low">
+        <altRef refId="p807.output.low" />
+      </connectionSet>
+      <connectionSet id="p807.sel.output.high">
+        <altRef refId="p807.output.high" />
+      </connectionSet>
+      <connectionSet id="p812.sel.disabled">
+        <altRef refId="p812.none" />
+      </connectionSet>
+      <connectionSet id="p812.sel.input">
+        <altRef refId="p812.input" />
+      </connectionSet>
+      <connectionSet id="p812.sel.output.low">
+        <altRef refId="p812.output.low" />
+      </connectionSet>
+      <connectionSet id="p812.sel.output.high">
+        <altRef refId="p812.output.high" />
+      </connectionSet>
+      <connectionSet id="pa07.sel.disabled">
+        <altRef refId="pa07.none" />
+      </connectionSet>
+      <connectionSet id="pa07.sel.input">
+        <altRef refId="pa07.input" />
+      </connectionSet>
+      <connectionSet id="pa07.sel.output.low">
+        <altRef refId="pa07.output.low" />
+      </connectionSet>
+      <connectionSet id="pa07.sel.output.high">
+        <altRef refId="pa07.output.high" />
+      </connectionSet>
+      <connectionSet id="jtag_fslash_swd.disabled" lock="true" operator="and">
+        <altRef refId="jtag_fslash_swd.tdi.none" />
+        <altRef refId="jtag_fslash_swd.tdo.none" />
+        <altRef refId="jtag_fslash_swd.tms.none" />
+        <altRef refId="jtag_fslash_swd.swdio.none" />
+        <altRef refId="jtag_fslash_swd.swclk.none" />
+        <altRef refId="jtag_fslash_swd.tck.none" />
+      </connectionSet>
+      <connectionSet id="jtag_fslash_swd.swd.free">
+        <configRef refId="jtag_fslash_swd.swclk" />
+        <configRef refId="jtag_fslash_swd.swdio" />
+        <connectionSet id="jtag_fslash_swd.swd.free.locked" lock="true">
+          <altRef refId="jtag_fslash_swd.tdi.none" />
+          <altRef refId="jtag_fslash_swd.tdo.none" />
+          <altRef refId="jtag_fslash_swd.tms.none" />
+          <altRef refId="jtag_fslash_swd.tck.none" />
+        </connectionSet>
+      </connectionSet>
+      <connectionSet id="jtag_fslash_swd.jtag.free">
+        <configRef refId="jtag_fslash_swd.tms" />
+        <configRef refId="jtag_fslash_swd.tdi" />
+        <configRef refId="jtag_fslash_swd.tck" />
+        <configRef refId="jtag_fslash_swd.tdo" />
+        <connectionSet id="jtag_fslash_swd.jtag.free.locked" lock="true">
+          <altRef refId="jtag_fslash_swd.swdio.none" />
+          <altRef refId="jtag_fslash_swd.swclk.none" />
+        </connectionSet>
+      </connectionSet>
+      <connectionSet id="p111.sel.disabled">
+        <altRef refId="p111.none" />
+      </connectionSet>
+      <connectionSet id="p111.sel.input">
+        <altRef refId="p111.input" />
+      </connectionSet>
+      <connectionSet id="p111.sel.output.low">
+        <altRef refId="p111.output.low" />
+      </connectionSet>
+      <connectionSet id="p111.sel.output.high">
+        <altRef refId="p111.output.high" />
+      </connectionSet>
+      <connectionSet id="pd02.sel.disabled">
+        <altRef refId="pd02.none" />
+      </connectionSet>
+      <connectionSet id="pd02.sel.input">
+        <altRef refId="pd02.input" />
+      </connectionSet>
+      <connectionSet id="pd02.sel.output.low">
+        <altRef refId="pd02.output.low" />
+      </connectionSet>
+      <connectionSet id="pd02.sel.output.high">
+        <altRef refId="pd02.output.high" />
+      </connectionSet>
+      <connectionSet id="pd03.sel.disabled">
+        <altRef refId="pd03.none" />
+      </connectionSet>
+      <connectionSet id="pd03.sel.input">
+        <altRef refId="pd03.input" />
+      </connectionSet>
+      <connectionSet id="pd03.sel.output.low">
+        <altRef refId="pd03.output.low" />
+      </connectionSet>
+      <connectionSet id="pd03.sel.output.high">
+        <altRef refId="pd03.output.high" />
+      </connectionSet>
+    </connectionSets>
+  </device>
+</pinMappings>

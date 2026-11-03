@@ -1,0 +1,5 @@
+<?xml version='1.0' encoding='utf-8'?>
+<toolingSupport family="ra" platform="platform.rafsp">
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##BSP##Board##ra8p1_ek####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##BSP##Board##ra8p1_ek####5.9.0##configuration.xml</file>
+</toolingSupport>

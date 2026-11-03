@@ -1,0 +1,43 @@
+{
+  "source": "qualification_wdt.c",
+  "bsp": {
+    "config.bsp.ra8p1.startup_profile": "config.bsp.ra8p1.startup_profile.pll240"
+  },
+  "modules": [
+    {
+      "id": "module.driver.watchdog_on_wdt",
+      "properties": {
+        "module.driver.watchdog.name": "g_wdt0",
+        "module.driver.watchdog.timeout": "module.driver.watchdog.timeout.4096",
+        "module.driver.watchdog.clock_division": "module.driver.watchdog.clock_division.8192",
+        "module.driver.watchdog.window_start": "module.driver.watchdog.window_start.100",
+        "module.driver.watchdog.window_end": "module.driver.watchdog.window_end.0",
+        "module.driver.watchdog.reset_control": "module.driver.watchdog.reset_control.reset",
+        "module.driver.watchdog.stop_control": "module.driver.watchdog.stop_control.disable",
+        "module.driver.watchdog.nmi_callback": "NULL"
+      }
+    }
+  ],
+  "pins": [
+    {
+      "component": "p514",
+      "configs": {"p514.gpio_mode": "p514.gpio_mode.gpio_mode_out.low"},
+      "connections": {"p514": "p514.output.low"}
+    },
+    {
+      "component": "p111",
+      "configs": {"p111.gpio_mode": "p111.gpio_mode.gpio_mode_out.low"},
+      "connections": {"p111": "p111.output.low"}
+    },
+    {
+      "component": "p806",
+      "configs": {"p806.gpio_mode": "p806.gpio_mode.gpio_mode_out.low"},
+      "connections": {"p806": "p806.output.low"}
+    },
+    {
+      "component": "p807",
+      "configs": {"p807.gpio_mode": "p807.gpio_mode.gpio_mode_out.low"},
+      "connections": {"p807": "p807.output.low"}
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+<?xml version='1.0' encoding='utf-8'?>
+<toolingSupport family="ra" platform="platform.rafsp">
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##BSP##ra8p1##device##R7KA8P1KFLCAC##5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##BSP##ra8p1##device####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##BSP##ra8p1##fsp####5.9.0.xml</file>
+  <file supportType="Modules" version="5.9.0">.module_descriptions/Renesas##BSP##ra8p1##events####5.9.0.xml</file>
+  <file supportType="PGDevice" version="5.9.0">.mcu/.devices/pg/pgra8p1.xmi</file>
+  <file supportType="PGDevice" version="5.9.0">.mcu/.devices/pg/memoryr7ka8p1kflcac.xmi</file>
+  <file supportType="DBGDeviceJLink" version="5.9.0">.mcu/.devices/dbg/dbgra8p1.xml</file>
+  <file supportType="GDBDevice" version="5.9.0">.mcu/.devices/gdb/ra8p1.5.9.0.xml</file>
+  <file supportType="CMSISZoneResource" version="5.9.0">.mcu/.devices/zone/R7KA8P1KFLCAC.rzone</file>
+  <file supportType="PinMapping" version="5.9.0">.mcu/.pinmapping/PinCfgR7KA8P1KFLCAC.xml</file>
+  <file supportType="PinMapping" version="5.9.0">.mcu/.pinmapping/pluginra8p1.xml</file>
+  <file supportType="PinConfig" version="5.9.0">.mcu/.pinconfig/R7KA8P1KFLCAC.pincfg</file>
+</toolingSupport>

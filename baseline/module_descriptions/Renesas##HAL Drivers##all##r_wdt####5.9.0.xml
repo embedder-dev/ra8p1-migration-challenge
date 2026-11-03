@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" ?>
+<?xml version="1.0" ?>
 <raModuleDescription>
     <config id="config.driver.wdt" path="fsp_cfg/r_wdt_cfg.h" version="0">
         <property id="config.driver.wdt.param_checking_enable" display="Parameter Checking" default="config.driver.wdt.param_checking_enable.bsp" description="If selected code for parameter checking is included in the build.">
@@ -38,7 +38,7 @@
         <provides interface="interface.driver.wdt_on_wdt" />
         <provides interface="interface.driver.wdt.${module.driver.watchdog.name}" />
         <provides interface="interface.peripheral.wdt" />
-        <property default="g_wdt${_instance}" display="Name" id="module.driver.watchdog.name" description="Module name.">
+        <property default="g_wdt${_instance}" display="Name" id="module.driver.watchdog.name" description="Module name. On RA8P1 this driver controls only the WDT associated with the selected CPU: CPU0/WDT0 uses OFS0, CPU1/WDT1 uses OFS3. The instance is not a selectable channel. Reset-mode expiry is reported by BSP reset-cause registers.">
             <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.watchdog.name}")</constraint>
             <signal event="event.wdt.underflow" />
         </property>

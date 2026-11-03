@@ -1,0 +1,109 @@
+{
+  "description": "Select the preserved named default stacks. Some serialized defaults (empty masks/display labels) are not legal setter inputs. Every preserved property below, plus BSP/clocks/pins, must match the generated candidate. No runtime qualification.",
+  "modules": [
+    {
+      "id": "module.driver.ioport_on_ioport",
+      "properties": {
+        "module.driver.ioport.name": "g_ioport"
+      }
+    },
+    {
+      "id": "module.driver.adc_on_adc",
+      "properties": {
+        "module.driver.adc.name": "g_adc0"
+      }
+    },
+    {
+      "id": "module.driver.dac_on_dac",
+      "properties": {
+        "module.driver.dac.name": "g_dac0"
+      }
+    },
+    {
+      "id": "module.driver.watchdog_on_wdt",
+      "properties": {
+        "module.driver.watchdog.name": "g_wdt0"
+      }
+    }
+  ],
+  "preserved_modules": [
+    {
+      "id": "module.driver.ioport_on_ioport",
+      "properties": {
+        "module.driver.ioport.name": "g_ioport",
+        "module.driver.ioport.elc_trigger_ioport1": "_disabled",
+        "module.driver.ioport.elc_trigger_ioport2": "_disabled",
+        "module.driver.ioport.elc_trigger_ioport3": "_disabled",
+        "module.driver.ioport.elc_trigger_ioport4": "_disabled",
+        "module.driver.ioport.pincfg": "g_bsp_pin_cfg"
+      }
+    },
+    {
+      "id": "module.driver.adc_on_adc",
+      "properties": {
+        "module.driver.adc.name": "g_adc0",
+        "module.driver.adc.unit": "0",
+        "module.driver.adc.resolution": "module.driver.adc.resolution.resolution_12_bit",
+        "module.driver.adc.alignment": "module.driver.adc.alignment.alignment_right",
+        "module.driver.adc.clearing": "module.driver.adc.clearing.clear_after_read_on",
+        "module.driver.adc.mode": "module.driver.adc.mode.mode_single_scan",
+        "module.driver.adc.mode.dt": "module.driver.adc.mode.dt.disabled",
+        "module.driver.adc.scan_mask": "",
+        "module.driver.adc.scan_mask_group_b": "",
+        "module.driver.adc.trigger": "enum.driver.adc.trigger.trigger_software",
+        "module.driver.adc.trigger_group_b": "_disabled",
+        "module.driver.adc.priority_group_a": "module.driver.adc.priority_group_a.group_a_priority_off",
+        "module.driver.adc.add_average_count": "module.driver.adc.add_average_count.add_off",
+        "module.driver.adc.adc_vref_control": "module.driver.adc.adc_vref_control.vrefh",
+        "module.driver.adc.add_mask": "",
+        "module.driver.adc.sample_hold_mask": "",
+        "module.driver.adc.sample_hold_states": "24",
+        "module.driver.adc.compare.window_mode": "module.driver.adc.compare.window_mode.disabled",
+        "module.driver.adc.compare.event_mode": "module.driver.adc.compare.event_mode.or",
+        "module.driver.adc.compare.window_a.enable": "module.driver.adc.compare.window_a.enable.disabled",
+        "module.driver.adc.compare.window_a.channels": "",
+        "module.driver.adc.compare.window_a.channel_mode": "",
+        "module.driver.adc.compare.window_a.ref_lower": "0",
+        "module.driver.adc.compare.window_a.ref_upper": "0",
+        "module.driver.adc.compare.window_b.enable": "module.driver.adc.compare.window_b.enable.disabled",
+        "module.driver.adc.compare.window_b.channel": "module.driver.adc.compare.window_b.channel.channel_0",
+        "module.driver.adc.compare.window_b.mode": "module.driver.adc.compare.window_b.mode",
+        "module.driver.adc.compare.window_b.ref_lower": "0",
+        "module.driver.adc.compare.window_b.ref_upper": "0",
+        "module.driver.adc.p_callback": "NULL",
+        "module.driver.adc.scan_end_ipl": "_disabled",
+        "module.driver.adc.scan_end_b_ipl": "_disabled",
+        "module.driver.adc.window_a_ipl": "_disabled",
+        "module.driver.adc.window_b_ipl": "_disabled",
+        "module.driver.adc.adbuf": "module.driver.adc.adbuf.disabled"
+      }
+    },
+    {
+      "id": "module.driver.dac_on_dac",
+      "properties": {
+        "module.driver.dac.name": "g_dac0",
+        "module.driver.dac.channel_id": "0",
+        "module.driver.dac.ad_da_synchronized": "module.driver.dac.ad_da_synchronized.disabled",
+        "module.driver.dac.data_format": "module.driver.dac.data_format.data_format_flush_right",
+        "module.driver.dac.output_amplifier_enabled": "module.driver.dac.output_amplifier.disabled",
+        "module.driver.dac.charge_pump_enabled": "enum.mcu.dac.charge_pump.disabled",
+        "module.driver.dac.internal_output": "enum.mcu.dac.internal_output.disabled",
+        "module.driver.dac.elc_trigger": "_disabled",
+        "module.driver.dac.ref_volt_sel": "module.driver.dac.ref_volt_sel.disable"
+      }
+    },
+    {
+      "id": "module.driver.watchdog_on_wdt",
+      "properties": {
+        "module.driver.watchdog.name": "g_wdt0",
+        "module.driver.watchdog.timeout": "module.driver.watchdog.timeout.16384",
+        "module.driver.watchdog.clock_division": "module.driver.watchdog.clock_division.8192",
+        "module.driver.watchdog.window_start": "module.driver.watchdog.window_start.100",
+        "module.driver.watchdog.window_end": "module.driver.watchdog.window_end.0",
+        "module.driver.watchdog.reset_control": "module.driver.watchdog.reset_control.reset",
+        "module.driver.watchdog.stop_control": "module.driver.watchdog.stop_control.enable",
+        "module.driver.watchdog.nmi_callback": "NULL"
+      }
+    }
+  ]
+}

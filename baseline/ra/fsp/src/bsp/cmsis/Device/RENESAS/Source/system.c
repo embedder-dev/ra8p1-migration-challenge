@@ -54,6 +54,15 @@
  * Exported global variables (to be accessed by other files)
  **********************************************************************************************************************/
 
+#if BSP_MCU_GROUP_RA8P1 && defined(__GNUC__)
+/* The linker selects disjoint MRAM/SRAM partitions from this absolute symbol. */
+ #if BSP_CFG_CPU_CORE == 0
+__asm__(".global __ra8p1_core\n.equ __ra8p1_core, 0\n");
+ #else
+__asm__(".global __ra8p1_core\n.equ __ra8p1_core, 1\n");
+ #endif
+#endif
+
 /** System Clock Frequency (Core Clock) */
 uint32_t SystemCoreClock BSP_SECTION_EARLY_INIT;
 

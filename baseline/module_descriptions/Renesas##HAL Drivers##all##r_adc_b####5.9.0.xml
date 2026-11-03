@@ -830,42 +830,42 @@ To update this file: modify and re-run mdf_xml_gen.py and pipe the output into t
         <property display="User Gain Table|Entry 0" default="1" id="module.driver.adc.user_gain_0" description="Select user gain table 0 value, between 0.0 and 4.0.">
             <constraint display="Must be greater than or equal to 0">("${module.driver.adc.user_gain_0}" &gt;= 0)</constraint>
             <constraint display="Must be less than 4.0">("${module.driver.adc.user_gain_0}" &lt; 4.0)</constraint>
-            <export><![CDATA[eval('"((" + Math.floor(${module.driver.adc.user_gain_0}) + "U << R_ADC_B0_ADUGTR0_UGAINI_Pos) + (uint32_t)(" + parseFloat(${module.driver.adc.user_gain_0} - Math.floor(${module.driver.adc.user_gain_0})) + " * (R_ADC_B0_ADUGTR0_UGAINF_Msk + 1)))"')]]></export>
+            <export><![CDATA[eval('"((" + Math.floor(${module.driver.adc.user_gain_0}) + "U << R_ADC_B0_ADUGTR_UGAIN_INTEGER_Pos) + (uint32_t)(" + parseFloat(${module.driver.adc.user_gain_0} - Math.floor(${module.driver.adc.user_gain_0})) + " * (R_ADC_B0_ADUGTR_UGAIN_FRACTIONAL_Msk + 1)))"')]]></export>
         </property>
         <property display="User Gain Table|Entry 1" default="1" id="module.driver.adc.user_gain_1" description="Select user gain table 1 value, between 0.0 and 4.0.">
             <constraint display="Must be greater than or equal to 0">("${module.driver.adc.user_gain_1}" &gt;= 0)</constraint>
             <constraint display="Must be less than 4.0">("${module.driver.adc.user_gain_1}" &lt; 4.0)</constraint>
-            <export><![CDATA[eval('"((" + Math.floor(${module.driver.adc.user_gain_1}) + "U << R_ADC_B0_ADUGTR1_UGAINI_Pos) + (uint32_t)(" + parseFloat(${module.driver.adc.user_gain_1} - Math.floor(${module.driver.adc.user_gain_1})) + " * (R_ADC_B0_ADUGTR1_UGAINF_Msk + 1)))"')]]></export>
+            <export><![CDATA[eval('"((" + Math.floor(${module.driver.adc.user_gain_1}) + "U << R_ADC_B0_ADUGTR_UGAIN_INTEGER_Pos) + (uint32_t)(" + parseFloat(${module.driver.adc.user_gain_1} - Math.floor(${module.driver.adc.user_gain_1})) + " * (R_ADC_B0_ADUGTR_UGAIN_FRACTIONAL_Msk + 1)))"')]]></export>
         </property>
         <property display="User Gain Table|Entry 2" default="1" id="module.driver.adc.user_gain_2" description="Select user gain table 2 value, between 0.0 and 4.0.">
             <constraint display="Must be greater than or equal to 0">("${module.driver.adc.user_gain_2}" &gt;= 0)</constraint>
             <constraint display="Must be less than 4.0">("${module.driver.adc.user_gain_2}" &lt; 4.0)</constraint>
-            <export><![CDATA[eval('"((" + Math.floor(${module.driver.adc.user_gain_2}) + "U << R_ADC_B0_ADUGTR2_UGAINI_Pos) + (uint32_t)(" + parseFloat(${module.driver.adc.user_gain_2} - Math.floor(${module.driver.adc.user_gain_2})) + " * (R_ADC_B0_ADUGTR2_UGAINF_Msk + 1)))"')]]></export>
+            <export><![CDATA[eval('"((" + Math.floor(${module.driver.adc.user_gain_2}) + "U << R_ADC_B0_ADUGTR_UGAIN_INTEGER_Pos) + (uint32_t)(" + parseFloat(${module.driver.adc.user_gain_2} - Math.floor(${module.driver.adc.user_gain_2})) + " * (R_ADC_B0_ADUGTR_UGAIN_FRACTIONAL_Msk + 1)))"')]]></export>
         </property>
         <property display="User Gain Table|Entry 3" default="1" id="module.driver.adc.user_gain_3" description="Select user gain table 3 value, between 0.0 and 4.0.">
             <constraint display="Must be greater than or equal to 0">("${module.driver.adc.user_gain_3}" &gt;= 0)</constraint>
             <constraint display="Must be less than 4.0">("${module.driver.adc.user_gain_3}" &lt; 4.0)</constraint>
-            <export><![CDATA[eval('"((" + Math.floor(${module.driver.adc.user_gain_3}) + "U << R_ADC_B0_ADUGTR3_UGAINI_Pos) + (uint32_t)(" + parseFloat(${module.driver.adc.user_gain_3} - Math.floor(${module.driver.adc.user_gain_3})) + " * (R_ADC_B0_ADUGTR3_UGAINF_Msk + 1)))"')]]></export>
+            <export><![CDATA[eval('"((" + Math.floor(${module.driver.adc.user_gain_3}) + "U << R_ADC_B0_ADUGTR_UGAIN_INTEGER_Pos) + (uint32_t)(" + parseFloat(${module.driver.adc.user_gain_3} - Math.floor(${module.driver.adc.user_gain_3})) + " * (R_ADC_B0_ADUGTR_UGAIN_FRACTIONAL_Msk + 1)))"')]]></export>
         </property>
         <property display="User Gain Table|Entry 4" default="1" id="module.driver.adc.user_gain_4" description="Select user gain table 4 value, between 0.0 and 4.0.">
             <constraint display="Must be greater than or equal to 0">("${module.driver.adc.user_gain_4}" &gt;= 0)</constraint>
             <constraint display="Must be less than 4.0">("${module.driver.adc.user_gain_4}" &lt; 4.0)</constraint>
-            <export><![CDATA[eval('"((" + Math.floor(${module.driver.adc.user_gain_4}) + "U << R_ADC_B0_ADUGTR4_UGAINI_Pos) + (uint32_t)(" + parseFloat(${module.driver.adc.user_gain_4} - Math.floor(${module.driver.adc.user_gain_4})) + " * (R_ADC_B0_ADUGTR4_UGAINF_Msk + 1)))"')]]></export>
+            <export><![CDATA[eval('"((" + Math.floor(${module.driver.adc.user_gain_4}) + "U << R_ADC_B0_ADUGTR_UGAIN_INTEGER_Pos) + (uint32_t)(" + parseFloat(${module.driver.adc.user_gain_4} - Math.floor(${module.driver.adc.user_gain_4})) + " * (R_ADC_B0_ADUGTR_UGAIN_FRACTIONAL_Msk + 1)))"')]]></export>
         </property>
         <property display="User Gain Table|Entry 5" default="1" id="module.driver.adc.user_gain_5" description="Select user gain table 5 value, between 0.0 and 4.0.">
             <constraint display="Must be greater than or equal to 0">("${module.driver.adc.user_gain_5}" &gt;= 0)</constraint>
             <constraint display="Must be less than 4.0">("${module.driver.adc.user_gain_5}" &lt; 4.0)</constraint>
-            <export><![CDATA[eval('"((" + Math.floor(${module.driver.adc.user_gain_5}) + "U << R_ADC_B0_ADUGTR5_UGAINI_Pos) + (uint32_t)(" + parseFloat(${module.driver.adc.user_gain_5} - Math.floor(${module.driver.adc.user_gain_5})) + " * (R_ADC_B0_ADUGTR5_UGAINF_Msk + 1)))"')]]></export>
+            <export><![CDATA[eval('"((" + Math.floor(${module.driver.adc.user_gain_5}) + "U << R_ADC_B0_ADUGTR_UGAIN_INTEGER_Pos) + (uint32_t)(" + parseFloat(${module.driver.adc.user_gain_5} - Math.floor(${module.driver.adc.user_gain_5})) + " * (R_ADC_B0_ADUGTR_UGAIN_FRACTIONAL_Msk + 1)))"')]]></export>
         </property>
         <property display="User Gain Table|Entry 6" default="1" id="module.driver.adc.user_gain_6" description="Select user gain table 6 value, between 0.0 and 4.0.">
             <constraint display="Must be greater than or equal to 0">("${module.driver.adc.user_gain_6}" &gt;= 0)</constraint>
             <constraint display="Must be less than 4.0">("${module.driver.adc.user_gain_6}" &lt; 4.0)</constraint>
-            <export><![CDATA[eval('"((" + Math.floor(${module.driver.adc.user_gain_6}) + "U << R_ADC_B0_ADUGTR6_UGAINI_Pos) + (uint32_t)(" + parseFloat(${module.driver.adc.user_gain_6} - Math.floor(${module.driver.adc.user_gain_6})) + " * (R_ADC_B0_ADUGTR6_UGAINF_Msk + 1)))"')]]></export>
+            <export><![CDATA[eval('"((" + Math.floor(${module.driver.adc.user_gain_6}) + "U << R_ADC_B0_ADUGTR_UGAIN_INTEGER_Pos) + (uint32_t)(" + parseFloat(${module.driver.adc.user_gain_6} - Math.floor(${module.driver.adc.user_gain_6})) + " * (R_ADC_B0_ADUGTR_UGAIN_FRACTIONAL_Msk + 1)))"')]]></export>
         </property>
         <property display="User Gain Table|Entry 7" default="1" id="module.driver.adc.user_gain_7" description="Select user gain table 7 value, between 0.0 and 4.0.">
             <constraint display="Must be greater than or equal to 0">("${module.driver.adc.user_gain_7}" &gt;= 0)</constraint>
             <constraint display="Must be less than 4.0">("${module.driver.adc.user_gain_7}" &lt; 4.0)</constraint>
-            <export><![CDATA[eval('"((" + Math.floor(${module.driver.adc.user_gain_7}) + "U << R_ADC_B0_ADUGTR7_UGAINI_Pos) + (uint32_t)(" + parseFloat(${module.driver.adc.user_gain_7} - Math.floor(${module.driver.adc.user_gain_7})) + " * (R_ADC_B0_ADUGTR7_UGAINF_Msk + 1)))"')]]></export>
+            <export><![CDATA[eval('"((" + Math.floor(${module.driver.adc.user_gain_7}) + "U << R_ADC_B0_ADUGTR_UGAIN_INTEGER_Pos) + (uint32_t)(" + parseFloat(${module.driver.adc.user_gain_7} - Math.floor(${module.driver.adc.user_gain_7})) + " * (R_ADC_B0_ADUGTR_UGAIN_FRACTIONAL_Msk + 1)))"')]]></export>
         </property>
         <property display="Limiter Clipping|Interrupt Enable" default="0" id="module.driver.adc.limiter_clip_interrupt_enable_mask" description="Enable/disable limiter clip interrupt for channels 0 to 8" bitmapPrefix="">
             <option display="Table 0" id="module.driver.adc.limiter_clip_interrupt_enable_mask.table_0" value="0x1"/>

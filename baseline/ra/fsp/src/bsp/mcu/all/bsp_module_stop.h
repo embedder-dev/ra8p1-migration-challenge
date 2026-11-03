@@ -15,7 +15,7 @@ FSP_HEADER
  * @{
  **********************************************************************************************************************/
 
-#if BSP_FEATURE_TZ_HAS_TRUSTZONE
+#if BSP_FEATURE_TZ_HAS_TRUSTZONE || BSP_MCU_GROUP_RA8P1
 
 /* MSTPCRA is located in R_MSTP for Star devices. */
  #define R_BSP_MSTPCRA    (R_MSTP->MSTPCRA)
@@ -324,7 +324,12 @@ FSP_HEADER
 #define BSP_MSTP_BIT_FSP_IP_TML(channel)                (1U << (4U));
 #define BSP_MSTP_REG_TYPE_FSP_IP_TML(channel)           uint32_t
 #define BSP_MSTP_REG_FSP_IP_ADC(channel)                R_MSTP->MSTPCRD
-#if BSP_MCU_GROUP_NEPTUNE
+#if BSP_MCU_GROUP_RA8P1
+ #define BSP_MSTP_BIT_FSP_IP_ADC(channel)               (1U << 21U)
+ #define BSP_MSTP_REG_FSP_IP_PDM(channel)               R_MSTP->MSTPCRC
+ #define BSP_MSTP_BIT_FSP_IP_PDM(channel)               (1U << 24U)
+ #define BSP_MSTP_REG_TYPE_FSP_IP_PDM(channel)          uint32_t
+#elif BSP_MCU_GROUP_NEPTUNE
  #define BSP_MSTP_BIT_FSP_IP_ADC(channel)               (1U << (21U - channel));
 #else
  #define BSP_MSTP_BIT_FSP_IP_ADC(channel)               (1U << (16U - channel));

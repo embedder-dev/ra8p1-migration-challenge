@@ -1,0 +1,10 @@
+{
+  "source": "qualification_boot.c",
+  "bsp": {"config.bsp.ra8p1.startup_profile": "config.bsp.ra8p1.startup_profile.moco"},
+  "pins": [
+    {"component": "p514", "configs": {"p514.gpio_mode": "p514.gpio_mode.gpio_mode_out.low"}, "connections": {"p514": "p514.output.low"}},
+    {"component": "p111", "configs": {"p111.gpio_mode": "p111.gpio_mode.gpio_mode_out.low"}, "connections": {"p111": "p111.output.low"}},
+    {"component": "p806", "configs": {"p806.gpio_mode": "p806.gpio_mode.gpio_mode_out.low"}, "connections": {"p806": "p806.output.low"}},
+    {"component": "p807", "configs": {"p807.gpio_mode": "p807.gpio_mode.gpio_mode_out.low"}, "connections": {"p807": "p807.output.low"}}
+  ]
+}

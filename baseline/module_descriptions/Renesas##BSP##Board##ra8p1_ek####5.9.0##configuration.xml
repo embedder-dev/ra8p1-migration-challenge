@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<raConfiguration version="4">
+  <raBspConfiguration>
+    <config id="config.bsp.ra">
+      <property id="config.bsp.common.main_osc_populated" value="config.bsp.common.main_osc_populated.enabled"/>
+      <property id="config.bsp.common.main_osc_clock_source" value="config.bsp.common.main_osc_clock_source.crystal"/>
+      <property id="config.bsp.common.subclock_populated" value="config.bsp.common.subclock_populated.enabled"/>
+      <property id="config.bsp.common.subclock_drive" value="config.bsp.common.subclock_drive.standard"/>
+    </config>
+  </raBspConfiguration>
+  <raPinConfiguration>
+    <symbolicName propertyId="p001.symbolic_name" value="ARDUINO_A0"/>
+    <symbolicName propertyId="p014.symbolic_name" value="ARDUINO_A4"/>
+    <symbolicName propertyId="p008.symbolic_name" value="USER_SW2"/>
+    <symbolicName propertyId="p009.symbolic_name" value="USER_SW1"/>
+    <symbolicName propertyId="p600.symbolic_name" value="LED1_BLUE"/>
+    <symbolicName propertyId="p303.symbolic_name" value="LED2_GREEN"/>
+    <symbolicName propertyId="pa07.symbolic_name" value="LED3_RED"/>
+    <symbolicName propertyId="p210.symbolic_name" value="SWDIO"/>
+    <symbolicName propertyId="p211.symbolic_name" value="SWCLK"/>
+    <pincfg active="true" name="RA8P1 EK" selected="true" symbol="g_bsp_pin_cfg">
+      <configSetting altId="p210.gpio_mode.gpio_mode_peripheral" configurationId="p210.gpio_mode"/>
+      <configSetting altId="p210.jtag_fslash_swd.swdio" configurationId="p210"/>
+      <configSetting altId="jtag_fslash_swd.swdio.p210" configurationId="jtag_fslash_swd.swdio"/>
+      <configSetting altId="p211.gpio_mode.gpio_mode_peripheral" configurationId="p211.gpio_mode"/>
+      <configSetting altId="p211.jtag_fslash_swd.swclk" configurationId="p211"/>
+      <configSetting altId="jtag_fslash_swd.swclk.p211" configurationId="jtag_fslash_swd.swclk"/>
+      <configSetting altId="jtag_fslash_swd.mode.swd.free" configurationId="jtag_fslash_swd.mode"/>
+    </pincfg>
+  </raPinConfiguration>
+</raConfiguration>

@@ -1,0 +1,6 @@
+#ifndef R_PDM_CFG_H
+#define R_PDM_CFG_H
+#ifndef PDM_CFG_PARAM_CHECKING_ENABLE
+#define PDM_CFG_PARAM_CHECKING_ENABLE 1
+#endif
+#endif

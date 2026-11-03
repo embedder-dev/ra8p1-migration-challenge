@@ -28,7 +28,11 @@ FSP_HEADER
  * Typedef definitions
  **********************************************************************************************************************/
 
-/** WDT private control block. DO NOT MODIFY. Initialization occurs when R_WDT_Open() is called. */
+/** WDT private control block. DO NOT MODIFY. Initialization occurs when R_WDT_Open() is called.
+ * On dual-WDT devices the BSP-selected core owns its corresponding instance (CPU0/WDT0, CPU1/WDT1).
+ * This is not a selectable channel. CPU1 auto-start settings come from OFS3, CPU0 from OFS0.
+ * Reset-mode expiry is reported by BSP reset-cause registers, not by StatusGet.
+ */
 typedef struct st_wdt_instance_ctrl
 {
     uint32_t wdt_open;                                 // Indicates whether the open() API has been successfully

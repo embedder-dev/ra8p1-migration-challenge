@@ -1,0 +1,35 @@
+<?xml version='1.0' encoding='utf-8'?>
+<deviceconfig>
+  <device>
+    <name>R7KA8P1KF_CPU0</name>
+    <series>RA</series>
+    <family>RA8</family>
+    <server>
+      <params>
+        <param>-t R7KA8P1KF_CPU0</param>
+      </params>
+    </server>
+    <initcmd />
+    <runcmd />
+    <supportFileTarget>com.renesas.ide.supportfiles.ra.debug.debugSupportFileTarget</supportFileTarget>
+    <extraAttributes>
+      <booleanAttribute key="com.renesas.hardwaredebug.jlink.connection.defaultSwi" value="true" />
+    </extraAttributes>
+  </device>
+  <device>
+    <name>R7KA8P1KF_CPU1</name>
+    <series>RA</series>
+    <family>RA8</family>
+    <server>
+      <params>
+        <param>-t R7KA8P1KF_CPU1</param>
+      </params>
+    </server>
+    <initcmd />
+    <runcmd />
+    <supportFileTarget>com.renesas.ide.supportfiles.ra.debug.debugSupportFileTarget</supportFileTarget>
+    <extraAttributes>
+      <booleanAttribute key="com.renesas.hardwaredebug.jlink.connection.defaultSwi" value="true" />
+    </extraAttributes>
+  </device>
+</deviceconfig>

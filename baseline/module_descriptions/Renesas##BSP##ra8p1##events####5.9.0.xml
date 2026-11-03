@@ -1,0 +1,54 @@
+<?xml version='1.0' encoding='utf-8'?>
+<raModuleDescription>
+  <config id="config.bsp.ra8p1.events" path="fsp_cfg/bsp/bsp_elc_cfg.h" version="0">
+    <content>/* RA8P1 events are defined by bsp_elc.h. */</content>
+  </config>
+  <bsp id="bsp.ra8p1.events" config="config.bsp.ra8p1.events" display="RA8P1 events" version="0">
+    <scope id="scope.dtc" interruptOnly="true" />
+    <scope id="scope.dmac" />
+    <event id="event.iwdt.underflow" display="IWDT|UNDERFLOW" value="IWDT_UNDERFLOW" scope="interrupt" />
+    <event id="event.wdt0.underflow" display="WDT0|UNDERFLOW" value="WDT0_UNDERFLOW" scope="interrupt" />
+    <event id="event.wdt1.underflow" display="WDT1|UNDERFLOW" value="WDT1_UNDERFLOW" scope="interrupt" />
+    <event id="event.pdm.dat0" display="PDM|DAT0" value="PDM_DAT0" scope="interrupt,scope.dtc,scope.dmac" />
+    <event id="event.pdm.dat1" display="PDM|DAT1" value="PDM_DAT1" scope="interrupt,scope.dtc,scope.dmac" />
+    <event id="event.pdm.dat2" display="PDM|DAT2" value="PDM_DAT2" scope="interrupt,scope.dtc,scope.dmac" />
+    <event id="event.pdm.sdet" display="PDM|SDET" value="PDM_SDET" scope="interrupt" />
+    <event id="event.pdm.err0" display="PDM|ERR0" value="PDM_ERR0" scope="interrupt" />
+    <event id="event.pdm.err1" display="PDM|ERR1" value="PDM_ERR1" scope="interrupt" />
+    <event id="event.pdm.err2" display="PDM|ERR2" value="PDM_ERR2" scope="interrupt" />
+    <event id="event.adc.limclpi" display="ADC|LIMCLPI" value="ADC_LIMCLPI" scope="interrupt" />
+    <event id="event.adc.fifoovf" display="ADC|FIFOOVF" value="ADC_FIFOOVF" scope="interrupt" />
+    <event id="event.adc.adi0" display="ADC|ADI0" value="ADC_ADI0" scope="interrupt,scope.dtc,scope.dmac" />
+    <event id="event.adc.adi1" display="ADC|ADI1" value="ADC_ADI1" scope="interrupt,scope.dtc,scope.dmac" />
+    <event id="event.adc.adi2" display="ADC|ADI2" value="ADC_ADI2" scope="interrupt,scope.dtc,scope.dmac" />
+    <event id="event.adc.adi3" display="ADC|ADI3" value="ADC_ADI3" scope="interrupt,scope.dtc,scope.dmac" />
+    <event id="event.adc.adi4" display="ADC|ADI4" value="ADC_ADI4" scope="interrupt,scope.dtc,scope.dmac" />
+    <event id="event.adc.adi5" display="ADC|ADI5" value="ADC_ADI5" scope="interrupt,scope.dtc,scope.dmac" />
+    <event id="event.adc.adi6" display="ADC|ADI6" value="ADC_ADI6" scope="interrupt,scope.dtc,scope.dmac" />
+    <event id="event.adc.adi7" display="ADC|ADI7" value="ADC_ADI7" scope="interrupt,scope.dtc,scope.dmac" />
+    <event id="event.adc.adi8" display="ADC|ADI8" value="ADC_ADI8" scope="interrupt,scope.dtc,scope.dmac" />
+    <event id="event.adc.fiforeq0" display="ADC|FIFOREQ0" value="ADC_FIFOREQ0" scope="interrupt,scope.dtc,scope.dmac" />
+    <event id="event.adc.fiforeq1" display="ADC|FIFOREQ1" value="ADC_FIFOREQ1" scope="interrupt,scope.dtc,scope.dmac" />
+    <event id="event.adc.fiforeq2" display="ADC|FIFOREQ2" value="ADC_FIFOREQ2" scope="interrupt,scope.dtc,scope.dmac" />
+    <event id="event.adc.fiforeq3" display="ADC|FIFOREQ3" value="ADC_FIFOREQ3" scope="interrupt,scope.dtc,scope.dmac" />
+    <event id="event.adc.fiforeq4" display="ADC|FIFOREQ4" value="ADC_FIFOREQ4" scope="interrupt,scope.dtc,scope.dmac" />
+    <event id="event.adc.fiforeq5" display="ADC|FIFOREQ5" value="ADC_FIFOREQ5" scope="interrupt,scope.dtc,scope.dmac" />
+    <event id="event.adc.fiforeq6" display="ADC|FIFOREQ6" value="ADC_FIFOREQ6" scope="interrupt,scope.dtc,scope.dmac" />
+    <event id="event.adc.fiforeq7" display="ADC|FIFOREQ7" value="ADC_FIFOREQ7" scope="interrupt,scope.dtc,scope.dmac" />
+    <event id="event.adc.fiforeq8" display="ADC|FIFOREQ8" value="ADC_FIFOREQ8" scope="interrupt,scope.dtc,scope.dmac" />
+    <event id="event.adc.cmpi0" display="ADC|CMPI0" value="ADC_CMPI0" scope="interrupt" />
+    <event id="event.adc.cmpi1" display="ADC|CMPI1" value="ADC_CMPI1" scope="interrupt" />
+    <event id="event.adc.ccmpm0" display="ADC|CCMPM0" value="ADC_CCMPM0" scope="interrupt,scope.dtc,scope.dmac" />
+    <event id="event.adc.ccmpum0" display="ADC|CCMPUM0" value="ADC_CCMPUM0" scope="interrupt,scope.dtc,scope.dmac" />
+    <event id="event.adc.err0" display="ADC|ERR0" value="ADC_ERR0" scope="interrupt" />
+    <event id="event.adc.resovf0" display="ADC|RESOVF0" value="ADC_RESOVF0" scope="interrupt" />
+    <event id="event.adc.calend0" display="ADC|CALEND0" value="ADC_CALEND0" scope="interrupt" />
+    <event id="event.adc.cmpi2" display="ADC|CMPI2" value="ADC_CMPI2" scope="interrupt" />
+    <event id="event.adc.cmpi3" display="ADC|CMPI3" value="ADC_CMPI3" scope="interrupt" />
+    <event id="event.adc.ccmpm1" display="ADC|CCMPM1" value="ADC_CCMPM1" scope="interrupt,scope.dtc,scope.dmac" />
+    <event id="event.adc.ccmpum1" display="ADC|CCMPUM1" value="ADC_CCMPUM1" scope="interrupt,scope.dtc,scope.dmac" />
+    <event id="event.adc.err1" display="ADC|ERR1" value="ADC_ERR1" scope="interrupt" />
+    <event id="event.adc.resovf1" display="ADC|RESOVF1" value="ADC_RESOVF1" scope="interrupt" />
+    <event id="event.adc.calend1" display="ADC|CALEND1" value="ADC_CALEND1" scope="interrupt" />
+  </bsp>
+</raModuleDescription>

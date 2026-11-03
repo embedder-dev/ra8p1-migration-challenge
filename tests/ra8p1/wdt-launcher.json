@@ -1,0 +1,6 @@
+{
+  "source": "qualification_wdt_launcher.c",
+  "bsp": {
+    "config.bsp.ra8p1.startup_profile": "config.bsp.ra8p1.startup_profile.pll240"
+  }
+}

@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<raModuleDescription>
+  <device id="R7KA8P1KFLCAC" device="R7KA8P1KFLCAC" core="CM85" irqCount="96">
+    <select bsp="bsp.ra8p1.R7KA8P1KFLCAC" />
+    <select bsp="bsp.ra8p1.cpu0" />
+    <select bsp="bsp.ra8p1" />
+    <select bsp="bsp.ra8p1.fsp" />
+    <select bsp="bsp.ra8p1.clocks" />
+    <select bsp="bsp.ra8p1.events" />
+    <select bsp="bsp.ra" />
+  </device>
+  <!-- A tooling target alias, not a second physical part number. -->
+  <device id="R7KA8P1KFLCAC_CPU1" device="R7KA8P1KFLCAC" core="CM33" irqCount="96">
+    <select bsp="bsp.ra8p1.R7KA8P1KFLCAC" />
+    <select bsp="bsp.ra8p1.cpu1" />
+    <select bsp="bsp.ra8p1" />
+    <select bsp="bsp.ra8p1.fsp" />
+    <select bsp="bsp.ra8p1.clocks" />
+    <select bsp="bsp.ra8p1.events" />
+    <select bsp="bsp.ra" />
+  </device>
+  <config id="config.bsp.ra8p1.R7KA8P1KFLCAC" path="fsp_cfg/bsp/bsp_mcu_device_pn_cfg.h" version="0">
+    <property id="config.bsp.part_number" display="part_number" default="config.bsp.part_number.value">
+      <option id="config.bsp.part_number.value" display="R7KA8P1KFLCAC" value="R7KA8P1KFLCAC" />
+    </property>
+    <property id="config.bsp.rom_size_bytes" display="rom_size_bytes" default="config.bsp.rom_size_bytes.value">
+      <option id="config.bsp.rom_size_bytes.value" display="1048576" value="1048576" />
+    </property>
+    <property id="config.bsp.rom_size_bytes_hidden" default="1048576" />
+    <property id="config.bsp.ram_size_bytes" display="ram_size_bytes" default="config.bsp.ram_size_bytes.value">
+      <!-- Ordinary SRAM only; CPU-local TCM is mapped separately (HWM Table 5.1). -->
+      <option id="config.bsp.ram_size_bytes.value" display="1703936" value="1703936" />
+    </property>
+    <property id="config.bsp.data_flash_size_bytes" display="data_flash_size_bytes" default="config.bsp.data_flash_size_bytes.value">
+      <option id="config.bsp.data_flash_size_bytes.value" display="0" value="0" />
+    </property>
+    <property id="config.bsp.package_style" display="package_style" default="config.bsp.package_style.value">
+      <option id="config.bsp.package_style.value" display="BGA" value="BGA" />
+    </property>
+    <property id="config.bsp.package_pins" display="package_pins" default="config.bsp.package_pins.value">
+      <option id="config.bsp.package_pins.value" display="289" value="289" />
+    </property>
+    <property id="config.bsp.irq_count_hidden" default="96" />
+    <content>
+#define BSP_MCU_${config.bsp.part_number}
+#define BSP_MCU_FEATURE_SET ('K')
+#define BSP_ROM_SIZE_BYTES (${config.bsp.rom_size_bytes})
+#define BSP_RAM_SIZE_BYTES (${config.bsp.ram_size_bytes})
+#define BSP_DATA_FLASH_SIZE_BYTES (${config.bsp.data_flash_size_bytes})
+#define BSP_PACKAGE_${config.bsp.package_style}
+#define BSP_PACKAGE_PINS (${config.bsp.package_pins})
+    </content>
+  </config>
+  <bsp id="bsp.ra8p1.R7KA8P1KFLCAC" config="config.bsp.ra8p1.R7KA8P1KFLCAC" display="R7KA8P1KFLCAC" version="0">
+    <provides interface="interface.mcu.r7ka8p1kflcac" />
+    <provides interface="interface.mcu.feature_set.k" />
+    <provides interface="interface.mcu.ra8p1.k" />
+  </bsp>
+</raModuleDescription>

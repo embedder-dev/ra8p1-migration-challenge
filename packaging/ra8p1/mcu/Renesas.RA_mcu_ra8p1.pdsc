@@ -1,0 +1,86 @@
+<?xml version='1.0' encoding='utf-8'?>
+<package xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" schemaVersion="1.2" xsi:noNamespaceSchemaLocation="PACK.xsd">
+  <vendor>Renesas</vendor>
+  <name>RA_mcu_ra8p1</name>
+  <description>Custom 5.9-derived RA8P1 support candidate; not an official Renesas release</description>
+  <url>www.renesas.com</url>
+  <supportContact />
+  <releases>
+    <release version="5.9.0">Custom RA8P1 candidate: internal memory, restricted pin support</release>
+  </releases>
+  <conditions>
+    <condition id="Only_GCC">
+      <require Tcompiler="GCC" />
+    </condition>
+  </conditions>
+  <components>
+    <component Cvendor="Renesas" Cclass="BSP" Cgroup="ra8p1" Csub="device" Cvariant="R7KA8P1KFLCAC" Cversion="5.9.0">
+      <description>Board support package for R7KA8P1KFLCAC</description>
+      <files>
+        <file category="include" name="ra/fsp/inc/" />
+      </files>
+    </component>
+    <component Cvendor="Renesas" Cclass="BSP" Cgroup="ra8p1" Csub="device" Cversion="5.9.0">
+      <description>Board support package for RA8P1</description>
+      <files>
+        <file category="header" name="ra/fsp/src/bsp/cmsis/Device/RENESAS/Include/R7KA8P1AD.h" version="5.9.0" condition="" select="" />
+      </files>
+    </component>
+    <component Cvendor="Renesas" Cclass="BSP" Cgroup="ra8p1" Csub="fsp" Cversion="5.9.0">
+      <description>Board support package for RA8P1 - FSP Data</description>
+      <files>
+        <file category="header" name="ra/fsp/src/bsp/mcu/ra8p1/bsp_elc.h" version="5.9.0" condition="" select="" />
+        <file category="header" name="ra/fsp/src/bsp/mcu/ra8p1/bsp_feature.h" version="5.9.0" condition="" select="" />
+        <file category="header" name="ra/fsp/src/bsp/mcu/ra8p1/bsp_mcu_info.h" version="5.9.0" condition="" select="" />
+        <file category="header" name="ra/fsp/src/bsp/mcu/ra8p1/bsp_mcu_family.h" version="5.9.0" condition="" select="" />
+        <file category="header" name="ra/fsp/src/bsp/mcu/ra8p1/bsp_clocks_ra8p1.h" version="5.9.0" condition="" select="" />
+        <file category="header" name="ra/fsp/src/bsp/mcu/ra8p1/bsp_clocks_ra8p1.inc" version="5.9.0" condition="" select="" />
+        <file category="header" name="ra/fsp/src/bsp/mcu/ra8p1/bsp_override.h" version="5.9.0" condition="" select="" />
+        <file category="header" name="ra/fsp/src/bsp/mcu/ra8p1/bsp_peripheral.h" version="5.9.0" condition="" select="" />
+        <file category="header" name="ra/fsp/src/bsp/mcu/ra8p1/r_adc_device_types.h" version="5.9.0" condition="" select="" />
+        <file category="source" name="ra/fsp/src/bsp/mcu/all/bsp_clocks.c" version="5.9.0" condition="" select="" />
+        <file category="header" name="ra/fsp/src/bsp/mcu/all/bsp_clocks.h" version="5.9.0" condition="" select="" />
+        <file category="source" name="ra/fsp/src/bsp/mcu/all/bsp_common.c" version="5.9.0" condition="" select="" />
+        <file category="header" name="ra/fsp/src/bsp/mcu/all/bsp_common.h" version="5.9.0" condition="" select="" />
+        <file category="header" name="ra/fsp/src/bsp/mcu/all/bsp_compiler_support.h" version="5.9.0" condition="" select="" />
+        <file category="source" name="ra/fsp/src/bsp/mcu/all/bsp_delay.c" version="5.9.0" condition="" select="" />
+        <file category="header" name="ra/fsp/src/bsp/mcu/all/bsp_delay.h" version="5.9.0" condition="" select="" />
+        <file category="header" name="ra/fsp/src/bsp/mcu/all/bsp_exceptions.h" version="5.9.0" condition="" select="" />
+        <file category="source" name="ra/fsp/src/bsp/mcu/all/bsp_group_irq.c" version="5.9.0" condition="" select="" />
+        <file category="header" name="ra/fsp/src/bsp/mcu/all/bsp_group_irq.h" version="5.9.0" condition="" select="" />
+        <file category="source" name="ra/fsp/src/bsp/mcu/all/bsp_guard.c" version="5.9.0" condition="" select="" />
+        <file category="header" name="ra/fsp/src/bsp/mcu/all/bsp_guard.h" version="5.9.0" condition="" select="" />
+        <file category="source" name="ra/fsp/src/bsp/mcu/all/bsp_io.c" version="5.9.0" condition="" select="" />
+        <file category="header" name="ra/fsp/src/bsp/mcu/all/bsp_io.h" version="5.9.0" condition="" select="" />
+        <file category="source" name="ra/fsp/src/bsp/mcu/all/bsp_irq.c" version="5.9.0" condition="" select="" />
+        <file category="header" name="ra/fsp/src/bsp/mcu/all/bsp_irq.h" version="5.9.0" condition="" select="" />
+        <file category="header" name="ra/fsp/src/bsp/mcu/all/bsp_mcu_api.h" version="5.9.0" condition="" select="" />
+        <file category="header" name="ra/fsp/src/bsp/mcu/all/bsp_mmf.h" version="5.9.0" condition="" select="" />
+        <file category="header" name="ra/fsp/src/bsp/mcu/all/bsp_module_stop.h" version="5.9.0" condition="" select="" />
+        <file category="source" name="ra/fsp/src/bsp/mcu/all/bsp_register_protection.c" version="5.9.0" condition="" select="" />
+        <file category="header" name="ra/fsp/src/bsp/mcu/all/bsp_register_protection.h" version="5.9.0" condition="" select="" />
+        <file category="source" name="ra/fsp/src/bsp/mcu/all/bsp_rom_registers.c" version="5.9.0" condition="" select="" />
+        <file category="source" name="ra/fsp/src/bsp/mcu/all/bsp_sbrk.c" version="5.9.0" condition="" select="" />
+        <file category="source" name="ra/fsp/src/bsp/mcu/all/bsp_sdram.c" version="5.9.0" condition="" select="" />
+        <file category="header" name="ra/fsp/src/bsp/mcu/all/bsp_sdram.h" version="5.9.0" condition="" select="" />
+        <file category="header" name="ra/fsp/src/bsp/mcu/all/board_sdram.h" version="5.9.0" condition="" select="" />
+        <file category="source" name="ra/fsp/src/bsp/mcu/all/bsp_security.c" version="5.9.0" condition="" select="" />
+        <file category="header" name="ra/fsp/src/bsp/mcu/all/bsp_security.h" version="5.9.0" condition="" select="" />
+        <file category="source" name="ra/fsp/src/bsp/mcu/all/bsp_macl.c" version="5.9.0" condition="" select="" />
+        <file category="header" name="ra/fsp/src/bsp/mcu/all/bsp_macl.h" version="5.9.0" condition="" select="" />
+        <file category="header" name="ra/fsp/src/bsp/mcu/all/bsp_tfu.h" version="5.9.0" condition="" select="" />
+        <file category="header" name="ra/fsp/inc/instances/r_ioport.h" version="5.9.0" condition="" select="" />
+        <file category="source" name="ra/fsp/src/bsp/cmsis/Device/RENESAS/Source/startup.c" version="5.9.0" condition="" select="" />
+        <file category="source" name="ra/fsp/src/bsp/cmsis/Device/RENESAS/Source/system.c" version="5.9.0" condition="" select="" />
+        <file category="linkerScript" name="script/fsp.ld" version="5.9.0" condition="Only_GCC" select="" />
+        <file category="header" name="ra/fsp/inc/fsp_features.h" version="5.9.0" condition="" select="" />
+      </files>
+    </component>
+    <component Cvendor="Renesas" Cclass="BSP" Cgroup="ra8p1" Csub="events" Cversion="5.9.0">
+      <description>Board support package for RA8P1 - Events </description>
+      <files>
+        <file category="include" name="ra/fsp/inc/" />
+      </files>
+    </component>
+  </components>
+</package>

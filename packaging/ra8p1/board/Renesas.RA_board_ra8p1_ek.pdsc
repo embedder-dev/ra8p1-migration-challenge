@@ -1,0 +1,23 @@
+<?xml version='1.0' encoding='utf-8'?>
+<package xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" schemaVersion="1.2" xsi:noNamespaceSchemaLocation="PACK.xsd">
+  <vendor>Renesas</vendor>
+  <name>RA_board_ra8p1_ek</name>
+  <description>Custom 5.9-derived EK-RA8P1 board candidate; not an official Renesas release</description>
+  <url>www.renesas.com</url>
+  <supportContact />
+  <releases>
+    <release version="5.9.0">Custom EK-RA8P1 board support</release>
+  </releases>
+  <components>
+    <component Cvendor="Renesas" Cclass="BSP" Cgroup="Board" Csub="ra8p1_ek" Cversion="5.9.0">
+      <description>EK-RA8P1 board support (R7KA8P1KFLCAC)</description>
+      <files>
+        <file category="header" name="ra/board/ra8p1_ek/board.h" version="5.9.0" condition="" select="" />
+        <file category="source" name="ra/board/ra8p1_ek/board_init.c" version="5.9.0" condition="" select="" />
+        <file category="header" name="ra/board/ra8p1_ek/board_init.h" version="5.9.0" condition="" select="" />
+        <file category="source" name="ra/board/ra8p1_ek/board_leds.c" version="5.9.0" condition="" select="" />
+        <file category="header" name="ra/board/ra8p1_ek/board_leds.h" version="5.9.0" condition="" select="" />
+      </files>
+    </component>
+  </components>
+</package>

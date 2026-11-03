@@ -16,6 +16,10 @@
 /** Common macro for FSP header files. There is also a corresponding FSP_FOOTER macro at the end of this file. */
 FSP_HEADER
 
+#if BSP_MCU_GROUP_RA8P1
+ #include "../ra8p1/bsp_clocks_ra8p1.h"
+#else
+
 /***********************************************************************************************************************
  * Macro definitions
  **********************************************************************************************************************/
@@ -499,6 +503,8 @@ typedef BSP_CMSE_NONSECURE_CALL void (*volatile bsp_clock_update_callback_t)(bsp
  #endif
 
 #endif
+
+#endif /* BSP_MCU_GROUP_RA8P1 */
 
 /** PLL multiplier values */
 typedef enum e_cgc_pll_mul
@@ -1651,6 +1657,7 @@ typedef enum e_cgc_pll_mul
     CGC_PLL_MUL_781_0  = BSP_CLOCKS_PLL_MUL(781U, 0U),  ///< PLL multiplier of 781.00
 } cgc_pll_mul_t;
 
+#if !BSP_MCU_GROUP_RA8P1
 /***********************************************************************************************************************
  * Exported global variables
  **********************************************************************************************************************/
@@ -1720,6 +1727,8 @@ fsp_err_t R_BSP_SubclockStatusGet();
 fsp_err_t R_BSP_SubclockInitialize();
 
 #endif
+
+#endif /* !BSP_MCU_GROUP_RA8P1 */
 
 /** Common macro for FSP header files. There is also a corresponding FSP_HEADER macro at the top of this file. */
 FSP_FOOTER

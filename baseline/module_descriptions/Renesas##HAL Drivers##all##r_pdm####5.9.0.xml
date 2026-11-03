@@ -1,0 +1,97 @@
+<?xml version="1.0"?>
+<raModuleDescription>
+    <config id="config.driver.pdm" path="fsp_cfg/r_pdm_cfg.h" version="0">
+        <property default="config.driver.pdm.param_checking_enable.bsp" display="Parameter Checking" id="config.driver.pdm.param_checking_enable" description="Include assertion checks for pointers. State, ownership and numeric bounds are always checked.">
+            <option display="Default (BSP)" id="config.driver.pdm.param_checking_enable.bsp" value="(BSP_CFG_PARAM_CHECKING_ENABLE)"/>
+            <option display="Enabled" id="config.driver.pdm.param_checking_enable.enabled" value="(1)"/>
+            <option display="Disabled" id="config.driver.pdm.param_checking_enable.disabled" value="(0)"/>
+        </property>
+        <content>#define PDM_CFG_PARAM_CHECKING_ENABLE ${config.driver.pdm.param_checking_enable}</content>
+    </config>
+    <module config="config.driver.pdm" display="Connectivity|${module.driver.pdm.name} PDM (r_pdm)" id="module.driver.pdm_on_pdm" version="0" url="group___p_d_m.html">
+        <constraint display="Requires the RA8P1 PDMIF peripheral">"${interface.mcu.pdm}" === "1"</constraint>
+        <constraint display="Unique name required">"${interface.driver.pdm.${module.driver.pdm.name}}" === "1"</constraint>
+        <constraint display="Stereo uses physical input 0 and filter channels 0 and 1">("${module.driver.pdm.mode}" == "module.driver.pdm.mode.mono") || ("${module.driver.pdm.channel}" == "0")</constraint>
+        <constraint display="Stereo requires falling-edge interrupts at the same priority; disable them for mono">(("${module.driver.pdm.mode}" == "module.driver.pdm.mode.stereo") &amp;&amp; ("${module.driver.pdm.falling_ipl}" == "${module.driver.pdm.ipl}")) || (("${module.driver.pdm.mode}" == "module.driver.pdm.mode.mono") &amp;&amp; ("${module.driver.pdm.falling_ipl}" == "_disabled"))</constraint>
+        <requires id="module.driver.pdm_on_pdm.requires.pdm" interface="interface.mcu.pdm" visible="false" display="Requires PDMIF"/>
+        <provides interface="interface.driver.pdm"/>
+        <provides interface="interface.driver.pdm_on_pdm"/>
+        <provides interface="interface.driver.pdm.${module.driver.pdm.name}"/>
+        <provides interface="interface.peripheral.pdm${module.driver.pdm.channel}"/>
+        <property default="g_pdm${_instance}" display="Name" id="module.driver.pdm.name" description="Instance name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.pdm.name}")</constraint>
+        </property>
+        <property default="0" display="Physical Input Channel" id="module.driver.pdm.channel" description="PDM clock and rising-edge input channel. EK-RA8P1 microphones use input 2. Stereo is supported on input 0 only and requires its own pin route.">
+            <constraint display="Channel must be 0, 1 or 2">testInteger("${module.driver.pdm.channel}") &amp;&amp; ("${module.driver.pdm.channel}" &gt;= 0) &amp;&amp; ("${module.driver.pdm.channel}" &lt;= 2)</constraint>
+        </property>
+        <property default="module.driver.pdm.mode.mono" display="Input Mode" id="module.driver.pdm.mode" description="Signed 20-bit PCM in int32_t. A mono frame is one sample; a stereo frame is rising then falling samples.">
+            <option display="Mono (rising edge)" id="module.driver.pdm.mode.mono" value="PDM_MODE_MONO"/>
+            <option display="Stereo (input 0, rising then falling)" id="module.driver.pdm.mode.stereo" value="PDM_MODE_STEREO"/>
+        </property>
+        <property default="10000" display="Microphone Startup Time (us)" id="module.driver.pdm.microphone_startup_us" description="Use the microphone datasheet wake-up time. Driver adds 4 ms for its fixed filter settling. Requires running 8 MHz MOCO/PDMIFCLK and PCLKB in 1..100 MHz. Fixed 2 MHz PDM clock, sinc M=125, half-band /2: 8000 frames/s nominal.">
+            <constraint display="Startup time must be 0..1000000 us">testInteger("${module.driver.pdm.microphone_startup_us}") &amp;&amp; ("${module.driver.pdm.microphone_startup_us}" &gt;= 0) &amp;&amp; ("${module.driver.pdm.microphone_startup_us}" &lt;= 1000000)</constraint>
+        </property>
+        <property default="NULL" display="Callback" id="module.driver.pdm.callback" description="Called in IRQ context on completion, overflow or error. NULL uses status polling for completion of interrupt-driven capture. Cross-security callbacks are unsupported.">
+            <constraint display="Callback must be a valid C symbol">testSymbol("${module.driver.pdm.callback}")</constraint>
+        </property>
+        <property default="board.icu.common.irq.priority2" display="Data/Error Interrupt Priority" id="module.driver.pdm.ipl" description="Same priority prevents nested service of one instance.">
+            <select enum="enum.mcu.nvic.priorities.mandatory"/>
+            <interrupt event="event.pdm.dat${module.driver.pdm.channel}" isr="pdm_dat_isr"/>
+            <interrupt event="event.pdm.err${module.driver.pdm.channel}" isr="pdm_err_isr"/>
+        </property>
+        <property default="_disabled" display="Stereo Falling-edge Data/Error Interrupt Priority" id="module.driver.pdm.falling_ipl" description="Stereo only: channel 1 processes the falling edge of input 0. Select the same priority as above.">
+            <select enum="enum.mcu.nvic.priorities.optional"/>
+            <interrupt event="event.pdm.dat1" isr="pdm_dat_isr"/>
+            <interrupt event="event.pdm.err1" isr="pdm_err_isr"/>
+        </property>
+        <peripheral name="PDM${module.driver.pdm.channel}" component="pdm${module.driver.pdm.channel}"/>
+        <header>
+            extern const pdm_instance_t ${module.driver.pdm.name};
+            extern pdm_instance_ctrl_t ${module.driver.pdm.name}_ctrl;
+            extern const pdm_cfg_t ${module.driver.pdm.name}_cfg;
+            #ifndef ${module.driver.pdm.callback}
+            void ${module.driver.pdm.callback}(pdm_callback_args_t * p_args);
+            #endif
+        </header>
+        <includes>
+            #include "r_pdm_api.h"
+            #include "r_pdm.h"
+        </includes>
+        <declarations>
+            pdm_instance_ctrl_t ${module.driver.pdm.name}_ctrl;
+            const pdm_extended_cfg_t ${module.driver.pdm.name}_cfg_extend =
+            {
+                .microphone_startup_us = ${module.driver.pdm.microphone_startup_us},
+            };
+            const pdm_cfg_t ${module.driver.pdm.name}_cfg =
+            {
+                .channel = ${module.driver.pdm.channel},
+                .mode = ${module.driver.pdm.mode},
+                .ipl = ${module.driver.pdm.ipl},
+                .dat_irq = { VECTOR_NUMBER_PDM_DAT${module.driver.pdm.channel},
+            #if ${module.driver.pdm.falling_ipl} != BSP_IRQ_DISABLED
+                    VECTOR_NUMBER_PDM_DAT1
+            #else
+                    FSP_INVALID_VECTOR
+            #endif
+                },
+                .err_irq = { VECTOR_NUMBER_PDM_ERR${module.driver.pdm.channel},
+            #if ${module.driver.pdm.falling_ipl} != BSP_IRQ_DISABLED
+                    VECTOR_NUMBER_PDM_ERR1
+            #else
+                    FSP_INVALID_VECTOR
+            #endif
+                },
+                .p_callback = ${module.driver.pdm.callback},
+                .p_context = NULL,
+                .p_extend = &amp;${module.driver.pdm.name}_cfg_extend,
+            };
+            const pdm_instance_t ${module.driver.pdm.name} =
+            {
+                .p_ctrl = &amp;${module.driver.pdm.name}_ctrl,
+                .p_cfg = &amp;${module.driver.pdm.name}_cfg,
+                .p_api = &amp;g_pdm_on_pdm,
+            };
+        </declarations>
+    </module>
+</raModuleDescription>

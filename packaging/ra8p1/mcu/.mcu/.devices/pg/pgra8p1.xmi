@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<projgen:Container xmi:version="2.0" xmlns:projgen="http:///projgen.ecore" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xmi="http://www.omg.org/XMI" xsi:schemaLocation="http:///projgen.ecore ProjGen.ecore">
+  <Target shortName="ARM_RA" target="ARM_RA">
+    <CpuType shortName="RA8" isUsedInPG="true">
+      <Cpu shortName="RA8P1" compilerCpuType="cortex-m85">
+        <BuilderOptions optionName="Capabilities" value="renesaspincfg" />
+
+
+
+
+        <PinCountRZTC shortName="RA8P1 - 289 Pin" isUsedInPG="true" PinNumber="289">
+          <Device shortName="R7KA8P1KFLCAC" DeviceCommand="R7KA8P1KF" />
+        </PinCountRZTC>
+      </Cpu>
+    </CpuType>
+  </Target>
+</projgen:Container>

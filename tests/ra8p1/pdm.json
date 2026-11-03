@@ -1,0 +1,56 @@
+{
+  "source": "qualification_pdm.c",
+  "bsp": {
+    "config.bsp.ra8p1.startup_profile": "config.bsp.ra8p1.startup_profile.pll240",
+    "config.bsp.common.main": "0x1000",
+    "config.bsp.common.heap": "0",
+    "config.bsp.common.checking": "config.bsp.common.checking.enabled"
+  },
+  "modules": [
+    {
+      "id": "module.driver.pdm_on_pdm",
+      "properties": {
+        "module.driver.pdm.name": "g_pdm0",
+        "module.driver.pdm.channel": "2",
+        "module.driver.pdm.mode": "module.driver.pdm.mode.mono",
+        "module.driver.pdm.microphone_startup_us": "10000",
+        "module.driver.pdm.callback": "validation_pdm_callback",
+        "module.driver.pdm.ipl": "board.icu.common.irq.priority2",
+        "module.driver.pdm.falling_ipl": "_disabled"
+      }
+    }
+  ],
+  "pins": [
+    {
+      "component": "pdm2",
+      "configs": {
+        "pdm2.pairing": "pdm2.pairing.free",
+        "pdm2.mode": "pdm2.mode.enabled.free"
+      },
+      "connections": {
+        "pdm2.pdmdat2": "pdm2.pdmdat2.p502",
+        "pdm2.pdmclk2": "pdm2.pdmclk2.p812"
+      }
+    },
+    {
+      "component": "p514",
+      "configs": {"p514.gpio_mode": "p514.gpio_mode.gpio_mode_out.low"},
+      "connections": {"p514": "p514.output.low"}
+    },
+    {
+      "component": "p111",
+      "configs": {"p111.gpio_mode": "p111.gpio_mode.gpio_mode_out.low"},
+      "connections": {"p111": "p111.output.low"}
+    },
+    {
+      "component": "p806",
+      "configs": {"p806.gpio_mode": "p806.gpio_mode.gpio_mode_out.low"},
+      "connections": {"p806": "p806.output.low"}
+    },
+    {
+      "component": "p807",
+      "configs": {"p807.gpio_mode": "p807.gpio_mode.gpio_mode_out.low"},
+      "connections": {"p807": "p807.output.low"}
+    }
+  ]
+}

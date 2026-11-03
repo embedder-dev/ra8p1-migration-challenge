@@ -48,7 +48,15 @@
 #define IOPORT_PRV_SET_PWPR_PFSWE         (0x40U)
 #define IOPORT_PRV_SET_PWPR_BOWI          (0x80U)
 
-#define IOPORT_PRV_PORT_ADDRESS(port_number)    ((uint32_t) (R_PORT1 - R_PORT0) * (port_number) + R_PORT0)
+#if BSP_MCU_GROUP_RA8P1
+/* SVD port views differ: only event-capable ports have PCNTR4. Use byte addresses, not typed pointer strides. */
+ #define IOPORT_PRV_PORT_ADDRESS(port_number) \
+    ((R_PORT0_Type *) (R_PORT0_BASE + (R_PORT1_BASE - R_PORT0_BASE) * (port_number)))
+ #define IOPORT_PRV_EVENT_PORT_TYPE    R_PORT1_Type
+#else
+ #define IOPORT_PRV_PORT_ADDRESS(port_number)    ((uint32_t) (R_PORT1 - R_PORT0) * (port_number) + R_PORT0)
+ #define IOPORT_PRV_EVENT_PORT_TYPE              R_PORT0_Type
+#endif
 
 /***********************************************************************************************************************
  * Typedef definitions
@@ -523,7 +531,11 @@ fsp_err_t R_IOPORT_PortEventInputRead (ioport_ctrl_t * const p_ctrl, bsp_io_port
     R_PORT0_Type * p_ioport_regs = IOPORT_PRV_PORT_ADDRESS(port >> IOPORT_PRV_PORT_OFFSET & IOPORT_PRV_8BIT_MASK);
 
     /* Read current value of EIDR value from PCNTR2 register for the specified port */
+ #if BSP_MCU_GROUP_RA8P1
+    *p_event_data = p_ioport_regs->EIDR;
+ #else
     *p_event_data = p_ioport_regs->PCNTR2_b.EIDR;
+ #endif
 
     return FSP_SUCCESS;
 #else
@@ -572,8 +584,12 @@ fsp_err_t R_IOPORT_PinEventInputRead (ioport_ctrl_t * const p_ctrl, bsp_io_port_
     R_PORT0_Type * p_ioport_regs = IOPORT_PRV_PORT_ADDRESS((pin >> IOPORT_PRV_PORT_OFFSET) & IOPORT_PRV_8BIT_MASK);
 
     /* Read current value of EIDR value from PCNTR2 register for the specified port */
+ #if BSP_MCU_GROUP_RA8P1
+    portvalue = p_ioport_regs->EIDR;
+ #else
     portvalue = p_ioport_regs->PCNTR2_b.EIDR;
-    mask      = (ioport_size_t) (1U << (IOPORT_PRV_PIN_BITS & (bsp_io_port_t) pin));
+ #endif
+    mask = (ioport_size_t) (1U << (IOPORT_PRV_PIN_BITS & (bsp_io_port_t) pin));
 
     if ((portvalue & mask) == mask)
     {
@@ -638,7 +654,8 @@ fsp_err_t R_IOPORT_PortEventOutputWrite (ioport_ctrl_t * const p_ctrl,
     reset_bits = (ioport_size_t) ((~event_data) & mask_value);
 
     /* Get the port address */
-    R_PORT0_Type * p_ioport_regs = IOPORT_PRV_PORT_ADDRESS((port >> IOPORT_PRV_PORT_OFFSET) & IOPORT_PRV_8BIT_MASK);
+    IOPORT_PRV_EVENT_PORT_TYPE * p_ioport_regs =
+        (IOPORT_PRV_EVENT_PORT_TYPE *) IOPORT_PRV_PORT_ADDRESS((port >> IOPORT_PRV_PORT_OFFSET) & IOPORT_PRV_8BIT_MASK);
 #if (3U == BSP_FEATURE_IOPORT_VERSION)
 
     /* Reset data in EORR, set data in EOSR register */
@@ -733,7 +750,8 @@ void r_ioport_pins_config (const ioport_cfg_t * p_cfg)
 static void r_ioport_hw_pin_event_output_data_write (bsp_io_port_t port, ioport_size_t pin, bsp_io_level_t pin_level)
 {
     /* Get the port address */
-    R_PORT0_Type * p_ioport_regs = IOPORT_PRV_PORT_ADDRESS((port >> IOPORT_PRV_PORT_OFFSET) & IOPORT_PRV_8BIT_MASK);
+    IOPORT_PRV_EVENT_PORT_TYPE * p_ioport_regs =
+        (IOPORT_PRV_EVENT_PORT_TYPE *) IOPORT_PRV_PORT_ADDRESS((port >> IOPORT_PRV_PORT_OFFSET) & IOPORT_PRV_8BIT_MASK);
 
 #if (3U == BSP_FEATURE_IOPORT_VERSION)
     uint16_t set_value_high = (uint16_t) (pin_level << pin);

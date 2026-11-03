@@ -93,6 +93,76 @@ static BSP_DONT_REMOVE const uint8_t g_fsp_version_build_string[] BSP_PLACE_IN_S
  * Private global variables and functions
  **********************************************************************************************************************/
 
+#if BSP_MCU_GROUP_RA8P1
+/*******************************************************************************************************************//**
+ * Activate CPU1 from CPU0 using a vector table in internal code MRAM.
+ *
+ * The caller must finish loading the CPU1 image and make its memory contents visible before calling. CPU1 must have
+ * separate data, BSS and stack regions; this function does not initialize or partition shared memory. Success means
+ * hardware activation completed, not that CPU1 reached its application entry point.
+ *
+ * @param[in] vector_address    Secure MRAM vector table address, aligned to 512 bytes for all 112 vector entries.
+ * @retval FSP_SUCCESS          CPU1 activation completed.
+ * @retval FSP_ERR_INVALID_ARGUMENT Address is not an aligned, complete vector table inside code MRAM.
+ * @retval FSP_ERR_IN_USE        CPU1 is already active.
+ * @retval FSP_ERR_UNSUPPORTED   Caller is CPU1, or CPU1 is configured to stall after activation.
+ * @retval FSP_ERR_TIMEOUT       Hardware did not acknowledge the vector address or activation request.
+ **********************************************************************************************************************/
+fsp_err_t R_BSP_SecondaryCoreStart (uint32_t vector_address)
+{
+ #if BSP_CFG_CPU_CORE == 0
+    if ((vector_address < 0x02000000U) || (vector_address > 0x02100000U - 512U) ||
+        (vector_address & 511U))
+    {
+        return FSP_ERR_INVALID_ARGUMENT;
+    }
+
+    uint32_t irq_mask = __get_PRIMASK();
+    __disable_irq();
+    fsp_err_t err = FSP_SUCCESS;
+    if (R_CPU_CTRL->CPU1ACTCSR_b.ACT)
+    {
+        err = FSP_ERR_IN_USE;
+    }
+    else if (R_CPU_CTRL->CPU1WAITCR_b.CPUWAIT)
+    {
+        /* Do not bypass the application's explicit CPUWAIT policy or its register protection. */
+        err = FSP_ERR_UNSUPPORTED;
+    }
+    else
+    {
+        /* R01UH1064EJ0130 2.6.1.1 and 2.9.1.7/9: set the vector before requesting activation. */
+        R_CPU_CTRL->CPU1INITVTOR = vector_address;
+        if (R_CPU_CTRL->CPU1INITVTOR != vector_address)
+        {
+            err = FSP_ERR_TIMEOUT;
+        }
+        else
+        {
+            __DSB();
+            R_CPU_CTRL->CPU1ACTCSR = 0xA501U;
+            uint32_t remaining = 100000U;
+            while (!R_CPU_CTRL->CPU1ACTCSR_b.ACT)
+            {
+                if (--remaining == 0U)
+                {
+                    err = FSP_ERR_TIMEOUT;
+                    break;
+                }
+            }
+            __DSB();
+            __ISB();
+        }
+    }
+    __set_PRIMASK(irq_mask);
+    return err;
+ #else
+    FSP_PARAMETER_NOT_USED(vector_address);
+    return FSP_ERR_UNSUPPORTED;
+ #endif
+}
+#endif
+
 /*******************************************************************************************************************//**
  * Get the FSP version based on compile time macros.
  *

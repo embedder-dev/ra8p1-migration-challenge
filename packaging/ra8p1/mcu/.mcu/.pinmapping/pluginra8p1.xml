@@ -1,0 +1,9 @@
+<?xml version='1.0' encoding='utf-8'?>
+<plugin>
+  <extension point="com.tasking.pinmapper.mapping">
+    <vendor caption="Renesas" id="renesas" />
+    <group caption="Renesas RA" id="renesas.ra" />
+    <family caption="Renesas RA8P1 (restricted candidate)" id="renesas.ra8p1" />
+    <mapping vendor="renesas" group="renesas.ra" family="renesas.ra8p1" device="renesas.ra8p1_ac" package="renesas.289bga" path="platform:/base/../internal/projectgen/ra/${version}/pinmapping/PinCfgR7KA8P1KFLCAC.xml" />
+  </extension>
+</plugin>

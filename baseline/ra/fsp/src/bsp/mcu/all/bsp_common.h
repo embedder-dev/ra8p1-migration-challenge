@@ -299,6 +299,12 @@ typedef enum e_fsp_priv_clock
     FSP_PRIV_CLOCK_ICLK   = 24,
     FSP_PRIV_CLOCK_FCLK   = 28,
     FSP_PRIV_CLOCK_CPUCLK = 32,
+#if BSP_MCU_GROUP_RA8P1
+    FSP_PRIV_CLOCK_MRPCLK = 28,
+    FSP_PRIV_CLOCK_CPUCLK0 = 48,
+    FSP_PRIV_CLOCK_CPUCLK1 = 36,
+    FSP_PRIV_CLOCK_MRICLK = 44,
+#endif
 } fsp_priv_clock_t;
 
 /* Private enum used in R_FSP_SciSpiClockHzGe.  Maps clock name to base bit in SCISPICKCR. */
@@ -333,6 +339,10 @@ typedef struct st_bsp_unique_id
  **********************************************************************************************************************/
 uint32_t R_BSP_SourceClockHzGet(fsp_priv_source_clock_t clock);
 
+#if BSP_MCU_GROUP_RA8P1
+fsp_err_t R_BSP_SecondaryCoreStart(uint32_t vector_address);
+#endif
+
 /***********************************************************************************************************************
  * Global variables (defined in other files)
  **********************************************************************************************************************/
@@ -361,7 +371,10 @@ __STATIC_INLINE IRQn_Type R_FSP_CurrentIrqGet (void)
  **********************************************************************************************************************/
 __STATIC_INLINE uint32_t R_FSP_SystemClockHzGet (fsp_priv_clock_t clock)
 {
-#if !BSP_FEATURE_CGC_REGISTER_SET_B
+#if BSP_MCU_GROUP_RA8P1
+    extern uint32_t bsp_ra8p1_clock_hz_get(uint32_t clock);
+    return bsp_ra8p1_clock_hz_get((uint32_t) clock);
+#elif !BSP_FEATURE_CGC_REGISTER_SET_B
     uint32_t sckdivcr  = FSP_STYPE3_REG32_READ(R_SYSTEM->SCKDIVCR, BSP_CFG_CLOCKS_SECURE);
     uint32_t clock_div = (sckdivcr >> clock) & FSP_PRV_SCKDIVCR_DIV_MASK;
 
@@ -486,9 +499,14 @@ __STATIC_INLINE uint32_t R_FSP_SpiClockHzGet (void)
     uint32_t                spidivcr  = FSP_STYPE3_REG8_READ(R_SYSTEM->SPICKDIVCR, BSP_CFG_CLOCKS_SECURE);
     uint32_t                clock_div = R_FSP_ClockDividerGet(spidivcr & FSP_PRV_SCKDIVCR_DIV_MASK);
     fsp_priv_source_clock_t spicksel  =
+#if BSP_MCU_GROUP_RA8P1
+        (fsp_priv_source_clock_t) ((R_SYSTEM->SPICKCR & R_SYSTEM_SPICKCR_SPICKSEL_Msk) >>
+                                   R_SYSTEM_SPICKCR_SPICKSEL_Pos);
+#else
         (fsp_priv_source_clock_t) ((FSP_STYPE3_REG8_READ(R_SYSTEM->SPICKCR,
                                                          BSP_CFG_CLOCKS_SECURE) & R_SYSTEM_SPICKCR_CKSEL_Msk) >>
                                    R_SYSTEM_SPICKCR_CKSEL_Pos);
+#endif
 
     return R_BSP_SourceClockHzGet(spicksel) / clock_div;
 }

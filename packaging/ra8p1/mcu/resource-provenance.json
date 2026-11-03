@@ -1,0 +1,53 @@
+{
+  "candidate": "custom-5.9-derived",
+  "part": "R7KA8P1KFLCAC",
+  "family_header": "R7KA8P1AD.h",
+  "archive_sha256": "99c4abae6239a68171fcbff86070971f591f0a8945e90a50eb07d87843bee363",
+  "schema_source": "Renesas.RA_mcu_ra8m1.5.9.0.pack and Renesas.RA_board_ra8m1_ek.5.9.0.pack within original archive",
+  "hardware_source": "R01UH1064EJ0130 Rev.1.30: Fig.1.3 p88, Table5.1 p239; R7KA8P1AD SVD 1.10.02",
+  "debug_name_evidence": "Read-only strings of SEGGER J-Link 9.42 host library (no FSP source/packs)",
+  "gpio_ball_map": {
+    "p001": "T13",
+    "p008": "U11",
+    "p009": "P11",
+    "p014": "T8",
+    "p111": "E8",
+    "p208": "C7",
+    "p209": "E7",
+    "p210": "C6",
+    "p211": "D6",
+    "p303": "B6",
+    "p502": "T7",
+    "p514": "R14",
+    "p600": "P3",
+    "p806": "T14",
+    "p807": "N11",
+    "p812": "P8",
+    "pa07": "G4",
+    "pd02": "B17",
+    "pd03": "C15"
+  },
+  "pdm_pinmux": {
+    "component": "pdm2",
+    "source": "R01UH1064EJ0130 Rev.1.30: Table 21.12 p872 (PORT5), Table 21.15 p875 (PORT8), section 21.2.5 PmnPFS; pin list pp100-101",
+    "psel": 27,
+    "psel_bits": "28:24",
+    "pmr_bit": 16,
+    "selector_expression": "0x1B000000",
+    "enabled_pfs_value": "0x1B010000",
+    "routes": {
+      "p502": {"signal": "PDMDAT2", "direction": "in", "ball": "T7"},
+      "p812": {"signal": "PDMCLK2", "direction": "out", "ball": "P8"}
+    },
+    "schema_precedent": "Original FSP 5.9 RA8M1 port peripheral alternatives, IIC/SSI reciprocal connections, disabled and locked connection sets; no RA8M1 mux values used",
+    "encoding_note": "Literal selector avoids inventing an IOPORT_PERIPHERAL_PDM enum absent from FSP 5.9; IOPORT_CFG_PERIPHERAL_PIN supplies PMR separately",
+    "limits": "Only physical input/clock 2; no channel-0 route, stereo filter assignment, drive-strength claim or default microphone enable"
+  },
+  "limits": [
+    "CPU0 PG only; original 5.9 schema does not establish CPU1 project/solution selection",
+    "GNU linker only; no TCM/external memory or option/security programming",
+    "Memory map describes physical shared SRAM, not an automatic multicore partition",
+    "19 verified GPIO balls, analog mode on P001/P014, JTAG/SWD, PDMDAT2 on P502 and PDMCLK2 on P812 only; other pin multiplexers unavailable",
+    "No E2/E2Lite firmware, CMSIS-Zone, or reconstructed SVD XML advertised"
+  ]
+}

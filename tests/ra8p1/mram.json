@@ -1,0 +1,47 @@
+{
+  "source": "qualification_mram.c",
+  "bsp": {
+    "config.bsp.ra8p1.startup_profile": "config.bsp.ra8p1.startup_profile.moco",
+    "config.bsp.common.main": "0x1000",
+    "config.bsp.common.heap": "0",
+    "config.bsp.common.checking": "config.bsp.common.checking.enabled"
+  },
+  "modules": [
+    {
+      "id": "module.driver.flash_on_mram",
+      "properties": {
+        "module.driver.mram.name": "g_mram0",
+        "module.driver.mram.alias": "module.driver.mram.alias.secure",
+        "module.driver.mram.mriclk_hz": "8000000",
+        "module.driver.mram.mrpclk_hz": "8000000",
+        "module.driver.mram.timeout_us": "1000",
+        "module.driver.mram.enter": "validation_mram_enter",
+        "module.driver.mram.exit": "validation_mram_exit",
+        "module.driver.mram.time": "validation_mram_time_us",
+        "module.driver.mram.context": "NULL"
+      }
+    }
+  ],
+  "pins": [
+    {
+      "component": "p514",
+      "configs": {"p514.gpio_mode": "p514.gpio_mode.gpio_mode_out.low"},
+      "connections": {"p514": "p514.output.low"}
+    },
+    {
+      "component": "p111",
+      "configs": {"p111.gpio_mode": "p111.gpio_mode.gpio_mode_out.low"},
+      "connections": {"p111": "p111.output.low"}
+    },
+    {
+      "component": "p806",
+      "configs": {"p806.gpio_mode": "p806.gpio_mode.gpio_mode_out.low"},
+      "connections": {"p806": "p806.output.low"}
+    },
+    {
+      "component": "p807",
+      "configs": {"p807.gpio_mode": "p807.gpio_mode.gpio_mode_out.low"},
+      "connections": {"p807": "p807.output.low"}
+    }
+  ]
+}

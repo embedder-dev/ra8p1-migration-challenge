@@ -1,0 +1,85 @@
+<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.driver.mram" path="fsp_cfg/r_mram_cfg.h" version="1">
+        <property default="config.driver.mram.param_checking_enable.bsp" display="Parameter Checking" id="config.driver.mram.param_checking_enable" description="Safety, range and timeout checks remain enabled regardless of this setting.">
+            <option display="Default (BSP)" id="config.driver.mram.param_checking_enable.bsp" value="(BSP_CFG_PARAM_CHECKING_ENABLE)"/>
+            <option display="Enabled" id="config.driver.mram.param_checking_enable.enabled" value="(1)"/>
+            <option display="Disabled" id="config.driver.mram.param_checking_enable.disabled" value="(0)"/>
+        </property>
+        <content>#define MRAM_CFG_PARAM_CHECKING_ENABLE ${config.driver.mram.param_checking_enable}</content>
+    </config>
+    <module config="config.driver.mram" display="Storage|${module.driver.mram.name} Code MRAM (r_mram)" id="module.driver.flash_on_mram" version="1" url="group___m_r_a_m.html">
+        <constraint display="Requires code MRAM">"${interface.mcu.mram}" === "1"</constraint>
+        <constraint display="Unique instance name required">"${interface.driver.flash.${module.driver.mram.name}}" === "1"</constraint>
+        <constraint display="Supply the actual frozen MRICLK and MRPCLK frequencies">${module.driver.mram.mriclk_hz} &gt; 0 &amp;&amp; ${module.driver.mram.mrpclk_hz} &gt; 0</constraint>
+        <constraint display="System-wide ownership and independent time hooks are mandatory for memory operations">"${module.driver.mram.enter}" !== "NULL" &amp;&amp; "${module.driver.mram.exit}" !== "NULL" &amp;&amp; "${module.driver.mram.time}" !== "NULL"</constraint>
+        <constraint display="Non-secure projects require the non-secure data alias">"${_project.nonsecure}" !== "1" || "${module.driver.mram.alias}" === "module.driver.mram.alias.nonsecure"</constraint>
+        <requires id="interface.driver.mram.requires.mcu" visible="false" interface="interface.mcu.mram" display="Requires code MRAM"/>
+        <provides interface="interface.driver.flash"/>
+        <provides interface="interface.driver.flash_on_mram"/>
+        <provides interface="interface.peripheral.mram"/>
+        <provides interface="interface.driver.flash.${module.driver.mram.name}"/>
+        <property default="g_mram${_instance}" display="Name" id="module.driver.mram.name"><constraint display="Name must be a C symbol">testSymbol("${module.driver.mram.name}")</constraint></property>
+        <property default="module.driver.mram.alias.nonsecure" display="Code MRAM data alias" id="module.driver.mram.alias">
+            <option display="Non-secure (0x12000000)" id="module.driver.mram.alias.nonsecure" value="MRAM_CODE_NONSECURE_START"/>
+            <option display="Secure (0x02000000)" id="module.driver.mram.alias.secure" value="MRAM_CODE_SECURE_START"/>
+        </property>
+        <property default="0" display="Actual MRICLK (Hz)" id="module.driver.mram.mriclk_hz" description="Frozen clock profile; BSP must configure MRCFREQ before use."/>
+        <property default="0" display="Actual MRPCLK (Hz)" id="module.driver.mram.mrpclk_hz"/>
+        <property default="1000" display="Per-page timeout (microseconds)" id="module.driver.mram.timeout_us" description="Open verifies against the manual's maximum program time plus margin."/>
+        <property default="NULL" display="System-wide enter hook" id="module.driver.mram.enter"><constraint display="Hook must be a C symbol">testSymbol("${module.driver.mram.enter}")</constraint></property>
+        <property default="NULL" display="System-wide exit hook (RAM)" id="module.driver.mram.exit"><constraint display="Hook must be a C symbol">testSymbol("${module.driver.mram.exit}")</constraint></property>
+        <property default="NULL" display="Free-running microsecond time hook (RAM)" id="module.driver.mram.time"><constraint display="Hook must be a C symbol">testSymbol("${module.driver.mram.time}")</constraint></property>
+        <property default="NULL" display="Hook context" id="module.driver.mram.context"><constraint display="Context must be a C symbol">testSymbol("${module.driver.mram.context}")</constraint></property>
+        <symbol id="symbol.driver.mram.name" value="${module.driver.mram.name}"/>
+        <symbol id="symbol.driver.mram.ctrl" value="${module.driver.mram.name}_ctrl"/>
+        <symbol id="symbol.driver.mram.cfg" value="${module.driver.mram.name}_cfg"/>
+        <header>
+extern const flash_instance_t ${module.driver.mram.name};
+extern mram_instance_ctrl_t ${module.driver.mram.name}_ctrl;
+extern const flash_cfg_t ${module.driver.mram.name}_cfg;
+#ifndef ${module.driver.mram.enter}
+fsp_err_t ${module.driver.mram.enter}(void const * p_context);
+#endif
+#ifndef ${module.driver.mram.exit}
+void ${module.driver.mram.exit}(void const * p_context, bool hardware_idle);
+#endif
+#ifndef ${module.driver.mram.time}
+uint32_t ${module.driver.mram.time}(void const * p_context);
+#endif
+        </header>
+        <includes>#include "r_mram.h"
+#include "r_flash_api.h"</includes>
+        <declarations>
+mram_instance_ctrl_t ${module.driver.mram.name}_ctrl;
+const mram_extended_cfg_t ${module.driver.mram.name}_extend =
+{
+    .code_start = ${module.driver.mram.alias},
+    .mriclk_hz = ${module.driver.mram.mriclk_hz},
+    .mrpclk_hz = ${module.driver.mram.mrpclk_hz},
+    .timeout_us = ${module.driver.mram.timeout_us},
+    .p_enter = ${module.driver.mram.enter},
+    .p_exit = ${module.driver.mram.exit},
+    .p_time_us = ${module.driver.mram.time},
+    .p_context = ${module.driver.mram.context},
+};
+const flash_cfg_t ${module.driver.mram.name}_cfg =
+{
+    .data_flash_bgo = false,
+    .p_callback = NULL,
+    .p_context = NULL,
+    .p_extend = &amp;${module.driver.mram.name}_extend,
+    .ipl = BSP_IRQ_DISABLED,
+    .irq = FSP_INVALID_VECTOR,
+    .err_ipl = BSP_IRQ_DISABLED,
+    .err_irq = FSP_INVALID_VECTOR,
+};
+const flash_instance_t ${module.driver.mram.name} =
+{
+    .p_ctrl = &amp;${module.driver.mram.name}_ctrl,
+    .p_cfg = &amp;${module.driver.mram.name}_cfg,
+    .p_api = &amp;g_flash_on_mram,
+};
+        </declarations>
+    </module>
+</raModuleDescription>

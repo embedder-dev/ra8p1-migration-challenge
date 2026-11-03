@@ -1,0 +1,69 @@
+<?xml version="1.0"?>
+<raModuleDescription>
+    <config id="config.driver.dac_b" path="fsp_cfg/r_dac_b_cfg.h" version="0">
+        <property id="config.driver.dac_b.param_checking_enable" display="Parameter Checking" default="config.driver.dac_b.param_checking_enable.bsp">
+            <option id="config.driver.dac_b.param_checking_enable.bsp" display="Default (BSP)" value="BSP_CFG_PARAM_CHECKING_ENABLE"/>
+            <option id="config.driver.dac_b.param_checking_enable.enabled" display="Enabled" value="1"/>
+            <option id="config.driver.dac_b.param_checking_enable.disabled" display="Disabled" value="0"/>
+        </property>
+        <content>#define DAC_B_CFG_PARAM_CHECKING_ENABLE (${config.driver.dac_b.param_checking_enable})</content>
+    </config>
+    <module id="module.driver.dac_on_dac_b" config="config.driver.dac_b" display="Analog|${module.driver.dac_b.name} DAC (r_dac_b)" version="0" url="group___d_a_c___b.html">
+        <constraint display="Requires DAC_B peripheral">"${interface.mcu.dac_b}" === "1"</constraint>
+        <constraint display="Unique name required">"${interface.driver.dac.${module.driver.dac_b.name}}" === "1"</constraint>
+        <constraint display="Channel already in use">"${interface.driver.dac_b.channel.${module.driver.dac_b.channel}}" === "1"</constraint>
+        <requires id="module.driver.dac_on_dac_b.requires.dac" interface="interface.mcu.dac_b" visible="false" display="Requires DAC_B peripheral"/>
+        <provides interface="interface.driver.dac"/>
+        <provides interface="interface.driver.dac_on_dac_b"/>
+        <provides interface="interface.driver.dac.${module.driver.dac_b.name}"/>
+        <provides interface="interface.driver.dac_b.channel.${module.driver.dac_b.channel}"/>
+        <provides interface="interface.peripheral.dac_b"/>
+        <property id="module.driver.dac_b.name" display="Name" default="g_dac${_instance}">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.dac_b.name}")</constraint>
+        </property>
+        <property id="module.driver.dac_b.channel" display="Channel" default="module.driver.dac_b.channel.0">
+            <option id="module.driver.dac_b.channel.0" display="0" value="0"/>
+            <option id="module.driver.dac_b.channel.1" display="1" value="1"/>
+        </property>
+        <property id="module.driver.dac_b.format" display="Data Format" default="module.driver.dac_b.format.right">
+            <option id="module.driver.dac_b.format.right" display="Right Justified" value="DAC_DATA_FORMAT_FLUSH_RIGHT"/>
+            <option id="module.driver.dac_b.format.left" display="Left Justified" value="DAC_DATA_FORMAT_FLUSH_LEFT"/>
+        </property>
+        <property id="module.driver.dac_b.voltage" display="Reference Voltage Range" default="module.driver.dac_b.voltage.normal" description="Select the range of the externally supplied VREFH. This does not change the reference supply.">
+            <option id="module.driver.dac_b.voltage.normal" display="Normal (VREFH at least 2.7 V)" value="DAC_B_VOLTAGE_MODE_NORMAL"/>
+            <option id="module.driver.dac_b.voltage.low" display="Low (VREFH below 2.7 V)" value="DAC_B_VOLTAGE_MODE_LOW"/>
+        </property>
+        <property id="module.driver.dac_b.internal" display="Output Destination" default="module.driver.dac_b.internal.pin" description="ADC synchronization and ELC startup are not supported. Serialize Open with all other DAC and MRAM operations across both cores.">
+            <option id="module.driver.dac_b.internal.pin" display="External Pin" value="false"/>
+            <option id="module.driver.dac_b.internal.internal" display="Internal Comparator/ADC" value="true"/>
+        </property>
+        <peripheral name="DAC${module.driver.dac_b.channel}" component="dac${module.driver.dac_b.channel}"/>
+        <header>
+extern const dac_instance_t ${module.driver.dac_b.name};
+extern dac_b_instance_ctrl_t ${module.driver.dac_b.name}_ctrl;
+extern const dac_cfg_t ${module.driver.dac_b.name}_cfg;
+        </header>
+        <includes>#include "r_dac_b.h"</includes>
+        <declarations>
+dac_b_instance_ctrl_t ${module.driver.dac_b.name}_ctrl;
+const dac_b_extended_cfg_t ${module.driver.dac_b.name}_ext_cfg =
+{
+    .data_format = ${module.driver.dac_b.format},
+    .voltage_mode = ${module.driver.dac_b.voltage},
+    .internal_output = ${module.driver.dac_b.internal},
+};
+const dac_cfg_t ${module.driver.dac_b.name}_cfg =
+{
+    .channel = ${module.driver.dac_b.channel},
+    .ad_da_synchronized = false,
+    .p_extend = &amp;${module.driver.dac_b.name}_ext_cfg,
+};
+const dac_instance_t ${module.driver.dac_b.name} =
+{
+    .p_ctrl = &amp;${module.driver.dac_b.name}_ctrl,
+    .p_cfg = &amp;${module.driver.dac_b.name}_cfg,
+    .p_api = &amp;g_dac_on_dac_b,
+};
+        </declarations>
+    </module>
+</raModuleDescription>

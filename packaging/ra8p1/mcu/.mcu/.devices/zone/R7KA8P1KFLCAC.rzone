@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rzone>
+  <device Dname="R7KA8P1KFLCAC" Dvendor="Renesas">
+    <processor Dclock="1000000000" Dcore="Cortex-M85" DcoreVersion="r1p1" Ddsp="1" Dendian="Little-endian" Dfpu="1" Dmpu="1" DnumInterrupts="96" DnumSauRegions="8" Dtz="TZ" Pname="CM85"/>
+    <processor Dclock="250000000" Dcore="Cortex-M33" DcoreVersion="r0p4" Ddsp="1" Dendian="Little-endian" Dfpu="1" Dmpu="1" DnumInterrupts="96" DnumSauRegions="8" Dtz="TZ" Pname="CM33"/>
+  </device>
+  <resources>
+    <memories>
+      <memory name="RAM" security="" size="0x001a0000" start="0x22000000" type="RAM"/>
+      <memory name="FLASH" security="" size="0x00100000" start="0x02000000" type="ROM"/>
+    </memories>
+    <peripherals/>
+  </resources>
+</rzone>

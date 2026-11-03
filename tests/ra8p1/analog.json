@@ -1,0 +1,118 @@
+{
+  "source": "qualification_analog.c",
+  "bsp": {
+    "config.bsp.ra8p1.startup_profile": "config.bsp.ra8p1.startup_profile.pll240"
+  },
+  "modules": [
+    {
+      "id": "module.driver.dac_on_dac_b",
+      "properties": {
+        "module.driver.dac_b.name": "g_dac0",
+        "module.driver.dac_b.channel": "module.driver.dac_b.channel.0",
+        "module.driver.dac_b.format": "module.driver.dac_b.format.right",
+        "module.driver.dac_b.voltage": "module.driver.dac_b.voltage.normal",
+        "module.driver.dac_b.internal": "module.driver.dac_b.internal.pin"
+      }
+    },
+    {
+      "id": "module.driver.adc_on_adc_b",
+      "properties": {
+        "module.driver.adc.name": "g_adc0",
+        "module.driver.adc.p_callback": "analog_validation_callback",
+        "module.driver.adc.adc_0_method": "module.driver.adc.adc_0_method.sar_mode",
+        "module.driver.adc.adc_1_method": "module.driver.adc.adc_1_method.sar_mode",
+        "module.driver.adc.adc_0_mode": "module.driver.adc.adc_0_mode.single_scan",
+        "module.driver.adc.adc_1_mode": "module.driver.adc.adc_1_mode.single_scan",
+        "module.driver.adc.adc_clock_source": "module.driver.adc.adc_clock_source.pclka",
+        "module.driver.adc.adc_clock_divider": "module.driver.adc.adc_clock_divider.div_2",
+        "module.driver.adc.adc_0_conversion_state": "5",
+        "module.driver.adc.adc_1_conversion_state": "5",
+        "module.driver.adc.calibration_conversion_time": "5",
+        "module.driver.adc.calibration_sampling_time": "95",
+        "module.driver.adc.sampling_table_id_0": "95",
+        "module.driver.adc.adc_0_sync_operation": "module.driver.adc.adc_0_sync_operation.disable",
+        "module.driver.adc.adc_1_sync_operation": "module.driver.adc.adc_1_sync_operation.disable",
+        "module.driver.adc.sync_operation_control_period": "100",
+        "module.driver.adc.calibration_end_ipl_adc": "board.icu.common.irq.priority12",
+        "module.driver.adc.scan_end_ipl_group_0": "board.icu.common.irq.priority12",
+        "module.driver.adc.conversion_error_ipl_adc_0": "_disabled",
+        "module.driver.adc.conversion_error_ipl_adc_1": "_disabled",
+        "module.driver.adc.overflow_error_ipl_adc_0": "_disabled",
+        "module.driver.adc.overflow_error_ipl_adc_1": "_disabled",
+        "module.driver.adc.limit_clip_ipl": "_disabled",
+        "module.driver.adc.fifo_overflow_ipl": "_disabled",
+        "module.driver.adc.fifo_read_ipl_group_0": "_disabled",
+        "module.driver.adc.fifo_read_ipl_group_1": "_disabled",
+        "module.driver.adc.fifo_read_ipl_group_2": "_disabled",
+        "module.driver.adc.fifo_read_ipl_group_3": "_disabled",
+        "module.driver.adc.fifo_read_ipl_group_4": "_disabled",
+        "module.driver.adc.fifo_read_ipl_group_5": "_disabled",
+        "module.driver.adc.fifo_read_ipl_group_6": "_disabled",
+        "module.driver.adc.fifo_read_ipl_group_7": "_disabled",
+        "module.driver.adc.fifo_read_ipl_group_8": "_disabled",
+        "module.driver.adc.fifo_read_ipl_group_5678": "_disabled",
+        "module.driver.adc.scan_end_ipl_group_1": "_disabled",
+        "module.driver.adc.scan_end_ipl_group_2": "_disabled",
+        "module.driver.adc.scan_end_ipl_group_3": "_disabled",
+        "module.driver.adc.scan_end_ipl_group_4": "_disabled",
+        "module.driver.adc.scan_end_ipl_group_5": "_disabled",
+        "module.driver.adc.scan_end_ipl_group_6": "_disabled",
+        "module.driver.adc.scan_end_ipl_group_7": "_disabled",
+        "module.driver.adc.scan_end_ipl_group_8": "_disabled",
+        "module.driver.adc.scan_end_ipl_group_5678": "_disabled",
+        "module.driver.adc.scan_group_0_enable": "module.driver.adc.scan_group_0_enable.enable",
+        "module.driver.adc.scan_group_0_converter_selection": "module.driver.adc.scan_group_0_converter_selection.adc_0",
+        "module.driver.adc.scan_group_0_start_trigger_delay": "0",
+        "module.driver.adc.scan_group_0_self_diag_voltage": "module.driver.adc.scan_group_0_self_diag_voltage.self_diagnosis_mode_disabled",
+        "module.driver.adc.scan_group_0_scan_end_isr_enable": "module.driver.adc.scan_group_0_scan_end_isr_enable.enable",
+        "module.driver.adc.scan_group_0_fifo_enable": "module.driver.adc.scan_group_0_fifo_enable.disable",
+        "module.driver.adc.scan_group_0_fifo_isr_enable": "module.driver.adc.scan_group_0_fifo_isr_enable.disable",
+        "module.driver.adc.scan_group_0_limit_clip_isr_enable": "module.driver.adc.scan_group_0_limit_clip_isr_enable.disable",
+        "module.driver.adc.virtual_channel_0_scan_group": "module.driver.adc.virtual_channel_0_scan_group.scan_group_0",
+        "module.driver.adc.virtual_channel_0_channel_select": "module.driver.adc.virtual_channel_0_channel_select.an001",
+        "module.driver.adc.virtual_channel_0_sampling_table_id": "module.driver.adc.virtual_channel_0_sampling_table_id.sampling_state_entry_0",
+        "module.driver.adc.virtual_channel_0_data_format": "module.driver.adc.virtual_channel_0_data_format.16_bit_data_format",
+        "module.driver.adc.virtual_channel_0_data_is_unsigned": "module.driver.adc.virtual_channel_0_data_is_unsigned.unsigned",
+        "module.driver.adc.virtual_channel_0_input_mode_selection": "enum.mcu.adc_b.virtual_channel_0_input_mode.single_ended",
+        "module.driver.adc.virtual_channel_0_gain_table": "module.driver.adc.virtual_channel_0_gain_table.disabled",
+        "module.driver.adc.virtual_channel_0_offset_table": "module.driver.adc.virtual_channel_0_offset_table.disabled",
+        "module.driver.adc.virtual_channel_0_add_average_mode": "module.driver.adc.virtual_channel_0_add_average_mode.disabled",
+        "module.driver.adc.virtual_channel_0_add_average_count": "module.driver.adc.virtual_channel_0_add_average_count.1_time_conversion",
+        "module.driver.adc.virtual_channel_0_limit_clip_table_id": "module.driver.adc.virtual_channel_0_limit_clip_table_id.disabled",
+        "module.driver.adc.virtual_channel_0_digital_filter_id": "module.driver.adc.virtual_channel_0_digital_filter_id.disabled"
+      }
+    }
+  ],
+  "pins": [
+    {
+      "component": "p001",
+      "configs": {"p001.gpio_mode": "p001.gpio_mode.gpio_mode_an"},
+      "connections": {"p001": "p001.none"}
+    },
+    {
+      "component": "p014",
+      "configs": {"p014.gpio_mode": "p014.gpio_mode.gpio_mode_an"},
+      "connections": {"p014": "p014.none"}
+    },
+    {
+      "component": "p514",
+      "configs": {"p514.gpio_mode": "p514.gpio_mode.gpio_mode_out.low"},
+      "connections": {"p514": "p514.output.low"}
+    },
+    {
+      "component": "p111",
+      "configs": {"p111.gpio_mode": "p111.gpio_mode.gpio_mode_out.low"},
+      "connections": {"p111": "p111.output.low"}
+    },
+    {
+      "component": "p806",
+      "configs": {"p806.gpio_mode": "p806.gpio_mode.gpio_mode_out.low"},
+      "connections": {"p806": "p806.output.low"}
+    },
+    {
+      "component": "p807",
+      "configs": {"p807.gpio_mode": "p807.gpio_mode.gpio_mode_out.low"},
+      "connections": {"p807": "p807.output.low"}
+    }
+  ]
+}

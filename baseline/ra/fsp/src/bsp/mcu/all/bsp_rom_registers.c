@@ -112,7 +112,7 @@ BSP_DONT_REMOVE static const uint32_t BSP_PLACE_IN_SECTION(".option_setting_pbps
     BSP_CFG_ROM_REG_PBPS0;
 
   #endif
- #elif BSP_FEATURE_CGC_SCKDIVCR2_HAS_EXTRA_CLOCKS
+ #elif BSP_FEATURE_CGC_SCKDIVCR2_HAS_EXTRA_CLOCKS || BSP_MCU_GROUP_RA8P1
 
 /* OFS NOT YET SUPPORTED FOR THIS PART */
  #else                                 /* CM33 & CM85 parts */

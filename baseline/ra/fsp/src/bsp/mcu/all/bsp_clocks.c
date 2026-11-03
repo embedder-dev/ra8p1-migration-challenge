@@ -9,6 +9,10 @@
  **********************************************************************************************************************/
 #include "bsp_clocks.h"
 
+#if BSP_MCU_GROUP_RA8P1
+ #include "../ra8p1/bsp_clocks_ra8p1.inc"
+#else
+
 #if BSP_TZ_NONSECURE_BUILD
  #include "bsp_guard.h"
 #endif
@@ -3515,3 +3519,5 @@ fsp_err_t R_BSP_SubclockInitialize ()
 #endif
 
 /** @} (end addtogroup BSP_MCU_PRV) */
+
+#endif /* BSP_MCU_GROUP_RA8P1 */

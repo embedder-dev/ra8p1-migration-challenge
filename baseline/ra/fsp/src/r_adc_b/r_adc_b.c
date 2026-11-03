@@ -66,14 +66,19 @@ static void adc_b_open_pga(adc_b_extended_cfg_t * p_extend);
 #endif
 static void      adc_b_calculate_wait_time(adc_b_instance_ctrl_t * p_instance_ctrl, adc_b_scan_cfg_t * p_scan_data);
 static uint32_t  adc_b_update_calibrate_state(adc_b_instance_ctrl_t * p_instance_ctrl);
-static void      adc_b_force_stop(adc_b_instance_ctrl_t * p_instance_ctrl);
+#if BSP_FEATURE_ADC_B_CLOCK_SOURCE_ADCCLK
+static fsp_err_t adc_b_open_check(adc_b_extended_cfg_t const * p_extend);
+static fsp_err_t adc_b_scan_check(adc_b_extended_cfg_t const * p_extend, adc_b_scan_cfg_t const * p_scan);
+#endif
+static fsp_err_t adc_b_force_stop(adc_b_instance_ctrl_t * p_instance_ctrl);
+static fsp_err_t adc_b_wait_idle(void);
 static void      adc_b_isr_enable(adc_b_instance_ctrl_t * p_instance_ctrl, IRQn_Type irq, uint8_t ipl);
 static IRQn_Type adc_b_isr_handler(adc_event_t          event,
                                    adc_group_mask_t     group_mask,
                                    adc_b_channel_mask_t channel_mask,
                                    adc_b_unit_mask_t    unit);
 
-#if (ADC_B_CFG_PARAM_CHECKING_ENABLE)
+#if ADC_B_CFG_PARAM_CHECKING_ENABLE || BSP_FEATURE_ADC_B_CLOCK_SOURCE_ADCCLK
 static bool adc_channel_is_sample_hold_enabled(adc_channel_t channel, uint8_t sample_and_hold_enable_mask);
 
 #endif
@@ -154,10 +159,19 @@ const adc_api_t g_adc_on_adc_b =
 fsp_err_t R_ADC_B_Open (adc_ctrl_t * p_ctrl, adc_cfg_t const * const p_cfg)
 {
     adc_b_instance_ctrl_t * p_instance_ctrl = (adc_b_instance_ctrl_t *) p_ctrl;
-#if ADC_B_CFG_PARAM_CHECKING_ENABLE
+#if ADC_B_CFG_PARAM_CHECKING_ENABLE || BSP_FEATURE_ADC_B_CLOCK_SOURCE_ADCCLK
     FSP_ASSERT(NULL != p_instance_ctrl);
     FSP_ASSERT(NULL != p_cfg);
     FSP_ERROR_RETURN(ADC_B_OPEN != p_instance_ctrl->opened, FSP_ERR_ALREADY_OPEN);
+#endif
+
+#if BSP_FEATURE_ADC_B_CLOCK_SOURCE_ADCCLK
+    FSP_ASSERT(p_instance_ctrl);
+    FSP_ASSERT(p_cfg);
+    FSP_ASSERT(p_cfg->p_extend);
+    FSP_ERROR_RETURN(ADC_B_OPEN != p_instance_ctrl->opened, FSP_ERR_ALREADY_OPEN);
+    fsp_err_t err = adc_b_open_check((adc_b_extended_cfg_t const *) p_cfg->p_extend);
+    FSP_ERROR_RETURN(FSP_SUCCESS == err, err);
 #endif
 
     /* Save configurations. */
@@ -180,16 +194,50 @@ fsp_err_t R_ADC_B_Open (adc_ctrl_t * p_ctrl, adc_cfg_t const * const p_cfg)
     /*  Set synchronous operation period and Enable/Disable for ADC 0/1 */
     R_ADC_B->ADSYCR = p_extend->sync_operation_control;
 
-    /* Configure the ADC clock. See table 36.27 in the RA6T2 user manual, R01UH0951EJ0100 */
+    /* Stop the conversion clock before changing its source or divider. */
     R_ADC_B->ADCLKENR = 0x00;
+#if BSP_FEATURE_ADC_B_CLOCK_SOURCE_ADCCLK
+    uint32_t remaining = 1000U;
+    while ((0U != R_ADC_B->ADCLKSR) && (remaining > 0U))
+    {
+        R_BSP_SoftwareDelay(1U, BSP_DELAY_UNITS_MICROSECONDS);
+        remaining--;
+    }
+
+    if (0U == remaining)
+    {
+        R_BSP_MODULE_STOP(FSP_IP_ADC, 0);
+        return FSP_ERR_TIMEOUT;
+    }
+#else
     FSP_HARDWARE_REGISTER_WAIT(R_ADC_B->ADCLKSR, 0x00);
+#endif
     R_ADC_B->ADCLKCR  = p_extend->clock_control_data;
     R_ADC_B->ADCLKENR = 0x01;
+#if BSP_FEATURE_ADC_B_CLOCK_SOURCE_ADCCLK
+    remaining = 1000U;
+    while ((1U != R_ADC_B->ADCLKSR) && (remaining > 0U))
+    {
+        R_BSP_SoftwareDelay(1U, BSP_DELAY_UNITS_MICROSECONDS);
+        remaining--;
+    }
+
+    if (0U == remaining)
+    {
+        R_ADC_B->ADCLKENR = 0U;
+        R_BSP_MODULE_STOP(FSP_IP_ADC, 0);
+        return FSP_ERR_TIMEOUT;
+    }
+
+    /* Table 70.99: allow at least 2 us for A/D startup. */
+    R_BSP_SoftwareDelay(2U, BSP_DELAY_UNITS_MICROSECONDS);
+#else
     FSP_HARDWARE_REGISTER_WAIT(R_ADC_B->ADCLKSR, 0x01);
+#endif
 
     /* Set ADC unit scan modes
      *  - ADC Converter Background Continuous Mode only valid for Hybrid mode */
-#if ADC_B_CFG_PARAM_CHECKING_ENABLE
+#if ADC_B_CFG_PARAM_CHECKING_ENABLE || BSP_FEATURE_ADC_B_CLOCK_SOURCE_ADCCLK
     FSP_ASSERT(p_extend->adc_b_converter_mode[0].mode != ADC_B_CONVERTER_MODE_BACKGROUND_SCAN ||
                p_extend->adc_b_converter_mode[0].method == ADC_B_CONVERSION_METHOD_HYBRID);
     FSP_ASSERT(p_extend->adc_b_converter_mode[1].mode != ADC_B_CONVERTER_MODE_BACKGROUND_SCAN ||
@@ -209,7 +257,11 @@ fsp_err_t R_ADC_B_Open (adc_ctrl_t * p_ctrl, adc_cfg_t const * const p_cfg)
 
     /* Configure Digital filters */
     R_ADC_B->ADDFSR0 = p_extend->adc_filter_selection[0].bits;
+#if BSP_FEATURE_ADC_B_CLOCK_SOURCE_ADCCLK
+    *ADC_B_REG_ADDRESS(R_ADC_B->ADDFSR0, 1U, 4U) = p_extend->adc_filter_selection[1].bits;
+#else
     R_ADC_B->ADDFSR1 = p_extend->adc_filter_selection[1].bits;
+#endif
 
 #if BSP_FEATURE_ADC_B_PGA_SUPPORTED
     adc_b_open_pga(p_extend);
@@ -240,7 +292,11 @@ fsp_err_t R_ADC_B_Open (adc_ctrl_t * p_ctrl, adc_cfg_t const * const p_cfg)
 
     /* Do not use compare match tables */
     R_ADC_B->ADCCMPCR0 = 0;
+#if BSP_FEATURE_ADC_B_CLOCK_SOURCE_ADCCLK
+    *ADC_B_REG_ADDRESS(R_ADC_B->ADCCMPCR0, 1U, 4U) = 0;
+#else
     R_ADC_B->ADCCMPCR1 = 0;
+#endif
 
     /* Set FIFO configuration */
     R_ADC_B->ADFIFOCR     = p_extend->fifo_enable_mask;
@@ -292,13 +348,19 @@ fsp_err_t R_ADC_B_ScanCfg (adc_ctrl_t * p_ctrl, void const * const p_scan_cfg)
     uint32_t                scan_group_enable_mask    = 0;
     uint32_t                scan_group_end_interrupts = 0;
 
-#if ADC_B_CFG_PARAM_CHECKING_ENABLE
+#if ADC_B_CFG_PARAM_CHECKING_ENABLE || BSP_FEATURE_ADC_B_CLOCK_SOURCE_ADCCLK
     FSP_ASSERT(NULL != p_instance_ctrl);
     FSP_ASSERT(NULL != p_scan_cfg);
     FSP_ERROR_RETURN(ADC_B_OPEN == p_instance_ctrl->opened, FSP_ERR_NOT_OPEN);
 #endif
 
     adc_b_extended_cfg_t * p_extend = (adc_b_extended_cfg_t *) p_instance_ctrl->p_cfg->p_extend;
+
+#if BSP_FEATURE_ADC_B_CLOCK_SOURCE_ADCCLK
+    fsp_err_t err = adc_b_scan_check(p_extend, p_scan_data);
+    FSP_ERROR_RETURN(FSP_SUCCESS == err, err);
+    FSP_ERROR_RETURN(0U == R_ADC_B->ADSR, FSP_ERR_IN_USE);
+#endif
 
     /* Clear any previous channel configuration, specifically group selections */
     p_instance_ctrl->adc_state = ADC_B_CONVERTER_STATE_NONE;
@@ -325,7 +387,7 @@ fsp_err_t R_ADC_B_ScanCfg (adc_ctrl_t * p_ctrl, void const * const p_scan_cfg)
         *ADC_B_REG_ADDRESS(R_ADC_B->ADSSTR0, i, 0x4) = p_extend->sampling_state_tables[i];
     }
 
-#if ADC_B_CFG_PARAM_CHECKING_ENABLE
+#if ADC_B_CFG_PARAM_CHECKING_ENABLE || BSP_FEATURE_ADC_B_CLOCK_SOURCE_ADCCLK
     uint32_t adsycyc = (p_extend->sync_operation_control & R_ADC_B0_ADSYCR_ADSYCYC_Msk) >>
                        R_ADC_B0_ADSYCR_ADSYCYC_Pos;
     uint32_t adcnvstr = p_extend->conversion_state;
@@ -357,7 +419,7 @@ fsp_err_t R_ADC_B_ScanCfg (adc_ctrl_t * p_ctrl, void const * const p_scan_cfg)
     for (uint8_t group = 0; group < p_scan_data->group_count; group++)
     {
         const adc_b_group_cfg_t * p_adc_group = p_scan_data->p_adc_groups[group];
-#if ADC_B_CFG_PARAM_CHECKING_ENABLE
+#if ADC_B_CFG_PARAM_CHECKING_ENABLE || BSP_FEATURE_ADC_B_CLOCK_SOURCE_ADCCLK
 
         /*============================================================================================================
          *  Constraints to check while Synchronous Mode is enabled
@@ -397,23 +459,27 @@ fsp_err_t R_ADC_B_ScanCfg (adc_ctrl_t * p_ctrl, void const * const p_scan_cfg)
         {
             adc_b_virtual_channel_cfg_t * p_virtual_channel_cfg = p_adc_group->p_virtual_channels[channel];
             adc_b_virtual_channel_t       virtual_channel_id    = p_virtual_channel_cfg->channel_id;
-#if ADC_B_CFG_PARAM_CHECKING_ENABLE
+#if ADC_B_CFG_PARAM_CHECKING_ENABLE || BSP_FEATURE_ADC_B_CLOCK_SOURCE_ADCCLK
 
             /* Check that channel is valid for configured unit */
             adc_channel_t        channel_id    = (adc_channel_t) p_virtual_channel_cfg->channel_cfg_bits.channel;
-            adc_b_channel_mask_t extended_mask =
-                (adc_b_channel_mask_t) (1ULL <<
-                                        (channel_id - ADC_CHANNEL_FIRST_INTERNAL + ADC_B_CHANNEL_MASK_EXT_OFFSET));
-            adc_b_channel_mask_t physical_mask = (adc_b_channel_mask_t) (1 << channel_id);
-            adc_b_channel_mask_t channel_mask  =
-                (channel_id > ADC_CHANNEL_LAST_EXTERNAL) ? extended_mask : physical_mask;
+            FSP_ERROR_RETURN(ADC_B_CHANNEL_IS_EXTERNAL(channel_id) || ADC_B_CHANNEL_IS_INTERNAL(channel_id),
+                             FSP_ERR_INVALID_CHANNEL);
+            uint32_t bit = ADC_B_CHANNEL_IS_EXTERNAL(channel_id) ? (uint32_t) channel_id :
+                           ((uint32_t) channel_id - ADC_CHANNEL_FIRST_INTERNAL + ADC_B_CHANNEL_MASK_EXT_OFFSET);
+            FSP_ERROR_RETURN(bit < 64U, FSP_ERR_INVALID_CHANNEL);
+            adc_b_channel_mask_t channel_mask = (adc_b_channel_mask_t) (1ULL << bit);
             FSP_ERROR_RETURN(ADC_B_CHANNEL_VALID_FOR_UNIT(channel_mask, converter_selection), FSP_ERR_INVALID_CHANNEL);
 
             /* Check synchronous operation */
             if (sync_operation_enabled)
             {
                 /* Set so that the sum of the sampling times of the analog channels and successive approximation time of ADCm (m = 0, 1) is an integral multiple of the Synchronous Operation Period */
+#if BSP_FEATURE_ADC_B_CLOCK_SOURCE_ADCCLK
+                uint16_t sst = p_extend->sampling_state_table[p_virtual_channel_cfg->channel_cfg_bits.sample_table_id];
+#else
                 uint16_t sst = p_extend->sampling_state_table[virtual_channel_id];
+#endif
                 FSP_ERROR_RETURN((sst + cst) % adsycyc == 0, FSP_ERR_INVALID_STATE);
 
                 /*============================================================================================================
@@ -541,7 +607,7 @@ fsp_err_t R_ADC_B_CallbackSet (adc_ctrl_t * const          p_api_ctrl,
 {
     adc_b_instance_ctrl_t * p_ctrl = (adc_b_instance_ctrl_t *) p_api_ctrl;
 
-#if (ADC_B_CFG_PARAM_CHECKING_ENABLE)
+#if ADC_B_CFG_PARAM_CHECKING_ENABLE || BSP_FEATURE_ADC_B_CLOCK_SOURCE_ADCCLK
     FSP_ASSERT(p_ctrl);
     FSP_ASSERT(p_callback);
     FSP_ERROR_RETURN(ADC_B_OPEN == p_ctrl->opened, FSP_ERR_NOT_OPEN);
@@ -555,7 +621,7 @@ fsp_err_t R_ADC_B_CallbackSet (adc_ctrl_t * const          p_api_ctrl,
     bool callback_is_secure =
         (NULL == cmse_check_address_range((void *) p_callback, sizeof(void *), CMSE_AU_NONSECURE));
 
- #if ADC_B_CFG_PARAM_CHECKING_ENABLE
+ #if ADC_B_CFG_PARAM_CHECKING_ENABLE || BSP_FEATURE_ADC_B_CLOCK_SOURCE_ADCCLK
 
     /* In secure projects, p_callback_memory must be provided in non-secure space if p_callback is non-secure */
     adc_callback_args_t * const p_callback_memory_checked = cmse_check_pointed_object(p_callback_memory,
@@ -595,7 +661,7 @@ fsp_err_t R_ADC_B_CallbackSet (adc_ctrl_t * const          p_api_ctrl,
 fsp_err_t R_ADC_B_ScanStart (adc_ctrl_t * p_ctrl)
 {
     adc_b_instance_ctrl_t * p_instance_ctrl = (adc_b_instance_ctrl_t *) p_ctrl;
-#if ADC_B_CFG_PARAM_CHECKING_ENABLE
+#if ADC_B_CFG_PARAM_CHECKING_ENABLE || BSP_FEATURE_ADC_B_CLOCK_SOURCE_ADCCLK
     FSP_ASSERT(NULL != p_instance_ctrl);
 
     FSP_ERROR_RETURN(ADC_B_OPEN == p_instance_ctrl->opened, FSP_ERR_NOT_OPEN);
@@ -638,7 +704,7 @@ fsp_err_t R_ADC_B_ScanGroupStart (adc_ctrl_t * p_ctrl, adc_group_mask_t group_ma
 {
     adc_b_instance_ctrl_t * p_instance_ctrl = (adc_b_instance_ctrl_t *) p_ctrl;
 
-#if ADC_B_CFG_PARAM_CHECKING_ENABLE
+#if ADC_B_CFG_PARAM_CHECKING_ENABLE || BSP_FEATURE_ADC_B_CLOCK_SOURCE_ADCCLK
     FSP_ASSERT(NULL != p_instance_ctrl);
     FSP_ERROR_RETURN(ADC_B_OPEN == p_instance_ctrl->opened, FSP_ERR_NOT_OPEN);
     FSP_ERROR_RETURN(ADC_B_OPEN == p_instance_ctrl->initialized, FSP_ERR_NOT_INITIALIZED);
@@ -650,7 +716,12 @@ fsp_err_t R_ADC_B_ScanGroupStart (adc_ctrl_t * p_ctrl, adc_group_mask_t group_ma
 #endif
 
     R_ADC_B->ADTRGENR |= (group_mask & p_instance_ctrl->cached_adtrgenr);
-    R_ADC_B->ADSYSTR  |= (group_mask & p_instance_ctrl->cached_adsystr);
+#if BSP_FEATURE_ADC_B_CLOCK_SOURCE_ADCCLK
+    /* ADSYSTR is write-only; do not read-modify-write a start request. */
+    R_ADC_B->ADSYSTR = (group_mask & p_instance_ctrl->cached_adsystr);
+#else
+    R_ADC_B->ADSYSTR |= (group_mask & p_instance_ctrl->cached_adsystr);
+#endif
 
     return FSP_SUCCESS;
 }
@@ -668,7 +739,7 @@ fsp_err_t R_ADC_B_ScanGroupStart (adc_ctrl_t * p_ctrl, adc_group_mask_t group_ma
 fsp_err_t R_ADC_B_ScanStop (adc_ctrl_t * p_ctrl)
 {
     adc_b_instance_ctrl_t * p_instance_ctrl = (adc_b_instance_ctrl_t *) p_ctrl;
-#if ADC_B_CFG_PARAM_CHECKING_ENABLE
+#if ADC_B_CFG_PARAM_CHECKING_ENABLE || BSP_FEATURE_ADC_B_CLOCK_SOURCE_ADCCLK
     FSP_ASSERT(NULL != p_instance_ctrl);
     FSP_ERROR_RETURN(ADC_B_OPEN == p_instance_ctrl->opened, FSP_ERR_NOT_OPEN);
     FSP_ERROR_RETURN(ADC_B_OPEN == p_instance_ctrl->initialized, FSP_ERR_NOT_INITIALIZED);
@@ -677,9 +748,7 @@ fsp_err_t R_ADC_B_ScanStop (adc_ctrl_t * p_ctrl)
     FSP_ERROR_RETURN(configured_channels, FSP_ERR_INVALID_ARGUMENT);
 #endif
 
-    adc_b_force_stop(p_instance_ctrl);
-
-    return FSP_SUCCESS;
+    return adc_b_force_stop(p_instance_ctrl);
 }
 
 /*******************************************************************************************************************//**
@@ -694,7 +763,7 @@ fsp_err_t R_ADC_B_StatusGet (adc_ctrl_t * p_ctrl, adc_status_t * p_status)
 {
     adc_b_instance_ctrl_t * p_instance_ctrl = (adc_b_instance_ctrl_t *) p_ctrl;
 
-#if ADC_B_CFG_PARAM_CHECKING_ENABLE
+#if ADC_B_CFG_PARAM_CHECKING_ENABLE || BSP_FEATURE_ADC_B_CLOCK_SOURCE_ADCCLK
     FSP_ASSERT(NULL != p_instance_ctrl);
     FSP_ASSERT(NULL != p_status);
     FSP_ERROR_RETURN(ADC_B_OPEN == p_instance_ctrl->opened, FSP_ERR_NOT_OPEN);
@@ -726,7 +795,7 @@ fsp_err_t R_ADC_B_StatusGet (adc_ctrl_t * p_ctrl, adc_status_t * p_status)
  **********************************************************************************************************************/
 fsp_err_t R_ADC_B_Read (adc_ctrl_t * p_ctrl, adc_channel_t const channel_id, uint16_t * const p_data)
 {
-#if ADC_B_CFG_PARAM_CHECKING_ENABLE
+#if ADC_B_CFG_PARAM_CHECKING_ENABLE || BSP_FEATURE_ADC_B_CLOCK_SOURCE_ADCCLK
     adc_b_instance_ctrl_t * p_instance_ctrl = (adc_b_instance_ctrl_t *) p_ctrl;
     FSP_ASSERT(NULL != p_instance_ctrl);
     FSP_ASSERT(NULL != p_data);
@@ -738,15 +807,39 @@ fsp_err_t R_ADC_B_Read (adc_ctrl_t * p_ctrl, adc_channel_t const channel_id, uin
     FSP_PARAMETER_NOT_USED(p_ctrl);
 #endif
 
+#if BSP_FEATURE_ADC_B_CLOCK_SOURCE_ADCCLK
+    FSP_ASSERT(p_ctrl);
+    FSP_ASSERT(p_data);
+    FSP_ERROR_RETURN(ADC_B_OPEN == ((adc_b_instance_ctrl_t *) p_ctrl)->opened, FSP_ERR_NOT_OPEN);
+    FSP_ERROR_RETURN(ADC_B_OPEN == ((adc_b_instance_ctrl_t *) p_ctrl)->initialized, FSP_ERR_NOT_INITIALIZED);
+    FSP_ERROR_RETURN(ADC_B_CHANNEL_IS_EXTERNAL(channel_id) || ADC_B_CHANNEL_IS_INTERNAL(channel_id),
+                     FSP_ERR_INVALID_CHANNEL);
+    uint32_t channel_bit = ADC_B_CHANNEL_IS_EXTERNAL(channel_id) ? (uint32_t) channel_id :
+                           (uint32_t) channel_id - ADC_CHANNEL_FIRST_INTERNAL + ADC_B_CHANNEL_MASK_EXT_OFFSET;
+    FSP_ERROR_RETURN((channel_bit < 64U) &&
+                     (0U != ((1ULL << channel_bit) & (BSP_FEATURE_ADC_B_UNIT_0_CHANNELS |
+                                                     BSP_FEATURE_ADC_B_UNIT_1_CHANNELS))), FSP_ERR_INVALID_CHANNEL);
+#endif
+
     uint32_t register_data = R_ADC_B0_ADDR_ERR_Msk;
     if (ADC_B_CHANNEL_IS_EXTERNAL(channel_id))
     {
+#if BSP_FEATURE_ADC_B_CLOCK_SOURCE_ADCCLK
+        register_data = *ADC_B_REG_ADDRESS(R_ADC_B->ADDR0, channel_id, 4U);
+#else
         register_data = *(uint32_t *) &R_ADC_B->ADDR[channel_id];
+#endif
     }
     else
     {
         /* Read data from extended register from converted offset. */
+#if BSP_FEATURE_ADC_B_CLOCK_SOURCE_ADCCLK
+        /* ADEXDRn is omitted from the vendor SVD; manual 54.2.13.2 specifies offset 0x2180 + 4*n. */
+        register_data = *(volatile uint32_t *) ((uint8_t *) R_ADC_B + 0x2180U +
+                                               4U * (channel_id - ADC_CHANNEL_FIRST_INTERNAL));
+#else
         register_data = *(uint32_t *) &R_ADC_B->ADEXDR[(channel_id - ADC_CHANNEL_FIRST_INTERNAL)];
+#endif
     }
 
     /* Extract error code from converted value */
@@ -774,7 +867,7 @@ fsp_err_t R_ADC_B_Read (adc_ctrl_t * p_ctrl, adc_channel_t const channel_id, uin
  **********************************************************************************************************************/
 fsp_err_t R_ADC_B_Read32 (adc_ctrl_t * p_ctrl, adc_channel_t const channel_id, uint32_t * const p_data)
 {
-#if ADC_B_CFG_PARAM_CHECKING_ENABLE
+#if ADC_B_CFG_PARAM_CHECKING_ENABLE || BSP_FEATURE_ADC_B_CLOCK_SOURCE_ADCCLK
     FSP_ASSERT(NULL != p_data);
 #endif
 
@@ -800,7 +893,7 @@ fsp_err_t R_ADC_B_Read32 (adc_ctrl_t * p_ctrl, adc_channel_t const channel_id, u
 fsp_err_t R_ADC_B_FifoRead (adc_ctrl_t * p_ctrl, adc_group_mask_t const group_mask, adc_b_fifo_read_t * const p_data)
 {
     uint8_t group_id = (uint8_t) __CLZ(__RBIT(group_mask));
-#if ADC_B_CFG_PARAM_CHECKING_ENABLE
+#if ADC_B_CFG_PARAM_CHECKING_ENABLE || BSP_FEATURE_ADC_B_CLOCK_SOURCE_ADCCLK
     adc_b_instance_ctrl_t * p_instance_ctrl = (adc_b_instance_ctrl_t *) p_ctrl;
     FSP_ASSERT(NULL != p_instance_ctrl);
     FSP_ASSERT(NULL != p_data);
@@ -817,6 +910,9 @@ fsp_err_t R_ADC_B_FifoRead (adc_ctrl_t * p_ctrl, adc_group_mask_t const group_ma
     uint32_t   remaining_count = *p_fifo_status & (R_ADC_B0_ADFIFOSR0_FIFOST0_Msk | R_ADC_B0_ADFIFOSR0_FIFOST1_Msk);
 
     remaining_count >>= ((group_id % 2) ? R_ADC_B0_ADFIFOSR0_FIFOST1_Pos : R_ADC_B0_ADFIFOSR0_FIFOST0_Pos);
+#if BSP_FEATURE_ADC_B_CLOCK_SOURCE_ADCCLK
+    FSP_ERROR_RETURN(remaining_count <= ADC_B_FIFO_STAGE_COUNT, FSP_ERR_INVALID_STATE);
+#endif
     uint8_t count = (ADC_B_FIFO_STAGE_COUNT - (uint8_t) remaining_count);
     p_data->count = count;
     volatile adc_b_fifo_data_t * p_data_dest = &p_data->fifo_data[0];
@@ -829,7 +925,11 @@ fsp_err_t R_ADC_B_FifoRead (adc_ctrl_t * p_ctrl, adc_group_mask_t const group_ma
     FSP_ERROR_LOG(err);
 
     /* Clear FIFO full flag */
+#if BSP_FEATURE_ADC_B_CLOCK_SOURCE_ADCCLK
+    R_ADC_B->ADFIFOERSCR = (uint32_t) group_mask << 16;
+#else
     R_ADC_B->ADFIFOERSCR_b.FIFOFLCn = group_mask;
+#endif
 
     return err;
 }
@@ -845,7 +945,7 @@ fsp_err_t R_ADC_B_FifoRead (adc_ctrl_t * p_ctrl, adc_group_mask_t const group_ma
  **********************************************************************************************************************/
 fsp_err_t R_ADC_B_InfoGet (adc_ctrl_t * p_ctrl, adc_info_t * p_adc_info)
 {
-#if ADC_B_CFG_PARAM_CHECKING_ENABLE
+#if ADC_B_CFG_PARAM_CHECKING_ENABLE || BSP_FEATURE_ADC_B_CLOCK_SOURCE_ADCCLK
     adc_b_instance_ctrl_t * p_instance_ctrl = (adc_b_instance_ctrl_t *) p_ctrl;
     FSP_ASSERT(NULL != p_instance_ctrl);
     FSP_ASSERT(NULL != p_adc_info);
@@ -887,13 +987,14 @@ fsp_err_t R_ADC_B_InfoGet (adc_ctrl_t * p_ctrl, adc_info_t * p_adc_info)
 fsp_err_t R_ADC_B_Close (adc_ctrl_t * p_ctrl)
 {
     adc_b_instance_ctrl_t * p_instance_ctrl = (adc_b_instance_ctrl_t *) p_ctrl;
-#if ADC_B_CFG_PARAM_CHECKING_ENABLE
+#if ADC_B_CFG_PARAM_CHECKING_ENABLE || BSP_FEATURE_ADC_B_CLOCK_SOURCE_ADCCLK
     FSP_ASSERT(NULL != p_instance_ctrl);
     FSP_ERROR_RETURN(ADC_B_OPEN == p_instance_ctrl->opened, FSP_ERR_NOT_OPEN);
 #endif
 
-    /* Force stop any active scans */
-    adc_b_force_stop(p_instance_ctrl);
+    /* Force stop any active scans before releasing the peripheral. */
+    fsp_err_t err = adc_b_force_stop(p_instance_ctrl);
+    FSP_ERROR_RETURN(FSP_SUCCESS == err, err);
 
     /* Mark driver as closed   */
     p_instance_ctrl->opened          = 0U;
@@ -948,7 +1049,9 @@ fsp_err_t R_ADC_B_Close (adc_ctrl_t * p_ctrl)
  **********************************************************************************************************************/
 fsp_err_t R_ADC_B_Calibrate (adc_ctrl_t * const p_ctrl, void const * p_extend)
 {
-#if defined(R_ADC_B0_ADOVFEXSCR_OVFEXC2_Msk)
+#if BSP_FEATURE_ADC_B_CLOCK_SOURCE_ADCCLK
+ #define R_ADC_B_EXTENDED_OVERFLOW_FLAG_CLEAR_Msk    (0x00770373UL)
+#elif defined(R_ADC_B0_ADOVFEXSCR_OVFEXC2_Msk)
  #define R_ADC_B_EXTENDED_OVERFLOW_FLAG_CLEAR_Msk    (R_ADC_B0_ADOVFEXSCR_OVFEXC0_Msk | \
                                                       R_ADC_B0_ADOVFEXSCR_OVFEXC1_Msk | \
                                                       R_ADC_B0_ADOVFEXSCR_OVFEXC2_Msk | \
@@ -973,15 +1076,20 @@ fsp_err_t R_ADC_B_Calibrate (adc_ctrl_t * const p_ctrl, void const * p_extend)
 #endif
 
     adc_b_instance_ctrl_t * p_instance_ctrl = (adc_b_instance_ctrl_t *) p_ctrl;
-#if ADC_B_CFG_PARAM_CHECKING_ENABLE
+#if ADC_B_CFG_PARAM_CHECKING_ENABLE || BSP_FEATURE_ADC_B_CLOCK_SOURCE_ADCCLK
     FSP_ASSERT(NULL != p_instance_ctrl);
     FSP_ERROR_RETURN(ADC_B_OPEN == p_instance_ctrl->opened, FSP_ERR_NOT_OPEN);
 #endif
     FSP_PARAMETER_NOT_USED(p_extend);
 
+#if BSP_FEATURE_ADC_B_CLOCK_SOURCE_ADCCLK
+    /* ADCALSTR must not be written again while self-calibration is active (54.3.8.3). */
+    FSP_ERROR_RETURN((p_instance_ctrl->adc_state == ADC_B_CONVERTER_STATE_NONE) ||
+                     (p_instance_ctrl->adc_state >= ADC_B_CONVERTER_STATE_READY), FSP_ERR_IN_USE);
+#endif
+    fsp_err_t err = adc_b_force_stop(p_instance_ctrl);
+    FSP_ERROR_RETURN(FSP_SUCCESS == err, err);
     p_instance_ctrl->adc_state = ADC_B_CONVERTER_STATE_NONE;
-
-    adc_b_force_stop(p_instance_ctrl); // This step ensures ADC is not operating
 
     /* Clear the error status flags */
     R_ADC_B->ADERSCR     = R_ADC_B0_ADERSCR_ADERCLR0_Msk | R_ADC_B0_ADERSCR_ADERCLR1_Msk;
@@ -1019,6 +1127,134 @@ fsp_err_t R_ADC_B_OffsetSet (adc_ctrl_t * const p_ctrl, adc_channel_t const reg_
 /***********************************************************************************************************************
  * Private Functions
  **********************************************************************************************************************/
+
+#if BSP_FEATURE_ADC_B_CLOCK_SOURCE_ADCCLK
+/* RA8P1 ADCLKCR and electrical limits: hardware manual 54.2.1.3, 54.3.1 and 70.6. */
+static fsp_err_t adc_b_open_check (adc_b_extended_cfg_t const * p_extend)
+{
+    FSP_ASSERT(p_extend->p_isr_cfg);
+    FSP_ERROR_RETURN((p_extend->clock_control_data & ~0x00070003UL) == 0U, FSP_ERR_INVALID_ARGUMENT);
+    uint32_t source = p_extend->clock_control_bits.source_selection;
+    uint32_t divisor = p_extend->clock_control_bits.divider + 1U;
+    FSP_ERROR_RETURN((source <= 2U) && (divisor <= 5U), FSP_ERR_INVALID_ARGUMENT);
+    uint32_t pclka_hz = R_FSP_SystemClockHzGet(FSP_PRIV_CLOCK_PCLKA);
+    uint32_t source_hz = pclka_hz;
+    if (source < 2U)
+    {
+        /* ADCCKCR/GPTCKCR select undivided oscillator/PLL outputs, not SCKDIVCR clocks.
+         * The source encodings match the existing BSP source-clock enum (manual 9.2). */
+        uint32_t clock_control = (0U == source) ? R_SYSTEM->ADCCKCR : R_SYSTEM->GPTCKCR;
+        uint32_t clock_source = clock_control & 0xFU;
+        FSP_ERROR_RETURN((0U == (clock_control & 0x40U)) && (clock_source <= 10U) &&
+                         ((0U == source) || ((clock_source != 2U) && (clock_source != 4U))),
+                         FSP_ERR_INVALID_ARGUMENT);
+        source_hz = R_BSP_SourceClockHzGet((fsp_priv_source_clock_t) clock_source);
+    }
+
+    uint32_t adclk_hz = source_hz / divisor;
+    FSP_ERROR_RETURN((adclk_hz >= 25000000U) && (adclk_hz <= 60000000U) && (adclk_hz <= pclka_hz),
+                     FSP_ERR_INVALID_ARGUMENT);
+    FSP_ERROR_RETURN((p_extend->sync_operation_control & ~0x000300FFUL) == 0U, FSP_ERR_INVALID_ARGUMENT);
+    FSP_ERROR_RETURN(p_extend->sync_operation_control_bits.period_cycle >= 5U, FSP_ERR_INVALID_ARGUMENT);
+    FSP_ERROR_RETURN((p_extend->p_isr_cfg->calibration_end_irq_adc_0 >= 0) &&
+                     (p_extend->p_isr_cfg->calibration_end_irq_adc_1 >= 0), FSP_ERR_INVALID_ARGUMENT);
+    uint32_t sample = p_extend->calibration_adc_state & 0x3FFU;
+    uint32_t conversion = (p_extend->calibration_adc_state >> 16) & 0x3FU;
+    FSP_ERROR_RETURN((sample >= 2U) && (conversion >= 3U) &&
+                     ((p_extend->calibration_adc_state & ~0x003F03FFUL) == 0U), FSP_ERR_INVALID_ARGUMENT);
+    /* Normal voltage range, table 70.99: 100..200 ns approximation time.
+     * Both converters and calibration must use identical CST values (54.2.4.3, 54.3.8.3). */
+    FSP_ERROR_RETURN(((uint64_t) conversion * 1000000000ULL >= (uint64_t) adclk_hz * 100U) &&
+                     ((uint64_t) conversion * 1000000000ULL <= (uint64_t) adclk_hz * 200U),
+                     FSP_ERR_INVALID_ARGUMENT);
+    FSP_ERROR_RETURN(((uint64_t) (sample - 1U) * 1000000000ULL >= (uint64_t) adclk_hz * 40U) &&
+                     (p_extend->conversion_state == (conversion | (conversion << 8))), FSP_ERR_INVALID_ARGUMENT);
+    for (uint32_t unit = 0; unit < 2U; unit++)
+    {
+        uint32_t sh_mask = (0U == unit) ? 0x07U : 0x70U;
+        if (p_extend->sample_and_hold_enable_mask & sh_mask)
+        {
+            uint32_t sh = (0U == unit) ? p_extend->sample_and_hold_config_012 :
+                          p_extend->sample_and_hold_config_456;
+            uint32_t sh_sample = sh & 0xFFU;
+            uint32_t sh_hold = (sh >> 16) & 7U;
+            FSP_ERROR_RETURN((p_extend->calibration_sample_and_hold == ((sh_sample + 1U) | (sh_hold << 16))) &&
+                             (sh_sample < 255U) && (sh_hold >= 2U) &&
+                             ((uint64_t) sh_sample * 1000000000ULL >= (uint64_t) adclk_hz * 400U) &&
+                             ((uint64_t) sh_hold * 1000000000ULL >= (uint64_t) adclk_hz * 40U),
+                             FSP_ERR_INVALID_ARGUMENT);
+        }
+
+        uint32_t mode = p_extend->adc_b_converter_mode[unit].mode;
+        uint32_t method = p_extend->adc_b_converter_mode[unit].method;
+        FSP_ERROR_RETURN((mode <= ADC_B_CONVERTER_MODE_BACKGROUND_SCAN) &&
+                         (method <= ADC_B_CONVERSION_METHOD_HYBRID), FSP_ERR_INVALID_ARGUMENT);
+        FSP_ERROR_RETURN((mode != ADC_B_CONVERTER_MODE_BACKGROUND_SCAN) ||
+                         (method == ADC_B_CONVERSION_METHOD_HYBRID), FSP_ERR_INVALID_ARGUMENT);
+    }
+
+    for (uint32_t i = 0; i < 8U; i++)
+    {
+        FSP_ERROR_RETURN(p_extend->user_gain_tables[i] <= UINT16_MAX, FSP_ERR_INVALID_ARGUMENT);
+        FSP_ERROR_RETURN((p_extend->user_offset_tables[i] >= INT16_MIN) &&
+                         (p_extend->user_offset_tables[i] <= INT16_MAX), FSP_ERR_INVALID_ARGUMENT);
+        FSP_ERROR_RETURN(p_extend->fifo_interrupt_level[i] <= 8U, FSP_ERR_INVALID_ARGUMENT);
+    }
+
+    FSP_ERROR_RETURN(p_extend->fifo_interrupt_level[8] <= 8U, FSP_ERR_INVALID_ARGUMENT);
+    return FSP_SUCCESS;
+}
+
+/* Validate every index before modifying an existing scan or indexing any register table. */
+static fsp_err_t adc_b_scan_check (adc_b_extended_cfg_t const * p_extend, adc_b_scan_cfg_t const * p_scan)
+{
+    FSP_ASSERT(p_scan);
+    FSP_ASSERT(p_scan->p_adc_groups);
+    FSP_ERROR_RETURN((p_scan->group_count > 0U) && (p_scan->group_count <= 9U), FSP_ERR_INVALID_ARGUMENT);
+    uint32_t groups = 0U;
+    uint64_t channels = 0U;
+    for (uint32_t i = 0; i < p_scan->group_count; i++)
+    {
+        adc_b_group_cfg_t const * p_group = p_scan->p_adc_groups[i];
+        FSP_ASSERT(p_group);
+        FSP_ASSERT(p_group->p_virtual_channels);
+        FSP_ERROR_RETURN(((uint32_t) p_group->scan_group_id <= 8U) &&
+                         ((uint32_t) p_group->converter_selection <= 1U) &&
+                         (p_group->virtual_channel_count > 0U) &&
+                         (p_group->virtual_channel_count <= ADC_B_VIRTUAL_CHANNEL_COUNT), FSP_ERR_INVALID_ARGUMENT);
+        uint32_t group_bit = 1UL << p_group->scan_group_id;
+        FSP_ERROR_RETURN(0U == (groups & group_bit), FSP_ERR_INVALID_ARGUMENT);
+        groups |= group_bit;
+        FSP_ERROR_RETURN(p_extend->converter_selection[p_group->scan_group_id] == p_group->converter_selection,
+                         FSP_ERR_INVALID_ARGUMENT);
+        for (uint32_t j = 0; j < p_group->virtual_channel_count; j++)
+        {
+            adc_b_virtual_channel_cfg_t const * p_channel = p_group->p_virtual_channels[j];
+            FSP_ASSERT(p_channel);
+            FSP_ERROR_RETURN((uint32_t) p_channel->channel_id < ADC_B_VIRTUAL_CHANNEL_COUNT, FSP_ERR_INVALID_CHANNEL);
+            uint64_t virtual_bit = 1ULL << p_channel->channel_id;
+            FSP_ERROR_RETURN(0U == (channels & virtual_bit), FSP_ERR_INVALID_CHANNEL);
+            channels |= virtual_bit;
+            uint32_t channel = p_channel->channel_cfg_bits.channel;
+            uint32_t bit = channel;
+            if (channel > ADC_CHANNEL_LAST_EXTERNAL)
+            {
+                FSP_ERROR_RETURN((channel >= ADC_CHANNEL_FIRST_INTERNAL) &&
+                                 (channel <= ADC_CHANNEL_LAST_INTERNAL), FSP_ERR_INVALID_CHANNEL);
+                bit = channel - ADC_CHANNEL_FIRST_INTERNAL + ADC_B_CHANNEL_MASK_EXT_OFFSET;
+            }
+
+            FSP_ERROR_RETURN(bit < 64U, FSP_ERR_INVALID_CHANNEL);
+            FSP_ERROR_RETURN(ADC_B_CHANNEL_VALID_FOR_UNIT(1ULL << bit, p_group->converter_selection),
+                             FSP_ERR_INVALID_CHANNEL);
+            FSP_ERROR_RETURN(p_channel->channel_cfg_bits.group == (uint32_t) p_group->scan_group_id + 1U,
+                             FSP_ERR_INVALID_ARGUMENT);
+        }
+    }
+
+    return FSP_SUCCESS;
+}
+#endif
 
 /***********************************************************************************************************************
  * @brief Helper function - Pre-calculate wait time for use when stopping ADC
@@ -1159,8 +1395,12 @@ static uint32_t adc_b_update_calibrate_state (adc_b_instance_ctrl_t * p_instance
  * @param p_instance_ctrl - Pointer to adc_b instance configuration
  * @return None
  **********************************************************************************************************************/
-static void adc_b_force_stop (adc_b_instance_ctrl_t * p_instance_ctrl)
+static fsp_err_t adc_b_force_stop (adc_b_instance_ctrl_t * p_instance_ctrl)
 {
+#if BSP_FEATURE_ADC_B_CLOCK_SOURCE_ADCCLK
+    FSP_ERROR_RETURN((p_instance_ctrl->adc_state == ADC_B_CONVERTER_STATE_NONE) ||
+                     (p_instance_ctrl->adc_state >= ADC_B_CONVERTER_STATE_READY), FSP_ERR_IN_USE);
+#endif
     /* Clear ADC Start Trigger Enable */
     R_ADC_B->ADTRGENR = ADC_GROUP_MASK_NONE;
 
@@ -1175,9 +1415,30 @@ static void adc_b_force_stop (adc_b_instance_ctrl_t * p_instance_ctrl)
     {
         R_ADC_B->ADSTOPR = R_ADC_B0_ADSTOPR_ADSTOP0_Msk | R_ADC_B0_ADSTOPR_ADSTOP1_Msk;
 
-        /* Wait for converter to stop */
-        FSP_HARDWARE_REGISTER_WAIT(R_ADC_B->ADSR, 0)
+        return adc_b_wait_idle();
     }
+
+    return FSP_SUCCESS;
+}
+
+static fsp_err_t adc_b_wait_idle (void)
+{
+#if BSP_FEATURE_ADC_B_CLOCK_SOURCE_ADCCLK
+    for (uint32_t remaining = 1000U; remaining > 0U; remaining--)
+    {
+        if (0U == R_ADC_B->ADSR)
+        {
+            return FSP_SUCCESS;
+        }
+
+        R_BSP_SoftwareDelay(1U, BSP_DELAY_UNITS_MICROSECONDS);
+    }
+
+    return FSP_ERR_TIMEOUT;
+#else
+    FSP_HARDWARE_REGISTER_WAIT(R_ADC_B->ADSR, 0);
+    return FSP_SUCCESS;
+#endif
 }
 
 #if BSP_FEATURE_ADC_B_PGA_SUPPORTED
@@ -1348,7 +1609,7 @@ static void adc_b_call_callback (adc_b_instance_ctrl_t * p_ctrl, adc_callback_ar
     }
 }
 
-#if (ADC_B_CFG_PARAM_CHECKING_ENABLE)
+#if ADC_B_CFG_PARAM_CHECKING_ENABLE || BSP_FEATURE_ADC_B_CLOCK_SOURCE_ADCCLK
 
 /***********************************************************************************************************************
  * @brief Check if sample and hold is enabled for given channel
@@ -1407,19 +1668,37 @@ void adc_b_calend0_isr (void)
         adcalstr = 0;
     }
 
+#if !BSP_FEATURE_ADC_B_CLOCK_SOURCE_ADCCLK
     /* End calibration sequence if complete or failed */
     if (ADC_B_CONVERTER_STATE_READY <= p_instance_ctrl->adc_state)
     {
         adc_b_isr_handler(event, ADC_GROUP_MASK_NONE, channel_mask, ADC_B_UNIT_MASK_UNDEFINED);
     }
+#endif
 
     R_ADC_B->ADCALENDSCR = R_ADC_B0_ADCALENDSCR_CALENDC0_Msk;
     R_BSP_IrqStatusClear(irq);
 
-    /* Wait for converter stopped to initiate next calibration step
-     * - See table 36.2.10.1 in the RA6T2 user manual, R01UH0951EJ0130 */
+    /* Do not start the next calibration step until the converter is idle. */
+#if BSP_FEATURE_ADC_B_CLOCK_SOURCE_ADCCLK
+    if (FSP_SUCCESS != adc_b_wait_idle())
+    {
+        p_instance_ctrl->adc_state = ADC_B_CONVERTER_STATE_CALIBRATION_FAIL;
+        event |= ADC_EVENT_CONVERSION_ERROR;
+    }
+    else
+    {
+        R_ADC_B->ADCALSTR = adcalstr;
+    }
+
+    if (ADC_B_CONVERTER_STATE_READY <= p_instance_ctrl->adc_state)
+    {
+        adc_b_isr_handler(event, ADC_GROUP_MASK_NONE, channel_mask, ADC_B_UNIT_MASK_UNDEFINED);
+    }
+#else
     FSP_HARDWARE_REGISTER_WAIT(R_ADC_B->ADSR, 0x00);
     R_ADC_B->ADCALSTR = adcalstr;
+#endif
 
     /* Restore context if RTOS is used */
     FSP_CONTEXT_RESTORE
@@ -1461,19 +1740,37 @@ void adc_b_calend1_isr (void)
         adcalstr = 0;
     }
 
+#if !BSP_FEATURE_ADC_B_CLOCK_SOURCE_ADCCLK
     /* End calibration sequence if complete or failed */
     if (ADC_B_CONVERTER_STATE_READY <= p_instance_ctrl->adc_state)
     {
         adc_b_isr_handler(event, ADC_GROUP_MASK_NONE, channel_mask, ADC_B_UNIT_MASK_UNDEFINED);
     }
+#endif
 
     R_ADC_B->ADCALENDSCR = R_ADC_B0_ADCALENDSCR_CALENDC1_Msk;
     R_BSP_IrqStatusClear(irq);
 
-    /* Wait for converter stopped to initiate next calibration step
-     * - See table 36.2.10.1 in the RA6T2 user manual, R01UH0951EJ0130 */
+    /* Do not start the next calibration step until the converter is idle. */
+#if BSP_FEATURE_ADC_B_CLOCK_SOURCE_ADCCLK
+    if (FSP_SUCCESS != adc_b_wait_idle())
+    {
+        p_instance_ctrl->adc_state = ADC_B_CONVERTER_STATE_CALIBRATION_FAIL;
+        event |= ADC_EVENT_CONVERSION_ERROR;
+    }
+    else
+    {
+        R_ADC_B->ADCALSTR = adcalstr;
+    }
+
+    if (ADC_B_CONVERTER_STATE_READY <= p_instance_ctrl->adc_state)
+    {
+        adc_b_isr_handler(event, ADC_GROUP_MASK_NONE, channel_mask, ADC_B_UNIT_MASK_UNDEFINED);
+    }
+#else
     FSP_HARDWARE_REGISTER_WAIT(R_ADC_B->ADSR, 0x00);
     R_ADC_B->ADCALSTR = adcalstr;
+#endif
 
     /* Restore context if RTOS is used */
     FSP_CONTEXT_RESTORE
@@ -1835,7 +2132,11 @@ void adc_b_fifoovf_isr (void)
     /* Save context if RTOS is used */
     FSP_CONTEXT_SAVE
 
+#if BSP_FEATURE_ADC_B_CLOCK_SOURCE_ADCCLK
+    adc_group_mask_t group_mask = (adc_group_mask_t) (R_ADC_B->ADFIFOERSR & 0x1FFU);
+#else
     adc_group_mask_t group_mask = (adc_group_mask_t) R_ADC_B->ADFIFOERSR_b.FIFOOVFn;
+#endif
 
     IRQn_Type irq = adc_b_isr_handler(ADC_EVENT_FIFO_OVERFLOW,
                                       group_mask,
@@ -1843,7 +2144,11 @@ void adc_b_fifoovf_isr (void)
                                       ADC_B_UNIT_MASK_UNDEFINED);
 
     R_ADC_B->ADFIFODCR               = group_mask;
+#if BSP_FEATURE_ADC_B_CLOCK_SOURCE_ADCCLK
+    R_ADC_B->ADFIFOERSCR = (uint32_t) group_mask;
+#else
     R_ADC_B->ADFIFOERSCR_b.FIFOOVFCn = group_mask;
+#endif
     R_BSP_IrqStatusClear(irq);
 
     /* Restore context if RTOS is used */
@@ -2041,7 +2346,11 @@ void adc_b_fiforeq5678_isr (void)
     FSP_CONTEXT_SAVE
 
     /* Get groups with less data availabe than threshold */
+#if BSP_FEATURE_ADC_B_CLOCK_SOURCE_ADCCLK
+    adc_group_mask_t group = (adc_group_mask_t) (ADC_B_GROUP_MASK_5678 & (R_ADC_B->ADFIFOERSR >> 16));
+#else
     adc_group_mask_t group = (adc_group_mask_t) (ADC_B_GROUP_MASK_5678 & R_ADC_B->ADFIFOERSR_b.FIFOFLFn);
+#endif
     IRQn_Type        irq   = adc_b_isr_handler(ADC_EVENT_FIFO_READ_REQUEST,
                                                group,
                                                ADC_B_CHANNEL_MASK_NONE,

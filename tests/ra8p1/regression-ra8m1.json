@@ -1,0 +1,64 @@
+{
+  "description": "Select the preserved named default stacks. Some serialized defaults (empty masks/display labels) are not legal setter inputs. Every preserved property below, plus BSP/clocks/pins, must match the generated candidate. No runtime qualification.",
+  "modules": [
+    {
+      "id": "module.driver.ioport_on_ioport",
+      "properties": {
+        "module.driver.ioport.name": "g_ioport"
+      }
+    },
+    {
+      "id": "module.driver.cgc_on_cgc",
+      "properties": {
+        "module.driver.cgc.name": "g_cgc0"
+      }
+    },
+    {
+      "id": "module.driver.watchdog_on_wdt",
+      "properties": {
+        "module.driver.watchdog.name": "g_wdt0"
+      }
+    }
+  ],
+  "preserved_modules": [
+    {
+      "id": "module.driver.ioport_on_ioport",
+      "properties": {
+        "module.driver.ioport.name": "g_ioport",
+        "module.driver.ioport.elc_trigger_ioport1": "_disabled",
+        "module.driver.ioport.elc_trigger_ioport2": "_disabled",
+        "module.driver.ioport.elc_trigger_ioport3": "_disabled",
+        "module.driver.ioport.elc_trigger_ioport4": "_disabled",
+        "module.driver.ioport.pincfg": "g_bsp_pin_cfg"
+      }
+    },
+    {
+      "id": "module.driver.cgc_on_cgc",
+      "properties": {
+        "module.driver.cgc.name": "g_cgc0",
+        "module.driver.cgc.ostd_system_clock_enabled": "module.driver.cgc.ostd_system_clock_enabled.true",
+        "module.driver.cgc.callback": "NULL",
+        "module.driver.cgc.SOSTD": "module.driver.cgc.SOSTD.false",
+        "module.driver.cgc.SOSTD.OSDCCMP": "0",
+        "module.driver.cgc.sostd_ipl": "_disabled",
+        "module.driver.cgc.MOSTD": "module.driver.cgc.MOSTD.false",
+        "module.driver.cgc.MOSTD.OSDCCMP": "0",
+        "module.driver.cgc.mostd_ipl": "_disabled",
+        "module.driver.cgc.OSTDCSE": "module.driver.cgc.OSTDCSE.false"
+      }
+    },
+    {
+      "id": "module.driver.watchdog_on_wdt",
+      "properties": {
+        "module.driver.watchdog.name": "g_wdt0",
+        "module.driver.watchdog.timeout": "module.driver.watchdog.timeout.16384",
+        "module.driver.watchdog.clock_division": "module.driver.watchdog.clock_division.8192",
+        "module.driver.watchdog.window_start": "module.driver.watchdog.window_start.100",
+        "module.driver.watchdog.window_end": "module.driver.watchdog.window_end.0",
+        "module.driver.watchdog.reset_control": "module.driver.watchdog.reset_control.reset",
+        "module.driver.watchdog.stop_control": "module.driver.watchdog.stop_control.enable",
+        "module.driver.watchdog.nmi_callback": "NULL"
+      }
+    }
+  ]
+}

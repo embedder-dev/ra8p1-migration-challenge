@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<raModuleDescription>
+  <config id="config.bsp.ra8p1" path="fsp_cfg/bsp/bsp_mcu_device_cfg.h" version="0">
+    <property id="config.bsp.series" display="series" default="config.bsp.series.value" macro="BSP_CFG_MCU_PART_SERIES">
+      <option id="config.bsp.series.value" display="8" value="8" />
+    </property>
+    <content>
+#define BSP_CFG_MCU_PART_SERIES (${config.bsp.series})
+    </content>
+  </config>
+  <config id="config.bsp.ra8p1.cpu0" path="fsp_cfg/bsp/bsp_mcu_core_cfg.h" version="0">
+    <content>
+#define BSP_CFG_CPU_CORE_FROM_DEVICE (0)
+    </content>
+  </config>
+  <config id="config.bsp.ra8p1.cpu1" path="fsp_cfg/bsp/bsp_mcu_core_cfg.h" version="0">
+    <content>
+#define BSP_CFG_CPU_CORE_FROM_DEVICE (1)
+    </content>
+  </config>
+  <bsp id="bsp.ra8p1.cpu0" config="config.bsp.ra8p1.cpu0" display="RA8P1 CPU0 Cortex-M85" version="0">
+    <provides interface="interface.mcu.core.cm85" />
+  </bsp>
+  <bsp id="bsp.ra8p1.cpu1" config="config.bsp.ra8p1.cpu1" display="RA8P1 CPU1 Cortex-M33" version="0">
+    <provides interface="interface.mcu.core.cm33" />
+  </bsp>
+  <bsp id="bsp.ra8p1" config="config.bsp.ra8p1" display="RA8P1" version="0">
+    <provides interface="interface.mcu.ra8p1" />
+    <provides interface="interface.mcu.cgc" />
+    <provides interface="interface.mcu.icu" />
+    <provides interface="interface.mcu.mstp" />
+    <provides interface="interface.mcu.pfs" />
+    <provides interface="interface.mcu.port" />
+    <provides interface="interface.mcu.mram" />
+    <provides interface="interface.mcu.adc_b" />
+    <provides interface="interface.mcu.adc_b.0" />
+    <provides interface="interface.mcu.dac_b" />
+    <provides interface="interface.mcu.dac_b.0" />
+    <provides interface="interface.mcu.dac_b.1" />
+    <provides interface="interface.mcu.pdm" />
+    <provides interface="interface.mcu.wdt" />
+    <provides interface="interface.mcu.iwdt" />
+  </bsp>
+</raModuleDescription>

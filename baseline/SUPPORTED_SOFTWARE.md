@@ -1,5 +1,42 @@
 ## Software Modules Packaged with FSP
 
+### Local RA8P1 candidate notice
+
+This working tree adds a **custom FSP 5.9-derived RA8P1 BSP/driver candidate** for
+EK-RA8P1 v1 / fitted R7KA8P1KFLCAC. It is **not an official Renesas FSP release**
+and does not establish FSP 6.0 equivalence. The original module catalogue below
+is retained; inclusion in that catalogue does not mean every module supports
+RA8P1 or has been tested on it.
+
+The candidate uses the preserved FSP 5.9.0 sources/packs, target documentation
+and R7KA8P1AD SVD, **not newer FSP source**. The installed e2 studio bundle labelled
+RA FSP v6.6.0 is used only as a tool host. Existing API/configuration versions
+remain 5.9.0; identify candidate packages by their manifest/hashes, not that
+version label alone.
+
+| Candidate area | Local source / scope | Limits |
+| --- | --- | --- |
+| BSP, device, board | `ra/fsp/src/bsp/mcu/ra8p1/`, `ra/board/ra8p1_ek/`, R7KA8P1AD header, core-aware MDFs | CPU0 M85 and CPU1 M33 source/configuration support; generated core/compiler/debugger selection and actual execution need separate evidence. Flat/internal-memory scope, not blanket TrustZone/RTOS/external-peripheral support |
+| CGC | `ra/fsp/src/r_cgc/r_cgc_ra8p1.inc` and RA8P1 BSP clocks | MOCO 8 MHz; PLL240: CPU0 240 MHz, CPU1/ICLK/MRICLK/MRPCLK 60 MHz, PCLKB 30 MHz. No 600 MHz/1 GHz profile or general runtime clock-switching promise |
+| MRAM | [r_mram](ra/fsp/inc/instances/r_mram.h), `flash_api_t` | Blocking code-MRAM scope, no erase/extra-MRAM/option/security programming. RAM-resident whole-system quiescence and safe-return hooks are mandatory; qualification fixture deliberately blocks writes until proved |
+| DAC_B | [r_dac_b](ra/fsp/inc/instances/r_dac_b.h), `dac_api_t` | DAC0/P014 external loopback passed; ELC startup, collective enable and ADC synchronization unsupported |
+| ADC_B | `ra/fsp/src/r_adc_b/`, existing ADC API | Calibrated AN001 loopback passed 144 samples and a repeat run; no qualification of other modes/channels or absolute voltage accuracy |
+| WDT | `ra/fsp/src/r_wdt/` | WDT0/CPU0 and WDT1/CPU1 legal-refresh and reset-expiry tests passed; actual options are read, never programmed; NMI and other window settings remain unqualified |
+| PDM | [r_pdm](ra/fsp/inc/instances/r_pdm.h), [PDM API](ra/fsp/inc/api/r_pdm_api.h) | Interrupt-driven capture; on-board PDM2/P502/P812, fixed nominal 2 MHz PDM / 8 kframes/s PCM. No DMA/arbitrary-rate or audio-quality guarantee |
+
+**Host compilation is not hardware proof. See the [validation results](../validation/results.md)
+for measured boot/clock, dual-core, analog, watchdog and PDM-transport evidence.**
+MRAM writes remain blocked by the DMA1/DTC1 isolation gate; scratch was confirmed unchanged.
+Known-tone audio response, absolute analog accuracy and older-device runtime behavior
+remain unqualified. The report preserves exact tested image hashes and separates
+those results from subsequent documentation-only changes.
+
+See the [candidate, Saleae harness and validation guide](../README-RA8P1-MIGRATION.md)
+for precise host/generation commands, deterministic pack manifests, installation
+and manual rollback journals, fixture procedures and unverified coverage. The
+[MIGRATION.md challenge brief](../MIGRATION.md) remains unchanged. No hardware or
+installation operation is performed by this documentation update.
+
 ### FSP Top Level Modules
   * AI
     * [Arm CMSIS NN Library Source](https://arm-software.github.io/CMSIS-NN/latest/index.html)

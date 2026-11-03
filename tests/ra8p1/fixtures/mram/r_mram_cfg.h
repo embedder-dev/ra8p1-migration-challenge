@@ -1,0 +1,6 @@
+#ifndef R_MRAM_CFG_H
+#define R_MRAM_CFG_H
+#ifndef MRAM_CFG_PARAM_CHECKING_ENABLE
+#define MRAM_CFG_PARAM_CHECKING_ENABLE 1
+#endif
+#endif

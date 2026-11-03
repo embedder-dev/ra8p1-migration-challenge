@@ -1,0 +1,148 @@
+#include <assert.h>
+#include <stdio.h>
+#include <string.h>
+#include "r_adc_b.h"
+extern uint32_t test_clocks[];
+extern bool test_clock_stuck;
+extern unsigned test_module_state[3][2];
+void adc_b_calend0_isr(void);
+void adc_b_calend1_isr(void);
+static unsigned callback_count;
+static adc_event_t expected_event = ADC_EVENT_CALIBRATION_COMPLETE;
+static void callback(adc_callback_args_t * args)
+{
+    assert(args->event == expected_event);
+    callback_count++;
+}
+int main(void)
+{
+    adc_b_instance_ctrl_t ctrl = {0};
+    test_system.ADCCKCR = 5;
+    test_system.GPTCKCR = 6;
+    adc_b_isr_cfg_t irq;
+    memset(&irq, 0, sizeof(irq));
+    adc_b_extended_cfg_t ext = {0};
+    ext.p_isr_cfg = &irq;
+    ext.sync_operation_control_bits.period_cycle = 5;
+    ext.sync_operation_control_bits.adc_0_disable_sync = 1;
+    ext.sync_operation_control_bits.adc_1_disable_sync = 1;
+    /* At 50 MHz: 60 ns calibration sample and 100 ns successive approximation. */
+    ext.calibration_adc_state = 3 | (5 << 16);
+    ext.conversion_state = 5 | (5 << 8);
+    ext.sampling_state_table[0] = 10;
+    adc_cfg_t cfg = {.p_extend = &ext, .p_callback = callback};
+    assert(g_adc_on_adc_b.open == R_ADC_B_Open);
+    ext.clock_control_bits.source_selection = 3;
+    assert(R_ADC_B_Open(&ctrl, &cfg) == FSP_ERR_INVALID_ARGUMENT);
+    ext.clock_control_bits.source_selection = 0;
+    test_clocks[1] = 61000000;
+    assert(R_ADC_B_Open(&ctrl, &cfg) == FSP_ERR_INVALID_ARGUMENT);
+    test_clocks[1] = 24000000;
+    assert(R_ADC_B_Open(&ctrl, &cfg) == FSP_ERR_INVALID_ARGUMENT);
+    test_clocks[1] = 50000000;
+    ext.clock_control_bits.divider = ADC_B_CLOCK_DIV_6;
+    assert(R_ADC_B_Open(&ctrl, &cfg) == FSP_ERR_INVALID_ARGUMENT);
+    ext.clock_control_bits.divider = ADC_B_CLOCK_DIV_1;
+    ext.calibration_adc_state = 2 | (5 << 16);
+    assert(R_ADC_B_Open(&ctrl, &cfg) == FSP_ERR_INVALID_ARGUMENT);
+    ext.calibration_adc_state = 3 | (5 << 16);
+    ext.conversion_state = 4 | (5 << 8);
+    assert(R_ADC_B_Open(&ctrl, &cfg) == FSP_ERR_INVALID_ARGUMENT);
+    ext.conversion_state = 5 | (5 << 8);
+    ext.user_gain_tables[0] = 0x10000;
+    assert(R_ADC_B_Open(&ctrl, &cfg) == FSP_ERR_INVALID_ARGUMENT);
+    ext.user_gain_tables[0] = 0x4000;
+    test_system.ADCCKCR = 15;
+    assert(R_ADC_B_Open(&ctrl, &cfg) == FSP_ERR_INVALID_ARGUMENT);
+    test_system.ADCCKCR = 0x45;
+    assert(R_ADC_B_Open(&ctrl, &cfg) == FSP_ERR_INVALID_ARGUMENT);
+    test_system.ADCCKCR = 5;
+    ext.clock_control_bits.source_selection = ADC_B_CLOCK_SOURCE_GPT;
+    test_system.GPTCKCR = 2;
+    assert(R_ADC_B_Open(&ctrl, &cfg) == FSP_ERR_INVALID_ARGUMENT);
+    test_system.GPTCKCR = 6;
+    ext.clock_control_bits.divider = ADC_B_CLOCK_DIV_2;
+    test_clock_stuck = true;
+    assert(R_ADC_B_Open(&ctrl, &cfg) == FSP_ERR_TIMEOUT);
+    ext.clock_control_bits.source_selection = ADC_B_CLOCK_SOURCE_ADCCLK;
+    ext.clock_control_bits.divider = ADC_B_CLOCK_DIV_1;
+    assert(R_ADC_B_Open(&ctrl, &cfg) == FSP_ERR_TIMEOUT);
+    assert(ctrl.opened == 0 && test_module_state[FSP_IP_ADC][0] == 0);
+    test_clock_stuck = false;
+    assert(R_ADC_B_Open(&ctrl, &cfg) == FSP_SUCCESS);
+    assert(R_ADC_B_Open(&ctrl, &cfg) == FSP_ERR_ALREADY_OPEN);
+    adc_b_virtual_channel_cfg_t channel = {.channel_id = 0};
+    channel.channel_cfg_bits.group = 1;
+    channel.channel_cfg_bits.channel = 0;
+    adc_b_virtual_channel_cfg_t * channels[] = {&channel};
+    adc_b_group_cfg_t group = {.scan_group_id = 0, .converter_selection = 0,
+                              .virtual_channel_count = 1, .p_virtual_channels = channels};
+    adc_b_group_cfg_t * groups[] = {&group};
+    adc_b_scan_cfg_t scan = {.group_count = 1, .p_adc_groups = groups};
+    group.scan_group_id = (adc_group_id_t) 9;
+    test_adc.ADCHCR0 = 0xCAFE;
+    assert(R_ADC_B_ScanCfg(&ctrl, &scan) == FSP_ERR_INVALID_ARGUMENT);
+    assert(test_adc.ADCHCR0 == 0xCAFE);
+    group.scan_group_id = 0;
+    channel.channel_id = (adc_b_virtual_channel_t) 63;
+    assert(R_ADC_B_ScanCfg(&ctrl, &scan) == FSP_ERR_INVALID_CHANNEL);
+    channel.channel_id = 0;
+    assert(ADC_B_VIRTUAL_CHANNEL_COUNT == 33);
+    assert(ADC_CHANNEL_LAST_EXTERNAL == 22);
+    channel.channel_cfg_bits.channel = 6;
+    assert(R_ADC_B_ScanCfg(&ctrl, &scan) == FSP_ERR_INVALID_CHANNEL);
+    channel.channel_cfg_bits.channel = 0;
+    assert(R_ADC_B_ScanCfg(&ctrl, &scan) == FSP_SUCCESS);
+    assert(test_adc.ADCHCR0 == 1);
+    assert(R_ADC_B_ScanStart(&ctrl) == FSP_ERR_INVALID_STATE);
+    assert(R_ADC_B_Calibrate(&ctrl, NULL) == FSP_SUCCESS);
+    assert(R_ADC_B_Calibrate(&ctrl, NULL) == FSP_ERR_IN_USE);
+    assert(test_adc.ADCALSTR == 3);
+    adc_b_calend0_isr();
+    assert(test_adc.ADCALSTR == 0x300);
+    adc_b_calend1_isr();
+    assert(ctrl.adc_state == ADC_B_CONVERTER_STATE_READY && callback_count == 1);
+    test_adc.ADDR0 = 0x8123;
+    uint16_t data;
+    assert(R_ADC_B_Read(&ctrl, 0, &data) == FSP_SUCCESS && data == 0x8123);
+    uint32_t wide = 0;
+    assert(R_ADC_B_Read32(&ctrl, 0, &wide) == FSP_SUCCESS && wide == 0x8123);
+    test_adc.ADDR0 = 0x80001234U;
+    assert(R_ADC_B_Read(&ctrl, 0, &data) == FSP_ERR_INVALID_DATA && data == 0x1234);
+    assert(R_ADC_B_Read(&ctrl, (adc_channel_t) 23, &data) == FSP_ERR_INVALID_CHANNEL);
+    assert(R_ADC_B_Read(&ctrl, (adc_channel_t) 103, &data) == FSP_ERR_INVALID_CHANNEL);
+    *(uint32_t *) ((uint8_t *) &test_adc + 0x21A0) = 0x7654;
+    assert(R_ADC_B_Read(&ctrl, (adc_channel_t) 104, &data) == FSP_SUCCESS && data == 0x7654);
+    assert(R_ADC_B_ScanStart(&ctrl) == FSP_SUCCESS && test_adc.ADSYSTR == 1);
+    adc_b_fifo_read_t fifo;
+    assert(R_ADC_B_FifoRead(&ctrl, 0, &fifo) == FSP_ERR_INVALID_ARGUMENT);
+    test_adc.ADFIFOSR0 = 8;
+    assert(R_ADC_B_FifoRead(&ctrl, 1, &fifo) == FSP_ERR_UNDERFLOW && fifo.count == 0);
+    test_adc.ADFIFOSR0 = 15;
+    assert(R_ADC_B_FifoRead(&ctrl, 1, &fifo) == FSP_ERR_INVALID_STATE);
+    test_adc.ADSR = 1;
+    assert(R_ADC_B_ScanStop(&ctrl) == FSP_ERR_TIMEOUT);
+    test_adc.ADSR = 0;
+    assert(R_ADC_B_Close(&ctrl) == FSP_SUCCESS);
+    assert(R_ADC_B_Read(&ctrl, 0, &data) == FSP_ERR_NOT_OPEN);
+
+    ext.sync_operation_control_bits.period_cycle = 8;
+    ext.sync_operation_control_bits.adc_0_disable_sync = 0;
+    ext.sync_operation_control_bits.adc_1_disable_sync = 0;
+    ext.sampling_state_table[3] = 11;
+    channel.channel_id = (adc_b_virtual_channel_t) 32;
+    channel.channel_cfg_bits.sample_table_id = 3;
+    assert(R_ADC_B_Open(&ctrl, &cfg) == FSP_SUCCESS);
+    assert(R_ADC_B_ScanCfg(&ctrl, &scan) == FSP_SUCCESS);
+    assert(*(uint32_t *) ((uint8_t *) &test_adc + 0x600 + 32 * 0x10) == channel.channel_cfg);
+    assert(R_ADC_B_Calibrate(&ctrl, NULL) == FSP_SUCCESS);
+    test_adc.ADSR = 1;
+    expected_event = ADC_EVENT_CALIBRATION_COMPLETE | ADC_EVENT_CONVERSION_ERROR;
+    uint32_t calibration_request = test_adc.ADCALSTR;
+    adc_b_calend0_isr();
+    assert(ctrl.adc_state == ADC_B_CONVERTER_STATE_CALIBRATION_FAIL && callback_count == 2);
+    assert(test_adc.ADCALSTR == calibration_request);
+    test_adc.ADSR = 0;
+    assert(R_ADC_B_Close(&ctrl) == FSP_SUCCESS);
+    puts("ADC_B behavior passed");
+}

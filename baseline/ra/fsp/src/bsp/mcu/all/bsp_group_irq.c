@@ -13,7 +13,8 @@
  * Macro definitions
  **********************************************************************************************************************/
 
-#if (BSP_FEATURE_ICU_NMIER_MAX_INDEX > 15U)
+/* RA8P1 NMI registers are 32-bit even when the supported callback range ends at bit 15. */
+#if (BSP_FEATURE_ICU_NMIER_MAX_INDEX > 15U) || BSP_MCU_GROUP_RA8P1
  #define BSP_PRV_NMIER_T    uint32_t
 #else
  #define BSP_PRV_NMIER_T    uint16_t

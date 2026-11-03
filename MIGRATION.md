@@ -28,7 +28,7 @@ The verification materials do not establish firmware correctness, successful bui
 
 Use a clean checkout of the designated challenge-baseline commit, in a standalone workspace outside any checkout containing newer FSP sources. Do not copy a previous run's working directory: untracked files and ignored directories can contain implementations, generated projects, tests, captures and session history even when Git reports no tracked changes.
 
-The starting inputs are the original `baseline/` and `reference/` contents, the two baseline-verification scripts in `tools/`, this brief, and the wiring guide and diagrams. No RA8P1 implementation, solution-specific tools, generated tests or prior-run results belong in the starting workspace. Ignoring such files does not remove them; discard previous-run artifacts before reusing a workspace.
+The starting inputs are the original `baseline/` and `reference/` contents, the two baseline-verification scripts in `tools/`, this brief, the host-workflow reference [embedder.md](embedder.md), and the wiring guide and diagrams. The host-workflow reference may guide tool use; it is not firmware implementation or validation evidence. No RA8P1 implementation, solution-specific tools, generated tests or prior-run results belong in the starting workspace. Ignoring such files does not remove them; discard previous-run artifacts before reusing a workspace.
 
 The archives under `reference/` are stored with Git LFS. Ensure they are materialized as real archives, not LFS pointer files. If needed, run `git lfs pull` in the clean checkout. A fresh checkout also needs the nested baseline Git metadata restored from the supplied archive:
 
@@ -61,6 +61,20 @@ any hardware test has passed.
 
 ## Behavioral acceptance
 
+### Integrate as implementation becomes available
+
+Start configurator integration as soon as the minimum device/BSP slice is ready. Continue it alongside driver implementation; do not wait for all drivers or an expanded host-test suite before generating real projects.
+
+- First prove one minimal CPU0 project through candidate packaging, discovery, Generate Project Content, and a clean linked build. Resolve device-header, board defaults, linker and tool-API mismatches at this checkpoint.
+- As each driver source and matching MDF become available, immediately generate and build a small project that actually selects that driver. Compile generated configuration, instances and interrupt vectors against the production headers. A bare BSP project or mock-register test does not satisfy this checkpoint.
+- Add CPU1 generation when its BSP is ready, and independently verify the selected core, compiler flags, debugger target and disjoint memory allocation. Exercise representative older-device builds as shared changes arrive.
+- After each candidate update, verify the hashes at all three layers: installed pack, extracted support resources, and generated project sources. Use the same-version refresh procedure in [embedder.md](embedder.md); a reinstall, regeneration or clean build alone does not prove current sources.
+- Report each slice's generated-build result or exact blocker immediately. Fix the owning source, metadata or automation before repeating that slice; continue independent work while it is blocked. Keep host tests, generated builds and hardware results separate.
+
+Use verified APIs and exported build constants from the installed tool host, as documented in [embedder.md](embedder.md). Recheck them when the host changes. Record a successful live invocation before treating a mock-based automation test as evidence that the API works.
+
+### Assess observable behavior
+
 Assess the candidate against observable requirements rather than resemblance to an undisclosed implementation:
 
 - **Target identification:** establish that the selected board, device and execution configuration are correct for EK-RA8P1. Do not infer them from the parent workspace or an attached probe's label.
@@ -78,4 +92,4 @@ Provide the scoped support changes and the evidence for the acceptance criteria 
 
 ## Prompt for the fresh chat
 
-> Work from the preserved FSP v5.9.0 baseline in this standalone bundle. Read MIGRATION.md and verify the baseline before editing. Add EK-RA8P1 BSP and driver support, with scope inspired by FSP 6.0.0. The original examples are new r_mram, r_dac_b and r_pdm drivers, and changes to existing r_wdt, r_adc and r_cgc drivers; these are problem examples, not an implementation recipe. No solution is supplied. Preserve unrelated older-device behavior, use the configurator for application generation, and report build, behavioral and regression evidence separately. Do not use the old chat or parent checkout as solution evidence. Obtain specific authorization before installation or device-changing operations. Do not claim full official FSP 6.0.0 equivalence.
+> Work from the preserved FSP v5.9.0 baseline in this standalone bundle. Read MIGRATION.md and verify the baseline before editing. Read embedder.md for verified host APIs and same-version pack refresh procedures. Add EK-RA8P1 BSP and driver support, with scope inspired by FSP 6.0.0. The original examples are new r_mram, r_dac_b and r_pdm drivers, and changes to existing r_wdt, r_adc and r_cgc drivers; these are problem examples, not an implementation recipe. No solution is supplied. Integrate incrementally: generate and clean-build the minimum BSP as soon as it is ready, then each driver as its source and MDF arrive; do not defer integration until all host tests pass. Preserve unrelated older-device behavior, use the configurator for application generation, and report build, behavioral and regression evidence separately. Do not use the old chat or parent checkout as solution evidence. Obtain specific authorization before installation or device-changing operations. Do not claim full official FSP 6.0.0 equivalence.

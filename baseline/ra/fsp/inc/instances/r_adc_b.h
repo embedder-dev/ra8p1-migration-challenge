@@ -34,10 +34,16 @@ FSP_HEADER
                                                                 (channel_mask & BSP_FEATURE_ADC_B_UNIT_0_CHANNELS) : \
                                                                 (channel_mask & BSP_FEATURE_ADC_B_UNIT_1_CHANNELS))
 
-#define R_ADC_B0_ADUGTR_UGAIN_INTEGER_Pos       (22)
-#define R_ADC_B0_ADUGTR_UGAIN_INTEGER_Msk       (0xC00000)
+#if BSP_FEATURE_ADC_B_CLOCK_SOURCE_ADCCLK
+ #define R_ADC_B0_ADUGTR_UGAIN_INTEGER_Pos       (14)
+ #define R_ADC_B0_ADUGTR_UGAIN_INTEGER_Msk       (0xC000)
+ #define R_ADC_B0_ADUGTR_UGAIN_FRACTIONAL_Msk    (0x3FFF)
+#else
+ #define R_ADC_B0_ADUGTR_UGAIN_INTEGER_Pos       (22)
+ #define R_ADC_B0_ADUGTR_UGAIN_INTEGER_Msk       (0xC00000)
+ #define R_ADC_B0_ADUGTR_UGAIN_FRACTIONAL_Msk    (0x3FFFFF)
+#endif
 #define R_ADC_B0_ADUGTR_UGAIN_FRACTIONAL_Pos    (0)
-#define R_ADC_B0_ADUGTR_UGAIN_FRACTIONAL_Msk    (0x3FFFFF)
 
 /***********************************************************************************************************************
  * Type definitions
@@ -587,7 +593,7 @@ typedef struct st_adc_b_extended_cfg
     union
     {
         uint32_t sampling_state_tables[8];               /// Sampling State Table register data
-        uint16_t sampling_state_table[15];               ///< Sampling State Tables
+        uint16_t sampling_state_table[16];               ///< Sampling State Tables
     };
     uint8_t  sample_and_hold_enable_mask;                ///< Sample and Hold enable register data
     uint32_t sample_and_hold_config_012;                 ///< Sample and Hold configuration register data
