@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<raModuleDescription>
+    <config id="config.board.ra8d1ek" path="fsp_cfg/bsp/board_cfg.h" version="0">
+        <content>
+            #include "../../../ra/board/ra8d1_ek/board.h"
+        </content>
+    </config>
+    <board id="board.ra8d1ek" display="RA8|RA8D1|EK-RA8D1" device="R7FA8D1BHECBD" config="config.board.ra8d1ek" version="0" debugger="com.renesas.hardwaredebug.rz.jlink">
+        <provides interface="interface.board.ether_phy.ics1894" />
+        <description>Evaluation kit for RA8D1 MCU Group&#xA;Visit https://www.renesas.com/ra/ek-ra8d1 to get kit user’s manual, quick start guide, errata, design package, example projects, etc.</description>
+        <capability id="capability.led"/>
+    </board>
+</raModuleDescription>

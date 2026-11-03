@@ -1,0 +1,291 @@
+﻿<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.driver.iica_master" path="fsp_cfg/r_iica_master_cfg.h" version="0">
+        <property default="config.driver.iica_master.param_checking_enable.bsp" display="Parameter Checking" id="config.driver.iica_master.param_checking_enable" description="If selected code for parameter checking is included in the build.">
+            <option display="Default (BSP)" id="config.driver.iica_master.param_checking_enable.bsp" value="(BSP_CFG_PARAM_CHECKING_ENABLE)"/>
+            <option display="Enabled" id="config.driver.iica_master.param_checking_enable.enabled" value="(1)"/>
+            <option display="Disabled" id="config.driver.iica_master.param_checking_enable.disabled" value="(0)"/>
+        </property>
+        <property default="config.driver.iica_master.addr_mode_10_bit_enable.disabled" display="10-bit slave addressing" id="config.driver.iica_master.addr_mode_10_bit_enable" description="If enabled, the driver will support 10-bit slave addressing mode along with the default 7-bit slave addressing mode.">
+            <option display="Enabled" id="config.driver.iica_master.addr_mode_10_bit_enable.enabled" value="(1)"/>
+            <option display="Disabled" id="config.driver.iica_master.addr_mode_10_bit_enable.disabled" value="(0)"/>
+        </property>
+        <property default="config.driver.iica.channel.disabled" display="Enable Single Channel" id="config.driver.iica_master.single_channel" description="Enable single channel to reduce code size if only one channel is to be configured for IICA.">
+            <select enum="enum.driver.iica.channel"/>
+        </property>
+        <content>
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#define IICA_MASTER_CFG_PARAM_CHECKING_ENABLE ${config.driver.iica_master.param_checking_enable}
+#define IICA_MASTER_CFG_ADDR_MODE_10_BIT_ENABLE ${config.driver.iica_master.addr_mode_10_bit_enable}
+#define IICA_MASTER_CFG_SINGLE_CHANNEL ${config.driver.iica_master.single_channel}
+
+#ifdef __cplusplus
+}
+#endif
+        </content>
+    </config>
+    <module config="config.driver.iica_master" display="Connectivity|${module.driver.i2c_master.name} IICA Master (r_iica_master)" id="module.driver.iica_on_iica_master" version="1" url="group___i_i_c_a___m_a_s_t_e_r.html">
+        <constraint display="Maximum configurable value for 7 bit address mode is 0x7F ">
+            ((testInteger("${module.driver.i2c_master.slave}") &amp;&amp; ("${module.driver.i2c_master.slave}" &gt;= 0) &amp;&amp; ("${module.driver.i2c_master.slave}" &lt;= 127)) || (("${module.driver.i2c_master.addr_mode}") != ("module.driver.i2c_master.addr_mode.addr_mode_7bit")))
+        </constraint>
+        <constraint display="Maximum configurable value for 10 bit address mode is 0x3FF ">
+            ((testInteger("${module.driver.i2c_master.slave}") &amp;&amp; ("${module.driver.i2c_master.slave}" &gt;= 0) &amp;&amp; ("${module.driver.i2c_master.slave}" &lt;= 1023)) || (("${module.driver.i2c_master.addr_mode}") != ("module.driver.i2c_master.addr_mode.addr_mode_10bit")))
+        </constraint>
+        <constraint display="The maximum configurable rate for Standard-mode is 100K bps">
+            (("${module.driver.i2c_master.rate_value}" &lt;= 100000) || ("${module.driver.i2c_master.rate}" != "module.driver.i2c_master.rate.rate_standard"))
+        </constraint>
+        <constraint display="The maximum configurable rate for Fast-mode is 400K bps">
+            (("${module.driver.i2c_master.rate_value}" &lt;= 400000) || ("${module.driver.i2c_master.rate}" != "module.driver.i2c_master.rate.rate_fast"))
+        </constraint>
+        <constraint display="The maximum configurable rate for Fast-mode Plus is 1M bps">
+            (("${module.driver.i2c_master.rate_value}" &lt;= 1000000) || ("${module.driver.i2c_master.rate}" != "module.driver.i2c_master.rate.rate_fastplus"))
+        </constraint>
+        <constraint display="The sum of falling time and rising time must be less or equal to duty cycle / bitrate">
+            ((("${module.driver.i2c_master.rate}") == ("module.driver.i2c_master.rate.rate_standard")) &amp;&amp; ((${module.driver.i2c_master.fall_time_us} + ${module.driver.i2c_master.rise_time_us}) &lt;= ${module.driver.i2c_master.duty}/10.0))
+            ||((("${module.driver.i2c_master.rate}") == ("module.driver.i2c_master.rate.rate_fast")) &amp;&amp; ((${module.driver.i2c_master.fall_time_us} + ${module.driver.i2c_master.rise_time_us}) &lt;= ${module.driver.i2c_master.duty}/40.0))||
+            ((("${module.driver.i2c_master.rate}") == ("module.driver.i2c_master.rate.rate_fastplus")) &amp;&amp; ((${module.driver.i2c_master.fall_time_us} + ${module.driver.i2c_master.rise_time_us}) &lt;= ${module.driver.i2c_master.duty}/100.0))
+        </constraint>
+        <constraint display="Unique name required for each instance">
+            "${interface.driver.i2c_master.${module.driver.i2c_master.name}}" === "1"
+        </constraint>
+        <constraint display="Fast-mode plus not available on selected MCU">
+            ((("${module.driver.i2c_master.rate}") != ("module.driver.i2c_master.rate.rate_fastplus")) || (Number("${config.bsp.fsp.mcu.iic_master.rate.rate_fastplus}") === 1))
+        </constraint>
+       <constraint display="Enable 10-bit slave addressing mode">
+            ((("${config.driver.iica_master.addr_mode_10_bit_enable}") === ("config.driver.iica_master.addr_mode_10_bit_enable.enabled")) || (("${module.driver.i2c_master.addr_mode}") != ("module.driver.i2c_master.addr_mode.addr_mode_10bit")))
+        </constraint>
+        <constraint display="Channel not available on selected MCU">
+            "${interface.mcu.iica.${module.driver.i2c_master.channel}}" === "1"
+        </constraint>
+        <constraint display="Channel must match value configured for single channel mode.">
+            ("${config.driver.iica_master.single_channel}" === "config.driver.iica.channel.disabled") ||
+                ("${config.driver.iica_master.single_channel}" === "config.driver.iica.channel." + "${module.driver.i2c_master.channel}")
+        </constraint>
+        <constraint display="Requires IICA Peripheral">
+          "${interface.mcu.iica.external}" === "1"
+        </constraint>
+        <constraint display="The digital filter to be enabled only in fast mode and fast mode plus">
+           ((("${module.driver.i2c_master.rate}") != ("module.driver.i2c_master.rate.rate_standard")) || ("${module.driver.i2c_master.dnf.enabled}" != ("module.driver.i2c_master.dnf.enabled.enabled")))
+        </constraint>
+        <requires id="module.driver.iica_on_iica_master.requires.iica" interface="interface.mcu.iica.external" visible="false" display="Requires IICA Peripheral" />
+        <provides interface="interface.driver.i2c_master" />
+        <provides interface="interface.driver.i2c_master_on_iica" />
+        <provides interface="interface.driver.i2c_master.${module.driver.i2c_master.name}" />
+        <provides interface="interface.peripheral.iica${module.driver.i2c_master.channel}" />
+        <property default="g_iica_master${_instance}" display="Name" id="module.driver.i2c_master.name" description="Module name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.i2c_master.name}")</constraint>
+        </property>
+        <property default="0" display="Channel" id="module.driver.i2c_master.channel" description="Specify the IICA channel.">
+            <constraint display="Value must be a non-negative integer">testInteger("${module.driver.i2c_master.channel}")  &amp;&amp; ("${module.driver.i2c_master.channel}" &gt;= 0)</constraint>
+            <signal event="event.iica${module.driver.i2c_master.channel}.txrxi" />
+        </property>
+        <property default="module.driver.i2c_master.rate.rate_standard" display="Rate" id="module.driver.i2c_master.rate" description="Select the transfer rate.\n\nIf the requested transfer rate cannot be achieved, the settings with the largest possible transfer rate that is less than or equal to the requested transfer rate are used. The theoretical calculated transfer rate is printed in a comment in the generated iica_master_extended_cfg_t structure.">
+            <option display="Standard" id="module.driver.i2c_master.rate.rate_standard" value="I2C_MASTER_RATE_STANDARD"/>
+            <option display="Fast-mode" id="module.driver.i2c_master.rate.rate_fast" value="I2C_MASTER_RATE_FAST"/>
+            <option display="Fast-mode plus" id="module.driver.i2c_master.rate.rate_fastplus" value="I2C_MASTER_RATE_FASTPLUS"/>
+        </property>
+        <property default="0" display="Custom Rate (bps)" id="module.driver.i2c_master.rate_value" description="Set a custom bitrate (bps). Set to 0 to use the maximum bitrate for the selected mode.\n\nStandard-mode: up to 100000; Fast-mode: up to 400000; Fast-mode plus: up to 1000000">
+            <constraint display="Value must be a non-negative integer">testInteger("${module.driver.i2c_master.rate_value}")  &amp;&amp; ("${module.driver.i2c_master.rate_value}" &gt;= 0) </constraint>
+        </property>
+        <property default="0" display="Signal Rising Time (us)" id="module.driver.i2c_master.rise_time_us" description="Set the SDA and SCL signal rising time in micro-seconds.">
+            <constraint display="Must be a valid value">
+            eval('' +
+            'var input = "${module.driver.i2c_master.rise_time_us}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?$","i");' +
+            'var regex_float_with_suffix = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?$","i");' +
+            ' ( regex_float.test(input) || regex_float_with_suffix.test(input))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${module.driver.i2c_master.rise_time_us}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)$","i");' +
+            'if (regex_float.test(output)){' +
+            'output = output;' +
+            '}' +
+            'output')
+            </export>
+        </property>
+        <property default="0" display="Signal Falling Time (us)" id="module.driver.i2c_master.fall_time_us" description="Set the SDA and SCL signal falling time in micro-seconds.">
+            <constraint display="Must be a valid value">
+            eval('' +
+            'var input = "${module.driver.i2c_master.fall_time_us}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?$","i");' +
+            'var regex_float_with_suffix = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?$","i");' +
+            ' ( regex_float.test(input) || regex_float_with_suffix.test(input))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${module.driver.i2c_master.fall_time_us}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)$","i");' +
+            'if (regex_float.test(output)){' +
+            'output = output;' +
+            '}' +
+            'output')
+            </export>
+        </property>
+        <property default="53" display="Duty Cycle (%)" id="module.driver.i2c_master.duty" description="Set SCL high duty cycle.">
+            <constraint display="Value must be an integer between 0 and 100">testInteger("${module.driver.i2c_master.duty}") &amp;&amp; ("${module.driver.i2c_master.duty}" &gt;= 0) &amp;&amp; ("${module.driver.i2c_master.duty}" &lt;= 100)</constraint>
+        </property>
+        <property default="module.driver.i2c_master.dnf.enabled.disabled" display="Digital Filter" id="module.driver.i2c_master.dnf.enabled" description="Configure digital filter.">
+            <option display="Enabled" id="module.driver.i2c_master.dnf.enabled.enabled" value="1"/>
+            <option display="Disabled" id="module.driver.i2c_master.dnf.enabled.disabled" value="0"/>
+        </property>
+
+        <property default="0" id="module.driver.iica.bitrate">
+            <export><![CDATA[eval('' +
+'/* INPUTS */' +
+'    var rate_enum = "${module.driver.i2c_master.rate}";' +
+'    var rate_value = ${module.driver.i2c_master.rate_value}; ' +
+'    var peripheral_clock = ${board.clock.peripheral.iica};' +
+'    var tR = ${module.driver.i2c_master.rise_time_us};' +
+'    var tF = ${module.driver.i2c_master.fall_time_us};' +
+'    var requested_bitrate = 0.0;' +
+'    var wl_us = 0.0;' +
+'    var wh_us = ${module.driver.i2c_master.duty} / 100.0;' +
+'    var divided_clock = 0.0;' +
+'    var actual_bitrate = 0.0;' +
+'    var cks = 0;' +
+'    var IICWL = 0;' +
+'    var IICWH = 0;' +
+'    var t_IICWL = 0;' +
+'    var t_IICWH = 0;' +
+'' +
+'    if(0 == rate_value)'+
+'    {' +
+    '    if ("I2C_MASTER_RATE_FASTPLUS" == rate_enum)' +
+    '    {' +
+    '        requested_bitrate = 1000000;' +
+    '    }' +
+    '    else if ("I2C_MASTER_RATE_FAST" == rate_enum)' +
+    '    {' +
+    '        requested_bitrate = 400000;' +
+    '    }' +
+    '    else' +
+    '    {' +
+    '        requested_bitrate = 100000;' +
+    '    }' +
+'    }'+
+'    else'+
+'    {' +
+'	    requested_bitrate = rate_value;' +
+'    }' +
+'' +
+'    if (peripheral_clock > 20000000)' +
+'    {' +
+'          cks=1;' +
+'    }' +
+'    else' +
+'    {' +
+'          cks=0;' +
+'    }' +
+'' +
+'     divided_clock = peripheral_clock / Math.pow(2, cks);' +
+'     wl_us = Math.round((1 - wh_us) * 100) / 100.0;' +
+'     t_IICWL = Math.ceil(wl_us / requested_bitrate * divided_clock);' +
+'     t_IICWH = Math.ceil((wh_us * divided_clock / requested_bitrate) - (tR + tF) * (divided_clock / 1000000));' +
+'' +
+'     IICWL = t_IICWL;' +
+'     IICWH = t_IICWH;' +
+'' +
+'    actual_bitrate = divided_clock / (IICWL + IICWH + (tR + tF) * (divided_clock / 1000000));' +
+'' +
+'    bitrate_setting = "/* Actual calculated bitrate: " + actual_bitrate.toFixed(0) + ". IICWH0 duty cycle: " + (wh_us * 100).toFixed(0) + ". IICWL0 duty cycle: " + (wl_us * 100).toFixed(0) + ". */" + ' +
+'                   " .clock_settings.iicwl_value = " + IICWL.toString() + ' +
+'                   ",.clock_settings.iicwh_value = " + IICWH.toString() +' +
+'                   ", .clock_settings.cks_value = " + cks.toString();' +
+'    bitrate_setting' +
+'')
+]]>            </export>
+        </property>
+       <property default="module.driver.i2c_master.addr_mode.addr_mode_7bit" display="Address Mode" id="module.driver.i2c_master.addr_mode" description="Select the slave address mode. Ensure 10-bit slave addressing is enabled in the configuration to use 10-Bit setting here.">
+            <option display="7-Bit" id="module.driver.i2c_master.addr_mode.addr_mode_7bit" value="I2C_MASTER_ADDR_MODE_7BIT"/>
+            <option display="10-Bit" id="module.driver.i2c_master.addr_mode.addr_mode_10bit" value="I2C_MASTER_ADDR_MODE_10BIT"/>
+        </property>
+        <property default="0x00" display="Slave Address" id="module.driver.i2c_master.slave" description="Specify the slave address.">
+            <constraint display="Value must be a non-negative integer">testInteger("${module.driver.i2c_master.slave}") &amp;&amp; ("${module.driver.i2c_master.slave}" &gt;= 0)</constraint>
+        </property>
+        <property default="module.driver.i2c_master.comm_rez_enable.disabled" display="Communication reservation" id="module.driver.i2c_master.comm_rez_enable" description="Configure Communication Reservation.">
+            <option display="Enabled" id="module.driver.i2c_master.comm_rez_enable.enabled" value="IICA_MASTER_COMM_REZ_ENABLED"/>
+            <option display="Disabled" id="module.driver.i2c_master.comm_rez_enable.disabled" value="IICA_MASTER_COMM_REZ_DISABLED"/>
+        </property>
+        <property default="iica_master_callback" display="Callback" id="module.driver.i2c_master.p_callback" description="A user callback function must be provided. This will be called from the interrupt service routine (ISR) upon IICA transaction completion reporting the transaction status.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.i2c_master.p_callback}")</constraint>
+        </property>
+        <property default="" display="Interrupt Priority Level" id="module.driver.i2c_master.ipl" description="Select end of IICA communication interrupt priority.">
+            <select enum="enum.mcu.nvic.priorities.mandatory"/>
+            <interrupt event="event.iica${module.driver.i2c_master.channel}.txrxi" isr="iica_master_txrxi_isr"/>
+        </property>
+        <peripheral name="IICA${module.driver.i2c_master.channel}" component="iica${module.driver.i2c_master.channel}" />
+        <header>
+/* IICA Master on IICA Instance. */
+extern const i2c_master_instance_t ${module.driver.i2c_master.name};
+
+/** Access the IICA Master instance using these structures when calling API functions directly (::p_api is not used). */
+extern iica_master_instance_ctrl_t ${module.driver.i2c_master.name}_ctrl;
+extern const i2c_master_cfg_t ${module.driver.i2c_master.name}_cfg;
+
+#ifndef ${module.driver.i2c_master.p_callback}
+void ${module.driver.i2c_master.p_callback}(i2c_master_callback_args_t * p_args);
+#endif
+        </header>
+        <includes>
+#include &quot;r_iica_master.h&quot;
+#include &quot;r_i2c_master_api.h&quot;
+        </includes>
+        <declarations>
+iica_master_instance_ctrl_t ${module.driver.i2c_master.name}_ctrl;
+const iica_master_extended_cfg_t ${module.driver.i2c_master.name}_extend =
+{
+    .clock_settings.comm_rez       = ${module.driver.i2c_master.comm_rez_enable},
+    .clock_settings.digital_filter = ${module.driver.i2c_master.dnf.enabled},
+    ${module.driver.iica.bitrate},
+#if defined(PIN_SDAA${module.driver.i2c_master.channel})
+    .sda_pin_settings.pin = PIN_SDAA${module.driver.i2c_master.channel},
+#else
+    .sda_pin_settings.pin = (bsp_io_port_pin_t) UINT16_MAX,
+#endif
+#if defined(CFG_SDAA${module.driver.i2c_master.channel})
+    .sda_pin_settings.cfg = CFG_SDAA${module.driver.i2c_master.channel} | (uint32_t) IOPORT_PERIPHERAL_PIN_IO,
+#else
+    .sda_pin_settings.cfg = (uint32_t) IOPORT_CFG_PORT_DIRECTION_INPUT,
+#endif
+#if defined(PIN_SCLA${module.driver.i2c_master.channel})
+    .scl_pin_settings.pin = PIN_SCLA${module.driver.i2c_master.channel},
+#else
+    .scl_pin_settings.pin = (bsp_io_port_pin_t) UINT16_MAX,
+#endif
+#if defined(CFG_SCLA${module.driver.i2c_master.channel})
+    .scl_pin_settings.cfg = CFG_SCLA${module.driver.i2c_master.channel} | (uint32_t) IOPORT_PERIPHERAL_PIN_IO,
+#else
+    .scl_pin_settings.cfg = (uint32_t) IOPORT_CFG_PORT_DIRECTION_INPUT,
+#endif
+};
+const i2c_master_cfg_t ${module.driver.i2c_master.name}_cfg =
+{
+    .channel             = ${module.driver.i2c_master.channel},
+    .rate                = ${module.driver.i2c_master.rate},
+    .slave               = ${module.driver.i2c_master.slave},
+    .addr_mode           = ${module.driver.i2c_master.addr_mode},
+    .p_callback          = ${module.driver.i2c_master.p_callback},
+    .p_context           = NULL,
+#if defined(VECTOR_NUMBER_IICA${module.driver.i2c_master.channel}_TXRXI)
+    .tei_irq             = VECTOR_NUMBER_IICA${module.driver.i2c_master.channel}_TXRXI,
+#else
+    .tei_irq             = FSP_INVALID_VECTOR,
+#endif
+    .ipl                 = ${module.driver.i2c_master.ipl},
+    .p_extend            = &amp;${module.driver.i2c_master.name}_extend,
+};
+/* Instance structure to use this module. */
+const i2c_master_instance_t ${module.driver.i2c_master.name} =
+{
+    .p_ctrl        = &amp;${module.driver.i2c_master.name}_ctrl,
+    .p_cfg         = &amp;${module.driver.i2c_master.name}_cfg,
+    .p_api         = &amp;g_iica_master_on_iica
+};
+        </declarations>
+    </module>
+</raModuleDescription>

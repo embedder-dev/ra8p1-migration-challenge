@@ -1,0 +1,212 @@
+<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.middleware.rm_ble_mesh_network" path="fsp_cfg/rm_ble_mesh_network_cfg.h" version="0">
+        <content>
+            #ifdef __cplusplus
+            extern "C" {
+            #endif
+
+            #ifdef __cplusplus
+            }
+            #endif
+        </content>
+    </config>
+    <module id="module.middleware.rm_ble_mesh_network_on_rm_ble_mesh_network" display="Networking|BLE Mesh Network modules|BLE Mesh Network (rm_ble_mesh_network)" config="config.middleware.rm_ble_mesh_network" common="1" version="0" visible="true" url="group___r_m___b_l_e___m_e_s_h___n_e_t_w_o_r_k.html">
+
+        <constraint display="Requires Low Level Library Implementation">
+            ("${interface.middleware.rm_ble_mesh_network_on_rm_ble_mesh_network}" === "1")
+        </constraint>
+        <constraint display="BLE Mesh Network middleware not support R_BLE_SPP module">
+            "${interface.mcu.radio}" === "1"
+        </constraint>
+        <requires id="module.middleware.rm_ble_mesh_network.requires.rm_ble_mesh_bearer" interface="interface.middleware.rm_ble_mesh_bearer.${module.middleware.rm_ble_mesh_bearer.name}" visible="true" display="Add BLE Mesh Bearer Module" find="true"/>
+        <requires id="module.middleware.rm_ble_mesh_network.requires.rm_ble_mesh_provision" interface="interface.middleware.rm_ble_mesh_provision.${module.middleware.rm_ble_mesh_provision.name}" visible="true" display="Add BLE Mesh Provision Module" find="true"/>
+
+        <provides interface="interface.middleware.rm_ble_mesh_network"/>
+        <provides interface="interface.middleware.rm_ble_mesh_network_on_rm_ble_mesh_network"/>
+        <provides interface="interface.middleware.rm_ble_mesh_network.${module.middleware.rm_ble_mesh_network.name}"/>
+
+        <property display="General|Name" id="module.middleware.rm_ble_mesh_network.name" default="g_rm_ble_mesh_network${_instance}" description="Module name.">
+            <constraint display="Name Must Be a Valid C Symbol">testSymbol("${module.middleware.rm_ble_mesh_network.name}")</constraint>
+        </property>
+
+        <property display="Channel Number" id="module.middleware.rm_ble_mesh_network.channel" default="0" description="Select channel corresponding to the channel number of the hardware.">
+            <constraint display="Invalid Channel Number">testInteger("${module.middleware.rm_ble_mesh_network.channel}") &amp;&amp; ("${module.middleware.rm_ble_mesh_network.channel}" &gt;= 0) &amp;&amp; ("${module.middleware.rm_ble_mesh_network.channel}" &lt;= 4294967295)</constraint>
+        </property>
+
+        <property display="Ignore Netcache Wrapping" default= "module.middleware.rm_ble_mesh_network.old_packet_treatment.dropped" id="module.middleware.rm_ble_mesh_network.old_packet_treatment" description="Ignore netcache wrapping.">
+            <option display="Processed" id="module.middleware.rm_ble_mesh_network.old_packet_treatment.processed" value="(1)"/>
+            <option display="Dropped" id="module.middleware.rm_ble_mesh_network.old_packet_treatment.dropped" value="(0)"/>
+        </property>
+
+        <property display="RX Callback Event Enable" default= "module.middleware.rm_ble_mesh_network.rx_state_event.disabled" id="module.middleware.rm_ble_mesh_network.rx_state_event" description="Whether to enable the RX callback event or not.">
+            <option display="Enabled" id="module.middleware.rm_ble_mesh_network.rx_state_event.enabled" value="(1)"/>
+            <option display="Disabled" id="module.middleware.rm_ble_mesh_network.rx_state_event.disabled" value="(0)"/>
+        </property>
+
+        <property display="TX Callback Event Enable" default= "module.middleware.rm_ble_mesh_network.tx_state_event.disabled" id="module.middleware.rm_ble_mesh_network.tx_state_event" description="Whether to enable the TX callback event or not.">
+            <option display="Enabled" id="module.middleware.rm_ble_mesh_network.tx_state_event.enabled" value="(1)"/>
+            <option display="Disabled" id="module.middleware.rm_ble_mesh_network.tx_state_event.disabled" value="(0)"/>
+        </property>
+
+        <property display="Callback" id="module.middleware.rm_ble_mesh_network.network_callback" default="NULL" description="Callback function name.">
+            <constraint display="Name Must Be a Valid C Symbol">testSymbol("${module.middleware.rm_ble_mesh_network.network_callback}")</constraint>
+        </property>
+
+        <property id="module.middleware.rm_ble_mesh_network.p_context" default="NULL">
+            <constraint display="Name Must Be a Valid C Symbol">testSymbol("${module.middleware.rm_ble_mesh_network.p_context}")</constraint>
+            <export>eval('' +
+                'var output = "${module.middleware.rm_ble_mesh_network.p_context}";' +
+                'if ("NULL" !== output) {' +
+                'output = "&amp;" + output;' +
+                '}' +
+                'output')
+            </export>
+        </property>
+
+        <header>
+/** BLE Mesh Netowork on BLE Mesh Network Instance. */
+extern const rm_ble_mesh_network_instance_t ${module.middleware.rm_ble_mesh_network.name};
+
+/** Access the BLE Mesh network instance using these structures when calling API functions directly (::p_api is not used). */
+extern rm_ble_mesh_network_instance_ctrl_t ${module.middleware.rm_ble_mesh_network.name}_ctrl;
+extern const rm_ble_mesh_network_cfg_t ${module.middleware.rm_ble_mesh_network.name}_cfg;
+
+extern rm_ble_mesh_network_address_t ${module.middleware.rm_ble_mesh_network.name}_address;
+extern rm_ble_mesh_network_subnet_handle_t ${module.middleware.rm_ble_mesh_network.name}_subnet_handle;
+extern rm_ble_mesh_network_appkey_handle_t ${module.middleware.rm_ble_mesh_network.name}_appkey_handle;
+extern rm_ble_mesh_network_address_type_t ${module.middleware.rm_ble_mesh_network.name}_address_type;
+
+#ifndef ${module.middleware.rm_ble_mesh_network.network_callback}
+void ${module.middleware.rm_ble_mesh_network.network_callback}(rm_ble_mesh_network_callback_args_t * p_args);
+#endif
+        </header>
+        <includes>
+#include "rm_ble_mesh_network.h"
+#include "rm_ble_mesh_network_api.h"
+        </includes>
+        <declarations>
+rm_ble_mesh_network_address_t ${module.middleware.rm_ble_mesh_network.name}_address;
+
+/** Subnet Handle */
+rm_ble_mesh_network_subnet_handle_t ${module.middleware.rm_ble_mesh_network.name}_subnet_handle;
+
+/** AppKey Handle */
+rm_ble_mesh_network_appkey_handle_t ${module.middleware.rm_ble_mesh_network.name}_appkey_handle;
+
+/** Address Type */
+rm_ble_mesh_network_address_type_t ${module.middleware.rm_ble_mesh_network.name}_address_type;
+
+/** BLE MESH control block.  Allocate an instance specific control block to pass into the BLE MESH API calls.
+ * @par Implemented as
+ * - rm_ble_mesh_network_instance_ctrl_t
+ */
+rm_ble_mesh_network_instance_ctrl_t ${module.middleware.rm_ble_mesh_network.name}_ctrl;
+
+/** BLE MESH configuration parameters. */
+const rm_ble_mesh_network_cfg_t ${module.middleware.rm_ble_mesh_network.name}_cfg =
+{
+    /** the parameters for initialization. */
+    .channel                           = ${module.middleware.rm_ble_mesh_network.channel},
+    .old_packet_treatment              = (rm_ble_mesh_network_old_packet_treatment_t) ${module.middleware.rm_ble_mesh_network.old_packet_treatment},
+    .rx_state_event                    = (rm_ble_mesh_network_rx_state_event_t) ${module.middleware.rm_ble_mesh_network.rx_state_event},
+    .tx_state_event                    = (rm_ble_mesh_network_tx_state_event_t) ${module.middleware.rm_ble_mesh_network.tx_state_event},
+    .p_mesh_bearer_instance            = &amp;${module.middleware.rm_ble_mesh_network.requires.rm_ble_mesh_bearer::module.middleware.rm_ble_mesh_bearer.name},
+    .p_mesh_provision_instance         = &amp;${module.middleware.rm_ble_mesh_network.requires.rm_ble_mesh_provision::module.middleware.rm_ble_mesh_provision.name},
+    .p_callback                        = ${module.middleware.rm_ble_mesh_network.network_callback},
+    .p_context                         = ${module.middleware.rm_ble_mesh_network.p_context},
+    .p_extend                          = NULL
+};
+
+/** This structure encompasses everything that is needed to use an instance of this interface. */
+const rm_ble_mesh_network_instance_t ${module.middleware.rm_ble_mesh_network.name} =
+{
+    .p_ctrl = &amp;${module.middleware.rm_ble_mesh_network.name}_ctrl,
+    .p_cfg  = &amp;${module.middleware.rm_ble_mesh_network.name}_cfg,
+    .p_api  = &amp;g_rm_ble_mesh_network_on_rm_ble_mesh_network
+};
+        </declarations>
+    </module>
+
+    <!-- Developer Assistance -->
+    <developerSupport>
+        <template category="none" display="Send Packet" id="module.middleware.rm_ble_mesh_network.send_packet" version="1">
+            <platform id="fsp" max="" min="3.6.0"/>
+            <moduleRef id="module.middleware.rm_ble_mesh_network_on_rm_ble_mesh_network"/>
+            <content><![CDATA[
+#define RM_BLE_MESH_NETWORK_PACKET_HEADER_INITIALIZED    (1)
+#define RM_BLE_MESH_NETWORK_PACKET_HEADER_UNINITIALIZED  (0)
+
+#ifndef RM_BLE_MESH_NETWORK_CFG_PACKET_TIME_TO_LIVE
+#define RM_BLE_MESH_NETWORK_CFG_PACKET_TIME_TO_LIVE      (1)
+#endif /* RM_BLE_MESH_NETWORK_CFG_PACKET_TIME_TO_LIVE */
+
+typedef enum e_rm_ble_mesh_network_packet_header_control_field
+{
+    /* If the CTL field is set to 0, the NetMIC is a 32-bit value and the lower transport PDU contains an access message. */
+    RM_BLE_MESH_NETWORK_PACKET_HEADER_CONTROL_FIELD_32BIT = 0x00,
+    /* If the CTL field is set to 1, the NetMIC is a 64-bit value and the lower transport PDU contains a control message. */
+    RM_BLE_MESH_NETWORK_PACKET_HEADER_CONTROL_FIELD_64BIT = 0x01,
+} rm_ble_mesh_network_packet_header_control_field_t;
+
+/* Global network packet header */
+rm_ble_mesh_network_header_t  ${rm_ble_mesh_network_name:raProperty(module.middleware.rm_ble_mesh_network.name)}_packet_header;
+
+/* Flag to check whether network packet header is already initialized. */
+uint8_t                       ${rm_ble_mesh_network_name}_packet_header_initialized_flag = RM_BLE_MESH_NETWORK_PACKET_HEADER_UNINITIALIZED;
+
+/* Prototype declaration */
+fsp_err_t ${rm_ble_mesh_network_name:raProperty(module.middleware.rm_ble_mesh_network.name)}_send_packet(uint16_t dstination_address, rm_ble_mesh_network_route_info_t const * const p_route_info, rm_ble_mesh_buffer_t const * const p_send_data);
+
+/*
+ * This function is used to send the unsegmented or segmented network packet.
+ * Before using this function need to set the network packet header.
+ */
+fsp_err_t ${rm_ble_mesh_network_name}_send_packet(uint16_t dstination_address, rm_ble_mesh_network_route_info_t const * const p_route_info, rm_ble_mesh_buffer_t const * const p_send_data)
+{
+    fsp_err_t                         result = FSP_SUCCESS;
+
+    if (RM_BLE_MESH_NETWORK_PACKET_HEADER_UNINITIALIZED == ${rm_ble_mesh_network_name}_packet_header_initialized_flag)
+    {
+        /* Initialize */
+        memset(&${rm_ble_mesh_network_name}_packet_header, 0x0, sizeof(${rm_ble_mesh_network_name}_packet_header));
+
+        RM_BLE_MESH_ACCESS_GetPrimaryUnicastAddress(&${rm_ble_mesh_access_name:raProperty(module.middleware.rm_ble_mesh_access.name)}_ctrl, &${rm_ble_mesh_network_name}_packet_header.src_addr);
+        ${rm_ble_mesh_network_name}_packet_header.dst_addr = dstination_address;
+        ${rm_ble_mesh_network_name}_packet_header.ttl   = RM_BLE_MESH_NETWORK_CFG_PACKET_TIME_TO_LIVE;
+        ${rm_ble_mesh_network_name}_packet_header.ctl   = (uint8_t) RM_BLE_MESH_NETWORK_PACKET_HEADER_CONTROL_FIELD_32BIT;
+
+        ${rm_ble_mesh_network_name}_packet_header_initialized_flag = RM_BLE_MESH_NETWORK_PACKET_HEADER_INITIALIZED;
+    }
+
+    /* Update sequence number irrespective of ${rm_ble_mesh_network_name}_packet_header_initialized_flag */
+    RM_BLE_MESH_NETWORK_AllocateSeqNumber(&${rm_ble_mesh_network_name}_ctrl, &${rm_ble_mesh_network_name}_packet_header.seq_num);
+
+    result = RM_BLE_MESH_NETWORK_SendPduOnInterface(&${rm_ble_mesh_network_name}_ctrl, p_route_info, &${rm_ble_mesh_network_name}_packet_header, p_send_data);
+
+    return result;
+}
+]]>            </content>
+        </template>
+        <template category="none" display="Broadcast Secure Beacon" id="module.middleware.rm_ble_mesh_network.broadcast_secure_beacon" version="1">
+            <platform id="fsp" max="" min="3.6.0"/>
+            <moduleRef id="module.middleware.rm_ble_mesh_network_on_rm_ble_mesh_network"/>
+            <content><![CDATA[
+/* Prototype declaration */
+fsp_err_t ${rm_ble_mesh_network_name:raProperty(module.middleware.rm_ble_mesh_network.name)}_broadcast_secure_beacon(rm_ble_mesh_network_subnet_handle_t subnet_handle, uint8_t const * const p_key_refresh_state, uint32_t iv_index, uint8_t iv_state);
+
+/* This function send a secure network beacon with key refresh state, IV update, and IV state. */
+fsp_err_t ${rm_ble_mesh_network_name}_broadcast_secure_beacon(rm_ble_mesh_network_subnet_handle_t subnet_handle, uint8_t const * const p_key_refresh_state, uint32_t iv_index, uint8_t iv_state)
+{
+    RM_BLE_MESH_ACCESS_SetKeyRefreshPhase(&${rm_ble_mesh_access_name:raProperty(module.middleware.rm_ble_mesh_access.name)}_ctrl, subnet_handle, p_key_refresh_state);
+    RM_BLE_MESH_ACCESS_SetIvIndex(&${rm_ble_mesh_access_name}_ctrl, iv_index, iv_state);
+
+    /* Send the secure network beacon */
+    RM_BLE_MESH_NETWORK_BroadcastSecureBeacon(&${rm_ble_mesh_network_name}_ctrl, subnet_handle);
+
+    return FSP_SUCCESS;
+}
+]]>            </content>
+        </template>
+    </developerSupport>
+</raModuleDescription>

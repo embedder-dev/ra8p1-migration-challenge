@@ -1,0 +1,563 @@
+<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.middleware.rrh46410" path="fsp_cfg/rm_rrh46410_cfg.h" version="0">
+        <property default="config.middleware.rrh46410.param_checking_enable.bsp" display="Parameter Checking" id="config.middleware.rrh46410.param_checking_enable" description="If selected code for parameter checking is included in the build.">
+            <option display="Default (BSP)" id="config.middleware.rrh46410.param_checking_enable.bsp" value="(BSP_CFG_PARAM_CHECKING_ENABLE)"/>
+            <option display="Enabled" id="config.middleware.rrh46410.param_checking_enable.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.rrh46410.param_checking_enable.disabled" value="(0)"/>
+        </property>
+        <property default="config.middleware.rrh46410.operation_mode.iaq_2nd_gen" display="Operation Mode" id="config.middleware.rrh46410.operation_mode" description="Select operation mode.">
+            <option display="IAQ 2nd Gen and Rel IAQ" id="config.middleware.rrh46410.operation_mode.iaq_2nd_gen" value="(0x01)"/>
+            <option display="IAQ 2nd Gen ULP and Rel IAQ ULP" id="config.middleware.rrh46410.operation_mode.iaq_2nd_gen_ulp" value="(0x02)"/>
+            <option display="Public Building AQ Standard (PBAQ)" id="config.middleware.rrh46410.operation_mode.pbaq" value="(0x05)"/>
+        </property>
+        <content>
+            #ifdef __cplusplus
+            extern "C" {
+            #endif
+
+            #define RM_RRH46410_CFG_PARAM_CHECKING_ENABLE   ${config.middleware.rrh46410.param_checking_enable}
+            #define RM_RRH46410_CFG_OPERATION_MODE          ${config.middleware.rrh46410.operation_mode}
+
+            #ifdef __cplusplus
+            }
+            #endif
+        </content>
+    </config>
+    <module config="config.middleware.rrh46410" display="Sensor|${module.middleware.zmod4xxx.name} RRH46410 Gas Sensor Module (rm_rrh46410)" id="module.middleware.zmod4xxx_on_rrh46410" version="1" url="group___r_m___r_r_h46410.html">
+        <constraint display="Unique name required for each instance">
+            "${interface.middleware.zmod4xxx.${module.middleware.zmod4xxx.name}}" === "1"
+        </constraint>
+        <constraint display="RRH46410 needs clock stretching, but is not supported by SAU I2C.">
+            "${interface.driver.i2c_on_sau_i2c}" != "1"
+        </constraint>
+        <requires id="module.middleware.zmod4xxx.requires.comms_i2c_device" interface="interface.driver.comms_i2c_device" visible="true" display="Requires I2C Communications Device">
+            <override property="module.driver.comms_i2c_device.slave_address" value="0x38"/>
+            <override property="module.driver.comms_i2c_device.address_mode" value="I2C_MASTER_ADDR_MODE_7BIT"/>
+            <override property="module.driver.comms_i2c_device.p_context" value="${module.middleware.zmod4xxx.name}_ctrl"/>
+            <override property="module.driver.comms_i2c_device.p_callback" value="rm_rrh46410_comms_i2c_callback"/>
+        </requires>
+        <requires id="module.middleware.zmod4xxx.requires.irq" interface="interface.driver.external_irq_on_icu" display="Add IRQ Driver for measurement [optional]" find="false" optional="true" >
+            <override property="module.driver.external_irq.p_callback" value="rm_rrh46410_irq_callback"/>
+        </requires>
+
+        <provides interface="interface.middleware.zmod4xxx" />
+        <provides interface="interface.middleware.zmod4xxx_on_rrh46410" />
+        <provides interface="interface.middleware.zmod4xxx.${module.middleware.zmod4xxx.name}" />
+        <property default="g_rrh46410_sensor${_instance}" display="Name" id="module.middleware.zmod4xxx.name" description="Module name.">
+            <constraint display="Name must be a valid C symbol">
+                testSymbol("${module.middleware.zmod4xxx.name}")
+            </constraint>
+        </property>
+        <property default="NULL" id="module.middleware.zmod4xxx.p_context" />
+        <property default="rrh46410_comms_i2c_callback" display="Comms I2C Callback" id="module.middleware.zmod4xxx.p_callback" description="A user COMMS I2C callback function can be provided.">
+            <constraint display="Name must be a valid C symbol">
+                testSymbol("${module.middleware.zmod4xxx.p_callback}")
+            </constraint>
+        </property>
+        <property default="rrh46410_irq_callback" display="IRQ Callback" id="module.middleware.zmod4xxx.p_irq_callback" description="A user IRQ callback function can be provided.">
+            <constraint display="Name must be a valid C symbol">
+                testSymbol("${module.middleware.zmod4xxx.p_irq_callback}")
+            </constraint>
+        </property>
+        <property default="" id="module.middleware.zmod4xxx.name_upper">
+            <export>"${module.middleware.zmod4xxx.name}".toUpperCase()</export>
+        </property>
+
+        <header>
+/* ZMOD4XXX on RRH46410 Sensor Instance. */
+/** Access the RRH46410 Sensor instance using these structures when calling API functions directly (::p_api is not used). */
+extern rm_rrh46410_instance_ctrl_t ${module.middleware.zmod4xxx.name}_ctrl;
+extern const rm_zmod4xxx_cfg_t ${module.middleware.zmod4xxx.name}_cfg;
+#ifndef ${module.middleware.zmod4xxx.p_callback}
+void ${module.middleware.zmod4xxx.p_callback}(rm_zmod4xxx_callback_args_t * p_args);
+#endif
+#ifndef ${module.middleware.zmod4xxx.p_irq_callback}
+void ${module.middleware.zmod4xxx.p_irq_callback}(rm_zmod4xxx_callback_args_t *p_args);
+#endif
+        </header>
+
+        <includes>
+#include &quot;rm_rrh46410.h&quot;
+#include &quot;rm_zmod4xxx_api.h&quot;
+        </includes>
+
+        <declarations>
+rm_rrh46410_instance_ctrl_t ${module.middleware.zmod4xxx.name}_ctrl;
+const rm_zmod4xxx_cfg_t ${module.middleware.zmod4xxx.name}_cfg =
+{
+    .p_comms_instance = &amp;${module.middleware.zmod4xxx.requires.comms_i2c_device::module.driver.comms_i2c_device.name},
+#define RA_NOT_DEFINED (1)
+#if (RA_NOT_DEFINED == ${module.middleware.zmod4xxx.requires.irq::module.driver.external_irq.name})
+    .p_irq_instance = NULL,
+    .p_irq_callback = NULL,
+#else
+    .p_irq_instance = &amp;${module.middleware.zmod4xxx.requires.irq::module.driver.external_irq.name},
+    .p_irq_callback = ${module.middleware.zmod4xxx.p_irq_callback},
+#endif
+#undef RA_NOT_DEFINED
+    .p_comms_callback = ${module.middleware.zmod4xxx.p_callback},
+#if defined(${module.middleware.zmod4xxx.p_context})
+    .p_context           = ${module.middleware.zmod4xxx.p_context},
+#else
+    .p_context           = &amp;${module.middleware.zmod4xxx.p_context},
+#endif
+};
+
+const rm_zmod4xxx_instance_t ${module.middleware.zmod4xxx.name} =
+{
+    .p_ctrl = &amp;${module.middleware.zmod4xxx.name}_ctrl,
+    .p_cfg  = &amp;${module.middleware.zmod4xxx.name}_cfg,
+    .p_api  = &amp;g_zmod4xxx_on_rrh46410,
+};
+        </declarations>
+    </module>
+
+    <!-- Developer Assistance -->
+    <developerSupport>
+        <api version="1">
+            <platform id="fsp" max="" min="1.1.0"/>
+            <moduleRef id="module.middleware.zmod4xxx_on_rrh46410"/>
+            <description><![CDATA[<form><p><span color="header" font="header">Overview</span></p><p>RRH46410 provides snippets of code for operating the RRH46410 Middleware.</p></form>]]></description>
+            <function display="Quick Setup" id="rrh46410_quick_setup">
+                <description><![CDATA[<form><p>This function provides quick setup for RRH46410 using the properties from the RA configurator.</p></form>]]></description>
+            </function>
+            <function display="Quick Getting IAQ 2nd Gen. Data" id="rrh46410_quick_getting_iaq_2nd_gen_data">
+                <description><![CDATA[<form><p>This function provides quick getting IAQ 2nd Gen. values for RRH46410 using the properties from the RA configurator.</p></form>]]></description>
+            </function>
+            <function display="Quick Getting IAQ 2nd Gen. Ultra Low Power Data" id="rrh46410_quick_getting_iaq_2nd_gen_ulp_data">
+                <description><![CDATA[<form><p>This function provides quick getting IAQ 2nd Gen. Ultra Low Power values for RRH46410 using the properties from the RA configurator.</p></form>]]></description>
+            </function>
+            <function display="Quick Getting PBAQ Data" id="rrh46410_quick_getting_pbaq_data">
+                <description><![CDATA[<form><p>This function provides quick getting PBAQ values for RRH46410 using the properties from the RA configurator.</p></form>]]></description>
+            </function>
+        </api>
+        <template category="function_call" display="Call Quick Setup" id="module.middleware.zmod4xxx.quick_setup" version="1">
+            <platform id="fsp" max="" min="1.1.0"/>
+            <moduleRef id="module.middleware.zmod4xxx_on_rrh46410">
+                <function id="rrh46410_quick_setup"/>
+            </moduleRef>
+            <content>
+/* TODO: Enable if you want to open RRH46410 */
+#define ${rrh46410_name_upper:raProperty(module.middleware.zmod4xxx.name_upper)}_NON_BLOCKING (0)
+#define ${rrh46410_name_upper}_IRQ_ENABLE   (0)
+
+#if ${rrh46410_name_upper}_NON_BLOCKING
+volatile bool g_rrh46410_i2c_completed = false;
+#endif
+#if ${rrh46410_name_upper}_IRQ_ENABLE
+volatile bool g_rrh46410_irq_completed = false;
+#endif
+
+/* TODO: Enable if you want to use a I2C callback */
+#define ${rrh46410_name_upper}_I2C_CALLBACK_ENABLE (0)
+#if ${rrh46410_name_upper}_I2C_CALLBACK_ENABLE
+void ${rrh46410_callback:raProperty(module.middleware.zmod4xxx.p_callback)}(rm_zmod4xxx_callback_args_t * p_args)
+{
+#if ${rrh46410_name_upper}_NON_BLOCKING
+    if (RM_ZMOD4XXX_EVENT_ERROR != p_args->event)
+    {
+        g_rrh46410_i2c_completed = true;
+    }
+#else
+    FSP_PARAMETER_NOT_USED(p_args);
+#endif
+}
+#endif
+
+/* TODO: Enable if you want to use a IRQ callback */
+#define ${rrh46410_name_upper}_IRQ_CALLBACK_ENABLE (0)
+#if ${rrh46410_name_upper}_IRQ_CALLBACK_ENABLE
+void ${rrh46410_irq_callback:raProperty(module.middleware.zmod4xxx.p_irq_callback)}(rm_zmod4xxx_callback_args_t * p_args)
+{
+#if ${rrh46410_name_upper}_IRQ_ENABLE
+    if (RM_ZMOD4XXX_EVENT_MEASUREMENT_COMPLETE == p_args->event)
+    {
+        g_rrh46410_irq_completed = true;
+    }
+#else
+    FSP_PARAMETER_NOT_USED(p_args);
+#endif
+}
+#endif
+
+/* Delay */
+#define ${rrh46410_name_upper}_DELAY_10     (10)
+#define ${rrh46410_name_upper}_DELAY_90000  (90000)
+#define ${rrh46410_name_upper}_DELAY_3000   (3000)
+#define ${rrh46410_name_upper}_DELAY_5000   (5000)
+#define ${rrh46410_name_upper}_DELAY_MS     (1000)
+
+/* Variables */
+bool g_rrh46410_measurement_start = false;
+
+/* Quick setup for ${rrh46410_name:raProperty(module.middleware.zmod4xxx.name)}.
+ * - ${i2c_bus_name:raProperty(module.driver.comms_i2c_bus.name)} must be setup before calling this function
+ *     (See Developer Assistance -> ${rrh46410_name} -> RRH46410 ***** on rm_rrh46410 -> ${i2c_device_name:raProperty(module.driver.comms_i2c_device.name)} -> ${i2c_bus_name} -> Quick Setup).
+ */
+void ${rrh46410_name}_quick_setup(void);
+
+/* Quick setup for ${rrh46410_name}. */
+void ${rrh46410_name}_quick_setup(void)
+{
+    fsp_err_t err;
+
+    /* Open RRH46410 sensor instance, this must be done before calling any RRH46410 API */
+    err = RM_RRH46410_Open(&amp;${rrh46410_name}_ctrl, &amp;${rrh46410_name}_cfg);
+    assert(FSP_SUCCESS == err);
+
+    /* Clear the flag */
+    g_rrh46410_measurement_start = false;
+}
+            </content>
+        </template>
+        <template category="function_call" display="Quick Getting IAQ 2nd Gen. Data" id="module.middleware.zmod4xxx.quick_getting_iaq_2nd_gen_data" version="1">
+            <platform id="fsp" max="" min="1.1.0"/>
+            <moduleRef id="module.middleware.zmod4xxx_on_rrh46410">
+                <function id="rrh46410_quick_getting_iaq_2nd_gen_data"/>
+            </moduleRef>
+            <content>
+/* Quick getting IAQ 2nd Gen. values for ${rrh46410_name:raProperty(module.middleware.zmod4xxx.name)}.
+ * - ${rrh46410_name} must be setup before calling this function.
+ */
+bool ${rrh46410_name}_quick_getting_iaq_2nd_gen_data(rm_zmod4xxx_iaq_2nd_data_t * p_gas_data, float humidity);
+
+/* Quick getting gas data for ${rrh46410_name}. */
+bool ${rrh46410_name}_quick_getting_iaq_2nd_gen_data(rm_zmod4xxx_iaq_2nd_data_t * p_gas_data, float humidity)
+{
+    fsp_err_t            err;
+    rm_zmod4xxx_raw_data_t rrh46410_raw_data;
+    bool stabilization_complete = false;
+
+    /* Clear callback flags */
+#if ${rrh46410_name_upper:raProperty(module.middleware.zmod4xxx.name_upper)}_IRQ_ENABLE
+    g_rrh46410_irq_completed = false;
+#endif
+#if ${rrh46410_name_upper}_NON_BLOCKING
+    g_rrh46410_i2c_completed = false;
+#endif
+
+    if (false == g_rrh46410_measurement_start)
+    {
+        /* MeasurementStart API is called only once at first */
+        g_rrh46410_measurement_start = true;
+
+        /* Start the measurement */
+        err = RM_RRH46410_MeasurementStart(&amp;${rrh46410_name}_ctrl);
+        assert(FSP_SUCCESS == err);
+#if ${rrh46410_name_upper}_NON_BLOCKING
+        while (!g_rrh46410_i2c_completed)
+        {
+            ;
+        }
+        g_rrh46410_i2c_completed = false;
+#endif
+    }
+
+    /* Set the current humidity */
+    err = RM_RRH46410_TemperatureAndHumiditySet(&amp;${rrh46410_name}_ctrl, 0.0F, humidity);
+    assert(FSP_SUCCESS == err);
+#if ${rrh46410_name_upper}_NON_BLOCKING
+        while (!g_rrh46410_i2c_completed)
+        {
+            ;
+        }
+        g_rrh46410_i2c_completed = false;
+#endif
+
+    /* Wait for the measurement to complete */
+#if ${rrh46410_name_upper}_IRQ_ENABLE
+    while (!g_rrh46410_irq_completed)
+    {
+        ;
+    }
+    g_rrh46410_irq_completed = false;
+#else
+    /* Delay required time. See Table 3 in the RRH46410 Programming Manual. */
+#if BSP_CFG_RTOS == 1 // AzureOS
+    tx_thread_sleep(${rrh46410_name_upper}_DELAY_3000 * TX_TIMER_TICKS_PER_SECOND / ${rrh46410_name_upper}_DELAY_MS);
+#elif BSP_CFG_RTOS == 2 // FreeRTOS
+    vTaskDelay(${rrh46410_name_upper}_DELAY_3000 * configTICK_RATE_HZ / ${rrh46410_name_upper}_DELAY_MS);
+#else // Bare Metal
+    R_BSP_SoftwareDelay(${rrh46410_name_upper}_DELAY_3000, BSP_DELAY_UNITS_MILLISECONDS);
+#endif
+#endif
+
+    do
+    {
+        /* Read ADC data from RRH46410 sensor */
+        err = RM_RRH46410_Read(&amp;${rrh46410_name}_ctrl, &amp;rrh46410_raw_data);
+        assert(FSP_SUCCESS == err);
+#if ${rrh46410_name_upper}_NON_BLOCKING
+        while (!g_rrh46410_i2c_completed)
+        {
+            ;
+        }
+        g_rrh46410_i2c_completed = false;
+#endif
+
+        /* Calculate IAQ 2nd Gen. values from RRH46410 measurement results */
+        err = RM_RRH46410_Iaq2ndGenDataCalculate(&amp;${rrh46410_name}_ctrl, &amp;rrh46410_raw_data, p_gas_data);
+        if (err == FSP_SUCCESS)
+        {
+            stabilization_complete = true;
+        }
+        else if(err == FSP_ERR_SENSOR_IN_STABILIZATION)
+        {
+            stabilization_complete = false;
+        }
+        else if (err == FSP_ERR_SENSOR_MEASUREMENT_NOT_FINISHED)
+        {
+#if BSP_CFG_RTOS == 1 // AzureOS
+            tx_thread_sleep(${rrh46410_name_upper}_DELAY_10 * TX_TIMER_TICKS_PER_SECOND / ${rrh46410_name_upper}_DELAY_MS);
+#elif BSP_CFG_RTOS == 2 // FreeRTOS
+            vTaskDelay(${rrh46410_name_upper}_DELAY_10 * configTICK_RATE_HZ / ${rrh46410_name_upper}_DELAY_MS);
+#else // Bare Metal
+            R_BSP_SoftwareDelay(${rrh46410_name_upper}_DELAY_10, BSP_DELAY_UNITS_MILLISECONDS);
+#endif
+        }
+        else
+        {
+            assert(false);
+        }
+    }
+    while (err == FSP_ERR_SENSOR_MEASUREMENT_NOT_FINISHED);
+
+    return stabilization_complete;
+}
+            </content>
+        </template>
+        <template category="function_call" display="Quick Getting IAQ 2nd Gen. Ultra Low Power Data" id="module.middleware.zmod4xxx.quick_getting_iaq_2nd_gen_ulp_data" version="1">
+            <platform id="fsp" max="" min="1.1.0"/>
+            <moduleRef id="module.middleware.zmod4xxx_on_rrh46410">
+                <function id="rrh46410_quick_getting_iaq_2nd_gen_ulp_data"/>
+            </moduleRef>
+            <content>
+/* Quick getting IAQ 2nd Gen. Ultra Low Power values for ${rrh46410_name:raProperty(module.middleware.zmod4xxx.name)}.
+ * - ${rrh46410_name} must be setup before calling this function.
+ */
+bool ${rrh46410_name}_quick_getting_iaq_2nd_gen_ulp_data(rm_zmod4xxx_iaq_2nd_data_t * p_gas_data, float humidity);
+
+/* Quick getting gas data for ${rrh46410_name}. */
+bool ${rrh46410_name}_quick_getting_iaq_2nd_gen_ulp_data(rm_zmod4xxx_iaq_2nd_data_t * p_gas_data, float humidity)
+{
+    fsp_err_t            err;
+    rm_zmod4xxx_raw_data_t rrh46410_raw_data;
+    bool stabilization_complete = false;
+
+    /* Clear callback flags */
+#if ${rrh46410_name_upper:raProperty(module.middleware.zmod4xxx.name_upper)}_IRQ_ENABLE
+    g_rrh46410_irq_completed = false;
+#endif
+#if ${rrh46410_name_upper}_NON_BLOCKING
+    g_rrh46410_i2c_completed = false;
+#endif
+
+    if (false == g_rrh46410_measurement_start)
+    {
+        /* MeasurementStart API is called only once at first */
+        g_rrh46410_measurement_start = true;
+
+        /* Start the measurement */
+        err = RM_RRH46410_MeasurementStart(&amp;${rrh46410_name}_ctrl);
+        assert(FSP_SUCCESS == err);
+#if ${rrh46410_name_upper}_NON_BLOCKING
+        while (!g_rrh46410_i2c_completed)
+        {
+            ;
+        }
+        g_rrh46410_i2c_completed = false;
+#endif
+    }
+
+    /* Set the current humidity */
+    err = RM_RRH46410_TemperatureAndHumiditySet(&amp;${rrh46410_name}_ctrl, 0.0F, humidity);
+    assert(FSP_SUCCESS == err);
+#if ${rrh46410_name_upper}_NON_BLOCKING
+        while (!g_rrh46410_i2c_completed)
+        {
+            ;
+        }
+        g_rrh46410_i2c_completed = false;
+#endif
+
+    /* Wait for the measurement to complete */
+#if ${rrh46410_name_upper}_IRQ_ENABLE
+    while (!g_rrh46410_irq_completed)
+    {
+        ;
+    }
+    g_rrh46410_irq_completed = false;
+#else
+    /* Delay required time. See Table 3 in the RRH46410 Programming Manual. */
+#if BSP_CFG_RTOS == 1 // AzureOS
+    tx_thread_sleep(${rrh46410_name_upper}_DELAY_90000 * TX_TIMER_TICKS_PER_SECOND / ${rrh46410_name_upper}_DELAY_MS);
+#elif BSP_CFG_RTOS == 2 // FreeRTOS
+    vTaskDelay(${rrh46410_name_upper}_DELAY_90000 * configTICK_RATE_HZ / ${rrh46410_name_upper}_DELAY_MS);
+#else // Bare Metal
+    R_BSP_SoftwareDelay(${rrh46410_name_upper}_DELAY_90000, BSP_DELAY_UNITS_MILLISECONDS);
+#endif
+#endif
+
+    do
+    {
+        /* Read ADC data from RRH46410 sensor */
+        err = RM_RRH46410_Read(&amp;${rrh46410_name}_ctrl, &amp;rrh46410_raw_data);
+        assert(FSP_SUCCESS == err);
+#if ${rrh46410_name_upper}_NON_BLOCKING
+        while (!g_rrh46410_i2c_completed)
+        {
+            ;
+        }
+        g_rrh46410_i2c_completed = false;
+#endif
+
+        /* Calculate IAQ 2nd Gen ULP. values from RRH46410 measurement results */
+        err = RM_RRH46410_Iaq2ndGenDataCalculate(&amp;${rrh46410_name}_ctrl, &amp;rrh46410_raw_data, p_gas_data);
+        if (err == FSP_SUCCESS)
+        {
+            stabilization_complete = true;
+        }
+        else if(err == FSP_ERR_SENSOR_IN_STABILIZATION)
+        {
+            stabilization_complete = false;
+        }
+        else if (err == FSP_ERR_SENSOR_MEASUREMENT_NOT_FINISHED)
+        {
+#if BSP_CFG_RTOS == 1 // AzureOS
+            tx_thread_sleep(${rrh46410_name_upper}_DELAY_10 * TX_TIMER_TICKS_PER_SECOND / ${rrh46410_name_upper}_DELAY_MS);
+#elif BSP_CFG_RTOS == 2 // FreeRTOS
+            vTaskDelay(${rrh46410_name_upper}_DELAY_10 * configTICK_RATE_HZ / ${rrh46410_name_upper}_DELAY_MS);
+#else // Bare Metal
+            R_BSP_SoftwareDelay(${rrh46410_name_upper}_DELAY_10, BSP_DELAY_UNITS_MILLISECONDS);
+#endif
+        }
+        else
+        {
+            assert(false);
+        }
+    }
+    while (err == FSP_ERR_SENSOR_MEASUREMENT_NOT_FINISHED);
+
+    return stabilization_complete;
+}
+            </content>
+        </template>
+        <template category="function_call" display="Quick Getting PBAQ Data" id="module.middleware.zmod4xxx.quick_getting_pbaq_data" version="1">
+            <platform id="fsp" max="" min="1.1.0"/>
+            <moduleRef id="module.middleware.zmod4xxx_on_rrh46410">
+                <function id="rrh46410_quick_getting_pbaq_data"/>
+            </moduleRef>
+            <content>
+/* Quick getting PBAQ values for ${rrh46410_name:raProperty(module.middleware.zmod4xxx.name)}.
+ * - ${rrh46410_name} must be setup before calling this function.
+ */
+bool ${rrh46410_name}_quick_getting_pbaq_data(rm_zmod4xxx_pbaq_data_t * p_gas_data, float humidity);
+
+/* Quick getting gas data for ${rrh46410_name}. */
+bool ${rrh46410_name}_quick_getting_pbaq_data(rm_zmod4xxx_pbaq_data_t * p_gas_data, float humidity)
+{
+    fsp_err_t            err;
+    rm_zmod4xxx_raw_data_t rrh46410_raw_data;
+    bool stabilization_complete = false;
+
+    /* Clear callback flags */
+#if ${rrh46410_name_upper:raProperty(module.middleware.zmod4xxx.name_upper)}_IRQ_ENABLE
+    g_rrh46410_irq_completed = false;
+#endif
+#if ${rrh46410_name_upper}_NON_BLOCKING
+    g_rrh46410_i2c_completed = false;
+#endif
+
+    if (false == g_rrh46410_measurement_start)
+    {
+        /* MeasurementStart API is called only once at first */
+        g_rrh46410_measurement_start = true;
+
+        /* Start the measurement */
+        err = RM_RRH46410_MeasurementStart(&amp;${rrh46410_name}_ctrl);
+        assert(FSP_SUCCESS == err);
+#if ${rrh46410_name_upper}_NON_BLOCKING
+        while (!g_rrh46410_i2c_completed)
+        {
+            ;
+        }
+        g_rrh46410_i2c_completed = false;
+#endif
+    }
+
+    /* Set the current humidity */
+    err = RM_RRH46410_TemperatureAndHumiditySet(&amp;${rrh46410_name}_ctrl, 0.0F, humidity);
+    assert(FSP_SUCCESS == err);
+#if ${rrh46410_name_upper}_NON_BLOCKING
+        while (!g_rrh46410_i2c_completed)
+        {
+            ;
+        }
+        g_rrh46410_i2c_completed = false;
+#endif
+
+    /* Wait for the measurement to complete */
+#if ${rrh46410_name_upper}_IRQ_ENABLE
+    while (!g_rrh46410_irq_completed)
+    {
+        ;
+    }
+    g_rrh46410_irq_completed = false;
+#else
+    /* Delay required time. See Table 3 in the RRH46410 Programming Manual. */
+#if BSP_CFG_RTOS == 1 // AzureOS
+    tx_thread_sleep(${rrh46410_name_upper}_DELAY_5000 * TX_TIMER_TICKS_PER_SECOND / ${rrh46410_name_upper}_DELAY_MS);
+#elif BSP_CFG_RTOS == 2 // FreeRTOS
+    vTaskDelay(${rrh46410_name_upper}_DELAY_5000 * configTICK_RATE_HZ / ${rrh46410_name_upper}_DELAY_MS);
+#else // Bare Metal
+    R_BSP_SoftwareDelay(${rrh46410_name_upper}_DELAY_5000, BSP_DELAY_UNITS_MILLISECONDS);
+#endif
+#endif
+
+    do
+    {
+        /* Read ADC data from RRH46410 sensor */
+        err = RM_RRH46410_Read(&amp;${rrh46410_name}_ctrl, &amp;rrh46410_raw_data);
+        assert(FSP_SUCCESS == err);
+#if ${rrh46410_name_upper}_NON_BLOCKING
+        while (!g_rrh46410_i2c_completed)
+        {
+            ;
+        }
+        g_rrh46410_i2c_completed = false;
+#endif
+
+        /* Calculate PBAQ. values from RRH46410 measurement results */
+        err = RM_RRH46410_PbaqDataCalculate(&amp;${rrh46410_name}_ctrl, &amp;rrh46410_raw_data, p_gas_data);
+        if (err == FSP_SUCCESS)
+        {
+            stabilization_complete = true;
+        }
+        else if(err == FSP_ERR_SENSOR_IN_STABILIZATION)
+        {
+            stabilization_complete = false;
+        }
+        else if (err == FSP_ERR_SENSOR_MEASUREMENT_NOT_FINISHED)
+        {
+#if BSP_CFG_RTOS == 1 // AzureOS
+            tx_thread_sleep(${rrh46410_name_upper}_DELAY_10 * TX_TIMER_TICKS_PER_SECOND / ${rrh46410_name_upper}_DELAY_MS);
+#elif BSP_CFG_RTOS == 2 // FreeRTOS
+            vTaskDelay(${rrh46410_name_upper}_DELAY_10 * configTICK_RATE_HZ / ${rrh46410_name_upper}_DELAY_MS);
+#else // Bare Metal
+            R_BSP_SoftwareDelay(${rrh46410_name_upper}_DELAY_10, BSP_DELAY_UNITS_MILLISECONDS);
+#endif
+        }
+        else
+        {
+            assert(false);
+        }
+    }
+    while (err == FSP_ERR_SENSOR_MEASUREMENT_NOT_FINISHED);
+
+    return stabilization_complete;
+}
+            </content>
+        </template>
+    </developerSupport>
+</raModuleDescription>

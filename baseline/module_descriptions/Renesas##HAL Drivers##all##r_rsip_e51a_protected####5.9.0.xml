@@ -1,0 +1,317 @@
+<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.driver.rsip" path="fsp_cfg/r_rsip_cfg.h" version="0">
+        <!-- Parameter Checking -->
+        <property id="config.driver.rsip.param_checking_enable" display="Parameter Checking" default="config.driver.rsip.param_checking_enable.bsp" description="If selected code for parameter checking is included in the build.">
+            <option id="config.driver.rsip.param_checking_enable.bsp" display="Default (BSP)" value="BSP_CFG_PARAM_CHECKING_ENABLE" />
+            <option id="config.driver.rsip.param_checking_enable.enabled" display="Enabled" value="(1)" />
+            <option id="config.driver.rsip.param_checking_enable.disabled" display="Disabled" value="(0)" />
+        </property>
+
+        <!-- Selection of algorithms to enable for each function -->
+        <!-- AES -->
+        <property id="config.driver.rsip.algorithms_enable.aes128" display="Selection of algorithms to enable|AES-128" default="config.driver.rsip.algorithms_enable.aes128.enabled" description="If the application uses only some of the algorithm in the function, the code size can be reduced by disabling the unused algorithms. This configuration is provided only for the functions for which it works effectively.">
+            <option id="config.driver.rsip.algorithms_enable.aes128.enabled" display="Enabled" value="(1)" />
+            <option id="config.driver.rsip.algorithms_enable.aes128.disabled" display="Disabled" value="(0)" />
+        </property>
+        <property id="config.driver.rsip.algorithms_enable.aes192" display="Selection of algorithms to enable|AES-192" default="config.driver.rsip.algorithms_enable.aes192.enabled" description="If the application uses only some of the algorithm in the function, the code size can be reduced by disabling the unused algorithms. This configuration is provided only for the functions for which it works effectively.">
+            <option id="config.driver.rsip.algorithms_enable.aes192.enabled" display="Enabled" value="(1)" />
+            <option id="config.driver.rsip.algorithms_enable.aes192.disabled" display="Disabled" value="(0)" />
+        </property>
+        <property id="config.driver.rsip.algorithms_enable.aes256" display="Selection of algorithms to enable|AES-256" default="config.driver.rsip.algorithms_enable.aes256.enabled" description="If the application uses only some of the algorithm in the function, the code size can be reduced by disabling the unused algorithms. This configuration is provided only for the functions for which it works effectively.">
+            <option id="config.driver.rsip.algorithms_enable.aes256.enabled" display="Enabled" value="(1)" />
+            <option id="config.driver.rsip.algorithms_enable.aes256.disabled" display="Disabled" value="(0)" />
+        </property>
+        <property id="config.driver.rsip.algorithms_enable.aes_ecb_cbc_ctr" display="Selection of algorithms to enable|AES-ECB CBC CTR" default="config.driver.rsip.algorithms_enable.aes_ecb_cbc_ctr.enabled" description="If the application uses only some of the algorithm in the function, the code size can be reduced by disabling the unused algorithms. This configuration is provided only for the functions for which it works effectively.">
+            <option id="config.driver.rsip.algorithms_enable.aes_ecb_cbc_ctr.enabled" display="Enabled" value="(1)" />
+            <option id="config.driver.rsip.algorithms_enable.aes_ecb_cbc_ctr.disabled" display="Disabled" value="(0)" />
+        </property>
+        <!-- AES-XTS -->
+        <property id="config.driver.rsip.algorithms_enable.aes128xts" display="Selection of algorithms to enable|XTS-AES-128" default="config.driver.rsip.algorithms_enable.aes128xts.enabled" description="If the application uses only some of the algorithm in the function, the code size can be reduced by disabling the unused algorithms. This configuration is provided only for the functions for which it works effectively.">
+            <option id="config.driver.rsip.algorithms_enable.aes128xts.enabled" display="Enabled" value="(1)" />
+            <option id="config.driver.rsip.algorithms_enable.aes128xts.disabled" display="Disabled" value="(0)" />
+        </property>
+        <property id="config.driver.rsip.algorithms_enable.aes256xts" display="Selection of algorithms to enable|XTS-AES-256" default="config.driver.rsip.algorithms_enable.aes256xts.enabled" description="If the application uses only some of the algorithm in the function, the code size can be reduced by disabling the unused algorithms. This configuration is provided only for the functions for which it works effectively.">
+            <option id="config.driver.rsip.algorithms_enable.aes256xts.enabled" display="Enabled" value="(1)" />
+            <option id="config.driver.rsip.algorithms_enable.aes256xts.disabled" display="Disabled" value="(0)" />
+        </property>
+        <property id="config.driver.rsip.algorithms_enable.aes_xts" display="Selection of algorithms to enable|XTS-AES" default="config.driver.rsip.algorithms_enable.aes_xts.enabled" description="If the application uses only some of the algorithm in the function, the code size can be reduced by disabling the unused algorithms. This configuration is provided only for the functions for which it works effectively.">
+            <option id="config.driver.rsip.algorithms_enable.aes_xts.enabled" display="Enabled" value="(1)" />
+            <option id="config.driver.rsip.algorithms_enable.aes_xts.disabled" display="Disabled" value="(0)" />
+        </property>
+        <!-- AES-GCM -->
+        <property id="config.driver.rsip.algorithms_enable.aes_gcm" display="Selection of algorithms to enable|AES-GCM" default="config.driver.rsip.algorithms_enable.aes_gcm.enabled" description="If the application uses only some of the algorithm in the function, the code size can be reduced by disabling the unused algorithms. This configuration is provided only for the functions for which it works effectively.">
+            <option id="config.driver.rsip.algorithms_enable.aes_gcm.enabled" display="Enabled" value="(1)" />
+            <option id="config.driver.rsip.algorithms_enable.aes_gcm.disabled" display="Disabled" value="(0)" />
+        </property>
+        <!-- AES-CCM -->
+        <property id="config.driver.rsip.algorithms_enable.aes_ccm" display="Selection of algorithms to enable|AES-CCM" default="config.driver.rsip.algorithms_enable.aes_ccm.enabled" description="If the application uses only some of the algorithm in the function, the code size can be reduced by disabling the unused algorithms. This configuration is provided only for the functions for which it works effectively.">
+            <option id="config.driver.rsip.algorithms_enable.aes_ccm.enabled" display="Enabled" value="(1)" />
+            <option id="config.driver.rsip.algorithms_enable.aes_ccm.disabled" display="Disabled" value="(0)" />
+        </property>
+        <!-- AES-CMAC -->
+        <property id="config.driver.rsip.algorithms_enable.aes_cmac" display="Selection of algorithms to enable|AES-CMAC" default="config.driver.rsip.algorithms_enable.aes_cmac.enabled" description="If the application uses only some of the algorithm in the function, the code size can be reduced by disabling the unused algorithms. This configuration is provided only for the functions for which it works effectively.">
+            <option id="config.driver.rsip.algorithms_enable.aes_cmac.enabled" display="Enabled" value="(1)" />
+        </property>
+        <!-- ECC -->
+        <property id="config.driver.rsip.algorithms_enable.secp256r1" display="Selection of algorithms to enable|ECC SECP256R1" default="config.driver.rsip.algorithms_enable.secp256r1.enabled" description="If the application uses only some of the algorithm in the function, the code size can be reduced by disabling the unused algorithms. This configuration is provided only for the functions for which it works effectively.">
+            <option id="config.driver.rsip.algorithms_enable.secp256r1.enabled" display="Enabled" value="(1)" />
+            <option id="config.driver.rsip.algorithms_enable.secp256r1.disabled" display="Disabled" value="(0)" />
+        </property>
+        <property id="config.driver.rsip.algorithms_enable.secp384r1" display="Selection of algorithms to enable|ECC SECP384R1" default="config.driver.rsip.algorithms_enable.secp384r1.enabled" description="If the application uses only some of the algorithm in the function, the code size can be reduced by disabling the unused algorithms. This configuration is provided only for the functions for which it works effectively.">
+            <option id="config.driver.rsip.algorithms_enable.secp384r1.enabled" display="Enabled" value="(1)" />
+            <option id="config.driver.rsip.algorithms_enable.secp384r1.disabled" display="Disabled" value="(0)" />
+        </property>
+        <property id="config.driver.rsip.algorithms_enable.secp521r1" display="Selection of algorithms to enable|ECC SECP521R1" default="config.driver.rsip.algorithms_enable.secp521r1.enabled" description="If the application uses only some of the algorithm in the function, the code size can be reduced by disabling the unused algorithms. This configuration is provided only for the functions for which it works effectively.">
+            <option id="config.driver.rsip.algorithms_enable.secp521r1.enabled" display="Enabled" value="(1)" />
+            <option id="config.driver.rsip.algorithms_enable.secp521r1.disabled" display="Disabled" value="(0)" />
+        </property>
+        <property id="config.driver.rsip.algorithms_enable.secp256k1" display="Selection of algorithms to enable|ECC SECP256K1" default="config.driver.rsip.algorithms_enable.secp256k1.enabled" description="If the application uses only some of the algorithm in the function, the code size can be reduced by disabling the unused algorithms. This configuration is provided only for the functions for which it works effectively.">
+            <option id="config.driver.rsip.algorithms_enable.secp256k1.enabled" display="Enabled" value="(1)" />
+            <option id="config.driver.rsip.algorithms_enable.secp256k1.disabled" display="Disabled" value="(0)" />
+        </property>
+        <property id="config.driver.rsip.algorithms_enable.brainpoolp256r1" display="Selection of algorithms to enable|ECC BRAINPOOLP256R1" default="config.driver.rsip.algorithms_enable.brainpoolp256r1.enabled" description="If the application uses only some of the algorithm in the function, the code size can be reduced by disabling the unused algorithms. This configuration is provided only for the functions for which it works effectively.">
+            <option id="config.driver.rsip.algorithms_enable.brainpoolp256r1.enabled" display="Enabled" value="(1)" />
+            <option id="config.driver.rsip.algorithms_enable.brainpoolp256r1.disabled" display="Disabled" value="(0)" />
+        </property>
+        <property id="config.driver.rsip.algorithms_enable.brainpoolp384r1" display="Selection of algorithms to enable|ECC BRAINPOOLP384R1" default="config.driver.rsip.algorithms_enable.brainpoolp384r1.enabled" description="If the application uses only some of the algorithm in the function, the code size can be reduced by disabling the unused algorithms. This configuration is provided only for the functions for which it works effectively.">
+            <option id="config.driver.rsip.algorithms_enable.brainpoolp384r1.enabled" display="Enabled" value="(1)" />
+            <option id="config.driver.rsip.algorithms_enable.brainpoolp384r1.disabled" display="Disabled" value="(0)" />
+        </property>
+        <property id="config.driver.rsip.algorithms_enable.brainpoolp512r1" display="Selection of algorithms to enable|ECC BRAINPOOLP512R1" default="config.driver.rsip.algorithms_enable.brainpoolp512r1.enabled" description="If the application uses only some of the algorithm in the function, the code size can be reduced by disabling the unused algorithms. This configuration is provided only for the functions for which it works effectively.">
+            <option id="config.driver.rsip.algorithms_enable.brainpoolp512r1.enabled" display="Enabled" value="(1)" />
+            <option id="config.driver.rsip.algorithms_enable.brainpoolp512r1.disabled" display="Disabled" value="(0)" />
+        </property>
+        <property id="config.driver.rsip.algorithms_enable.edwards25519" display="Selection of algorithms to enable|ECC EDWARDS25519" default="config.driver.rsip.algorithms_enable.edwards25519.enabled" description="If the application uses only some of the algorithm in the function, the code size can be reduced by disabling the unused algorithms. This configuration is provided only for the functions for which it works effectively.">
+            <option id="config.driver.rsip.algorithms_enable.edwards25519.enabled" display="Enabled" value="(1)" />
+            <option id="config.driver.rsip.algorithms_enable.edwards25519.disabled" display="Disabled" value="(0)" />
+        </property>
+
+        <!-- RSA -->
+        <property id="config.driver.rsip.algorithms_enable.rsa2048" display="Selection of algorithms to enable|RSA-2048" default="config.driver.rsip.algorithms_enable.rsa2048.enabled" description="If the application uses only some of the algorithm in the function, the code size can be reduced by disabling the unused algorithms. This configuration is provided only for the functions for which it works effectively.">
+            <option id="config.driver.rsip.algorithms_enable.rsa2048.enabled" display="Enabled" value="(1)" />
+            <option id="config.driver.rsip.algorithms_enable.rsa2048.disabled" display="Disabled" value="(0)" />
+        </property>
+        <property id="config.driver.rsip.algorithms_enable.rsa3072" display="Selection of algorithms to enable|RSA-3072" default="config.driver.rsip.algorithms_enable.rsa3072.enabled" description="If the application uses only some of the algorithm in the function, the code size can be reduced by disabling the unused algorithms. This configuration is provided only for the functions for which it works effectively.">
+            <option id="config.driver.rsip.algorithms_enable.rsa3072.enabled" display="Enabled" value="(1)" />
+            <option id="config.driver.rsip.algorithms_enable.rsa3072.disabled" display="Disabled" value="(0)" />
+        </property>
+        <property id="config.driver.rsip.algorithms_enable.rsa4096" display="Selection of algorithms to enable|RSA-4096" default="config.driver.rsip.algorithms_enable.rsa4096.enabled" description="If the application uses only some of the algorithm in the function, the code size can be reduced by disabling the unused algorithms. This configuration is provided only for the functions for which it works effectively.">
+            <option id="config.driver.rsip.algorithms_enable.rsa4096.enabled" display="Enabled" value="(1)" />
+            <option id="config.driver.rsip.algorithms_enable.rsa4096.disabled" display="Disabled" value="(0)" />
+        </property>
+
+        <!-- SHA -->
+        <property id="config.driver.rsip.algorithms_enable.sha1" display="Selection of algorithms to enable|SHA-1" default="config.driver.rsip.algorithms_enable.sha1.disabled" description="If the application uses only some of the algorithm in the function, the code size can be reduced by disabling the unused algorithms. This configuration is provided only for the functions for which it works effectively.">
+            <option id="config.driver.rsip.algorithms_enable.sha1.disabled" display="Disabled" value="(0)" />
+        </property>
+        <property id="config.driver.rsip.algorithms_enable.sha224" display="Selection of algorithms to enable|SHA-224" default="config.driver.rsip.algorithms_enable.sha224.enabled" description="If the application uses only some of the algorithm in the function, the code size can be reduced by disabling the unused algorithms. This configuration is provided only for the functions for which it works effectively.">
+            <option id="config.driver.rsip.algorithms_enable.sha224.enabled" display="Enabled" value="(1)" />
+            <option id="config.driver.rsip.algorithms_enable.sha224.disabled" display="Disabled" value="(0)" />
+        </property>
+        <property id="config.driver.rsip.algorithms_enable.sha256" display="Selection of algorithms to enable|SHA-256" default="config.driver.rsip.algorithms_enable.sha256.enabled" description="If the application uses only some of the algorithm in the function, the code size can be reduced by disabling the unused algorithms. This configuration is provided only for the functions for which it works effectively.">
+            <option id="config.driver.rsip.algorithms_enable.sha256.enabled" display="Enabled" value="(1)" />
+            <option id="config.driver.rsip.algorithms_enable.sha256.disabled" display="Disabled" value="(0)" />
+        </property>
+        <property id="config.driver.rsip.algorithms_enable.sha384" display="Selection of algorithms to enable|SHA-384" default="config.driver.rsip.algorithms_enable.sha384.enabled" description="If the application uses only some of the algorithm in the function, the code size can be reduced by disabling the unused algorithms. This configuration is provided only for the functions for which it works effectively.">
+            <option id="config.driver.rsip.algorithms_enable.sha384.enabled" display="Enabled" value="(1)" />
+            <option id="config.driver.rsip.algorithms_enable.sha384.disabled" display="Disabled" value="(0)" />
+        </property>
+        <property id="config.driver.rsip.algorithms_enable.sha512" display="Selection of algorithms to enable|SHA-512" default="config.driver.rsip.algorithms_enable.sha512.enabled" description="If the application uses only some of the algorithm in the function, the code size can be reduced by disabling the unused algorithms. This configuration is provided only for the functions for which it works effectively.">
+            <option id="config.driver.rsip.algorithms_enable.sha512.enabled" display="Enabled" value="(1)" />
+            <option id="config.driver.rsip.algorithms_enable.sha512.disabled" display="Disabled" value="(0)" />
+        </property>
+        <property id="config.driver.rsip.algorithms_enable.sha512_224" display="Selection of algorithms to enable|SHA-512_224" default="config.driver.rsip.algorithms_enable.sha512_224.enabled" description="If the application uses only some of the algorithm in the function, the code size can be reduced by disabling the unused algorithms. This configuration is provided only for the functions for which it works effectively.">
+            <option id="config.driver.rsip.algorithms_enable.sha512_224.enabled" display="Enabled" value="(1)" />
+            <option id="config.driver.rsip.algorithms_enable.sha512_224.disabled" display="Disabled" value="(0)" />
+        </property>
+        <property id="config.driver.rsip.algorithms_enable.sha512_256" display="Selection of algorithms to enable|SHA-512_256" default="config.driver.rsip.algorithms_enable.sha512_256.enabled" description="If the application uses only some of the algorithm in the function, the code size can be reduced by disabling the unused algorithms. This configuration is provided only for the functions for which it works effectively.">
+            <option id="config.driver.rsip.algorithms_enable.sha512_256.enabled" display="Enabled" value="(1)" />
+            <option id="config.driver.rsip.algorithms_enable.sha512_256.disabled" display="Disabled" value="(0)" />
+        </property>
+
+        <!-- HMAC -->
+        <property id="config.driver.rsip.algorithms_enable.hmac_sha1" display="Selection of algorithms to enable|HMAC_SHA1" default="config.driver.rsip.algorithms_enable.hmac_sha1.disabled" description="If the application uses only some of the algorithm in the function, the code size can be reduced by disabling the unused algorithms. This configuration is provided only for the functions for which it works effectively.">
+            <option id="config.driver.rsip.algorithms_enable.hmac_sha1.disabled" display="Disabled" value="(0)" />
+        </property>
+        <property id="config.driver.rsip.algorithms_enable.hmac_sha224" display="Selection of algorithms to enable|HMAC_SHA224" default="config.driver.rsip.algorithms_enable.hmac_sha224.enabled" description="If the application uses only some of the algorithm in the function, the code size can be reduced by disabling the unused algorithms. This configuration is provided only for the functions for which it works effectively.">
+            <option id="config.driver.rsip.algorithms_enable.hmac_sha224.enabled" display="Enabled" value="(1)" />
+            <option id="config.driver.rsip.algorithms_enable.hmac_sha224.disabled" display="Disabled" value="(0)" />
+        </property>
+        <property id="config.driver.rsip.algorithms_enable.hmac_sha256" display="Selection of algorithms to enable|HMAC_SHA256" default="config.driver.rsip.algorithms_enable.hmac_sha256.enabled" description="If the application uses only some of the algorithm in the function, the code size can be reduced by disabling the unused algorithms. This configuration is provided only for the functions for which it works effectively.">
+            <option id="config.driver.rsip.algorithms_enable.hmac_sha256.enabled" display="Enabled" value="(1)" />
+            <option id="config.driver.rsip.algorithms_enable.hmac_sha256.disabled" display="Disabled" value="(0)" />
+        </property>
+        <property id="config.driver.rsip.algorithms_enable.hmac_sha384" display="Selection of algorithms to enable|HMAC_SHA384" default="config.driver.rsip.algorithms_enable.hmac_sha384.enabled" description="If the application uses only some of the algorithm in the function, the code size can be reduced by disabling the unused algorithms. This configuration is provided only for the functions for which it works effectively.">
+            <option id="config.driver.rsip.algorithms_enable.hmac_sha384.enabled" display="Enabled" value="(1)" />
+            <option id="config.driver.rsip.algorithms_enable.hmac_sha384.disabled" display="Disabled" value="(0)" />
+        </property>
+        <property id="config.driver.rsip.algorithms_enable.hmac_sha512" display="Selection of algorithms to enable|HMAC_SHA512" default="config.driver.rsip.algorithms_enable.hmac_sha512.enabled" description="If the application uses only some of the algorithm in the function, the code size can be reduced by disabling the unused algorithms. This configuration is provided only for the functions for which it works effectively.">
+            <option id="config.driver.rsip.algorithms_enable.hmac_sha512.enabled" display="Enabled" value="(1)" />
+            <option id="config.driver.rsip.algorithms_enable.hmac_sha512.disabled" display="Disabled" value="(0)" />
+        </property>
+
+
+        <content>
+            #define RSIP_CFG_ENC_KEY_SIZE(wrappped_key_value_size)                      (wrappped_key_value_size - 4)
+
+            #define RSIP_CFG_PARAM_CHECKING_ENABLE                                      ${config.driver.rsip.param_checking_enable}
+            #define RSIP_CFG_AES_128_ENABLE                                             ${config.driver.rsip.algorithms_enable.aes128}
+            #define RSIP_CFG_AES_192_ENABLE                                             ${config.driver.rsip.algorithms_enable.aes192}
+            #define RSIP_CFG_AES_256_ENABLE                                             ${config.driver.rsip.algorithms_enable.aes256}
+            #define RSIP_CFG_XTS_AES_128_ENABLE                                         ${config.driver.rsip.algorithms_enable.aes128xts}
+            #define RSIP_CFG_XTS_AES_256_ENABLE                                         ${config.driver.rsip.algorithms_enable.aes256xts}
+            #define RSIP_CFG_AES_ECB_CBC_CTR_ENABLE                                     ${config.driver.rsip.algorithms_enable.aes_ecb_cbc_ctr}
+            #define RSIP_CFG_AES_XTS_ENABLE                                             ${config.driver.rsip.algorithms_enable.aes_xts}
+            #define RSIP_CFG_AES_GCM_ENABLE                                             ${config.driver.rsip.algorithms_enable.aes_gcm}
+            #define RSIP_CFG_AES_CCM_ENABLE                                             ${config.driver.rsip.algorithms_enable.aes_ccm}
+            #define RSIP_CFG_AES_CMAC_ENABLE                                            ${config.driver.rsip.algorithms_enable.aes_cmac}
+
+            #define RSIP_CFG_ECC_SECP256R1_ENABLE                                       ${config.driver.rsip.algorithms_enable.secp256r1}
+            #define RSIP_CFG_ECC_SECP384R1_ENABLE                                       ${config.driver.rsip.algorithms_enable.secp384r1}
+            #define RSIP_CFG_ECC_SECP521R1_ENABLE                                       ${config.driver.rsip.algorithms_enable.secp521r1}
+            #define RSIP_CFG_ECC_SECP256K1_ENABLE                                       ${config.driver.rsip.algorithms_enable.secp256k1}
+            #define RSIP_CFG_ECC_BRAINPOOLP256R1_ENABLE                                 ${config.driver.rsip.algorithms_enable.brainpoolp256r1}
+            #define RSIP_CFG_ECC_BRAINPOOLP384R1_ENABLE                                 ${config.driver.rsip.algorithms_enable.brainpoolp384r1}
+            #define RSIP_CFG_ECC_BRAINPOOLP512R1_ENABLE                                 ${config.driver.rsip.algorithms_enable.brainpoolp512r1}
+            #define RSIP_CFG_ECC_EDWARDS25519_ENABLE                                    ${config.driver.rsip.algorithms_enable.edwards25519}
+
+            #define RSIP_CFG_RSA_2048_ENABLE                                            ${config.driver.rsip.algorithms_enable.rsa2048}
+            #define RSIP_CFG_RSA_3072_ENABLE                                            ${config.driver.rsip.algorithms_enable.rsa3072}
+            #define RSIP_CFG_RSA_4096_ENABLE                                            ${config.driver.rsip.algorithms_enable.rsa4096}
+
+            #define RSIP_CFG_SHA1_ENABLE                                                ${config.driver.rsip.algorithms_enable.sha1}
+            #define RSIP_CFG_SHA224_ENABLE                                              ${config.driver.rsip.algorithms_enable.sha224}
+            #define RSIP_CFG_SHA256_ENABLE                                              ${config.driver.rsip.algorithms_enable.sha256}
+            #define RSIP_CFG_SHA384_ENABLE                                              ${config.driver.rsip.algorithms_enable.sha384}
+            #define RSIP_CFG_SHA512_ENABLE                                              ${config.driver.rsip.algorithms_enable.sha512}
+            #define RSIP_CFG_SHA512_224_ENABLE                                          ${config.driver.rsip.algorithms_enable.sha512_224}
+            #define RSIP_CFG_SHA512_256_ENABLE                                          ${config.driver.rsip.algorithms_enable.sha512_256}
+            #define RSIP_CFG_HMAC_SHA1_ENABLE                                           ${config.driver.rsip.algorithms_enable.hmac_sha1}
+            #define RSIP_CFG_HMAC_SHA224_ENABLE                                         ${config.driver.rsip.algorithms_enable.hmac_sha224}
+            #define RSIP_CFG_HMAC_SHA256_ENABLE                                         ${config.driver.rsip.algorithms_enable.hmac_sha256}
+            #define RSIP_CFG_HMAC_SHA384_ENABLE                                         ${config.driver.rsip.algorithms_enable.hmac_sha384}
+            #define RSIP_CFG_HMAC_SHA512_ENABLE                                         ${config.driver.rsip.algorithms_enable.hmac_sha512}
+
+            #define RSIP_CFG_KDF_SHA256_ENABLE                                          (0)
+            #define RSIP_CFG_KDF_SHA_ENABLE                                             RSIP_CFG_KDF_SHA256_ENABLE
+            #define RSIP_CFG_KDF_HMAC_SHA256_ENABLE                                     ${config.driver.rsip.algorithms_enable.hmac_sha256}
+            #define RSIP_CFG_KDF_HMAC_SHA384_ENABLE                                     ${config.driver.rsip.algorithms_enable.hmac_sha384}
+            #define RSIP_CFG_KDF_HMAC_SHA512_ENABLE                                     ${config.driver.rsip.algorithms_enable.hmac_sha512}
+            #define RSIP_CFG_KDF_HMAC_ENABLE                                            RSIP_CFG_KDF_HMAC_SHA256_ENABLE | RSIP_CFG_KDF_HMAC_SHA384_ENABLE | RSIP_CFG_KDF_HMAC_SHA512_ENABLE
+
+            #define RSIP_CFG_BYTE_SIZE_SHA_BLOCK_MAX                                    (128U)
+            #define RSIP_CFG_WORD_SIZE_SHA_INTERNAL_STATE_MAX                           (20U)
+            #define RSIP_CFG_BYTE_SIZE_HMAC_BLOCK_MAX                                   (128U)
+            #define RSIP_CFG_WORD_SIZE_HMAC_INTERNAL_STATE_MAX                          (20U)
+            #define RSIP_CFG_BYTE_SIZE_WRAPPED_KEY_HMAC_MAX                             RSIP_BYTE_SIZE_WRAPPED_KEY_HMAC_SHA512
+            #define RSIP_CFG_BYTE_SIZE_WRAPPED_KEY_VALUE_KEY_UPDATE_KEY                 (64U)
+            #define RSIP_CFG_BYTE_SIZE_WRAPPED_KEY_KDF_HMAC_MAX                         RSIP_BYTE_SIZE_WRAPPED_KEY_KDF_HMAC_SHA512
+            #define RSIP_CFG_BYTE_SIZE_PKI_ENC_CERT_INFO                                (84U)
+            #define RSIP_CFG_BYTE_SIZE_KDF_SHA_PLAIN_MSG1_MAX                           (0U)
+            #define RSIP_CFG_BYTE_SIZE_KDF_SHA_PLAIN_MSG2_MAX                           (0U)
+
+            #define RSIP_CFG_BYTE_SIZE_WRAPPED_KEY_VALUE_AES_128                        (36U)
+            #define RSIP_CFG_BYTE_SIZE_WRAPPED_KEY_VALUE_AES_192                        (52U)
+            #define RSIP_CFG_BYTE_SIZE_WRAPPED_KEY_VALUE_AES_256                        (52U)
+            #define RSIP_CFG_BYTE_SIZE_WRAPPED_KEY_VALUE_XTS_AES_128                    (52U)
+            #define RSIP_CFG_BYTE_SIZE_WRAPPED_KEY_VALUE_XTS_AES_256                    (84U)
+            #define RSIP_CFG_BYTE_SIZE_WRAPPED_KEY_VALUE_ECC_SECP256R1_PUBLIC           (84U)
+            #define RSIP_CFG_BYTE_SIZE_WRAPPED_KEY_VALUE_ECC_SECP384R1_PUBLIC           (116U)
+            #define RSIP_CFG_BYTE_SIZE_WRAPPED_KEY_VALUE_ECC_SECP521R1_PUBLIC           (180U)
+            #define RSIP_CFG_BYTE_SIZE_WRAPPED_KEY_VALUE_ECC_SECP256K1_PUBLIC           (84U)
+            #define RSIP_CFG_BYTE_SIZE_WRAPPED_KEY_VALUE_ECC_BRAINPOOLP256R1_PUBLIC     (84U)
+            #define RSIP_CFG_BYTE_SIZE_WRAPPED_KEY_VALUE_ECC_BRAINPOOLP384R1_PUBLIC     (116U)
+            #define RSIP_CFG_BYTE_SIZE_WRAPPED_KEY_VALUE_ECC_BRAINPOOLP512R1_PUBLIC     (148U)
+            #define RSIP_CFG_BYTE_SIZE_WRAPPED_KEY_VALUE_ECC_EDWARDS25519_PUBLIC        (52U)
+            #define RSIP_CFG_BYTE_SIZE_WRAPPED_KEY_VALUE_ECC_SECP256R1_PRIVATE          (52U)
+            #define RSIP_CFG_BYTE_SIZE_WRAPPED_KEY_VALUE_ECC_SECP384R1_PRIVATE          (68U)
+            #define RSIP_CFG_BYTE_SIZE_WRAPPED_KEY_VALUE_ECC_SECP521R1_PRIVATE          (100U)
+            #define RSIP_CFG_BYTE_SIZE_WRAPPED_KEY_VALUE_ECC_SECP256K1_PRIVATE          (52U)
+            #define RSIP_CFG_BYTE_SIZE_WRAPPED_KEY_VALUE_ECC_BRAINPOOLP256R1_PRIVATE    (52U)
+            #define RSIP_CFG_BYTE_SIZE_WRAPPED_KEY_VALUE_ECC_BRAINPOOLP384R1_PRIVATE    (68U)
+            #define RSIP_CFG_BYTE_SIZE_WRAPPED_KEY_VALUE_ECC_BRAINPOOLP512R1_PRIVATE    (84U)
+            #define RSIP_CFG_BYTE_SIZE_WRAPPED_KEY_VALUE_ECC_EDWARDS25519_PRIVATE       (52U)
+            #define RSIP_CFG_BYTE_SIZE_WRAPPED_KEY_VALUE_RSA_1024_PUBLIC                (164U)
+            #define RSIP_CFG_BYTE_SIZE_WRAPPED_KEY_VALUE_RSA_2048_PUBLIC                (292U)
+            #define RSIP_CFG_BYTE_SIZE_WRAPPED_KEY_VALUE_RSA_3072_PUBLIC                (420U)
+            #define RSIP_CFG_BYTE_SIZE_WRAPPED_KEY_VALUE_RSA_4096_PUBLIC                (548U)
+            #define RSIP_CFG_BYTE_SIZE_WRAPPED_KEY_VALUE_RSA_1024_PRIVATE               (276U)
+            #define RSIP_CFG_BYTE_SIZE_WRAPPED_KEY_VALUE_RSA_2048_PRIVATE               (532U)
+            #define RSIP_CFG_BYTE_SIZE_WRAPPED_KEY_VALUE_RSA_3072_PRIVATE               (788U)
+            #define RSIP_CFG_BYTE_SIZE_WRAPPED_KEY_VALUE_RSA_4096_PRIVATE               (1044U)
+            #define RSIP_CFG_BYTE_SIZE_WRAPPED_KEY_VALUE_HMAC_SHA1                      (52U)
+            #define RSIP_CFG_BYTE_SIZE_WRAPPED_KEY_VALUE_HMAC_SHA224                    (52U)
+            #define RSIP_CFG_BYTE_SIZE_WRAPPED_KEY_VALUE_HMAC_SHA256                    (52U)
+            #define RSIP_CFG_BYTE_SIZE_WRAPPED_KEY_VALUE_HMAC_SHA384                    (68U)
+            #define RSIP_CFG_BYTE_SIZE_WRAPPED_KEY_VALUE_HMAC_SHA512                    (84U)
+            #define RSIP_CFG_BYTE_SIZE_WRAPPED_KEY_VALUE_TLS12_PREMASTER_SECRET         (0U)
+            #define RSIP_CFG_BYTE_SIZE_WRAPPED_KEY_VALUE_KDF_HMAC_SHA256                (52U)
+            #define RSIP_CFG_BYTE_SIZE_WRAPPED_KEY_VALUE_KDF_HMAC_SHA384                (68U)
+            #define RSIP_CFG_BYTE_SIZE_WRAPPED_KEY_VALUE_KDF_HMAC_SHA512                (84U)
+            #define RSIP_CFG_BYTE_POS_WRAPPED_PUBLIC_KEY_ECC_224_QX                     (4U)
+            #define RSIP_CFG_BYTE_POS_WRAPPED_PUBLIC_KEY_ECC_224_QY                     (32U)
+            #define RSIP_CFG_BYTE_POS_WRAPPED_PUBLIC_KEY_ECC_256_QX                     (4U)
+            #define RSIP_CFG_BYTE_POS_WRAPPED_PUBLIC_KEY_ECC_256_QY                     (36U)
+            #define RSIP_CFG_BYTE_POS_WRAPPED_PUBLIC_KEY_ECC_384_QX                     (4U)
+            #define RSIP_CFG_BYTE_POS_WRAPPED_PUBLIC_KEY_ECC_384_QY                     (52U)
+            #define RSIP_CFG_BYTE_POS_WRAPPED_PUBLIC_KEY_ECC_512_QX                     (4U)
+            #define RSIP_CFG_BYTE_POS_WRAPPED_PUBLIC_KEY_ECC_512_QY                     (68U)
+            #define RSIP_CFG_BYTE_POS_WRAPPED_PUBLIC_KEY_ECC_521_QX                     (18U)
+            #define RSIP_CFG_BYTE_POS_WRAPPED_PUBLIC_KEY_ECC_521_QY                     (98U)
+            #define RSIP_CFG_BYTE_POS_WRAPPED_PUBLIC_KEY_ECC_EDWARDS25519_Q             (4U)
+            #define RSIP_CFG_BYTE_POS_WRAPPED_PUBLIC_KEY_RSA_1024_N                     (4U)
+            #define RSIP_CFG_BYTE_POS_WRAPPED_PUBLIC_KEY_RSA_1024_E                     (132U)
+            #define RSIP_CFG_BYTE_POS_WRAPPED_PUBLIC_KEY_RSA_2048_N                     (4U)
+            #define RSIP_CFG_BYTE_POS_WRAPPED_PUBLIC_KEY_RSA_2048_E                     (260U)
+            #define RSIP_CFG_BYTE_POS_WRAPPED_PUBLIC_KEY_RSA_3072_N                     (4U)
+            #define RSIP_CFG_BYTE_POS_WRAPPED_PUBLIC_KEY_RSA_3072_E                     (388U)
+            #define RSIP_CFG_BYTE_POS_WRAPPED_PUBLIC_KEY_RSA_4096_N                     (4U)
+            #define RSIP_CFG_BYTE_POS_WRAPPED_PUBLIC_KEY_RSA_4096_E                     (516U)
+            #define RSIP_CFG_BYTE_SIZE_ECDH_WRAPPED_SECRET_256                          (52U)
+            #define RSIP_CFG_BYTE_SIZE_ECDH_WRAPPED_SECRET_384                          (68U)
+            #define RSIP_CFG_BYTE_SIZE_ECDH_WRAPPED_SECRET_521                          (100U)
+            #define RSIP_CFG_BYTE_SIZE_ECDH_WRAPPED_SECRET_MAX                          RSIP_CFG_BYTE_SIZE_ECDH_WRAPPED_SECRET_521
+            #define RSIP_CFG_BYTE_SIZE_KDF_WRAPPED_MAC_SHA256                           (52U)
+            #define RSIP_CFG_BYTE_SIZE_KDF_WRAPPED_MAC_SHA384                           (68U)
+            #define RSIP_CFG_BYTE_SIZE_KDF_WRAPPED_MAC_SHA512                           (84U)
+            #define RSIP_CFG_BYTE_SIZE_KDF_WRAPPED_MAC_MAX                              RSIP_CFG_BYTE_SIZE_KDF_WRAPPED_MAC_SHA512
+            #define RSIP_CFG_BYTE_SIZE_KDF_WRAPPED_MSG_MAX                              RSIP_CFG_BYTE_SIZE_ECDH_WRAPPED_SECRET_521
+        </content>
+    </config>
+  <module config="config.driver.rsip" display="Security|${module.driver.rsip_protected.name} RSIP Protected Mode (r_rsip_protected)" id="module.driver.rsip_protected" common="1" version="1" url="group___r_s_i_p___p_r_o_t_e_c_t_e_d.html">
+    <constraint display="Driver used multiple times. Can only be used once.">
+        "${interface.driver.rsip_on_rsip_protected}" === "1"
+    </constraint>
+    <constraint display="Only secure projects are supported">
+        "${_project.nonsecure}" !== "1"
+    </constraint>
+    <requires id="module.driver.rsip.requires.e51a" interface="interface.mcu.rsip.rsip_e51a" visible="false" display="Requires RA8 with RSIP_E51A"/>
+    <provides interface="interface.driver.rsip_on_rsip_protected"/>
+    <provides interface="interface.driver.rsip.dotf"/>
+    <provides interface="interface.peripheral.rsip"/>
+    <property default="g_rsip" display="General|Name" id="module.driver.rsip_protected.name" description="Module name.">
+        <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.rsip_protected.name}")</constraint>
+    </property>
+    <header>
+    /* RSIP on RSIP Protected Instance. */
+extern const rsip_instance_t ${module.driver.rsip_protected.name};
+extern rsip_instance_ctrl_t ${module.driver.rsip_protected.name}_ctrl;
+extern const rsip_cfg_t ${module.driver.rsip_protected.name}_cfg;
+    </header>
+    <includes>
+#include &quot;r_rsip.h&quot;
+    </includes>
+    <declarations>
+rsip_instance_ctrl_t ${module.driver.rsip_protected.name}_ctrl;
+const rsip_cfg_t ${module.driver.rsip_protected.name}_cfg;
+/* Instance structure to use this module. */
+const rsip_instance_t ${module.driver.rsip_protected.name} =
+{
+    .p_ctrl        = &amp;${module.driver.rsip_protected.name}_ctrl,
+    .p_cfg         = &amp;${module.driver.rsip_protected.name}_cfg,
+    .p_api         = &amp;g_rsip_on_rsip
+};
+    </declarations>
+  </module>
+</raModuleDescription>

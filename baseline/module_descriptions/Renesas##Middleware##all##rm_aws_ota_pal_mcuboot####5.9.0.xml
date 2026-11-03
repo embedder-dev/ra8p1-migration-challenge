@@ -1,0 +1,55 @@
+﻿<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.middleware.rm_aws_ota_pal_mcuboot" path="fsp_cfg/rm_aws_ota_pal_mcuboot_cfg.h" version="0">
+        <property default="config.middleware.rm_aws_ota_pal_mcuboot.param_checking_enable.bsp" display="Parameter Checking" id="config.middleware.rm_aws_ota_pal_mcuboot.param_checking_enable" description="If selected code for parameter checking is included in the build.">
+            <option display="Default (BSP)" id="config.middleware.rm_aws_ota_pal_mcuboot.param_checking_enable.bsp" value="(BSP_CFG_PARAM_CHECKING_ENABLE)"/>
+            <option display="Enabled" id="config.middleware.rm_aws_ota_pal_mcuboot.param_checking_enable.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.rm_aws_ota_pal_mcuboot.param_checking_enable.disabled" value="(0)"/>
+        </property>
+        <property id="config.middleware.rm_aws_ota_pal_mcuboot.slot_id_callback" display="Filepath to Slot ID Callback Function" default="NULL" description="Callback function for determining which Slot ID the image should be downloaded to.">
+            <constraint display="Must be a valid C symbol">testSymbol("${config.middleware.rm_aws_ota_pal_mcuboot.slot_id_callback}")</constraint>
+        </property>
+        <property id="config.middleware.rm_aws_ota_pal_mcuboot.json_file_signature_key" display="OTA code signing signature algorithm" default="config.middleware.rm_aws_ota_pal_mcuboot.json_file_signature_key.sig_sha256_ecdsa" description="Code signing algorithm used by AWS to sign the downloaded image.">
+            <option display="sig-sha256-ecdsa" id="config.middleware.rm_aws_ota_pal_mcuboot.json_file_signature_key.sig_sha256_ecdsa" value="sig-sha256-ecdsa"/>
+        </property>
+        <content>
+        #ifdef __cplusplus
+        extern "C" {
+        #endif
+
+        #define RM_AWS_OTA_PAL_MCUBOOT_CFG_PARAM_CHECKING_ENABLE ${config.middleware.rm_aws_ota_pal_mcuboot.param_checking_enable}
+
+        #ifndef ${config.middleware.rm_aws_ota_pal_mcuboot.slot_id_callback}
+        extern uint8_t ${config.middleware.rm_aws_ota_pal_mcuboot.slot_id_callback}(uint8_t * file_path, uint16_t max_file_path);
+        #define RM_AWS_OTA_PAL_MCUBOOT_CFG_CALLBACK ${config.middleware.rm_aws_ota_pal_mcuboot.slot_id_callback}
+        #endif
+
+        #define RM_AWS_OTA_PAL_MCUBOOT_CFG_JSON_FILE_SIGNATURE_KEY &quot;${config.middleware.rm_aws_ota_pal_mcuboot.json_file_signature_key}&quot;
+
+        #ifdef __cplusplus
+        }
+        #endif
+        </content>
+    </config>
+    <module id="module.middleware.rm_aws_ota_pal_mcuboot" display="Storage|AWS OTA PAL (rm_aws_ota_pal_mcuboot)" config="config.middleware.rm_aws_ota_pal_mcuboot" common="1" version="0" visible="false" url="group___a_w_s___o_t_a___p_a_l___m_c_u_b_o_o_t.html">
+        <constraint display="Unique name required for each instance">
+            "${interface.middleware.rm_aws_ota_pal_mcuboot.${module.middleware.rm_aws_ota_pal_mcuboot.name}}" === "1"
+        </constraint>
+        <requires id="module.driver.rm_aws_ota_pal_mcuboot.requires.middleware.mcuboot_image_utilities" interface="interface.middleware.mcuboot_image_utilities" visible="true" find="true" display="Requires MCUBoot Port" />
+        <provides interface="interface.middleware.aws_ota_port" />
+        <provides interface="interface.middleware.rm_aws_ota_pal_mcuboot" />
+        <provides interface="interface.middleware.rm_aws_ota_pal_mcuboot.${module.middleware.rm_aws_ota_pal_mcuboot.name}" />
+        <property default="g_rm_aws_ota_pal_mcuboot${_instance}" display="Name" id="module.middleware.rm_aws_ota_pal_mcuboot.name" description="Module name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.middleware.rm_aws_ota_pal_mcuboot.name}")</constraint>
+        </property>
+        <header>
+        </header>
+        <includes>
+        </includes>
+        <declarations>
+        </declarations>
+        <functions>
+        </functions>
+    </module>
+</raModuleDescription>
+

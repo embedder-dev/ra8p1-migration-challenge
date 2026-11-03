@@ -1,0 +1,1270 @@
+<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.driver.gpt" path="fsp_cfg/r_gpt_cfg.h" version="0">
+        <property default="config.driver.gpt.param_checking_enable.bsp" display="Parameter Checking" id="config.driver.gpt.param_checking_enable" description="If selected code for parameter checking is included in the build.">
+            <option display="Default (BSP)" id="config.driver.gpt.param_checking_enable.bsp" value="(BSP_CFG_PARAM_CHECKING_ENABLE)"/>
+            <option display="Enabled" id="config.driver.gpt.param_checking_enable.enabled" value="(1)"/>
+            <option display="Disabled" id="config.driver.gpt.param_checking_enable.disabled" value="(0)"/>
+        </property>
+        <property default="config.driver.gpt.output_support_enable.disabled" display="Pin Output Support" id="config.driver.gpt.output_support_enable" description="Enables or disables support for outputting PWM waveforms on GTIOCx pins. The &quot;Enabled with Extra Features&quot; option enables support for Triangle wave modes and also enables the features located in the &quot;Extra Features&quot; section of each module instance.">
+            <option display="Disabled" id="config.driver.gpt.output_support_enable.disabled" value="(0)"/>
+            <option display="Enabled" id="config.driver.gpt.output_support_enable.enabled" value="(1)"/>
+            <option display="Enabled with Extra Features" id="config.driver.gpt.output_support_enable.enabled_extra" value="(2)"/>
+        </property>
+        <property default="config.driver.gpt.write_protect_enable.disabled" display="Write Protect Enable" id="config.driver.gpt.write_protect_enable" description="If selected write protection is applied to all GPT channels.">
+            <option display="Enabled" id="config.driver.gpt.write_protect_enable.enabled" value="(1)"/>
+            <option display="Disabled" id="config.driver.gpt.write_protect_enable.disabled" value="(0)"/>
+        </property>
+        <content>
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#define GPT_CFG_PARAM_CHECKING_ENABLE ${config.driver.gpt.param_checking_enable}
+#define GPT_CFG_OUTPUT_SUPPORT_ENABLE ${config.driver.gpt.output_support_enable}
+#define GPT_CFG_WRITE_PROTECT_ENABLE  ${config.driver.gpt.write_protect_enable}
+
+#ifndef BSP_CFG_GPT_COUNT_CLOCK_SOURCE
+#define GPT_CFG_GPTCLK_BYPASS         (0)
+#else
+#define GPT_CFG_GPTCLK_BYPASS         (BSP_CFG_GPT_COUNT_CLOCK_SOURCE)
+#endif
+
+#ifdef __cplusplus
+}
+#endif
+        </content>
+    </config>
+    <module config="config.driver.gpt" display="Timers|${module.driver.timer.name} Timer, General PWM (r_gpt)" id="module.driver.timer_on_gpt" version="1" url="group___g_p_t.html">
+        <constraint display="Requires Interrupt enabled">
+            "${module.driver.timer.p_callback}" === "NULL" || "${module.driver.timer.ipl}" != "_disabled" || "${module.driver.timer.capture_a_ipl}" != "_disabled"  || "${module.driver.timer.capture_b_ipl}" != "_disabled" || "${module.driver.timer.trough_ipl}" != "_disabled"
+        </constraint>
+        <constraint display="When Capture A Source is used, Capture A Interrupt must be enabled">
+            "${module.driver.timer.capture_a_source}".length === 0 || "${module.driver.timer.capture_a_ipl}" != "_disabled"
+        </constraint>
+        <constraint display="When Capture B Source is used, Capture B Interrupt must be enabled">
+            "${module.driver.timer.capture_b_source}".length === 0 || "${module.driver.timer.capture_b_ipl}" != "_disabled"
+        </constraint>
+        <constraint display="Unique name required for each instance">
+            "${interface.driver.timer.${module.driver.timer.name}}" === "1"
+        </constraint>
+        <constraint display="Requires GPT peripheral">
+          "${interface.mcu.gpt}" === "1"
+        </constraint>
+        <constraint display="Disable all output pins or enable Pin Output Support">
+            "${config.driver.gpt.output_support_enable}" === "config.driver.gpt.output_support_enable.enabled" ||
+            "${config.driver.gpt.output_support_enable}" === "config.driver.gpt.output_support_enable.enabled_extra" ||
+            ("${module.driver.timer.gtioca_output_enabled}" === "module.driver.timer.gtioca_output_enabled.false" &amp;&amp;
+            "${module.driver.timer.gtiocb_output_enabled}" === "module.driver.timer.gtiocb_output_enabled.false")
+        </constraint>
+        <constraint display="ELC signal source selection requires an ELC Driver">
+            (
+                (!testDynamicEnum("${module.driver.timer.start_source}", "_signal")) &amp;&amp;
+                (!testDynamicEnum("${module.driver.timer.stop_source}", "_signal")) &amp;&amp;
+                (!testDynamicEnum("${module.driver.timer.clear_source}", "_signal")) &amp;&amp;
+                (!testDynamicEnum("${module.driver.timer.count_up_source}", "_signal")) &amp;&amp;
+                (!testDynamicEnum("${module.driver.timer.count_down_source}", "_signal")) &amp;&amp;
+                (!testDynamicEnum("${module.driver.timer.capture_a_source}", "_signal")) &amp;&amp;
+                (!testDynamicEnum("${module.driver.timer.capture_b_source}", "_signal"))
+            ) || ("1" === "${interface.driver.elc}")
+        </constraint>
+        <constraint display="Event count up/down source selection not available on this MCU.">
+                (("${module.driver.timer.count_up_source}" == "") &amp;&amp; ("${module.driver.timer.count_down_source}" == "")) ||
+                (0 != (${config.bsp.fsp.mcu.gpt.pin_count_source_channels} &amp; (1 &lt;&lt; ${module.driver.timer.channel})))
+        </constraint>
+        <constraint display="Event count cannot be used in Triangle PWM modes.">
+                !((("${module.driver.timer.count_up_source}" != "") || ("${module.driver.timer.count_down_source}" != "")) &amp;&amp;
+                  ("${module.driver.timer.mode}" == "module.driver.timer.mode.mode_symmetric_pwm" ||
+                   "${module.driver.timer.mode}" == "module.driver.timer.mode.mode_asymmetric_pwm" ||
+                   "${module.driver.timer.mode}" == "module.driver.timer.mode.mode_asymmetric_pwm_mode3"))
+        </constraint>
+        <constraint display="Set Pin Output Support to Enabled with Extra Features or set Enable Extra Features to Disabled">
+            "${config.driver.gpt.output_support_enable}" === "config.driver.gpt.output_support_enable.enabled_extra" ||
+            "${module.driver.timer.extra}" === "module.driver.timer.extra.disabled"
+        </constraint>
+        <constraint display="Set Pin Output Support to Enabled with Extra Features to use Triangle-Wave PWM">
+            "${config.driver.gpt.output_support_enable}" === "config.driver.gpt.output_support_enable.enabled_extra" ||
+            ("${module.driver.timer.mode}" != "module.driver.timer.mode.mode_symmetric_pwm" &amp;&amp;
+            "${module.driver.timer.mode}" != "module.driver.timer.mode.mode_asymmetric_pwm" &amp;&amp;
+            "${module.driver.timer.mode}" != "module.driver.timer.mode.mode_asymmetric_pwm_mode3")
+        </constraint>
+        <constraint display="Channel not available on selected MCU">
+            ("${interface.mcu.gpt.${module.driver.timer.channel}}" === "1")
+        </constraint>
+        <constraint display="Set Extra Features|Extra Features to Enabled or Disable the Trough interrupt Priority.">
+            (("${module.driver.timer.trough_ipl}" === "_disabled")||
+            ("${module.driver.timer.extra}" != "module.driver.timer.extra.disabled"))
+        </constraint>
+        <constraint display="Pin Output Support must be enabled in order to use custom waveforms.">
+            ("${module.driver.timer.gtior.custom_waveform_enable}" === "module.driver.timer.gtior.custom_waveform_enable.disabled") || "${config.driver.gpt.output_support_enable}" === "config.driver.gpt.output_support_enable.enabled" || "${config.driver.gpt.output_support_enable}" === "config.driver.gpt.output_support_enable.enabled_extra"
+        </constraint>
+        <constraint display="The clock selected for the GPT module is not enabled."> <!-- GPTCLK is before GPT clock selection. GTCLK is after selection -->
+             ("${board.clock.peripheral.gtclk}" &gt; 0)
+        </constraint>
+        <constraint display="In Compare Match operation, Saw-wave PWM, One-Shot Pulse, Triangle-Wave PWM modes should not be used.">
+            (("${module.driver.timer.mode}" === "module.driver.timer.mode.mode_periodic") ||
+            ("${module.driver.timer.mode}" === "module.driver.timer.mode.mode_one_shot")) ||
+            (("${module.driver.timer.compare_match.a.status}" === "module.driver.timer.compare_match.a.status.disabled") &amp;&amp;
+            ("${module.driver.timer.compare_match.b.status}" === "module.driver.timer.compare_match.b.status.disabled"))
+        </constraint>
+        <constraint display="Value of Compare Match A, B must be less than or equal to the value of Period.">
+            eval(' \n' +
+            '   var requested_unit = "${module.driver.timer.unit}"; \n' +
+            '   var requested_period = ${module.driver.timer.period}; \n' +
+            '   var requested_cmp_a_period = ${module.driver.timer.compare_match.a.value}; \n' +
+            '   var requested_cmp_b_period = ${module.driver.timer.compare_match.b.value}; \n' +
+            '   var comapre_match_a_status = "${module.driver.timer.compare_match.a.status}"; \n' +
+            '   var comapre_match_b_status = "${module.driver.timer.compare_match.b.status}"; \n' +
+            '   var output = true; \n' +
+            ' \n' +
+            '   if (("module.driver.timer.unit.unit_frequency_hz" != requested_unit) &amp;&amp; ("module.driver.timer.unit.unit_frequency_khz" != requested_unit)) \n' +
+            '   { \n' +
+            '       if (((requested_cmp_a_period &gt; requested_period) &amp;&amp; ("module.driver.timer.compare_match.a.status.enabled" == comapre_match_a_status)) || \n' +
+            '           ((requested_cmp_b_period &gt; requested_period) &amp;&amp; ("module.driver.timer.compare_match.b.status.enabled" == comapre_match_b_status))) \n' +
+            '       { \n' +
+            '           output = false; \n' +
+            '       } \n' +
+            '   } \n' +
+            'output')
+        </constraint>
+        <constraint display="Value of Compare Match A, B must be greater than or equal to the value of Period.">
+            eval(' \n' +
+            '   var requested_unit = "${module.driver.timer.unit}"; \n' +
+            '   var requested_period = ${module.driver.timer.period}; \n' +
+            '   var requested_cmp_a_period = ${module.driver.timer.compare_match.a.value}; \n' +
+            '   var requested_cmp_b_period = ${module.driver.timer.compare_match.b.value}; \n' +
+            '   var comapre_match_a_status = "${module.driver.timer.compare_match.a.status}"; \n' +
+            '   var comapre_match_b_status = "${module.driver.timer.compare_match.b.status}"; \n' +
+            '   var output = true; \n' +
+            ' \n' +
+            '   if (("module.driver.timer.unit.unit_frequency_hz" == requested_unit) || ("module.driver.timer.unit.unit_frequency_khz" == requested_unit)) \n' +
+            '   { \n' +
+            '       if (((requested_cmp_a_period &lt; requested_period) &amp;&amp; ("module.driver.timer.compare_match.a.status.enabled" == comapre_match_a_status)) || \n' +
+            '           ((requested_cmp_b_period &lt; requested_period) &amp;&amp; ("module.driver.timer.compare_match.b.status.enabled" == comapre_match_b_status))) \n' +
+            '       { \n' +
+            '           output = false; \n' +
+            '       } \n' +
+            '   } \n' +
+            'output')
+        </constraint>
+        <constraint display="Input capture can not be used when compare match is enabled.">
+            (("${module.driver.timer.compare_match.a.status}" === "module.driver.timer.compare_match.a.status.disabled") ||
+            (("${module.driver.timer.compare_match.a.status}" === "module.driver.timer.compare_match.a.status.enabled") &amp;&amp;
+            ("${module.driver.timer.capture_a_source}".length === 0))) &amp;&amp;
+            (("${module.driver.timer.compare_match.b.status}" === "module.driver.timer.compare_match.b.status.disabled") ||
+            (("${module.driver.timer.compare_match.b.status}" === "module.driver.timer.compare_match.b.status.enabled") &amp;&amp;
+            ("${module.driver.timer.capture_b_source}".length === 0)))
+        </constraint>
+        <constraint display="Value of compare match A must greater than 0.">
+            (("${module.driver.timer.compare_match.a.status}" === "module.driver.timer.compare_match.a.status.enabled") &amp;&amp; (${module.driver.timer.compare_match.a.value} &gt; 0)) ||
+            ("${module.driver.timer.compare_match.a.status}" === "module.driver.timer.compare_match.a.status.disabled")
+        </constraint>
+        <constraint display="Value of compare match B must greater than 0.">
+            (("${module.driver.timer.compare_match.b.status}" === "module.driver.timer.compare_match.b.status.enabled") &amp;&amp; (${module.driver.timer.compare_match.b.value} &gt; 0)) ||
+            ("${module.driver.timer.compare_match.b.status}" === "module.driver.timer.compare_match.b.status.disabled")
+        </constraint>
+        <constraint display="Selected MCU channel does not support A/D Converter Start Request feature. ADC Trigger settings must be set to default values.">
+              (("${interface.mcu.gpt.${module.driver.timer.channel}.gpteh}" === "1") ||
+               ("${interface.mcu.gpt.${module.driver.timer.channel}.gpte}" === "1") ||
+               ("${interface.mcu.gpt.${module.driver.timer.channel}.ad_direct_start}" === "1")) ||
+              (("${module.driver.timer.adc_trigger}" == "") &amp;&amp;
+               ("${module.driver.timer.adc_a_compare_match}" == "0") &amp;&amp;
+               ("${module.driver.timer.adc_b_compare_match}" == "0"))
+        </constraint>
+        <requires id="module.driver.timer_on_gpt.requires.gpt" interface="interface.mcu.gpt" visible="false" display="Requires GPT peripheral" />
+        <provides interface="interface.driver.timer" />
+        <provides interface="interface.driver.timer_on_gpt" />
+        <provides interface="interface.driver.timer.${module.driver.timer.name}" />
+        <provides interface="interface.driver.timer_on_gpt.${module.driver.timer.channel}" />
+        <provides interface="interface.peripheral.gpt${module.driver.timer.channel}" />
+        <property default="" id="module.driver.timer.divider_step">
+            <select enum="enum.driver.timer.divider_step_size"/>
+        </property>
+        <property default="" id="module.driver.timer.divider_valid_value_7_9">
+            <select enum="enum.driver.timer.divider_valid_value_7_9"/>
+        </property>
+        <property default="g_timer${_instance}" display="General|Name" id="module.driver.timer.name" description="Module name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.timer.name}")</constraint>
+        </property>
+        <property default="0" display="General|Channel" id="module.driver.timer.channel" description="Specify the hardware channel.">
+            <constraint display="Enter the supported Channel number">testInteger("${module.driver.timer.channel}")  &amp;&amp; ("${module.driver.timer.channel}" &gt;= 0)</constraint>
+            <signal event="event.gpt${module.driver.timer.channel}.capture.compare.a" />
+            <signal event="event.gpt${module.driver.timer.channel}.capture.compare.b" />
+            <signal event="event.gpt${module.driver.timer.channel}.compare.c" />
+            <signal event="event.gpt${module.driver.timer.channel}.compare.d" />
+            <signal event="event.gpt${module.driver.timer.channel}.compare.e" />
+            <signal event="event.gpt${module.driver.timer.channel}.compare.f" />
+            <signal event="event.gpt${module.driver.timer.channel}.counter.overflow" />
+            <signal event="event.gpt${module.driver.timer.channel}.counter.underflow" />
+            <signal event="event.gpt${module.driver.timer.channel}.ad.trig.a" />
+            <signal event="event.gpt${module.driver.timer.channel}.ad.trig.b" />
+        </property>
+        <property default="module.driver.timer.mode.mode_periodic" display="General|Mode" id="module.driver.timer.mode" description="Mode selection.\nPeriodic: Generates periodic interrupts or square waves.\nOne-shot: Generate a single interrupt or a pulse wave. Note: One-shot mode is implemented in software. ISRs must be enabled for one-shot even if callback is unused.\nOne-Shot Pulse: Counter performs saw-wave operation with fixed buffer operation.\nSaw-wave PWM: Generates basic saw-wave PWM waveforms.\nTriangle-wave PWM (symmetric, Mode 1): Generates symmetric PWM waveforms with duty cycle determined by compare match set with 32-bit transfer during a crest event and updated at the next trough with single or double buffer operation.\nTriangle-wave PWM (asymmetric, Mode 2): Generates asymmetric PWM waveforms with duty cycle determined by compare match set with 32-bit transfer during a crest/trough event and updated at the next trough/crest.\nTriangle-wave PWM (asymmetric, Mode 3): Generates PWM waveforms with duty cycle determined by compare match set with 64-bit transfer during a crest interrupt and updated at the next trough with fixed buffer operation.">
+            <option display="Periodic" id="module.driver.timer.mode.mode_periodic" value="TIMER_MODE_PERIODIC"/>
+            <option display="One-Shot" id="module.driver.timer.mode.mode_one_shot" value="TIMER_MODE_ONE_SHOT"/>
+            <option display="One-Shot Pulse" id="module.driver.timer.mode_one_shot_pulse" value="TIMER_MODE_ONE_SHOT_PULSE" />
+            <option display="Saw-wave PWM" id="module.driver.timer.mode.mode_pwm" value="TIMER_MODE_PWM"/>
+            <option display="Triangle-wave PWM (symmetric, Mode 1)" id="module.driver.timer.mode.mode_symmetric_pwm" value="TIMER_MODE_TRIANGLE_WAVE_SYMMETRIC_PWM"/>
+            <option display="Triangle-wave PWM (asymmetric, Mode 2)" id="module.driver.timer.mode.mode_asymmetric_pwm" value="TIMER_MODE_TRIANGLE_WAVE_ASYMMETRIC_PWM"/>
+            <option display="Triangle-wave PWM (asymmetric, Mode 3)" id="module.driver.timer.mode.mode_asymmetric_pwm_mode3" value="TIMER_MODE_TRIANGLE_WAVE_ASYMMETRIC_PWM_MODE3"/>
+        </property>
+        <property default="0x10000" display="General|Period" id="module.driver.timer.period" description="Specify the timer period in units selected below. Set the period to 0x100000000 (32-bit) or 0x10000 (16-bit) raw counts for a free running timer or an input capture configuration.  The period can be set up to 0x40000000000 (32-bit) or 0x4000000 (16-bit) which will use a divider of 1024 with the maximum period.\n\nIf the requested period cannot be achieved, the settings with the largest possible period that is less than or equal to the requested period are used. The theoretical calculated period is printed in a comment in the generated timer_cfg_t structure.">
+            <constraint display="Value must be a non-negative integer less than or equal to 0x40000000000">testInteger("${module.driver.timer.period}") &amp;&amp; ("${module.driver.timer.period}" &gt;= 0) &amp;&amp; ("${module.driver.timer.period}" &lt;= 0x40000000000)</constraint>
+            <export><![CDATA[eval(' \n' +
+'/* INPUTS */ \n' +
+'    var mode = "${module.driver.timer.mode}"; \n' +
+'    var requested_period = ${module.driver.timer.period}; \n' +
+'    var requested_unit_string = "${module.driver.timer.unit}"; \n' +
+'    var peripheral_clock_hz = ${board.clock.peripheral.gtclk}; // GPTCLK is before GPT clock selection. GTCLK is after selection \n' +
+'    var divider_step_size = ${module.driver.timer.divider_step}; \n' +
+'    var divider_valid_value_7_9 = ${module.driver.timer.divider_valid_value_7_9}; \n' +
+'    var requested_duty = ${module.driver.timer.duty_cycle}; \n' +
+'    var timer_counter_max = 0x10000; \n' +
+' \n' +
+'    if ("${module.driver.timer.bits.ch${module.driver.timer.channel}}" == "32") \n' +
+'    { \n' +
+'        /* This is a 32 bit timer. */ \n' +
+'        timer_counter_max = 0x100000000; \n' +
+'    } \n' +
+' \n' +
+'    /* Calculate the number of counts in the requested period. */ \n' +
+'    var requested_period_s = 0; \n' +
+'    if ("ns" == requested_unit_string) \n' +
+'    { \n' +
+'        requested_period_s = requested_period / 1000000000; \n' +
+'    } \n' +
+'    else if ("us" == requested_unit_string) \n' +
+'    { \n' +
+'        requested_period_s = requested_period / 1000000; \n' +
+'    } \n' +
+'    else if ("ms" == requested_unit_string) \n' +
+'    { \n' +
+'        requested_period_s = requested_period / 1000; \n' +
+'    } \n' +
+'    else if ("s" == requested_unit_string) \n' +
+'    { \n' +
+'        requested_period_s = requested_period; \n' +
+'    } \n' +
+'    else if ("hz" == requested_unit_string) \n' +
+'    { \n' +
+'        requested_period_s = 1 / requested_period; \n' +
+'    } \n' +
+'    else if ("khz" == requested_unit_string) \n' +
+'    { \n' +
+'        requested_period_s = 1 / (requested_period * 1000); \n' +
+'    } \n' +
+' \n' +
+'    if ((mode == "TIMER_MODE_TRIANGLE_WAVE_SYMMETRIC_PWM") || (mode == "TIMER_MODE_TRIANGLE_WAVE_ASYMMETRIC_PWM") || \n' +
+'        (mode == "TIMER_MODE_TRIANGLE_WAVE_ASYMMETRIC_PWM_MODE3")) \n' +
+'    { \n' +
+'        /* Set the period to half the desired period for triangle waves. The actual period is twice the requested value. */ \n' +
+'        requested_period_s = requested_period_s / 2; \n' +
+'    } \n' +
+' \n' +
+'    var period_counts = requested_period; \n' +
+'    if ("raw" != requested_unit_string) \n' +
+'    { \n' +
+'        period_counts = requested_period_s * peripheral_clock_hz; \n' +
+'    } \n' +
+' \n' +
+'    /* Calculate the smallest divider required to fit the period in 32 bits or 16 bits for 16 bit timer. */ \n' +
+'    var divider = 0; \n' +
+'    while (period_counts > timer_counter_max) \n' +
+'    { \n' +
+'        period_counts = period_counts / divider_step_size; \n' +
+'        divider = divider + (divider_step_size / 2); \n' +
+' \n' +
+'        if (!divider_valid_value_7_9 && ((divider == 7) || (divider == 9))) \n' +
+'        { \n' +
+'            period_counts = period_counts / divider_step_size; \n' +
+'            divider = divider + (divider_step_size / 2); \n' +
+'        } \n' +
+' \n' +
+'        /* If the divider is larger than the maximum divider, set the period and divider to the maximum. */ \n' +
+'        if (divider > 10) \n' +
+'        { \n' +
+'            period_counts = timer_counter_max; \n' +
+'            divider = 10; \n' +
+'            break; \n' +
+'        } \n' +
+'    } \n' +
+' \n' +
+'    /* Round period down. */ \n' +
+'    period_counts = Math.floor(period_counts); \n' +
+' \n' +
+'    /* If the requested period is less than one count, set the period to 1 count and the divider to 1. */ \n' +
+'    if (period_counts === 0) \n' +
+'    { \n' +
+'        period_counts = 1; \n' +
+'        divider = 0; \n' +
+'    } \n' +
+' \n' +
+'    /* Calculate the duty cycle. */ \n' +
+'    var duty_counts = Math.floor(requested_duty * period_counts / 100); \n' +
+' \n' +
+'    /* Calculate the actual values. */ \n' +
+'    var actual_period = period_counts / (peripheral_clock_hz / Math.pow( 2, divider ) ); \n' +
+'    if ((mode == "TIMER_MODE_TRIANGLE_WAVE_SYMMETRIC_PWM") || (mode == "TIMER_MODE_TRIANGLE_WAVE_ASYMMETRIC_PWM") || \n' +
+'        (mode == "TIMER_MODE_TRIANGLE_WAVE_ASYMMETRIC_PWM_MODE3")) \n' +
+'    { \n' +
+'        /* The actual period is twice the value set in the configuration. */ \n' +
+'        actual_period = actual_period * 2; \n' +
+'    } \n' +
+'    var actual_duty = 100 * duty_counts / period_counts; \n' +
+' \n' +
+'    period_setting =  "/* Actual period: " + actual_period.toString() + " seconds. Actual duty: " + actual_duty.toString() + "%. */" +  \n' +
+'                   " .period_counts = (uint32_t) 0x" + period_counts.toString(16) + \n' +
+'                   ", .duty_cycle_counts = 0x" + duty_counts.toString(16) + \n' +
+'                   ", .source_div = (timer_source_div_t)" + divider.toString(); \n' +
+'    period_setting \n' +
+'')
+]]>            </export>
+        </property>
+        <property default="module.driver.timer.compare_match.a.status.disabled" display="General|Compare Match|Compare Match A|Status" id="module.driver.timer.compare_match.a.status" description="">
+            <option display="Enabled" id="module.driver.timer.compare_match.a.status.enabled" value="1"/>
+            <option display="Disabled" id="module.driver.timer.compare_match.a.status.disabled" value="0"/>
+        </property>
+        <property default="0" display="General|Compare Match|Compare Match A|Compare match value" id="module.driver.timer.compare_match.a.value" description="Specify the compare match A value in units that selected in Period Unit section.">
+            <constraint display="Value must be a non-negative integer less than or equal to 0x40000000000">
+                testInteger("${module.driver.timer.compare_match.a.value}") &amp;&amp;
+                ("${module.driver.timer.compare_match.a.value}" &gt;= 0) &amp;&amp;
+                ("${module.driver.timer.compare_match.a.value}" &lt;= 0x40000000000)
+            </constraint>
+        </property>
+        <property default="module.driver.timer.compare_match.b.status.disabled" display="General|Compare Match|Compare Match B|Status" id="module.driver.timer.compare_match.b.status" description="">
+            <option display="Enabled" id="module.driver.timer.compare_match.b.status.enabled" value="1"/>
+            <option display="Disabled" id="module.driver.timer.compare_match.b.status.disabled" value="0"/>
+        </property>
+        <property default="0" display="General|Compare Match|Compare Match B|Compare match value" id="module.driver.timer.compare_match.b.value" description="Specify the compare match B value in units that selected in Period Unit section.">
+            <constraint display="Value must be a non-negative integer less than or equal to 0x40000000000">
+                testInteger("${module.driver.timer.compare_match.b.value}") &amp;&amp;
+                ("${module.driver.timer.compare_match.b.value}" &gt;= 0) &amp;&amp;
+                ("${module.driver.timer.compare_match.b.value}" &lt;= 0x40000000000)
+            </constraint>
+        </property>
+        <!-- This property is used for calculating the period for compare match A/B -->
+        <property default="0" id="module.driver.timer.compare_match.configure">
+            <export><![CDATA[eval(' \n' +
+'/* INPUTS */ \n' +
+'   var compare_match_a_counts = ${module.driver.timer.compare_match.a.value}; \n' +
+'   var compare_match_b_counts = ${module.driver.timer.compare_match.b.value}; \n' +
+'   var timner_reuqested_val = ${module.driver.timer.period}; \n' +
+'   var timer_requested_unit = "${module.driver.timer.unit}"; \n' +
+'   var compare_match_a_status = ${module.driver.timer.compare_match.a.status}; \n' +
+'   var compare_match_b_status = ${module.driver.timer.compare_match.b.status}; \n' +
+' \n' +
+'   function calculate_period(requested_cmp_val) \n' +
+'   { \n' +
+'       var compare_match_cnt; \n' +
+'       var period_counts; \n' +
+'       var peripheral_clock_hz = ${board.clock.peripheral.gtclk}; // GPTCLK is before GPT clock selection. GTCLK is after selection \n' +
+' \n' +
+'       var requested_period_s = 0; \n' +
+'       var requested_cmp_s = 0; \n' +
+' \n' +
+'       /* Convert uint of requested value into second */ \n' +
+'       if ("ns" == timer_requested_unit) \n' +
+'       { \n' +
+'           requested_period_s = timner_reuqested_val / 1000000000; \n' +
+'           requested_cmp_s = requested_cmp_val / 1000000000; \n' +
+'       } \n' +
+'       else if ("us" == timer_requested_unit) \n' +
+'       { \n' +
+'           requested_period_s = timner_reuqested_val / 1000000; \n' +
+'           requested_cmp_s = requested_cmp_val / 1000000; \n' +
+'       } \n' +
+'       else if ("ms" == timer_requested_unit) \n' +
+'       { \n' +
+'           requested_period_s = timner_reuqested_val / 1000; \n' +
+'           requested_cmp_s = requested_cmp_val / 1000; \n' +
+'       } \n' +
+'       else if ("s" == timer_requested_unit) \n' +
+'       { \n' +
+'           requested_period_s = timner_reuqested_val; \n' +
+'           requested_cmp_s = requested_cmp_val; \n' +
+'       } \n' +
+'       else if ("hz" == timer_requested_unit) \n' +
+'       { \n' +
+'           requested_period_s = 1 / timner_reuqested_val; \n' +
+'           requested_cmp_s = 1 / requested_cmp_val; \n' +
+'       } \n' +
+'       else if ("khz" == timer_requested_unit) \n' +
+'       { \n' +
+'           requested_period_s = 1 / (timner_reuqested_val * 1000); \n' +
+'           requested_cmp_s = 1 / (requested_cmp_val * 1000); \n' +
+'       } \n' +
+'       else \n' +
+'       { \n' +
+'           /* Nothing */ \n' +
+'       } \n' +
+' \n' +
+'       if ("raw" == timer_requested_unit) \n' +
+'       { \n' +
+'           period_counts = timner_reuqested_val; \n' +
+'       } \n' +
+'       else \n' +
+'       { \n' +
+'           period_counts = requested_period_s * peripheral_clock_hz; \n' +
+'       } \n' +
+' \n' +
+'       var divider = 0; \n' +
+'       var timer_counter_max = 0x10000; \n' +
+'       var divider_step_size = ${module.driver.timer.divider_step}; \n' +
+'       var divider_valid_value_7_9 = ${module.driver.timer.divider_valid_value_7_9}; \n' +
+' \n' +
+'       if ("${module.driver.timer.bits.ch${module.driver.timer.channel}}" == "32") \n' +
+'       { \n' +
+'           /* This is a 32 bit timer. */ \n' +
+'           timer_counter_max = 0x100000000; \n' +
+'       } \n' +
+' \n' +
+'       /* Calculate the period when timer need to apply divider to achieve target period */ \n' +
+'       while (period_counts > timer_counter_max) \n' +
+'       { \n' +
+'           period_counts = period_counts / divider_step_size; \n' +
+'           divider = divider + (divider_step_size / 2); \n' +
+' \n' +
+'           if (!divider_valid_value_7_9 && ((divider == 7) || (divider == 9))) \n' +
+'           { \n' +
+'               period_counts = period_counts / divider_step_size; \n' +
+'               divider = divider + (divider_step_size / 2); \n' +
+'           } \n' +
+' \n' +
+'           if (divider > 10) \n' +
+'           { \n' +
+'               period_counts = timer_counter_max; \n' +
+'               divider = 10; \n' +
+'               break; \n' +
+'           } \n' +
+'       } \n' +
+' \n' +
+'       /* Round period down. */ \n' +
+'       period_counts = Math.floor(period_counts); \n' +
+' \n' +
+'       if (period_counts === 0) \n' +
+'       { \n' +
+'           period_counts = 1; \n' +
+'       } \n' +
+' \n' +
+'       /* Calculate the compare match counts. */ \n' +
+'       if ("raw" == timer_requested_unit) \n' +
+'       { \n' +
+'           compare_match_cnt = Math.floor((requested_cmp_val / timner_reuqested_val) * period_counts); \n' +
+'       } \n' +
+'       else \n' +
+'       { \n' +
+'           compare_match_cnt = Math.floor((requested_cmp_s / requested_period_s) * period_counts); \n' +
+'       } \n' +
+' \n' +
+'       if (0 == compare_match_cnt) \n' +
+'       { \n' +
+'           compare_match_cnt = 1; \n' +
+'       } \n' +
+' \n' +
+'       return compare_match_cnt; \n' +
+'   } \n' +
+' \n' +
+'   /* Calculate period for requested compare match value */ \n' +
+'   var compare_match_a; \n' +
+'   var compare_match_b; \n' +
+' \n' +
+'   /* If compare channel A is enabled, calculate the period count from requested unit. Otherwise, return 0 immediately. */ \n' +
+'   if (0 != compare_match_a_status) \n' +
+'   { \n' +
+'       compare_match_a = calculate_period(compare_match_a_counts); \n' +
+'   } \n' +
+'   else \n' +
+'   { \n' +
+'       compare_match_a = 0; \n' +
+'   } \n' +
+' \n' +
+'   /* If compare channel A is enabled, calculate the period count from requested unit. Otherwise, return 0 immediately. */ \n' +
+'   if (0 != compare_match_b_status) \n' +
+'   { \n' +
+'       compare_match_b = calculate_period(compare_match_b_counts); \n' +
+'   } \n' +
+'   else \n' +
+'   { \n' +
+'       compare_match_b = 0; \n' +
+'   } \n' +
+' \n' +
+'   compare_match_setting = " .compare_match_value = { /* CMP_A */ (uint32_t)0x" + compare_match_a.toString(16) +  \n' +
+'                           ", /* CMP_B */ (uint32_t)0x" + compare_match_b.toString(16) + "}" +  \n' +
+'                           ", .compare_match_status = " + "(" + compare_match_b_status.toString(16) + "U" + " << 1U)" + " | " + compare_match_a_status.toString(16) + "U"; \n' +
+' \n' +
+'   compare_match_setting \n' +
+'')
+]]>         </export>
+        </property>
+        <!-- Get the number of bits in the timer from an enum. -->
+        <property default="" id="module.driver.timer.bits.ch0" description="">
+            <select enum="enum.mcu.gpt.bits.ch0"/>
+        </property>
+        <property default="" id="module.driver.timer.bits.ch1" description="">
+            <select enum="enum.mcu.gpt.bits.ch1"/>
+        </property>
+        <property default="" id="module.driver.timer.bits.ch2" description="">
+            <select enum="enum.mcu.gpt.bits.ch2"/>
+        </property>
+        <property default="" id="module.driver.timer.bits.ch3" description="">
+            <select enum="enum.mcu.gpt.bits.ch3"/>
+        </property>
+        <property default="" id="module.driver.timer.bits.ch4" description="">
+            <select enum="enum.mcu.gpt.bits.ch4"/>
+        </property>
+        <property default="" id="module.driver.timer.bits.ch5" description="">
+            <select enum="enum.mcu.gpt.bits.ch5"/>
+        </property>
+        <property default="" id="module.driver.timer.bits.ch6" description="">
+            <select enum="enum.mcu.gpt.bits.ch6"/>
+        </property>
+        <property default="" id="module.driver.timer.bits.ch7" description="">
+            <select enum="enum.mcu.gpt.bits.ch7"/>
+        </property>
+        <property default="" id="module.driver.timer.bits.ch8" description="">
+            <select enum="enum.mcu.gpt.bits.ch8"/>
+        </property>
+        <property default="" id="module.driver.timer.bits.ch9" description="">
+            <select enum="enum.mcu.gpt.bits.ch9"/>
+        </property>
+        <property default="" id="module.driver.timer.bits.ch10" description="">
+            <select enum="enum.mcu.gpt.bits.ch10"/>
+        </property>
+        <property default="" id="module.driver.timer.bits.ch11" description="">
+            <select enum="enum.mcu.gpt.bits.ch11"/>
+        </property>
+        <property default="" id="module.driver.timer.bits.ch12" description="">
+            <select enum="enum.mcu.gpt.bits.ch12"/>
+        </property>
+        <property default="" id="module.driver.timer.bits.ch13" description="">
+            <select enum="enum.mcu.gpt.bits.ch13"/>
+        </property>
+        <property default="module.driver.timer.unit.unit_period_raw_counts" display="General|Period Unit" id="module.driver.timer.unit" description="Unit of the period specified above">
+            <option display="Raw Counts" id="module.driver.timer.unit.unit_period_raw_counts" value="raw"/>
+            <option display="Nanoseconds" id="module.driver.timer.unit.unit_period_nsec" value="ns"/>
+            <option display="Microseconds" id="module.driver.timer.unit.unit_period_usec" value="us"/>
+            <option display="Milliseconds" id="module.driver.timer.unit.unit_period_msec" value="ms"/>
+            <option display="Seconds" id="module.driver.timer.unit.unit_period_sec" value="s"/>
+            <option display="Hertz" id="module.driver.timer.unit.unit_frequency_hz" value="hz"/>
+            <option display="Kilohertz" id="module.driver.timer.unit.unit_frequency_khz" value="khz"/>
+        </property>
+        <property default="module.driver.timer.gtior.gtioa.initial_output_level.low" display="Output|Custom Waveform|GTIOA|Initial Output Level" id="module.driver.timer.gtior.gtioa.initial_output_level" description="Set the initial output level of GTIOCxA.">
+            <option display="Pin Level Low" id="module.driver.timer.gtior.gtioa.initial_output_level.low" value="0"/>
+            <option display="Pin Level High" id="module.driver.timer.gtior.gtioa.initial_output_level.high" value="1"/>
+        </property>
+        <property default="module.driver.timer.gtior.gtioa.cycle_end_output_level.retain" display="Output|Custom Waveform|GTIOA|Cycle End Output Level" id="module.driver.timer.gtior.gtioa.cycle_end_output_level" description="Set the output level of GTIOCxA at cycle end.">
+            <option display="Pin Level Retain" id="module.driver.timer.gtior.gtioa.cycle_end_output_level.retain" value="0"/>
+            <option display="Pin Level Low" id="module.driver.timer.gtior.gtioa.cycle_end_output_level.low" value="1"/>
+            <option display="Pin Level High" id="module.driver.timer.gtior.gtioa.cycle_end_output_level.high" value="2"/>
+            <option display="Pin Level Toggle" id="module.driver.timer.gtior.gtioa.cycle_end_output_level.toggle" value="3"/>
+        </property>
+        <property default="module.driver.timer.gtior.gtioa.compare_match_output_level.retain" display="Output|Custom Waveform|GTIOA|Compare Match Output Level" id="module.driver.timer.gtior.gtioa.compare_match_output_level" description="Set the output level of GTIOCxA at compare match.">
+            <option display="Pin Level Retain" id="module.driver.timer.gtior.gtioa.compare_match_output_level.retain" value="0"/>
+            <option display="Pin Level Low" id="module.driver.timer.gtior.gtioa.compare_match_output_level.low" value="1"/>
+            <option display="Pin Level High" id="module.driver.timer.gtior.gtioa.compare_match_output_level.high" value="2"/>
+            <option display="Pin Level Toggle" id="module.driver.timer.gtior.gtioa.compare_match_output_level.toggle" value="3"/>
+        </property>
+        <property default="module.driver.timer.gtior.gtioa.count_stop_retain.disabled" display="Output|Custom Waveform|GTIOA|Retain Output Level at Count Stop" id="module.driver.timer.gtior.gtioa.count_stop_retain" description="Retain the current GTIOxA output level when counting is stopped.">
+            <option display="Disabled" id="module.driver.timer.gtior.gtioa.count_stop_retain.disabled" value="0"/>
+            <option display="Enabled" id="module.driver.timer.gtior.gtioa.count_stop_retain.enabled" value="1"/>
+        </property>
+        <property default="module.driver.timer.gtior.gtiob.initial_output_level.low" display="Output|Custom Waveform|GTIOB|Initial Output Level" id="module.driver.timer.gtior.gtiob.initial_output_level" description="Set the initial output level of GTIOCxB.">
+            <option display="Pin Level Low" id="module.driver.timer.gtior.gtiob.initial_output_level.low" value="0"/>
+            <option display="Pin Level High" id="module.driver.timer.gtior.gtiob.initial_output_level.high" value="1"/>
+        </property>
+        <property default="module.driver.timer.gtior.gtiob.cycle_end_output_level.retain" display="Output|Custom Waveform|GTIOB|Cycle End Output Level" id="module.driver.timer.gtior.gtiob.cycle_end_output_level" description="Set the output level of GTIOCxB at cycle end.">
+            <option display="Pin Level Retain" id="module.driver.timer.gtior.gtiob.cycle_end_output_level.retain" value="0"/>
+            <option display="Pin Level Low" id="module.driver.timer.gtior.gtiob.cycle_end_output_level.low" value="1"/>
+            <option display="Pin Level High" id="module.driver.timer.gtior.gtiob.cycle_end_output_level.high" value="2"/>
+            <option display="Pin Level Toggle" id="module.driver.timer.gtior.gtiob.cycle_end_output_level.toggle" value="3"/>
+        </property>
+        <property default="module.driver.timer.gtior.gtiob.compare_match_output_level.retain" display="Output|Custom Waveform|GTIOB|Compare Match Output Level" id="module.driver.timer.gtior.gtiob.compare_match_output_level" description="Set the output level of GTIOCxB at compare match.">
+            <option display="Pin Level Retain" id="module.driver.timer.gtior.gtiob.compare_match_output_level.retain" value="0"/>
+            <option display="Pin Level Low" id="module.driver.timer.gtior.gtiob.compare_match_output_level.low" value="1"/>
+            <option display="Pin Level High" id="module.driver.timer.gtior.gtiob.compare_match_output_level.high" value="2"/>
+            <option display="Pin Level Toggle" id="module.driver.timer.gtior.gtiob.compare_match_output_level.toggle" value="3"/>
+        </property>
+        <property default="module.driver.timer.gtior.gtiob.count_stop_retain.disabled" display="Output|Custom Waveform|GTIOB|Retain Output Level at Count Stop" id="module.driver.timer.gtior.gtiob.count_stop_retain" description="Retain the current GTIOxB output level when counting is stopped.">
+            <option display="Disabled" id="module.driver.timer.gtior.gtiob.count_stop_retain.disabled" value="0"/>
+            <option display="Enabled" id="module.driver.timer.gtior.gtiob.count_stop_retain.enabled" value="1"/>
+        </property>
+        <property default="module.driver.timer.gtior.custom_waveform_enable.disabled" display="Output|Custom Waveform|Custom Waveform Enable" id="module.driver.timer.gtior.custom_waveform_enable" description="Enable custom waveform configuration.">
+            <option display="Disabled" id="module.driver.timer.gtior.custom_waveform_enable.disabled" value="0"/>
+            <option display="Enabled" id="module.driver.timer.gtior.custom_waveform_enable.enabled" value="1"/>
+        </property>
+        <property default="50" display="Output|Duty Cycle Percent (only applicable in PWM mode)" id="module.driver.timer.duty_cycle" description="Specify the timer duty cycle percent. Only used in PWM mode.">
+            <constraint display="Value must be between 0 and 100">testInteger("${module.driver.timer.duty_cycle}") &amp;&amp; ("${module.driver.timer.duty_cycle}" &gt;= 0) &amp;&amp;("${module.driver.timer.duty_cycle}" &lt;= 100)</constraint>
+        </property>
+        <property default="module.driver.timer.gtioca_output_enabled.false" display="Output|GTIOCA Output Enabled" id="module.driver.timer.gtioca_output_enabled" description="Enable the output of GTIOCA on a pin.">
+            <option display="True" id="module.driver.timer.gtioca_output_enabled.true" value="true"/>
+            <option display="False" id="module.driver.timer.gtioca_output_enabled.false" value="false"/>
+        </property>
+        <property default="module.driver.timer.gtioca_stop_level.pin_level_low" display="Output|GTIOCA Stop Level" id="module.driver.timer.gtioca_stop_level" description="Select the behavior of the output pin when the timer is stopped.">
+            <option display="Pin Level Low" id="module.driver.timer.gtioca_stop_level.pin_level_low" value="GPT_PIN_LEVEL_LOW"/>
+            <option display="Pin Level High" id="module.driver.timer.gtioca_stop_level.pin_level_high" value="GPT_PIN_LEVEL_HIGH"/>
+        </property>
+        <property default="module.driver.timer.gtiocb_output_enabled.false" display="Output|GTIOCB Output Enabled" id="module.driver.timer.gtiocb_output_enabled" description="Enable the output of GTIOCB on a pin.">
+            <option display="True" id="module.driver.timer.gtiocb_output_enabled.true" value="true"/>
+            <option display="False" id="module.driver.timer.gtiocb_output_enabled.false" value="false"/>
+        </property>
+        <property default="module.driver.timer.gtiocb_stop_level.pin_level_low" display="Output|GTIOCB Stop Level" id="module.driver.timer.gtiocb_stop_level" description="Select the behavior of the output pin when the timer is stopped.">
+            <option display="Pin Level Low" id="module.driver.timer.gtiocb_stop_level.pin_level_low" value="GPT_PIN_LEVEL_LOW"/>
+            <option display="Pin Level High" id="module.driver.timer.gtiocb_stop_level.pin_level_high" value="GPT_PIN_LEVEL_HIGH"/>
+        </property>
+        <property bitmapPrefix="GPT_SOURCE_" default="" display="Input|Count Up Source" id="module.driver.timer.count_up_source" description="Select external source that will increment the counter.  If any count up source is selected, the timer will count the external sources only.  It will not count PCLKD cycles.">
+            <select enum="enum.driver.gpt.sources"/>
+            <select enum="_signal" />
+            <linkConstraint display="Requires an ELC peripheral function for GPT">
+                "${_link}".startsWith("link.gpt")
+            </linkConstraint>
+        </property>
+        <property bitmapPrefix="GPT_SOURCE_" default="" display="Input|Count Down Source" id="module.driver.timer.count_down_source" description="Select external source that will decrement the counter.  If any count down source is selected, the timer will count the external sources only.  It will not count PCLKD cycles.">
+            <select enum="enum.driver.gpt.sources"/>
+            <select enum="_signal" />
+            <linkConstraint display="Requires an ELC peripheral function for GPT">
+                "${_link}".startsWith("link.gpt")
+            </linkConstraint>
+        </property>
+        <property bitmapPrefix="GPT_SOURCE_" default="" display="Input|Start Source" id="module.driver.timer.start_source" description="Select external source that will start the timer. \n\n
+For pulse width measurement, set the Start Source and the Clear Source to the trigger edge (the edge to start the measurement), and set the Stop Source and Capture Source (either A or B) to the opposite edge (the edge to stop the measurement). \n\n
+
+For pulse period measurement, set the Start Source, the Clear Source, and the Capture Source (either A or B) to the trigger edge (the edge to start the measurement).">
+            <select enum="enum.driver.gpt.sources"/>
+            <select enum="_signal" />
+            <linkConstraint display="Requires an ELC peripheral function for GPT">
+                "${_link}".startsWith("link.gpt")
+            </linkConstraint>
+        </property>
+        <property bitmapPrefix="GPT_SOURCE_" default="" display="Input|Stop Source" id="module.driver.timer.stop_source" description="Select external source that will stop the timer.">
+            <select enum="enum.driver.gpt.sources"/>
+            <select enum="_signal" />
+            <linkConstraint display="Requires an ELC peripheral function for GPT">
+                "${_link}".startsWith("link.gpt")
+            </linkConstraint>
+        </property>
+        <property bitmapPrefix="GPT_SOURCE_" default="" display="Input|Clear Source" id="module.driver.timer.clear_source" description="Select external source that will clear the timer.">
+            <select enum="enum.driver.gpt.sources"/>
+            <select enum="_signal" />
+            <linkConstraint display="Requires an ELC peripheral function for GPT">
+                "${_link}".startsWith("link.gpt")
+            </linkConstraint>
+        </property>
+        <property bitmapPrefix="GPT_SOURCE_" default="" display="Input|Capture A Source" id="module.driver.timer.capture_a_source" description="Select external source that will trigger a capture A event.">
+            <select enum="enum.driver.gpt.sources"/>
+            <select enum="_signal" />
+            <linkConstraint display="Requires an ELC peripheral function for GPT">
+                "${_link}".startsWith("link.gpt")
+            </linkConstraint>
+        </property>
+        <property bitmapPrefix="GPT_SOURCE_" default="" display="Input|Capture B Source" id="module.driver.timer.capture_b_source" description="Select external source that will trigger a capture B event.">
+            <select enum="enum.driver.gpt.sources"/>
+            <select enum="_signal" />
+            <linkConstraint display="Requires an ELC peripheral function for GPT">
+                "${_link}".startsWith("link.gpt")
+            </linkConstraint>
+        </property>
+        <property default="module.driver.timer.gtioc_filter.gtioc_filter_none" display="Input|Noise Filter A Sampling Clock Select" id="module.driver.timer.gtioca_filter" description="Select the input filter for GTIOCA.">
+            <option display="No Filter" id="module.driver.timer.gtioc_filter.gtioc_filter_none" value="GPT_CAPTURE_FILTER_NONE"/>
+            <option display="Filter PCLKD / 1" id="module.driver.timer.gtioc_filter.gtioc_filter_pclkd_div_1" value="GPT_CAPTURE_FILTER_PCLKD_DIV_1"/>
+            <option display="Filter PCLKD / 4" id="module.driver.timer.gtioc_filter.gtioc_filter_pclkd_div_4" value="GPT_CAPTURE_FILTER_PCLKD_DIV_4"/>
+            <option display="Filter PCLKD / 16" id="module.driver.timer.gtioc_filter.gtioc_filter_pclkd_div_16" value="GPT_CAPTURE_FILTER_PCLKD_DIV_16"/>
+            <option display="Filter PCLKD / 64" id="module.driver.timer.gtioc_filter.gtioc_filter_pclkd_div_64" value="GPT_CAPTURE_FILTER_PCLKD_DIV_64"/>
+        </property>
+        <property default="module.driver.timer.gtioc_filter.gtioc_filter_none" display="Input|Noise Filter B Sampling Clock Select" id="module.driver.timer.gtiocb_filter" description="Select the input filter for GTIOCB.">
+            <option display="No Filter" id="module.driver.timer.gtioc_filter.gtioc_filter_none" value="GPT_CAPTURE_FILTER_NONE"/>
+            <option display="Filter PCLKD / 1" id="module.driver.timer.gtioc_filter.gtioc_filter_pclkd_div_1" value="GPT_CAPTURE_FILTER_PCLKD_DIV_1"/>
+            <option display="Filter PCLKD / 4" id="module.driver.timer.gtioc_filter.gtioc_filter_pclkd_div_4" value="GPT_CAPTURE_FILTER_PCLKD_DIV_4"/>
+            <option display="Filter PCLKD / 16" id="module.driver.timer.gtioc_filter.gtioc_filter_pclkd_div_16" value="GPT_CAPTURE_FILTER_PCLKD_DIV_16"/>
+            <option display="Filter PCLKD / 64" id="module.driver.timer.gtioc_filter.gtioc_filter_pclkd_div_64" value="GPT_CAPTURE_FILTER_PCLKD_DIV_64"/>
+        </property>
+        <property default="NULL" display="Interrupts|Callback" id="module.driver.timer.p_callback" description="A user callback function can be specified here. If this callback function is provided, it will be called from the interrupt service routine (ISR) each time the timer period elapses">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.timer.p_callback}")</constraint>
+        </property>
+        <property default="NULL" id="module.driver.timer.p_context" />
+        <property default="" display="Interrupts|Overflow/Crest Interrupt Priority" id="module.driver.timer.ipl" description="Select the overflow interrupt priority. This is the crest interrupt for triangle-wave PWM.">
+            <select enum="enum.mcu.nvic.priorities.optional"/>
+            <interrupt event="event.gpt${module.driver.timer.channel}.counter.overflow" isr="gpt_counter_overflow_isr"/>
+        </property>
+        <property default="" display="Interrupts|Capture/Compare match A Interrupt Priority" id="module.driver.timer.capture_a_ipl" description="Select the interrupt priority for Capture/Compare match A.">
+            <select enum="enum.mcu.nvic.priorities.optional"/>
+            <interrupt event="event.gpt${module.driver.timer.channel}.capture.compare.a" isr="gpt_capture_compare_a_isr"/>
+        </property>
+        <property default="" display="Interrupts|Capture/Compare match B Interrupt Priority" id="module.driver.timer.capture_b_ipl" description="Select the interrupt priority for Capture/Compare match B.">
+            <select enum="enum.mcu.nvic.priorities.optional"/>
+            <interrupt event="event.gpt${module.driver.timer.channel}.capture.compare.b" isr="gpt_capture_compare_b_isr"/>
+        </property>
+        <property default="" display="Interrupts|Underflow/Trough Interrupt Priority" id="module.driver.timer.trough_ipl" description="Select the interrupt priority for the trough interrupt (triangle-wave PWM only).">
+            <select enum="enum.mcu.nvic.priorities.optional"/>
+            <interrupt event="event.gpt${module.driver.timer.channel}.counter.underflow" isr="gpt_counter_underflow_isr"/>
+        </property>
+        <property default="module.driver.timer.extra.disabled" display="Extra Features|Extra Features" id="module.driver.timer.extra" description="Select whether to enable extra features on this channel.">
+            <option display="Enabled" id="module.driver.timer.extra.enabled" value="1"/>
+            <option display="Disabled" id="module.driver.timer.extra.disabled" value="0"/>
+        </property>
+        <property default="" display="Extra Features|Output Disable|POEG Link" id="module.driver.timer.poeg_link" description="Select which POEG to link this GPT channel to.">
+            <select enum="enum.driver.poeg.channels"/>
+        </property>
+        <property bitmapPrefix="" default="" display="Extra Features|Output Disable|Output Disable POEG Trigger" id="module.driver.timer.output_disable" description="Select which errors send an output disable trigger to POEG. Dead time error is only available GPT channels that have GTINTAD.GRPDTE.">
+            <option display="Dead Time Error" id="module.driver.timer.output_disable.output_disable_dead_time_error" value="GPT_OUTPUT_DISABLE_DEAD_TIME_ERROR"/>
+            <option display="GTIOCA and GTIOCB High Level" id="module.driver.timer.output_disable.output_disable_gtioca_gtiocb_high" value="GPT_OUTPUT_DISABLE_GTIOCA_GTIOCB_HIGH"/>
+            <option display="GTIOCA and GTIOCB Low Level" id="module.driver.timer.output_disable.output_disable_gtioca_gtiocb_low" value="GPT_OUTPUT_DISABLE_GTIOCA_GTIOCB_LOW"/>
+        </property>
+        <property bitmapPrefix="" default="" display="Extra Features|ADC Trigger|Start Event Trigger (Channels with GTINTAD only)" id="module.driver.timer.adc_trigger" description="Select which A/D converter start request interrupts to generate and at which point in the cycle to generate them.">
+            <option display="Trigger Event A/D Converter Start Request A During Up Counting" id="module.driver.timer.adc_trigger.adc_trigger_up_count_start_adc_a" value="GPT_ADC_TRIGGER_UP_COUNT_START_ADC_A"/>
+            <option display="Trigger Event A/D Converter Start Request A During Down Counting" id="module.driver.timer.adc_trigger.adc_trigger_down_count_start_adc_a" value="GPT_ADC_TRIGGER_DOWN_COUNT_START_ADC_A"/>
+            <option display="Trigger Event A/D Converter Start Request B During Up Counting" id="module.driver.timer.adc_trigger.adc_trigger_up_count_start_adc_b" value="GPT_ADC_TRIGGER_UP_COUNT_START_ADC_B"/>
+            <option display="Trigger Event A/D Converter Start Request B During Down Counting" id="module.driver.timer.adc_trigger.adc_trigger_down_count_start_adc_b" value="GPT_ADC_TRIGGER_DOWN_COUNT_START_ADC_B"/>
+        </property>
+        <property default="0" display="Extra Features|ADC Trigger|ADC A Compare Match (Raw Counts)" id="module.driver.timer.adc_a_compare_match" description="Select the compare match value that generates a GPTn AD TRIG A event.">
+            <constraint display="Must be a valid non-negative integer with a maximum configurable value of 4294967295 (0xffffffff).">
+                testInteger("${module.driver.timer.adc_a_compare_match}")  &amp;&amp; ("${module.driver.timer.adc_a_compare_match}" &gt;= 0) &amp;&amp; ("${module.driver.timer.adc_a_compare_match}" &lt;= 4294967295)
+            </constraint>
+        </property>
+        <property default="0" display="Extra Features|ADC Trigger|ADC B Compare Match (Raw Counts)" id="module.driver.timer.adc_b_compare_match" description="Select the compare match value that generates a GPTn AD TRIG B event.">
+            <constraint display="Must be a valid non-negative integer with a maximum configurable value of 4294967295 (0xffffffff).">
+                    testInteger("${module.driver.timer.adc_b_compare_match}")  &amp;&amp; ("${module.driver.timer.adc_b_compare_match}" &gt;= 0) &amp;&amp; ("${module.driver.timer.adc_b_compare_match}" &lt;= 4294967295)
+            </constraint>
+        </property>
+        <property default="0" display="Extra Features|Dead Time (Value range varies with Channel)|Dead Time Count Up (Raw Counts)" id="module.driver.timer.dead_time_count_up" description="Select the dead time to apply during up counting. This value also applies during down counting for channels that do not have GTDVD. The dead time count up value can be set up to 0xffffffff (32-bit) or 0xffff (16-bit).">
+            <constraint display="Must be a valid non-negative integer with a maximum configurable value of 4294967295 (0xffffffff).">testInteger("${module.driver.timer.dead_time_count_up}")  &amp;&amp; ("${module.driver.timer.dead_time_count_up}" &gt;= 0) &amp;&amp; ("${module.driver.timer.dead_time_count_up}" &lt;= 4294967295)</constraint>
+        </property>
+        <property default="0" display="Extra Features|Dead Time (Value range varies with Channel)|Dead Time Count Down (Raw Counts) (Channels with GTDVD only)" id="module.driver.timer.dead_time_count_down" description="Select the dead time to apply during down counting. The dead time count down value can be set up to 0xffffffff (32-bit) or 0xffff (16-bit).">
+            <constraint display="Must be a valid non-negative integer with a maximum configurable value of 4294967295 (0xffffffff).">testInteger("${module.driver.timer.dead_time_count_down}")  &amp;&amp; ("${module.driver.timer.dead_time_count_down}" &gt;= 0) &amp;&amp; ("${module.driver.timer.dead_time_count_down}" &lt;= 4294967295)</constraint>
+        </property>
+        <property default="module.driver.timer.interrupt_skip.source.none" display="Extra Features|Interrupt Skipping (Channels with GTITC only)|Interrupt to Count" id="module.driver.timer.interrupt_skip.source" description="Select the count source for interrupt skipping. The interrupt skip counter increments after each source event. All crest/overflow and trough/underflow interrupts are skipped when the interrupt skip counter is non-zero.">
+            <option display="None" id="module.driver.timer.interrupt_skip.source.none" value="GPT_INTERRUPT_SKIP_SOURCE_NONE"/>
+            <option display="Overflow and Underflow (sawtooth)" id="module.driver.timer.interrupt_skip.source.ovf_udf" value="GPT_INTERRUPT_SKIP_SOURCE_OVERFLOW_UNDERFLOW"/>
+            <option display="Crest (triangle)" id="module.driver.timer.interrupt_skip.source.crest" value="GPT_INTERRUPT_SKIP_SOURCE_CREST"/>
+            <option display="Trough (triangle)" id="module.driver.timer.interrupt_skip.source.trough" value="GPT_INTERRUPT_SKIP_SOURCE_TROUGH"/>
+        </property>
+        <property default="module.driver.timer.interrupt_skip.count.count_0" display="Extra Features|Interrupt Skipping (Channels with GTITC only)|Interrupt Skip Count" id="module.driver.timer.interrupt_skip.count" description="Select the number of interrupts to skip.">
+            <option display="0" id="module.driver.timer.interrupt_skip.count.count_0" value="GPT_INTERRUPT_SKIP_COUNT_0"/>
+            <option display="1" id="module.driver.timer.interrupt_skip.count.count_1" value="GPT_INTERRUPT_SKIP_COUNT_1"/>
+            <option display="2" id="module.driver.timer.interrupt_skip.count.count_2" value="GPT_INTERRUPT_SKIP_COUNT_2"/>
+            <option display="3" id="module.driver.timer.interrupt_skip.count.count_3" value="GPT_INTERRUPT_SKIP_COUNT_3"/>
+            <option display="4" id="module.driver.timer.interrupt_skip.count.count_4" value="GPT_INTERRUPT_SKIP_COUNT_4"/>
+            <option display="5" id="module.driver.timer.interrupt_skip.count.count_5" value="GPT_INTERRUPT_SKIP_COUNT_5"/>
+            <option display="6" id="module.driver.timer.interrupt_skip.count.count_6" value="GPT_INTERRUPT_SKIP_COUNT_6"/>
+            <option display="7" id="module.driver.timer.interrupt_skip.count.count_7" value="GPT_INTERRUPT_SKIP_COUNT_7"/>
+        </property>
+        <property default="module.driver.timer.interrupt_skip.skip_sources.interrupt_skip.adc.none" display="Extra Features|Interrupt Skipping (Channels with GTITC only)|Skip ADC Events" id="module.driver.timer.interrupt_skip.adc" description="Select ADC events to suppress when the interrupt skip count is not zero.">
+            <option display="None" id="module.driver.timer.interrupt_skip.skip_sources.interrupt_skip.adc.none" value="GPT_INTERRUPT_SKIP_ADC_NONE"/>
+            <option display="ADC A Compare Match" id="module.driver.timer.interrupt_skip.skip_sources.interrupt_skip.adc.a" value="GPT_INTERRUPT_SKIP_ADC_A"/>
+            <option display="ADC B Compare Match" id="module.driver.timer.interrupt_skip.skip_sources.interrupt_skip.adc.b" value="GPT_INTERRUPT_SKIP_ADC_B"/>
+            <option display="ADC A and B Compare Match" id="module.driver.timer.interrupt_skip.skip_sources.interrupt_skip.adc.a_and_b" value="GPT_INTERRUPT_SKIP_ADC_A_AND_B"/>
+        </property>
+        <property default="module.driver.timer.gtioca_disable_setting.gtioc_disable_prohibited" display="Extra Features|Output Disable|GTIOCA Disable Setting" id="module.driver.timer.gtioca_disable_setting" description="Select the disable setting for GTIOCA.">
+            <option display="Disable Prohibited" id="module.driver.timer.gtioca_disable_setting.gtioc_disable_prohibited" value="GPT_GTIOC_DISABLE_PROHIBITED"/>
+            <option display="Set Hi Z" id="module.driver.timer.gtioca_disable_setting.gtioc_disable_set_hi_z" value="GPT_GTIOC_DISABLE_SET_HI_Z"/>
+            <option display="Level Low" id="module.driver.timer.gtioca_disable_setting.gtioc_disable_level_low" value="GPT_GTIOC_DISABLE_LEVEL_LOW"/>
+            <option display="Level High" id="module.driver.timer.gtioca_disable_setting.gtioc_disable_level_high" value="GPT_GTIOC_DISABLE_LEVEL_HIGH"/>
+        </property>
+        <property default="module.driver.timer.gtiocb_disable_setting.gtioc_disable_prohibited" display="Extra Features|Output Disable|GTIOCB Disable Setting" id="module.driver.timer.gtiocb_disable_setting" description="Select the disable setting for GTIOCB.">
+            <option display="Disable Prohibited" id="module.driver.timer.gtiocb_disable_setting.gtioc_disable_prohibited" value="GPT_GTIOC_DISABLE_PROHIBITED"/>
+            <option display="Set Hi Z" id="module.driver.timer.gtiocb_disable_setting.gtioc_disable_set_hi_z" value="GPT_GTIOC_DISABLE_SET_HI_Z"/>
+            <option display="Level Low" id="module.driver.timer.gtiocb_disable_setting.gtioc_disable_level_low" value="GPT_GTIOC_DISABLE_LEVEL_LOW"/>
+            <option display="Level High" id="module.driver.timer.gtiocb_disable_setting.gtioc_disable_level_high" value="GPT_GTIOC_DISABLE_LEVEL_HIGH"/>
+        </property>
+        <peripheral name="GPT${module.driver.timer.channel}" component="gpt${module.driver.timer.channel}" />
+        <symbol id="symbol.driver.timer.name" value="${module.driver.timer.name}"/>
+        <symbol id="symbol.driver.timer.guard.open" value="${module.driver.timer.name}_open_guard"/>
+        <symbol id="symbol.driver.timer.guard.macro.open" value="FSP_GUARD_${module.driver.timer.name}_R_GPT_Open"/>
+        <symbol id="symbol.driver.timer.guard.stop" value="${module.driver.timer.name}_stop_guard"/>
+        <symbol id="symbol.driver.timer.guard.macro.stop" value="FSP_GUARD_${module.driver.timer.name}_R_GPT_Stop"/>
+        <symbol id="symbol.driver.timer.guard.start" value="${module.driver.timer.name}_start_guard"/>
+        <symbol id="symbol.driver.timer.guard.macro.start" value="FSP_GUARD_${module.driver.timer.name}_R_GPT_Start"/>
+        <symbol id="symbol.driver.timer.guard.reset" value="${module.driver.timer.name}_reset_guard"/>
+        <symbol id="symbol.driver.timer.guard.macro.reset" value="FSP_GUARD_${module.driver.timer.name}_R_GPT_Reset"/>
+        <symbol id="symbol.driver.timer.guard.enable" value="${module.driver.timer.name}_enable_guard"/>
+        <symbol id="symbol.driver.timer.guard.macro.enable" value="FSP_GUARD_${module.driver.timer.name}_R_GPT_Enable"/>
+        <symbol id="symbol.driver.timer.guard.disable" value="${module.driver.timer.name}_disable_guard"/>
+        <symbol id="symbol.driver.timer.guard.macro.disable" value="FSP_GUARD_${module.driver.timer.name}_R_GPT_Disable"/>
+        <symbol id="symbol.driver.timer.guard.period_set" value="${module.driver.timer.name}_period_set_guard"/>
+        <symbol id="symbol.driver.timer.guard.macro.period_set" value="FSP_GUARD_${module.driver.timer.name}_R_GPT_PeriodSet"/>
+        <symbol id="symbol.driver.timer.guard.duty_cycle_set" value="${module.driver.timer.name}_duty_cycle_set_guard"/>
+        <symbol id="symbol.driver.timer.guard.macro.duty_cycle_set" value="FSP_GUARD_${module.driver.timer.name}_R_GPT_DutyCycleSet"/>
+        <symbol id="symbol.driver.timer.guard.info_get" value="${module.driver.timer.name}_info_get_guard"/>
+        <symbol id="symbol.driver.timer.guard.macro.info_get" value="FSP_GUARD_${module.driver.timer.name}_R_GPT_InfoGet"/>
+        <symbol id="symbol.driver.timer.guard.status_get" value="${module.driver.timer.name}_status_get_guard"/>
+        <symbol id="symbol.driver.timer.guard.macro.status_get" value="FSP_GUARD_${module.driver.timer.name}_R_GPT_StatusGet"/>
+        <symbol id="symbol.driver.timer.guard.counter_set" value="${module.driver.timer.name}_counter_set_guard"/>
+        <symbol id="symbol.driver.timer.guard.macro.counter_set" value="FSP_GUARD_${module.driver.timer.name}_R_GPT_CounterSet"/>
+        <symbol id="symbol.driver.timer.guard.output_enable" value="${module.driver.timer.name}_output_enable_guard"/>
+        <symbol id="symbol.driver.timer.guard.macro.output_enable" value="FSP_GUARD_${module.driver.timer.name}_R_GPT_OutputEnable"/>
+        <symbol id="symbol.driver.timer.guard.output_disable" value="${module.driver.timer.name}_output_disable_guard"/>
+        <symbol id="symbol.driver.timer.guard.macro.output_disable" value="FSP_GUARD_${module.driver.timer.name}_R_GPT_OutputDisable"/>
+        <symbol id="symbol.driver.timer.guard.adc_trigger_set" value="${module.driver.timer.name}_adc_trigger_set_guard"/>
+        <symbol id="symbol.driver.timer.guard.macro.adc_trigger_set" value="FSP_GUARD_${module.driver.timer.name}_R_GPT_AdcTriggerSet"/>
+        <symbol id="symbol.driver.timer.guard.pwm_output_delay_set" value="${module.driver.timer.name}_pwm_output_delay_set_guard"/>
+        <symbol id="symbol.driver.timer.guard.macro.pwm_output_delay_set" value="FSP_GUARD_${module.driver.timer.name}_R_GPT_PwmOutputDelaySet"/>
+        <symbol id="symbol.driver.timer.guard.callback_set" value="${module.driver.timer.name}_callback_set_guard"/>
+        <symbol id="symbol.driver.timer.guard.macro.callback_set" value="FSP_GUARD_${module.driver.timer.name}_R_GPT_CallbackSet"/>
+        <symbol id="symbol.driver.timer.guard.close" value="${module.driver.timer.name}_close_guard"/>
+        <symbol id="symbol.driver.timer.guard.macro.close" value="FSP_GUARD_${module.driver.timer.name}_R_GPT_Close"/>
+        <symbol id="symbol.driver.timer.guard.pwm_output_delay_initialize" value="${module.driver.timer.name}_pwm_output_delay_initialize_guard"/>
+        <symbol id="symbol.driver.timer.guard.macro.pwm_output_delay_initialize" value="FSP_GUARD_${module.driver.timer.name}_R_GPT_PwmOutputDelayInitialize"/>
+        <symbol id="symbol.driver.timer.nsc_api" value="${module.driver.timer.name}_nsc_api"/>
+        <symbol id="symbol.driver.timer.cfg" value="${module.driver.timer.name}_cfg"/>
+        <symbol id="symbol.driver.timer.ctrl" value="${module.driver.timer.name}_ctrl"/>
+        <symbol id="symbol.driver.timer.extend" value="${module.driver.timer.name}_extend"/>
+        <symbol id="symbol.driver.timer.pwm_extend" value="${module.driver.timer.name}_pwm_extend"/>
+        <header>
+/** Timer on GPT Instance. */
+extern const timer_instance_t ${module.driver.timer.name};
+
+/** Access the GPT instance using these structures when calling API functions directly (::p_api is not used). */
+extern gpt_instance_ctrl_t ${module.driver.timer.name}_ctrl;
+extern const timer_cfg_t ${module.driver.timer.name}_cfg;
+
+#ifndef ${module.driver.timer.p_callback}
+void ${module.driver.timer.p_callback}(timer_callback_args_t * p_args);
+#endif
+        </header>
+        <includes>#include &quot;r_gpt.h&quot;
+#include &quot;r_timer_api.h&quot;</includes>
+        <macros>
+        </macros>
+        <declarations>
+gpt_instance_ctrl_t ${module.driver.timer.name}_ctrl;
+#if ${module.driver.timer.extra}
+const gpt_extended_pwm_cfg_t ${module.driver.timer.name}_pwm_extend =
+{
+    .trough_ipl          = ${module.driver.timer.trough_ipl},
+#if defined(VECTOR_NUMBER_GPT${module.driver.timer.channel}_COUNTER_UNDERFLOW)
+    .trough_irq          = VECTOR_NUMBER_GPT${module.driver.timer.channel}_COUNTER_UNDERFLOW,
+#else
+    .trough_irq          = FSP_INVALID_VECTOR,
+#endif
+    .poeg_link           = ${module.driver.timer.poeg_link},
+    .output_disable      = (gpt_output_disable_t) (${module.driver.timer.output_disable} GPT_OUTPUT_DISABLE_NONE),
+    .adc_trigger         = (gpt_adc_trigger_t) (${module.driver.timer.adc_trigger} GPT_ADC_TRIGGER_NONE),
+    .dead_time_count_up  = ${module.driver.timer.dead_time_count_up},
+    .dead_time_count_down = ${module.driver.timer.dead_time_count_down},
+    .adc_a_compare_match = ${module.driver.timer.adc_a_compare_match},
+    .adc_b_compare_match = ${module.driver.timer.adc_b_compare_match},
+    .interrupt_skip_source = ${module.driver.timer.interrupt_skip.source},
+    .interrupt_skip_count  = ${module.driver.timer.interrupt_skip.count},
+    .interrupt_skip_adc    = ${module.driver.timer.interrupt_skip.adc},
+    .gtioca_disable_setting = ${module.driver.timer.gtioca_disable_setting},
+    .gtiocb_disable_setting = ${module.driver.timer.gtiocb_disable_setting},
+};
+#endif
+const gpt_extended_cfg_t ${module.driver.timer.name}_extend =
+{
+    .gtioca = { .output_enabled = ${module.driver.timer.gtioca_output_enabled},
+                .stop_level     = ${module.driver.timer.gtioca_stop_level}
+              },
+    .gtiocb = { .output_enabled = ${module.driver.timer.gtiocb_output_enabled},
+                .stop_level     = ${module.driver.timer.gtiocb_stop_level}
+              },
+    .start_source        = (gpt_source_t) (${module.driver.timer.start_source} GPT_SOURCE_NONE),
+    .stop_source         = (gpt_source_t) (${module.driver.timer.stop_source} GPT_SOURCE_NONE),
+    .clear_source        = (gpt_source_t) (${module.driver.timer.clear_source} GPT_SOURCE_NONE),
+    .count_up_source     = (gpt_source_t) (${module.driver.timer.count_up_source} GPT_SOURCE_NONE),
+    .count_down_source   = (gpt_source_t) (${module.driver.timer.count_down_source} GPT_SOURCE_NONE),
+    .capture_a_source    = (gpt_source_t) (${module.driver.timer.capture_a_source} GPT_SOURCE_NONE),
+    .capture_b_source    = (gpt_source_t) (${module.driver.timer.capture_b_source} GPT_SOURCE_NONE),
+    .capture_a_ipl       = ${module.driver.timer.capture_a_ipl},
+    .capture_b_ipl       = ${module.driver.timer.capture_b_ipl},
+#if defined(VECTOR_NUMBER_GPT${module.driver.timer.channel}_CAPTURE_COMPARE_A)
+    .capture_a_irq       = VECTOR_NUMBER_GPT${module.driver.timer.channel}_CAPTURE_COMPARE_A,
+#else
+    .capture_a_irq       = FSP_INVALID_VECTOR,
+#endif
+#if defined(VECTOR_NUMBER_GPT${module.driver.timer.channel}_CAPTURE_COMPARE_B)
+    .capture_b_irq       = VECTOR_NUMBER_GPT${module.driver.timer.channel}_CAPTURE_COMPARE_B,
+#else
+    .capture_b_irq       = FSP_INVALID_VECTOR,
+#endif
+    ${module.driver.timer.compare_match.configure},
+    .capture_filter_gtioca       = ${module.driver.timer.gtioca_filter},
+    .capture_filter_gtiocb       = ${module.driver.timer.gtiocb_filter},
+#if ${module.driver.timer.extra}
+    .p_pwm_cfg                   = &amp;${module.driver.timer.name}_pwm_extend,
+#else
+    .p_pwm_cfg                   = NULL,
+#endif
+#if ${module.driver.timer.gtior.custom_waveform_enable}
+    .gtior_setting.gtior_b.gtioa  = (${module.driver.timer.gtior.gtioa.initial_output_level}U &lt;&lt; 4U) | (${module.driver.timer.gtior.gtioa.cycle_end_output_level}U &lt;&lt; 2U) | (${module.driver.timer.gtior.gtioa.compare_match_output_level}U &lt;&lt; 0U),
+    .gtior_setting.gtior_b.oadflt = (uint32_t) ${module.driver.timer.gtioca_stop_level},
+    .gtior_setting.gtior_b.oahld  = ${module.driver.timer.gtior.gtioa.count_stop_retain}U,
+    .gtior_setting.gtior_b.oae    = (uint32_t) ${module.driver.timer.gtioca_output_enabled},
+    .gtior_setting.gtior_b.oadf   = (uint32_t) ${module.driver.timer.gtioca_disable_setting},
+    .gtior_setting.gtior_b.nfaen  = ((uint32_t) ${module.driver.timer.gtioca_filter} &amp; 1U),
+    .gtior_setting.gtior_b.nfcsa  = ((uint32_t) ${module.driver.timer.gtioca_filter} &gt;&gt; 1U),
+    .gtior_setting.gtior_b.gtiob  = (${module.driver.timer.gtior.gtiob.initial_output_level}U &lt;&lt; 4U) | (${module.driver.timer.gtior.gtiob.cycle_end_output_level}U &lt;&lt; 2U) | (${module.driver.timer.gtior.gtiob.compare_match_output_level}U &lt;&lt; 0U),
+    .gtior_setting.gtior_b.obdflt = (uint32_t) ${module.driver.timer.gtiocb_stop_level},
+    .gtior_setting.gtior_b.obhld  = ${module.driver.timer.gtior.gtiob.count_stop_retain}U,
+    .gtior_setting.gtior_b.obe    = (uint32_t) ${module.driver.timer.gtiocb_output_enabled},
+    .gtior_setting.gtior_b.obdf   = (uint32_t) ${module.driver.timer.gtiocb_disable_setting},
+    .gtior_setting.gtior_b.nfben  = ((uint32_t) ${module.driver.timer.gtiocb_filter} &amp; 1U),
+    .gtior_setting.gtior_b.nfcsb  = ((uint32_t) ${module.driver.timer.gtiocb_filter} &gt;&gt; 1U),
+#else
+    .gtior_setting.gtior = 0U,
+#endif
+};
+
+const timer_cfg_t ${module.driver.timer.name}_cfg =
+{
+    .mode                = ${module.driver.timer.mode},
+    ${module.driver.timer.period},
+    .channel             = ${module.driver.timer.channel},
+    .p_callback          = ${module.driver.timer.p_callback},
+    /** If NULL then do not add &amp; */
+#if defined(${module.driver.timer.p_context})
+    .p_context           = ${module.driver.timer.p_context},
+#else
+    .p_context           = &amp;${module.driver.timer.p_context},
+#endif
+    .p_extend            = &amp;${module.driver.timer.name}_extend,
+    .cycle_end_ipl       = ${module.driver.timer.ipl},
+#if defined(VECTOR_NUMBER_GPT${module.driver.timer.channel}_COUNTER_OVERFLOW)
+    .cycle_end_irq       = VECTOR_NUMBER_GPT${module.driver.timer.channel}_COUNTER_OVERFLOW,
+#else
+    .cycle_end_irq       = FSP_INVALID_VECTOR,
+#endif
+};
+/* Instance structure to use this module. */
+const timer_instance_t ${module.driver.timer.name} =
+{
+    .p_ctrl        = &amp;${module.driver.timer.name}_ctrl,
+    .p_cfg         = &amp;${module.driver.timer.name}_cfg,
+    .p_api         = &amp;g_timer_on_gpt
+};
+        </declarations>
+        <guard>
+            <header>
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.timer.name}_open_guard(timer_ctrl_t *const p_ctrl, timer_cfg_t const *const p_cfg);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.timer.name}_stop_guard(timer_ctrl_t *const p_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.timer.name}_start_guard(timer_ctrl_t *const p_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.timer.name}_reset_guard(timer_ctrl_t *const p_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.timer.name}_enable_guard(timer_ctrl_t *const p_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.timer.name}_disable_guard(timer_ctrl_t *const p_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.timer.name}_period_set_guard(timer_ctrl_t *const p_ctrl, uint32_t const period_counts);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.timer.name}_duty_cycle_set_guard(timer_ctrl_t *const p_ctrl, uint32_t const duty_cycle_counts, uint32_t const pin);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.timer.name}_info_get_guard(timer_ctrl_t *const p_ctrl, timer_info_t *const p_info);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.timer.name}_status_get_guard(timer_ctrl_t *const p_ctrl, timer_status_t *const p_status);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.timer.name}_counter_set_guard(timer_ctrl_t *const p_ctrl, uint32_t counter);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.timer.name}_output_enable_guard(timer_ctrl_t *const p_ctrl, gpt_io_pin_t pin);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.timer.name}_output_disable_guard(timer_ctrl_t *const p_ctrl, gpt_io_pin_t pin);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.timer.name}_adc_trigger_set_guard(timer_ctrl_t *const p_ctrl, gpt_adc_compare_match_t which_compare_match, uint32_t compare_match_value);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.timer.name}_pwm_output_delay_set_guard(timer_ctrl_t *const p_ctrl, gpt_pwm_output_delay_edge_t edge, gpt_pwm_output_delay_setting_t delay_setting, uint32_t const pin);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.timer.name}_callback_set_guard(timer_ctrl_t *const p_api_ctrl, void(*p_callback)(timer_callback_args_t *), void const *const p_context, timer_callback_args_t *const p_callback_memory);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.timer.name}_close_guard(timer_ctrl_t *const p_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.timer.name}_pwm_output_delay_initialize_guard();
+
+            </header>
+            <template name="${module.driver.timer.name}_guard.c">
+                <![CDATA[
+                    #include "guard.h"
+
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.timer.name}_open_guard (timer_ctrl_t *const p_ctrl, timer_cfg_t const *const p_cfg)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+    FSP_PARAMETER_NOT_USED(p_cfg);
+
+    return R_GPT_Open(&${module.driver.timer.name}_ctrl, &${module.driver.timer.name}_cfg);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.timer.name}_stop_guard (timer_ctrl_t *const p_ctrl)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+
+    return R_GPT_Stop(&${module.driver.timer.name}_ctrl);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.timer.name}_start_guard (timer_ctrl_t *const p_ctrl)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+
+    return R_GPT_Start(&${module.driver.timer.name}_ctrl);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.timer.name}_reset_guard (timer_ctrl_t *const p_ctrl)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+
+    return R_GPT_Reset(&${module.driver.timer.name}_ctrl);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.timer.name}_enable_guard (timer_ctrl_t *const p_ctrl)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+
+    return R_GPT_Enable(&${module.driver.timer.name}_ctrl);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.timer.name}_disable_guard (timer_ctrl_t *const p_ctrl)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+
+    return R_GPT_Disable(&${module.driver.timer.name}_ctrl);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.timer.name}_period_set_guard (timer_ctrl_t *const p_ctrl, uint32_t const period_counts)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+
+    return R_GPT_PeriodSet(&${module.driver.timer.name}_ctrl, period_counts);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.timer.name}_duty_cycle_set_guard (timer_ctrl_t *const p_ctrl, uint32_t const duty_cycle_counts, uint32_t const pin)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+
+    return R_GPT_DutyCycleSet(&${module.driver.timer.name}_ctrl, duty_cycle_counts, pin);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.timer.name}_info_get_guard (timer_ctrl_t *const p_ctrl, timer_info_t *const p_info)
+{
+    /* Verify all pointers are in non-secure memory. */
+    timer_info_t *const p_info_checked = cmse_check_pointed_object(p_info, CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_info_checked != NULL);
+
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+
+    return R_GPT_InfoGet(&${module.driver.timer.name}_ctrl, p_info_checked);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.timer.name}_status_get_guard (timer_ctrl_t *const p_ctrl, timer_status_t *const p_status)
+{
+    /* Verify all pointers are in non-secure memory. */
+    timer_status_t *const p_status_checked = cmse_check_pointed_object(p_status, CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_status_checked != NULL);
+
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+
+    return R_GPT_StatusGet(&${module.driver.timer.name}_ctrl, p_status_checked);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.timer.name}_counter_set_guard (timer_ctrl_t *const p_ctrl, uint32_t counter)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+
+    return R_GPT_CounterSet(&${module.driver.timer.name}_ctrl, counter);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.timer.name}_output_enable_guard (timer_ctrl_t *const p_ctrl, gpt_io_pin_t pin)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+
+    return R_GPT_OutputEnable(&${module.driver.timer.name}_ctrl, pin);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.timer.name}_output_disable_guard (timer_ctrl_t *const p_ctrl, gpt_io_pin_t pin)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+
+    return R_GPT_OutputDisable(&${module.driver.timer.name}_ctrl, pin);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.timer.name}_adc_trigger_set_guard (timer_ctrl_t *const p_ctrl, gpt_adc_compare_match_t which_compare_match, uint32_t compare_match_value)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+
+    return R_GPT_AdcTriggerSet(&${module.driver.timer.name}_ctrl, which_compare_match, compare_match_value);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.timer.name}_pwm_output_delay_set_guard (timer_ctrl_t *const p_ctrl, gpt_pwm_output_delay_edge_t edge, gpt_pwm_output_delay_setting_t delay_setting, uint32_t const pin)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+
+    return R_GPT_PwmOutputDelaySet(&${module.driver.timer.name}_ctrl, edge, delay_setting, pin);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.timer.name}_callback_set_guard (timer_ctrl_t *const p_api_ctrl, void(*p_callback)(timer_callback_args_t *), void const *const p_context, timer_callback_args_t *const p_callback_memory)
+{
+    /* Verify all pointers are in non-secure memory. */
+    void(*p_callback_checked)(timer_callback_args_t *) = (void(*)(timer_callback_args_t *)) cmse_check_address_range((void *) p_callback, sizeof(void *), CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_callback_checked != NULL);
+    timer_callback_args_t *const p_callback_memory_checked = cmse_check_pointed_object(p_callback_memory, CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_callback_memory_checked != NULL);
+
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+    FSP_PARAMETER_NOT_USED(p_context);
+
+    return R_GPT_CallbackSet(&${module.driver.timer.name}_ctrl, p_callback_checked, p_context, p_callback_memory_checked);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.timer.name}_close_guard (timer_ctrl_t *const p_ctrl)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+
+    return R_GPT_Close(&${module.driver.timer.name}_ctrl);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.timer.name}_pwm_output_delay_initialize_guard ()
+{
+    /* TODO: add your own security checks here */
+
+    return R_GPT_PwmOutputDelayInitialize();
+}
+
+                ]]>
+            </template>
+        </guard>
+        <nsc>
+            <header>
+
+#define FSP_GUARD_${module.driver.timer.name}_R_GPT_Open() ${module.driver.timer.name}_open_guard(FSP_SECURE_ARGUMENT, FSP_SECURE_ARGUMENT)
+
+#define FSP_GUARD_${module.driver.timer.name}_R_GPT_Stop() ${module.driver.timer.name}_stop_guard(FSP_SECURE_ARGUMENT)
+
+#define FSP_GUARD_${module.driver.timer.name}_R_GPT_Start() ${module.driver.timer.name}_start_guard(FSP_SECURE_ARGUMENT)
+
+#define FSP_GUARD_${module.driver.timer.name}_R_GPT_Reset() ${module.driver.timer.name}_reset_guard(FSP_SECURE_ARGUMENT)
+
+#define FSP_GUARD_${module.driver.timer.name}_R_GPT_Enable() ${module.driver.timer.name}_enable_guard(FSP_SECURE_ARGUMENT)
+
+#define FSP_GUARD_${module.driver.timer.name}_R_GPT_Disable() ${module.driver.timer.name}_disable_guard(FSP_SECURE_ARGUMENT)
+
+#define FSP_GUARD_${module.driver.timer.name}_R_GPT_PeriodSet(period_counts) ${module.driver.timer.name}_period_set_guard(FSP_SECURE_ARGUMENT, period_counts)
+
+#define FSP_GUARD_${module.driver.timer.name}_R_GPT_DutyCycleSet(duty_cycle_counts, pin) ${module.driver.timer.name}_duty_cycle_set_guard(FSP_SECURE_ARGUMENT, duty_cycle_counts, pin)
+
+#define FSP_GUARD_${module.driver.timer.name}_R_GPT_InfoGet(p_info) ${module.driver.timer.name}_info_get_guard(FSP_SECURE_ARGUMENT, p_info)
+
+#define FSP_GUARD_${module.driver.timer.name}_R_GPT_StatusGet(p_status) ${module.driver.timer.name}_status_get_guard(FSP_SECURE_ARGUMENT, p_status)
+
+#define FSP_GUARD_${module.driver.timer.name}_R_GPT_CounterSet(counter) ${module.driver.timer.name}_counter_set_guard(FSP_SECURE_ARGUMENT, counter)
+
+#define FSP_GUARD_${module.driver.timer.name}_R_GPT_OutputEnable(pin) ${module.driver.timer.name}_output_enable_guard(FSP_SECURE_ARGUMENT, pin)
+
+#define FSP_GUARD_${module.driver.timer.name}_R_GPT_OutputDisable(pin) ${module.driver.timer.name}_output_disable_guard(FSP_SECURE_ARGUMENT, pin)
+
+#define FSP_GUARD_${module.driver.timer.name}_R_GPT_AdcTriggerSet(which_compare_match, compare_match_value) ${module.driver.timer.name}_adc_trigger_set_guard(FSP_SECURE_ARGUMENT, which_compare_match, compare_match_value)
+
+#define FSP_GUARD_${module.driver.timer.name}_R_GPT_PwmOutputDelaySet(edge, delay_setting, pin) ${module.driver.timer.name}_pwm_output_delay_set_guard(FSP_SECURE_ARGUMENT, edge, delay_setting, pin)
+
+#define FSP_GUARD_${module.driver.timer.name}_R_GPT_CallbackSet(p_callback, p_context, p_callback_memory) ${module.driver.timer.name}_callback_set_guard(FSP_SECURE_ARGUMENT, p_callback, p_context, p_callback_memory)
+
+#define FSP_GUARD_${module.driver.timer.name}_R_GPT_Close() ${module.driver.timer.name}_close_guard(FSP_SECURE_ARGUMENT)
+
+#define FSP_GUARD_${module.driver.timer.name}_R_GPT_PwmOutputDelayInitialize() ${module.driver.timer.name}_pwm_output_delay_initialize_guard()
+
+
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.timer.name}_open_guard(timer_ctrl_t *const p_ctrl, timer_cfg_t const *const p_cfg);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.timer.name}_stop_guard(timer_ctrl_t *const p_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.timer.name}_start_guard(timer_ctrl_t *const p_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.timer.name}_reset_guard(timer_ctrl_t *const p_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.timer.name}_enable_guard(timer_ctrl_t *const p_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.timer.name}_disable_guard(timer_ctrl_t *const p_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.timer.name}_period_set_guard(timer_ctrl_t *const p_ctrl, uint32_t const period_counts);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.timer.name}_duty_cycle_set_guard(timer_ctrl_t *const p_ctrl, uint32_t const duty_cycle_counts, uint32_t const pin);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.timer.name}_info_get_guard(timer_ctrl_t *const p_ctrl, timer_info_t *const p_info);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.timer.name}_status_get_guard(timer_ctrl_t *const p_ctrl, timer_status_t *const p_status);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.timer.name}_counter_set_guard(timer_ctrl_t *const p_ctrl, uint32_t counter);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.timer.name}_output_enable_guard(timer_ctrl_t *const p_ctrl, gpt_io_pin_t pin);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.timer.name}_output_disable_guard(timer_ctrl_t *const p_ctrl, gpt_io_pin_t pin);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.timer.name}_adc_trigger_set_guard(timer_ctrl_t *const p_ctrl, gpt_adc_compare_match_t which_compare_match, uint32_t compare_match_value);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.timer.name}_pwm_output_delay_set_guard(timer_ctrl_t *const p_ctrl, gpt_pwm_output_delay_edge_t edge, gpt_pwm_output_delay_setting_t delay_setting, uint32_t const pin);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.timer.name}_callback_set_guard(timer_ctrl_t *const p_api_ctrl, void(*p_callback)(timer_callback_args_t *), void const *const p_context, timer_callback_args_t *const p_callback_memory);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.timer.name}_close_guard(timer_ctrl_t *const p_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.timer.name}_pwm_output_delay_initialize_guard();
+
+
+extern const timer_instance_t ${module.driver.timer.name};
+            </header>
+            <declarations>
+                <![CDATA[
+static const timer_api_t ${module.driver.timer.name}_nsc_api =
+{
+    .open = ${module.driver.timer.name}_open_guard,
+    .stop = ${module.driver.timer.name}_stop_guard,
+    .start = ${module.driver.timer.name}_start_guard,
+    .reset = ${module.driver.timer.name}_reset_guard,
+    .enable = ${module.driver.timer.name}_enable_guard,
+    .disable = ${module.driver.timer.name}_disable_guard,
+    .periodSet = ${module.driver.timer.name}_period_set_guard,
+    .dutyCycleSet = ${module.driver.timer.name}_duty_cycle_set_guard,
+    .infoGet = ${module.driver.timer.name}_info_get_guard,
+    .statusGet = ${module.driver.timer.name}_status_get_guard,
+    .callbackSet = ${module.driver.timer.name}_callback_set_guard,
+    .close = ${module.driver.timer.name}_close_guard,
+};
+const timer_instance_t ${module.driver.timer.name} =
+{
+    .p_api = &${module.driver.timer.name}_nsc_api,
+    .p_ctrl = FSP_SECURE_ARGUMENT,
+    .p_cfg = FSP_SECURE_ARGUMENT,
+};
+                ]]>
+            </declarations>
+        </nsc>
+        <api configurable="true">
+            <file>ra/fsp/inc/instances/r_gpt.h</file>
+            <file>ra/fsp/inc/api/r_timer_api.h</file>
+        </api>
+    </module>
+</raModuleDescription>

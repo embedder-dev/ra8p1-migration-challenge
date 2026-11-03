@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<raModuleDescription>
+    <config id="config.middleware.rm_netxduo_ether" path="fsp_cfg/middleware/rm_netxduo_ether_cfg.h" version="0">
+        <content>
+        </content>
+    </config>
+    <module config="config.middleware.rm_netxduo_ether" display="Networking|NetX Duo Ethernet Driver (rm_netxduo_ether)" id="module.middleware.rm_netxduo_ether" version="1" url="https://github.com/eclipse-threadx/rtos-docs/blob/main/rtos-docs/netx-duo/chapter5.md" visible="false">
+        <requires interface="_rtos" />
+        <requires interface="" />
+        <requires id="module.middleware.rm_netxduo_ether.requires.threadx" interface="interface.rtos.tx" visible="false" display="Requires ThreadX"/>
+        <requires id="module.middleware.rm_netxduo_ether.requires.ether" interface="interface.driver.ether" display="Add Ethernet Driver">
+            <override property="module.driver.ether.p_callback" value="rm_netxduo_ether_callback"/>
+            <override property="module.driver.ether.zerocopy" value="module.driver.ether.zerocopy.1"/>
+            <override property="module.driver.ether.padding" value="module.driver.ether.padding.2"/>
+            <override property="module.driver.ether.padding_offset" value="14"/>
+            <override property="module.driver.ether.num_tx_descriptors" value="4"/>
+            <override property="module.driver.ether.num_rx_descriptors" value="4"/>
+            <override property="module.driver.ether.ether_buffer_size" value="${module.middleware.rm_netxduo_ether.ether_buffer_size}"/>
+            <override property="module.driver.ether.allocate_rx_buffer" value="module.driver.ether.allocate_rx_buffer.0"/>
+            <override property="module.driver.ether.p_context" value="&amp;${module.middleware.rm_netxduo_ether.name}_instance"/>
+        </requires>
+        <requires id="module.middleware.rm_netxduo_ether.requires.nxd.common" interface="interface.azure.nxd.common" display="Add NetX Duo Common" />
+        <provides interface="interface.middleware.rm_netxduo_ether" />
+        <provides interface="interface.azure.nxd.driver" />
+        <provides interface="interface.azure.nxd.driver.${module.middleware.rm_netxduo_ether.name}" />
+        <property default="g_netxduo_ether_${_instance}" display="Name" id="module.middleware.rm_netxduo_ether.name" description="Module name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.middleware.rm_netxduo_ether.name}")</constraint>
+        </property>
+        <property default="1500" display="IP MTU" id="module.middleware.rm_netxduo_ether.ip_mtu" description="IP MTU">
+            <constraint display="Value must be in the range [576, 1500] bytes.">
+                testInteger("${module.middleware.rm_netxduo_ether.ip_mtu}")  &amp;&amp; (${module.middleware.rm_netxduo_ether.ip_mtu} &gt;= 576) &amp;&amp; (${module.middleware.rm_netxduo_ether.ip_mtu} &lt;= 1500)
+            </constraint>
+        </property>
+        <property default="" id="module.middleware.rm_netxduo_ether.ether_buffer_size">
+            <export><![CDATA[eval(${module.middleware.rm_netxduo_ether.ip_mtu} + 14)]]></export>
+        </property>
+        <header>
+/* NetX Duo Ethernet Driver */
+void ${module.middleware.rm_netxduo_ether.name}(NX_IP_DRIVER * driver_req_ptr);
+
+/* Instance for storing state information for the Ethernet Driver. */
+extern rm_netxduo_ether_instance_t ${module.middleware.rm_netxduo_ether.name}_instance;
+        </header>
+        <includes>
+#include &quot;rm_netxduo_ether.h&quot;
+        </includes>
+        <declarations>
+static NX_PACKET * ${module.middleware.rm_netxduo_ether.name}_tx_packets[${module.middleware.rm_netxduo_ether.requires.ether::module.driver.ether.num_tx_descriptors}];
+static NX_PACKET * ${module.middleware.rm_netxduo_ether.name}_rx_packets[${module.middleware.rm_netxduo_ether.requires.ether::module.driver.ether.num_rx_descriptors}];
+
+static rm_netxduo_ether_ctrl_t ${module.middleware.rm_netxduo_ether.name}_ctrl;
+static rm_netxduo_ether_cfg_t  ${module.middleware.rm_netxduo_ether.name}_cfg =
+{
+    .p_ether_instance = &amp;${module.middleware.rm_netxduo_ether.requires.ether::module.driver.ether.name},
+    .mtu              = ${module.middleware.rm_netxduo_ether.ip_mtu},
+    .p_tx_packets     = ${module.middleware.rm_netxduo_ether.name}_tx_packets,
+    .p_rx_packets     = ${module.middleware.rm_netxduo_ether.name}_rx_packets
+};
+
+rm_netxduo_ether_instance_t ${module.middleware.rm_netxduo_ether.name}_instance =
+{
+    .p_ctrl = &amp;${module.middleware.rm_netxduo_ether.name}_ctrl,
+    .p_cfg  = &amp;${module.middleware.rm_netxduo_ether.name}_cfg
+};
+
+
+/*
+ * NetX Duo Driver: ${module.middleware.rm_netxduo_ether.name}
+ * Passes rm_netxduo_ether instance and driver request into the rm_netxduo_ether driver.
+ */
+void ${module.middleware.rm_netxduo_ether.name}(NX_IP_DRIVER * driver_req_ptr)
+{
+    rm_netxduo_ether(driver_req_ptr, &amp;${module.middleware.rm_netxduo_ether.name}_instance);
+}
+        </declarations>
+    </module>
+</raModuleDescription>

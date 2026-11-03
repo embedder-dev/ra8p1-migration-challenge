@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+IMPORTANT NOTE:
+Do not modify this file directly.
+
+This file is generated using: scripts/jinja/mdf_render.sh
+-->
+<raModuleDescription>
+    <config id="config.middleware.ocrypto_accel" path="fsp_cfg/rm_ocrypto_port_cfg.h" version="0">
+        <property default="config.middleware.ocrypto_accel.param_checking_enable.bsp" display="Parameter Checking" id="config.middleware.ocrypto_accel.param_checking_enable" description="If selected code for parameter checking is included in the build.">
+            <option display="Default (BSP)" id="config.middleware.ocrypto_accel.param_checking_enable.bsp" value="(BSP_CFG_PARAM_CHECKING_ENABLE)"/>
+            <option display="Enabled" id="config.middleware.ocrypto_accel.param_checking_enable.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.ocrypto_accel.param_checking_enable.disabled" value="(0)"/>
+        </property>
+        <content>
+            #ifdef __cplusplus
+            extern "C" {
+            #endif
+
+                #define RM_OCRYPTO_PORT_CFG_PARAM_CHECKING_ENABLE ${config.middleware.ocrypto_accel.param_checking_enable}
+
+            #ifdef __cplusplus
+            }
+            #endif
+        </content>
+    </config>
+    <module config="config.middleware.ocrypto_accel" display="Security|Ocrypto Port - H/W Accelerated (rm_ocrypto_port)" id="module.middleware.rm_ocrypto_port" visible="false" version="1" url="group___r_m___o_c_r_y_p_t_o___p_o_r_t.html">
+        <constraint display="Requires SCE Driver">
+            "${interface.driver.sce}" === "1"
+        </constraint>
+        <requires id="module.middleware.rm_ocrypto_port.requires.sce" interface="interface.driver.sce" visible="true" find="true" display="Requires Crypto RA2" />
+        <provides interface="interface.middleware.rm_ocrypto_port" />
+        <includes>
+            #include "rm_ocrypto_port.h"
+        </includes>
+    </module>
+    <developerSupport>
+        <api version="1">
+            <platform id="fsp" max="" min=""/>
+            <moduleRef id="module.middleware.rm_ocrypto_port"/>
+            <description><![CDATA[<form><p><span color="header" font="header">Overview</span></p><p>Provides rm_ocrypto_port APIs.</p></form>]]></description>
+            <function display="Module Setup" id="ocrypto_module_setup">
+                <description><![CDATA[<form><p>Template to setup an rm_ocrypto_port instance</p></form>]]></description>
+            </function>
+            <function display="Random Generation" id="ocrypto_random_generation">
+                <description><![CDATA[<form><p>Template for random number generation</p></form>]]></description>
+            </function>
+        </api>
+        <template category="function_call" display="RM_OCRYPTO_PORT_Init" id="module.middleware.rm_ocrypto_port.ocrypto_port_init" version="1">
+            <platform id="fsp" max="" min=""/>
+            <moduleRef id="module.middleware.rm_ocrypto_port">
+                <function id="ocrypto_module_setup"/>
+            </moduleRef>
+            <content>
+            status = RM_OCRYPTO_PORT_Init();
+            </content>
+        </template>
+        <template category="function_call" display="RM_OCRYPTO_PORT_TRNG_Read" id="module.middleware.rm_ocrypto_port.ocrypto_port_trng_read" version="1">
+            <platform id="fsp" max="" min=""/>
+            <moduleRef id="module.middleware.rm_ocrypto_port">
+                <function id="ocrypto_random_generation"/>
+            </moduleRef>
+            <content>
+            uint8_t random[16];
+            status = RM_OCRYPTO_PORT_TRNG_Read(random, 16);
+            </content>
+        </template>
+    </developerSupport>
+</raModuleDescription>

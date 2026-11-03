@@ -1,0 +1,119 @@
+<?xml version="1.0" ?>
+<raModuleDescription>
+    <module id="module.cellular_interface.gm" display="Networking|AWS Cellular Interface on GM (rm_cellular_gm_aws)" common="1" version="0" url="group___r_m___c_e_l_l_u_l_a_r___g_m___a_w_s.html">
+        <constraint display="Max number of sockets in Cellular Interface config can't be greater than 6.">
+            "${config.aws.cellular_interface.num_sockets_max_size}" &lt;= 6
+        </constraint>
+        <constraint display="GSM support must be disabled when using GM.">
+            "${config.aws.cellular_interface.gsm}" === "config.aws.cellular_interface.gsm.disabled"
+        </constraint>
+        <constraint display="Requires AWS Cellular platform">
+            testExists("${interface.cellular_interface.platform}")
+        </constraint>
+        <constraint display="Requires AWS Cellular Interface Common">
+            testExists("${interface.cellular_interface.cellular_common}")
+        </constraint>
+        <requires id="module.cellular_interface.gm.requires.awsfreertos" interface="interface.rtos.awsfreertos" visible="false" display="Requires FreeRTOS"/>
+        <requires id="module.cellular_interface.gm.requires.platform" interface="interface.cellular_interface.platform" display="Requires Cellular Platform"/>
+        <requires id="module.cellular_interface.gm.requires.cellular_common" interface="interface.cellular_interface.cellular_common" display="Requires Cellular Interface Common"/>
+        <requires id="module.cellular_interface.gm.requires.comm_if" interface="interface.cellular_interface.comm_if" display="Requires Cellular Comm Interface"/>
+        <provides interface="interface.aws.cellular_interface_gm" />
+        <provides interface="interface.aws.cellular_interface" />
+        <property default="CellularHandle" id="module.cellular_interface.gm.name" />
+        <property default="module.cellular_interface.gm.reset_port.PORT_00" display="Module Reset Pin (Port Number)" id="module.cellular_interface.gm.reset_port" description="Specify the reset control port for the GM module. This property is only used in devassist.">
+            <option id="module.cellular_interface.gm.reset_port.PORT_00" display="00" value="00" />
+            <option id="module.cellular_interface.gm.reset_port.PORT_01" display="01" value="01" />
+            <option id="module.cellular_interface.gm.reset_port.PORT_02" display="02" value="02" />
+            <option id="module.cellular_interface.gm.reset_port.PORT_03" display="03" value="03" />
+            <option id="module.cellular_interface.gm.reset_port.PORT_04" display="04" value="04" />
+            <option id="module.cellular_interface.gm.reset_port.PORT_05" display="05" value="05" />
+            <option id="module.cellular_interface.gm.reset_port.PORT_06" display="06" value="06" />
+            <option id="module.cellular_interface.gm.reset_port.PORT_07" display="07" value="07" />
+            <option id="module.cellular_interface.gm.reset_port.PORT_08" display="08" value="08" />
+            <option id="module.cellular_interface.gm.reset_port.PORT_09" display="09" value="09" />
+            <option id="module.cellular_interface.gm.reset_port.PORT_10" display="10" value="10" />
+            <option id="module.cellular_interface.gm.reset_port.PORT_11" display="11" value="11" />
+        </property>
+        <property default="module.cellular_interface.gm.reset_pin.PIN_00" display="Module Reset Pin (Pin Number)" id="module.cellular_interface.gm.reset_pin" description="Specify the reset control pin for the GM module. This property is only used in devassist.">
+            <option id="module.cellular_interface.gm.reset_pin.PIN_00" display="00" value="00" />
+            <option id="module.cellular_interface.gm.reset_pin.PIN_01" display="01" value="01" />
+            <option id="module.cellular_interface.gm.reset_pin.PIN_02" display="02" value="02" />
+            <option id="module.cellular_interface.gm.reset_pin.PIN_03" display="03" value="03" />
+            <option id="module.cellular_interface.gm.reset_pin.PIN_04" display="04" value="04" />
+            <option id="module.cellular_interface.gm.reset_pin.PIN_05" display="05" value="05" />
+            <option id="module.cellular_interface.gm.reset_pin.PIN_06" display="06" value="06" />
+            <option id="module.cellular_interface.gm.reset_pin.PIN_07" display="07" value="07" />
+            <option id="module.cellular_interface.gm.reset_pin.PIN_08" display="08" value="08" />
+            <option id="module.cellular_interface.gm.reset_pin.PIN_09" display="09" value="09" />
+            <option id="module.cellular_interface.gm.reset_pin.PIN_10" display="10" value="10" />
+            <option id="module.cellular_interface.gm.reset_pin.PIN_11" display="11" value="11" />
+            <option id="module.cellular_interface.gm.reset_pin.PIN_12" display="12" value="12" />
+            <option id="module.cellular_interface.gm.reset_pin.PIN_13" display="13" value="13" />
+            <option id="module.cellular_interface.gm.reset_pin.PIN_14" display="14" value="14" />
+            <option id="module.cellular_interface.gm.reset_pin.PIN_15" display="15" value="15" />
+        </property>
+        <header>
+extern CellularHandle_t ${module.cellular_interface.gm.name};
+        </header>
+        <includes>
+#include "cellular_gm.h"
+        </includes>
+        <declarations>
+CellularHandle_t ${module.cellular_interface.gm.name} = NULL;
+        </declarations>
+    </module>
+    <developerSupport>
+        <api version="1">
+            <platform id="fsp" max="" min="1.1.0"/>
+            <moduleRef id="module.cellular_interface.gm"/>
+            <description><![CDATA[<form><p><span color="header" font="header">Overview</span></p><p>The AWS Cellular Interface on GM module provides snippets of code for configuring the AWS Cellular Interface running on GM hardware.</p></form>]]></description>
+            <function display="Quick Setup" id="cellular_gm_aws_quick_setup">
+                <description><![CDATA[<form><p>This function provides quick setup for the GM Cellular instance using the properties from the RA configurator.</p></form>]]></description>
+            </function>
+            <function display="Reset Module" id="cellular_gm_aws_reset">
+                <description><![CDATA[<form><p>This function provides an example implementation for resetting the GM module via the reset pin.</p></form>]]></description>
+            </function>
+        </api>
+        <template category="function_call" display="Call Quick Setup" id="module.cellular_interface.gm.quick_setup" version="1">
+            <platform id="fsp" max="" min="1.1.0"/>
+            <moduleRef id="module.cellular_interface.gm">
+                <function id="cellular_gm_aws_quick_setup"/>
+            </moduleRef>
+            <content>
+void ${gm_name:raProperty(module.cellular_interface.gm.name)}_quick_setup();
+
+/* Quick setup for ${gm_name}. */
+void ${gm_name}_quick_setup()
+{
+    CellularError_t err;
+
+    /* Initialize Cellular Modem. */
+    err = Cellular_Init(&amp;${gm_name}, &amp;${comm_if_name:raProperty(module.cellular_interface.comm_uart.name)});
+    assert(CELLULAR_SUCCESS == err);
+}
+            </content>
+        </template>
+        <template category="function_call" display="Reset GM Module" id="module.cellular_interface.gm.reset_module" version="1">
+            <platform id="fsp" max="" min="1.1.0"/>
+            <moduleRef id="module.cellular_interface.gm">
+                <function id="cellular_gm_aws_reset"/>
+            </moduleRef>
+            <content>
+void ${gm_name:raProperty(module.cellular_interface.gm.name)}_reset_gm();
+
+#define GM_RESET_HOLD_TIME_MIN_US (1) // Minimum hold time in microseconds from RYZ014A datasheet (Table 18)
+
+/* Reset GM module. */
+void ${gm_name}_reset_gm()
+{
+    /* Assert reset pin to reset modem */
+    R_IOPORT_PinWrite(&amp;g_ioport_ctrl, BSP_IO_PORT_${reset_port:raProperty(module.cellular_interface.gm.reset_port)}_PIN_${reset_pin:raProperty(module.cellular_interface.gm.reset_pin)}, BSP_IO_LEVEL_HIGH);
+
+    R_BSP_SoftwareDelay(GM_RESET_HOLD_TIME_MIN_US, BSP_DELAY_UNITS_MICROSECONDS);
+
+    R_IOPORT_PinWrite(&amp;g_ioport_ctrl, BSP_IO_PORT_${reset_port}_PIN_${reset_pin}, BSP_IO_LEVEL_LOW);
+}
+            </content>
+        </template>
+    </developerSupport>
+</raModuleDescription>

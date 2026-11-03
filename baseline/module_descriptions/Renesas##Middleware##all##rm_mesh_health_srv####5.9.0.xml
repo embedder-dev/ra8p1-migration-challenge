@@ -1,0 +1,127 @@
+<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.middleware.rm_mesh_health_srv" path="fsp_cfg/rm_mesh_health_srv_cfg.h" version="0">
+        <content>
+            #ifdef __cplusplus
+            extern "C" {
+            #endif
+
+            #ifdef __cplusplus
+            }
+            #endif
+        </content>
+    </config>
+    <module id="module.middleware.rm_ble_mesh_health_server_on_rm_mesh_health_srv" display="Networking|BLE Mesh Network modules|BLE Mesh Model Health Server (rm_mesh_health_srv)" config="config.middleware.rm_mesh_health_srv" version="0" visible="true" url="group___r_m___m_e_s_h___h_e_a_l_t_h___s_r_v.html">
+
+        <!-- <constraint display="Requires Low Level Library Implementation">
+            "${interface.middleware.rm_ble_mesh_access_on_rm_ble_mesh_access}" === "1"
+        </constraint> -->
+        <constraint display="BLE Mesh Model Health Server middleware not support R_BLE_SPP module">
+            "${interface.mcu.radio}" === "1"
+        </constraint>
+        <constraint display="If self tests is NULL, number of self tests must be zero. Otherwise the number must be greater than zero">
+            (("${module.middleware.rm_ble_mesh_health_server.self_tests}"==="NULL") &amp;&amp; (${module.middleware.rm_ble_mesh_health_server.num_self_tests} === 0)) ||
+            (("${module.middleware.rm_ble_mesh_health_server.self_tests}"!=="NULL") &amp;&amp; (${module.middleware.rm_ble_mesh_health_server.num_self_tests} &gt; 0))
+        </constraint>
+        <requires id="module.middleware.rm_ble_mesh_health_server.requires.rm_ble_mesh_access" interface="interface.middleware.rm_ble_mesh_access_on_rm_ble_mesh_access" visible="true" display="Add BLE Mesh Access Module" find="false"/>
+
+        <provides interface="interface.middleware.rm_ble_mesh_health_server"/>
+        <provides interface="interface.middleware.rm_ble_mesh_health_server_on_rm_mesh_health_srv"/>
+        <provides interface="interface.middleware.rm_ble_mesh_health_server.${module.middleware.rm_ble_mesh_health_server.name}"/>
+
+        <property display="Name" default="g_rm_mesh_health_srv${_instance}" id="module.middleware.rm_ble_mesh_health_server.name" description="Module name.">
+            <constraint display="Name Must Be a Valid C Symbol">testSymbol("${module.middleware.rm_ble_mesh_health_server.name}")</constraint>
+        </property>
+
+        <property display="Company ID" id="module.middleware.rm_ble_mesh_health_server.company_id" default="0" description="Select company id.">
+            <constraint display="Invalid Company Id">testInteger("${module.middleware.rm_ble_mesh_health_server.company_id}") &amp;&amp; ("${module.middleware.rm_ble_mesh_health_server.company_id}" &gt;= 0) &amp;&amp; ("${module.middleware.rm_ble_mesh_health_server.company_id}" &lt;= 65535)</constraint>
+        </property>
+
+        <property display="Number of Self Tests" id="module.middleware.rm_ble_mesh_health_server.num_self_tests" default="0" description="Select number of self tests.">
+            <constraint display="Invalid Number of Self Tests">
+                testInteger("${module.middleware.rm_ble_mesh_health_server.num_self_tests}") &amp;&amp; ("${module.middleware.rm_ble_mesh_health_server.num_self_tests}" &gt;= 0) &amp;&amp; ("${module.middleware.rm_ble_mesh_health_server.num_self_tests}" &lt;= 4294967295)
+            </constraint>
+        </property>
+
+        <property display="Self Tests" id="module.middleware.rm_ble_mesh_health_server.self_tests" default="NULL" description="Self test">
+            <constraint display="Name Must Be a Valid C Symbol">eval('' +
+                'var input = "${module.middleware.rm_ble_mesh_health_server.self_tests}";' +
+                'var regex = RegExp("^\([a-zA-Z_][a-zA-Z0-9_]*\)\(\\\\[\\\\]|\)$","i");' +
+                'regex.test(input)')
+            </constraint>
+        </property>
+
+        <property id="module.middleware.rm_ble_mesh_health_server.p_self_tests" default="NULL">
+            <export>eval('' +
+                'var output = "${module.middleware.rm_ble_mesh_health_server.self_tests}";' +
+                'var regex = RegExp("^\([a-zA-Z_][a-zA-Z0-9_]*\)$","i");' +
+                'if (regex.test(output) &amp;&amp; ("NULL" !== output)) {' +
+                'output = "&amp;" + output;' +
+                '}else{' +
+                'output = output.replace( "\\[\\]" , "" );' +
+                '}' +
+                'output')
+            </export>
+        </property>
+
+
+        <property display="Interrupts|Callback Provided when Timeout Occurs" id="module.middleware.rm_ble_mesh_health_server.p_callback" default="NULL" description="Callback provided when mesh health server ISR occurs">
+            <constraint display="Name Must Be a Valid C Symbol">testSymbol("${module.middleware.rm_ble_mesh_health_server.p_callback}")</constraint>
+        </property>
+
+        <property id="module.middleware.rm_ble_mesh_health_server.p_context" default="NULL">
+            <constraint display="Name Must Be a Valid C Symbol">testSymbol("${module.middleware.rm_ble_mesh_health_server.p_context}")</constraint>
+            <export>eval('' +
+                'var output = "${module.middleware.rm_ble_mesh_health_server.p_context}";' +
+                'if ("NULL" !== output) {' +
+                'output = "&amp;" + output;' +
+                '}' +
+                'output')
+            </export>
+        </property>
+
+        <header>
+/** BLE Mesh Model Health on BLE Mesh Model Server Instance. */
+extern const rm_ble_mesh_health_server_instance_t ${module.middleware.rm_ble_mesh_health_server.name};
+
+/** Access the BLE Mesh model health server instance using these structures when calling API functions directly (::p_api is not used). */
+extern rm_mesh_health_server_instance_ctrl_t ${module.middleware.rm_ble_mesh_health_server.name}_ctrl;
+extern const rm_ble_mesh_health_server_cfg_t ${module.middleware.rm_ble_mesh_health_server.name}_cfg;
+
+/* If the number of self tests is greater than 0, declare self tests */
+#if ${module.middleware.rm_ble_mesh_health_server.num_self_tests} &gt; 0
+extern rm_ble_mesh_health_server_self_test_t ${module.middleware.rm_ble_mesh_health_server.self_tests};
+#endif
+
+#ifndef ${module.middleware.rm_ble_mesh_health_server.p_callback}
+void ${module.middleware.rm_ble_mesh_health_server.p_callback}(rm_ble_mesh_model_health_callback_args_t * p_args);
+#endif
+
+        </header>
+        <includes>
+#include "rm_ble_mesh_health_server_api.h"
+#include "rm_mesh_health_srv.h"
+        </includes>
+        <declarations>
+rm_mesh_health_server_instance_ctrl_t ${module.middleware.rm_ble_mesh_health_server.name}_ctrl;
+
+const rm_ble_mesh_health_server_cfg_t ${module.middleware.rm_ble_mesh_health_server.name}_cfg =
+{
+    .p_access_instance   = &amp;${module.middleware.rm_ble_mesh_health_server.requires.rm_ble_mesh_access::module.middleware.rm_ble_mesh_access.name},
+    .p_self_tests        = ${module.middleware.rm_ble_mesh_health_server.p_self_tests},
+    .company_id          = ${module.middleware.rm_ble_mesh_health_server.company_id},
+    .num_self_tests      = ${module.middleware.rm_ble_mesh_health_server.num_self_tests},
+    .p_callback          = ${module.middleware.rm_ble_mesh_health_server.p_callback},
+    .p_context           = ${module.middleware.rm_ble_mesh_health_server.p_context},
+    .p_extend            = NULL
+};
+
+const rm_ble_mesh_health_server_instance_t ${module.middleware.rm_ble_mesh_health_server.name} =
+{
+    .p_ctrl = &amp;${module.middleware.rm_ble_mesh_health_server.name}_ctrl,
+    .p_cfg  = &amp;${module.middleware.rm_ble_mesh_health_server.name}_cfg,
+    .p_api  = &amp;g_rm_ble_mesh_health_server_on_rm_mesh_health_srv
+};
+        </declarations>
+    </module>
+</raModuleDescription>

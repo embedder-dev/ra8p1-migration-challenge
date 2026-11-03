@@ -1,0 +1,434 @@
+﻿<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.driver.ceu" path="fsp_cfg/r_ceu_cfg.h" version="0">
+        <property default="config.driver.ceu.param_checking_enable.bsp" display="Parameter Checking" id="config.driver.ceu.param_checking_enable" description="If selected code for parameter checking is included in the build.">
+            <option display="Default (BSP)" id="config.driver.ceu.param_checking_enable.bsp" value="(BSP_CFG_PARAM_CHECKING_ENABLE)"/>
+            <option display="Enabled" id="config.driver.ceu.param_checking_enable.enabled" value="(1)"/>
+            <option display="Disabled" id="config.driver.ceu.param_checking_enable.disabled" value="(0)"/>
+        </property>
+        <content>
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#define CEU_CFG_PARAM_CHECKING_ENABLE ${config.driver.ceu.param_checking_enable}
+
+#ifdef __cplusplus
+}
+#endif
+        </content>
+    </config>
+    <module config="config.driver.ceu" display="Graphics|${module.driver.ceu.name} Capture Engine Unit (r_ceu)" id="module.driver.ceu_on_capture" version="1" url="group___c_e_u.html">
+        <!-- Module level constraints -->
+        <constraint display="Module instances must have unique names"> "${interface.driver.ceu.${module.driver.ceu.name}}" === "1" </constraint>
+        <constraint display="Requires CEU Peripheral"> "${interface.mcu.ceu.external}" === "1" </constraint>
+        <!-- Inter-related constraints, Data Enable Fetch -->
+        <constraint display="Interrupts|Selectable CEU Events|H-Sync and V-Sync validation interrupts must be disabled when Data Enable Fetch format is configured.">("${module.driver.ceu.capture_format}" != "module.driver.ceu.capture_format.data_enable") || (("module.driver.ceu.interrupts_enabled.ighsie.disabled" == "${module.driver.ceu.interrupts_enabled.ighsie}") &amp;&amp; ("module.driver.ceu.interrupts_enabled.igvsie.disabled" == "${module.driver.ceu.interrupts_enabled.igvsie}")) </constraint>
+        <constraint display="Input|Capture Specifications|Horizontal pixel offset must be 0 when Data Enable Fetch format is used.">("${module.driver.ceu.capture_format}" != "module.driver.ceu.capture_format.data_enable") || ("${module.driver.ceu.x_start_pixel}" == 0) </constraint>
+        <constraint display="Input|Capture Specifications|Horizontal capture resolution must be 0 when Data Enable Fetch format is used.">("${module.driver.ceu.capture_format}" != "module.driver.ceu.capture_format.data_enable") || ("${module.driver.ceu.x_pixels}" == 0) </constraint>
+        <constraint display="Input|Capture Specifications|Vertical pixel offset must be 0 when Data Enable Fetch format is used.">("${module.driver.ceu.capture_format}" != "module.driver.ceu.capture_format.data_enable") || ("${module.driver.ceu.y_start_pixel}" == 0) </constraint>
+        <constraint display="Input|Capture Specifications|Vertical capture resolution must be 0 when Data Enable Fetch format is used.">("${module.driver.ceu.capture_format}" != "module.driver.ceu.capture_format.data_enable") || ("${module.driver.ceu.y_pixels}" == 0) </constraint>
+        <constraint display="Input|Data Bus Specifications|VSYNC Polarity must be active high when Data Enable Fetch format is used.">("${module.driver.ceu.capture_format}" != "module.driver.ceu.capture_format.data_enable") || ("${module.driver.ceu.vsync_polarity}" == "module.driver.ceu.vsync_polarity.high") </constraint>
+
+        <!-- Data Enable Buffer Size -->
+        <constraint display="Output|Buffer|Data Enable Buffer Size must be zero when Data Synchronous Fetch format is configured.">("${module.driver.ceu.capture_format}" != "module.driver.ceu.capture_format.data_synchronous") || ("${module.driver.ceu.image_buffer_size}" == 0)</constraint>
+        <constraint display="Output|Buffer|Data Enable Buffer Size must be specified when Data Enable Fetch format is used.">("${module.driver.ceu.capture_format}" != "module.driver.ceu.capture_format.data_enable") || ("${module.driver.ceu.image_buffer_size}" != 0x0)</constraint>
+
+        <requires id="module.driver.ceu_on_capture.requires.ceu" interface="interface.mcu.ceu" visible="false" display="Requires CEU Peripheral" />
+
+        <provides interface="interface.driver.ceu" />
+        <provides interface="interface.driver.ceu_on_capture" />
+        <provides interface="interface.driver.ceu.${module.driver.ceu.name}" />
+        <provides interface="interface.peripheral.ceu" />
+
+        <!--
+        General Configurations
+        -->
+        <property display="General|Name" id="module.driver.ceu.name" default="g_ceu${_instance}" description="Module name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.ceu.name}")</constraint>
+        </property>
+
+        <!--
+        Extended Configuration
+        -->
+        <property display="Input|Capture Mode" id="module.driver.ceu.capture_format" default="module.driver.ceu.capture_format.data_synchronous" description="Capture mode of incoming data.">
+            <option display="Data Synchronous Fetch" id="module.driver.ceu.capture_format.data_synchronous" value="CEU_CAPTURE_FORMAT_DATA_SYNCHRONOUS"/>
+            <option display="Data Enable Fetch" id="module.driver.ceu.capture_format.data_enable" value="CEU_CAPTURE_FORMAT_DATA_ENABLE"/>
+        </property>
+        <property display="Input|Data Bus Specifications|Data Bus Size" id="module.driver.ceu.bus_size" default="module.driver.ceu.bus_size.8_bit" description="Data bus-width of CEU physical connection.">
+            <select enum="enum.driver.ceu.bus_size"/>
+        </property>
+        <property display="Input|Data Bus Specifications|HSYNC Polarity" id="module.driver.ceu.hsync_polarity" default="module.driver.ceu.hsync_polarity.high" description="Specify the active polarity of the HSYNC signal.">
+            <option display="High" id="module.driver.ceu.hsync_polarity.high" value="CEU_HSYNC_POLARITY_HIGH"/>
+            <option display="Low" id="module.driver.ceu.hsync_polarity.low" value="CEU_HSYNC_POLARITY_LOW"/>
+        </property>
+        <property display="Input|Data Bus Specifications|VSYNC Polarity" id="module.driver.ceu.vsync_polarity" default="module.driver.ceu.vsync_polarity.high" description="Specify the active polarity of the VSYNC signal.">
+            <option display="High" id="module.driver.ceu.vsync_polarity.high" value="CEU_VSYNC_POLARITY_HIGH"/>
+            <option display="Low" id="module.driver.ceu.vsync_polarity.low" value="CEU_VSYNC_POLARITY_LOW"/>
+        </property>
+        <property display="Output|Byte Swapping" id="module.driver.ceu.byte_swapping" default="" description="Byte swapping configuration. Bytes may be swapped in 8-bit, 16-bit, or 32-bit units." bitmapPrefix="">
+            <option display="Swap 8-bit units" id="module.driver.ceu.swap_bits.8bit_units" value="0x1"/>
+            <option display="Swap 16-bit units" id="module.driver.ceu.swap_bits.16bit_units" value="0x2"/>
+            <option display="Swap 32-bit units" id="module.driver.ceu.swap_bits.32bit_units" value="0x4"/>
+        </property>
+        <property display="Output|Burst Transfer Mode" id="module.driver.ceu.burst_mode" default="module.driver.ceu.burst_mode.x8" description="Specify the unit for transferring data to the bus bridge module.">
+            <option display="Transfer in 32-byte units" id="module.driver.ceu.burst_mode.x1" value="CEU_BURST_TRANSFER_MODE_X1"/>
+            <option display="Transfer in 64-byte units" id="module.driver.ceu.burst_mode.x2" value="CEU_BURST_TRANSFER_MODE_X2"/>
+            <option display="Transfer in 128-byte units" id="module.driver.ceu.burst_mode.x4" value="CEU_BURST_TRANSFER_MODE_X4"/>
+            <option display="Transfer in 256-byte units" id="module.driver.ceu.burst_mode.x8" value="CEU_BURST_TRANSFER_MODE_X8"/>
+        </property>
+
+        <!-- Interrupt Configurations -->
+        <property display="Interrupts|Callback" id="module.driver.ceu.p_callback" default="g_ceu${_instance}_user_callback" description="A user callback function must be provided. This callback is invoked for every successful frame capture as well as other status or error conditions.">
+            <constraint display="Name must be a valid C symbol.">testSymbol("${module.driver.ceu.p_callback}")</constraint>
+        </property>
+        <property id="module.driver.ceu.p_context" default="NULL" description="Pointer to the context structure to be passed through the callback argument.">
+            <constraint display="Name must be a valid C symbol.">testSymbol("${module.driver.ceu.p_context}")</constraint>
+            <export>
+            eval('' +
+                'var output = "${module.driver.ceu.p_context}";' +
+                'if ("NULL" !== output){' +
+                '    output = "&amp;" + output  ;' +
+                '}' +
+                'output' +
+                '')
+            </export>
+        </property>
+        <property display="Interrupts|CEU Interrupt Priority" default="" id="module.driver.ceu.ipl" description="Select the CEU interrupt priority.">
+            <select enum="enum.mcu.nvic.priorities.mandatory"/>
+            <interrupt event="event.ceu.ceui" isr="ceu_isr"/>
+        </property>
+
+        <property display="Interrupts|Selectable CEU Events|One-Frame Capture End Event" id="module.driver.ceu.interrupts_enabled.cpeie" default="module.driver.ceu.interrupts_enabled.cpeie.enabled" description="Capturing one frame from an external module has finished.">
+            <option display="Enabled" id="module.driver.ceu.interrupts_enabled.cpeie.enabled" value="R_CEU_CEIER_CPEIE_Msk"/>
+            <option display="Disabled" id="module.driver.ceu.interrupts_enabled.cpeie.disabled" value="0"/>
+        </property>
+        <property display="Interrupts|Selectable CEU Events|Horizontal Sync Event" id="module.driver.ceu.interrupts_enabled.hdie" default="module.driver.ceu.interrupts_enabled.hdie.disabled" description="Horizontal sync signal was input from an external module.">
+            <option display="Enabled" id="module.driver.ceu.interrupts_enabled.hdie.enabled" value="R_CEU_CEIER_HDIE_Msk"/>
+            <option display="Disabled" id="module.driver.ceu.interrupts_enabled.hdie.disabled" value="0"/>
+        </property>
+        <property display="Interrupts|Selectable CEU Events|Vertical Sync Event" id="module.driver.ceu.interrupts_enabled.vdie" default="module.driver.ceu.interrupts_enabled.vdie.enabled" description="Vertical sync signal was input from an external module.">
+            <option display="Enabled" id="module.driver.ceu.interrupts_enabled.vdie.enabled" value="R_CEU_CEIER_VDIE_Msk"/>
+            <option display="Disabled" id="module.driver.ceu.interrupts_enabled.vdie.disabled" value="0"/>
+        </property>
+        <property display="Interrupts|Selectable CEU Events|CRAM Buffer Overflow Error" id="module.driver.ceu.interrupts_enabled.cdtofie" default="module.driver.ceu.interrupts_enabled.cdtofie.enabled" description="Data overflowed in the CRAM write buffer.">
+            <option display="Enabled" id="module.driver.ceu.interrupts_enabled.cdtofie.enabled" value="R_CEU_CEIER_CDTOFIE_Msk"/>
+            <option display="Disabled" id="module.driver.ceu.interrupts_enabled.cdtofie.disabled" value="0"/>
+        </property>
+        <property display="Interrupts|Selectable CEU Events|H-Sync Validation Error" id="module.driver.ceu.interrupts_enabled.ighsie" default="module.driver.ceu.interrupts_enabled.ighsie.disabled" description="The number of configured H-sync cycles is different than the H-sync cycles input from the external module.">
+            <option display="Enabled" id="module.driver.ceu.interrupts_enabled.ighsie.enabled" value="R_CEU_CEIER_IGHSIE_Msk"/>
+            <option display="Disabled" id="module.driver.ceu.interrupts_enabled.ighsie.disabled" value="0"/>
+        </property>
+        <property display="Interrupts|Selectable CEU Events|V-Sync Validation Error" id="module.driver.ceu.interrupts_enabled.igvsie" default="module.driver.ceu.interrupts_enabled.igvsie.disabled" description="The number of configured V-sync cycles is different than the V-sync cycles input from the external module.">
+            <option display="Enabled" id="module.driver.ceu.interrupts_enabled.igvsie.enabled" value="R_CEU_CEIER_IGVSIE_Msk"/>
+            <option display="Disabled" id="module.driver.ceu.interrupts_enabled.igvsie.disabled" value="0"/>
+        </property>
+        <property display="Interrupts|Selectable CEU Events|V-Sync Error" id="module.driver.ceu.interrupts_enabled.vbpie" default="module.driver.ceu.interrupts_enabled.vbpie.enabled" description="V-sync has been input while CEU holds data (insufficient vertical-sync front porch).">
+            <option display="Enabled" id="module.driver.ceu.interrupts_enabled.vbpie.enabled" value="R_CEU_CEIER_VBPIE_Msk"/>
+            <option display="Disabled" id="module.driver.ceu.interrupts_enabled.vbpie.disabled" value="0"/>
+        </property>
+        <property display="Interrupts|Selectable CEU Events|No H-Sync error" id="module.driver.ceu.interrupts_enabled.nhdie" default="module.driver.ceu.interrupts_enabled.nhdie.enabled" description="No H-sync signal was input.">
+            <option display="Enabled" id="module.driver.ceu.interrupts_enabled.nhdie.enabled" value="R_CEU_CEIER_NHDIE_Msk"/>
+            <option display="Disabled" id="module.driver.ceu.interrupts_enabled.nhdie.disabled" value="0"/>
+        </property>
+        <property display="Interrupts|Selectable CEU Events|No V-Sync error" id="module.driver.ceu.interrupts_enabled.nvdie" default="module.driver.ceu.interrupts_enabled.nvdie.enabled" description="No V-sync signal was input.">
+            <option display="Enabled" id="module.driver.ceu.interrupts_enabled.nvdie.enabled" value="R_CEU_CEIER_NVDIE_Msk"/>
+            <option display="Disabled" id="module.driver.ceu.interrupts_enabled.nvdie.disabled" value="0"/>
+        </property>
+
+        <!--
+        Capture API Configuration
+        -->
+        <property display="Input|Capture Specifications|Horizontal capture resolution" id="module.driver.ceu.x_pixels" default="640" description="Specify the number of horizontal pixels to capture.">
+            <constraint display="Value must be an integer.">testInteger("${module.driver.ceu.x_pixels}")</constraint>
+            <constraint display="Value must be greater than or equal to zero.">"${module.driver.ceu.x_pixels}" &gt;= 0</constraint>
+            <constraint display="Value must be less than or equal to 2560.">"${module.driver.ceu.x_pixels}" &lt;= 2560</constraint>
+            <constraint display="Value must be zero (for Data Enable Fetch) or a multiple of 8.">"${module.driver.ceu.x_pixels}" % 8 == 0</constraint>
+        </property>
+        <property display="Input|Capture Specifications|Vertical capture resolution" id="module.driver.ceu.y_pixels" default="480" description="Specify the number of vertical pixels to capture.">
+            <constraint display="Value must be an integer.">testInteger("${module.driver.ceu.y_pixels}")</constraint>
+            <constraint display="Value must be greater than or equal to zero.">"${module.driver.ceu.y_pixels}" &gt;= 0</constraint>
+            <constraint display="Value must be less than or equal to 1920.">"${module.driver.ceu.y_pixels}" &lt;= 1920</constraint>
+            <constraint display="Value must be zero (for Data Enable Fetch) or a multiple of 4.">(("${module.driver.ceu.y_pixels}" % 4 === 0))</constraint>
+        </property>
+        <property display="Input|Capture Specifications|Horizontal pixel offset" id="module.driver.ceu.x_start_pixel" default="0" description="Number of pixels from H-sync signal up to the start of a valid data period.">
+            <constraint display="Value must be an integer.">testInteger("${module.driver.ceu.x_start_pixel}")</constraint>
+            <constraint display="Value must be greater than or equal to zero.">"${module.driver.ceu.x_start_pixel}" &gt;= 0</constraint>
+        </property>
+        <property display="Input|Capture Specifications|Vertical pixel offset" id="module.driver.ceu.y_start_pixel" default="0" description="Specify the vertical line to start capturing image data.">
+            <constraint display="Value must be an integer.">testInteger("${module.driver.ceu.y_start_pixel}")</constraint>
+            <constraint display="Value must be greater than or equal to zero.">"${module.driver.ceu.y_start_pixel}" &gt;= 0</constraint>
+        </property>
+        <property display="Input|Capture Specifications|Sample Points|Data Sample Point" id="module.driver.ceu.dsel" default="module.driver.ceu.dsel.rising" description="Specify the external camera clock transition state for fetching the image data (D15 to D0) from the external module.">
+            <option display="Rising edge of the camera clock" id="module.driver.ceu.dsel.rising" value="0"/>
+            <option display="Falling edge of the camera clock" id="module.driver.ceu.dsel.falling" value="1"/>
+        </property>
+        <property display="Input|Capture Specifications|Sample Points|H-Sync Sample Point" id="module.driver.ceu.hdsel" default="module.driver.ceu.hdsel.rising" description="Specify the external camera clock transition state for capturing H-Sync from the external module.">
+            <option display="Rising edge of the camera clock" id="module.driver.ceu.hdsel.rising" value="0"/>
+            <option display="Falling edge of the camera clock" id="module.driver.ceu.hdsel.falling" value="1"/>
+        </property>
+        <property display="Input|Capture Specifications|Sample Points|V-Sync Sample Point" id="module.driver.ceu.vdsel" default="module.driver.ceu.vdsel.rising" description="Specify the external camera clock transition state for capturing V-Sync from the external module.">
+            <option display="Rising edge of the camera clock" id="module.driver.ceu.vdsel.rising" value="0"/>
+            <option display="Falling edge of the camera clock" id="module.driver.ceu.vdsel.falling" value="1"/>
+        </property>
+        <property id="module.driver.ceu.bytes_per_pixel" default="2" ></property>
+        <property display="Output|Buffer|Data Enable Buffer Size" id="module.driver.ceu.image_buffer_size" default="0" description="Specify size of image region available for use by CEU data bus. (Only applicable to Data Enable Fetch capture mode)">
+            <constraint display="Value must be a positive integer.">testInteger("${module.driver.ceu.image_buffer_size}")  &amp;&amp; ("${module.driver.ceu.image_buffer_size}" &gt;= 0)</constraint>
+            <constraint display="Value must be a multiple of 32.">("${module.driver.ceu.image_buffer_size}" % 32 === 0)</constraint>
+        </property>
+        <property id="module.driver.ceu.single_image_buffer_size" default="">
+            <export>
+            eval('' +
+                'var buffer_size = 0;' +
+                'var data_enable_fetch_mode = (\"${module.driver.ceu.capture_format}\" == \"CEU_CAPTURE_FORMAT_DATA_ENABLE\");' +
+                'if (data_enable_fetch_mode){' +
+                '    buffer_size = \"${module.driver.ceu.image_buffer_size}\";' +
+                '}' +
+                'else {' +
+                '    buffer_size = \"${module.driver.ceu.x_pixels} * ${module.driver.ceu.y_pixels} * ${module.driver.ceu.bytes_per_pixel}\";' +
+                '}' +
+                'buffer_size')
+            </export>
+        </property>
+        <property id="module.driver.ceu.interrupts_enabled.fwfie" default="">
+            <export>
+            eval('' +
+                'var output = 0;' +
+                'var data_enable_fetch_mode = (\"${module.driver.ceu.capture_format}\" == \"CEU_CAPTURE_FORMAT_DATA_ENABLE\");' +
+                'if (data_enable_fetch_mode){' +
+                'output = \"R_CEU_CEIER_FWFIE_Msk\";' +
+                '}' +
+                'output')
+            </export>
+        </property>
+        <peripheral name="CEU" component="ceu" />
+        <symbol id="symbol.driver.ceu.name" value="${module.driver.ceu.name}"/>
+        <symbol id="symbol.driver.ceu.guard.open" value="${module.driver.ceu.name}_open_guard"/>
+        <symbol id="symbol.driver.ceu.guard.macro.open" value="FSP_GUARD_${module.driver.ceu.name}_R_CEU_Open"/>
+        <symbol id="symbol.driver.ceu.guard.close" value="${module.driver.ceu.name}_close_guard"/>
+        <symbol id="symbol.driver.ceu.guard.macro.close" value="FSP_GUARD_${module.driver.ceu.name}_R_CEU_Close"/>
+        <symbol id="symbol.driver.ceu.guard.capture_start" value="${module.driver.ceu.name}_capture_start_guard"/>
+        <symbol id="symbol.driver.ceu.guard.macro.capture_start" value="FSP_GUARD_${module.driver.ceu.name}_R_CEU_CaptureStart"/>
+        <symbol id="symbol.driver.ceu.guard.capture_stop" value="${module.driver.ceu.name}_capture_stop_guard"/>
+        <symbol id="symbol.driver.ceu.guard.callback_set" value="${module.driver.ceu.name}_callback_set_guard"/>
+        <symbol id="symbol.driver.ceu.guard.macro.callback_set" value="FSP_GUARD_${module.driver.ceu.name}_R_CEU_CallbackSet"/>
+        <symbol id="symbol.driver.ceu.guard.status_get" value="${module.driver.ceu.name}_status_get_guard"/>
+        <symbol id="symbol.driver.ceu.guard.macro.status_get" value="FSP_GUARD_${module.driver.ceu.name}_R_CEU_StatusGet"/>
+        <symbol id="symbol.driver.ceu.nsc_api" value="${module.driver.ceu.name}_nsc_api"/>
+        <symbol id="symbol.driver.ceu.cfg" value="${module.driver.ceu.name}_cfg"/>
+        <symbol id="symbol.driver.ceu.ctrl" value="${module.driver.ceu.name}_ctrl"/>
+        <symbol id="symbol.driver.ceu.extended_cfg" value="${module.driver.ceu.name}_extended_cfg"/>
+        <header>
+            /* CEU on CAPTURE instance */
+            extern const capture_instance_t ${module.driver.ceu.name};
+            /* Access the CEU instance using these structures when calling API functions directly (::p_api is not used). */
+            extern ceu_instance_ctrl_t ${module.driver.ceu.name}_ctrl;
+            extern const capture_cfg_t ${module.driver.ceu.name}_cfg;
+            #ifndef ${module.driver.ceu.p_callback}
+            void ${module.driver.ceu.p_callback}(capture_callback_args_t * p_args);
+            #endif
+
+        </header>
+        <includes>
+            #include &quot;r_capture_api.h&quot;
+            #include &quot;r_ceu.h&quot;
+        </includes>
+        <declarations>
+            ceu_instance_ctrl_t ${module.driver.ceu.name}_ctrl;
+            const ceu_extended_cfg_t ${module.driver.ceu.name}_extended_cfg =
+            {
+                .capture_format       = ${module.driver.ceu.capture_format},
+                .data_bus_width       = ${module.driver.ceu.bus_size},
+                .edge_info.dsel       = ${module.driver.ceu.dsel},
+                .edge_info.hdsel      = ${module.driver.ceu.hdsel},
+                .edge_info.vdsel      = ${module.driver.ceu.vdsel},
+                .hsync_polarity       = ${module.driver.ceu.hsync_polarity},
+                .vsync_polarity       = ${module.driver.ceu.vsync_polarity},
+                .byte_swapping        = {
+                                        .swap_8bit_units  = (${module.driver.ceu.byte_swapping} 0x0) >> 0x00 &amp; 0x01,
+                                        .swap_16bit_units = (${module.driver.ceu.byte_swapping} 0x0) >> 0x01 &amp; 0x01,
+                                        .swap_32bit_units = (${module.driver.ceu.byte_swapping} 0x0) >> 0x02 &amp; 0x01,
+                                        },
+                .burst_mode           = ${module.driver.ceu.burst_mode},
+                .image_area_size      = ${module.driver.ceu.single_image_buffer_size},
+                .interrupts_enabled   = ${module.driver.ceu.interrupts_enabled.fwfie} | \
+                                        ${module.driver.ceu.interrupts_enabled.cpeie} | \
+                                        ${module.driver.ceu.interrupts_enabled.hdie} | \
+                                        ${module.driver.ceu.interrupts_enabled.vdie} | \
+                                        ${module.driver.ceu.interrupts_enabled.cdtofie} | \
+                                        ${module.driver.ceu.interrupts_enabled.ighsie} | \
+                                        ${module.driver.ceu.interrupts_enabled.igvsie} | \
+                                        ${module.driver.ceu.interrupts_enabled.vbpie} | \
+                                        ${module.driver.ceu.interrupts_enabled.nhdie} | \
+                                        ${module.driver.ceu.interrupts_enabled.nvdie},
+                .ceu_ipl              = ${module.driver.ceu.ipl},
+                .ceu_irq              = VECTOR_NUMBER_CEU_CEUI,
+            };
+
+            const capture_cfg_t ${module.driver.ceu.name}_cfg =
+            {
+                .x_capture_pixels      = ${module.driver.ceu.x_pixels},
+                .y_capture_pixels      = ${module.driver.ceu.y_pixels},
+                .x_capture_start_pixel = ${module.driver.ceu.x_start_pixel},
+                .y_capture_start_pixel = ${module.driver.ceu.y_start_pixel},
+                .bytes_per_pixel       = ${module.driver.ceu.bytes_per_pixel},
+                .p_callback            = ${module.driver.ceu.p_callback},
+                .p_context             = ${module.driver.ceu.p_context},
+                .p_extend              = &amp;${module.driver.ceu.name}_extended_cfg,
+            };
+
+            const capture_instance_t ${module.driver.ceu.name} =
+            {
+                .p_ctrl = &amp;${module.driver.ceu.name}_ctrl,
+                .p_cfg =  &amp;${module.driver.ceu.name}_cfg,
+                .p_api =  &amp;g_ceu_on_capture,
+            };
+        </declarations>
+        <guard>
+            <header>
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.ceu.name}_open_guard(capture_ctrl_t *const p_ctrl, capture_cfg_t const *const p_cfg);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.ceu.name}_close_guard(capture_ctrl_t *const p_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.ceu.name}_capture_start_guard(capture_ctrl_t *const p_ctrl, uint8_t *const p_buffer);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.ceu.name}_capture_stop_guard(capture_ctrl_t *const p_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.ceu.name}_callback_set_guard(capture_ctrl_t *const p_ctrl, void(*p_callback)(capture_callback_args_t *), void const *const p_context, capture_callback_args_t *const p_callback_memory);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.ceu.name}_status_get_guard(capture_ctrl_t *const p_ctrl, capture_status_t *p_status);
+
+            </header>
+            <template name="${module.driver.ceu.name}_guard.c">
+                <![CDATA[
+                    #include "guard.h"
+
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.ceu.name}_open_guard (capture_ctrl_t *const p_ctrl, capture_cfg_t const *const p_cfg)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+    FSP_PARAMETER_NOT_USED(p_cfg);
+
+    return R_CEU_Open(&${module.driver.ceu.name}_ctrl, &${module.driver.ceu.name}_cfg);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.ceu.name}_close_guard (capture_ctrl_t *const p_ctrl)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+
+    return R_CEU_Close(&${module.driver.ceu.name}_ctrl);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.ceu.name}_capture_start_guard (capture_ctrl_t *const p_ctrl, uint8_t *const p_buffer)
+{
+    /* Verify pointers and buffers are in non-secure memory. */
+    uint8_t *const p_buffer_checked = cmse_check_address_range((void *) p_buffer, ${module.driver.ceu.name}_ctrl.image_area_size, CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_buffer_checked != NULL);
+
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+
+    return R_CEU_CaptureStart(&${module.driver.ceu.name}_ctrl, p_buffer_checked);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.ceu.name}_callback_set_guard (capture_ctrl_t *const p_ctrl, void(*p_callback)(capture_callback_args_t *), void const *const p_context, capture_callback_args_t *const p_callback_memory)
+{
+    /* Verify all pointers are in non-secure memory. */
+    void(*p_callback_checked)(capture_callback_args_t *) = (void(*)(capture_callback_args_t *)) cmse_check_address_range((void *) p_callback, sizeof(void *), CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_callback_checked != NULL);
+    capture_callback_args_t *const p_callback_memory_checked = cmse_check_pointed_object(p_callback_memory, CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_callback_memory_checked != NULL);
+
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+    FSP_PARAMETER_NOT_USED(p_context);
+
+    return R_CEU_CallbackSet(&${module.driver.ceu.name}_ctrl, p_callback_checked, p_context, p_callback_memory_checked);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.ceu.name}_status_get_guard (capture_ctrl_t *const p_ctrl, capture_status_t *p_status)
+{
+    /* Verify all pointers are in non-secure memory. */
+    capture_status_t * p_status_checked = cmse_check_pointed_object(p_status, CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_status_checked != NULL);
+
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+
+    return R_CEU_StatusGet(&${module.driver.ceu.name}_ctrl, p_status_checked);
+}
+
+                ]]>
+            </template>
+        </guard>
+        <nsc>
+            <header>
+
+#define FSP_GUARD_${module.driver.ceu.name}_R_CEU_Open() ${module.driver.ceu.name}_open_guard(FSP_SECURE_ARGUMENT, FSP_SECURE_ARGUMENT)
+
+#define FSP_GUARD_${module.driver.ceu.name}_R_CEU_Close() ${module.driver.ceu.name}_close_guard(FSP_SECURE_ARGUMENT)
+
+#define FSP_GUARD_${module.driver.ceu.name}_R_CEU_CaptureStart(p_buffer) ${module.driver.ceu.name}_capture_start_guard(FSP_SECURE_ARGUMENT, p_buffer)
+
+#define FSP_GUARD_${module.driver.ceu.name}_R_CEU_CallbackSet(p_callback, p_context, p_callback_memory) ${module.driver.ceu.name}_callback_set_guard(FSP_SECURE_ARGUMENT, p_callback, p_context, p_callback_memory)
+
+#define FSP_GUARD_${module.driver.ceu.name}_R_CEU_StatusGet(p_status) ${module.driver.ceu.name}_status_get_guard(FSP_SECURE_ARGUMENT, p_status)
+
+
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.ceu.name}_open_guard(capture_ctrl_t *const p_ctrl, capture_cfg_t const *const p_cfg);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.ceu.name}_close_guard(capture_ctrl_t *const p_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.ceu.name}_capture_start_guard(capture_ctrl_t *const p_ctrl, uint8_t *const p_buffer);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.ceu.name}_capture_stop_guard(capture_ctrl_t *const p_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.ceu.name}_callback_set_guard(capture_ctrl_t *const p_ctrl, void(*p_callback)(capture_callback_args_t *), void const *const p_context, capture_callback_args_t *const p_callback_memory);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.ceu.name}_status_get_guard(capture_ctrl_t *const p_ctrl, capture_status_t *p_status);
+
+
+extern const capture_instance_t ${module.driver.ceu.name};
+            </header>
+            <declarations>
+                <![CDATA[
+static const capture_api_t ${module.driver.ceu.name}_nsc_api =
+{
+    .open = ${module.driver.ceu.name}_open_guard,
+    .close = ${module.driver.ceu.name}_close_guard,
+    .captureStart = ${module.driver.ceu.name}_capture_start_guard,
+    .callbackSet = ${module.driver.ceu.name}_callback_set_guard,
+    .statusGet = ${module.driver.ceu.name}_status_get_guard,
+};
+const capture_instance_t ${module.driver.ceu.name} =
+{
+    .p_api = &${module.driver.ceu.name}_nsc_api,
+    .p_ctrl = FSP_SECURE_ARGUMENT,
+    .p_cfg = FSP_SECURE_ARGUMENT,
+};
+                ]]>
+            </declarations>
+        </nsc>
+        <api configurable="true">
+            <file>ra/fsp/inc/api/r_capture_api.h</file>
+            <file>ra/fsp/inc/instances/r_ceu.h</file>
+        </api>
+    </module>
+    <developerSupport>
+        <template category="none" display="Image Buffer" id="module.driver.ceu.user_buffer" version="1">
+            <platform id="fsp" max="" min="4.0.0"/>
+            <moduleRef id="module.driver.ceu_on_capture"/>
+            <content>/* CEU User Defined Image Buffer ${name:raProperty(module.driver.ceu.name)} */
+uint8_t ${name:raProperty(module.driver.ceu.name)}_user_buffer[${single_image_buffer_size:raProperty(module.driver.ceu.single_image_buffer_size)}] __attribute__((section(".bss")));</content>
+        </template>
+    </developerSupport>
+</raModuleDescription>

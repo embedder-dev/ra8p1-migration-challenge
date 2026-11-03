@@ -1,0 +1,71 @@
+<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.driver.rm_block_media_ram" path="fsp_cfg/rm_block_media_ram_cfg.h" version="0">
+        <property default="config.driver.rm_block_media_ram.param_checking_enable.bsp" display="Parameter Checking" id="config.driver.rm_block_media_ram.param_checking_enable" description="If selected code for parameter checking is included in the build.">
+            <option display="Default (BSP)" id="config.driver.rm_block_media_ram.param_checking_enable.bsp" value="(BSP_CFG_PARAM_CHECKING_ENABLE)"/>
+            <option display="Enabled" id="config.driver.rm_block_media_ram.param_checking_enable.enabled" value="(1)"/>
+            <option display="Disabled" id="config.driver.rm_block_media_ram.param_checking_enable.disabled" value="(0)"/>
+        </property>
+        <property default="65536" display="RAM Media Size" id="config.driver.rm_block_media_ram.media_size" description="Enter a RAM media size of 20K bytes or more.">
+            <constraint display="Please enter the RAM media size.">testInteger("${config.driver.rm_block_media_ram.media_size}")  &amp;&amp; ("${config.driver.rm_block_media_ram.media_size}" &gt;= 20480)</constraint>
+        </property>
+        <property default=".bss" display="Memory Storage Section" id="config.driver.rm_block_media_ram.memory_section" description="This is the section of memory that will be used for the backing storage. Must be a valid Linker section. ('.bss', '.sdram', '.OSPI_DEVICE_0_RAM', etc). For AC6 preface any section with '.bss' e.g. '.bss.sdram'" />
+        <content>
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#define RM_BLOCK_MEDIA_RAM_CFG_PARAM_CHECKING_ENABLE ${config.driver.rm_block_media_ram.param_checking_enable}
+#define RM_BLOCK_MEDIA_RAM_CFG_MEDIA_SIZE (${config.driver.rm_block_media_ram.media_size})
+#define RM_BLOCK_MEIDA_RAM_CFG_MEDIA_SIZE (RM_BLOCK_MEDIA_RAM_CFG_MEDIA_SIZE) // DEPRECATED. Will be removed in FSP v6.0.
+#define RM_BLOCK_MEDIA_RAM_CFG_SECTION    "${config.driver.rm_block_media_ram.memory_section}"
+
+#ifdef __cplusplus
+}
+#endif
+        </content>
+    </config>
+    <module config="config.driver.rm_block_media_ram" display="Storage|${module.driver.rm_block_media.name} Block Media RAM Implementation (rm_block_media_ram)" id="module.driver.block_media_ram" version="1" url="group___r_m___b_l_o_c_k___m_e_d_i_a___r_a_m.html">
+        <provides interface="interface.driver.rm_block_media" />
+        <provides interface="interface.driver.rm_block_media_no_usb" />
+        <provides interface="interface.driver.rm_block_media_pmsc" />
+        <property default="g_rm_block_media${_instance}" display="Name" id="module.driver.rm_block_media.name" description="Module name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.rm_block_media.name}")</constraint>
+        </property>
+        <property default="NULL" id="module.driver.rm_block_media.p_context" />
+        <property default="NULL" display="Callback" id="module.driver.rm_block_media.callback" description="A user callback function can be provided. If this callback function is provided, it will be  called when a card is inserted or removed.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.rm_block_media.callback}")</constraint>
+        </property>
+        <header>
+            /** Block Media on RAM Implementation Instance */
+            extern const rm_block_media_instance_t ${module.driver.rm_block_media.name};
+
+            /** Access the Block Media RAM Implementation instance using these structures when calling API functions directly (::p_api is not used). */
+            extern rm_block_media_ram_instance_ctrl_t ${module.driver.rm_block_media.name}_ctrl;
+            extern const rm_block_media_cfg_t ${module.driver.rm_block_media.name}_cfg;
+
+#ifndef ${module.driver.rm_block_media.callback}
+void ${module.driver.rm_block_media.callback}(rm_block_media_callback_args_t * p_args);
+#endif
+        </header>
+        <includes>
+            #include &quot;rm_block_media_ram.h&quot;
+            #include &quot;rm_block_media_api.h&quot;
+        </includes>
+        <declarations>
+const rm_block_media_cfg_t ${module.driver.rm_block_media.name}_cfg =
+{
+    .p_extend = NULL,
+    .p_callback = ${module.driver.rm_block_media.callback},
+    .p_context = ${module.driver.rm_block_media.p_context},
+};
+rm_block_media_ram_instance_ctrl_t ${module.driver.rm_block_media.name}_ctrl;
+const rm_block_media_instance_t ${module.driver.rm_block_media.name} =
+{
+    .p_api  = &amp;g_rm_block_media_on_ram_media,
+    .p_ctrl = &amp;${module.driver.rm_block_media.name}_ctrl,
+    .p_cfg  = &amp;${module.driver.rm_block_media.name}_cfg,
+};
+        </declarations>
+    </module>
+</raModuleDescription>

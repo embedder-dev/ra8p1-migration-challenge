@@ -1,0 +1,11 @@
+<?xml version="1.0" ?>
+<raModuleDescription>
+  <module display="Security|TRNG" id="module.driver.trng" common="1" version="1" visible="false" url="">
+    <constraint display="Requires TRNG">
+          "${interface.mcu.rsip.trng}" === "1"
+    </constraint>
+    <requires id="module.driver.sce.requires.trng" interface="interface.mcu.rsip.trng" visible="false" find="true" display="Requires TRNG" />
+    <provides interface="interface.driver.sce"/>
+    <provides interface="interface.driver.trng"/>
+  </module>
+</raModuleDescription>

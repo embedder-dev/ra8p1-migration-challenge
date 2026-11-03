@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<raModuleDescription>
+    <config id="config.board.ra4l1rssk" path="fsp_cfg/bsp/board_cfg.h" version="0">
+        <content>
+            #include "../../../ra/board/ra4l1_rssk/board.h"
+        </content>
+    </config>
+    <board id="board.ra4l1rssk" display="RA4|RA4L1|RSSK-RA4L1" device="R7FA4L1BD4CFP" config="config.board.ra4l1rssk" version="0" debugger="com.renesas.hardwaredebug.rz.jlink">
+        <description>Renesas Solution Starter Kit for RA4L1 MCU Group. Internal use only.</description>
+        <capability id="capability.led"/>
+    </board>
+</raModuleDescription>

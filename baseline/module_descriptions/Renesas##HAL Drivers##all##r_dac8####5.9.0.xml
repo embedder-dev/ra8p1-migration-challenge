@@ -1,0 +1,113 @@
+﻿<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.driver.dac8" path="fsp_cfg/r_dac8_cfg.h" version="0">
+        <property default="config.driver.dac8.param_checking_enable.bsp" display="Parameter Checking" id="config.driver.dac8.param_checking_enable" description="If selected code for parameter checking is included in the build.">
+            <option display="Default (BSP)" id="config.driver.dac8.param_checking_enable.bsp" value="(BSP_CFG_PARAM_CHECKING_ENABLE)"/>
+            <option display="Enabled" id="config.driver.dac8.param_checking_enable.enabled" value="(1)"/>
+            <option display="Disabled" id="config.driver.dac8.param_checking_enable.disabled" value="(0)"/>
+        </property>
+        <content>
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#define DAC8_CFG_PARAM_CHECKING_ENABLE ${config.driver.dac8.param_checking_enable}
+
+#ifdef __cplusplus
+}
+#endif
+        </content>
+    </config>
+    <module config="config.driver.dac8" display="Analog|${module.driver.dac8.name} DAC8 (r_dac8)" id="module.driver.dac_on_dac8" version="1" url="group___d_a_c8.html">
+        <constraint display="Channel not available on selected MCU" id="module.driver.dac8.channel_id.constraint">
+            eval('\n' +
+                 'var selected_channel = "${module.driver.dac8.channel_id}"; \n' +
+                 'var temp_unit_count = "${module.driver.dac.unit_count}".split(".") \n' +
+                 'var temp_channels_per_unit = "${module.driver.dac.channels_per_unit}".split(".") \n' +
+                 'var available_channels = temp_unit_count[temp_unit_count.length -1] * temp_channels_per_unit[temp_channels_per_unit.length -1]; \n' +
+                 'output = selected_channel &lt; available_channels; \n' +
+                 'output\n' +
+                 '')
+        </constraint>
+        <constraint display="Unique name required for each instance">
+            "${interface.driver.dac.${module.driver.dac8.name}}" === "1"
+        </constraint>
+        <constraint display="Requires DAC8 peripheral">
+          "${interface.mcu.dac8}" === "1"
+        </constraint>
+        <constraint display="Real-time Trigger Event is supported only in Real-time mode and requires ELC driver. Disable the Real-time Trigger Event if the mode is unsupported on selected MCU.">
+            (!"${module.driver.dac8.realtime_trigger}".startsWith("_signal.")) ||  ("${module.driver.dac8.dac_mode}" === ("module.driver.dac8.dac_mode.real_time")) &amp;&amp; ("1" === "${interface.driver.elc}")
+        </constraint>
+        <requires id="module.driver.dac_on_dac8.requires.dac8" interface="interface.mcu.dac8" visible="false" display="Requires DAC8 peripheral" />
+        <provides interface="interface.driver.dac" />
+        <provides interface="interface.driver.dac_on_dac8" />
+        <provides interface="interface.driver.dac.${module.driver.dac8.name}" />
+        <property default="g_dac8_${_instance}" display="Name" id="module.driver.dac8.name" description="Module name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.dac8.name}")</constraint>
+        </property>
+        <property default="" id="module.driver.dac.unit_count" description="Hidden Property - Total number of units for DAC8 on this MCU.">
+            <select enum="enum.mcu.dac8.unit.count" />
+        </property>
+        <property default="" id="module.driver.dac.channels_per_unit" description="Hidden Property - Total output channels per unit for DAC8 on this MCU.">
+            <select enum="enum.mcu.dac8.channels_per_unit" />
+        </property>
+        <property default="0" display="Channel" id="module.driver.dac8.channel_id" description="Specify the hardware channel.">
+            <constraint display="Value must be an integer greater than or equal to 0">testInteger("${module.driver.dac8.channel_id}")  &amp;&amp; ("${module.driver.dac8.channel_id}" &gt;= 0)</constraint>
+        </property>
+        <property default="" display="D/A A/D Synchronous Conversion" id="module.driver.dac8.ad_da_synchronized" description="Synchronize the DAC8 update with the ADC to reduce interference with A/D conversions.">
+            <select enum="enum.mcu.dac8.ad_da_synchronized" />
+        </property>
+        <property default="module.driver.dac8.dac_mode.normal" display="DAC Mode" id="module.driver.dac8.dac_mode" description="Select the DAC operating mode">
+            <select enum="enum.mcu.dac8.dac_mode"/>
+        </property>
+        <property default="" display="Real-time Trigger Event" id="module.driver.dac8.realtime_trigger" description="Specify the event used to trigger conversion in Real-time mode. This setting is only valid when Real-time mode is enabled.">
+            <select enum="enum.disabled" />
+            <select enum="_signal" />
+            <linkConstraint display="Requires an ELC peripheral function if Real-time mode is selected.">
+                "${_link}" === "link.da8${module.driver.dac8.channel_id}"
+            </linkConstraint>
+        </property>
+        <property default="module.driver.dac8.charge_pump.true" display="Charge Pump (Requires MOCO active)" id="module.driver.dac8.charge_pump" description="Enable the DAC charge pump.">
+            <select enum="enum.mcu.dac8.charge_pump"/>
+        </property>
+        <peripheral name="DAC8${module.driver.dac8.channel_id}" component="dac8${module.driver.dac8.channel_id}" />
+        <header>
+/** DAC on DAC8 Instance. */
+extern const dac_instance_t ${module.driver.dac8.name};
+
+/** Access the DAC instance using these structures when calling API functions directly (::p_api is not used). */
+extern dac8_instance_ctrl_t ${module.driver.dac8.name}_ctrl;
+extern const dac_cfg_t ${module.driver.dac8.name}_cfg;
+
+        </header>
+        <includes>#include &quot;r_dac8.h&quot;
+#include &quot;r_dac_api.h&quot;</includes>
+        <declarations>dac8_instance_ctrl_t ${module.driver.dac8.name}_ctrl;
+const dac8_extended_cfg_t ${module.driver.dac8.name}_ext_ctrl =
+{
+    .enable_charge_pump   = ${module.driver.dac8.charge_pump},
+    .dac_mode             = (dac8_mode_t) ${module.driver.dac8.dac_mode}
+};
+
+const dac_cfg_t ${module.driver.dac8.name}_cfg =
+{
+    .channel                  = ${module.driver.dac8.channel_id},
+    .ad_da_synchronized       = ${module.driver.dac8.ad_da_synchronized},
+    .p_extend                 = &amp;${module.driver.dac8.name}_ext_ctrl
+};
+/* Instance structure to use this module. */
+const dac_instance_t ${module.driver.dac8.name} =
+{
+    .p_ctrl  = &amp;${module.driver.dac8.name}_ctrl,
+    .p_cfg   = &amp;${module.driver.dac8.name}_cfg,
+    .p_api   = &amp;g_dac_on_dac8
+};
+        </declarations>
+        <api configurable="true">
+            <file>ra/fsp/inc/instances/r_dac8.h</file>
+            <file>ra/fsp/inc/api/r_dac_api.h</file>
+            <file>ra/fsp/inc/api/r_elc_api.h</file>
+            <file>ra/fsp/inc/api/r_transfer_api.h</file>
+        </api>
+    </module>
+</raModuleDescription>

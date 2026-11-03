@@ -1,0 +1,131 @@
+﻿<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.driver.usbx_pcdc" path="fsp_cfg/r_usb_pcdc_cfg.h" version="0">
+        <property id="config.driver.usbx_pcdc.bulk_in" display="Bulk In Pipe" default="config.driver.usbx_pcdc.bulk_in.pipe4" description="Select the USB pipe to use for bulk input transfers.">
+            <option id="config.driver.usbx_pcdc.bulk_in.pipe1" display="USB PIPE1" value="USB_PIPE1"/>
+            <option id="config.driver.usbx_pcdc.bulk_in.pipe2" display="USB PIPE2" value="USB_PIPE2"/>
+            <option id="config.driver.usbx_pcdc.bulk_in.pipe3" display="USB PIPE3" value="USB_PIPE3"/>
+            <option id="config.driver.usbx_pcdc.bulk_in.pipe4" display="USB PIPE4" value="USB_PIPE4"/>
+            <option id="config.driver.usbx_pcdc.bulk_in.pipe5" display="USB PIPE5" value="USB_PIPE5"/>
+        </property>
+        <property id="config.driver.usbx_pcdc.bulk_out" display="Bulk Out Pipe" default="config.driver.usbx_pcdc.bulk_out.pipe5" description="Select the USB pipe to use for bulk output transfers.">
+            <option id="config.driver.usbx_pcdc.bulk_out.pipe1" display="USB PIPE1" value="USB_PIPE1"/>
+            <option id="config.driver.usbx_pcdc.bulk_out.pipe2" display="USB PIPE2" value="USB_PIPE2"/>
+            <option id="config.driver.usbx_pcdc.bulk_out.pipe3" display="USB PIPE3" value="USB_PIPE3"/>
+            <option id="config.driver.usbx_pcdc.bulk_out.pipe4" display="USB PIPE4" value="USB_PIPE4"/>
+            <option id="config.driver.usbx_pcdc.bulk_out.pipe5" display="USB PIPE5" value="USB_PIPE5"/>
+        </property>
+        <property id="config.driver.usbx_pcdc.int_in" display="Interrupt In Pipe" default="config.driver.usbx_pcdc.int_in.pipe6" description="Select the USB pipe to use for interrupts.">
+            <option id="config.driver.usbx_pcdc.int_in.pipe6" display="USB PIPE6" value="USB_PIPE6"/>
+            <option id="config.driver.usbx_pcdc.int_in.pipe7" display="USB PIPE7" value="USB_PIPE7"/>
+            <option id="config.driver.usbx_pcdc.int_in.pipe8" display="USB PIPE8" value="USB_PIPE8"/>
+            <option id="config.driver.usbx_pcdc.int_in.pipe9" display="USB PIPE9" value="USB_PIPE9"/>
+        </property>
+        <content>
+            #ifdef __cplusplus
+            extern "C" {
+            #endif
+
+            #if (${interface.driver.pcdc2} != RA_NOT_DEFINED)
+            #include &quot;r_usb_pcdc_2ch_cfg.h&quot;
+            #else
+            #define USB_CFG_PCDC_BULK_IN2 (USB_NULL)
+            #define USB_CFG_PCDC_BULK_OUT2 (USB_NULL)
+            #define USB_CFG_PCDC_INT_IN2 (USB_NULL)
+            #endif
+
+            #define USB_CFG_PCDC_BULK_IN (${config.driver.usbx_pcdc.bulk_in})
+            #define USB_CFG_PCDC_BULK_OUT (${config.driver.usbx_pcdc.bulk_out})
+            #define USB_CFG_PCDC_INT_IN (${config.driver.usbx_pcdc.int_in})
+
+            #ifdef __cplusplus
+            }
+            #endif
+        </content>
+    </config>
+    <module config="config.driver.usbx_pcdc" display="Connectivity|Azure RTOS USBX PCDC" id="module.driver.usbx_pcdc" version="1" url="https://github.com/eclipse-threadx/rtos-docs/blob/main/rtos-docs/usbx/index.md">
+        <constraint display="Unique name required for each instance">
+            "${interface.driver.usbx_pcdc.${module.driver.usbx_pcdc.name}}" === "1"
+        </constraint>
+        <constraint display="Requires USB Peripheral">
+          "${interface.mcu.usb_fs.external}" === "1"
+        </constraint>
+        <constraint display="The USB pipe numbers for Bulk Input and Bulk Output must be different.">
+            !(("${config.driver.usbx_pcdc.bulk_in}" === "config.driver.usbx_pcdc.bulk_in.pipe1") &amp;&amp;
+            ("${config.driver.usbx_pcdc.bulk_out}" === "config.driver.usbx_pcdc.bulk_out.pipe1"))
+        </constraint>
+        <constraint display="The USB pipe numbers for Bulk Input and Bulk Output must be different.">
+            !(("${config.driver.usbx_pcdc.bulk_in}" === "config.driver.usbx_pcdc.bulk_in.pipe2") &amp;&amp;
+            ("${config.driver.usbx_pcdc.bulk_out}" === "config.driver.usbx_pcdc.bulk_out.pipe2"))
+        </constraint>
+        <constraint display="The USB pipe numbers for Bulk Input and Bulk Output must be different.">
+            !(("${config.driver.usbx_pcdc.bulk_in}" === "config.driver.usbx_pcdc.bulk_in.pipe3") &amp;&amp;
+            ("${config.driver.usbx_pcdc.bulk_out}" === "config.driver.usbx_pcdc.bulk_out.pipe3"))
+        </constraint>
+        <constraint display="The USB pipe numbers for Bulk Input and Bulk Output must be different.">
+            !(("${config.driver.usbx_pcdc.bulk_in}" === "config.driver.usbx_pcdc.bulk_in.pipe4") &amp;&amp;
+            ("${config.driver.usbx_pcdc.bulk_out}" === "config.driver.usbx_pcdc.bulk_out.pipe4"))
+        </constraint>
+        <constraint display="The USB pipe numbers for Bulk Input and Bulk Output must be different.">
+            !(("${config.driver.usbx_pcdc.bulk_in}" === "config.driver.usbx_pcdc.bulk_in.pipe5") &amp;&amp;
+            ("${config.driver.usbx_pcdc.bulk_out}" === "config.driver.usbx_pcdc.bulk_out.pipe5"))
+        </constraint>
+        <constraint display="Requires USB PIPE4 or PIPE5 for Bulk Input transfer when using this MCU.">
+            !(("${interface.mcu.usb.pipes.0.4.5.6.7}" === "1") &amp;&amp;
+            ("${config.driver.usbx_pcdc.bulk_in}" === "config.driver.usbx_pcdc.bulk_in.pipe1"))
+        </constraint>
+        <constraint display="Requires USB PIPE4 or PIPE5 for Bulk Input transfer when using this MCU.">
+            !(("${interface.mcu.usb.pipes.0.4.5.6.7}" === "1") &amp;&amp;
+            ("${config.driver.usbx_pcdc.bulk_in}" === "config.driver.usbx_pcdc.bulk_in.pipe2"))
+        </constraint>
+        <constraint display="Requires USB PIPE4 or PIPE5 for Bulk Input transfer when using this MCU.">
+            !(("${interface.mcu.usb.pipes.0.4.5.6.7}" === "1") &amp;&amp;
+            ("${config.driver.usbx_pcdc.bulk_in}" === "config.driver.usbx_pcdc.bulk_in.pipe3"))
+        </constraint>
+        <constraint display="Requires USB PIPE4 or PIPE5 for Bulk Output transfer when using this MCU.">
+            !(("${interface.mcu.usb.pipes.0.4.5.6.7}" === "1") &amp;&amp;
+            ("${config.driver.usbx_pcdc.bulk_out}" === "config.driver.usbx_pcdc.bulk_out.pipe1"))
+        </constraint>
+        <constraint display="Requires USB PIPE4 or PIPE5 for Bulk Output transfer when using this MCU.">
+            !(("${interface.mcu.usb.pipes.0.4.5.6.7}" === "1") &amp;&amp;
+            ("${config.driver.usbx_pcdc.bulk_out}" === "config.driver.usbx_pcdc.bulk_out.pipe2"))
+        </constraint>
+        <constraint display="Requires USB PIPE4 or PIPE5 for Bulk Output transfer when using this MCU.">
+            !(("${interface.mcu.usb.pipes.0.4.5.6.7}" === "1") &amp;&amp;
+            ("${config.driver.usbx_pcdc.bulk_out}" === "config.driver.usbx_pcdc.bulk_out.pipe3"))
+        </constraint>
+        <constraint display="Requires USB PIPE6 or PIPE7 for Interrupt IN transfer when using this MCU.">
+            !(("${interface.mcu.usb.pipes.0.4.5.6.7}" === "1") &amp;&amp;
+            ("${config.driver.usbx_pcdc.int_in}" === "config.driver.usbx_pcdc.int_in.pipe8"))
+        </constraint>
+        <constraint display="Requires USB PIPE6 or PIPE7 for Interrupt IN transfer when using this MCU.">
+            !(("${interface.mcu.usb.pipes.0.4.5.6.7}" === "1") &amp;&amp;
+            ("${config.driver.usbx_pcdc.int_in}" === "config.driver.usbx_pcdc.int_in.pipe9"))
+        </constraint>
+        <requires id="module.azure.usbx_pcdc.requires.threadx" interface="interface.rtos.tx" visible="false" display="Requires ThreadX"/>
+        <requires id="module.driver.usbx_pcdc.requires.usb_basic" interface="interface.middleware.rm_usbx_port" visible="true" display="USBX PCDC">
+            <override property="module.middleware.rm_usbx_port.usb_mode" value="module.middleware.rm_usbx_port.usb_mode.peri"/>
+            <override property="module.middleware.rm_usbx_port.usb_classtype" value="module.middleware.rm_usbx_port.usb_classtype.pcdc"/>
+            <override property="module.middleware.rm_usbx_port.p_usb_reg" value="NULL"/>
+        </requires>
+        <provides interface="interface.driver.usbx" />
+        <provides interface="interface.driver.usbx_pcdc" />
+        <provides interface="interface.driver.usbx_pcdc.${module.driver.usbx_pcdc.name}" />
+        <property default="usbx_pcdc" id="module.driver.usbx_pcdc.usbx_pcdc_interface" description=""/>
+        <property default="g_usbx_pcdc${_instance}" display="Name" id="module.driver.usbx_pcdc.name" description="Module name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.usbx_pcdc.name}")</constraint>
+        </property>
+        <header>
+        /** CDC Driver on USB Instance. */
+        </header>
+        <includes>
+#include "ux_device_class_cdc_acm.h"
+        </includes>
+        <declarations>
+        </declarations>
+        <functions>
+        </functions>
+        <api configurable="true">
+        </api>
+    </module>
+</raModuleDescription>

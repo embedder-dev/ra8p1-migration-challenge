@@ -1,0 +1,126 @@
+<?xml version="1.0" ?>
+
+<raModuleDescription>
+    <config id="config.driver.wifi_da16xxx" path="fsp_cfg/rm_wifi_da16xxx_cfg.h" version="0">
+        <property default="config.driver.wifi_da16xxx.param_checking_enable.bsp" display="Parameter Checking" id="config.driver.wifi_da16xxx.param_checking_enable" description="If selected code for parameter checking is included in the build.">
+            <option display="Default (BSP)" id="config.driver.wifi_da16xxx.param_checking_enable.bsp" value="(BSP_CFG_PARAM_CHECKING_ENABLE)"/>
+            <option display="Enabled" id="config.driver.wifi_da16xxx.param_checking_enable.enabled" value="(1)"/>
+            <option display="Disabled" id="config.driver.wifi_da16xxx.param_checking_enable.disabled" value="(0)"/>
+        </property>
+        <property default="config.driver.wifi_da16xxx.enable_da16600_support.disabled" display="Enable DA16600 Support" id="config.driver.wifi_da16xxx.enable_da16600_support" description="Enabled if using the DA16600 module">
+            <option display="Enabled" id="config.driver.wifi_da16xxx.enable_da16600_support.enabled" value="1"/>
+            <option display="Disabled" id="config.driver.wifi_da16xxx.enable_da16600_support.disabled" value="0"/>
+        </property>
+        <property default="config.driver.wifi_da16xxx.check_sdk.enabled" display="Check Minimum SDK Version" id="config.driver.wifi_da16xxx.check_sdk" description="Enable or disable comparing the current DA16XXX module's SDK version to the minimum required">
+            <option id="config.driver.wifi_da16xxx.check_sdk.disabled" display="Disabled" value="0"/>
+            <option id="config.driver.wifi_da16xxx.check_sdk.enabled" display="Enabled" value="1"/>
+        </property>
+        <property default="config.driver.wifi_da16xxx.num_sockets.one" display="Number of supported socket instances (not used with on-chip APIs)" id="config.driver.wifi_da16xxx.num_sockets" description="Enable number of socket instances">
+            <option display="1" id="config.driver.wifi_da16xxx.num_sockets.one" value="(1)"/>
+        </property>
+        <property default="8192" display="Size of RX buffer for socket (not used with on-chip APIs)" id="config.driver.wifi_da16xxx.socket_rx_size"/>
+        <property default="1500" display="Size of TX buffer for CMD Port" id="config.driver.wifi_da16xxx.cmd_port_tx_size"/>
+        <property default="3000" display="Size of RX buffer for CMD Port" id="config.driver.wifi_da16xxx.cmd_port_rx_size"/>
+        <property default="config.driver.wifi_da16xxx.enable_sntp_client.disabled" display="Enable SNTP Client" id="config.driver.wifi_da16xxx.enable_sntp_client" description="Should the SNTP client of the module be enabled">
+            <option display="Enabled" id="config.driver.wifi_da16xxx.enable_sntp_client.enabled" value="1"/>
+            <option display="Disabled" id="config.driver.wifi_da16xxx.enable_sntp_client.disabled" value="0"/>
+        </property>
+        <content>
+            #ifdef __cplusplus
+            extern "C" {
+            #endif
+
+            #define WIFI_DA16XXX_CFG_PARAM_CHECKING_ENABLED        (${config.driver.wifi_da16xxx.param_checking_enable})
+            #define WIFI_DA16XXX_CFG_DA16600_SUPPORT               (${config.driver.wifi_da16xxx.enable_da16600_support})
+            #define WIFI_DA16XXX_CFG_CHECK_SDK_VERSION             (${config.driver.wifi_da16xxx.check_sdk})
+            #define WIFI_DA16XXX_CFG_NUM_CREATEABLE_SOCKETS        (${config.driver.wifi_da16xxx.num_sockets})
+
+            #if ((1 == ${interface.driver.mqtt_onchip_da16xxx}) || (1 == ${interface.driver.http_onchip_da16xxx}))
+            #define WIFI_DA16XXX_CFG_MAX_SOCKET_RX_SIZE            (1)
+            #define WIFI_DA16XXX_CFG_CMD_TX_BUF_SIZE               (512)
+            #else
+            #define WIFI_DA16XXX_CFG_MAX_SOCKET_RX_SIZE            (${config.driver.wifi_da16xxx.socket_rx_size})
+            #define WIFI_DA16XXX_CFG_CMD_TX_BUF_SIZE               (${config.driver.wifi_da16xxx.cmd_port_tx_size})
+            #endif
+
+            #define WIFI_DA16XXX_CFG_CMD_RX_BUF_SIZE               (${config.driver.wifi_da16xxx.cmd_port_rx_size})
+            #define WIFI_DA16XXX_CFG_TLS_SUPPORT                   (${interface.secure_sockets.tls_support})
+            #define WIFI_DA16XXX_CFG_SNTP_ENABLE                   (${config.driver.wifi_da16xxx.enable_sntp_client})
+            #define RM_AT_TRANSPORT_DA16XXX_INTERFACE_UART
+
+#ifdef __cplusplus
+}
+#endif
+        </content>
+    </config>
+    <module config="config.driver.wifi_da16xxx" display="Networking|WiFi DA16XXX Framework Driver (rm_wifi_da16xxx)" id="module.driver.wifi_da16xxx" common="1" visible="false" version="1" url="group___w_i_f_i___d_a16_x_x_x.html">
+        <constraint display="Mutexes must be enabled in the FreeRTOS thread config under Common|General|Use Mutexes.">
+          ("${config.awsfreertos.thread.configuse_mutexes}" === "config.awsfreertos.thread.configuse_mutexes.enabled") ||
+            !testExists("${interface.rtos.awsfreertos}")
+        </constraint>
+        <requires id="module.driver.wifi_da16xxx.wifi.common" interface="interface.aws.wifi.common" display="Requires WiFi Common" find="true"/>
+        <requires id="module.driver.wifi_da16xxx.requires.at_transport_da16xxx" interface="interface.driver.at_transport_da16xxx" display="Transport Interface for communicating with the module." find="true">
+            <override property="module.driver.at_transport_da16xxx.p_callback" value="rm_wifi_da16xxx_callback"/>
+        </requires>
+        <provides interface="interface.driver.wifi_da16xxx" />
+        <provides interface="interface.driver.wifi" />
+        <property default="US" display="Country code in ISO 3166-1 alpha-2 standard" id="module.driver.wifi_da16xxx.country_code"/>
+        <property default="wifi_da16xxx" id="module.driver.wifi_da16xxx.wifi_da16xxx_interface" description=""/>
+
+        <property default="0.0.0.0" display="SNTP server IPv4 address" id="module.driver.wifi_da16xxx.sntp_server_ip">
+            <constraint display="Must be a valid IPv4 address">eval('' +
+            'var input = "${module.driver.wifi_da16xxx.sntp_server_ip}";' +
+            'var regex = RegExp("^(?:(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])\.){3}(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])$","i");' +
+            'regex.test(input)')
+            </constraint>
+        </property>
+        <property default="0" display="SNTP Timezone UTC Offset in Hours" id="module.driver.wifi_da16xxx.sntp_utc_offset_in_hours" description="Value in hours from 12 to -12">
+            <option id="module.driver.wifi_da16xxx.sntp_utc_offset_in_hours.-12" display="-12" value="-12" />
+            <option id="module.driver.wifi_da16xxx.sntp_utc_offset_in_hours.-11" display="-11" value="-11" />
+            <option id="module.driver.wifi_da16xxx.sntp_utc_offset_in_hours.-10" display="-10" value="-10" />
+            <option id="module.driver.wifi_da16xxx.sntp_utc_offset_in_hours.-9" display="-9" value="-9" />
+            <option id="module.driver.wifi_da16xxx.sntp_utc_offset_in_hours.-8" display="-8" value="-8" />
+            <option id="module.driver.wifi_da16xxx.sntp_utc_offset_in_hours.-7" display="-7" value="-7" />
+            <option id="module.driver.wifi_da16xxx.sntp_utc_offset_in_hours.-6" display="-6" value="-6" />
+            <option id="module.driver.wifi_da16xxx.sntp_utc_offset_in_hours.-5" display="-5" value="-5" />
+            <option id="module.driver.wifi_da16xxx.sntp_utc_offset_in_hours.-4" display="-4" value="-4" />
+            <option id="module.driver.wifi_da16xxx.sntp_utc_offset_in_hours.-3" display="-3" value="-3" />
+            <option id="module.driver.wifi_da16xxx.sntp_utc_offset_in_hours.-2" display="-2" value="-2" />
+            <option id="module.driver.wifi_da16xxx.sntp_utc_offset_in_hours.-1" display="-1" value="-1" />
+            <option id="module.driver.wifi_da16xxx.sntp_utc_offset_in_hours.0" display="0" value="0" />
+            <option id="module.driver.wifi_da16xxx.sntp_utc_offset_in_hours.1" display="1" value="1" />
+            <option id="module.driver.wifi_da16xxx.sntp_utc_offset_in_hours.2" display="2" value="2" />
+            <option id="module.driver.wifi_da16xxx.sntp_utc_offset_in_hours.3" display="3" value="3" />
+            <option id="module.driver.wifi_da16xxx.sntp_utc_offset_in_hours.4" display="4" value="4" />
+            <option id="module.driver.wifi_da16xxx.sntp_utc_offset_in_hours.5" display="5" value="5" />
+            <option id="module.driver.wifi_da16xxx.sntp_utc_offset_in_hours.6" display="6" value="6" />
+            <option id="module.driver.wifi_da16xxx.sntp_utc_offset_in_hours.7" display="7" value="7" />
+            <option id="module.driver.wifi_da16xxx.sntp_utc_offset_in_hours.8" display="8" value="8" />
+            <option id="module.driver.wifi_da16xxx.sntp_utc_offset_in_hours.9" display="9" value="9" />
+            <option id="module.driver.wifi_da16xxx.sntp_utc_offset_in_hours.10" display="10" value="10" />
+            <option id="module.driver.wifi_da16xxx.sntp_utc_offset_in_hours.11" display="11" value="11" />
+            <option id="module.driver.wifi_da16xxx.sntp_utc_offset_in_hours.12" display="12" value="12" />
+        </property>
+
+        <header>
+           extern const wifi_da16xxx_cfg_t          g_wifi_da16xxx_cfg;
+        </header>
+
+        <includes>
+            #include &quot;rm_wifi_da16xxx.h&quot;
+        </includes>
+
+        <declarations>
+            /** WiFi DA16XXX configuration */
+            const wifi_da16xxx_cfg_t     g_wifi_da16xxx_cfg =
+            {
+                .p_transport_instance        = &amp;g_at_transport_da16xxx,
+                .num_sockets = WIFI_DA16XXX_CFG_NUM_CREATEABLE_SOCKETS,
+                .country_code = (uint8_t*)"${module.driver.wifi_da16xxx.country_code}",
+                .sntp_server_ip = (uint8_t*)"${module.driver.wifi_da16xxx.sntp_server_ip}",
+                .sntp_utc_offset_in_hours = ${module.driver.wifi_da16xxx.sntp_utc_offset_in_hours},
+            };
+
+        </declarations>
+    </module>
+</raModuleDescription>

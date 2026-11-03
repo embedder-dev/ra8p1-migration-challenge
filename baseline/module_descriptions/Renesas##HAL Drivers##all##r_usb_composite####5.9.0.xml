@@ -1,0 +1,540 @@
+<?xml version="1.0" ?>
+<raModuleDescription>
+  <module display="Connectivity|${module.driver.r_usb_composite.name} USB Composite (r_usb_composite)" id="module.driver.usb_composite" version="1" url="group___u_s_b___c_o_m_p_o_s_i_t_e.html">
+    <constraint display="The pipe number is duplicated.">
+            !(("1" == "${interface.driver.pcdc}") &amp;&amp;
+              ("1" == "${interface.driver.phid}") &amp;&amp;
+              ("${config.driver.usb_pcdc.int_in}" === "config.driver.usb_pcdc.int_in.pipe6") &amp;&amp;
+              ("${config.driver.usb_phid.int_in}" === "config.driver.usb_phid.int_in.pipe6"))
+    </constraint>
+    <constraint display="The pipe number is duplicated.">
+            !(("1" == "${interface.driver.pcdc}") &amp;&amp;
+              ("1" == "${interface.driver.phid}") &amp;&amp;
+              ("${config.driver.usb_pcdc.int_in}" === "config.driver.usb_pcdc.int_in.pipe7") &amp;&amp;
+              ("${config.driver.usb_phid.int_in}" === "config.driver.usb_phid.int_in.pipe7"))
+    </constraint>
+    <constraint display="The pipe number is duplicated.">
+            !(("1" == "${interface.driver.pcdc}") &amp;&amp;
+              ("1" == "${interface.driver.phid}") &amp;&amp;
+              ("${config.driver.usb_pcdc.int_in}" === "config.driver.usb_pcdc.int_in.pipe8") &amp;&amp;
+              ("${config.driver.usb_phid.int_in}" === "config.driver.usb_phid.int_in.pipe8"))
+    </constraint>
+    <constraint display="The pipe number is duplicated.">
+            !(("1" == "${interface.driver.pcdc}") &amp;&amp;
+              ("1" == "${interface.driver.phid}") &amp;&amp;
+              ("${config.driver.usb_pcdc.int_in}" === "config.driver.usb_pcdc.int_in.pipe9") &amp;&amp;
+              ("${config.driver.usb_phid.int_in}" === "config.driver.usb_phid.int_in.pipe9"))
+    </constraint>
+    <constraint display="The pipe number is duplicated.">
+            !(("1" == "${interface.driver.pcdc}") &amp;&amp;
+              ("1" == "${interface.driver.phid}") &amp;&amp;
+              ("${config.driver.usb_pcdc.int_in}" === "config.driver.usb_pcdc.int_in.pipe6") &amp;&amp;
+              ("${config.driver.usb_phid.int_out}" === "config.driver.usb_phid.int_out.pipe6"))
+    </constraint>
+    <constraint display="The pipe number is duplicated.">
+            !(("1" == "${interface.driver.pcdc}") &amp;&amp;
+              ("1" == "${interface.driver.phid}") &amp;&amp;
+              ("${config.driver.usb_pcdc.int_in}" === "config.driver.usb_pcdc.int_in.pipe7") &amp;&amp;
+              ("${config.driver.usb_phid.int_out}" === "config.driver.usb_phid.int_out.pipe7"))
+    </constraint>
+    <constraint display="The pipe number is duplicated.">
+            !(("1" == "${interface.driver.pcdc}") &amp;&amp;
+              ("1" == "${interface.driver.phid}") &amp;&amp;
+              ("${config.driver.usb_pcdc.int_in}" === "config.driver.usb_pcdc.int_in.pipe8") &amp;&amp;
+              ("${config.driver.usb_phid.int_out}" === "config.driver.usb_phid.int_out.pipe8"))
+    </constraint>
+    <constraint display="The pipe number is duplicated.">
+            !(("1" == "${interface.driver.pcdc}") &amp;&amp;
+              ("1" == "${interface.driver.phid}") &amp;&amp;
+              ("${config.driver.usb_pcdc.int_in}" === "config.driver.usb_pcdc.int_in.pipe9") &amp;&amp;
+              ("${config.driver.usb_phid.int_out}" === "config.driver.usb_phid.int_out.pipe9"))
+    </constraint>
+    <constraint display="The pipe number is duplicated.">
+            !(("1" == "${interface.driver.pcdc}") &amp;&amp;
+              ("1" == "${interface.driver.pmsc}") &amp;&amp;
+              ("${config.driver.usb_pcdc.bulk_in}" === "config.driver.usb_pcdc.bulk_in.pipe1") &amp;&amp;
+              ("${config.driver.usb_pmsc.bulk_in}" === "config.driver.usb_pmsc.bulk_in.pipe1"))
+    </constraint>
+    <constraint display="The pipe number is duplicated.">
+            !(("1" == "${interface.driver.pcdc}") &amp;&amp;
+              ("1" == "${interface.driver.pmsc}") &amp;&amp;
+              ("${config.driver.usb_pcdc.bulk_in}" === "config.driver.usb_pcdc.bulk_in.pipe2") &amp;&amp;
+              ("${config.driver.usb_pmsc.bulk_in}" === "config.driver.usb_pmsc.bulk_in.pipe2"))
+    </constraint>
+    <constraint display="The pipe number is duplicated.">
+            !(("1" == "${interface.driver.pcdc}") &amp;&amp;
+              ("1" == "${interface.driver.pmsc}") &amp;&amp;
+              ("${config.driver.usb_pcdc.bulk_in}" === "config.driver.usb_pcdc.bulk_in.pipe3") &amp;&amp;
+              ("${config.driver.usb_pmsc.bulk_in}" === "config.driver.usb_pmsc.bulk_in.pipe3"))
+    </constraint>
+    <constraint display="The pipe number is duplicated.">
+            !(("1" == "${interface.driver.pcdc}") &amp;&amp;
+              ("1" == "${interface.driver.pmsc}") &amp;&amp;
+              ("${config.driver.usb_pcdc.bulk_in}" === "config.driver.usb_pcdc.bulk_in.pipe4") &amp;&amp;
+              ("${config.driver.usb_pmsc.bulk_in}" === "config.driver.usb_pmsc.bulk_in.pipe4"))
+    </constraint>
+    <constraint display="The pipe number is duplicated.">
+            !(("1" == "${interface.driver.pcdc}") &amp;&amp;
+              ("1" == "${interface.driver.pmsc}") &amp;&amp;
+              ("${config.driver.usb_pcdc.bulk_in}" === "config.driver.usb_pcdc.bulk_in.pipe5") &amp;&amp;
+              ("${config.driver.usb_pmsc.bulk_in}" === "config.driver.usb_pmsc.bulk_in.pipe5"))
+    </constraint>
+    <constraint display="The pipe number is duplicated.">
+            !(("1" == "${interface.driver.pcdc}") &amp;&amp;
+              ("1" == "${interface.driver.pmsc}") &amp;&amp;
+              ("${config.driver.usb_pcdc.bulk_out}" === "config.driver.usb_pcdc.bulk_out.pipe1") &amp;&amp;
+              ("${config.driver.usb_pmsc.bulk_out}" === "config.driver.usb_pmsc.bulk_out.pipe1"))
+    </constraint>
+    <constraint display="The pipe number is duplicated.">
+            !(("1" == "${interface.driver.pcdc}") &amp;&amp;
+              ("1" == "${interface.driver.pmsc}") &amp;&amp;
+              ("${config.driver.usb_pcdc.bulk_out}" === "config.driver.usb_pcdc.bulk_out.pipe2") &amp;&amp;
+              ("${config.driver.usb_pmsc.bulk_out}" === "config.driver.usb_pmsc.bulk_out.pipe2"))
+    </constraint>
+    <constraint display="The pipe number is duplicated.">
+            !(("1" == "${interface.driver.pcdc}") &amp;&amp;
+              ("1" == "${interface.driver.pmsc}") &amp;&amp;
+              ("${config.driver.usb_pcdc.bulk_out}" === "config.driver.usb_pcdc.bulk_out.pipe3") &amp;&amp;
+              ("${config.driver.usb_pmsc.bulk_out}" === "config.driver.usb_pmsc.bulk_out.pipe3"))
+    </constraint>
+    <constraint display="The pipe number is duplicated.">
+            !(("1" == "${interface.driver.pcdc}") &amp;&amp;
+              ("1" == "${interface.driver.pmsc}") &amp;&amp;
+              ("${config.driver.usb_pcdc.bulk_out}" === "config.driver.usb_pcdc.bulk_out.pipe4") &amp;&amp;
+              ("${config.driver.usb_pmsc.bulk_out}" === "config.driver.usb_pmsc.bulk_out.pipe4"))
+    </constraint>
+    <constraint display="The pipe number is duplicated.">
+            !(("1" == "${interface.driver.pcdc}") &amp;&amp;
+              ("1" == "${interface.driver.pmsc}") &amp;&amp;
+              ("${config.driver.usb_pcdc.bulk_out}" === "config.driver.usb_pcdc.bulk_out.pipe5") &amp;&amp;
+              ("${config.driver.usb_pmsc.bulk_out}" === "config.driver.usb_pmsc.bulk_out.pipe5"))
+    </constraint>
+    <constraint display="The pipe number is duplicated.">
+            !(("1" == "${interface.driver.pcdc}") &amp;&amp;
+              ("1" == "${interface.driver.pmsc}") &amp;&amp;
+              ("${config.driver.usb_pcdc.bulk_in}" === "config.driver.usb_pcdc.bulk_in.pipe1") &amp;&amp;
+              ("${config.driver.usb_pmsc.bulk_out}" === "config.driver.usb_pmsc.bulk_out.pipe1"))
+    </constraint>
+    <constraint display="The pipe number is duplicated.">
+            !(("1" == "${interface.driver.pcdc}") &amp;&amp;
+              ("1" == "${interface.driver.pmsc}") &amp;&amp;
+              ("${config.driver.usb_pcdc.bulk_in}" === "config.driver.usb_pcdc.bulk_in.pipe2") &amp;&amp;
+              ("${config.driver.usb_pmsc.bulk_out}" === "config.driver.usb_pmsc.bulk_out.pipe2"))
+    </constraint>
+    <constraint display="The pipe number is duplicated.">
+            !(("1" == "${interface.driver.pcdc}") &amp;&amp;
+              ("1" == "${interface.driver.pmsc}") &amp;&amp;
+              ("${config.driver.usb_pcdc.bulk_in}" === "config.driver.usb_pcdc.bulk_in.pipe3") &amp;&amp;
+              ("${config.driver.usb_pmsc.bulk_out}" === "config.driver.usb_pmsc.bulk_out.pipe3"))
+    </constraint>
+    <constraint display="The pipe number is duplicated.">
+            !(("1" == "${interface.driver.pcdc}") &amp;&amp;
+              ("1" == "${interface.driver.pmsc}") &amp;&amp;
+              ("${config.driver.usb_pcdc.bulk_in}" === "config.driver.usb_pcdc.bulk_in.pipe4") &amp;&amp;
+              ("${config.driver.usb_pmsc.bulk_out}" === "config.driver.usb_pmsc.bulk_out.pipe4"))
+    </constraint>
+    <constraint display="The pipe number is duplicated.">
+            !(("1" == "${interface.driver.pcdc}") &amp;&amp;
+              ("1" == "${interface.driver.pmsc}") &amp;&amp;
+              ("${config.driver.usb_pcdc.bulk_in}" === "config.driver.usb_pcdc.bulk_in.pipe5") &amp;&amp;
+              ("${config.driver.usb_pmsc.bulk_out}" === "config.driver.usb_pmsc.bulk_out.pipe5"))
+    </constraint>
+    <constraint display="The pipe number is duplicated.">
+            !(("1" == "${interface.driver.pcdc}") &amp;&amp;
+              ("1" == "${interface.driver.pmsc}") &amp;&amp;
+              ("${config.driver.usb_pcdc.bulk_out}" === "config.driver.usb_pcdc.bulk_out.pipe1") &amp;&amp;
+              ("${config.driver.usb_pmsc.bulk_in}" === "config.driver.usb_pmsc.bulk_in.pipe1"))
+    </constraint>
+    <constraint display="The pipe number is duplicated.">
+            !(("1" == "${interface.driver.pcdc}") &amp;&amp;
+              ("1" == "${interface.driver.pmsc}") &amp;&amp;
+              ("${config.driver.usb_pcdc.bulk_out}" === "config.driver.usb_pcdc.bulk_out.pipe2") &amp;&amp;
+              ("${config.driver.usb_pmsc.bulk_in}" === "config.driver.usb_pmsc.bulk_in.pipe2"))
+    </constraint>
+    <constraint display="The pipe number is duplicated.">
+            !(("1" == "${interface.driver.pcdc}") &amp;&amp;
+              ("1" == "${interface.driver.pmsc}") &amp;&amp;
+              ("${config.driver.usb_pcdc.bulk_out}" === "config.driver.usb_pcdc.bulk_out.pipe3") &amp;&amp;
+              ("${config.driver.usb_pmsc.bulk_in}" === "config.driver.usb_pmsc.bulk_in.pipe3"))
+    </constraint>
+    <constraint display="The pipe number is duplicated.">
+            !(("1" == "${interface.driver.pcdc}") &amp;&amp;
+              ("1" == "${interface.driver.pmsc}") &amp;&amp;
+              ("${config.driver.usb_pcdc.bulk_out}" === "config.driver.usb_pcdc.bulk_out.pipe4") &amp;&amp;
+              ("${config.driver.usb_pmsc.bulk_in}" === "config.driver.usb_pmsc.bulk_in.pipe4"))
+    </constraint>
+    <constraint display="The pipe number is duplicated.">
+            !(("1" == "${interface.driver.pcdc}") &amp;&amp;
+              ("1" == "${interface.driver.pmsc}") &amp;&amp;
+              ("${config.driver.usb_pcdc.bulk_out}" === "config.driver.usb_pcdc.bulk_out.pipe5") &amp;&amp;
+              ("${config.driver.usb_pmsc.bulk_in}" === "config.driver.usb_pmsc.bulk_in.pipe5"))
+    </constraint>
+    <constraint display="The pipe number is duplicated.">
+            !(("1" == "${interface.driver.pcdc}") &amp;&amp;
+              ("1" == "${interface.driver.pcdc2}") &amp;&amp;
+              ("${config.driver.usb_pcdc.bulk_in}" === "config.driver.usb_pcdc.bulk_in.pipe1") &amp;&amp;
+              ("${config.driver.usb_pcdc2.bulk_in}" === "config.driver.usb_pcdc2.bulk_in.pipe1"))
+    </constraint>
+    <constraint display="The pipe number is duplicated.">
+            !(("1" == "${interface.driver.pcdc}") &amp;&amp;
+              ("1" == "${interface.driver.pcdc2}") &amp;&amp;
+              ("${config.driver.usb_pcdc.bulk_in}" === "config.driver.usb_pcdc.bulk_in.pipe2") &amp;&amp;
+              ("${config.driver.usb_pcdc2.bulk_in}" === "config.driver.usb_pcdc2.bulk_in.pipe2"))
+    </constraint>
+    <constraint display="The pipe number is duplicated.">
+            !(("1" == "${interface.driver.pcdc}") &amp;&amp;
+              ("1" == "${interface.driver.pcdc2}") &amp;&amp;
+              ("${config.driver.usb_pcdc.bulk_in}" === "config.driver.usb_pcdc.bulk_in.pipe3") &amp;&amp;
+              ("${config.driver.usb_pcdc2.bulk_in}" === "config.driver.usb_pcdc2.bulk_in.pipe3"))
+    </constraint>
+    <constraint display="The pipe number is duplicated.">
+            !(("1" == "${interface.driver.pcdc}") &amp;&amp;
+              ("1" == "${interface.driver.pcdc2}") &amp;&amp;
+              ("${config.driver.usb_pcdc.bulk_in}" === "config.driver.usb_pcdc.bulk_in.pipe4") &amp;&amp;
+              ("${config.driver.usb_pcdc2.bulk_in}" === "config.driver.usb_pcdc2.bulk_in.pipe4"))
+    </constraint>
+    <constraint display="The pipe number is duplicated.">
+            !(("1" == "${interface.driver.pcdc}") &amp;&amp;
+              ("1" == "${interface.driver.pcdc2}") &amp;&amp;
+              ("${config.driver.usb_pcdc.bulk_in}" === "config.driver.usb_pcdc.bulk_in.pipe5") &amp;&amp;
+              ("${config.driver.usb_pcdc2.bulk_in}" === "config.driver.usb_pcdc2.bulk_in.pipe5"))
+    </constraint>
+    <constraint display="The pipe number is duplicated.">
+            !(("1" == "${interface.driver.pcdc}") &amp;&amp;
+              ("1" == "${interface.driver.pcdc2}") &amp;&amp;
+              ("${config.driver.usb_pcdc.bulk_out}" === "config.driver.usb_pcdc.bulk_out.pipe1") &amp;&amp;
+              ("${config.driver.usb_pcdc2.bulk_out}" === "config.driver.usb_pcdc2.bulk_out.pipe1"))
+    </constraint>
+    <constraint display="The pipe number is duplicated.">
+            !(("1" == "${interface.driver.pcdc}") &amp;&amp;
+              ("1" == "${interface.driver.pcdc2}") &amp;&amp;
+              ("${config.driver.usb_pcdc.bulk_out}" === "config.driver.usb_pcdc.bulk_out.pipe2") &amp;&amp;
+              ("${config.driver.usb_pcdc2.bulk_out}" === "config.driver.usb_pcdc2.bulk_out.pipe2"))
+    </constraint>
+    <constraint display="The pipe number is duplicated.">
+            !(("1" == "${interface.driver.pcdc}") &amp;&amp;
+              ("1" == "${interface.driver.pcdc2}") &amp;&amp;
+              ("${config.driver.usb_pcdc.bulk_out}" === "config.driver.usb_pcdc.bulk_out.pipe3") &amp;&amp;
+              ("${config.driver.usb_pcdc2.bulk_out}" === "config.driver.usb_pcdc2.bulk_out.pipe3"))
+    </constraint>
+    <constraint display="The pipe number is duplicated.">
+            !(("1" == "${interface.driver.pcdc}") &amp;&amp;
+              ("1" == "${interface.driver.pcdc2}") &amp;&amp;
+              ("${config.driver.usb_pcdc.bulk_out}" === "config.driver.usb_pcdc.bulk_out.pipe4") &amp;&amp;
+              ("${config.driver.usb_pcdc2.bulk_out}" === "config.driver.usb_pcdc2.bulk_out.pipe4"))
+    </constraint>
+    <constraint display="The pipe number is duplicated.">
+            !(("1" == "${interface.driver.pcdc}") &amp;&amp;
+              ("1" == "${interface.driver.pcdc2}") &amp;&amp;
+              ("${config.driver.usb_pcdc.bulk_out}" === "config.driver.usb_pcdc.bulk_out.pipe5") &amp;&amp;
+              ("${config.driver.usb_pcdc2.bulk_out}" === "config.driver.usb_pcdc2.bulk_out.pipe5"))
+    </constraint>
+    <constraint display="The pipe number is duplicated.">
+            !(("1" == "${interface.driver.pcdc}") &amp;&amp;
+              ("1" == "${interface.driver.pcdc2}") &amp;&amp;
+              ("${config.driver.usb_pcdc.bulk_in}" === "config.driver.usb_pcdc.bulk_in.pipe1") &amp;&amp;
+              ("${config.driver.usb_pcdc2.bulk_out}" === "config.driver.usb_pcdc2.bulk_out.pipe1"))
+    </constraint>
+    <constraint display="The pipe number is duplicated.">
+            !(("1" == "${interface.driver.pcdc}") &amp;&amp;
+              ("1" == "${interface.driver.pcdc2}") &amp;&amp;
+              ("${config.driver.usb_pcdc.bulk_in}" === "config.driver.usb_pcdc.bulk_in.pipe2") &amp;&amp;
+              ("${config.driver.usb_pcdc2.bulk_out}" === "config.driver.usb_pcdc2.bulk_out.pipe2"))
+    </constraint>
+    <constraint display="The pipe number is duplicated.">
+            !(("1" == "${interface.driver.pcdc}") &amp;&amp;
+              ("1" == "${interface.driver.pcdc2}") &amp;&amp;
+              ("${config.driver.usb_pcdc.bulk_in}" === "config.driver.usb_pcdc.bulk_in.pipe3") &amp;&amp;
+              ("${config.driver.usb_pcdc2.bulk_out}" === "config.driver.usb_pcdc2.bulk_out.pipe3"))
+    </constraint>
+    <constraint display="The pipe number is duplicated.">
+            !(("1" == "${interface.driver.pcdc}") &amp;&amp;
+              ("1" == "${interface.driver.pcdc2}") &amp;&amp;
+              ("${config.driver.usb_pcdc.bulk_in}" === "config.driver.usb_pcdc.bulk_in.pipe4") &amp;&amp;
+              ("${config.driver.usb_pcdc2.bulk_out}" === "config.driver.usb_pcdc2.bulk_out.pipe4"))
+    </constraint>
+    <constraint display="The pipe number is duplicated.">
+            !(("1" == "${interface.driver.pcdc}") &amp;&amp;
+              ("1" == "${interface.driver.pcdc2}") &amp;&amp;
+              ("${config.driver.usb_pcdc.bulk_in}" === "config.driver.usb_pcdc.bulk_in.pipe5") &amp;&amp;
+              ("${config.driver.usb_pcdc2.bulk_out}" === "config.driver.usb_pcdc2.bulk_out.pipe5"))
+    </constraint>
+    <constraint display="The pipe number is duplicated.">
+            !(("1" == "${interface.driver.pcdc}") &amp;&amp;
+              ("1" == "${interface.driver.pcdc2}") &amp;&amp;
+              ("${config.driver.usb_pcdc.bulk_out}" === "config.driver.usb_pcdc.bulk_out.pipe1") &amp;&amp;
+              ("${config.driver.usb_pcdc2.bulk_in}" === "config.driver.usb_pcdc2.bulk_in.pipe1"))
+    </constraint>
+    <constraint display="The pipe number is duplicated.">
+            !(("1" == "${interface.driver.pcdc}") &amp;&amp;
+              ("1" == "${interface.driver.pcdc2}") &amp;&amp;
+              ("${config.driver.usb_pcdc.bulk_out}" === "config.driver.usb_pcdc.bulk_out.pipe2") &amp;&amp;
+              ("${config.driver.usb_pcdc2.bulk_in}" === "config.driver.usb_pcdc2.bulk_in.pipe2"))
+    </constraint>
+    <constraint display="The pipe number is duplicated.">
+            !(("1" == "${interface.driver.pcdc}") &amp;&amp;
+              ("1" == "${interface.driver.pcdc2}") &amp;&amp;
+              ("${config.driver.usb_pcdc.bulk_out}" === "config.driver.usb_pcdc.bulk_out.pipe3") &amp;&amp;
+              ("${config.driver.usb_pcdc2.bulk_in}" === "config.driver.usb_pcdc2.bulk_in.pipe3"))
+    </constraint>
+    <constraint display="The pipe number is duplicated.">
+            !(("1" == "${interface.driver.pcdc}") &amp;&amp;
+              ("1" == "${interface.driver.pcdc2}") &amp;&amp;
+              ("${config.driver.usb_pcdc.bulk_out}" === "config.driver.usb_pcdc.bulk_out.pipe4") &amp;&amp;
+              ("${config.driver.usb_pcdc2.bulk_in}" === "config.driver.usb_pcdc2.bulk_in.pipe4"))
+    </constraint>
+    <constraint display="The pipe number is duplicated.">
+            !(("1" == "${interface.driver.pcdc}") &amp;&amp;
+              ("1" == "${interface.driver.pcdc2}") &amp;&amp;
+              ("${config.driver.usb_pcdc.bulk_out}" === "config.driver.usb_pcdc.bulk_out.pipe5") &amp;&amp;
+              ("${config.driver.usb_pcdc2.bulk_in}" === "config.driver.usb_pcdc2.bulk_in.pipe5"))
+    </constraint>
+    <constraint display="Requires USB PIPE1 or PIPE2 for Bulk Input when using DMA transfer on USB PCDC composite.">
+            !(("1" == "${interface.driver.pcdc2}") &amp;&amp;
+              ("1" == "${interface.driver.pcdc}") &amp;&amp;
+              ("${config.driver.usb_basic.dma}" === "config.driver.usb_basic.dma.enable") &amp;&amp;
+              (("${config.driver.usb_pcdc.bulk_in}" === "config.driver.usb_pcdc.bulk_in.pipe3") ||
+               ("${config.driver.usb_pcdc.bulk_in}" === "config.driver.usb_pcdc.bulk_in.pipe4") ||
+               ("${config.driver.usb_pcdc.bulk_in}" === "config.driver.usb_pcdc.bulk_in.pipe5")))
+    </constraint>
+    <constraint display="Requires USB PIPE1 or PIPE2 for Bulk Output when using DMA transfer on USB PCDC composite.">
+            !(("1" == "${interface.driver.pcdc2}") &amp;&amp;
+              ("1" == "${interface.driver.pcdc}") &amp;&amp;
+              ("${config.driver.usb_basic.dma}" === "config.driver.usb_basic.dma.enable") &amp;&amp;
+              (("${config.driver.usb_pcdc.bulk_out}" === "config.driver.usb_pcdc.bulk_out.pipe3") ||
+               ("${config.driver.usb_pcdc.bulk_out}" === "config.driver.usb_pcdc.bulk_out.pipe4") ||
+               ("${config.driver.usb_pcdc.bulk_out}" === "config.driver.usb_pcdc.bulk_out.pipe5")))
+    </constraint>
+    <constraint display="Requires USB PIPE1 or PIPE2 for Bulk Input when using DMA transfer on USB PCDC composite.">
+            !(("1" == "${interface.driver.pmsc}") &amp;&amp;
+              ("1" == "${interface.driver.pcdc}") &amp;&amp;
+              ("${config.driver.usb_basic.dma}" === "config.driver.usb_basic.dma.enable") &amp;&amp;
+              (("${config.driver.usb_pcdc.bulk_in}" === "config.driver.usb_pcdc.bulk_in.pipe3") ||
+               ("${config.driver.usb_pcdc.bulk_in}" === "config.driver.usb_pcdc.bulk_in.pipe4") ||
+               ("${config.driver.usb_pcdc.bulk_in}" === "config.driver.usb_pcdc.bulk_in.pipe5")))
+    </constraint>
+    <constraint display="Requires USB PIPE1 or PIPE2 for Bulk Output when using DMA transfer on USB PCDC composite.">
+            !(("1" == "${interface.driver.pmsc}") &amp;&amp;
+              ("1" == "${interface.driver.pcdc}") &amp;&amp;
+              ("${config.driver.usb_basic.dma}" === "config.driver.usb_basic.dma.enable") &amp;&amp;
+              (("${config.driver.usb_pcdc.bulk_out}" === "config.driver.usb_pcdc.bulk_out.pipe3") ||
+               ("${config.driver.usb_pcdc.bulk_out}" === "config.driver.usb_pcdc.bulk_out.pipe4") ||
+               ("${config.driver.usb_pcdc.bulk_out}" === "config.driver.usb_pcdc.bulk_out.pipe5")))
+    </constraint>
+    <constraint display="Requires USB PIPE1 or PIPE2 for Bulk Input when using DMA transfer on USB PCDC composite.">
+            !(("1" == "${interface.driver.pvnd}") &amp;&amp;
+              ("1" == "${interface.driver.pcdc}") &amp;&amp;
+              ("${config.driver.usb_basic.dma}" === "config.driver.usb_basic.dma.enable") &amp;&amp;
+              (("${config.driver.usb_pcdc.bulk_in}" === "config.driver.usb_pcdc.bulk_in.pipe3") ||
+               ("${config.driver.usb_pcdc.bulk_in}" === "config.driver.usb_pcdc.bulk_in.pipe4") ||
+               ("${config.driver.usb_pcdc.bulk_in}" === "config.driver.usb_pcdc.bulk_in.pipe5")))
+    </constraint>
+    <constraint display="Requires USB PIPE1 or PIPE2 for Bulk Output when using DMA transfer on USB PCDC composite.">
+            !(("1" == "${interface.driver.pvnd}") &amp;&amp;
+              ("1" == "${interface.driver.pcdc}") &amp;&amp;
+              ("${config.driver.usb_basic.dma}" === "config.driver.usb_basic.dma.enable") &amp;&amp;
+              (("${config.driver.usb_pcdc.bulk_out}" === "config.driver.usb_pcdc.bulk_out.pipe3") ||
+               ("${config.driver.usb_pcdc.bulk_out}" === "config.driver.usb_pcdc.bulk_out.pipe4") ||
+               ("${config.driver.usb_pcdc.bulk_out}" === "config.driver.usb_pcdc.bulk_out.pipe5")))
+    </constraint>
+    <constraint display="Configuration of multiple PHID composite devices is not supported.">
+            !(("2" === "${interface.driver.phid}"))
+    </constraint>
+    <constraint display="Configuration of multiple PMSC composite devices is not supported.">
+            !(("2" === "${interface.driver.pmsc}"))
+    </constraint>
+    <constraint display="Using multiple pcdcs.">
+            !(("2" === "${interface.driver.pcdc}"))
+    </constraint>
+    <constraint display="Using multiple pcdc 2chs.">
+            !(("2" === "${interface.driver.pcdc2}"))
+    </constraint>
+    <constraint display="Use USBX instead in Azure RTOS projects.">
+            !testExists("${interface.rtos.tx}")
+    </constraint>
+    <constraint display="Use USB PCDC driver on r_usb_pcdc">
+            !(("1" == "${interface.driver.phid}") &amp;&amp;
+              ("1" == "${interface.driver.pcdc2}"))
+    </constraint>
+    <constraint display="Use USB PCDC driver on r_usb_pcdc">
+            !(("1" == "${interface.driver.pmsc}") &amp;&amp;
+              ("1" == "${interface.driver.pcdc2}"))
+    </constraint>
+    <constraint display="USB PCDC 2Channel requires USB PCDC">
+            !((testExists("${interface.driver.pcdc2}"))&amp;&amp; (!(testExists("${interface.driver.pcdc}"))))
+    </constraint>
+    <constraint display="USB PHID 2Channel requires USB PHID">
+            !((testExists("${interface.driver.phid2}"))&amp;&amp; (!(testExists("${interface.driver.phid}"))))
+    </constraint>
+    <constraint display="Unique name required for each instance">
+            "${interface.driver.r_usb_composite.${module.driver.r_usb_composite.name}}" === "1"
+    </constraint>
+    <requires id="module.driver.r_usb_composite_pmsc_phid.requires.pmsc_phid" interface="interface.mcu.usb_fs.external" visible="false" display="Requires USB Peripheral" />
+    <requires id="module.driver.r_usb_composite_pmsc_phid.requires.class1" interface="interface.driver.usb" display="Add USB Driver Class1" />
+    <requires id="module.driver.r_usb_composite_pmsc_phid.requires.class2" interface="interface.driver.usb" display="Add USB Driver Class2" />
+    <requires id="module.driver.r_usb_composite_pmsc_phid.ignore.azure_projects" interface="interface.rtos.supports.renesas_usb" visible="false" display="Use Azure USBX for Azure RTOS projects."/>
+    <provides interface="interface.driver.r_usb_composite.${module.driver.r_usb_composite.name}" />
+    <provides interface="interface.driver.r_usb_composite" />
+    <property default="g_r_usb_composite${_instance}" display="Name" id="module.driver.r_usb_composite.name" description="Module name.">
+      <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.r_usb_composite.name}")</constraint>
+    </property>
+  </module>
+  <module display="Connectivity|${module.driver.r_usbx_composite.name} USB Composite (r_usb_composite)" id="module.driver.usbx_composite" version="1" url="group___u_s_b___c_o_m_p_o_s_i_t_e.html">
+    <constraint display="The pipe number is duplicated.">
+            !(("1" == "${interface.driver.usbx_pcdc}") &amp;&amp;
+              ("1" == "${interface.driver.usbx_pmsc}") &amp;&amp;
+              ("${config.driver.usbx_pcdc.bulk_in}" === "config.driver.usbx_pcdc.bulk_in.pipe1") &amp;&amp;
+              ("${config.driver.usbx_pmsc.bulk_in}" === "config.driver.usbx_pmsc.bulk_in.pipe1"))
+    </constraint>
+    <constraint display="The pipe number is duplicated.">
+            !(("1" == "${interface.driver.usbx_pcdc}") &amp;&amp;
+              ("1" == "${interface.driver.usbx_pmsc}") &amp;&amp;
+              ("${config.driver.usbx_pcdc.bulk_in}" === "config.driver.usbx_pcdc.bulk_in.pipe2") &amp;&amp;
+              ("${config.driver.usbx_pmsc.bulk_in}" === "config.driver.usbx_pmsc.bulk_in.pipe2"))
+    </constraint>
+    <constraint display="The pipe number is duplicated.">
+            !(("1" == "${interface.driver.usbx_pcdc}") &amp;&amp;
+              ("1" == "${interface.driver.usbx_pmsc}") &amp;&amp;
+              ("${config.driver.usbx_pcdc.bulk_in}" === "config.driver.usbx_pcdc.bulk_in.pipe3") &amp;&amp;
+              ("${config.driver.usbx_pmsc.bulk_in}" === "config.driver.usbx_pmsc.bulk_in.pipe3"))
+    </constraint>
+    <constraint display="The pipe number is duplicated.">
+            !(("1" == "${interface.driver.usbx_pcdc}") &amp;&amp;
+              ("1" == "${interface.driver.usbx_pmsc}") &amp;&amp;
+              ("${config.driver.usbx_pcdc.bulk_in}" === "config.driver.usbx_pcdc.bulk_in.pipe4") &amp;&amp;
+              ("${config.driver.usbx_pmsc.bulk_in}" === "config.driver.usbx_pmsc.bulk_in.pipe4"))
+    </constraint>
+    <constraint display="The pipe number is duplicated.">
+            !(("1" == "${interface.driver.usbx_pcdc}") &amp;&amp;
+              ("1" == "${interface.driver.usbx_pmsc}") &amp;&amp;
+              ("${config.driver.usbx_pcdc.bulk_in}" === "config.driver.usbx_pcdc.bulk_in.pipe5") &amp;&amp;
+              ("${config.driver.usbx_pmsc.bulk_in}" === "config.driver.usbx_pmsc.bulk_in.pipe5"))
+    </constraint>
+    <constraint display="The pipe number is duplicated.">
+            !(("1" == "${interface.driver.usbx_pcdc}") &amp;&amp;
+              ("1" == "${interface.driver.usbx_pmsc}") &amp;&amp;
+              ("${config.driver.usbx_pcdc.bulk_out}" === "config.driver.usbx_pcdc.bulk_out.pipe1") &amp;&amp;
+              ("${config.driver.usbx_pmsc.bulk_out}" === "config.driver.usbx_pmsc.bulk_out.pipe1"))
+    </constraint>
+    <constraint display="The pipe number is duplicated.">
+            !(("1" == "${interface.driver.usbx_pcdc}") &amp;&amp;
+              ("1" == "${interface.driver.usbx_pmsc}") &amp;&amp;
+              ("${config.driver.usbx_pcdc.bulk_out}" === "config.driver.usbx_pcdc.bulk_out.pipe2") &amp;&amp;
+              ("${config.driver.usbx_pmsc.bulk_out}" === "config.driver.usbx_pmsc.bulk_out.pipe2"))
+    </constraint>
+    <constraint display="The pipe number is duplicated.">
+            !(("1" == "${interface.driver.usbx_pcdc}") &amp;&amp;
+              ("1" == "${interface.driver.usbx_pmsc}") &amp;&amp;
+              ("${config.driver.usbx_pcdc.bulk_out}" === "config.driver.usbx_pcdc.bulk_out.pipe3") &amp;&amp;
+              ("${config.driver.usbx_pmsc.bulk_out}" === "config.driver.usbx_pmsc.bulk_out.pipe3"))
+    </constraint>
+    <constraint display="The pipe number is duplicated.">
+            !(("1" == "${interface.driver.usbx_pcdc}") &amp;&amp;
+              ("1" == "${interface.driver.usbx_pmsc}") &amp;&amp;
+              ("${config.driver.usbx_pcdc.bulk_out}" === "config.driver.usbx_pcdc.bulk_out.pipe4") &amp;&amp;
+              ("${config.driver.usbx_pmsc.bulk_out}" === "config.driver.usbx_pmsc.bulk_out.pipe4"))
+    </constraint>
+    <constraint display="The pipe number is duplicated.">
+            !(("1" == "${interface.driver.usbx_pcdc}") &amp;&amp;
+              ("1" == "${interface.driver.usbx_pmsc}") &amp;&amp;
+              ("${config.driver.usbx_pcdc.bulk_out}" === "config.driver.usbx_pcdc.bulk_out.pipe5") &amp;&amp;
+              ("${config.driver.usbx_pmsc.bulk_out}" === "config.driver.usbx_pmsc.bulk_out.pipe5"))
+    </constraint>
+    <constraint display="The pipe number is duplicated.">
+            !(("1" == "${interface.driver.usbx_pcdc}") &amp;&amp;
+              ("1" == "${interface.driver.usbx_pmsc}") &amp;&amp;
+              ("${config.driver.usbx_pcdc.bulk_in}" === "config.driver.usbx_pcdc.bulk_in.pipe1") &amp;&amp;
+              ("${config.driver.usbx_pmsc.bulk_out}" === "config.driver.usbx_pmsc.bulk_out.pipe1"))
+    </constraint>
+    <constraint display="The pipe number is duplicated.">
+            !(("1" == "${interface.driver.usbx_pcdc}") &amp;&amp;
+              ("1" == "${interface.driver.usbx_pmsc}") &amp;&amp;
+              ("${config.driver.usbx_pcdc.bulk_in}" === "config.driver.usbx_pcdc.bulk_in.pipe2") &amp;&amp;
+              ("${config.driver.usbx_pmsc.bulk_out}" === "config.driver.usbx_pmsc.bulk_out.pipe2"))
+    </constraint>
+    <constraint display="The pipe number is duplicated.">
+            !(("1" == "${interface.driver.usbx_pcdc}") &amp;&amp;
+              ("1" == "${interface.driver.usbx_pmsc}") &amp;&amp;
+              ("${config.driver.usbx_pcdc.bulk_in}" === "config.driver.usbx_pcdc.bulk_in.pipe3") &amp;&amp;
+              ("${config.driver.usbx_pmsc.bulk_out}" === "config.driver.usbx_pmsc.bulk_out.pipe3"))
+    </constraint>
+    <constraint display="The pipe number is duplicated.">
+            !(("1" == "${interface.driver.usbx_pcdc}") &amp;&amp;
+              ("1" == "${interface.driver.usbx_pmsc}") &amp;&amp;
+              ("${config.driver.usbx_pcdc.bulk_in}" === "config.driver.usbx_pcdc.bulk_in.pipe4") &amp;&amp;
+              ("${config.driver.usbx_pmsc.bulk_out}" === "config.driver.usbx_pmsc.bulk_out.pipe4"))
+    </constraint>
+    <constraint display="The pipe number is duplicated.">
+            !(("1" == "${interface.driver.usbx_pcdc}") &amp;&amp;
+              ("1" == "${interface.driver.usbx_pmsc}") &amp;&amp;
+              ("${config.driver.usbx_pcdc.bulk_in}" === "config.driver.usbx_pcdc.bulk_in.pipe5") &amp;&amp;
+              ("${config.driver.usbx_pmsc.bulk_out}" === "config.driver.usbx_pmsc.bulk_out.pipe5"))
+    </constraint>
+    <constraint display="The pipe number is duplicated.">
+            !(("1" == "${interface.driver.usbx_pcdc}") &amp;&amp;
+              ("1" == "${interface.driver.usbx_pmsc}") &amp;&amp;
+              ("${config.driver.usbx_pcdc.bulk_out}" === "config.driver.usbx_pcdc.bulk_out.pipe1") &amp;&amp;
+              ("${config.driver.usbx_pmsc.bulk_in}" === "config.driver.usbx_pmsc.bulk_in.pipe1"))
+    </constraint>
+    <constraint display="The pipe number is duplicated.">
+            !(("1" == "${interface.driver.usbx_pcdc}") &amp;&amp;
+              ("1" == "${interface.driver.usbx_pmsc}") &amp;&amp;
+              ("${config.driver.usbx_pcdc.bulk_out}" === "config.driver.usbx_pcdc.bulk_out.pipe2") &amp;&amp;
+              ("${config.driver.usbx_pmsc.bulk_in}" === "config.driver.usbx_pmsc.bulk_in.pipe2"))
+    </constraint>
+    <constraint display="The pipe number is duplicated.">
+            !(("1" == "${interface.driver.usbx_pcdc}") &amp;&amp;
+              ("1" == "${interface.driver.usbx_pmsc}") &amp;&amp;
+              ("${config.driver.usbx_pcdc.bulk_out}" === "config.driver.usbx_pcdc.bulk_out.pipe3") &amp;&amp;
+              ("${config.driver.usbx_pmsc.bulk_in}" === "config.driver.usbx_pmsc.bulk_in.pipe3"))
+    </constraint>
+    <constraint display="The pipe number is duplicated.">
+            !(("1" == "${interface.driver.usbx_pcdc}") &amp;&amp;
+              ("1" == "${interface.driver.usbx_pmsc}") &amp;&amp;
+              ("${config.driver.usbx_pcdc.bulk_out}" === "config.driver.usbx_pcdc.bulk_out.pipe4") &amp;&amp;
+              ("${config.driver.usbx_pmsc.bulk_in}" === "config.driver.usbx_pmsc.bulk_in.pipe4"))
+    </constraint>
+    <constraint display="The pipe number is duplicated.">
+            !(("1" == "${interface.driver.usbx_pcdc}") &amp;&amp;
+              ("1" == "${interface.driver.usbx_pmsc}") &amp;&amp;
+              ("${config.driver.usbx_pcdc.bulk_out}" === "config.driver.usbx_pcdc.bulk_out.pipe5") &amp;&amp;
+              ("${config.driver.usbx_pmsc.bulk_in}" === "config.driver.usbx_pmsc.bulk_in.pipe5"))
+    </constraint>
+    <constraint display="Configuration of multiple USBX PCDC composite devices is not supported.">
+            !(("2" === "${interface.driver.usbx_pcdc}"))
+    </constraint>
+    <constraint display="Configuration of multiple PMSC composite devices is not supported.">
+            !(("2" === "${interface.driver.usbx_pmsc}"))
+    </constraint>
+<!--
+    <constraint display="Configuration of multiple PHID composite devices is not supported.">
+            !(("2" === "${interface.driver.phid}"))
+    </constraint>
+    <constraint display="Using multiple pcdcs.">
+            !(("2" === "${interface.driver.usbx_pcdc}"))
+    </constraint>
+    <constraint display="Using multiple pcdc 2chs.">
+            !(("2" === "${interface.driver.usbx_pcdc2}"))
+    </constraint>
+    <constraint display="Use USBX instead in Azure RTOS projects.">
+            !testExists("${interface.rtos.tx}")
+    </constraint>
+    <constraint display="Use USB PCDC driver on r_usbx_pcdc">
+            !(("1" == "${interface.driver.phid}") &amp;&amp;
+              ("1" == "${interface.driver.usbx_pcdc2}"))
+    </constraint>
+    <constraint display="Use USB PCDC driver on r_usbx_pcdc">
+            !(("1" == "${interface.driver.usbx_pmsc}") &amp;&amp;
+              ("1" == "${interface.driver.usbx_pcdc2}"))
+    </constraint>
+-->
+    <requires id="module.driver.r_usbx_composite.requires.compsite_class" interface="interface.mcu.usb_fs.external" visible="false" display="Requires USB Peripheral" />
+    <requires id="module.driver.r_usbx_composite.requires.class1" interface="interface.driver.usbx" display="Add USB Driver Class1" />
+    <requires id="module.driver.r_usbx_composite.requires.class2" interface="interface.driver.usbx" display="Add USB Driver Class2" />
+    <requires id="module.driver.r_usbx_composite.requires.usbx" interface="interface.rtos.supports.usbx" visible="false" display="Use Azure USBX for Azure RTOS projects."/>
+    <provides interface="interface.driver.r_usbx_composite" />
+    <property default="g_r_usbx_composite${_instance}" display="Name" id="module.driver.r_usbx_composite.name" description="Module name.">
+      <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.r_usbx_composite.name}")</constraint>
+    </property>
+  </module>
+</raModuleDescription>

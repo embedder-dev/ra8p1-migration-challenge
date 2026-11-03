@@ -1,0 +1,120 @@
+<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.driver.at_transport_da16xxx" path="fsp_cfg/rm_at_transport_da16xxx_uart_cfg.h" version="0">
+        <property default="config.driver.at_transport_da16xxx.param_checking_enable.bsp" display="Parameter Checking" id="config.driver.at_transport_da16xxx.param_checking_enable" description="If selected code for parameter checking is included in the build.">
+            <option display="Default (BSP)" id="config.driver.at_transport_da16xxx.param_checking_enable.bsp" value="(BSP_CFG_PARAM_CHECKING_ENABLE)"/>
+            <option display="Enabled" id="config.driver.at_transport_da16xxx.param_checking_enable.enabled" value="(1)"/>
+            <option display="Disabled" id="config.driver.at_transport_da16xxx.param_checking_enable.disabled" value="(0)"/>
+        </property>
+        <property default="3000" display="Size of RX buffer for CMD Port" id="config.driver.at_transport_da16xxx.cmd_port_rx_size"/>
+        <property default="10000" display="Semaphore maximum timeout" id="config.driver.at_transport_da16xxx.sem_max_timeout"/>
+        <property default="10" display="Number of retries for AT commands" id="config.driver.at_transport_da16xxx.max_retries_uart_comms"/>
+        <property default="" id="config.driver.at_transport_da16xxx.mqtt_exists">
+            <export>"${interface.driver.mqtt_onchip_da16xxx}"</export>
+        </property>
+        <property default="config.driver.at_transport_da16xxx.pin_control_port.PORT_06" display="Module Reset Port" id="config.driver.at_transport_da16xxx.pin_control_port" description="Specify the module reset pin port for the MCU.">
+            <option id="config.driver.at_transport_da16xxx.pin_control_port.PORT_00" display="00" value="00" />
+            <option id="config.driver.at_transport_da16xxx.pin_control_port.PORT_01" display="01" value="01" />
+            <option id="config.driver.at_transport_da16xxx.pin_control_port.PORT_02" display="02" value="02" />
+            <option id="config.driver.at_transport_da16xxx.pin_control_port.PORT_03" display="03" value="03" />
+            <option id="config.driver.at_transport_da16xxx.pin_control_port.PORT_04" display="04" value="04" />
+            <option id="config.driver.at_transport_da16xxx.pin_control_port.PORT_05" display="05" value="05" />
+            <option id="config.driver.at_transport_da16xxx.pin_control_port.PORT_06" display="06" value="06" />
+            <option id="config.driver.at_transport_da16xxx.pin_control_port.PORT_07" display="07" value="07" />
+            <option id="config.driver.at_transport_da16xxx.pin_control_port.PORT_08" display="08" value="08" />
+            <option id="config.driver.at_transport_da16xxx.pin_control_port.PORT_09" display="09" value="09" />
+            <option id="config.driver.at_transport_da16xxx.pin_control_port.PORT_10" display="10" value="10" />
+            <option id="config.driver.at_transport_da16xxx.pin_control_port.PORT_11" display="11" value="11" />
+        </property>
+        <property default="config.driver.at_transport_da16xxx.pin_control_pin.PIN_03" display="Module Reset Pin" id="config.driver.at_transport_da16xxx.pin_control_pin" description="Specify the module reset pin for the MCU.">
+            <option id="config.driver.at_transport_da16xxx.pin_control_pin.PIN_00" display="00" value="00" />
+            <option id="config.driver.at_transport_da16xxx.pin_control_pin.PIN_01" display="01" value="01" />
+            <option id="config.driver.at_transport_da16xxx.pin_control_pin.PIN_02" display="02" value="02" />
+            <option id="config.driver.at_transport_da16xxx.pin_control_pin.PIN_03" display="03" value="03" />
+            <option id="config.driver.at_transport_da16xxx.pin_control_pin.PIN_04" display="04" value="04" />
+            <option id="config.driver.at_transport_da16xxx.pin_control_pin.PIN_05" display="05" value="05" />
+            <option id="config.driver.at_transport_da16xxx.pin_control_pin.PIN_06" display="06" value="06" />
+            <option id="config.driver.at_transport_da16xxx.pin_control_pin.PIN_07" display="07" value="07" />
+            <option id="config.driver.at_transport_da16xxx.pin_control_pin.PIN_08" display="08" value="08" />
+            <option id="config.driver.at_transport_da16xxx.pin_control_pin.PIN_09" display="09" value="09" />
+            <option id="config.driver.at_transport_da16xxx.pin_control_pin.PIN_10" display="10" value="10" />
+            <option id="config.driver.at_transport_da16xxx.pin_control_pin.PIN_11" display="11" value="11" />
+            <option id="config.driver.at_transport_da16xxx.pin_control_pin.PIN_12" display="12" value="12" />
+            <option id="config.driver.at_transport_da16xxx.pin_control_pin.PIN_13" display="13" value="13" />
+            <option id="config.driver.at_transport_da16xxx.pin_control_pin.PIN_14" display="14" value="14" />
+            <option id="config.driver.at_transport_da16xxx.pin_control_pin.PIN_15" display="15" value="15" />
+        </property>
+        <content>
+            #ifdef __cplusplus
+            extern "C" {
+            #endif
+            #define AT_TRANSPORT_DA16XXX_CFG_CMD_RX_BUF_SIZE               (${config.driver.at_transport_da16xxx.cmd_port_rx_size})
+            #define AT_TRANSPORT_DA16XXX_CFG_SEM_MAX_TIMEOUT               (${config.driver.at_transport_da16xxx.sem_max_timeout})
+            #define AT_TRANSPORT_DA16XXX_CFG_MAX_NUMBER_UART_PORTS         (2)
+            #define AT_TRANSPORT_DA16XXX_CFG_RESET_PIN                     BSP_IO_PORT_${config.driver.at_transport_da16xxx.pin_control_port}_PIN_${config.driver.at_transport_da16xxx.pin_control_pin}
+            #define AT_TRANSPORT_DA16XXX_CFG_MAX_RETRIES_UART_COMMS        (${config.driver.at_transport_da16xxx.max_retries_uart_comms})
+#ifdef __cplusplus
+}
+#endif
+        </content>
+    </config>
+    <module id="module.driver.at_transport_da16xxx_uart" config="config.driver.at_transport_da16xxx" display="Networking|DA16XXX Transport on UART (rm_at_transport_da16xxx_uart)" visible="false" version="0" url="group___a_t___t_r_a_n_s_p_o_r_t___d_a16_x_x_x___u_a_r_t.html">
+        <requires id="module.driver.at_transport_da16xxx_uart.requires.uart" interface="interface.driver.uart" display="Requires SCI UART Peripheral Cmd/Data Port" find="true">
+            <override property="module.driver.uart.callback" value="rm_at_transport_da16xxx_uart_callback"/>
+        </requires>
+        <provides interface="interface.driver.at_transport_da16xxx" />
+        <provides interface="interface.driver.at_transport_da16xxx_uart" />
+        <property default="g_at_transport_da16xxx" id="module.driver.at_transport_da16xxx.name" description="Module name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.at_transport_da16xxx.name}")</constraint>
+        </property>
+        <property default="NULL" id="module.driver.at_transport_da16xxx.p_context" description="Context to pass down to the transport interface."/>
+        <property default="NULL" id="module.driver.at_transport_da16xxx.p_callback" description="A user callback function can be provided."/>
+        <header>
+                   extern const char *                           g_at_transport_da16xxx_uart_cmd_baud;
+                   extern at_transport_da16xxx_instance_ctrl_t g_at_transport_da16xxx_ctrl;
+                   extern at_transport_da16xxx_cfg_t  g_at_transport_da16xxx_cfg;
+                   extern const at_transport_da16xxx_instance_t g_at_transport_da16xxx;
+        </header>
+        <includes>
+                    #include &quot;rm_at_transport_da16xxx_uart.h&quot;
+                    #include &quot;rm_at_transport_da16xxx.h&quot;
+        </includes>
+        <declarations>
+        const char *g_at_transport_da16xxx_uart_cmd_baud = "${module.driver.at_transport_da16xxx_uart.requires.uart::module.driver.uart.baud}";
+        at_transport_da16xxx_instance_ctrl_t g_at_transport_da16xxx_ctrl;
+        const at_transport_da16xxx_extended_cfg_t g_at_transport_da16xxx_cfg_extend =
+        {
+        #define RA_NOT_DEFINED (1)
+        .num_uarts = 1,
+        .reset_pin = AT_TRANSPORT_DA16XXX_CFG_RESET_PIN,
+        .uart_instances =
+        {
+
+        #if (RA_NOT_DEFINED == ${module.driver.at_transport_da16xxx_uart.requires.uart::module.driver.uart.name})
+            NULL,
+        #else
+            &amp;${module.driver.at_transport_da16xxx_uart.requires.uart::module.driver.uart.name},
+        #endif
+
+        NULL,
+
+        #undef RA_NOT_DEFINED
+        }
+        };
+
+        at_transport_da16xxx_cfg_t g_at_transport_da16xxx_cfg =
+        {
+        .p_extend = &amp;g_at_transport_da16xxx_cfg_extend,
+        .p_callback         = ${module.driver.at_transport_da16xxx.p_callback},
+        };
+
+        const at_transport_da16xxx_instance_t g_at_transport_da16xxx =
+        {
+            .p_ctrl = &amp;g_at_transport_da16xxx_ctrl, .p_cfg = &amp;g_at_transport_da16xxx_cfg,
+            .p_api  = &amp;g_at_transport_da16xxx_on_uart,
+        };
+        </declarations>
+        <functions>
+        </functions>
+    </module>
+</raModuleDescription>

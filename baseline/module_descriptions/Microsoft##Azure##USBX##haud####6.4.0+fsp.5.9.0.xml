@@ -1,0 +1,67 @@
+﻿<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.driver.usbx_haud" path="fsp_cfg/r_usb_haud_cfg.h" version="0">
+        <property id="config.driver.usbx_haud.iso_in" display="Isochronous In Pipe" default="config.driver.usbx_haud.iso_in.pipe1" description="Select the USB pipe to use for isochronous in transfer.">
+            <option id="config.driver.usbx_haud.iso_in.pipe1" display="USB PIPE1" value="USB_PIPE1"/>
+            <option id="config.driver.usbx_haud.iso_in.pipe2" display="USB PIPE2" value="USB_PIPE2"/>
+        </property>
+        <property id="config.driver.usbx_haud.iso_out" display="Isochronous Out Pipe" default="config.driver.usbx_haud.iso_out.pipe2" description="Select the USB pipe to use for isochronous out transfer.">
+            <option id="config.driver.usbx_haud.iso_out.pipe1" display="USB PIPE1" value="USB_PIPE1"/>
+            <option id="config.driver.usbx_haud.iso_out.pipe2" display="USB PIPE2" value="USB_PIPE2"/>
+            <option id="config.driver.usbx_haud.iso_in.pipe_no_use" display="NO USE" value="USB_NULL"/>
+        </property>
+        <content>
+            #ifdef __cplusplus
+            extern "C" {
+            #endif
+
+            #define USB_CFG_HAUD_ISO_IN (${config.driver.usbx_haud.iso_in})
+            #define USB_CFG_HAUD_ISO_OUT (${config.driver.usbx_haud.iso_out})
+
+            #ifdef __cplusplus
+            }
+            #endif
+        </content>
+    </config>
+    <module config="config.driver.usbx_haud" display="Connectivity|Azure RTOS USBX HAUD" id="module.driver.usbx_haud" version="1" url="https://github.com/eclipse-threadx/rtos-docs/blob/main/rtos-docs/usbx/index.md">
+        <constraint display="Unique name required for each instance">
+            "${interface.driver.usbx_haud.${module.driver.usbx_haud.name}}" === "1"
+        </constraint>
+        <constraint display="Requires USB Peripheral">
+          "${interface.mcu.usb_fs.external}" === "1"
+        </constraint>
+        <constraint display="The USB pipe numbers for Isochronous In and Isochronous Out must be different.">
+            !(("${config.driver.usbx_haud.iso_in}" === "config.driver.usbx_haud.iso_in.pipe1") &amp;&amp;
+            ("${config.driver.usbx_haud.iso_out}" === "config.driver.usbx_haud.iso_out.pipe1"))
+        </constraint>
+        <constraint display="The USB pipe numbers for Isochronous In and Isochronous Out must be different.">
+            !(("${config.driver.usbx_haud.iso_in}" === "config.driver.usbx_haud.iso_in.pipe2") &amp;&amp;
+            ("${config.driver.usbx_haud.iso_out}" === "config.driver.usbx_haud.iso_out.pipe2"))
+        </constraint>
+        <requires id="module.azure.usbx_haud.requires.threadx" interface="interface.rtos.tx" visible="false" display="Requires ThreadX"/>
+        <requires id="module.azure.usbx_basic.requires.full_module" interface="interface.mcu.usb.pipes.0.1.2.3.4.5.6.7.8.9" visible="false" display="Requires USB Full Module" />
+        <requires id="module.driver.usbx_haud.requires.usb_basic" interface="interface.middleware.rm_usbx_port" visible="true" display="USBX HAUD">
+            <override property="module.middleware.rm_usbx_port.usb_mode" value="module.middleware.rm_usbx_port.usb_mode.host"/>
+            <override property="module.middleware.rm_usbx_port.usb_classtype" value="module.middleware.rm_usbx_port.usb_classtype.haud"/>
+            <override property="module.middleware.rm_usbx_port.p_usb_reg" value="NULL"/>
+        </requires>
+        <provides interface="interface.driver.usbx_haud" />
+        <provides interface="interface.driver.usbx_haud.${module.driver.usbx_haud.name}" />
+        <property default="usbx_haud" id="module.driver.usbx_haud.usbx_haud_interface" description=""/>
+        <property default="g_usbx_haud${_instance}" display="Name" id="module.driver.usbx_haud.name" description="Module name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.usbx_haud.name}")</constraint>
+        </property>
+        <header>
+        /** AUD Driver on USB Instance. */
+        </header>
+        <includes>
+#include "ux_host_class_audio.h"
+        </includes>
+        <declarations>
+        </declarations>
+        <functions>
+        </functions>
+        <api configurable="true">
+        </api>
+    </module>
+</raModuleDescription>

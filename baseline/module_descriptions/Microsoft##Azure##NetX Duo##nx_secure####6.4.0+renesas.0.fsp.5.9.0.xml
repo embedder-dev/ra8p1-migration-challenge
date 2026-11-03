@@ -1,0 +1,101 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<raModuleDescription>
+    <config id="config.azure.nxd_nx_secure" path="fsp_cfg/azure/nxd/nx_secure_user.h" version="0">
+        <property default="config.azure.nxd_nx_secure.allow_self_signed_cert.Disable" display="Self Signed Certificates" id="config.azure.nxd_nx_secure.allow_self_signed_cert" description="This option allows TLS to accept self-signed certificates from a remote host. By default, TLS will reject self-signed server certificates as a security precaution. If this macro is defined, self-signed certificates must still be added to the trusted store to be accepted.">
+            <option display="Enable" id="config.azure.nxd_nx_secure.allow_self_signed_cert.Enable" value="#define NX_SECURE_ALLOW_SELF_SIGNED_CERTIFICATES"/>
+            <option display="Disable" id="config.azure.nxd_nx_secure.allow_self_signed_cert.Disable" value=""/>
+        </property>
+        <property default="config.azure.nxd_nx_secure.client_certificate_verify.Disable" display="Client Certificate Verify" id="config.azure.nxd_nx_secure.client_certificate_verify" description="This option enables the optional X.509 Client Certificate Verification for TLS Servers.">
+            <option display="Enable" id="config.azure.nxd_nx_secure.client_certificate_verify.Enable" value="#define NX_SECURE_ENABLE_CLIENT_CERTIFICATE_VERIFY"/>
+            <option display="Disable" id="config.azure.nxd_nx_secure.client_certificate_verify.Disable" value=""/>
+        </property>
+        <property default="config.azure.nxd_nx_secure.enable_aead_cipher.Disable" display="AEAD Cipher Suite" id="config.azure.nxd_nx_secure.enable_aead_cipher" description="This option enables AEAD ciphersuites">
+            <option display="Enable" id="config.azure.nxd_nx_secure.enable_aead_cipher.Enable" value="#define NX_SECURE_ENABLE_AEAD_CIPHER"/>
+            <option display="Disable" id="config.azure.nxd_nx_secure.enable_aead_cipher.Disable" value=""/>
+        </property>
+        <property default="config.azure.nxd_nx_secure.enable_psk_cipher.Disable" display="PSK Cipher Suite" id="config.azure.nxd_nx_secure.enable_psk_cipher" description="This option enables Pre-Shared Key (PSK) functionality. It does not disable digital certificates.">
+            <option display="Enable" id="config.azure.nxd_nx_secure.enable_psk_cipher.Enable" value="#define NX_SECURE_ENABLE_PSK_CIPHERSUITES"/>
+            <option display="Disable" id="config.azure.nxd_nx_secure.enable_psk_cipher.Disable" value=""/>
+        </property>
+        <property default="config.azure.nxd_nx_secure.enable_ecc_cipher.Enable" display="ECC Cipher Suite" id="config.azure.nxd_nx_secure.enable_ecc_cipher" description="When disabled, this option removes all TLS logic for Elliptic Curve Cryptography (ECC) ciphersuites. These ciphersuites are optional in TLS 1.2 and earlier and disabling them can result in significant code and data size reduction.">
+            <option display="Enable" id="config.azure.nxd_nx_secure.enable_ecc_cipher.Enable" value=""/>
+            <option display="Disable" id="config.azure.nxd_nx_secure.enable_ecc_cipher.Disable" value="#define NX_SECURE_DISABLE_ECC_CIPHERSUITE"/>
+        </property>
+        <property default="config.azure.nxd_nx_secure.x509_strict_name_compare.Disable" display="X509 Strict Name Compare" id="config.azure.nxd_nx_secure.x509_strict_name_compare" description="This option enables strict distinguished name comparison for X.509 certificates for certificate searching and verification. The default is to only compare the Common Name fields of the Distinguished Names.">
+            <option display="Enable" id="config.azure.nxd_nx_secure.x509_strict_name_compare.Enable" value="#define NX_SECURE_X509_STRICT_NAME_COMPARE"/>
+            <option display="Disable" id="config.azure.nxd_nx_secure.x509_strict_name_compare.Disable" value=""/>
+        </property>
+        <property default="config.azure.nxd_nx_secure.x509_extend_distinguished_name.Disable" display="X509 Extended Distinguished Names" id="config.azure.nxd_nx_secure.x509_extend_distinguished_name" description="This option enables the optional X.509 Distinguished Name fields, at the expense of extra memory use for X.509 certificates.">
+            <option display="Enable" id="config.azure.nxd_nx_secure.x509_extend_distinguished_name.Enable" value="#define NX_SECURE_X509_USE_EXTENDED_DISTINGUISHED_NAMES"/>
+            <option display="Disable" id="config.azure.nxd_nx_secure.x509_extend_distinguished_name.Disable" value=""/>
+        </property>
+        <property default="config.azure.nxd_nx_secure.enable_tls_v_1_3.Disable" display="TLS v1.3" id="config.azure.nxd_nx_secure.enable_tls_v_1_3" description="This option enables TLSv1.3 mode. TLS 1.3 is the newest version of TLS and is disabled by default.">
+            <option display="Enable" id="config.azure.nxd_nx_secure.enable_tls_v_1_3.Enable" value="#define NX_SECURE_TLS_ENABLE_TLS_1_3"/>
+            <option display="Disable" id="config.azure.nxd_nx_secure.enable_tls_v_1_3.Disable" value=""/>
+        </property>
+        <property default="config.azure.nxd_nx_secure.enable_legacy_tls_v_10.Disable" display="TLS v1.0" id="config.azure.nxd_nx_secure.enable_legacy_tls_v_10" description="This option enables the legacy TLSv1.0 mode. TLSv1.0 is considered obsolete so it should only be enabled for backward-compatibility with older applications.">
+            <option display="Enable" id="config.azure.nxd_nx_secure.enable_legacy_tls_v_10.Enable" value="#define NX_SECURE_TLS_ENABLE_TLS_1_0"/>
+            <option display="Disable" id="config.azure.nxd_nx_secure.enable_legacy_tls_v_10.Disable" value=""/>
+        </property>
+        <property default="config.azure.nxd_nx_secure.enable_legacy_tls_v_11.Disable" display="TLS v1.1 Legacy Mode" id="config.azure.nxd_nx_secure.enable_legacy_tls_v_11" description="This option enables the legacy TLSv1.1 mode. TLSv1.1 is considered obsolete so it should only be enabled for backward-compatibility with older applications.">
+            <option display="Enable" id="config.azure.nxd_nx_secure.enable_legacy_tls_v_11.Enable" value="#define NX_SECURE_TLS_ENABLE_TLS_1_1"/>
+            <option display="Disable" id="config.azure.nxd_nx_secure.enable_legacy_tls_v_11.Disable" value=""/>
+        </property>
+        <property default="config.azure.nxd_nx_secure.disable_tls_v_1_1_mode.Disable" display="TLS v1.1" id="config.azure.nxd_nx_secure.disable_tls_v_1_1_mode" description="This option disables TLSv1.1 mode. It is disabled by default. TLSv1.1 is disabled in favor of using only the more-secure TLSv1.2.">
+            <option display="Enable" id="config.azure.nxd_nx_secure.disable_tls_v_1_1_mode.Enable" value=""/>
+            <option display="Disable" id="config.azure.nxd_nx_secure.disable_tls_v_1_1_mode.Disable" value="#define NX_SECURE_TLS_DISABLE_TLS_1_1"/>
+        </property>
+        <property default="config.azure.nxd_nx_secure.disable_server.Enable" display="Server Mode" id="config.azure.nxd_nx_secure.disable_server" description="When disabled, this option removes all TLS stack code related to TLS Server mode, reducing code and data usage.">
+            <option display="Enable" id="config.azure.nxd_nx_secure.disable_server.Enable" value=""/>
+            <option display="Disable" id="config.azure.nxd_nx_secure.disable_server.Disable" value="#define NX_SECURE_TLS_SERVER_DISABLED"/>
+        </property>
+        <property default="config.azure.nxd_nx_secure.disable_client.Enable" display="Client Mode" id="config.azure.nxd_nx_secure.disable_client" description="When disabled, this option removes all TLS stack code related to TLS Client mode, reducing code and data usage.">
+            <option display="Enable" id="config.azure.nxd_nx_secure.disable_client.Enable" value=""/>
+            <option display="Disable" id="config.azure.nxd_nx_secure.disable_client.Disable" value="#define NX_SECURE_TLS_CLIENT_DISABLED"/>
+        </property>
+        <property default="config.azure.nxd_nx_secure.disable_error_checking.Enable" display="Error Checking" id="config.azure.nxd_nx_secure.disable_error_checking" description="When disabled, this option removes the basic NetX Secure error checking. It is typically used after the application has been debugged.">
+            <option display="Enable" id="config.azure.nxd_nx_secure.disable_error_checking.Enable" value=""/>
+            <option display="Disable" id="config.azure.nxd_nx_secure.disable_error_checking.Disable" value="#define NX_SECURE_DISABLE_ERROR_CHECKING"/>
+        </property>
+        <property default="config.azure.nxd_nx_secure.dtls.Disable" display="DTLS" id="config.azure.nxd_nx_secure.dtls" description="This option must be set to enable to enable DTLS logic in NetX Secure.">
+            <option display="Enable" id="config.azure.nxd_nx_secure.dtls.Enable" value="#define NX_SECURE_ENABLE_DTLS"/>
+            <option display="Disable" id="config.azure.nxd_nx_secure.dtls.Disable" value=""/>
+        </property>
+        <content>
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/* TLS Common Configuration. */
+${config.azure.nxd_nx_secure.disable_error_checking}
+${config.azure.nxd_nx_secure.allow_self_signed_cert}
+${config.azure.nxd_nx_secure.client_certificate_verify}
+${config.azure.nxd_nx_secure.enable_aead_cipher}
+${config.azure.nxd_nx_secure.enable_psk_cipher}
+${config.azure.nxd_nx_secure.enable_ecc_cipher}
+${config.azure.nxd_nx_secure.x509_strict_name_compare}
+${config.azure.nxd_nx_secure.x509_extend_distinguished_name}
+${config.azure.nxd_nx_secure.enable_tls_v_1_3}
+${config.azure.nxd_nx_secure.enable_legacy_tls_v_10}
+${config.azure.nxd_nx_secure.enable_legacy_tls_v_11}
+${config.azure.nxd_nx_secure.disable_tls_v_1_1_mode}
+${config.azure.nxd_nx_secure.disable_server}
+${config.azure.nxd_nx_secure.disable_client}
+${config.azure.nxd_nx_secure.dtls}
+
+#ifdef __cplusplus
+}
+#endif
+        </content>
+    </config>
+
+    <module config="config.azure.nxd_nx_secure" display="Security|Azure RTOS NetX Secure" id="module.azure.nxd_nx_secure" common="1" version="1" url="https://github.com/eclipse-threadx/rtos-docs/blob/main/rtos-docs/netx-duo/netx-duo-secure-tls/chapter1.md">
+        <constraint display="NetX Crypto must not be configured as standalone.">
+            ("${config.middleware.rm_netx_secure_crypto_sw_port.standalone}" === "config.middleware.rm_netx_secure_crypto_sw_port.standalone.disabled" || "${interface.middleware.rm_netx_secure_crypto_sw_port}" &lt; "1") &amp;&amp; ("${config.middleware.rm_netx_secure_crypto.standalone}" === "config.middleware.rm_netx_secure_crypto.standalone.disabled" || "${interface.middleware.rm_netx_secure_crypto}" &lt; "1")
+        </constraint>
+        <requires id="module.azure.nxd_nx_secure.requires.threadx" interface="interface.rtos.tx" visible="false" display="Requires ThreadX"/>
+        <requires id="module.azure.nxd_nx_secure.requires.nx_crypto" interface="interface.nx_crypto" visible="true" display="Add NetX Crypto" />
+        <requires id="module.azure.nxd_nx_secure.requires.nxd.common" interface="interface.azure.nxd.common" visible="true" display="Add NetX Duo Common" />
+        <provides interface="interface.nx_secure" />
+    </module>
+</raModuleDescription>

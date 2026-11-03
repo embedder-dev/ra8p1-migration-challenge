@@ -1,0 +1,369 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<raModuleDescription>
+    <config id="config.driver.gpt_three_phase" path="fsp_cfg/r_gpt_three_phase_cfg.h" version="0">
+        <property default="config.driver.gpt_three_phase.param_checking_enable.bsp" display="Parameter Checking" id="config.driver.gpt_three_phase.param_checking_enable" description="If selected code for parameter checking is included in the build.">
+            <option display="Default (BSP)" id="config.driver.gpt_three_phase.param_checking_enable.bsp" value="(BSP_CFG_PARAM_CHECKING_ENABLE)"/>
+            <option display="Enabled" id="config.driver.gpt_three_phase.param_checking_enable.enabled" value="(1)"/>
+            <option display="Disabled" id="config.driver.gpt_three_phase.param_checking_enable.disabled" value="(0)"/>
+        </property>
+        <content>
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#define GPT_THREE_PHASE_CFG_PARAM_CHECKING_ENABLE ${config.driver.gpt_three_phase.param_checking_enable}
+
+#ifdef __cplusplus
+}
+#endif
+        </content>
+    </config>
+    <module config="config.driver.gpt_three_phase" display="Timers|Three-Phase PWM (r_gpt_three_phase)" id="module.driver.three_phase_on_gpt_three_phase" version="1" url="group___g_p_t___t_h_r_e_e___p_h_a_s_e.html">
+        <constraint display="Requires GPT Pin Output Support Extra Features to be enabled">
+              ("${config.driver.gpt.output_support_enable}" === "config.driver.gpt.output_support_enable.enabled_extra") ||
+              !(testExists("${module.driver.three_phase.requires.gpt_u::module.driver.timer.name}") || 
+              testExists("${module.driver.three_phase.requires.gpt_v::module.driver.timer.name}") || 
+              testExists("${module.driver.three_phase.requires.gpt_w::module.driver.timer.name}"))
+        </constraint>
+        <constraint display="General|GPT U-Channel not available on selected MCU.">
+            ("${interface.mcu.gpt.${module.driver.three_phase.channel_u}}" === "1")
+        </constraint>
+        <constraint display="General|GPT V-Channel not available on selected MCU.">
+            ("${interface.mcu.gpt.${module.driver.three_phase.channel_v}}" === "1")
+        </constraint>
+        <constraint display="General|GPT W-Channel not available on selected MCU.">
+            ("${interface.mcu.gpt.${module.driver.three_phase.channel_w}}" === "1")
+        </constraint>
+        <constraint display="Unique name required for each instance">
+            ("${interface.driver.three_phase.${module.driver.three_phase.name}}" === "1")
+        </constraint>
+        <constraint display="Requires GPT Driver (U)">
+            testExists("${module.driver.three_phase.requires.gpt_u::module.driver.timer.name}")
+        </constraint>
+        <constraint display="Requires GPT Driver (V)">
+            testExists("${module.driver.three_phase.requires.gpt_v::module.driver.timer.name}")
+        </constraint>
+        <constraint display="Requires GPT Driver (W)">
+            testExists("${module.driver.three_phase.requires.gpt_w::module.driver.timer.name}")
+        </constraint>
+        <requires id="module.driver.three_phase.requires.gpt_u" interface="interface.driver.timer_on_gpt" find="true" display="Add GPT Driver (U) [Mandatory]">
+            <override property="module.driver.timer.mode" value="module.driver.timer.mode.${module.driver.three_phase.mode}"/>
+            <override property="module.driver.timer.channel" value="${module.driver.three_phase.channel_u}"/>
+            <override property="module.driver.timer.period" value="${module.driver.three_phase.period}"/>
+            <override property="module.driver.timer.unit" value="module.driver.timer.unit.${module.driver.three_phase.unit}"/>
+            <override property="module.driver.timer.dead_time_count_up" value="${module.driver.three_phase.dead_time_count_up}"/>
+            <override property="module.driver.timer.dead_time_count_down" value="${module.driver.three_phase.dead_time_count_down}"/>
+            <override property="module.driver.timer.gtioca_output_enabled" value="module.driver.timer.gtioca_output_enabled.true"/>
+            <override property="module.driver.timer.gtiocb_output_enabled" value="module.driver.timer.gtiocb_output_enabled.true"/>
+            <override property="module.driver.timer.gtioca_stop_level" value="module.driver.timer.gtioca_stop_level.${module.driver.three_phase.gtioca_stop_level}"/>
+            <override property="module.driver.timer.gtiocb_stop_level" value="module.driver.timer.gtiocb_stop_level.${module.driver.three_phase.gtiocb_stop_level}"/>
+            <override property="module.driver.timer.extra" value="module.driver.timer.extra.enabled"/>
+        </requires>
+        <requires id="module.driver.three_phase.requires.gpt_v" interface="interface.driver.timer_on_gpt" find="true" display="Add GPT Driver (V) [Mandatory]">
+            <override property="module.driver.timer.mode" value="module.driver.timer.mode.${module.driver.three_phase.mode}"/>
+            <override property="module.driver.timer.channel" value="${module.driver.three_phase.channel_v}"/>
+            <override property="module.driver.timer.period" value="${module.driver.three_phase.period}"/>
+            <override property="module.driver.timer.unit" value="module.driver.timer.unit.${module.driver.three_phase.unit}"/>
+            <override property="module.driver.timer.dead_time_count_up" value="${module.driver.three_phase.dead_time_count_up}"/>
+            <override property="module.driver.timer.dead_time_count_down" value="${module.driver.three_phase.dead_time_count_down}"/>
+            <override property="module.driver.timer.gtioca_output_enabled" value="module.driver.timer.gtioca_output_enabled.true"/>
+            <override property="module.driver.timer.gtiocb_output_enabled" value="module.driver.timer.gtiocb_output_enabled.true"/>
+            <override property="module.driver.timer.gtioca_stop_level" value="module.driver.timer.gtioca_stop_level.${module.driver.three_phase.gtioca_stop_level}"/>
+            <override property="module.driver.timer.gtiocb_stop_level" value="module.driver.timer.gtiocb_stop_level.${module.driver.three_phase.gtiocb_stop_level}"/>
+            <override property="module.driver.timer.extra" value="module.driver.timer.extra.enabled"/>
+        </requires>
+        <requires id="module.driver.three_phase.requires.gpt_w" interface="interface.driver.timer_on_gpt" find="true" display="Add GPT Driver (W) [Mandatory]">
+            <override property="module.driver.timer.mode" value="module.driver.timer.mode.${module.driver.three_phase.mode}"/>
+            <override property="module.driver.timer.channel" value="${module.driver.three_phase.channel_w}"/>
+            <override property="module.driver.timer.period" value="${module.driver.three_phase.period}"/>
+            <override property="module.driver.timer.unit" value="module.driver.timer.unit.${module.driver.three_phase.unit}"/>
+            <override property="module.driver.timer.dead_time_count_up" value="${module.driver.three_phase.dead_time_count_up}"/>
+            <override property="module.driver.timer.dead_time_count_down" value="${module.driver.three_phase.dead_time_count_down}"/>
+            <override property="module.driver.timer.gtioca_output_enabled" value="module.driver.timer.gtioca_output_enabled.true"/>
+            <override property="module.driver.timer.gtiocb_output_enabled" value="module.driver.timer.gtiocb_output_enabled.true"/>
+            <override property="module.driver.timer.gtioca_stop_level" value="module.driver.timer.gtioca_stop_level.${module.driver.three_phase.gtioca_stop_level}"/>
+            <override property="module.driver.timer.gtiocb_stop_level" value="module.driver.timer.gtiocb_stop_level.${module.driver.three_phase.gtiocb_stop_level}"/>
+            <override property="module.driver.timer.extra" value="module.driver.timer.extra.enabled"/>
+        </requires>
+        <provides interface="interface.driver.three_phase" />
+        <provides interface="interface.driver.three_phase.${module.driver.three_phase.name}" />
+
+        <!-- Module Name -->
+        <property default="g_three_phase${_instance}" display="General|Name" id="module.driver.three_phase.name" description="Module name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.three_phase.name}")</constraint>
+        </property>
+
+        <!-- General Settings -->
+        <property default="module.driver.three_phase.mode.mode_symmetric_pwm" display="General|Mode" id="module.driver.three_phase.mode" description="Mode selection.\nTriangle-Wave Symmetric PWM: Generates symmetric PWM waveforms with duty cycle determined by compare match set during a crest interrupt and updated at the next trough.\nTriangle-Wave Asymmetric PWM: Generates asymmetric PWM waveforms with duty cycle determined by compare match set during a crest/trough interrupt and updated at the next trough/crest.">
+            <option display="Triangle-Wave Symmetric PWM" id="module.driver.three_phase.mode.mode_symmetric_pwm" value="mode_symmetric_pwm"/>
+            <option display="Triangle-Wave Asymmetric PWM" id="module.driver.three_phase.mode.mode_asymmetric_pwm" value="mode_asymmetric_pwm"/>
+            <option display="Triangle-Wave Asymmetric PWM (Mode 3)" id="module.driver.three_phase.mode.mode_asymmetric_pwm_mode3" value="mode_asymmetric_pwm_mode3"/>
+        </property>
+        <property default="15" display="General|Period" id="module.driver.three_phase.period" description="Specify the timer period in units selected below. Setting the period to 0x100000000 raw counts results in the maximum period. Set the period to 0x100000000 raw counts for a free running timer or an input capture configuration.  The period can be set up to 0x40000000000, which will use a divider of 1024 with the maximum period.\n\nIf the requested period cannot be achieved, the settings with the largest possible period that is less than or equal to the requested period are used. The theoretical calculated period is printed in a comment in the generated timer_cfg_t structures for each timer.">
+            <constraint display="Value must be a non-negative integer less than or equal to 0x40000000000">testInteger("${module.driver.three_phase.period}") &amp;&amp; ("${module.driver.three_phase.period}" &gt;= 0) &amp;&amp; ("${module.driver.three_phase.period}" &lt;= 0x40000000000)</constraint>
+        </property>
+        <property default="module.driver.three_phase.unit.unit_frequency_khz" display="General|Period Unit" id="module.driver.three_phase.unit" description="Unit of the period specified above">
+            <option display="Raw Counts" id="module.driver.three_phase.unit.unit_period_raw_counts" value="unit_period_raw_counts"/>
+            <option display="Nanoseconds" id="module.driver.three_phase.unit.unit_period_nsec" value="unit_period_nsec"/>
+            <option display="Microseconds" id="module.driver.three_phase.unit.unit_period_usec" value="unit_period_usec"/>
+            <option display="Milliseconds" id="module.driver.three_phase.unit.unit_period_msec" value="unit_period_msec"/>
+            <option display="Seconds" id="module.driver.three_phase.unit.unit_period_sec" value="unit_period_sec"/>
+            <option display="Hertz" id="module.driver.three_phase.unit.unit_frequency_hz" value="unit_frequency_hz"/>
+            <option display="Kilohertz" id="module.driver.three_phase.unit.unit_frequency_khz" value="unit_frequency_khz"/>
+        </property>
+        <property default="0" display="General|GPT U-Channel" id="module.driver.three_phase.channel_u" description="Specify the GPT channel for U signal output.">
+            <constraint display="Value must be an integer greater than or equal to 0">testInteger("${module.driver.three_phase.channel_u}")  &amp;&amp; ("${module.driver.three_phase.channel_u}" &gt;= 0)</constraint>
+        </property>
+        <property default="1" display="General|GPT V-Channel" id="module.driver.three_phase.channel_v" description="Specify the GPT channel for V signal output.">
+            <constraint display="Value must be an integer greater than or equal to 0">testInteger("${module.driver.three_phase.channel_v}")  &amp;&amp; ("${module.driver.three_phase.channel_v}" &gt;= 0)</constraint>
+        </property>
+        <property default="2" display="General|GPT W-Channel" id="module.driver.three_phase.channel_w" description="Specify the GPT channel for W signal output.">
+            <constraint display="Value must be an integer greater than or equal to 0">testInteger("${module.driver.three_phase.channel_w}")  &amp;&amp; ("${module.driver.three_phase.channel_w}" &gt;= 0)</constraint>
+        </property>
+        <property default="module.driver.three_phase.callback_ch.u" display="General|Callback Channel" id="module.driver.three_phase.callback_ch" description="Specify the GPT channel to set a callback for when using R_GPT_THREE_PHASE_CallbackSet.">
+            <option display="U-Channel" id="module.driver.three_phase.callback_ch.u" value="THREE_PHASE_CHANNEL_U"/>
+            <option display="V-Channel" id="module.driver.three_phase.callback_ch.v" value="THREE_PHASE_CHANNEL_V"/>
+            <option display="W-Channel" id="module.driver.three_phase.callback_ch.w" value="THREE_PHASE_CHANNEL_W"/>
+        </property>
+        <property default="module.driver.three_phase.buffer_mode.single" display="General|Buffer Mode" id="module.driver.three_phase.buffer_mode" description="When Double Buffer is selected the 'duty_buffer' array in three_phase_duty_cycle_t is used as a buffer for the 'duty' array. This allows setting the duty cycle for the next two crest/trough events in asymmetric mode with only one call to R_GPT_THREE_PHASE_DutyCycleSet.">
+            <option display="Single Buffer" id="module.driver.three_phase.buffer_mode.single" value="(THREE_PHASE_BUFFER_MODE_SINGLE)"/>
+            <option display="Double Buffer" id="module.driver.three_phase.buffer_mode.double" value="(THREE_PHASE_BUFFER_MODE_DOUBLE)"/>
+        </property>
+        <property default="module.driver.three_phase.gtioca_stop_level.pin_level_low" display="General|GTIOCA Stop Level" id="module.driver.three_phase.gtioca_stop_level" description="Select the behavior of the output pin when the timer is stopped.">
+            <option display="Pin Level Low" id="module.driver.three_phase.gtioca_stop_level.pin_level_low" value="pin_level_low"/>
+            <option display="Pin Level High" id="module.driver.three_phase.gtioca_stop_level.pin_level_high" value="pin_level_high"/>
+        </property>
+        <property default="module.driver.three_phase.gtiocb_stop_level.pin_level_low" display="General|GTIOCB Stop Level" id="module.driver.three_phase.gtiocb_stop_level" description="Select the behavior of the output pin when the timer is stopped.">
+            <option display="Pin Level Low" id="module.driver.three_phase.gtiocb_stop_level.pin_level_low" value="pin_level_low"/>
+            <option display="Pin Level High" id="module.driver.three_phase.gtiocb_stop_level.pin_level_high" value="pin_level_high"/>
+        </property>
+
+        <!-- Dead time settings -->
+        <property default="0" display="Extra Features|Dead Time|Dead Time Count Up (Raw Counts)" id="module.driver.three_phase.dead_time_count_up" description="Select the dead time to apply during up counting. This value also applies during down counting for the GPT32 and GPT16 variants.">
+            <constraint display="Must be a valid non-negative integer with a maximum configurable value of 4294967295 (0xffffffff).">testInteger("${module.driver.three_phase.dead_time_count_up}")  &amp;&amp; ("${module.driver.three_phase.dead_time_count_up}" &gt;= 0) &amp;&amp; ("${module.driver.three_phase.dead_time_count_up}" &lt;= 4294967295)</constraint>
+        </property>
+        <property default="0" display="Extra Features|Dead Time|Dead Time Count Down (Raw Counts) (GPTE/GPTEH only)" id="module.driver.three_phase.dead_time_count_down" description="Select the dead time to apply during down counting. This value only applies to the GPT32E and GPT32EH variants.">
+            <constraint display="Must be a valid non-negative integer with a maximum configurable value of 4294967295 (0xffffffff).">testInteger("${module.driver.three_phase.dead_time_count_down}")  &amp;&amp; ("${module.driver.three_phase.dead_time_count_down}" &gt;= 0) &amp;&amp; ("${module.driver.three_phase.dead_time_count_down}" &lt;= 4294967295)</constraint>
+        </property>
+
+        <!-- Contents -->
+        <symbol id="symbol.driver.three_phase.name" value="${module.driver.three_phase.name}"/>
+        <symbol id="symbol.driver.three_phase.guard.open" value="${module.driver.three_phase.name}_open_guard"/>
+        <symbol id="symbol.driver.three_phase.guard.macro.open" value="FSP_GUARD_${module.driver.three_phase.name}_R_GPT_THREE_PHASE_Open"/>
+        <symbol id="symbol.driver.three_phase.guard.stop" value="${module.driver.three_phase.name}_stop_guard"/>
+        <symbol id="symbol.driver.three_phase.guard.macro.stop" value="FSP_GUARD_${module.driver.three_phase.name}_R_GPT_THREE_PHASE_Stop"/>
+        <symbol id="symbol.driver.three_phase.guard.start" value="${module.driver.three_phase.name}_start_guard"/>
+        <symbol id="symbol.driver.three_phase.guard.macro.start" value="FSP_GUARD_${module.driver.three_phase.name}_R_GPT_THREE_PHASE_Start"/>
+        <symbol id="symbol.driver.three_phase.guard.reset" value="${module.driver.three_phase.name}_reset_guard"/>
+        <symbol id="symbol.driver.three_phase.guard.macro.reset" value="FSP_GUARD_${module.driver.three_phase.name}_R_GPT_THREE_PHASE_Reset"/>
+        <symbol id="symbol.driver.three_phase.guard.duty_cycle_set" value="${module.driver.three_phase.name}_duty_cycle_set_guard"/>
+        <symbol id="symbol.driver.three_phase.guard.macro.duty_cycle_set" value="FSP_GUARD_${module.driver.three_phase.name}_R_GPT_THREE_PHASE_DutyCycleSet"/>
+        <symbol id="symbol.driver.three_phase.guard.callback_set" value="${module.driver.three_phase.name}_callback_set_guard"/>
+        <symbol id="symbol.driver.three_phase.guard.macro.callback_set" value="FSP_GUARD_${module.driver.three_phase.name}_R_GPT_THREE_PHASE_CallbackSet"/>
+        <symbol id="symbol.driver.three_phase.guard.close" value="${module.driver.three_phase.name}_close_guard"/>
+        <symbol id="symbol.driver.three_phase.guard.macro.close" value="FSP_GUARD_${module.driver.three_phase.name}_R_GPT_THREE_PHASE_Close"/>
+        <symbol id="symbol.driver.three_phase.nsc_api" value="${module.driver.three_phase.name}_nsc_api"/>
+        <symbol id="symbol.driver.three_phase.cfg" value="${module.driver.three_phase.name}_cfg"/>
+        <symbol id="symbol.driver.three_phase.ctrl" value="${module.driver.three_phase.name}_ctrl"/>
+        <header>
+/** GPT Three-Phase Instance. */
+extern const three_phase_instance_t ${module.driver.three_phase.name};
+
+/** Access the GPT Three-Phase instance using these structures when calling API functions directly (::p_api is not used). */
+extern gpt_three_phase_instance_ctrl_t ${module.driver.three_phase.name}_ctrl;
+extern const three_phase_cfg_t ${module.driver.three_phase.name}_cfg;
+        </header>
+        <includes>
+            #include &quot;r_gpt_three_phase.h&quot;
+            #include &quot;r_three_phase_api.h&quot;
+        </includes>
+        <macros>
+        </macros>
+        <declarations>
+gpt_three_phase_instance_ctrl_t ${module.driver.three_phase.name}_ctrl;
+const three_phase_cfg_t ${module.driver.three_phase.name}_cfg =
+{
+    .buffer_mode         = ${module.driver.three_phase.buffer_mode},
+    .p_timer_instance    =
+    {
+        &amp;${module.driver.three_phase.requires.gpt_u::module.driver.timer.name},
+        &amp;${module.driver.three_phase.requires.gpt_v::module.driver.timer.name},
+        &amp;${module.driver.three_phase.requires.gpt_w::module.driver.timer.name}
+    },
+    .callback_ch         = ${module.driver.three_phase.callback_ch},
+    .channel_mask        = (1 &lt;&lt; ${module.driver.three_phase.requires.gpt_u::module.driver.timer.channel}) | (1 &lt;&lt; ${module.driver.three_phase.requires.gpt_v::module.driver.timer.channel}) | (1 &lt;&lt; ${module.driver.three_phase.requires.gpt_w::module.driver.timer.channel}),
+    .p_context           = NULL,
+    .p_extend            = NULL,
+};
+/* Instance structure to use this module. */
+const three_phase_instance_t ${module.driver.three_phase.name} =
+{
+    .p_ctrl        = &amp;${module.driver.three_phase.name}_ctrl,
+    .p_cfg         = &amp;${module.driver.three_phase.name}_cfg,
+    .p_api         = &amp;g_gpt_three_phase_on_gpt_three_phase
+};
+        </declarations>
+        <guard>
+            <header>
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.three_phase.name}_open_guard(three_phase_ctrl_t *const p_ctrl, three_phase_cfg_t const *const p_cfg);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.three_phase.name}_stop_guard(three_phase_ctrl_t *const p_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.three_phase.name}_start_guard(three_phase_ctrl_t *const p_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.three_phase.name}_reset_guard(three_phase_ctrl_t *const p_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.three_phase.name}_duty_cycle_set_guard(three_phase_ctrl_t *const p_ctrl, three_phase_duty_cycle_t *const p_duty_cycle);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.three_phase.name}_callback_set_guard(three_phase_ctrl_t *const p_ctrl, void(*p_callback)(timer_callback_args_t *), void const *const p_context, timer_callback_args_t *const p_callback_memory);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.three_phase.name}_close_guard(three_phase_ctrl_t *const p_ctrl);
+
+            </header>
+            <template name="${module.driver.three_phase.name}_guard.c">
+                <![CDATA[
+                    #include "guard.h"
+
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.three_phase.name}_open_guard (three_phase_ctrl_t *const p_ctrl, three_phase_cfg_t const *const p_cfg)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+    FSP_PARAMETER_NOT_USED(p_cfg);
+
+    return R_GPT_THREE_PHASE_Open(&${module.driver.three_phase.name}_ctrl, &${module.driver.three_phase.name}_cfg);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.three_phase.name}_stop_guard (three_phase_ctrl_t *const p_ctrl)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+
+    return R_GPT_THREE_PHASE_Stop(&${module.driver.three_phase.name}_ctrl);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.three_phase.name}_start_guard (three_phase_ctrl_t *const p_ctrl)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+
+    return R_GPT_THREE_PHASE_Start(&${module.driver.three_phase.name}_ctrl);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.three_phase.name}_reset_guard (three_phase_ctrl_t *const p_ctrl)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+
+    return R_GPT_THREE_PHASE_Reset(&${module.driver.three_phase.name}_ctrl);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.three_phase.name}_duty_cycle_set_guard (three_phase_ctrl_t *const p_ctrl, three_phase_duty_cycle_t *const p_duty_cycle)
+{
+    /* Verify all pointers are in non-secure memory. */
+    three_phase_duty_cycle_t *const p_duty_cycle_checked = cmse_check_pointed_object(p_duty_cycle, CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_duty_cycle_checked != NULL);
+
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+
+    return R_GPT_THREE_PHASE_DutyCycleSet(&${module.driver.three_phase.name}_ctrl, p_duty_cycle_checked);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.three_phase.name}_callback_set_guard (three_phase_ctrl_t *const p_ctrl, void(*p_callback)(timer_callback_args_t *), void const *const p_context, timer_callback_args_t *const p_callback_memory)
+{
+    /* Verify all pointers are in non-secure memory. */
+    void(*p_callback_checked)(timer_callback_args_t *) = (void(*)(timer_callback_args_t *)) cmse_check_address_range((void *) p_callback, sizeof(void *), CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_callback_checked != NULL);
+    timer_callback_args_t *const p_callback_memory_checked = cmse_check_pointed_object(p_callback_memory, CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_callback_memory_checked != NULL);
+
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+    FSP_PARAMETER_NOT_USED(p_context);
+
+    return R_GPT_THREE_PHASE_CallbackSet(&${module.driver.three_phase.name}_ctrl, p_callback_checked, p_context, p_callback_memory_checked);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.three_phase.name}_close_guard (three_phase_ctrl_t *const p_ctrl)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+
+    return R_GPT_THREE_PHASE_Close(&${module.driver.three_phase.name}_ctrl);
+}
+
+                ]]>
+            </template>
+        </guard>
+        <nsc>
+            <header>
+
+#define FSP_GUARD_${module.driver.three_phase.name}_R_GPT_THREE_PHASE_Open() ${module.driver.three_phase.name}_open_guard(FSP_SECURE_ARGUMENT, FSP_SECURE_ARGUMENT)
+
+#define FSP_GUARD_${module.driver.three_phase.name}_R_GPT_THREE_PHASE_Stop() ${module.driver.three_phase.name}_stop_guard(FSP_SECURE_ARGUMENT)
+
+#define FSP_GUARD_${module.driver.three_phase.name}_R_GPT_THREE_PHASE_Start() ${module.driver.three_phase.name}_start_guard(FSP_SECURE_ARGUMENT)
+
+#define FSP_GUARD_${module.driver.three_phase.name}_R_GPT_THREE_PHASE_Reset() ${module.driver.three_phase.name}_reset_guard(FSP_SECURE_ARGUMENT)
+
+#define FSP_GUARD_${module.driver.three_phase.name}_R_GPT_THREE_PHASE_DutyCycleSet(p_duty_cycle) ${module.driver.three_phase.name}_duty_cycle_set_guard(FSP_SECURE_ARGUMENT, p_duty_cycle)
+
+#define FSP_GUARD_${module.driver.three_phase.name}_R_GPT_THREE_PHASE_CallbackSet(p_callback, p_context, p_callback_memory) ${module.driver.three_phase.name}_callback_set_guard(FSP_SECURE_ARGUMENT, p_callback, p_context, p_callback_memory)
+
+#define FSP_GUARD_${module.driver.three_phase.name}_R_GPT_THREE_PHASE_Close() ${module.driver.three_phase.name}_close_guard(FSP_SECURE_ARGUMENT)
+
+
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.three_phase.name}_open_guard(three_phase_ctrl_t *const p_ctrl, three_phase_cfg_t const *const p_cfg);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.three_phase.name}_stop_guard(three_phase_ctrl_t *const p_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.three_phase.name}_start_guard(three_phase_ctrl_t *const p_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.three_phase.name}_reset_guard(three_phase_ctrl_t *const p_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.three_phase.name}_duty_cycle_set_guard(three_phase_ctrl_t *const p_ctrl, three_phase_duty_cycle_t *const p_duty_cycle);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.three_phase.name}_callback_set_guard(three_phase_ctrl_t *const p_ctrl, void(*p_callback)(timer_callback_args_t *), void const *const p_context, timer_callback_args_t *const p_callback_memory);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.three_phase.name}_close_guard(three_phase_ctrl_t *const p_ctrl);
+
+
+extern const three_phase_instance_t ${module.driver.three_phase.name};
+            </header>
+            <declarations>
+                <![CDATA[
+static const three_phase_api_t ${module.driver.three_phase.name}_nsc_api =
+{
+    .open = ${module.driver.three_phase.name}_open_guard,
+    .stop = ${module.driver.three_phase.name}_stop_guard,
+    .start = ${module.driver.three_phase.name}_start_guard,
+    .reset = ${module.driver.three_phase.name}_reset_guard,
+    .dutyCycleSet = ${module.driver.three_phase.name}_duty_cycle_set_guard,
+    .callbackSet = ${module.driver.three_phase.name}_callback_set_guard,
+    .close = ${module.driver.three_phase.name}_close_guard,
+};
+const three_phase_instance_t ${module.driver.three_phase.name} =
+{
+    .p_api = &${module.driver.three_phase.name}_nsc_api,
+    .p_ctrl = FSP_SECURE_ARGUMENT,
+    .p_cfg = FSP_SECURE_ARGUMENT,
+};
+                ]]>
+            </declarations>
+        </nsc>
+        <api configurable="true">
+            <file>ra/fsp/inc/instances/r_gpt_three_phase.h</file>
+            <file>ra/fsp/inc/api/r_three_phase_api.h</file>
+        </api>
+    </module>
+</raModuleDescription>

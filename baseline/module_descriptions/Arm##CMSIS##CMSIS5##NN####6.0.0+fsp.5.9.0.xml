@@ -1,0 +1,10 @@
+<?xml version="1.0" ?>
+<raModuleDescription>
+    <module id="module.arm.cmsis5.nn" display="AI|Arm CMSIS NN Library Source" common="1" version="0" url="https://arm-software.github.io/CMSIS-NN/latest/index.html">
+        <requires id="module.arm.cmsis5.nn.requires.dsp" interface="interface.cmsis5.dsp" display="Add CMSIS DSP" find="true"/>
+        <provides interface="interface.cmsis5.nn" />
+        <includes>
+#include &quot;arm_nnfunctions.h&quot;
+        </includes>
+    </module>
+</raModuleDescription>

@@ -1,0 +1,67 @@
+﻿<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.driver.usbx_paud" path="fsp_cfg/r_usb_paud_cfg.h" version="0">
+        <property id="config.driver.usbx_paud.iso_in" display="Isochronous In Pipe" default="config.driver.usbx_paud.iso_in.pipe1" description="Select the USB pipe to use for isochronous input transfers.">
+            <option id="config.driver.usbx_paud.iso_in.pipe1" display="USB PIPE1" value="USB_PIPE1"/>
+            <option id="config.driver.usbx_paud.iso_in.pipe2" display="USB PIPE2" value="USB_PIPE2"/>
+        </property>
+        <property id="config.driver.usbx_paud.iso_out" display="Isochronous Out Pipe" default="config.driver.usbx_paud.iso_out.pipe2" description="Select the USB pipe to use for isochronous output transfers.">
+            <option id="config.driver.usbx_paud.iso_out.pipe1" display="USB PIPE1" value="USB_PIPE1"/>
+            <option id="config.driver.usbx_paud.iso_out.pipe2" display="USB PIPE2" value="USB_PIPE2"/>
+        </property>
+        <content>
+            #ifdef __cplusplus
+            extern "C" {
+            #endif
+
+            #define USB_CFG_PAUD_ISO_IN (${config.driver.usbx_paud.iso_in})
+            #define USB_CFG_PAUD_ISO_OUT (${config.driver.usbx_paud.iso_out})
+
+            #ifdef __cplusplus
+            }
+            #endif
+        </content>
+    </config>
+    <module config="config.driver.usbx_paud" display="Connectivity|Azure RTOS USBX PAUD" id="module.driver.usbx_paud" version="1" url="https://github.com/eclipse-threadx/rtos-docs/blob/main/rtos-docs/usbx/index.md">
+        <constraint display="Unique name required for each instance">
+            "${interface.driver.usbx_paud.${module.driver.usbx_paud.name}}" === "1"
+        </constraint>
+        <constraint display="Requires USB Peripheral">
+          "${interface.mcu.usb_fs.external}" === "1"
+        </constraint>
+        <constraint display="The USB pipe number for Isochronous Input and Isochronous Output must be different.">
+            !(("${config.driver.usbx_paud.iso_in}" === "config.driver.usbx_paud.iso_in.pipe1") &amp;&amp;
+            ("${config.driver.usbx_paud.iso_out}" === "config.driver.usbx_paud.iso_out.pipe1"))
+        </constraint>
+        <constraint display="The USB pipe number for Isochronous Input and Isochronous Output must be different.">
+            !(("${config.driver.usbx_paud.iso_in}" === "config.driver.usbx_paud.iso_in.pipe2") &amp;&amp;
+            ("${config.driver.usbx_paud.iso_out}" === "config.driver.usbx_paud.iso_out.pipe2"))
+        </constraint>
+        <requires id="module.azure.usbx_paud.requires.threadx" interface="interface.rtos.tx" visible="false" display="Requires ThreadX"/>
+        <requires id="module.driver.usbx_paud.requires.usb_basic" interface="interface.middleware.rm_usbx_port" visible="true" display="USBX PAUD">
+            <override property="module.middleware.rm_usbx_port.usb_mode" value="module.middleware.rm_usbx_port.usb_mode.peri"/>
+            <override property="module.middleware.rm_usbx_port.usb_classtype" value="module.middleware.rm_usbx_port.usb_classtype.paud"/>
+            <override property="module.middleware.rm_usbx_port.p_usb_reg" value="NULL"/>
+        </requires>
+        <provides interface="interface.driver.usbx_paud" />
+        <provides interface="interface.driver.usbx_paud.${module.driver.usbx_paud.name}" />
+        <property default="usbx_paud" id="module.driver.usbx_paud.usbx_paud_interface" description=""/>
+        <property default="g_usbx_paud${_instance}" display="Name" id="module.driver.usbx_paud.name" description="Module name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.usbx_paud.name}")</constraint>
+        </property>
+        <header>
+        /** AUD Driver on USB Instance. */
+        </header>
+        <includes>
+#include "ux_device_class_audio.h"
+#include "ux_device_class_audio10.h"
+#include "ux_device_class_audio20.h"
+        </includes>
+        <declarations>
+        </declarations>
+        <functions>
+        </functions>
+        <api configurable="true">
+        </api>
+    </module>
+</raModuleDescription>

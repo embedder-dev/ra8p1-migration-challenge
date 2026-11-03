@@ -1,0 +1,19 @@
+<?xml version="1.0" ?>
+<raModuleDescription>
+    <module id="module.aws.sockets_wrapper.cellular" display="Networking|AWS Cellular Sockets Wrapper" common="1" version="0" visible="false" url="https://docs.aws.amazon.com/embedded-csdk/latest/lib-ref/libraries/standard/coreMQTT/docs/doxygen/output/html/mqtt_transport_interface.html">
+        <requires id="module.aws.sockets_wrapper.cellular.requires.awsfreertos" interface="interface.rtos.awsfreertos" visible="false" display="Requires FreeRTOS"/>
+        <requires id="module.aws.sockets_wrapper.cellular.requires.cellular_interface" interface="interface.aws.cellular_interface" display="Add Cellular Interface" find="true"/>
+        <requires id="module.aws.sockets_wrapper.cellular.requires.mbedtls_bio.cellular" interface="interface.aws.mbedtls_bio.plus_tcp" display="Add MbedTLS Bio" find="true" />
+        <provides interface="interface.aws.sockets_wrapper" />
+        <provides interface="interface.aws.sockets_wrapper.cellular" />
+        <property default="1" display="Cellular Context ID" id="module.aws.sockets_wrapper.cellular.context_id" description="Modem context ID to use for sockets.">
+            <constraint display="Value must be a positive integer">("${module.aws.sockets_wrapper.cellular.context_id}" &gt; 0) </constraint>
+        </property>
+        <includes>
+#include "tcp_sockets_wrapper.h"
+        </includes>
+        <declarations>
+uint8_t CellularSocketPdnContextId = ${module.aws.sockets_wrapper.cellular.context_id};
+        </declarations>
+    </module>
+</raModuleDescription>

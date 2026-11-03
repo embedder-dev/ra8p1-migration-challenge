@@ -1,0 +1,251 @@
+﻿<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.middleware.motor_return_origin" path="fsp_cfg/rm_motor_return_origin_cfg.h" version="0">
+        <property default="config.middleware.motor_return_origin.param_checking_enable.bsp" display="Parameter Checking" id="config.middleware.motor_return_origin.param_checking_enable" description="If selected code for parameter checking is included in the build.">
+            <option display="Default (BSP)" id="config.middleware.motor_return_origin.param_checking_enable.bsp" value="(BSP_CFG_PARAM_CHECKING_ENABLE)"/>
+            <option display="Enabled" id="config.middleware.motor_return_origin.param_checking_enable.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.motor_return_origin.param_checking_enable.disabled" value="(0)"/>
+        </property>
+
+        <content>
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#define MOTOR_RETURN_ORIGIN_CFG_PARAM_CHECKING_ENABLE   ${config.middleware.motor_return_origin.param_checking_enable}
+
+#ifdef __cplusplus
+}
+#endif
+        </content>
+    </config>
+    <module config="config.middleware.motor_return_origin" display="Motor| Motor return origin function (rm_motor_return_origin)" id="module.middleware.motor_return_origin" version="1" url="group___m_o_t_o_r___r_e_t_u_r_n___o_r_i_g_i_n.html">
+        <constraint display="Unique name required for each instance">
+            ("${interface.middleware.motor_return_origin.${module.middleware.motor_return_origin.name}}" === "1")
+        </constraint>
+
+        <!-- motor_return_origin configuration -->
+        <provides interface="interface.middleware.motor_return_origin" />
+        <provides interface="interface.middleware.motor_return_origin.${module.middleware.motor_return_origin.name}" />
+
+        <!-- Module Name -->
+        <property default="g_motor_return_origin${_instance}" display="General|Name" id="module.middleware.motor_return_origin.name" description="Module name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.middleware.motor_return_origin.name}")</constraint>
+        </property>
+
+        <!-- General Settings -->
+        <property display="General|Using mode" id="module.middleware.motor_return_origin.mode" default="module.middleware.motor_return_origin.mode.return_push" description="Select using mode">
+            <option id="module.middleware.motor_return_origin.mode.return_push" display="Search by pushing" value="MOTOR_RETURN_ORIGIN_MODE_PUSH" />
+        </property>
+
+        <property display="Search speed (rpm)" id="module.middleware.motor_return_origin.search_speed" default="10.0" description="Speed to search origin position (rpm)">
+            <constraint display="Must be a valid non-negative value.">
+            eval('' +
+            'var input = "${module.middleware.motor_return_origin.search_speed}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?$","i");' +
+            'var regex_float_with_suffix = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?F$","i");' +
+            ' ( regex_float.test(input) || regex_float_with_suffix.test(input))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${module.middleware.motor_return_origin.search_speed}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)$","i");' +
+            'if (regex_float.test(output)){' +
+            'output = output + "F";' +
+            '}' +
+            'output')
+            </export>
+        </property>
+        <property display="Acceleration of speed (rpm/sec)" id="module.middleware.motor_return_origin.return_accel" default="10000.0" description="Acceleration of rotation speed at return moving (rpm/sec)">
+            <constraint display="Must be set 1 to 10000.">
+            eval('' +
+            'var input = "${module.middleware.motor_return_origin.return_accel}";' +
+            'var regex_float = RegExp("^([1-9][0-9]{0,3}([.]{1}[0-9]+)?|10000([.]{1}0+)?)$","i");' +
+            'var regex_float_with_suffix = RegExp("^([1-9][0-9]{0,3}([.]{1}[0-9]+)?|10000([.]{1}0+)?)F$","i");' +
+            ' ( regex_float.test(input) || regex_float_with_suffix.test(input))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${module.middleware.motor_return_origin.return_accel}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)$","i");' +
+            'if (regex_float.test(output)){' +
+            'output = output + "F";' +
+            '}' +
+            'output')
+            </export>
+        </property>
+        <property display="Cyclic period of speed control (sec)" id="module.middleware.motor_return_origin.spd_ctrl_period" default="0.0005" description="Cyclic period of speed control (sec)">
+            <constraint display="Must be a valid non-negative value.">
+            eval('' +
+            'var input = "${module.middleware.motor_return_origin.spd_ctrl_period}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?$","i");' +
+            'var regex_float_with_suffix = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?F$","i");' +
+            ' ( regex_float.test(input) || regex_float_with_suffix.test(input))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${module.middleware.motor_return_origin.spd_ctrl_period}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)$","i");' +
+            'if (regex_float.test(output)){' +
+            'output = output + "F";' +
+            '}' +
+            'output')
+            </export>
+        </property>
+        <property display="Maximum current (A)" id="module.middleware.motor_return_origin.max_current" default="1.8" description="Maximum current (A). Please set to match used motor.">
+            <constraint display="Must be a valid non-negative value.">
+            eval('' +
+            'var input = "${module.middleware.motor_return_origin.max_current}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?$","i");' +
+            'var regex_float_with_suffix = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?F$","i");' +
+            ' ( regex_float.test(input) || regex_float_with_suffix.test(input))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${module.middleware.motor_return_origin.max_current}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)$","i");' +
+            'if (regex_float.test(output)){' +
+            'output = output + "F";' +
+            '}' +
+            'output')
+            </export>
+        </property>
+        <property display="Percentage of current to judge pushing (%)" id="module.middleware.motor_return_origin.current_limit" default="30.0" description="Perentage of current to judge pushing (%)">
+            <constraint display="Must be a valid non-negative value.">
+            eval('' +
+            'var input = "${module.middleware.motor_return_origin.current_limit}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?$","i");' +
+            'var regex_float_with_suffix = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?F$","i");' +
+            ' ( regex_float.test(input) || regex_float_with_suffix.test(input))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${module.middleware.motor_return_origin.current_limit}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)$","i");' +
+            'if (regex_float.test(output)){' +
+            'output = output + "F";' +
+            '}' +
+            'output')
+            </export>
+        </property>
+        <property display="Pushing time (sec)" id="module.middleware.motor_return_origin.pushing_time" default="1.0" description="Time to push the stopper (sec)">
+            <constraint display="Must be a valid non-negative value.">
+            eval('' +
+            'var input = "${module.middleware.motor_return_origin.pushing_time}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?$","i");' +
+            'var regex_float_with_suffix = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?F$","i");' +
+            ' ( regex_float.test(input) || regex_float_with_suffix.test(input))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${module.middleware.motor_return_origin.pushing_time}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)$","i");' +
+            'if (regex_float.test(output)){' +
+            'output = output + "F";' +
+            '}' +
+            'output')
+            </export>
+        </property>
+        <property display="Degree to judge none stopper" id="module.middleware.motor_return_origin.over_degree" default="360.0" description="When the motor runs over this value, it is judged impossible to search the stopper.">
+            <constraint display="Must be set -360 to 360.">
+			eval('' +
+            'var input = "${module.middleware.motor_return_origin.over_degree}";' +
+            'var regex_float = RegExp("^-?(360([.]{1}0+)?|([0-9]|[1-9][0-9]|[1-2][0-9][0-9]|3[0-5][0-9])([.]{1}[0-9]+)?)$","i");' +
+            'var regex_float_with_suffix = RegExp("^-?(360([.]{1}0+)?|([0-9]|[1-9][0-9]|[1-2][0-9][0-9]|3[0-5][0-9])([.]{1}[0-9]+)?)F$","i");' +
+            ' ( regex_float.test(input) || regex_float_with_suffix.test(input))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${module.middleware.motor_return_origin.over_degree}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)$","i");' +
+            'if (regex_float.test(output)){' +
+            'output = output + "F";' +
+            '}' +
+            'output')
+            </export>
+        </property>
+        <property display="Degree to return" id="module.middleware.motor_return_origin.return_degree" default="3.0" description="Degree to return from the stopper (degree)">
+            <constraint display="Must be a valid non-negative value.">
+            eval('' +
+            'var input = "${module.middleware.motor_return_origin.return_degree}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?$","i");' +
+            'var regex_float_with_suffix = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?F$","i");' +
+            ' ( regex_float.test(input) || regex_float_with_suffix.test(input))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${module.middleware.motor_return_origin.return_degree}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)$","i");' +
+            'if (regex_float.test(output)){' +
+            'output = output + "F";' +
+            '}' +
+            'output')
+            </export>
+        </property>
+        <property display="Mechanical gear ratio" id="module.middleware.motor_return_origin.mecha_gear" default="1.0" description="Mechanical gear ratio">
+            <constraint display="Must be a valid non-negative value.">
+            eval('' +
+            'var input = "${module.middleware.motor_return_origin.mecha_gear}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?$","i");' +
+            'var regex_float_with_suffix = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?F$","i");' +
+            ' ( regex_float.test(input) || regex_float_with_suffix.test(input))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${module.middleware.motor_return_origin.mecha_gear}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)$","i");' +
+            'if (regex_float.test(output)){' +
+            'output = output + "F";' +
+            '}' +
+            'output')
+            </export>
+        </property>
+
+        <header>
+/** Motor Return origin Instance */
+extern const motor_return_origin_instance_t ${module.middleware.motor_return_origin.name};
+
+/** Access the Motor Return origin instance using these structures
+    when calling API functions directly (::p_api is not used). */
+extern motor_return_origin_instance_ctrl_t ${module.middleware.motor_return_origin.name}_ctrl;
+extern const motor_return_origin_extended_cfg_t ${module.middleware.motor_return_origin.name}_extend;
+extern const motor_return_origin_cfg_t ${module.middleware.motor_return_origin.name}_cfg;
+        </header>
+
+        <includes>
+#include &quot;rm_motor_return_origin.h&quot;
+        </includes>
+
+        <declarations>
+/* Motor Return origin Configuration */
+motor_return_origin_instance_ctrl_t ${module.middleware.motor_return_origin.name}_ctrl;
+const motor_return_origin_extended_cfg_t ${module.middleware.motor_return_origin.name}_extend =
+{
+  .f_search_speed_rpm = ${module.middleware.motor_return_origin.search_speed},
+  .f_return_accel_rpm = ${module.middleware.motor_return_origin.return_accel},
+  .f_speed_ctrl_period = ${module.middleware.motor_return_origin.spd_ctrl_period},
+  .f_maximum_current = ${module.middleware.motor_return_origin.max_current},
+  .f_current_limit_percent_push = ${module.middleware.motor_return_origin.current_limit} * 0.01F,
+  .f_pushing_time = ${module.middleware.motor_return_origin.pushing_time},
+  .f_over_degree = ${module.middleware.motor_return_origin.over_degree},
+  .f_return_degree = ${module.middleware.motor_return_origin.return_degree},
+  .f_mechanical_gear_ratio = ${module.middleware.motor_return_origin.mecha_gear},
+};
+
+const motor_return_origin_cfg_t ${module.middleware.motor_return_origin.name}_cfg =
+{
+  .mode         = ${module.middleware.motor_return_origin.mode},
+  .p_context    = NULL,
+  .p_extend     = &amp;${module.middleware.motor_return_origin.name}_extend,
+};
+
+/* Instance structure to use Motor return origin module. */
+const motor_return_origin_instance_t ${module.middleware.motor_return_origin.name} =
+{
+  .p_ctrl   = &amp;${module.middleware.motor_return_origin.name}_ctrl,
+  .p_cfg    = &amp;${module.middleware.motor_return_origin.name}_cfg,
+  .p_api    = &amp;g_motor_return_origin_on_motor_return_origin,
+};
+        </declarations>
+    </module>
+</raModuleDescription>

@@ -1,0 +1,198 @@
+﻿<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.middleware.motor_hall" path="fsp_cfg/rm_motor_hall_cfg.h" version="0">
+        <property default="config.middleware.motor_hall.param_checking_enable.bsp" display="Parameter checking" id="config.middleware.motor_hall.param_checking_enable" description="If selected code for parameter checking is included in the build.">
+            <option display="Default (BSP)" id="config.middleware.motor_hall.param_checking_enable.bsp" value="(BSP_CFG_PARAM_CHECKING_ENABLE)"/>
+            <option display="Enabled" id="config.middleware.motor_hall.param_checking_enable.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.motor_hall.param_checking_enable.disabled" value="(0)"/>
+        </property>
+
+        <content>
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#define MOTOR_HALL_CFG_PARAM_CHECKING_ENABLE   ${config.middleware.motor_hall.param_checking_enable}
+
+#ifdef __cplusplus
+}
+#endif
+        </content>
+    </config>
+    <module config="config.middleware.motor_hall" display="Motor|Motor Vector Control with hall sensors(rm_motor_hall)" id="module.middleware.motor_hall" version="1" url="group___m_o_t_o_r___h_a_l_l.html">
+        <constraint display="Requires lower level Motor Speed module implementation">
+            testExists("${module.middleware.motor_hall.requires.speed::module.middleware.motor_speed.name}")
+        </constraint>
+        <constraint display="Requires lower level Motor Current module implementation">
+            testExists("${module.middleware.motor_hall.requires.current::module.middleware.motor_current.name}")
+        </constraint>
+        <constraint display="Unique name required for each instance">
+            ("${interface.middleware.motor_hall.${module.middleware.motor_hall.name}}" === "1")
+        </constraint>
+
+        <!-- Speed Module  -->
+        <requires id="module.middleware.motor_hall.requires.speed" interface="interface.middleware.motor_speed" find="true" display="Add motor speed module [Mandatory]">
+            <override property="module.middleware.motor_speed.control_type" value="module.middleware.motor_speed.control_type.hall"/>
+            <override property="module.middleware.motor_speed.sc_callback" value="rm_motor_hall_speed_callback"/>
+            <override property="module.middleware.motor_speed.sc_context" value="${module.middleware.motor_hall.name}"/>
+            <override property="module.middleware.motor_speed.st_input" value="(${module.middleware.motor_hall.name}_ctrl.st_speed_input)"/>
+            <override property="module.middleware.motor_speed.st_output" value="(${module.middleware.motor_hall.name}_ctrl.st_speed_output)"/>
+        </requires>
+
+        <!-- Current Module  -->
+        <requires id="module.middleware.motor_hall.requires.current" interface="interface.middleware.motor_current" find="true" display="Add motor current module [Mandatory]">
+            <override property="module.middleware.motor_current.ctrl_type" value="module.middleware.motor_current.ctrl_type.hall"/>
+            <override property="module.middleware.motor_current.cc_callback" value="rm_motor_hall_current_callback"/>
+            <override property="module.middleware.motor_current.cc_context" value="${module.middleware.motor_hall.name}"/>
+        </requires>
+
+        <provides interface="interface.middleware.motor_hall" />
+        <provides interface="interface.middleware.motor_hall.${module.middleware.motor_hall.name}" />
+
+        <!-- Module Name -->
+        <property default="g_motor_hall${_instance}" display="General|Name" id="module.middleware.motor_hall.name" description="Module name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.middleware.motor_hall.name}")</constraint>
+        </property>
+
+        <!-- General Settings -->
+        <property default="0.42F" display="General|Limit of over current (A)" id="module.middleware.motor_hall.f_over_current" description="Limit of over current.(Detection threshold)">
+            <constraint display="Must be a valid value">
+            eval('' +
+            'var input = "${module.middleware.motor_hall.f_over_current}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?$","i");' +
+            'var regex_float_with_suffix = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?F$","i");' +
+            ' ( regex_float.test(input) || regex_float_with_suffix.test(input))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${module.middleware.motor_hall.f_over_current}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)$","i");' +
+            'if (regex_float.test(output)){' +
+            'output = output + "F";' +
+            '}' +
+            'output')
+            </export>
+        </property>
+        <property default="28.0F" display="General|Limit of over voltage (V)" id="module.middleware.motor_hall.f_over_voltage" description="Limit of over voltage.(Detection threshold)">
+            <constraint display="Must be a valid value">
+            eval('' +
+            'var input = "${module.middleware.motor_hall.f_over_voltage}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?$","i");' +
+            'var regex_float_with_suffix = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?F$","i");' +
+            ' ( regex_float.test(input) || regex_float_with_suffix.test(input))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${module.middleware.motor_hall.f_over_voltage}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)$","i");' +
+            'if (regex_float.test(output)){' +
+            'output = output + "F";' +
+            '}' +
+            'output')
+            </export>
+        </property>
+        <property default="3000.0F" display="General|Limit of over speed (rpm)" id="module.middleware.motor_hall.f_over_speed" description="Limit of over speed.(Detection threshold)">
+            <constraint display="Must be a valid value">
+            eval('' +
+            'var input = "${module.middleware.motor_hall.f_over_speed}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?$","i");' +
+            'var regex_float_with_suffix = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?F$","i");' +
+            ' ( regex_float.test(input) || regex_float_with_suffix.test(input))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${module.middleware.motor_hall.f_over_speed}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)$","i");' +
+            'if (regex_float.test(output)){' +
+            'output = output + "F";' +
+            '}' +
+            'output')
+            </export>
+        </property>
+        <property default="14.0F" display="General|Limit of low voltage (V)" id="module.middleware.motor_hall.f_low_voltage" description="Limit of low voltage.(Detection threshold)">
+            <constraint display="Must be a valid value">
+            eval('' +
+            'var input = "${module.middleware.motor_hall.f_low_voltage}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?$","i");' +
+            'var regex_float_with_suffix = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?F$","i");' +
+            ' ( regex_float.test(input) || regex_float_with_suffix.test(input))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${module.middleware.motor_hall.f_low_voltage}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)$","i");' +
+            'if (regex_float.test(output)){' +
+            'output = output + "F";' +
+            '}' +
+            'output')
+            </export>
+        </property>
+
+        <!-- Callback Settings -->
+        <property default="NULL" display="Interrupts|Callback" id="module.middleware.motor_hall.callback" description="A user callback function. If this callback function is provided, it is called at speed control cyclic interrupt.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.middleware.motor_hall.callback}")
+            </constraint>
+        </property>
+        <property default="NULL" id="module.middleware.motor_hall.context">
+            <export>eval('' +
+            'var string = "${module.middleware.motor_hall.context}";' +
+            'if ("NULL" !== string){' +
+            'string = "&amp;" + string  ;' +
+            '}' +
+            'String(string)')
+            </export>
+        </property>
+
+        <!-- Contents -->
+        <header>
+/** Motor vector control with hall sensors instance. */
+extern const motor_instance_t ${module.middleware.motor_hall.name};
+
+/** Access the motor hall control instance using these structures
+    when calling API functions directly (::p_api is not used). */
+extern motor_hall_instance_ctrl_t ${module.middleware.motor_hall.name}_ctrl;
+extern const motor_hall_extended_cfg_t ${module.middleware.motor_hall.name}_extend;
+extern const motor_cfg_t ${module.middleware.motor_hall.name}_cfg;
+
+#ifndef ${module.middleware.motor_hall.callback}
+void ${module.middleware.motor_hall.callback}(motor_callback_args_t * p_args);
+#endif
+        </header>
+
+        <includes>
+#include &quot;rm_motor_hall.h&quot;
+        </includes>
+        <macros>
+        </macros>
+        <declarations>
+
+/* Motor hall control configuration */
+motor_hall_instance_ctrl_t ${module.middleware.motor_hall.name}_ctrl;
+
+const motor_hall_extended_cfg_t ${module.middleware.motor_hall.name}_extend =
+{
+  .f_overcurrent_limit = ${module.middleware.motor_hall.f_over_current} * 1.414213562F * 1.5F,
+  .f_overvoltage_limit = ${module.middleware.motor_hall.f_over_voltage},
+  .f_overspeed_limit = ${module.middleware.motor_hall.f_over_speed},
+  .f_lowvoltage_limit = ${module.middleware.motor_hall.f_low_voltage},
+};
+
+const motor_cfg_t ${module.middleware.motor_hall.name}_cfg =
+{
+  .p_callback = ${module.middleware.motor_hall.callback},
+  .p_context = ${module.middleware.motor_hall.context},
+  .p_motor_speed_instance = &amp;${module.middleware.motor_hall.requires.speed::module.middleware.motor_speed.name},
+  .p_motor_current_instance = &amp;${module.middleware.motor_hall.requires.current::module.middleware.motor_current.name},
+  .p_extend = &amp;${module.middleware.motor_hall.name}_extend,
+};
+
+/* Instance structure to use motor hall control module. */
+const motor_instance_t ${module.middleware.motor_hall.name} =
+{
+    .p_ctrl = &amp;${module.middleware.motor_hall.name}_ctrl,
+    .p_cfg  = &amp;${module.middleware.motor_hall.name}_cfg,
+    .p_api  = &amp;g_motor_on_motor_hall,
+};
+        </declarations>
+    </module>
+</raModuleDescription>

@@ -1,0 +1,113 @@
+﻿<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.driver.slcdc" path="fsp_cfg/r_slcdc_cfg.h" version="0">
+        <property default="config.driver.slcdc.param_checking_enable.bsp" display="Parameter Checking" id="config.driver.slcdc.param_checking_enable" description="If selected code for parameter checking is included in the build.">
+            <option display="Default (BSP)" id="config.driver.slcdc.param_checking_enable.bsp" value="(BSP_CFG_PARAM_CHECKING_ENABLE)"/>
+            <option display="Enabled" id="config.driver.slcdc.param_checking_enable.enabled" value="(1)"/>
+            <option display="Disabled" id="config.driver.slcdc.param_checking_enable.disabled" value="(0)"/>
+        </property>
+        <content>
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#define SLCDC_CFG_PARAM_CHECKING_ENABLE ${config.driver.slcdc.param_checking_enable}
+
+#ifdef __cplusplus
+}
+#endif
+        </content>
+    </config>
+    <module config="config.driver.slcdc" display="Graphics|${module.driver.slcdc.name} Segment LCD (r_slcdc)" id="module.driver.slcdc_on_slcdc" version="1" url="group___s_l_c_d_c.html">
+        <constraint display="Unique name required for each instance">
+            "${interface.driver.slcdc.${module.driver.slcdc.name}}" === "1"
+        </constraint>
+        <constraint display="Requires SLCDC peripheral">
+            "${interface.mcu.slcdc.external}" === "1"
+        </constraint>
+        <constraint display="In 1/4 bias mode the maximum contrast setting is 6.">
+            ("${config.bsp.fsp.mcu.slcdc.1_4_bias_method}" != "1") || ("${config.bsp.fsp.mcu.slcdc.max_contrast_on_1_4_bias}" != "6") || ("${module.driver.slcdc.bias_method}" != "module.driver.slcdc.bias_method.bias_4") ||
+            (("${module.driver.slcdc.bias_method}" == "module.driver.slcdc.bias_method.bias_4") &amp;&amp; ((parseInt(("${module.driver.slcdc.contrast}").match(/\d+$/)[0], 10) &lt;= 6)))
+        </constraint>
+        <constraint display="In 1/4 bias mode the maximum contrast setting is 9.">
+            ("${config.bsp.fsp.mcu.slcdc.1_4_bias_method}" != "1") || ("${config.bsp.fsp.mcu.slcdc.max_contrast_on_1_4_bias}" != "9") || ("${module.driver.slcdc.bias_method}" != "module.driver.slcdc.bias_method.bias_4") ||
+            (("${module.driver.slcdc.bias_method}" == "module.driver.slcdc.bias_method.bias_4") &amp;&amp; ((parseInt(("${module.driver.slcdc.contrast}").match(/\d+$/)[0], 10) &lt;= 9)))
+        </constraint>
+        <constraint display="1/4 bias mode is unsupported on the selected MCU.">
+            ("${config.bsp.fsp.mcu.slcdc.1_4_bias_method}" == "1") || ("${module.driver.slcdc.bias_method}" != "module.driver.slcdc.bias_method.bias_4")
+        </constraint>
+        <requires id="module.driver.slcdc_on_slcdc.requires.slcdc" interface="interface.mcu.slcdc.external" visible="false" display="Requires SLCDC peripheral" />
+        <provides interface="interface.driver.slcdc" />
+        <provides interface="interface.driver.slcdc_on_slcdc" />
+        <provides interface="interface.driver.slcdc.${module.driver.slcdc.name}" />
+        <property default="g_slcdc${_instance}" display="General|Name" id="module.driver.slcdc.name" description="Module Name">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.slcdc.name}")</constraint>
+        </property>
+        <property default="" display="Clock|Source" id="module.driver.slcdc.slcdc_clock" description="Select the clock source.">
+            <select enum="enum.driver.slcdc.slcdc_clock" />
+        </property>
+        <property default="" display="Clock|Divisor" id="module.driver.slcdc.slcdc_clock_setting" description="Select the clock divisor.">
+            <select enum="enum.driver.slcdc.slcdc_clock_setting" />
+        </property>
+        <property default="module.driver.slcdc.bias_method.bias_2" display="Output|Bias method" id="module.driver.slcdc.bias_method" description="Select the bias method. This determines the number of voltage levels used to create the waveforms.">
+            <option display="1/2 bias" id="module.driver.slcdc.bias_method.bias_2" value="SLCDC_BIAS_2"/>
+            <option display="1/3 bias" id="module.driver.slcdc.bias_method.bias_3" value="SLCDC_BIAS_3"/>
+            <option display="1/4 bias" id="module.driver.slcdc.bias_method.bias_4" value="SLCDC_BIAS_4"/>
+        </property>
+        <property default="" display="Output|Timeslice" id="module.driver.slcdc.time_slice" description="Select the LCD time slice. The number of slices should match the number of common (COM) pins for your LCD panel.">
+            <select enum="enum.driver.slcdc.time_slice" />
+        </property>
+        <property default="module.driver.slcdc.waveform.wave_a" display="Output|Waveform" id="module.driver.slcdc.waveform" description="Select the LCD waveform.">
+            <option display="Waveform A" id="module.driver.slcdc.waveform.wave_a" value="SLCDC_WAVE_A"/>
+            <option display="Waveform B" id="module.driver.slcdc.waveform.wave_b" value="SLCDC_WAVE_B"/>
+        </property>
+        <property default="" display="Output|Drive method" id="module.driver.slcdc.drive_volt_gen" description="Select the LCD drive method.">
+            <select enum="enum.driver.slcdc.drive_volt_gen" />
+        </property>
+        <property default="" display="Output|Reference Voltage" id="module.driver.slcdc.ref_volt_sel" description="Select the LCD reference voltage.">
+            <select enum="enum.driver.slcdc.ref_volt_sel" />
+        </property>
+        <property default="" display="Output|Default contrast (if available)" id="module.driver.slcdc.contrast" description="Select the default contrast level.">
+            <select enum="enum.driver.slcdc.contrast" />
+        </property>
+        <peripheral name="SLCDC" component="slcdc0" />
+        <peripheral name="SLCDC" component="slcdc" />
+        <header>
+            /** SLCDC Instance. */
+            extern const slcdc_instance_t ${module.driver.slcdc.name};
+
+            /** Access the SLCDC instance using these structures when calling API functions directly (::p_api is not used). */
+            extern slcdc_instance_ctrl_t ${module.driver.slcdc.name}_ctrl;
+            extern const slcdc_cfg_t ${module.driver.slcdc.name}_cfg;
+        </header>
+        <includes>
+            #include &quot;r_slcdc.h&quot;
+        </includes>
+        <declarations>
+            slcdc_instance_ctrl_t ${module.driver.slcdc.name}_ctrl;
+            const slcdc_cfg_t ${module.driver.slcdc.name}_cfg  =
+            {
+                .slcdc_clock         = ${module.driver.slcdc.slcdc_clock},
+                .slcdc_clock_setting = ${module.driver.slcdc.slcdc_clock_setting},
+                .bias_method         = ${module.driver.slcdc.bias_method},
+                .time_slice          = ${module.driver.slcdc.time_slice},
+                .waveform            = ${module.driver.slcdc.waveform},
+                .drive_volt_gen      = ${module.driver.slcdc.drive_volt_gen},
+                .contrast            = ${module.driver.slcdc.contrast},
+                .ref_volt_sel        = (slcdc_ref_volt_sel_t) ${module.driver.slcdc.ref_volt_sel}
+            };
+
+            /* Instance structure to use this module. */
+            const slcdc_instance_t ${module.driver.slcdc.name} =
+            {
+                .p_ctrl        = &amp;${module.driver.slcdc.name}_ctrl,
+                .p_cfg         = &amp;${module.driver.slcdc.name}_cfg,
+                .p_api         = &amp;g_slcdc_on_slcdc
+            };
+        </declarations>
+        <api configurable="true">
+            <file>ra/fsp/inc/instances/r_slcdc.h</file>
+            <file>ra/fsp/inc/api/r_slcdc_api.h</file>
+        </api>
+    </module>
+</raModuleDescription>

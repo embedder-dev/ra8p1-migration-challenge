@@ -1,0 +1,323 @@
+﻿<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.driver.cac" path="fsp_cfg/r_cac_cfg.h" version="1">
+        <property default="config.driver.cac.param_checking.bsp" display="Parameter Checking" id="config.driver.cac.param_checking" description="If selected code for parameter checking is included in the build.">
+            <option display="Default (BSP)" id="config.driver.cac.param_checking.bsp" value="(BSP_CFG_PARAM_CHECKING_ENABLE)"/>
+            <option display="Enabled" id="config.driver.cac.param_checking.enabled" value="(1)"/>
+            <option display="Disabled" id="config.driver.cac.param_checking.disabled" value="(0)"/>
+        </property>
+        <content>
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#define CAC_CFG_PARAM_CHECKING_ENABLE ${config.driver.cac.param_checking}
+
+#ifdef __cplusplus
+}
+#endif
+        </content>
+    </config>
+    <module config="config.driver.cac" display="Monitoring|${module.driver.cac.name} Clock Accuracy Circuit (r_cac)" id="module.driver.cac_on_cac" version="1" url="group___c_a_c.html">
+        <constraint display="Upper limit threshold should always be greater than lower limit threshold">
+          (${module.driver.cac.cac_upper_limit} &gt;= ${module.driver.cac.cac_lower_limit})
+        </constraint>
+        <constraint display="Unique name required for each instance">
+            "${interface.driver.cac.${module.driver.cac.name}}" === "1"
+        </constraint>
+        <constraint display="Requires CAC peripheral">
+          "${interface.mcu.cac}" === "1"
+        </constraint>
+        <requires id="module.driver.cac_on_cac.requires.cac" interface="interface.mcu.cac" visible="false" display="Requires CAC peripheral" />
+        <provides interface="interface.driver.cac" />
+        <provides interface="interface.driver.cac_on_cac" />
+        <provides interface="interface.driver.cac.${module.driver.cac.name}" />
+        <provides interface="interface.peripheral.cac" />
+        <property default="g_cac${_instance}" display="Name" id="module.driver.cac.name" description="Module name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.cac.name}")</constraint>
+        </property>
+        <property default="module.driver.cac.cac_ref_clock.divider.32" display="Reference clock divider" id="module.driver.cac.cac_ref_clock.divider" description="Reference clock divider.">
+            <option display="32" id="module.driver.cac.cac_ref_clock.divider.32" value="CAC_REF_DIV_32"/>
+            <option display="128" id="module.driver.cac.cac_ref_clock.divider.128" value="CAC_REF_DIV_128"/>
+            <option display="1024" id="module.driver.cac.cac_ref_clock.divider.1024" value="CAC_REF_DIV_1024"/>
+            <option display="8192" id="module.driver.cac.cac_ref_clock.divider.8192" value="CAC_REF_DIV_8192"/>
+        </property>
+        <property default="" display="Reference clock source" id="module.driver.cac.cac_ref_clock.clock" description="Reference clock source.">
+            <select enum="enum.mcu.cac.cac_ref_clock.clock"/>
+        </property>
+        <property default="module.driver.cac.cac_ref_clock.digfilter.off" display="Reference clock digital filter" id="module.driver.cac.cac_ref_clock.digfilter" description="Reference clock digital filter.">
+            <option display="Disabled" id="module.driver.cac.cac_ref_clock.digfilter.off" value="CAC_REF_DIGITAL_FILTER_OFF"/>
+            <option display="Sampling clock=Measuring freq" id="module.driver.cac.cac_ref_clock.digfilter.1" value="CAC_REF_DIGITAL_FILTER_1"/>
+            <option display="Sampling clock=Measuring freq/4" id="module.driver.cac.cac_ref_clock.digfilter.4" value="CAC_REF_DIGITAL_FILTER_4"/>
+            <option display="Sampling clock=Measuring freq/16" id="module.driver.cac.cac_ref_clock.digfilter.16" value="CAC_REF_DIGITAL_FILTER_16"/>
+        </property>
+        <property default="module.driver.cac.cac_ref_clock.edge.rise" display="Reference clock edge detect" id="module.driver.cac.cac_ref_clock.edge" description="Reference clock edge detection.">
+            <option display="Rising" id="module.driver.cac.cac_ref_clock.edge.rise" value="CAC_REF_EDGE_RISE"/>
+            <option display="Falling" id="module.driver.cac.cac_ref_clock.edge.fall" value="CAC_REF_EDGE_FALL"/>
+            <option display="Both" id="module.driver.cac.cac_ref_clock.edge.both" value="CAC_REF_EDGE_BOTH"/>
+        </property>
+        <property default="module.driver.cac.cac_meas_clock.divider.1" display="Measurement clock divider" id="module.driver.cac.cac_meas_clock.divider" description="Measurement clock divider.">
+            <option display="1" id="module.driver.cac.cac_meas_clock.divider.1" value="CAC_MEAS_DIV_1"/>
+            <option display="4" id="module.driver.cac.cac_meas_clock.divider.4" value="CAC_MEAS_DIV_4"/>
+            <option display="8" id="module.driver.cac.cac_meas_clock.divider.8" value="CAC_MEAS_DIV_8"/>
+            <option display="32" id="module.driver.cac.cac_meas_clock.divider.32" value="CAC_MEAS_DIV_32"/>
+        </property>
+        <property default="" display="Measurement clock source" id="module.driver.cac.cac_meas_clock.clock" description="Measurement clock source.">
+            <select enum="enum.mcu.cac.cac_meas_clock.clock"/>
+        </property>
+        <property default="0" display="Upper Limit Threshold" id="module.driver.cac.cac_upper_limit" description="Top end of allowable range for measurement completion.">
+            <constraint display="Value must be a non-negative integer, between 0 to 65535">testInteger("${module.driver.cac.cac_upper_limit}")  &amp;&amp; ("${module.driver.cac.cac_upper_limit}" &gt;= 0) &amp;&amp; ("${module.driver.cac.cac_upper_limit}" &lt;= 65535)</constraint>
+        </property>
+        <property default="0" display="Lower Limit Threshold" id="module.driver.cac.cac_lower_limit" description="Bottom end of allowable range for measurement completion.">
+            <constraint display="Value must be a non-negative integer, between 0 to 65535">testInteger("${module.driver.cac.cac_lower_limit}")  &amp;&amp; ("${module.driver.cac.cac_lower_limit}" &gt;= 0) &amp;&amp; ("${module.driver.cac.cac_lower_limit}" &lt;= 65535)</constraint>
+        </property>
+        <property default="" display="Frequency Error Interrupt Priority" id="module.driver.cac.frequency_error_ipl" description="CAC frequency error interrupt priority.">
+            <select enum="enum.mcu.nvic.priorities.optional"/>
+            <interrupt event="event.cac.frequency.error" isr="cac_ferri_isr"/>
+        </property>
+        <property default="" display="Measurement End Interrupt Priority" id="module.driver.cac.measurement_end_ipl" description="CAC measurement end interrupt priority.">
+            <select enum="enum.mcu.nvic.priorities.optional"/>
+            <interrupt event="event.cac.measurement.end" isr="cac_mendi_isr"/>
+        </property>
+        <property default="" display="Overflow Interrupt Priority" id="module.driver.cac.overflow_ipl" description="CAC overflow interrupt priority.">
+            <select enum="enum.mcu.nvic.priorities.optional"/>
+            <interrupt event="event.cac.overflow" isr="cac_ovfi_isr"/>
+        </property>
+        <property default="NULL" display="Callback" id="module.driver.cac.p_callback" description="Function name for callback">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.cac.p_callback}")</constraint>
+        </property>
+        <peripheral name="CAC" component="cac0" />
+        <!-- For MCU's whose pinmapping files have been generated with MPC Designer Tool -->
+        <peripheral name="CAC" component="cac" />
+        <symbol id="symbol.driver.cac.name" value="${module.driver.cac.name}"/>
+        <symbol id="symbol.driver.cac.guard.open" value="${module.driver.cac.name}_open_guard"/>
+        <symbol id="symbol.driver.cac.guard.macro.open" value="FSP_GUARD_${module.driver.cac.name}_R_CAC_Open"/>
+        <symbol id="symbol.driver.cac.guard.start_measurement" value="${module.driver.cac.name}_start_measurement_guard"/>
+        <symbol id="symbol.driver.cac.guard.macro.start_measurement" value="FSP_GUARD_${module.driver.cac.name}_R_CAC_StartMeasurement"/>
+        <symbol id="symbol.driver.cac.guard.stop_measurement" value="${module.driver.cac.name}_stop_measurement_guard"/>
+        <symbol id="symbol.driver.cac.guard.macro.stop_measurement" value="FSP_GUARD_${module.driver.cac.name}_R_CAC_StopMeasurement"/>
+        <symbol id="symbol.driver.cac.guard.read" value="${module.driver.cac.name}_read_guard"/>
+        <symbol id="symbol.driver.cac.guard.macro.read" value="FSP_GUARD_${module.driver.cac.name}_R_CAC_Read"/>
+        <symbol id="symbol.driver.cac.guard.close" value="${module.driver.cac.name}_close_guard"/>
+        <symbol id="symbol.driver.cac.guard.macro.close" value="FSP_GUARD_${module.driver.cac.name}_R_CAC_Close"/>
+        <symbol id="symbol.driver.cac.guard.callback_set" value="${module.driver.cac.name}_callback_set_guard"/>
+        <symbol id="symbol.driver.cac.guard.macro.callback_set" value="FSP_GUARD_${module.driver.cac.name}_R_CAC_CallbackSet"/>
+        <symbol id="symbol.driver.cac.nsc_api" value="${module.driver.cac.name}_nsc_api"/>
+        <symbol id="symbol.driver.cac.cfg" value="${module.driver.cac.name}_cfg"/>
+        <symbol id="symbol.driver.cac.ctrl" value="${module.driver.cac.name}_ctrl"/>
+        <header>
+/** CAC Instance */
+extern const cac_instance_t ${module.driver.cac.name};
+
+/** Access the CAC instance using these structures when calling API functions directly (::p_api is not used). */
+extern cac_instance_ctrl_t ${module.driver.cac.name}_ctrl;
+extern const cac_cfg_t ${module.driver.cac.name}_cfg;
+
+#ifndef ${module.driver.cac.p_callback}
+void ${module.driver.cac.p_callback}(cac_callback_args_t * p_args);
+#endif
+        </header>
+        <includes>
+#include &quot;r_cac.h&quot;
+#include &quot;r_cac_api.h&quot;</includes>
+        <declarations>
+cac_instance_ctrl_t ${module.driver.cac.name}_ctrl;
+
+const cac_cfg_t ${module.driver.cac.name}_cfg =
+{
+    .cac_ref_clock.divider      = ${module.driver.cac.cac_ref_clock.divider},
+    .cac_ref_clock.clock        = ${module.driver.cac.cac_ref_clock.clock},
+    .cac_ref_clock.digfilter    = ${module.driver.cac.cac_ref_clock.digfilter},
+    .cac_ref_clock.edge         = ${module.driver.cac.cac_ref_clock.edge},
+    .cac_meas_clock.divider     = ${module.driver.cac.cac_meas_clock.divider},
+    .cac_meas_clock.clock       = ${module.driver.cac.cac_meas_clock.clock},
+    .cac_upper_limit            = ${module.driver.cac.cac_upper_limit},
+    .cac_lower_limit            = ${module.driver.cac.cac_lower_limit},
+
+#if defined(VECTOR_NUMBER_CAC_MEASUREMENT_END)
+    .mendi_irq                  = VECTOR_NUMBER_CAC_MEASUREMENT_END,
+#else
+    .mendi_irq                  = FSP_INVALID_VECTOR,
+#endif
+
+#if defined(VECTOR_NUMBER_CAC_FREQUENCY_ERROR)
+    .ferri_irq                  = VECTOR_NUMBER_CAC_FREQUENCY_ERROR,
+#else
+    .ferri_irq                  = FSP_INVALID_VECTOR,
+#endif
+
+#if defined(VECTOR_NUMBER_CAC_OVERFLOW)
+    .ovfi_irq                   = VECTOR_NUMBER_CAC_OVERFLOW,
+#else
+    .ovfi_irq                   = FSP_INVALID_VECTOR,
+#endif
+
+    .ferri_ipl                  = ${module.driver.cac.frequency_error_ipl},
+    .mendi_ipl                  = ${module.driver.cac.measurement_end_ipl},
+    .ovfi_ipl                   = ${module.driver.cac.overflow_ipl},
+
+    .p_callback                 = ${module.driver.cac.p_callback},
+    .p_context                  = NULL
+
+};
+
+/* Instance structure to use this module. */
+const cac_instance_t ${module.driver.cac.name} =
+{
+    .p_ctrl        = &amp;${module.driver.cac.name}_ctrl,
+    .p_cfg         = &amp;${module.driver.cac.name}_cfg,
+    .p_api         = &amp;g_cac_on_cac
+};
+        </declarations>
+        <guard>
+            <header>
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.cac.name}_open_guard(cac_ctrl_t *const p_ctrl, cac_cfg_t const *const p_cfg);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.cac.name}_start_measurement_guard(cac_ctrl_t *const p_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.cac.name}_stop_measurement_guard(cac_ctrl_t *const p_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.cac.name}_read_guard(cac_ctrl_t *const p_ctrl, uint32_t *const p_counter);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.cac.name}_reset_guard(cac_ctrl_t *const p_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.cac.name}_close_guard(cac_ctrl_t *const p_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.cac.name}_callback_set_guard(cac_ctrl_t *const p_ctrl, void(*p_callback)(cac_callback_args_t *), void const *const p_context, cac_callback_args_t *const p_callback_memory);
+
+            </header>
+            <template name="${module.driver.cac.name}_guard.c">
+                <![CDATA[
+                    #include "guard.h"
+
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.cac.name}_open_guard (cac_ctrl_t *const p_ctrl, cac_cfg_t const *const p_cfg)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+    FSP_PARAMETER_NOT_USED(p_cfg);
+
+    return R_CAC_Open(&${module.driver.cac.name}_ctrl, &${module.driver.cac.name}_cfg);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.cac.name}_start_measurement_guard (cac_ctrl_t *const p_ctrl)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+
+    return R_CAC_StartMeasurement(&${module.driver.cac.name}_ctrl);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.cac.name}_stop_measurement_guard (cac_ctrl_t *const p_ctrl)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+
+    return R_CAC_StopMeasurement(&${module.driver.cac.name}_ctrl);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.cac.name}_read_guard (cac_ctrl_t *const p_ctrl, uint32_t *const p_counter)
+{
+    /* Verify all pointers are in non-secure memory. */
+    uint32_t *const p_counter_checked = cmse_check_address_range((void *) p_counter, sizeof(uint32_t), CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_counter_checked != NULL);
+
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+
+    return R_CAC_Read(&${module.driver.cac.name}_ctrl, p_counter_checked);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.cac.name}_close_guard (cac_ctrl_t *const p_ctrl)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+
+    return R_CAC_Close(&${module.driver.cac.name}_ctrl);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.cac.name}_callback_set_guard (cac_ctrl_t *const p_ctrl, void(*p_callback)(cac_callback_args_t *), void const *const p_context, cac_callback_args_t *const p_callback_memory)
+{
+    /* Verify all pointers are in non-secure memory. */
+    void(*p_callback_checked)(cac_callback_args_t *) = (void(*)(cac_callback_args_t *)) cmse_check_address_range((void *) p_callback, sizeof(void *), CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_callback_checked != NULL);
+    cac_callback_args_t *const p_callback_memory_checked = cmse_check_pointed_object(p_callback_memory, CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_callback_memory_checked != NULL);
+
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+    FSP_PARAMETER_NOT_USED(p_context);
+
+    return R_CAC_CallbackSet(&${module.driver.cac.name}_ctrl, p_callback_checked, p_context, p_callback_memory_checked);
+}
+
+                ]]>
+            </template>
+        </guard>
+        <nsc>
+            <header>
+
+#define FSP_GUARD_${module.driver.cac.name}_R_CAC_Open() ${module.driver.cac.name}_open_guard(FSP_SECURE_ARGUMENT, FSP_SECURE_ARGUMENT)
+
+#define FSP_GUARD_${module.driver.cac.name}_R_CAC_StartMeasurement() ${module.driver.cac.name}_start_measurement_guard(FSP_SECURE_ARGUMENT)
+
+#define FSP_GUARD_${module.driver.cac.name}_R_CAC_StopMeasurement() ${module.driver.cac.name}_stop_measurement_guard(FSP_SECURE_ARGUMENT)
+
+#define FSP_GUARD_${module.driver.cac.name}_R_CAC_Read(p_counter) ${module.driver.cac.name}_read_guard(FSP_SECURE_ARGUMENT, p_counter)
+
+#define FSP_GUARD_${module.driver.cac.name}_R_CAC_Close() ${module.driver.cac.name}_close_guard(FSP_SECURE_ARGUMENT)
+
+#define FSP_GUARD_${module.driver.cac.name}_R_CAC_CallbackSet(p_callback, p_context, p_callback_memory) ${module.driver.cac.name}_callback_set_guard(FSP_SECURE_ARGUMENT, p_callback, p_context, p_callback_memory)
+
+
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.cac.name}_open_guard(cac_ctrl_t *const p_ctrl, cac_cfg_t const *const p_cfg);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.cac.name}_start_measurement_guard(cac_ctrl_t *const p_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.cac.name}_stop_measurement_guard(cac_ctrl_t *const p_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.cac.name}_read_guard(cac_ctrl_t *const p_ctrl, uint32_t *const p_counter);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.cac.name}_reset_guard(cac_ctrl_t *const p_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.cac.name}_close_guard(cac_ctrl_t *const p_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.cac.name}_callback_set_guard(cac_ctrl_t *const p_ctrl, void(*p_callback)(cac_callback_args_t *), void const *const p_context, cac_callback_args_t *const p_callback_memory);
+
+
+extern const cac_instance_t ${module.driver.cac.name};
+            </header>
+            <declarations>
+                <![CDATA[
+static const cac_api_t ${module.driver.cac.name}_nsc_api =
+{
+    .open = ${module.driver.cac.name}_open_guard,
+    .startMeasurement = ${module.driver.cac.name}_start_measurement_guard,
+    .stopMeasurement = ${module.driver.cac.name}_stop_measurement_guard,
+    .read = ${module.driver.cac.name}_read_guard,
+    .close = ${module.driver.cac.name}_close_guard,
+    .callbackSet = ${module.driver.cac.name}_callback_set_guard,
+};
+const cac_instance_t ${module.driver.cac.name} =
+{
+    .p_api = &${module.driver.cac.name}_nsc_api,
+    .p_ctrl = FSP_SECURE_ARGUMENT,
+    .p_cfg = FSP_SECURE_ARGUMENT,
+};
+                ]]>
+            </declarations>
+        </nsc>
+        <api configurable="true">
+            <file>ra/fsp/inc/instances/r_cac.h</file>
+            <file>ra/fsp/inc/api/r_cac_api.h</file>
+        </api>
+    </module>
+</raModuleDescription>

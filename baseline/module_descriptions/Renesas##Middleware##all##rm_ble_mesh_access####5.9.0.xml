@@ -1,0 +1,122 @@
+<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.middleware.rm_ble_mesh_access" path="fsp_cfg/rm_ble_mesh_access_cfg.h" version="0">
+        <content>
+            #ifdef __cplusplus
+            extern "C" {
+            #endif
+
+            #ifdef __cplusplus
+            }
+            #endif
+        </content>
+    </config>
+    <module id="module.middleware.rm_ble_mesh_access_on_rm_ble_mesh" display="Networking|BLE Mesh Network modules|${module.middleware.rm_ble_mesh_access.name} BLE Mesh Access (rm_ble_mesh_access)" config="config.middleware.rm_ble_mesh_access" common="100" version="0" visible="true" url="group___r_m___b_l_e___m_e_s_h___a_c_c_e_s_s.html">
+
+        <constraint display="BLE Mesh Access middleware not support R_BLE_SPP module">
+            "${interface.mcu.radio}" === "1"
+        </constraint>
+        <constraint display="Access element does not allow duplicates">
+            "${interface.middleware.rm_ble_mesh_access.${module.middleware.rm_ble_mesh_access.element_number}}" === "1"
+        </constraint>
+        <requires id="module.middleware.rm_ble_mesh_access.requires.rm_ble_mesh_upper_trans" interface="interface.middleware.rm_ble_mesh_upper_trans.${module.middleware.rm_ble_mesh_upper_trans.name}" visible="true" display="Add BLE Mesh Upper Trans Module" find="true"/>
+
+        <provides interface="interface.middleware.rm_ble_mesh_access"/>
+        <provides interface="interface.middleware.rm_ble_mesh_access_on_rm_ble_mesh_access"/>
+        <provides interface="interface.middleware.rm_ble_mesh_access.${module.middleware.rm_ble_mesh_access.name}"/>
+        <provides interface="interface.middleware.rm_ble_mesh_access.${module.middleware.rm_ble_mesh_access.element_number}"/>
+
+        <property display="General|Name" id="module.middleware.rm_ble_mesh_access.name" default="g_rm_ble_mesh_access${_instance}" description="Module name.">
+            <constraint display="Name Must Be a Valid C Symbol">testSymbol("${module.middleware.rm_ble_mesh_access.name}")</constraint>
+        </property>
+
+        <property display="Channel Number" id="module.middleware.rm_ble_mesh_access.channel" default="0" description="Select channel corresponding to the channel number of the hardware.">
+            <constraint display="Invalid Channel Number">testInteger("${module.middleware.rm_ble_mesh_access.channel}") &amp;&amp; ("${module.middleware.rm_ble_mesh_access.channel}" &gt;= 0) &amp;&amp; ("${module.middleware.rm_ble_mesh_access.channel}" &lt;= 4294967295)</constraint>
+        </property>
+
+        <property display="Location Descriptor" id="module.middleware.rm_ble_mesh_access.loc" default="0" description="Location descriptor.">
+            <constraint display="Invalid Descriptor">testInteger("${module.middleware.rm_ble_mesh_access.loc}") &amp;&amp; ("${module.middleware.rm_ble_mesh_access.loc}" &gt;= 0) &amp;&amp; ("${module.middleware.rm_ble_mesh_access.loc}" &lt;= 65535)</constraint>
+        </property>
+
+        <property display="Element Number" id="module.middleware.rm_ble_mesh_access.element_number" default="0" description="Element number to register the model.">
+            <constraint display="Invalid Descriptor">testInteger("${module.middleware.rm_ble_mesh_access.element_number}") &amp;&amp; ("${module.middleware.rm_ble_mesh_access.element_number}" &gt;= 0) &amp;&amp; ("${module.middleware.rm_ble_mesh_access.element_number}" &lt;= 255)</constraint>
+        </property>
+
+        <property id="module.middleware.rm_ble_mesh_access.p_context" default="NULL">
+            <constraint display="Name Must Be a Valid C Symbol">testSymbol("${module.middleware.rm_ble_mesh_access.p_context}")</constraint>
+            <export>eval('' +
+                'var output = "${module.middleware.rm_ble_mesh_access.p_context}";' +
+                'if ("NULL" !== output) {' +
+                'output = "&amp;" + output;' +
+                '}' +
+                'output')
+            </export>
+        </property>
+
+        <header>
+/** BLE Mesh Access on BLE Mesh Access Instance. */
+extern const rm_ble_mesh_access_instance_t ${module.middleware.rm_ble_mesh_access.name};
+
+/** Access the BLE Mesh access instance using these structures when calling API functions directly (::p_api is not used). */
+extern rm_ble_mesh_access_instance_ctrl_t ${module.middleware.rm_ble_mesh_access.name}_ctrl;
+extern const rm_ble_mesh_access_cfg_t ${module.middleware.rm_ble_mesh_access.name}_cfg;
+        </header>
+        <includes>
+#include "rm_ble_mesh_access.h"
+#include "rm_ble_mesh_access_api.h"
+        </includes>
+        <declarations>
+rm_ble_mesh_access_instance_ctrl_t ${module.middleware.rm_ble_mesh_access.name}_ctrl;
+
+rm_ble_mesh_access_element_descriptor_t ${module.middleware.rm_ble_mesh_access.name}_element_descriptor = { .loc = ${module.middleware.rm_ble_mesh_access.loc} };
+
+/** BLE MESH configuration parameters. */
+const rm_ble_mesh_access_cfg_t ${module.middleware.rm_ble_mesh_access.name}_cfg =
+{
+    /** the parameters for initialization. */
+    .channel                     = ${module.middleware.rm_ble_mesh_access.channel},
+    .p_element_descriptor        = &amp;${module.middleware.rm_ble_mesh_access.name}_element_descriptor,
+    .p_mesh_upper_trans_instance = &amp;${module.middleware.rm_ble_mesh_access.requires.rm_ble_mesh_upper_trans::module.middleware.rm_ble_mesh_upper_trans.name},
+    .element_number              = ${module.middleware.rm_ble_mesh_access.element_number},
+    .p_context                   = ${module.middleware.rm_ble_mesh_access.p_context},
+    .p_extend                    = NULL
+};
+
+
+/** This structure encompasses everything that is needed to use an instance of this interface. */
+const rm_ble_mesh_access_instance_t ${module.middleware.rm_ble_mesh_access.name} =
+{
+    .p_ctrl = &amp;${module.middleware.rm_ble_mesh_access.name}_ctrl,
+    .p_cfg  = &amp;${module.middleware.rm_ble_mesh_access.name}_cfg,
+    .p_api  = &amp;g_rm_ble_mesh_access_on_rm_ble_mesh_access
+};
+        </declarations>
+    </module>
+
+    <!-- Developer Assistance -->
+    <developerSupport>
+        <template category="none" display="Reset Storage" id="module.middleware.rm_ble_mesh_access.reset_storage" version="1">
+            <platform id="fsp" max="" min="3.6.0"/>
+            <moduleRef id="module.middleware.rm_ble_mesh_access_on_rm_ble_mesh"/>
+            <content><![CDATA[
+/* Prototype declaration */
+fsp_err_t ${rm_ble_mesh_access_name:raProperty(module.middleware.rm_ble_mesh_access.name)}_reset_storage(void);
+
+/*
+ * This function deletes all the data present in the persistent storage.
+ * This function is to be used when device needs to be removed from the existing networks.
+ * Power-cycle the device after executing this function.
+ */
+fsp_err_t ${rm_ble_mesh_access_name}_reset_storage(void)
+{
+    fsp_err_t result = FSP_SUCCESS;
+
+    RM_BLE_MESH_ACCESS_Open(&${rm_ble_mesh_access_name}_ctrl, &${rm_ble_mesh_access_name}_cfg);
+    result = RM_BLE_MESH_ACCESS_Reset(&${rm_ble_mesh_access_name}_ctrl);
+
+    return result;
+}
+]]>            </content>
+        </template>
+    </developerSupport>
+</raModuleDescription>

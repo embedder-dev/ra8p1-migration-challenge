@@ -1,0 +1,285 @@
+<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.driver.hs300x" path="fsp_cfg/rm_hs300x_cfg.h" version="0">
+        <property default="config.driver.hs300x.param_checking_enable.bsp" display="Parameter Checking" id="config.driver.hs300x.param_checking_enable" description="If selected code for parameter checking is included in the build.">
+            <option display="Default (BSP)" id="config.driver.hs300x.param_checking_enable.bsp" value="(BSP_CFG_PARAM_CHECKING_ENABLE)"/>
+            <option display="Enabled" id="config.driver.hs300x.param_checking_enable.enabled" value="(1)"/>
+            <option display="Disabled" id="config.driver.hs300x.param_checking_enable.disabled" value="(0)"/>
+        </property>
+        <property default="config.driver.hs300x.sensor_data.both_humidity_temperature" display="Data type" id="config.driver.hs300x.sensor_data" description="Select Getting humidity only and both humidity and temperature.">
+            <option display="Both humidity and temperature" id="config.driver.hs300x.sensor_data.both_humidity_temperature" value="(1)"/>
+            <option display="Humidity only" id="config.driver.hs300x.sensor_data.humidity_only" value="(0)"/>
+        </property>
+        <property default="config.driver.hs300x.programming_mode.off" display="Programming Mode" id="config.driver.hs300x.programming_mode" description="If selected the programming mode can be entered.">
+            <option display="ON" id="config.driver.hs300x.programming_mode.on" value="(1)"/>
+            <option display="OFF" id="config.driver.hs300x.programming_mode.off" value="(0)"/>
+        </property>
+        <content>
+            #ifdef __cplusplus
+            extern "C" {
+            #endif
+
+            #define RM_HS300X_CFG_PARAM_CHECKING_ENABLE   ${config.driver.hs300x.param_checking_enable}
+            #define RM_HS300X_CFG_DATA_BOTH_HUMIDITY_TEMPERATURE ${config.driver.hs300x.sensor_data}
+            #define RM_HS300X_CFG_PROGRAMMING_MODE ${config.driver.hs300x.programming_mode}
+
+            #ifdef __cplusplus
+            }
+            #endif
+        </content>
+    </config>
+    <module config="config.driver.hs300x" display="Sensor|${module.driver.hs300x.name} HS300X Temperature/Humidity Sensor (rm_hs300x)" id="module.driver.hs300x_on_hs300x" version="1" url="group___r_m___h_s300_x.html">
+        <constraint display="Unique name required for each instance">
+            "${interface.driver.hs300x.${module.driver.hs300x.name}}" === "1"
+        </constraint>
+        <requires id="module.driver.hs300x.requires.comms_i2c_device" interface="interface.driver.comms_i2c_device" visible="true" display="Requires I2C Communications Device">
+            <override property="module.driver.comms_i2c_device.slave_address" value="0x44"/>
+            <override property="module.driver.comms_i2c_device.address_mode" value="I2C_MASTER_ADDR_MODE_7BIT"/>
+            <override property="module.driver.comms_i2c_device.p_context" value="${module.driver.hs300x.name}_ctrl"/>
+            <override property="module.driver.comms_i2c_device.p_callback" value="rm_hs300x_callback"/>
+        </requires>
+
+        <provides interface="interface.driver.hs300x" />
+        <provides interface="interface.driver.hs300x_on_hs300x" />
+        <provides interface="interface.driver.hs300x.${module.driver.hs300x.name}" />
+        <property default="g_hs300x_sensor${_instance}" display="Name" id="module.driver.hs300x.name" description="Module name.">
+            <constraint display="Name must be a valid C symbol">
+                testSymbol("${module.driver.hs300x.name}")
+            </constraint>
+        </property>
+        <property default="NULL" id="module.driver.hs300x.p_context" />
+        <property default="hs300x_callback" display="Callback" id="module.driver.hs300x.p_callback" description="A user callback function can be provided.">
+            <constraint display="Name must be a valid C symbol">
+                testSymbol("${module.driver.hs300x.p_callback}")
+            </constraint>
+        </property>
+        <property default="" id="module.driver.hs300x.name_upper">
+            <export>"${module.driver.hs300x.name}".toUpperCase()</export>
+        </property>
+
+        <header>
+/* HS300X Sensor */
+extern const rm_hs300x_instance_t ${module.driver.hs300x.name};
+extern rm_hs300x_instance_ctrl_t ${module.driver.hs300x.name}_ctrl;
+extern const rm_hs300x_cfg_t ${module.driver.hs300x.name}_cfg;
+#ifndef ${module.driver.hs300x.p_callback}
+void ${module.driver.hs300x.p_callback}(rm_hs300x_callback_args_t * p_args);
+#endif
+        </header>
+
+        <includes>
+#include &quot;rm_hs300x.h&quot;
+#include &quot;rm_hs300x_api.h&quot;
+        </includes>
+
+        <declarations>
+rm_hs300x_instance_ctrl_t ${module.driver.hs300x.name}_ctrl;
+const rm_hs300x_cfg_t ${module.driver.hs300x.name}_cfg =
+{
+    .p_instance = &amp;${module.driver.hs300x.requires.comms_i2c_device::module.driver.comms_i2c_device.name},
+    .p_callback = ${module.driver.hs300x.p_callback},
+#if defined(${module.driver.hs300x.p_context})
+    .p_context           = ${module.driver.hs300x.p_context},
+#else
+    .p_context           = &amp;${module.driver.hs300x.p_context},
+#endif
+};
+
+const rm_hs300x_instance_t ${module.driver.hs300x.name} =
+{
+    .p_ctrl = &amp;${module.driver.hs300x.name}_ctrl,
+    .p_cfg  = &amp;${module.driver.hs300x.name}_cfg,
+    .p_api  = &amp;g_hs300x_on_hs300x,
+};
+        </declarations>
+    </module>
+
+    <!-- Developer Assistance -->
+    <developerSupport>
+        <api version="1">
+            <platform id="fsp" max="" min="1.1.0"/>
+            <moduleRef id="module.driver.hs300x_on_hs300x"/>
+            <description><![CDATA[<form><p><span color="header" font="header">Overview</span></p><p>HS300X provides snippets of code for operating the HS300X Middleware.</p></form>]]></description>
+            <function display="Quick Setup" id="hs300x_quick_setup">
+                <description><![CDATA[<form><p>This function provides quick setup for HS300X using the properties from the RA configurator.</p></form>]]></description>
+            </function>
+            <function display="Quick Getting Humidity and Temperature" id="hs300x_quick_getting_humidity_and_temperature">
+                <description><![CDATA[<form><p>This function provides quick getting humidity and temperature values for HS300X using the properties from the RA configurator.</p></form>]]></description>
+            </function>
+        </api>
+        <template category="function_call" display="Call Quick Setup" id="module.driver.hs300x.quick_setup" version="1">
+            <platform id="fsp" max="" min="1.1.0"/>
+            <moduleRef id="module.driver.hs300x_on_hs300x">
+                <function id="hs300x_quick_setup"/>
+            </moduleRef>
+            <content>
+/* TODO: Enable if you want to open HS300X */
+#define ${hs300x_name_upper:raProperty(module.driver.hs300x.name_upper)}_NON_BLOCKING (0)
+
+#if ${hs300x_name_upper}_NON_BLOCKING
+volatile bool g_hs300x_completed = false;
+#endif
+
+#if RM_HS300X_CFG_PROGRAMMING_MODE
+uint32_t g_hs300x_sensor_id;
+#endif
+
+/* TODO: Enable if you want to use a callback */
+#define ${hs300x_name_upper}_CALLBACK_ENABLE (0)
+#if ${hs300x_name_upper}_CALLBACK_ENABLE
+void ${hs300x_callback:raProperty(module.driver.hs300x.p_callback)}(rm_hs300x_callback_args_t * p_args)
+{
+#if ${hs300x_name_upper}_NON_BLOCKING
+    if (RM_HS300X_EVENT_SUCCESS == p_args->event)
+    {
+        g_hs300x_completed = true;
+    }
+#else
+    FSP_PARAMETER_NOT_USED(p_args);
+#endif
+}
+#endif
+
+/* Quick setup for ${hs300x_name:raProperty(module.driver.hs300x.name)}.
+ * - ${i2c_bus_name:raProperty(module.driver.comms_i2c_bus.name)} must be setup before calling this function
+ *     (See Developer Assistance -> ${hs300x_name} -> ${i2c_device_name:raProperty(module.driver.comms_i2c_device.name)} -> ${i2c_bus_name} -> Quick Setup).
+ */
+void ${hs300x_name}_quick_setup(void);
+
+/* Quick setup for ${hs300x_name}. */
+void ${hs300x_name}_quick_setup(void)
+{
+    fsp_err_t err;
+
+    /* Open HS300X sensor instance, this must be done before calling any HS300X API */
+    err = ${hs300x_name}.p_api->open(${hs300x_name}.p_ctrl, ${hs300x_name}.p_cfg);
+    assert(FSP_SUCCESS == err);
+
+#if RM_HS300X_CFG_PROGRAMMING_MODE
+    /* Enter the programming mode. This must be called within 10ms after applying power. */
+    err = ${hs300x_name}.p_api->programmingModeEnter(${hs300x_name}.p_ctrl);
+    assert(FSP_SUCCESS == err);
+
+#if ${hs300x_name_upper}_NON_BLOCKING
+    while (!g_hs300x_completed)
+    {
+        ;
+    }
+    g_hs300x_completed = false;
+#endif
+
+    /* Delay 120us. Entering the programming mode takes 120us. */
+    R_BSP_SoftwareDelay(120, BSP_DELAY_UNITS_MICROSECONDS);
+
+    /* Get the sensor ID */
+    err = ${hs300x_name}.p_api->sensorIdGet(${hs300x_name}.p_ctrl, (uint32_t *)&amp;g_hs300x_sensor_id);
+    assert(FSP_SUCCESS == err);
+
+    /* Change the humidity resolution to 8 bit */
+    err = ${hs300x_name}.p_api->resolutionChange(${hs300x_name}.p_ctrl, RM_HS300X_HUMIDITY_DATA, RM_HS300X_RESOLUTION_8BIT);
+    assert(FSP_SUCCESS == err);
+
+#if ${hs300x_name_upper}_NON_BLOCKING
+    while (!g_hs300x_completed)
+    {
+        ;
+    }
+    g_hs300x_completed = false;
+#endif
+
+    /* Delay 14ms. Failure to comply with these times may result in data corruption and introduce errors in sensor measurements. */
+    R_BSP_SoftwareDelay(14, BSP_DELAY_UNITS_MILLISECONDS);
+
+    /* Change the temperature resolution to 8 bit */
+    err = ${hs300x_name}.p_api->resolutionChange(${hs300x_name}.p_ctrl, RM_HS300X_TEMPERATURE_DATA, RM_HS300X_RESOLUTION_8BIT);
+    assert(FSP_SUCCESS == err);
+
+#if ${hs300x_name_upper}_NON_BLOCKING
+    while (!g_hs300x_completed)
+    {
+        ;
+    }
+    g_hs300x_completed = false;
+#endif
+
+    /* Delay 14ms. Failure to comply with these times may result in data corruption and introduce errors in sensor measurements. */
+    R_BSP_SoftwareDelay(14, BSP_DELAY_UNITS_MILLISECONDS);
+
+    /* Exit the programming mode */
+    err = ${hs300x_name}.p_api->programmingModeExit(${hs300x_name}.p_ctrl);
+    assert(FSP_SUCCESS == err);
+
+#if ${hs300x_name_upper}_NON_BLOCKING
+    while (!g_hs300x_completed)
+    {
+        ;
+    }
+    g_hs300x_completed = false;
+#endif
+#endif
+}
+            </content>
+        </template>
+        <template category="function_call" display="Call Quick Getting Humidity and Temperature" id="module.driver.hs300x.quick_getting_humidity_and_temperature" version="1">
+            <platform id="fsp" max="" min="1.1.0"/>
+            <moduleRef id="module.driver.hs300x_on_hs300x">
+                <function id="hs300x_quick_getting_humidity_and_temperature"/>
+            </moduleRef>
+            <content>
+/* Quick getting humidity and temperature values for ${hs300x_name:raProperty(module.driver.hs300x.name)}.
+ * - ${hs300x_name} must be setup before calling this function.
+ */
+void ${hs300x_name}_quick_getting_humidity_and_temperature(rm_hs300x_data_t * p_data);
+
+/* Quick getting humidity and temperature for ${hs300x_name}. */
+void ${hs300x_name}_quick_getting_humidity_and_temperature(rm_hs300x_data_t * p_data)
+{
+    fsp_err_t            err;
+    rm_hs300x_raw_data_t hs300x_raw_data;
+    bool is_valid_data = false;
+
+    /* Start the measurement */
+    err = ${hs300x_name}.p_api->measurementStart(${hs300x_name}.p_ctrl);
+    assert(FSP_SUCCESS == err);
+#if ${hs300x_name_upper:raProperty(module.driver.hs300x.name_upper)}_NON_BLOCKING
+    while (!g_hs300x_completed)
+    {
+        ;
+    }
+    g_hs300x_completed = false;
+#endif
+
+    do
+    {
+        /* Read ADC data from HS300X sensor */
+        err = ${hs300x_name}.p_api->read(${hs300x_name}.p_ctrl, &amp;hs300x_raw_data);
+        assert(FSP_SUCCESS == err);
+#if ${hs300x_name_upper}_NON_BLOCKING
+        while (!g_hs300x_completed)
+        {
+            ;
+        }
+        g_hs300x_completed = false;
+#endif
+
+        /* Calculate humidity and temperature values from ADC data */
+        err = ${hs300x_name}.p_api->dataCalculate(${hs300x_name}.p_ctrl, &amp;hs300x_raw_data, p_data);
+        if (FSP_SUCCESS == err)
+        {
+            is_valid_data = true;
+        }
+        else if (FSP_ERR_SENSOR_INVALID_DATA == err)
+        {
+            is_valid_data = false;
+        }
+        else
+        {
+            assert(false);
+        }
+    }
+    while (false == is_valid_data);
+}
+            </content>
+        </template>
+    </developerSupport>
+</raModuleDescription>

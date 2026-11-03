@@ -1,0 +1,13 @@
+<?xml version="1.0" ?>
+<raModuleDescription>
+    <module display="Security|SCE5B" id="module.driver.sce5b" common="1" version="1" visible="false" url="">
+        <constraint display="Requires RA6 MCU">
+          "${interface.mcu.rsip.sce5b}" === "1"
+        </constraint>
+        <requires id="module.driver.sce.requires.sce5b" interface="interface.mcu.rsip.sce5b" visible="false" display="Requires RA6" />
+        <requires id="module.driver.sce.requires.sce5b_key_injection" interface="interface.driver.sce5b_key_injection" visible="true" display="Add Key Injection for PSA Crypto (Optional)" find="false" optional="true" />
+        <provides interface="interface.peripheral.rsip"/>
+        <provides interface="interface.driver.sce"/>
+        <provides interface="interface.driver.sce_for_nx"/>
+    </module>
+</raModuleDescription>

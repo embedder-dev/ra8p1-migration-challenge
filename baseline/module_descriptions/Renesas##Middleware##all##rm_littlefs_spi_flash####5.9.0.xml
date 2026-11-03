@@ -1,0 +1,197 @@
+﻿<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.middleware.rm_littlefs_spi_flash" path="fsp_cfg/rm_littlefs_spi_flash_cfg.h" version="0">
+        <property default="config.middleware.rm_littlefs_spi_flash.param_checking_enable.bsp" display="Parameter Checking" id="config.middleware.rm_littlefs_spi_flash.param_checking_enable" description="If selected code for parameter checking is included in the build.">
+            <option display="Default (BSP)" id="config.middleware.rm_littlefs_spi_flash.param_checking_enable.bsp" value="(BSP_CFG_PARAM_CHECKING_ENABLE)"/>
+            <option display="Enabled" id="config.middleware.rm_littlefs_spi_flash.param_checking_enable.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.rm_littlefs_spi_flash.param_checking_enable.disabled" value="(0)"/>
+        </property>
+        <content>
+        #ifdef __cplusplus
+        extern "C" {
+        #endif
+
+        #define RM_LITTLEFS_SPI_FLASH_CFG_PARAM_CHECKING_ENABLE ${config.middleware.rm_littlefs_spi_flash.param_checking_enable}
+
+        #ifdef __cplusplus
+        }
+        #endif
+        </content>
+    </config>
+    <module id="module.middleware.rm_littlefs_spi_flash" display="Storage|LittleFS on SPI Flash (rm_littlefs_spi_flash)" config="config.middleware.rm_littlefs_spi_flash" version="0" visible="false" url="group___r_m___l_i_t_t_l_e_f_s___s_p_i___f_l_a_s_h.html">
+        <constraint display="Unique name required for each instance">
+            "${interface.middleware.rm_littlefs.${module.middleware.rm_littlefs_spi_flash.name}}" === "1"
+        </constraint>
+        <constraint display="Block size must be a multiple of the read and program sizes">
+            (${module.middleware.rm_littlefs_spi_flash.block_size} % ${module.middleware.rm_littlefs_spi_flash.prog_size} === 0) &amp;&amp;
+            (${module.middleware.rm_littlefs_spi_flash.block_size} % ${module.middleware.rm_littlefs_spi_flash.read_size} === 0)
+        </constraint>
+        <constraint display="Cache size must be a multiple of the read and program sizes">
+            (${module.middleware.rm_littlefs_spi_flash.cache_size} % ${module.middleware.rm_littlefs_spi_flash.prog_size} === 0) &amp;&amp;
+            (${module.middleware.rm_littlefs_spi_flash.cache_size} % ${module.middleware.rm_littlefs_spi_flash.read_size} === 0)
+        </constraint>
+        <constraint display="Cache size must be a factor of the block size">
+            (${module.middleware.rm_littlefs_spi_flash.block_size} % ${module.middleware.rm_littlefs_spi_flash.cache_size} === 0)
+        </constraint>
+        <constraint display="Block Size must be a multiple of the spi flash sector erase size.">
+            (testInteger("${module.middleware.rm_littlefs_spi_flash.block_size}")) &amp;&amp;
+                (((("${module.middleware.rm_littlefs_spi_flash.block_size}" &gt;= "${module.middleware.rm_littlefs_spi_flash.requires.spi::module.driver.ospi_b.sector_erase_size}") &amp;&amp;
+                ("${module.middleware.rm_littlefs_spi_flash.block_size}" % "${module.middleware.rm_littlefs_spi_flash.requires.spi::module.driver.ospi_b.sector_erase_size}" === 0)) ||
+                (!testExists("${module.middleware.rm_littlefs_spi_flash.requires.spi::module.driver.ospi_b.name}"))) &amp;&amp;
+                ((("${module.middleware.rm_littlefs_spi_flash.block_size}" &gt;= "${module.middleware.rm_littlefs_spi_flash.requires.spi::module.driver.qspi.sector_erase_size}") &amp;&amp;
+                ("${module.middleware.rm_littlefs_spi_flash.block_size}" % "${module.middleware.rm_littlefs_spi_flash.requires.spi::module.driver.qspi.sector_erase_size}" === 0)) ||
+                (!testExists("${module.middleware.rm_littlefs_spi_flash.requires.spi::module.driver.qspi.name}"))) &amp;&amp;
+                ((("${module.middleware.rm_littlefs_spi_flash.block_size}" &gt;= "${module.middleware.rm_littlefs_spi_flash.requires.spi::module.driver.ospi.sector_erase_size}") &amp;&amp;
+                ("${module.middleware.rm_littlefs_spi_flash.block_size}" % "${module.middleware.rm_littlefs_spi_flash.requires.spi::module.driver.ospi.sector_erase_size}" === 0)) ||
+                (!testExists("${module.middleware.rm_littlefs_spi_flash.requires.spi::module.driver.ospi.name}"))))
+        </constraint>
+        <constraint display="Requires SPI Flash Memory Driver">
+            (testExists("${module.middleware.rm_littlefs_spi_flash.requires.spi::module.driver.qspi.name}") ||
+             testExists("${module.middleware.rm_littlefs_spi_flash.requires.spi::module.driver.ospi.name}") ||
+             testExists("${module.middleware.rm_littlefs_spi_flash.requires.spi::module.driver.ospi_b.name}"))
+        </constraint>
+        <requires id="module.middleware.rm_littlefs_spi_flash.requires.spi" interface="interface.driver.spi_flash" display="Add SPI Flash Memory Driver [Required]" />
+        <provides interface="interface.middleware.littlefs_port" />
+        <provides interface="interface.middleware.rm_littlefs" />
+        <provides interface="interface.middleware.rm_littlefs.${module.middleware.rm_littlefs_spi_flash.name}"/>
+        <property default="g_rm_littlefs${_instance}" display="Name" id="module.middleware.rm_littlefs_spi_flash.name" description="Module name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.middleware.rm_littlefs_spi_flash.name}")</constraint>
+        </property>
+        <property default="g_rm_littlefs_spi_flash${_instance}_callback" display="Delay Callback" id="module.middleware.rm_littlefs_spi_flash.callback" description="Optional delay callback for custom delay while waiting for the flash erase/write operation to complete.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.middleware.rm_littlefs_spi_flash.callback}")</constraint>
+        </property>
+        <property default="NULL" id="module.middleware.rm_littlefs_spi_flash.p_context" />
+        <property display="Read Size" id="module.middleware.rm_littlefs_spi_flash.read_size" default="1" description="Minimum size of a block read. All read operations will be a multiple of this value.">
+            <constraint display="Must be a non-negative integer">testInteger(${module.middleware.rm_littlefs_spi_flash.read_size}) &amp;&amp; (${module.middleware.rm_littlefs_spi_flash.read_size} &gt;= 0) </constraint>
+        </property>
+        <property display="Program Size" id="module.middleware.rm_littlefs_spi_flash.prog_size" default="4" description="Minimum size of a block program. All program operations will be a multiple of this value.">
+            <constraint display="Must be a non-negative integer">testInteger(${module.middleware.rm_littlefs_spi_flash.prog_size}) &amp;&amp; (${module.middleware.rm_littlefs_spi_flash.prog_size} &gt;= 0) </constraint>
+        </property>
+        <property display="Block Size (bytes)" id="module.middleware.rm_littlefs_spi_flash.block_size" default="4096" description="Size of an erasable block. This does not impact RAM consumption and may be larger than the physical erase size. However, non-inlined files take up at minimum one block. Must be a multiple of the read and program sizes.">
+            <constraint display="Must be a multiple of 64">testInteger(${module.middleware.rm_littlefs_spi_flash.block_size}) &amp;&amp; (${module.middleware.rm_littlefs_spi_flash.block_size} &gt;= 0) &amp;&amp; (${module.middleware.rm_littlefs_spi_flash.block_size} % 64 === 0) </constraint>
+            <constraint display="Must be larger than 104 bytes">(${module.middleware.rm_littlefs_spi_flash.block_size} &gt;= 104)</constraint>
+        </property>
+        <property display="Block Cycles" id="module.middleware.rm_littlefs_spi_flash.block_cycles" default="1024" description="Number of erase cycles before LittleFS evicts metadata logs and moves the metadata to another block. Suggested values are in the range 100-1000, with large values having better performance at the cost of less consistent wear distribution. Set to -1 to disable block-level wear-leveling.">
+            <constraint display="Must be an integer">testInteger(${module.middleware.rm_littlefs_spi_flash.block_cycles})</constraint>
+        </property>
+        <property display="Cache Size" id="module.middleware.rm_littlefs_spi_flash.cache_size" default="64" description="Size of block caches. Each cache buffers a portion of a block in RAM. The LittleFS needs a read cache, a program cache, and one additional cache per file. Larger caches can improve performance by storing more data and reducing the number of disk accesses. Must be a multiple of the read and program sizes, and a factor of the block size.">
+            <constraint display="Must be a non-negative integer">testInteger(${module.middleware.rm_littlefs_spi_flash.cache_size}) &amp;&amp; (${module.middleware.rm_littlefs_spi_flash.cache_size} &gt; 0) </constraint>
+        </property>
+        <property display="Lookahead Size" id="module.middleware.rm_littlefs_spi_flash.lookahead_size" default="16" description="Size of the lookahead buffer in bytes. A larger lookahead buffer increases the number of blocks found during an allocation pass. The lookahead buffer is stored as a compact bitmap, so each byte of RAM can track 8 blocks. Must be a multiple of 8.">
+            <constraint display="Must be a non-negative multiple of 8">testInteger(${module.middleware.rm_littlefs_spi_flash.lookahead_size}) &amp;&amp; (${module.middleware.rm_littlefs_spi_flash.lookahead_size} &gt; 0) &amp;&amp; (${module.middleware.rm_littlefs_spi_flash.lookahead_size} % 8 === 0) </constraint>
+        </property>
+        <property default="0" display="Memory Start Adress Offset (bytes)" id="module.middleware.rm_littlefs_spi_flash.address_offset" description="Enter the starting offset to use in the SPI memory. The starting address for LittleFS memory will be the SPI memory base address plus this offset.">
+            <constraint display="Offset should be greater than or equal to zero">testInteger("${module.middleware.rm_littlefs_spi_flash.address_offset}") &amp;&amp; ("${module.middleware.rm_littlefs_spi_flash.address_offset}" &gt;= 0)</constraint>
+        </property>
+        <property default="33554432" display="Memory Size (bytes)" id="module.middleware.rm_littlefs_spi_flash.size" description="Enter the size that the LittleFS Memory should be. This can be smaller than the SPI memory size in order to use a subset of SPI memory.">
+            <constraint display="Size should be greater than zero">testInteger("${module.middleware.rm_littlefs_spi_flash.size}") &amp;&amp; ("${module.middleware.rm_littlefs_spi_flash.size}" &gt; 0)</constraint>
+        </property>
+        <property default="0xFFFFFFFF" display="Poll Status Count" id="module.middleware.rm_littlefs_spi_flash.poll_status_count" description="Number of times to poll for operation complete status for blocking memory operations.">
+            <constraint display="Poll Status Count should be greater than or equal to zero">testInteger("${module.middleware.rm_littlefs_spi_flash.poll_status_count}") &amp;&amp; ("${module.middleware.rm_littlefs_spi_flash.poll_status_count}" &gt;= 0)</constraint>
+        </property>
+        <property default="" id="module.middleware.rm_littlefs_spi_flash.name_upper">
+            <export>"${module.middleware.rm_littlefs_spi_flash.name}".toUpperCase()</export>
+        </property>
+        <header>
+        /** LittleFS on Flash Instance. */
+        extern const rm_littlefs_instance_t ${module.middleware.rm_littlefs_spi_flash.name};
+        extern rm_littlefs_spi_flash_instance_ctrl_t ${module.middleware.rm_littlefs_spi_flash.name}_ctrl;
+        extern const rm_littlefs_cfg_t ${module.middleware.rm_littlefs_spi_flash.name}_cfg;
+
+        extern struct lfs ${module.middleware.rm_littlefs_spi_flash.name}_lfs;
+        extern const struct lfs_config ${module.middleware.rm_littlefs_spi_flash.name}_lfs_cfg;
+
+#ifndef ${module.middleware.rm_littlefs_spi_flash.callback}
+void ${module.middleware.rm_littlefs_spi_flash.callback}(rm_littlefs_spi_flash_callback_args_t * p_args);
+#endif
+        </header>
+        <includes>
+#include "rm_littlefs_api.h"
+#include "rm_littlefs_spi_flash.h"
+#include "lfs_util.h"
+        </includes>
+        <declarations>
+rm_littlefs_spi_flash_instance_ctrl_t ${module.middleware.rm_littlefs_spi_flash.name}_ctrl;
+
+#ifdef LFS_NO_MALLOC
+static uint8_t ${module.middleware.rm_littlefs_spi_flash.name}_read[${module.middleware.rm_littlefs_spi_flash.cache_size}];
+static uint8_t ${module.middleware.rm_littlefs_spi_flash.name}_prog[${module.middleware.rm_littlefs_spi_flash.cache_size}];
+static uint8_t ${module.middleware.rm_littlefs_spi_flash.name}_lookahead[${module.middleware.rm_littlefs_spi_flash.lookahead_size}];
+#endif
+
+struct lfs ${module.middleware.rm_littlefs_spi_flash.name}_lfs;
+
+#define RA_NOT_DEFINED 0xFFFFFFFF
+
+#if (RA_NOT_DEFINED != ${module.middleware.rm_littlefs_spi_flash.requires.spi::module.driver.qspi.name})
+#define ${module.middleware.rm_littlefs_spi_flash.name_upper}_SECTOR_SIZE (${module.middleware.rm_littlefs_spi_flash.requires.spi::module.driver.qspi.sector_erase_size})
+#elif (RA_NOT_DEFINED != ${module.middleware.rm_littlefs_spi_flash.requires.spi::module.driver.ospi.name})
+#define ${module.middleware.rm_littlefs_spi_flash.name_upper}_SECTOR_SIZE (${module.middleware.rm_littlefs_spi_flash.requires.spi::module.driver.ospi.sector_erase_size})
+#else
+#define ${module.middleware.rm_littlefs_spi_flash.name_upper}_SECTOR_SIZE (${module.middleware.rm_littlefs_spi_flash.requires.spi::module.driver.ospi_b.sector_erase_size})
+#endif
+
+const struct lfs_config ${module.middleware.rm_littlefs_spi_flash.name}_lfs_cfg =
+{
+    .context = &amp;${module.middleware.rm_littlefs_spi_flash.name}_ctrl,
+    .read    = &amp;rm_littlefs_spi_flash_read,
+    .prog    = &amp;rm_littlefs_spi_flash_write,
+    .erase   = &amp;rm_littlefs_spi_flash_erase,
+    .sync    = &amp;rm_littlefs_spi_flash_sync,
+    .read_size      = ${module.middleware.rm_littlefs_spi_flash.read_size},
+    .prog_size      = ${module.middleware.rm_littlefs_spi_flash.prog_size},
+    .block_size     = ${module.middleware.rm_littlefs_spi_flash.name_upper}_SECTOR_SIZE,
+    .block_count    = (${module.middleware.rm_littlefs_spi_flash.size}/${module.middleware.rm_littlefs_spi_flash.name_upper}_SECTOR_SIZE),
+    .block_cycles   = ${module.middleware.rm_littlefs_spi_flash.block_cycles},
+    .cache_size     = ${module.middleware.rm_littlefs_spi_flash.cache_size},
+    .lookahead_size = ${module.middleware.rm_littlefs_spi_flash.lookahead_size},
+#ifdef LFS_NO_MALLOC
+    .read_buffer = (void *) ${module.middleware.rm_littlefs_spi_flash.name}_read,
+    .prog_buffer = (void *) ${module.middleware.rm_littlefs_spi_flash.name}_prog,
+    .lookahead_buffer = (void *) ${module.middleware.rm_littlefs_spi_flash.name}_lookahead,
+#endif
+#ifdef LFS_THREADSAFE
+    .lock   = &amp;rm_littlefs_spi_flash_lock,
+    .unlock = &amp;rm_littlefs_spi_flash_unlock,
+#endif
+};
+
+const rm_littlefs_spi_flash_cfg_t ${module.middleware.rm_littlefs_spi_flash.name}_ext_cfg =
+{
+#if (RA_NOT_DEFINED != ${module.middleware.rm_littlefs_spi_flash.requires.spi::module.driver.qspi.name})
+    .p_lower_lvl        = &amp;${module.middleware.rm_littlefs_spi_flash.requires.spi::module.driver.qspi.name},
+    .base_address       = BSP_FEATURE_QSPI_DEVICE_START_ADDRESS,
+#elif (RA_NOT_DEFINED != ${module.middleware.rm_littlefs_spi_flash.requires.spi::module.driver.ospi.name})
+    .p_lower_lvl        = &amp;${module.middleware.rm_littlefs_spi_flash.requires.spi::module.driver.ospi.name},
+    .base_address       = BSP_FEATURE_OSPI_DEVICE_${module.middleware.rm_littlefs_spi_flash.requires.spi::module.driver.ospi.channel}_START_ADDRESS,
+#else
+    .p_lower_lvl        = &amp;${module.middleware.rm_littlefs_spi_flash.requires.spi::module.driver.ospi_b.name},
+    .base_address       = BSP_FEATURE_OSPI_B_DEVICE_${module.middleware.rm_littlefs_spi_flash.requires.spi::module.driver.ospi_b.channel}_START_ADDRESS,
+#endif
+    .address_offset     = ${module.middleware.rm_littlefs_spi_flash.address_offset},
+    .size               = ${module.middleware.rm_littlefs_spi_flash.size},
+    .poll_status_count  = ${module.middleware.rm_littlefs_spi_flash.poll_status_count},
+    .p_context          = ${module.middleware.rm_littlefs_spi_flash.p_context},
+    .p_callback         = ${module.middleware.rm_littlefs_spi_flash.callback}
+};
+#undef RA_NOT_DEFINED
+
+const rm_littlefs_cfg_t ${module.middleware.rm_littlefs_spi_flash.name}_cfg =
+{
+    .p_lfs_cfg    = &amp;${module.middleware.rm_littlefs_spi_flash.name}_lfs_cfg,
+    .p_extend     = &amp;${module.middleware.rm_littlefs_spi_flash.name}_ext_cfg
+};
+
+/* Instance structure to use this module. */
+const rm_littlefs_instance_t ${module.middleware.rm_littlefs_spi_flash.name} =
+{
+    .p_ctrl        = &amp;${module.middleware.rm_littlefs_spi_flash.name}_ctrl,
+    .p_cfg         = &amp;${module.middleware.rm_littlefs_spi_flash.name}_cfg,
+    .p_api         = &amp;g_rm_littlefs_on_flash,
+};
+        </declarations>
+        <functions>
+        </functions>
+    </module>
+</raModuleDescription>
+

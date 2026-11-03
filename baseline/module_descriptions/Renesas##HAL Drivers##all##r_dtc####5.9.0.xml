@@ -1,0 +1,168 @@
+﻿<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.driver.dtc" path="fsp_cfg/r_dtc_cfg.h" version="0">
+        <property default="config.driver.dtc.param_checking_enable.bsp" display="Parameter Checking" id="config.driver.dtc.param_checking_enable" description="If selected code for parameter checking is included in the build.">
+            <option display="Default (BSP)" id="config.driver.dtc.param_checking_enable.bsp" value="(BSP_CFG_PARAM_CHECKING_ENABLE)"/>
+            <option display="Enabled" id="config.driver.dtc.param_checking_enable.enabled" value="(1)"/>
+            <option display="Disabled" id="config.driver.dtc.param_checking_enable.disabled" value="(0)"/>
+        </property>
+        <property default=".fsp_dtc_vector_table" display="Linker section to keep DTC vector table" id="config.driver.dtc.vector_table" description="Section to place the DTC vector table." />
+
+        <content>
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#define DTC_CFG_PARAM_CHECKING_ENABLE ${config.driver.dtc.param_checking_enable}
+#define DTC_CFG_VECTOR_TABLE_SECTION_NAME "${config.driver.dtc.vector_table}"
+
+#ifdef __cplusplus
+}
+#endif
+        </content>
+    </config>
+    <module config="config.driver.dtc" display="Transfer|${module.driver.transfer.name} Transfer (r_dtc) ${module.driver.transfer.activation_source}" id="module.driver.transfer_on_dtc" version="1" url="group___d_t_c.html">
+        <constraint display="'Number of Transfers' must be a valid non-negative integer with a maximum configurable value of 65536 in Normal Mode.">
+            ((testInteger("${module.driver.transfer.length}")  &amp;&amp; ("${module.driver.transfer.length}" &gt;= 0) &amp;&amp; ("${module.driver.transfer.length}" &lt;= 65536)) || (("${module.driver.transfer.mode}") != ("module.driver.transfer.mode.mode_normal")))
+        </constraint>
+        <constraint display="'Number of Transfers' must be a valid non-negative integer with a maximum configurable value of 256 in Repeat Mode.">
+            ((testInteger("${module.driver.transfer.length}")  &amp;&amp; ("${module.driver.transfer.length}" &gt;= 0) &amp;&amp; ("${module.driver.transfer.length}" &lt;= 256)) || (("${module.driver.transfer.mode}") != ("module.driver.transfer.mode.mode_repeat")))
+        </constraint>
+        <constraint display="'Number of Transfers' must be a valid non-negative integer with a maximum configurable value of 256 in Block Mode.">
+            ((testInteger("${module.driver.transfer.length}")  &amp;&amp; ("${module.driver.transfer.length}" &gt;= 0) &amp;&amp; ("${module.driver.transfer.length}" &lt;= 256)) || (("${module.driver.transfer.mode}") != ("module.driver.transfer.mode.mode_block")))
+        </constraint>
+        <constraint display="Unique name required for each instance">
+            "${interface.driver.transfer.${module.driver.transfer.name}}" === "1"
+        </constraint>
+        <constraint display="Requires DTC peripheral">
+            "${interface.mcu.dtc}" === "1"
+        </constraint>
+        <constraint display="Requires an Activation Source selection">
+            "_disabled" !== "${module.driver.transfer.activation_source}"
+        </constraint>
+        <requires id="module.driver.transfer_on_dtc.requires.dtc" interface="interface.mcu.dtc" visible="false" display="Requires DTC peripheral" />
+        <provides interface="interface.peripheral.dtc_dmac" />
+        <provides interface="interface.peripheral.dtc" />
+        <provides interface="interface.driver.transfer" />
+        <provides interface="interface.driver.transfer_on_dtc" />
+        <!-- Sometimes only DTC can be used for a transfer interface -->
+        <provides interface="interface.driver.transfer.${module.driver.transfer.name}" />
+        <provides interface="interface.driver.transfer_on_dtc.${module.driver.transfer.name}" />
+        <provides interface="interface.driver.transfer_on_dtc.${module.driver.transfer.secret_name}" />
+        <property default="g_transfer${_instance}" display="Name" id="module.driver.transfer.name" description="Module name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.transfer.name}")</constraint>
+            <signal event="event.dtc.end" />
+        </property>
+        <property default="module.driver.transfer.mode.mode_normal" display="Mode" id="module.driver.transfer.mode" description="Select the transfer mode.\nNormal: One transfer per activation, transfer ends after Number of Transfers.\nRepeat: One transfer per activation, Repeat Area address reset after Number of Transfers, transfer repeats until stopped.\nBlock: Number of Blocks per activation, Repeat Area address reset after Number of Transfers, transfer ends after Number of Blocks.">
+            <option display="Normal" id="module.driver.transfer.mode.mode_normal" value="TRANSFER_MODE_NORMAL"/>
+            <option display="Repeat" id="module.driver.transfer.mode.mode_repeat" value="TRANSFER_MODE_REPEAT"/>
+            <option display="Block" id="module.driver.transfer.mode.mode_block" value="TRANSFER_MODE_BLOCK"/>
+        </property>
+        <property default="module.driver.transfer.size.size_2_byte" display="Transfer Size" id="module.driver.transfer.size" description="Select the transfer size.">
+            <option display="1 Byte" id="module.driver.transfer.size.size_1_byte" value="TRANSFER_SIZE_1_BYTE"/>
+            <option display="2 Bytes" id="module.driver.transfer.size.size_2_byte" value="TRANSFER_SIZE_2_BYTE"/>
+            <option display="4 Bytes" id="module.driver.transfer.size.size_4_byte" value="TRANSFER_SIZE_4_BYTE"/>
+        </property>
+        <property default="module.driver.transfer.dest_addr_mode.addr_mode_fixed" display="Destination Address Mode" id="module.driver.transfer.dest_addr_mode" description="Select the address mode for the destination.">
+            <option display="Fixed" id="module.driver.transfer.dest_addr_mode.addr_mode_fixed" value="TRANSFER_ADDR_MODE_FIXED"/>
+            <option display="Incremented" id="module.driver.transfer.dest_addr_mode.addr_mode_incremented" value="TRANSFER_ADDR_MODE_INCREMENTED"/>
+            <option display="Decremented" id="module.driver.transfer.dest_addr_mode.addr_mode_decremented" value="TRANSFER_ADDR_MODE_DECREMENTED"/>
+        </property>
+        <property default="module.driver.transfer.src_addr_mode.addr_mode_fixed" display="Source Address Mode" id="module.driver.transfer.src_addr_mode" description="Select the address mode for the source.">
+            <option display="Fixed" id="module.driver.transfer.src_addr_mode.addr_mode_fixed" value="TRANSFER_ADDR_MODE_FIXED"/>
+            <option display="Incremented" id="module.driver.transfer.src_addr_mode.addr_mode_incremented" value="TRANSFER_ADDR_MODE_INCREMENTED"/>
+            <option display="Decremented" id="module.driver.transfer.src_addr_mode.addr_mode_decremented" value="TRANSFER_ADDR_MODE_DECREMENTED"/>
+        </property>
+        <property default="module.driver.transfer.repeat_area.repeat_area_source" display="Repeat Area (Unused in Normal Mode)" id="module.driver.transfer.repeat_area" description="Select the repeat area. Either the source or destination address resets to its initial value after completing Number of Transfers in Repeat or Block mode.">
+            <option display="Destination" id="module.driver.transfer.repeat_area.repeat_area_destination" value="TRANSFER_REPEAT_AREA_DESTINATION"/>
+            <option display="Source" id="module.driver.transfer.repeat_area.repeat_area_source" value="TRANSFER_REPEAT_AREA_SOURCE"/>
+        </property>
+        <property default="NULL" id="module.driver.transfer.p_dest" />
+        <property default="NULL" id="module.driver.transfer.p_src" />
+        <property default="module.driver.transfer.interrupt.interrupt_end" display="Interrupt Frequency" id="module.driver.transfer.interrupt" description="Select to have interrupt after each transfer or after last transfer.">
+            <option display="After all transfers have completed" id="module.driver.transfer.interrupt.interrupt_end" value="TRANSFER_IRQ_END"/>
+            <option display="After each transfer" id="module.driver.transfer.interrupt.interrupt_each" value="TRANSFER_IRQ_EACH"/>
+        </property>
+        <property default="0" display="Number of Transfers" id="module.driver.transfer.length" description="Specify the number of transfers.">
+            <constraint display="Value must be a non-negative integer">testInteger("${module.driver.transfer.length}")  &amp;&amp; ("${module.driver.transfer.length}" &gt;= 0)</constraint>
+        </property>
+        <property default="0" display="Number of Blocks (Valid only in Block Mode)" id="module.driver.transfer.num_blocks" description="Specify the number of blocks to transfer in Block mode.">
+            <constraint display="Must be a valid non-negative integer with a maximum configurable value of 65536. Applicable only in Block Mode.">testInteger("${module.driver.transfer.num_blocks}")  &amp;&amp; ("${module.driver.transfer.num_blocks}" &gt;= 0) &amp;&amp; ("${module.driver.transfer.num_blocks}" &lt;= 65536)</constraint>
+        </property>
+        <property default="1" display="Number of Transfer Descriptors" id="module.driver.transfer.number_of_descriptors" description="Specify the number of transfer descriptors. Users have to initialize descriptors if its value is greater than 1.">
+            <constraint display="Value must be a non-negative integer">${module.driver.transfer.number_of_descriptors} &gt;= 0</constraint>
+        </property>
+        <property default="" display="Activation Source" id="module.driver.transfer.activation_source" destination="destination.dtc" description="Select the DTC transfer start event.">
+            <select enum="enum.disabled"/>
+            <select enum="scope.dtc"/>
+        </property>
+        <property default="without_middleware" id="module.driver.transfer.secret_name" description="Secret module name for internal use."></property>
+        <header>
+/* Transfer on DTC Instance. */
+extern const transfer_instance_t ${module.driver.transfer.name};
+
+/** Access the DTC instance using these structures when calling API functions directly (::p_api is not used). */
+extern dtc_instance_ctrl_t ${module.driver.transfer.name}_ctrl;
+extern const transfer_cfg_t ${module.driver.transfer.name}_cfg;
+        </header>
+        <includes>
+#include &quot;r_dtc.h&quot;
+#include &quot;r_transfer_api.h&quot;
+        </includes>
+        <declarations>
+dtc_instance_ctrl_t ${module.driver.transfer.name}_ctrl;
+
+#if (${module.driver.transfer.number_of_descriptors} == 1)
+transfer_info_t ${module.driver.transfer.name}_info DTC_TRANSFER_INFO_ALIGNMENT =
+{
+    .transfer_settings_word_b.dest_addr_mode = ${module.driver.transfer.dest_addr_mode},
+    .transfer_settings_word_b.repeat_area    = ${module.driver.transfer.repeat_area},
+    .transfer_settings_word_b.irq            = ${module.driver.transfer.interrupt},
+    .transfer_settings_word_b.chain_mode     = TRANSFER_CHAIN_MODE_DISABLED,
+    .transfer_settings_word_b.src_addr_mode  = ${module.driver.transfer.src_addr_mode},
+    .transfer_settings_word_b.size           = ${module.driver.transfer.size},
+    .transfer_settings_word_b.mode           = ${module.driver.transfer.mode},
+    .p_dest                                  = (void *) ${module.driver.transfer.p_dest},
+    .p_src                                   = (void const *) ${module.driver.transfer.p_src},
+    .num_blocks                              = (uint16_t) ${module.driver.transfer.num_blocks},
+    .length                                  = (uint16_t) ${module.driver.transfer.length},
+};
+
+#elif (${module.driver.transfer.number_of_descriptors} > 1)
+/* User is responsible to initialize the array. */
+transfer_info_t ${module.driver.transfer.name}_info[${module.driver.transfer.number_of_descriptors}] DTC_TRANSFER_INFO_ALIGNMENT;
+#else
+/* User must call api::reconfigure before enable DTC transfer. */
+#endif
+
+const dtc_extended_cfg_t ${module.driver.transfer.name}_cfg_extend =
+{
+    .activation_source   = VECTOR_NUMBER_${module.driver.transfer.activation_source},
+};
+
+const transfer_cfg_t ${module.driver.transfer.name}_cfg =
+{
+#if (${module.driver.transfer.number_of_descriptors} == 1)
+    .p_info              = &amp;${module.driver.transfer.name}_info,
+#elif (${module.driver.transfer.number_of_descriptors} > 1)
+    .p_info              = ${module.driver.transfer.name}_info,
+#else
+    .p_info = NULL,
+#endif
+    .p_extend            = &amp;${module.driver.transfer.name}_cfg_extend,
+};
+
+/* Instance structure to use this module. */
+const transfer_instance_t ${module.driver.transfer.name} =
+{
+    .p_ctrl        = &amp;${module.driver.transfer.name}_ctrl,
+    .p_cfg         = &amp;${module.driver.transfer.name}_cfg,
+    .p_api         = &amp;g_transfer_on_dtc
+};
+        </declarations>
+        <api configurable="true">
+            <file>ra/fsp/inc/instances/r_dtc.h</file>
+            <file>ra/fsp/inc/api/r_transfer_api.h</file>
+        </api>
+    </module>
+</raModuleDescription>

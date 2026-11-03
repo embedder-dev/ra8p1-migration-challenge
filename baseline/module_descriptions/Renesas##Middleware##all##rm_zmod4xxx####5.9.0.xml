@@ -1,0 +1,2006 @@
+<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.driver.zmod4xxx" path="fsp_cfg/rm_zmod4xxx_cfg.h" version="0">
+        <property default="config.driver.zmod4xxx.param_checking_enable.bsp" display="Parameter Checking" id="config.driver.zmod4xxx.param_checking_enable" description="If selected code for parameter checking is included in the build.">
+            <option display="Default (BSP)" id="config.driver.zmod4xxx.param_checking_enable.bsp" value="(BSP_CFG_PARAM_CHECKING_ENABLE)"/>
+            <option display="Enabled" id="config.driver.zmod4xxx.param_checking_enable.enabled" value="(1)"/>
+            <option display="Disabled" id="config.driver.zmod4xxx.param_checking_enable.disabled" value="(0)"/>
+        </property>
+        <content>
+            #ifdef __cplusplus
+            extern "C" {
+            #endif
+
+            #define RM_ZMOD4XXX_CFG_PARAM_CHECKING_ENABLE   ${config.driver.zmod4xxx.param_checking_enable}
+
+            #ifdef __cplusplus
+            }
+            #endif
+        </content>
+    </config>
+    <module config="config.driver.zmod4xxx" display="Sensor|${module.driver.zmod4xxx.name} ZMOD4XXX Gas Sensor (rm_zmod4xxx)" id="module.driver.zmod4xxx_on_zmod4xxx" version="1" url="group___r_m___z_m_o_d4_x_x_x.html">
+        <constraint display="Unique name required for each instance">
+            "${interface.driver.zmod4xxx.${module.driver.zmod4xxx.name}}" === "1"
+        </constraint>
+        <constraint display="Requires ZMOD4XXX Library">
+          testExists("${interface.driver.zmod4xxx_lib_on_zmod4xxx}")
+        </constraint>
+        <requires id="module.driver.zmod4xxx.requires.zmod4xxx_lib" interface="interface.driver.zmod4xxx_lib_on_zmod4xxx" visible="false" display="Requires ZMOD Library" find="false">
+            <override property="module.driver.zmod4xxx_lib.p_context" value="${module.driver.zmod4xxx.name}_ctrl"/>
+            <override property="module.driver.zmod4xxx_lib.instance_name" value="${module.driver.zmod4xxx.name}"/>
+        </requires>
+        <requires id="module.driver.zmod4xxx.requires.comms_i2c_device" interface="interface.driver.comms_i2c_device" visible="false">
+        </requires>
+        <requires id="module.driver.zmod4xxx.requires.irq" interface="interface.driver.external_irq_on_icu" display="Add IRQ Driver for measurement [optional]" find="false" optional="true" >
+            <override property="module.driver.external_irq.p_callback" value="rm_zmod4xxx_irq_callback"/>
+        </requires>
+
+        <provides interface="interface.driver.zmod4xxx" />
+        <provides interface="interface.driver.zmod4xxx_on_zmod4xxx" />
+        <provides interface="interface.driver.zmod4xxx.${module.driver.zmod4xxx.name}" />
+        <property default="g_zmod4xxx_sensor${_instance}" display="Name" id="module.driver.zmod4xxx.name" description="Module name.">
+            <constraint display="Name must be a valid C symbol">
+                testSymbol("${module.driver.zmod4xxx.name}")
+            </constraint>
+        </property>
+        <property default="NULL" id="module.driver.zmod4xxx.p_context" />
+        <property default="zmod4xxx_comms_i2c_callback" display="Comms I2C Callback" id="module.driver.zmod4xxx.p_callback" description="A user COMMS I2C callback function can be provided.">
+            <constraint display="Name must be a valid C symbol">
+                testSymbol("${module.driver.zmod4xxx.p_callback}")
+            </constraint>
+        </property>
+        <property default="zmod4xxx_irq_callback" display="IRQ Callback" id="module.driver.zmod4xxx.p_irq_callback" description="A user IRQ callback function can be provided.">
+            <constraint display="Name must be a valid C symbol">
+                testSymbol("${module.driver.zmod4xxx.p_irq_callback}")
+            </constraint>
+        </property>
+        <property default="" id="module.driver.zmod4xxx.name_upper">
+            <export>"${module.driver.zmod4xxx.name}".toUpperCase()</export>
+        </property>
+
+        <header>
+/* ZMOD4XXX Sensor */
+extern const rm_zmod4xxx_instance_t ${module.driver.zmod4xxx.name};
+extern rm_zmod4xxx_instance_ctrl_t ${module.driver.zmod4xxx.name}_ctrl;
+extern const rm_zmod4xxx_cfg_t ${module.driver.zmod4xxx.name}_cfg;
+#ifndef ${module.driver.zmod4xxx.p_callback}
+void ${module.driver.zmod4xxx.p_callback}(rm_zmod4xxx_callback_args_t * p_args);
+#endif
+#ifndef ${module.driver.zmod4xxx.requires.irq::module.driver.external_irq.p_callback}
+void ${module.driver.zmod4xxx.requires.irq::module.driver.external_irq.p_callback}(external_irq_callback_args_t * p_args);
+#endif
+#ifndef ${module.driver.zmod4xxx.p_irq_callback}
+void ${module.driver.zmod4xxx.p_irq_callback}(rm_zmod4xxx_callback_args_t *p_args);
+#endif
+        </header>
+
+        <includes>
+#include &quot;rm_zmod4xxx.h&quot;
+#include &quot;rm_zmod4xxx_api.h&quot;
+        </includes>
+
+        <declarations>
+rm_zmod4xxx_instance_ctrl_t ${module.driver.zmod4xxx.name}_ctrl;
+const rm_zmod4xxx_cfg_t ${module.driver.zmod4xxx.name}_cfg =
+{
+    .p_comms_instance = &amp;${module.driver.zmod4xxx.requires.comms_i2c_device::module.driver.comms_i2c_device.name},
+#define RA_NOT_DEFINED (1)
+#if (RA_NOT_DEFINED == ${module.driver.zmod4xxx.requires.irq::module.driver.external_irq.name})
+    .p_irq_instance = NULL,
+    .p_irq_callback = NULL,
+#else
+    .p_irq_instance = &amp;${module.driver.zmod4xxx.requires.irq::module.driver.external_irq.name},
+    .p_irq_callback = ${module.driver.zmod4xxx.p_irq_callback},
+#endif
+#undef RA_NOT_DEFINED
+    .p_comms_callback = ${module.driver.zmod4xxx.p_callback},
+#if defined(${module.driver.zmod4xxx.p_context})
+    .p_context           = ${module.driver.zmod4xxx.p_context},
+#else
+    .p_context           = &amp;${module.driver.zmod4xxx.p_context},
+#endif
+    .p_extend            = (void *)&amp;${module.driver.zmod4xxx.name}_extended_cfg,
+};
+
+const rm_zmod4xxx_instance_t ${module.driver.zmod4xxx.name} =
+{
+    .p_ctrl = &amp;${module.driver.zmod4xxx.name}_ctrl,
+    .p_cfg  = &amp;${module.driver.zmod4xxx.name}_cfg,
+    .p_api  = &amp;g_zmod4xxx_on_zmod4xxx,
+};
+        </declarations>
+    </module>
+
+    <!-- Developer Assistance -->
+    <developerSupport>
+        <api version="1">
+            <platform id="fsp" max="" min="1.1.0"/>
+            <moduleRef id="module.driver.zmod4xxx_on_zmod4xxx"/>
+            <description><![CDATA[<form><p><span color="header" font="header">Overview</span></p><p>ZMOD4XXX provides snippets of code for operating the ZMOD4XXX Middleware.</p></form>]]></description>
+            <function display="Quick Setup" id="zmod4xxx_quick_setup">
+                <description><![CDATA[<form><p>This function provides quick setup for ZMOD4XXX using the properties from the RA configurator.</p></form>]]></description>
+            </function>
+            <function display="Quick Getting IAQ 1st Gen. Continuous mode Data" id="zmod4xxx_quick_getting_iaq_1st_gen_continuous_data">
+                <description><![CDATA[<form><p>This function provides quick getting IAQ 1st Gen. Continuous mode values for ZMOD4410 using the properties from the RA configurator.</p></form>]]></description>
+            </function>
+            <function display="Quick Getting IAQ 1st Gen. Low Power Data" id="zmod4xxx_quick_getting_iaq_1st_gen_low_power_data">
+                <description><![CDATA[<form><p>This function provides quick getting IAQ 1st Gen. Low Power mode values for ZMOD4410 using the properties from the RA configurator.</p></form>]]></description>
+            </function>
+            <function display="Quick Getting IAQ 2nd Gen. Data" id="zmod4xxx_quick_getting_iaq_2nd_gen_data">
+                <description><![CDATA[<form><p>This function provides quick getting IAQ 2nd Gen. values for ZMOD4410 using the properties from the RA configurator.</p></form>]]></description>
+            </function>
+            <function display="Quick Getting IAQ 2nd Gen. Ultra Low Power Data" id="zmod4xxx_quick_getting_iaq_2nd_gen_ulp_data">
+                <description><![CDATA[<form><p>This function provides quick getting IAQ 2nd Gen. Ultra Low Power values for ZMOD4410 using the properties from the RA configurator.</p></form>]]></description>
+            </function>
+            <function display="Quick Getting Odor Data" id="zmod4xxx_quick_getting_odor_data">
+                <description><![CDATA[<form><p>This function provides quick getting Odor values for ZMOD4410 using the properties from the RA configurator.</p></form>]]></description>
+            </function>
+            <function display="Quick Getting Sulfur Odor Data" id="zmod4xxx_quick_getting_sulfur_odor_data">
+                <description><![CDATA[<form><p>This function provides quick getting Sulfur Odor values for ZMOD4410 using the properties from the RA configurator.</p></form>]]></description>
+            </function>
+            <function display="Quick Getting OAQ 1st Gen. Data" id="zmod4xxx_quick_getting_oaq_1st_gen_data">
+                <description><![CDATA[<form><p>This function provides quick getting OAQ 1st Gen. values for ZMOD4510 using the properties from the RA configurator.</p></form>]]></description>
+            </function>
+            <function display="Quick Getting OAQ 2nd Gen. Data" id="zmod4xxx_quick_getting_oaq_2nd_gen_data">
+                <description><![CDATA[<form><p>This function provides quick getting OAQ 2nd Gen. values for ZMOD4510 using the properties from the RA configurator.</p></form>]]></description>
+            </function>
+            <function display="Quick Getting RAQ Data" id="zmod4xxx_quick_getting_raq_data">
+                <description><![CDATA[<form><p>This function provides quick getting RAQ values for ZMOD4450 using the properties from the RA configurator.</p></form>]]></description>
+            </function>
+            <function display="Quick Getting Relative IAQ Data" id="zmod4xxx_quick_getting_rel_iaq_data">
+                <description><![CDATA[<form><p>This function provides quick getting Relative IAQ values for ZMOD4410 using the properties from the RA configurator.</p></form>]]></description>
+            </function>
+            <function display="Quick Getting Relative IAQ Ultra Low Power Data" id="zmod4xxx_quick_getting_rel_iaq_ulp_data">
+                <description><![CDATA[<form><p>This function provides quick getting Relative IAQ Ultra Low Power values for ZMOD4410 using the properties from the RA configurator.</p></form>]]></description>
+            </function>
+            <function display="Quick Getting PBAQ Data" id="zmod4xxx_quick_getting_pbaq_data">
+                <description><![CDATA[<form><p>This function provides quick getting PBAQ values for ZMOD4410 using the properties from the RA configurator.</p></form>]]></description>
+            </function>
+            <function display="Quick Getting NO2 O3 Data" id="zmod4xxx_quick_getting_no2_o3_data">
+                <description><![CDATA[<form><p>This function provides quick getting NO2 O3 values for ZMOD4510 using the properties from the RA configurator.</p></form>]]></description>
+            </function>
+        </api>
+        <template category="function_call" display="Call Quick Setup" id="module.driver.zmod4xxx.quick_setup" version="1">
+            <platform id="fsp" max="" min="1.1.0"/>
+            <moduleRef id="module.driver.zmod4xxx_on_zmod4xxx">
+                <function id="zmod4xxx_quick_setup"/>
+            </moduleRef>
+            <content>
+/* TODO: Enable if you want to open ZMOD4XXX */
+#define ${zmod4xxx_name_upper:raProperty(module.driver.zmod4xxx.name_upper)}_NON_BLOCKING (0)
+#define ${zmod4xxx_name_upper}_IRQ_ENABLE   (0)
+
+#if ${zmod4xxx_name_upper}_NON_BLOCKING
+volatile bool g_zmod4xxx_i2c_completed = false;
+volatile rm_zmod4xxx_event_t g_zmod4xxx_i2c_callback_event;
+#endif
+#if ${zmod4xxx_name_upper}_IRQ_ENABLE
+volatile bool g_zmod4xxx_irq_completed = false;
+#endif
+
+/* TODO: Enable if you want to use a I2C callback */
+#define ${zmod4xxx_name_upper}_I2C_CALLBACK_ENABLE (0)
+#if ${zmod4xxx_name_upper}_I2C_CALLBACK_ENABLE
+void ${zmod4xxx_callback:raProperty(module.driver.zmod4xxx.p_callback)}(rm_zmod4xxx_callback_args_t * p_args)
+{
+#if ${zmod4xxx_name_upper}_NON_BLOCKING
+    g_zmod4xxx_i2c_callback_event = p_args->event;
+
+    if (RM_ZMOD4XXX_EVENT_ERROR != p_args->event)
+    {
+        g_zmod4xxx_i2c_completed = true;
+    }
+#else
+    FSP_PARAMETER_NOT_USED(p_args);
+#endif
+}
+#endif
+
+/* TODO: Enable if you want to use a IRQ callback */
+#define ${zmod4xxx_name_upper}_IRQ_CALLBACK_ENABLE (0)
+#if ${zmod4xxx_name_upper}_IRQ_CALLBACK_ENABLE
+void ${zmod4xxx_irq_callback:raProperty(module.driver.zmod4xxx.p_irq_callback)}(rm_zmod4xxx_callback_args_t * p_args)
+{
+#if ${zmod4xxx_name_upper}_IRQ_ENABLE
+    if (RM_ZMOD4XXX_EVENT_MEASUREMENT_COMPLETE == p_args->event)
+    {
+        g_zmod4xxx_irq_completed = true;
+    }
+#else
+    FSP_PARAMETER_NOT_USED(p_args);
+#endif
+}
+#endif
+
+/* Delay */
+#define ${zmod4xxx_name_upper}_DELAY_50     (50)
+#define ${zmod4xxx_name_upper}_DELAY_5475   (5475)
+#define ${zmod4xxx_name_upper}_DELAY_1990   (1990)
+#define ${zmod4xxx_name_upper}_DELAY_1010   (1010)
+#define ${zmod4xxx_name_upper}_DELAY_90000  (90000)
+#define ${zmod4xxx_name_upper}_DELAY_1500   (1500)
+#define ${zmod4xxx_name_upper}_DELAY_2000   (2000)
+#define ${zmod4xxx_name_upper}_DELAY_3000   (3000)
+#define ${zmod4xxx_name_upper}_DELAY_5000   (5000)
+#define ${zmod4xxx_name_upper}_DELAY_6000   (6000)
+#define ${zmod4xxx_name_upper}_DELAY_MS     (1000)
+
+/* Quick setup for ${zmod4xxx_name:raProperty(module.driver.zmod4xxx.name)}.
+ * - ${i2c_bus_name:raProperty(module.driver.comms_i2c_bus.name)} must be setup before calling this function
+ *     (See Developer Assistance -> ${zmod4xxx_name} -> ZMOD4xxx ***** on rm_zmod4xxx -> ${i2c_device_name:raProperty(module.driver.comms_i2c_device.name)} -> ${i2c_bus_name} -> Quick Setup).
+ */
+void ${zmod4xxx_name}_quick_setup(void);
+
+/* Quick setup for ${zmod4xxx_name}. */
+void ${zmod4xxx_name}_quick_setup(void)
+{
+    fsp_err_t err;
+
+    /* Open ZMOD4XXX sensor instance, this must be done before calling any ZMOD4XXX API */
+    err = ${zmod4xxx_name}.p_api->open(${zmod4xxx_name}.p_ctrl, ${zmod4xxx_name}.p_cfg);
+    assert(FSP_SUCCESS == err);
+}
+            </content>
+        </template>
+        <template category="function_call" display="Quick Getting IAQ 1st Gen. Continuous mode Data" id="module.driver.zmod4xxx.quick_getting_iaq_1st_gen_continuous_mode_data" version="1">
+            <platform id="fsp" max="" min="1.1.0"/>
+            <moduleRef id="module.driver.zmod4xxx_on_zmod4xxx">
+                <function id="zmod4xxx_quick_getting_iaq_1st_gen_continuous_data"/>
+            </moduleRef>
+            <content>
+/* Quick getting IAQ 1st Gen. Continuous mode values for ${zmod4xxx_name:raProperty(module.driver.zmod4xxx.name)}.
+ * - ${zmod4xxx_name} must be setup before calling this function.
+ */
+bool ${zmod4xxx_name}_quick_getting_iaq_1st_gen_continuous_mode_data(rm_zmod4xxx_iaq_1st_data_t * p_gas_data);
+
+/* Quick getting gas data for ${zmod4xxx_name}. */
+bool ${zmod4xxx_name}_quick_getting_iaq_1st_gen_continuous_mode_data(rm_zmod4xxx_iaq_1st_data_t * p_gas_data)
+{
+    fsp_err_t            err;
+    rm_zmod4xxx_raw_data_t zmod4xxx_raw_data;
+    bool stabilization_complete = false;
+
+    /* Clear callback flags */
+#if ${zmod4xxx_name_upper:raProperty(module.driver.zmod4xxx.name_upper)}_IRQ_ENABLE
+    g_zmod4xxx_irq_completed = false;
+#endif
+#if ${zmod4xxx_name_upper}_NON_BLOCKING
+    g_zmod4xxx_i2c_completed = false;
+#endif
+
+    /* Start the measurement */
+    /* If the MeasurementStart API is called once, a second call is not required. */
+    err = ${zmod4xxx_name}.p_api->measurementStart(${zmod4xxx_name}.p_ctrl);
+    assert(FSP_SUCCESS == err);
+#if ${zmod4xxx_name_upper}_NON_BLOCKING
+    while (!g_zmod4xxx_i2c_completed)
+    {
+        ;
+    }
+    g_zmod4xxx_i2c_completed = false;
+#endif
+
+    do
+    {
+        /* Wait for the measurement to complete */
+#if ${zmod4xxx_name_upper}_IRQ_ENABLE
+        while (!g_zmod4xxx_irq_completed)
+        {
+            ;
+        }
+        g_zmod4xxx_irq_completed = false;
+#else
+        err = ${zmod4xxx_name}.p_api->statusCheck(${zmod4xxx_name}.p_ctrl);
+        assert(FSP_SUCCESS == err);
+#if ${zmod4xxx_name_upper}_NON_BLOCKING
+        while (!g_zmod4xxx_i2c_completed)
+        {
+            ;
+        }
+        g_zmod4xxx_i2c_completed = false;
+#endif
+#endif
+        /* Read ADC data from ZMOD4xxx sensor */
+        err = ${zmod4xxx_name}.p_api->read(${zmod4xxx_name}.p_ctrl, &amp;zmod4xxx_raw_data);
+        if (err == FSP_ERR_SENSOR_MEASUREMENT_NOT_FINISHED)
+        {
+#if BSP_CFG_RTOS == 1 // AzureOS
+            tx_thread_sleep(${zmod4xxx_name_upper}_DELAY_50 * TX_TIMER_TICKS_PER_SECOND / ${zmod4xxx_name_upper}_DELAY_MS);
+#elif BSP_CFG_RTOS == 2 // FreeRTOS
+            vTaskDelay(${zmod4xxx_name_upper}_DELAY_50 * configTICK_RATE_HZ / ${zmod4xxx_name_upper}_DELAY_MS);
+#else // Bare Metal
+            R_BSP_SoftwareDelay(${zmod4xxx_name_upper}_DELAY_50, BSP_DELAY_UNITS_MILLISECONDS);
+#endif
+        }
+    }
+    while (err == FSP_ERR_SENSOR_MEASUREMENT_NOT_FINISHED);
+    assert(FSP_SUCCESS == err);
+
+#if ${zmod4xxx_name_upper}_NON_BLOCKING
+    while (!g_zmod4xxx_i2c_completed)
+    {
+        ;
+    }
+    g_zmod4xxx_i2c_completed = false;
+#endif
+
+    /* Calculate IAQ 1st Gen. values from ZMOD4xxx ADC data */
+    err = ${zmod4xxx_name}.p_api->iaq1stGenDataCalculate(${zmod4xxx_name}.p_ctrl, &amp;zmod4xxx_raw_data, p_gas_data);
+    if (err == FSP_SUCCESS)
+    {
+        stabilization_complete = true;
+    }
+    else if(err == FSP_ERR_SENSOR_IN_STABILIZATION)
+    {
+        stabilization_complete = false;
+    }
+    else
+    {
+        assert(false);
+    }
+
+    return stabilization_complete;
+}
+            </content>
+        </template>
+        <template category="function_call" display="Quick Getting IAQ 1st Gen. Low Power mode Data" id="module.driver.zmod4xxx.quick_getting_iaq_1st_gen_low_power_mode_data" version="1">
+            <platform id="fsp" max="" min="1.1.0"/>
+            <moduleRef id="module.driver.zmod4xxx_on_zmod4xxx">
+                <function id="zmod4xxx_quick_getting_iaq_1st_gen_low_power_data"/>
+            </moduleRef>
+            <content>
+/* Quick getting IAQ 1st Gen. Low Power mode values for ${zmod4xxx_name:raProperty(module.driver.zmod4xxx.name)}.
+ * - ${zmod4xxx_name} must be setup before calling this function.
+ */
+bool ${zmod4xxx_name}_quick_getting_iaq_1st_gen_low_power_mode_data(rm_zmod4xxx_iaq_1st_data_t * p_gas_data);
+
+/* Quick getting gas data for ${zmod4xxx_name}. */
+bool ${zmod4xxx_name}_quick_getting_iaq_1st_gen_low_power_mode_data(rm_zmod4xxx_iaq_1st_data_t * p_gas_data)
+{
+    fsp_err_t            err;
+    rm_zmod4xxx_raw_data_t zmod4xxx_raw_data;
+    bool stabilization_complete = false;
+
+    /* Clear callback flags */
+#if ${zmod4xxx_name_upper:raProperty(module.driver.zmod4xxx.name_upper)}_IRQ_ENABLE
+    g_zmod4xxx_irq_completed = false;
+#endif
+#if ${zmod4xxx_name_upper}_NON_BLOCKING
+    g_zmod4xxx_i2c_completed = false;
+#endif
+
+    /* Start the measurement */
+    err = ${zmod4xxx_name}.p_api->measurementStart(${zmod4xxx_name}.p_ctrl);
+    assert(FSP_SUCCESS == err);
+#if ${zmod4xxx_name_upper}_NON_BLOCKING
+    while (!g_zmod4xxx_i2c_completed)
+    {
+        ;
+    }
+    g_zmod4xxx_i2c_completed = false;
+#endif
+
+    do
+    {
+        /* Wait for the measurement to complete */
+#if ${zmod4xxx_name_upper}_IRQ_ENABLE
+        while (!g_zmod4xxx_irq_completed)
+        {
+            ;
+        }
+        g_zmod4xxx_irq_completed = false;
+#else
+        err = ${zmod4xxx_name}.p_api->statusCheck(${zmod4xxx_name}.p_ctrl);
+        assert(FSP_SUCCESS == err);
+#if ${zmod4xxx_name_upper}_NON_BLOCKING
+        while (!g_zmod4xxx_i2c_completed)
+        {
+            ;
+        }
+        g_zmod4xxx_i2c_completed = false;
+#endif
+#endif
+        /* Read ADC data from ZMOD4xxx sensor */
+        err = ${zmod4xxx_name}.p_api->read(${zmod4xxx_name}.p_ctrl, &amp;zmod4xxx_raw_data);
+        if (err == FSP_ERR_SENSOR_MEASUREMENT_NOT_FINISHED)
+        {
+#if BSP_CFG_RTOS == 1 // AzureOS
+            tx_thread_sleep(${zmod4xxx_name_upper}_DELAY_50 * TX_TIMER_TICKS_PER_SECOND / ${zmod4xxx_name_upper}_DELAY_MS);
+#elif BSP_CFG_RTOS == 2 // FreeRTOS
+            vTaskDelay(${zmod4xxx_name_upper}_DELAY_50 * configTICK_RATE_HZ / ${zmod4xxx_name_upper}_DELAY_MS);
+#else // Bare Metal
+            R_BSP_SoftwareDelay(${zmod4xxx_name_upper}_DELAY_50, BSP_DELAY_UNITS_MILLISECONDS);
+#endif
+        }
+    }
+    while (err == FSP_ERR_SENSOR_MEASUREMENT_NOT_FINISHED);
+    assert(FSP_SUCCESS == err);
+
+#if ${zmod4xxx_name_upper}_NON_BLOCKING
+    while (!g_zmod4xxx_i2c_completed)
+    {
+        ;
+    }
+    g_zmod4xxx_i2c_completed = false;
+#endif
+
+    /* Calculate IAQ 1st Gen. values from ZMOD4xxx ADC data */
+    err = ${zmod4xxx_name}.p_api->iaq1stGenDataCalculate(${zmod4xxx_name}.p_ctrl, &amp;zmod4xxx_raw_data, p_gas_data);
+    if (err == FSP_SUCCESS)
+    {
+        stabilization_complete = true;
+    }
+    else if(err == FSP_ERR_SENSOR_IN_STABILIZATION)
+    {
+        stabilization_complete = false;
+    }
+    else
+    {
+        assert(false);
+    }
+
+    /* Delay required time. See Table 3 in the ZMOD4410 Programming Manual. */
+#if BSP_CFG_RTOS == 1 // AzureOS
+    tx_thread_sleep(${zmod4xxx_name_upper}_DELAY_5475 * TX_TIMER_TICKS_PER_SECOND / ${zmod4xxx_name_upper}_DELAY_MS);
+#elif BSP_CFG_RTOS == 2 // FreeRTOS
+    vTaskDelay(${zmod4xxx_name_upper}_DELAY_5475 * configTICK_RATE_HZ / ${zmod4xxx_name_upper}_DELAY_MS);
+#else // Bare Metal
+    R_BSP_SoftwareDelay(${zmod4xxx_name_upper}_DELAY_5475, BSP_DELAY_UNITS_MILLISECONDS);
+#endif
+
+    return stabilization_complete;
+}
+            </content>
+        </template>
+        <template category="function_call" display="Quick Getting IAQ 2nd Gen. Data" id="module.driver.zmod4xxx.quick_getting_iaq_2nd_gen_data" version="1">
+            <platform id="fsp" max="" min="1.1.0"/>
+            <moduleRef id="module.driver.zmod4xxx_on_zmod4xxx">
+                <function id="zmod4xxx_quick_getting_iaq_2nd_gen_data"/>
+            </moduleRef>
+            <content>
+/* Quick getting IAQ 2nd Gen. values for ${zmod4xxx_name:raProperty(module.driver.zmod4xxx.name)}.
+ * - ${zmod4xxx_name} must be setup before calling this function.
+ */
+bool ${zmod4xxx_name}_quick_getting_iaq_2nd_gen_data(rm_zmod4xxx_iaq_2nd_data_t * p_gas_data, float temperature, float humidity);
+
+/* Quick getting gas data for ${zmod4xxx_name}. */
+bool ${zmod4xxx_name}_quick_getting_iaq_2nd_gen_data(rm_zmod4xxx_iaq_2nd_data_t * p_gas_data, float temperature, float humidity)
+{
+    fsp_err_t            err;
+    rm_zmod4xxx_raw_data_t zmod4xxx_raw_data;
+    bool stabilization_complete = false;
+
+    /* Clear callback flags */
+#if ${zmod4xxx_name_upper:raProperty(module.driver.zmod4xxx.name_upper)}_IRQ_ENABLE
+    g_zmod4xxx_irq_completed = false;
+#endif
+#if ${zmod4xxx_name_upper}_NON_BLOCKING
+    g_zmod4xxx_i2c_completed = false;
+#endif
+
+    /* Start the measurement */
+    err = ${zmod4xxx_name}.p_api->measurementStart(${zmod4xxx_name}.p_ctrl);
+    assert(FSP_SUCCESS == err);
+#if ${zmod4xxx_name_upper}_NON_BLOCKING
+    while (!g_zmod4xxx_i2c_completed)
+    {
+        ;
+    }
+    g_zmod4xxx_i2c_completed = false;
+#endif
+
+    /* Delay required time. See Table 3 in the ZMOD4410 Programming Manual. */
+#if BSP_CFG_RTOS == 1 // AzureOS
+    tx_thread_sleep(${zmod4xxx_name_upper}_DELAY_3000 * TX_TIMER_TICKS_PER_SECOND / ${zmod4xxx_name_upper}_DELAY_MS);
+#elif BSP_CFG_RTOS == 2 // FreeRTOS
+    vTaskDelay(${zmod4xxx_name_upper}_DELAY_3000 * configTICK_RATE_HZ / ${zmod4xxx_name_upper}_DELAY_MS);
+#else // Bare Metal
+    R_BSP_SoftwareDelay(${zmod4xxx_name_upper}_DELAY_3000, BSP_DELAY_UNITS_MILLISECONDS);
+#endif
+
+    do
+    {
+        /* Wait for the measurement to complete */
+#if ${zmod4xxx_name_upper}_IRQ_ENABLE
+        while (!g_zmod4xxx_irq_completed)
+        {
+            ;
+        }
+        g_zmod4xxx_irq_completed = false;
+#else
+        err = ${zmod4xxx_name}.p_api->statusCheck(${zmod4xxx_name}.p_ctrl);
+        assert(FSP_SUCCESS == err);
+#if ${zmod4xxx_name_upper}_NON_BLOCKING
+        while (!g_zmod4xxx_i2c_completed)
+        {
+            ;
+        }
+        g_zmod4xxx_i2c_completed = false;
+#endif
+#endif
+
+        /* Check if a device error occurs */
+        err = ${zmod4xxx_name}.p_api->deviceErrorCheck(${zmod4xxx_name}.p_ctrl);
+        assert(FSP_SUCCESS == err);
+#if ${zmod4xxx_name_upper}_NON_BLOCKING
+        while (!g_zmod4xxx_i2c_completed)
+        {
+            ;
+        }
+        g_zmod4xxx_i2c_completed = false;
+
+        if ((RM_ZMOD4XXX_EVENT_DEV_ERR_POWER_ON_RESET == g_zmod4xxx_i2c_callback_event) ||
+            (RM_ZMOD4XXX_EVENT_DEV_ERR_ACCESS_CONFLICT == g_zmod4xxx_i2c_callback_event))
+        {
+            /* Error during read of sensor status. Please reset device. */
+            while (1)
+            {
+                ;
+            }
+        }
+#endif
+
+        /* Read ADC data from ZMOD4xxx sensor */
+        err = ${zmod4xxx_name}.p_api->read(${zmod4xxx_name}.p_ctrl, &amp;zmod4xxx_raw_data);
+        if (err == FSP_ERR_SENSOR_MEASUREMENT_NOT_FINISHED)
+        {
+#if BSP_CFG_RTOS == 1 // AzureOS
+            tx_thread_sleep(${zmod4xxx_name_upper}_DELAY_50 * TX_TIMER_TICKS_PER_SECOND / ${zmod4xxx_name_upper}_DELAY_MS);
+#elif BSP_CFG_RTOS == 2 // FreeRTOS
+            vTaskDelay(${zmod4xxx_name_upper}_DELAY_50 * configTICK_RATE_HZ / ${zmod4xxx_name_upper}_DELAY_MS);
+#else // Bare Metal
+            R_BSP_SoftwareDelay(${zmod4xxx_name_upper}_DELAY_50, BSP_DELAY_UNITS_MILLISECONDS);
+#endif
+        }
+    }
+    while (err == FSP_ERR_SENSOR_MEASUREMENT_NOT_FINISHED);
+    assert(FSP_SUCCESS == err);
+
+#if ${zmod4xxx_name_upper}_NON_BLOCKING
+    while (!g_zmod4xxx_i2c_completed)
+    {
+        ;
+    }
+    g_zmod4xxx_i2c_completed = false;
+#endif
+
+        /* Check if a device error occurs */
+        err = ${zmod4xxx_name}.p_api->deviceErrorCheck(${zmod4xxx_name}.p_ctrl);
+        assert(FSP_SUCCESS == err);
+#if ${zmod4xxx_name_upper}_NON_BLOCKING
+        while (!g_zmod4xxx_i2c_completed)
+        {
+            ;
+        }
+        g_zmod4xxx_i2c_completed = false;
+
+        if ((RM_ZMOD4XXX_EVENT_DEV_ERR_POWER_ON_RESET == g_zmod4xxx_i2c_callback_event) ||
+            (RM_ZMOD4XXX_EVENT_DEV_ERR_ACCESS_CONFLICT == g_zmod4xxx_i2c_callback_event))
+        {
+            /* Error during read of sensor status. Please reset device. */
+            while (1)
+            {
+                ;
+            }
+        }
+#endif
+
+    /* Set the current temperature and humidity */
+    err = ${zmod4xxx_name}.p_api->temperatureAndHumiditySet(${zmod4xxx_name}.p_ctrl, temperature, humidity);
+    assert(FSP_SUCCESS == err);
+
+    /* Calculate IAQ 2nd Gen. values from ZMOD4xxx ADC data */
+    err = ${zmod4xxx_name}.p_api->iaq2ndGenDataCalculate(${zmod4xxx_name}.p_ctrl, &amp;zmod4xxx_raw_data, p_gas_data);
+    if (err == FSP_SUCCESS)
+    {
+        stabilization_complete = true;
+    }
+    else if(err == FSP_ERR_SENSOR_IN_STABILIZATION)
+    {
+        stabilization_complete = false;
+    }
+    else if (err == FSP_ERR_SENSOR_INVALID_DATA)
+    {
+        stabilization_complete = false;
+    }
+    else
+    {
+        assert(false);
+    }
+
+    return stabilization_complete;
+}
+            </content>
+        </template>
+        <template category="function_call" display="Quick Getting IAQ 2nd Gen. Ultra Low Power Data" id="module.driver.zmod4xxx.quick_getting_iaq_2nd_gen_ulp_data" version="1">
+            <platform id="fsp" max="" min="1.1.0"/>
+            <moduleRef id="module.driver.zmod4xxx_on_zmod4xxx">
+                <function id="zmod4xxx_quick_getting_iaq_2nd_gen_ulp_data"/>
+            </moduleRef>
+            <content>
+/* Quick getting IAQ 2nd Gen. Ultra Low Power values for ${zmod4xxx_name:raProperty(module.driver.zmod4xxx.name)}.
+ * - ${zmod4xxx_name} must be setup before calling this function.
+ */
+bool ${zmod4xxx_name}_quick_getting_iaq_2nd_gen_ulp_data(rm_zmod4xxx_iaq_2nd_data_t * p_gas_data, float temperature, float humidity);
+
+/* Quick getting gas data for ${zmod4xxx_name}. */
+bool ${zmod4xxx_name}_quick_getting_iaq_2nd_gen_ulp_data(rm_zmod4xxx_iaq_2nd_data_t * p_gas_data, float temperature, float humidity)
+{
+    fsp_err_t            err;
+    rm_zmod4xxx_raw_data_t zmod4xxx_raw_data;
+    bool stabilization_complete = false;
+
+    /* Clear callback flags */
+#if ${zmod4xxx_name_upper:raProperty(module.driver.zmod4xxx.name_upper)}_IRQ_ENABLE
+    g_zmod4xxx_irq_completed = false;
+#endif
+#if ${zmod4xxx_name_upper}_NON_BLOCKING
+    g_zmod4xxx_i2c_completed = false;
+#endif
+
+    /* Start the measurement */
+    err = ${zmod4xxx_name}.p_api->measurementStart(${zmod4xxx_name}.p_ctrl);
+    assert(FSP_SUCCESS == err);
+#if ${zmod4xxx_name_upper}_NON_BLOCKING
+    while (!g_zmod4xxx_i2c_completed)
+    {
+        ;
+    }
+    g_zmod4xxx_i2c_completed = false;
+#endif
+
+    /* First delay. It should be longer than 1010 ms. See Table 4 in the ZMOD4410 Programming Manual. */
+#if BSP_CFG_RTOS == 1 // AzureOS
+    tx_thread_sleep(${zmod4xxx_name_upper}_DELAY_1010 * TX_TIMER_TICKS_PER_SECOND / ${zmod4xxx_name_upper}_DELAY_MS);
+#elif BSP_CFG_RTOS == 2 // FreeRTOS
+    vTaskDelay(${zmod4xxx_name_upper}_DELAY_1010 * configTICK_RATE_HZ / ${zmod4xxx_name_upper}_DELAY_MS);
+#else // Bare Metal
+    R_BSP_SoftwareDelay(${zmod4xxx_name_upper}_DELAY_1010, BSP_DELAY_UNITS_MILLISECONDS);
+#endif
+
+    do
+    {
+        /* Wait for the measurement to complete */
+#if ${zmod4xxx_name_upper}_IRQ_ENABLE
+        while (!g_zmod4xxx_irq_completed)
+        {
+            ;
+        }
+        g_zmod4xxx_irq_completed = false;
+#else
+        err = ${zmod4xxx_name}.p_api->statusCheck(${zmod4xxx_name}.p_ctrl);
+        assert(FSP_SUCCESS == err);
+#if ${zmod4xxx_name_upper}_NON_BLOCKING
+        while (!g_zmod4xxx_i2c_completed)
+        {
+            ;
+        }
+        g_zmod4xxx_i2c_completed = false;
+#endif
+#endif
+
+        /* Check if a device error occurs */
+        err = ${zmod4xxx_name}.p_api->deviceErrorCheck(${zmod4xxx_name}.p_ctrl);
+        assert(FSP_SUCCESS == err);
+#if ${zmod4xxx_name_upper}_NON_BLOCKING
+        while (!g_zmod4xxx_i2c_completed)
+        {
+            ;
+        }
+        g_zmod4xxx_i2c_completed = false;
+
+        if ((RM_ZMOD4XXX_EVENT_DEV_ERR_POWER_ON_RESET == g_zmod4xxx_i2c_callback_event) ||
+            (RM_ZMOD4XXX_EVENT_DEV_ERR_ACCESS_CONFLICT == g_zmod4xxx_i2c_callback_event))
+        {
+            /* Error during read of sensor status or Measurement not completed due to unexpected reset. Please reset device. */
+            while (1)
+            {
+                ;
+            }
+        }
+#endif
+
+        /* Read ADC data from ZMOD4xxx sensor */
+        err = ${zmod4xxx_name}.p_api->read(${zmod4xxx_name}.p_ctrl, &amp;zmod4xxx_raw_data);
+        if (err == FSP_ERR_SENSOR_MEASUREMENT_NOT_FINISHED)
+        {
+#if BSP_CFG_RTOS == 1 // AzureOS
+            tx_thread_sleep(${zmod4xxx_name_upper}_DELAY_50 * TX_TIMER_TICKS_PER_SECOND / ${zmod4xxx_name_upper}_DELAY_MS);
+#elif BSP_CFG_RTOS == 2 // FreeRTOS
+            vTaskDelay(${zmod4xxx_name_upper}_DELAY_50 * configTICK_RATE_HZ / ${zmod4xxx_name_upper}_DELAY_MS);
+#else // Bare Metal
+            R_BSP_SoftwareDelay(${zmod4xxx_name_upper}_DELAY_50, BSP_DELAY_UNITS_MILLISECONDS);
+#endif
+        }
+    }
+    while (err == FSP_ERR_SENSOR_MEASUREMENT_NOT_FINISHED);
+    assert(FSP_SUCCESS == err);
+
+#if ${zmod4xxx_name_upper}_NON_BLOCKING
+    while (!g_zmod4xxx_i2c_completed)
+    {
+        ;
+    }
+    g_zmod4xxx_i2c_completed = false;
+#endif
+
+    /* Check if a device error occurs */
+    err = ${zmod4xxx_name}.p_api->deviceErrorCheck(${zmod4xxx_name}.p_ctrl);
+    assert(FSP_SUCCESS == err);
+#if ${zmod4xxx_name_upper}_NON_BLOCKING
+    while (!g_zmod4xxx_i2c_completed)
+    {
+        ;
+    }
+    g_zmod4xxx_i2c_completed = false;
+
+    if ((RM_ZMOD4XXX_EVENT_DEV_ERR_POWER_ON_RESET == g_zmod4xxx_i2c_callback_event) ||
+        (RM_ZMOD4XXX_EVENT_DEV_ERR_ACCESS_CONFLICT == g_zmod4xxx_i2c_callback_event))
+    {
+        /* Check validness of ADC results:
+            * - RM_ZMOD4XXX_EVENT_DEV_ERR_POWER_ON_RESET : Unvalid ADC results due to an unexpected reset.
+            * - RM_ZMOD4XXX_EVENT_DEV_ERR_ACCESS_CONFLICT: Unvalid ADC results due a still running measurement while results readout.
+            *//* Please reset device. */
+        while (1)
+        {
+            ;
+        }
+    }
+#endif
+
+    /* Set the current temperature and humidity */
+    err = ${zmod4xxx_name}.p_api->temperatureAndHumiditySet(${zmod4xxx_name}.p_ctrl, temperature, humidity);
+    assert(FSP_SUCCESS == err);
+
+    /* Calculate IAQ 2nd Gen. Ultra Low Power values from ZMOD4xxx ADC data */
+    err = ${zmod4xxx_name}.p_api->iaq2ndGenDataCalculate(${zmod4xxx_name}.p_ctrl, &amp;zmod4xxx_raw_data, p_gas_data);
+    if (err == FSP_SUCCESS)
+    {
+        stabilization_complete = true;
+    }
+    else if(err == FSP_ERR_SENSOR_IN_STABILIZATION)
+    {
+        stabilization_complete = false;
+    }
+    else if (err == FSP_ERR_SENSOR_INVALID_DATA)
+    {
+        stabilization_complete = false;
+    }
+    else
+    {
+        assert(false);
+    }
+
+    /* Second Delay. The sum of the first and second delay should amount 90 seconds. See Table 4 in the ZMOD4410 Programming Manual. */
+#if BSP_CFG_RTOS == 1 // AzureOS
+    tx_thread_sleep((${zmod4xxx_name_upper}_DELAY_90000 - ${zmod4xxx_name_upper}_DELAY_1010) * TX_TIMER_TICKS_PER_SECOND / ${zmod4xxx_name_upper}_DELAY_MS);
+#elif BSP_CFG_RTOS == 2 // FreeRTOS
+    vTaskDelay((${zmod4xxx_name_upper}_DELAY_90000 - ${zmod4xxx_name_upper}_DELAY_1010) * configTICK_RATE_HZ / ${zmod4xxx_name_upper}_DELAY_MS);
+#else // Bare Metal
+    R_BSP_SoftwareDelay((${zmod4xxx_name_upper}_DELAY_90000 - ${zmod4xxx_name_upper}_DELAY_1010), BSP_DELAY_UNITS_MILLISECONDS);
+#endif
+
+    return stabilization_complete;
+}
+            </content>
+        </template>
+        <template category="function_call" display="Quick Getting Odor Data" id="module.driver.zmod4xxx.quick_getting_odor_data" version="1">
+            <platform id="fsp" max="" min="1.1.0"/>
+            <moduleRef id="module.driver.zmod4xxx_on_zmod4xxx">
+                <function id="zmod4xxx_quick_getting_odor_data"/>
+            </moduleRef>
+            <content>
+/* Quick getting Odor values for ${zmod4xxx_name:raProperty(module.driver.zmod4xxx.name)}.
+ * - ${zmod4xxx_name} must be setup before calling this function.
+ */
+bool ${zmod4xxx_name}_quick_getting_odor_data(rm_zmod4xxx_odor_data_t * p_gas_data);
+
+/* Quick getting gas data for ${zmod4xxx_name}. */
+bool ${zmod4xxx_name}_quick_getting_odor_data(rm_zmod4xxx_odor_data_t * p_gas_data)
+{
+    fsp_err_t            err;
+    rm_zmod4xxx_raw_data_t zmod4xxx_raw_data;
+    bool stabilization_complete = false;
+
+    /* Clear callback flags */
+#if ${zmod4xxx_name_upper:raProperty(module.driver.zmod4xxx.name_upper)}_IRQ_ENABLE
+    g_zmod4xxx_irq_completed = false;
+#endif
+#if ${zmod4xxx_name_upper}_NON_BLOCKING
+    g_zmod4xxx_i2c_completed = false;
+#endif
+
+    /* Start the measurement */
+    /* If the MeasurementStart API is called once, a second call is not required. */
+    err = ${zmod4xxx_name}.p_api->measurementStart(${zmod4xxx_name}.p_ctrl);
+    assert(FSP_SUCCESS == err);
+#if ${zmod4xxx_name_upper}_NON_BLOCKING
+    while (!g_zmod4xxx_i2c_completed)
+    {
+        ;
+    }
+    g_zmod4xxx_i2c_completed = false;
+#endif
+
+    do
+    {
+        /* Wait for the measurement to complete */
+#if ${zmod4xxx_name_upper}_IRQ_ENABLE
+        while (!g_zmod4xxx_irq_completed)
+        {
+            ;
+        }
+        g_zmod4xxx_irq_completed = false;
+#else
+        err = ${zmod4xxx_name}.p_api->statusCheck(${zmod4xxx_name}.p_ctrl);
+        assert(FSP_SUCCESS == err);
+#if ${zmod4xxx_name_upper}_NON_BLOCKING
+        while (!g_zmod4xxx_i2c_completed)
+        {
+            ;
+        }
+        g_zmod4xxx_i2c_completed = false;
+#endif
+#endif
+        /* Read ADC data from ZMOD4xxx sensor */
+        err = ${zmod4xxx_name}.p_api->read(${zmod4xxx_name}.p_ctrl, &amp;zmod4xxx_raw_data);
+        if (err == FSP_ERR_SENSOR_MEASUREMENT_NOT_FINISHED)
+        {
+#if BSP_CFG_RTOS == 1 // AzureOS
+            tx_thread_sleep(${zmod4xxx_name_upper}_DELAY_50 * TX_TIMER_TICKS_PER_SECOND / ${zmod4xxx_name_upper}_DELAY_MS);
+#elif BSP_CFG_RTOS == 2 // FreeRTOS
+            vTaskDelay(${zmod4xxx_name_upper}_DELAY_50 * configTICK_RATE_HZ / ${zmod4xxx_name_upper}_DELAY_MS);
+#else // Bare Metal
+            R_BSP_SoftwareDelay(${zmod4xxx_name_upper}_DELAY_50, BSP_DELAY_UNITS_MILLISECONDS);
+#endif
+        }
+    }
+    while (err == FSP_ERR_SENSOR_MEASUREMENT_NOT_FINISHED);
+    assert(FSP_SUCCESS == err);
+
+#if ${zmod4xxx_name_upper}_NON_BLOCKING
+    while (!g_zmod4xxx_i2c_completed)
+    {
+        ;
+    }
+    g_zmod4xxx_i2c_completed = false;
+#endif
+
+    /* Calculate Odor values from ZMOD4xxx ADC data */
+    err = ${zmod4xxx_name}.p_api->odorDataCalculate(${zmod4xxx_name}.p_ctrl, &amp;zmod4xxx_raw_data, p_gas_data);
+    if (err == FSP_SUCCESS)
+    {
+        stabilization_complete = true;
+    }
+    else if(err == FSP_ERR_SENSOR_IN_STABILIZATION)
+    {
+        stabilization_complete = false;
+    }
+    else
+    {
+        assert(false);
+    }
+
+    return stabilization_complete;
+}
+            </content>
+        </template>
+        <template category="function_call" display="Quick Getting Sulfur Odor Data" id="module.driver.zmod4xxx.quick_getting_sulfur_odor_data" version="1">
+            <platform id="fsp" max="" min="1.1.0"/>
+            <moduleRef id="module.driver.zmod4xxx_on_zmod4xxx">
+                <function id="zmod4xxx_quick_getting_sulfur_odor_data"/>
+            </moduleRef>
+            <content>
+/* Quick getting Sulfur Odor values for ${zmod4xxx_name:raProperty(module.driver.zmod4xxx.name)}.
+ * - ${zmod4xxx_name} must be setup before calling this function.
+ */
+bool ${zmod4xxx_name}_quick_getting_sulfur_odor_data(rm_zmod4xxx_sulfur_odor_data_t * p_gas_data);
+
+/* Quick getting gas data for ${zmod4xxx_name}. */
+bool ${zmod4xxx_name}_quick_getting_sulfur_odor_data(rm_zmod4xxx_sulfur_odor_data_t * p_gas_data)
+{
+    fsp_err_t            err;
+    rm_zmod4xxx_raw_data_t zmod4xxx_raw_data;
+    bool stabilization_complete = false;
+
+    /* Clear callback flags */
+#if ${zmod4xxx_name_upper:raProperty(module.driver.zmod4xxx.name_upper)}_IRQ_ENABLE
+    g_zmod4xxx_irq_completed = false;
+#endif
+#if ${zmod4xxx_name_upper}_NON_BLOCKING
+    g_zmod4xxx_i2c_completed = false;
+#endif
+
+    /* Start the measurement */
+    err = ${zmod4xxx_name}.p_api->measurementStart(${zmod4xxx_name}.p_ctrl);
+    assert(FSP_SUCCESS == err);
+#if ${zmod4xxx_name_upper}_NON_BLOCKING
+    while (!g_zmod4xxx_i2c_completed)
+    {
+        ;
+    }
+    g_zmod4xxx_i2c_completed = false;
+#endif
+
+    do
+    {
+        /* Wait for the measurement to complete */
+#if ${zmod4xxx_name_upper}_IRQ_ENABLE
+        while (!g_zmod4xxx_irq_completed)
+        {
+            ;
+        }
+        g_zmod4xxx_irq_completed = false;
+#else
+        err = ${zmod4xxx_name}.p_api->statusCheck(${zmod4xxx_name}.p_ctrl);
+        assert(FSP_SUCCESS == err);
+#if ${zmod4xxx_name_upper}_NON_BLOCKING
+        while (!g_zmod4xxx_i2c_completed)
+        {
+            ;
+        }
+        g_zmod4xxx_i2c_completed = false;
+#endif
+#endif
+        /* Read ADC data from ZMOD4xxx sensor */
+        err = ${zmod4xxx_name}.p_api->read(${zmod4xxx_name}.p_ctrl, &amp;zmod4xxx_raw_data);
+        if (err == FSP_ERR_SENSOR_MEASUREMENT_NOT_FINISHED)
+        {
+#if BSP_CFG_RTOS == 1 // AzureOS
+            tx_thread_sleep(${zmod4xxx_name_upper}_DELAY_50 * TX_TIMER_TICKS_PER_SECOND / ${zmod4xxx_name_upper}_DELAY_MS);
+#elif BSP_CFG_RTOS == 2 // FreeRTOS
+            vTaskDelay(${zmod4xxx_name_upper}_DELAY_50 * configTICK_RATE_HZ / ${zmod4xxx_name_upper}_DELAY_MS);
+#else // Bare Metal
+            R_BSP_SoftwareDelay(${zmod4xxx_name_upper}_DELAY_50, BSP_DELAY_UNITS_MILLISECONDS);
+#endif
+        }
+    }
+    while (err == FSP_ERR_SENSOR_MEASUREMENT_NOT_FINISHED);
+    assert(FSP_SUCCESS == err);
+
+#if ${zmod4xxx_name_upper}_NON_BLOCKING
+    while (!g_zmod4xxx_i2c_completed)
+    {
+        ;
+    }
+    g_zmod4xxx_i2c_completed = false;
+#endif
+
+    /* Calculate Sulfur Odor values from ZMOD4xxx ADC data */
+    err = ${zmod4xxx_name}.p_api->sulfurOdorDataCalculate(${zmod4xxx_name}.p_ctrl, &amp;zmod4xxx_raw_data, p_gas_data);
+    if (err == FSP_SUCCESS)
+    {
+        stabilization_complete = true;
+    }
+    else if(err == FSP_ERR_SENSOR_IN_STABILIZATION)
+    {
+        stabilization_complete = false;
+    }
+    else
+    {
+        assert(false);
+    }
+
+    /* Delay required time. See Table 6 in the ZMOD4410 Programming Manual. */
+#if BSP_CFG_RTOS == 1 // AzureOS
+    tx_thread_sleep(${zmod4xxx_name_upper}_DELAY_1990 * TX_TIMER_TICKS_PER_SECOND / ${zmod4xxx_name_upper}_DELAY_MS);
+#elif BSP_CFG_RTOS == 2 // FreeRTOS
+    vTaskDelay(${zmod4xxx_name_upper}_DELAY_1990 * configTICK_RATE_HZ / ${zmod4xxx_name_upper}_DELAY_MS);
+#else // Bare Metal
+    R_BSP_SoftwareDelay(${zmod4xxx_name_upper}_DELAY_1990, BSP_DELAY_UNITS_MILLISECONDS);
+#endif
+
+    return stabilization_complete;
+}
+            </content>
+        </template>
+        <template category="function_call" display="Quick Getting OAQ 1st Gen. Data" id="module.driver.zmod4xxx.quick_getting_oaq_1st_gen_data" version="1">
+            <platform id="fsp" max="" min="1.1.0"/>
+            <moduleRef id="module.driver.zmod4xxx_on_zmod4xxx">
+                <function id="zmod4xxx_quick_getting_oaq_1st_gen_data"/>
+            </moduleRef>
+            <content>
+/* Quick getting OAQ 1st Gen. values for ${zmod4xxx_name:raProperty(module.driver.zmod4xxx.name)}.
+ * - ${zmod4xxx_name} must be setup before calling this function.
+ */
+bool ${zmod4xxx_name}_quick_getting_oaq_1st_gen_data(rm_zmod4xxx_oaq_1st_data_t * p_gas_data);
+
+/* Quick getting gas data for ${zmod4xxx_name}. */
+bool ${zmod4xxx_name}_quick_getting_oaq_1st_gen_data(rm_zmod4xxx_oaq_1st_data_t * p_gas_data)
+{
+    fsp_err_t            err;
+    rm_zmod4xxx_raw_data_t zmod4xxx_raw_data;
+    bool stabilization_complete = false;
+
+    /* Clear callback flags */
+#if ${zmod4xxx_name_upper:raProperty(module.driver.zmod4xxx.name_upper)}_IRQ_ENABLE
+    g_zmod4xxx_irq_completed = false;
+#endif
+#if ${zmod4xxx_name_upper}_NON_BLOCKING
+    g_zmod4xxx_i2c_completed = false;
+#endif
+
+    /* Start the measurement */
+    err = ${zmod4xxx_name}.p_api->measurementStart(${zmod4xxx_name}.p_ctrl);
+    assert(FSP_SUCCESS == err);
+#if ${zmod4xxx_name_upper}_NON_BLOCKING
+    while (!g_zmod4xxx_i2c_completed)
+    {
+        ;
+    }
+    g_zmod4xxx_i2c_completed = false;
+#endif
+
+    do
+    {
+        /* Wait for the measurement to complete */
+#if ${zmod4xxx_name_upper}_IRQ_ENABLE
+        while (!g_zmod4xxx_irq_completed)
+        {
+            ;
+        }
+        g_zmod4xxx_irq_completed = false;
+#else
+        err = ${zmod4xxx_name}.p_api->statusCheck(${zmod4xxx_name}.p_ctrl);
+        assert(FSP_SUCCESS == err);
+#if ${zmod4xxx_name_upper}_NON_BLOCKING
+        while (!g_zmod4xxx_i2c_completed)
+        {
+            ;
+        }
+        g_zmod4xxx_i2c_completed = false;
+#endif
+#endif
+        /* Read ADC data from ZMOD4xxx sensor */
+        err = ${zmod4xxx_name}.p_api->read(${zmod4xxx_name}.p_ctrl, &amp;zmod4xxx_raw_data);
+        if (err == FSP_ERR_SENSOR_MEASUREMENT_NOT_FINISHED)
+        {
+#if BSP_CFG_RTOS == 1 // AzureOS
+            tx_thread_sleep(${zmod4xxx_name_upper}_DELAY_50 * TX_TIMER_TICKS_PER_SECOND / ${zmod4xxx_name_upper}_DELAY_MS);
+#elif BSP_CFG_RTOS == 2 // FreeRTOS
+            vTaskDelay(${zmod4xxx_name_upper}_DELAY_50 * configTICK_RATE_HZ / ${zmod4xxx_name_upper}_DELAY_MS);
+#else // Bare Metal
+            R_BSP_SoftwareDelay(${zmod4xxx_name_upper}_DELAY_50, BSP_DELAY_UNITS_MILLISECONDS);
+#endif
+        }
+    }
+    while (err == FSP_ERR_SENSOR_MEASUREMENT_NOT_FINISHED);
+    assert(FSP_SUCCESS == err);
+
+#if ${zmod4xxx_name_upper}_NON_BLOCKING
+    while (!g_zmod4xxx_i2c_completed)
+    {
+        ;
+    }
+    g_zmod4xxx_i2c_completed = false;
+#endif
+
+    /* Calculate OAQ 1st Gen. values from ZMOD4xxx ADC data */
+    err = ${zmod4xxx_name}.p_api->oaq1stGenDataCalculate(${zmod4xxx_name}.p_ctrl, &amp;zmod4xxx_raw_data, p_gas_data);
+    if (err == FSP_SUCCESS)
+    {
+        stabilization_complete = true;
+    }
+    else if(err == FSP_ERR_SENSOR_IN_STABILIZATION)
+    {
+        stabilization_complete = false;
+    }
+    else
+    {
+        assert(false);
+    }
+
+    return stabilization_complete;
+}
+            </content>
+        </template>
+        <template category="function_call" display="Quick Getting OAQ 2nd Gen. Data" id="module.driver.zmod4xxx.quick_getting_oaq_2nd_gen_data" version="1">
+            <platform id="fsp" max="" min="1.1.0"/>
+            <moduleRef id="module.driver.zmod4xxx_on_zmod4xxx">
+                <function id="zmod4xxx_quick_getting_oaq_2nd_gen_data"/>
+            </moduleRef>
+            <content>
+/* Quick getting OAQ 2nd Gen. values for ${zmod4xxx_name:raProperty(module.driver.zmod4xxx.name)}.
+ * - ${zmod4xxx_name} must be setup before calling this function.
+ */
+bool ${zmod4xxx_name}_quick_getting_oaq_2nd_gen_data(rm_zmod4xxx_oaq_2nd_data_t * p_gas_data, float temperature, float humidity);
+
+/* Quick getting gas data for ${zmod4xxx_name}. */
+bool ${zmod4xxx_name}_quick_getting_oaq_2nd_gen_data(rm_zmod4xxx_oaq_2nd_data_t * p_gas_data, float temperature, float humidity)
+{
+    fsp_err_t            err;
+    rm_zmod4xxx_raw_data_t zmod4xxx_raw_data;
+    bool stabilization_complete = false;
+
+    /* Clear callback flags */
+#if ${zmod4xxx_name_upper:raProperty(module.driver.zmod4xxx.name_upper)}_IRQ_ENABLE
+    g_zmod4xxx_irq_completed = false;
+#endif
+#if ${zmod4xxx_name_upper}_NON_BLOCKING
+    g_zmod4xxx_i2c_completed = false;
+#endif
+
+    /* Start the measurement */
+    err = ${zmod4xxx_name}.p_api->measurementStart(${zmod4xxx_name}.p_ctrl);
+    assert(FSP_SUCCESS == err);
+#if ${zmod4xxx_name_upper}_NON_BLOCKING
+    while (!g_zmod4xxx_i2c_completed)
+    {
+        ;
+    }
+    g_zmod4xxx_i2c_completed = false;
+#endif
+
+    /* Delay required time. See Table 4 in the ZMOD4510 Programming Manual. */
+#if BSP_CFG_RTOS == 1 // AzureOS
+    tx_thread_sleep(${zmod4xxx_name_upper}_DELAY_2000 * TX_TIMER_TICKS_PER_SECOND / ${zmod4xxx_name_upper}_DELAY_MS);
+#elif BSP_CFG_RTOS == 2 // FreeRTOS
+    vTaskDelay(${zmod4xxx_name_upper}_DELAY_2000 * configTICK_RATE_HZ / ${zmod4xxx_name_upper}_DELAY_MS);
+#else // Bare Metal
+    R_BSP_SoftwareDelay(${zmod4xxx_name_upper}_DELAY_2000, BSP_DELAY_UNITS_MILLISECONDS);
+#endif
+
+    do
+    {
+        /* Wait for the measurement to complete */
+#if ${zmod4xxx_name_upper}_IRQ_ENABLE
+        while (!g_zmod4xxx_irq_completed)
+        {
+            ;
+        }
+        g_zmod4xxx_irq_completed = false;
+#else
+        err = ${zmod4xxx_name}.p_api->statusCheck(${zmod4xxx_name}.p_ctrl);
+        assert(FSP_SUCCESS == err);
+#if ${zmod4xxx_name_upper}_NON_BLOCKING
+        while (!g_zmod4xxx_i2c_completed)
+        {
+            ;
+        }
+        g_zmod4xxx_i2c_completed = false;
+#endif
+#endif
+
+        /* Check if a device error occurs */
+        err = ${zmod4xxx_name}.p_api->deviceErrorCheck(${zmod4xxx_name}.p_ctrl);
+        assert(FSP_SUCCESS == err);
+#if ${zmod4xxx_name_upper}_NON_BLOCKING
+        while (!g_zmod4xxx_i2c_completed)
+        {
+            ;
+        }
+        g_zmod4xxx_i2c_completed = false;
+
+        if ((RM_ZMOD4XXX_EVENT_DEV_ERR_POWER_ON_RESET == g_zmod4xxx_i2c_callback_event) ||
+            (RM_ZMOD4XXX_EVENT_DEV_ERR_ACCESS_CONFLICT == g_zmod4xxx_i2c_callback_event))
+        {
+            /* Error during read of sensor status or Measurement not completed due to unexpected reset. Please reset device. */
+            while (1)
+            {
+                ;
+            }
+        }
+#endif
+
+        /* Read ADC data from ZMOD4xxx sensor */
+        err = ${zmod4xxx_name}.p_api->read(${zmod4xxx_name}.p_ctrl, &amp;zmod4xxx_raw_data);
+        if (err == FSP_ERR_SENSOR_MEASUREMENT_NOT_FINISHED)
+        {
+#if BSP_CFG_RTOS == 1 // AzureOS
+            tx_thread_sleep(${zmod4xxx_name_upper}_DELAY_50 * TX_TIMER_TICKS_PER_SECOND / ${zmod4xxx_name_upper}_DELAY_MS);
+#elif BSP_CFG_RTOS == 2 // FreeRTOS
+            vTaskDelay(${zmod4xxx_name_upper}_DELAY_50 * configTICK_RATE_HZ / ${zmod4xxx_name_upper}_DELAY_MS);
+#else // Bare Metal
+            R_BSP_SoftwareDelay(${zmod4xxx_name_upper}_DELAY_50, BSP_DELAY_UNITS_MILLISECONDS);
+#endif
+        }
+    }
+    while (err == FSP_ERR_SENSOR_MEASUREMENT_NOT_FINISHED);
+    assert(FSP_SUCCESS == err);
+
+#if ${zmod4xxx_name_upper}_NON_BLOCKING
+    while (!g_zmod4xxx_i2c_completed)
+    {
+        ;
+    }
+    g_zmod4xxx_i2c_completed = false;
+#endif
+
+    /* Check if a device error occurs */
+    err = ${zmod4xxx_name}.p_api->deviceErrorCheck(${zmod4xxx_name}.p_ctrl);
+    assert(FSP_SUCCESS == err);
+#if ${zmod4xxx_name_upper}_NON_BLOCKING
+    while (!g_zmod4xxx_i2c_completed)
+    {
+        ;
+    }
+    g_zmod4xxx_i2c_completed = false;
+
+    if ((RM_ZMOD4XXX_EVENT_DEV_ERR_POWER_ON_RESET == g_zmod4xxx_i2c_callback_event) ||
+        (RM_ZMOD4XXX_EVENT_DEV_ERR_ACCESS_CONFLICT == g_zmod4xxx_i2c_callback_event))
+    {
+        /* Check validness of ADC results:
+            * - RM_ZMOD4XXX_EVENT_DEV_ERR_POWER_ON_RESET : Unvalid ADC results due to an unexpected reset.
+            * - RM_ZMOD4XXX_EVENT_DEV_ERR_ACCESS_CONFLICT: Unvalid ADC results due a still running measurement while results readout.
+            *//* Please reset device. */
+        while (1)
+        {
+            ;
+        }
+    }
+#endif
+
+    /* Set the current temperature and humidity */
+    err = ${zmod4xxx_name}.p_api->temperatureAndHumiditySet(${zmod4xxx_name}.p_ctrl, temperature, humidity);
+    assert(FSP_SUCCESS == err);
+
+    /* Calculate OAQ 2nd Gen. values from ZMOD4xxx ADC data */
+    err = ${zmod4xxx_name}.p_api->oaq2ndGenDataCalculate(${zmod4xxx_name}.p_ctrl, &amp;zmod4xxx_raw_data, p_gas_data);
+    if (err == FSP_SUCCESS)
+    {
+        stabilization_complete = true;
+    }
+    else if(err == FSP_ERR_SENSOR_IN_STABILIZATION)
+    {
+        stabilization_complete = false;
+    }
+    else if(err == FSP_ERR_SENSOR_INVALID_DATA)
+    {
+        stabilization_complete = false;
+    }
+    else
+    {
+        assert(false);
+    }
+
+    return stabilization_complete;
+}
+            </content>
+        </template>
+        <template category="function_call" display="Quick Getting RAQ Data" id="module.driver.zmod4xxx.quick_getting_raq_data" version="1">
+            <platform id="fsp" max="" min="1.1.0"/>
+            <moduleRef id="module.driver.zmod4xxx_on_zmod4xxx">
+                <function id="zmod4xxx_quick_getting_raq_data"/>
+            </moduleRef>
+            <content>
+/* Quick getting RAQ values for ${zmod4xxx_name:raProperty(module.driver.zmod4xxx.name)}.
+ * - ${zmod4xxx_name} must be setup before calling this function.
+ */
+bool ${zmod4xxx_name}_quick_getting_raq_data(rm_zmod4xxx_raq_data_t * p_gas_data);
+
+/* Quick getting gas data for ${zmod4xxx_name}. */
+bool ${zmod4xxx_name}_quick_getting_raq_data(rm_zmod4xxx_raq_data_t * p_gas_data)
+{
+    fsp_err_t            err;
+    rm_zmod4xxx_raw_data_t zmod4xxx_raw_data;
+    bool stabilization_complete = false;
+
+    /* Clear callback flags */
+#if ${zmod4xxx_name_upper:raProperty(module.driver.zmod4xxx.name_upper)}_IRQ_ENABLE
+    g_zmod4xxx_irq_completed = false;
+#endif
+#if ${zmod4xxx_name_upper}_NON_BLOCKING
+    g_zmod4xxx_i2c_completed = false;
+#endif
+
+    /* Start the measurement */
+    /* If the MeasurementStart API is called once, a second call is not required. */
+    err = ${zmod4xxx_name}.p_api->measurementStart(${zmod4xxx_name}.p_ctrl);
+    assert(FSP_SUCCESS == err);
+#if ${zmod4xxx_name_upper}_NON_BLOCKING
+    while (!g_zmod4xxx_i2c_completed)
+    {
+        ;
+    }
+    g_zmod4xxx_i2c_completed = false;
+#endif
+
+    do
+    {
+        /* Wait for the measurement to complete */
+#if ${zmod4xxx_name_upper}_IRQ_ENABLE
+        while (!g_zmod4xxx_irq_completed)
+        {
+            ;
+        }
+        g_zmod4xxx_irq_completed = false;
+#else
+        err = ${zmod4xxx_name}.p_api->statusCheck(${zmod4xxx_name}.p_ctrl);
+        assert(FSP_SUCCESS == err);
+#if ${zmod4xxx_name_upper}_NON_BLOCKING
+        while (!g_zmod4xxx_i2c_completed)
+        {
+            ;
+        }
+        g_zmod4xxx_i2c_completed = false;
+#endif
+#endif
+        /* Read ADC data from ZMOD4xxx sensor */
+        err = ${zmod4xxx_name}.p_api->read(${zmod4xxx_name}.p_ctrl, &amp;zmod4xxx_raw_data);
+        if (err == FSP_ERR_SENSOR_MEASUREMENT_NOT_FINISHED)
+        {
+#if BSP_CFG_RTOS == 1 // AzureOS
+            tx_thread_sleep(${zmod4xxx_name_upper}_DELAY_50 * TX_TIMER_TICKS_PER_SECOND / ${zmod4xxx_name_upper}_DELAY_MS);
+#elif BSP_CFG_RTOS == 2 // FreeRTOS
+            vTaskDelay(${zmod4xxx_name_upper}_DELAY_50 * configTICK_RATE_HZ / ${zmod4xxx_name_upper}_DELAY_MS);
+#else // Bare Metal
+            R_BSP_SoftwareDelay(${zmod4xxx_name_upper}_DELAY_50, BSP_DELAY_UNITS_MILLISECONDS);
+#endif
+        }
+    }
+    while (err == FSP_ERR_SENSOR_MEASUREMENT_NOT_FINISHED);
+    assert(FSP_SUCCESS == err);
+
+#if ${zmod4xxx_name_upper}_NON_BLOCKING
+    while (!g_zmod4xxx_i2c_completed)
+    {
+        ;
+    }
+    g_zmod4xxx_i2c_completed = false;
+#endif
+
+    /* Calculate RAQ values from ZMOD4xxx ADC data */
+    err = ${zmod4xxx_name}.p_api->raqDataCalculate(${zmod4xxx_name}.p_ctrl, &amp;zmod4xxx_raw_data, p_gas_data);
+    if (err == FSP_SUCCESS)
+    {
+        stabilization_complete = true;
+    }
+    else if(err == FSP_ERR_SENSOR_IN_STABILIZATION)
+    {
+        stabilization_complete = false;
+    }
+    else
+    {
+        assert(false);
+    }
+
+    return stabilization_complete;
+}
+            </content>
+        </template>
+        <template category="function_call" display="Quick Getting Relative IAQ Data" id="module.driver.zmod4xxx.quick_getting_rel_iaq_data" version="1">
+            <platform id="fsp" max="" min="1.1.0"/>
+            <moduleRef id="module.driver.zmod4xxx_on_zmod4xxx">
+                <function id="zmod4xxx_quick_getting_rel_iaq_data"/>
+            </moduleRef>
+            <content>
+/* Quick getting Relative IAQ values for ${zmod4xxx_name:raProperty(module.driver.zmod4xxx.name)}.
+ * - ${zmod4xxx_name} must be setup before calling this function.
+ */
+bool ${zmod4xxx_name}_quick_getting_rel_iaq_data(rm_zmod4xxx_rel_iaq_data_t * p_gas_data);
+
+/* Quick getting gas data for ${zmod4xxx_name}. */
+bool ${zmod4xxx_name}_quick_getting_rel_iaq_data(rm_zmod4xxx_rel_iaq_data_t * p_gas_data)
+{
+    fsp_err_t            err;
+    rm_zmod4xxx_raw_data_t zmod4xxx_raw_data;
+    bool stabilization_complete = false;
+
+    /* Clear callback flags */
+#if ${zmod4xxx_name_upper:raProperty(module.driver.zmod4xxx.name_upper)}_IRQ_ENABLE
+    g_zmod4xxx_irq_completed = false;
+#endif
+#if ${zmod4xxx_name_upper}_NON_BLOCKING
+    g_zmod4xxx_i2c_completed = false;
+#endif
+
+    /* Start the measurement */
+    err = ${zmod4xxx_name}.p_api->measurementStart(${zmod4xxx_name}.p_ctrl);
+    assert(FSP_SUCCESS == err);
+#if ${zmod4xxx_name_upper}_NON_BLOCKING
+    while (!g_zmod4xxx_i2c_completed)
+    {
+        ;
+    }
+    g_zmod4xxx_i2c_completed = false;
+#endif
+
+    /* Delay required time. See Table 5 in the ZMOD4410 Programming Manual. */
+#if BSP_CFG_RTOS == 1 // AzureOS
+    tx_thread_sleep(${zmod4xxx_name_upper}_DELAY_3000 * TX_TIMER_TICKS_PER_SECOND / ${zmod4xxx_name_upper}_DELAY_MS);
+#elif BSP_CFG_RTOS == 2 // FreeRTOS
+    vTaskDelay(${zmod4xxx_name_upper}_DELAY_3000 * configTICK_RATE_HZ / ${zmod4xxx_name_upper}_DELAY_MS);
+#else // Bare Metal
+    R_BSP_SoftwareDelay(${zmod4xxx_name_upper}_DELAY_3000, BSP_DELAY_UNITS_MILLISECONDS);
+#endif
+
+    do
+    {
+        /* Wait for the measurement to complete */
+#if ${zmod4xxx_name_upper}_IRQ_ENABLE
+        while (!g_zmod4xxx_irq_completed)
+        {
+            ;
+        }
+        g_zmod4xxx_irq_completed = false;
+#else
+        err = ${zmod4xxx_name}.p_api->statusCheck(${zmod4xxx_name}.p_ctrl);
+        assert(FSP_SUCCESS == err);
+#if ${zmod4xxx_name_upper}_NON_BLOCKING
+        while (!g_zmod4xxx_i2c_completed)
+        {
+            ;
+        }
+        g_zmod4xxx_i2c_completed = false;
+#endif
+#endif
+
+        /* Check if a device error occurs */
+        err = ${zmod4xxx_name}.p_api->deviceErrorCheck(${zmod4xxx_name}.p_ctrl);
+        assert(FSP_SUCCESS == err);
+#if ${zmod4xxx_name_upper}_NON_BLOCKING
+        while (!g_zmod4xxx_i2c_completed)
+        {
+            ;
+        }
+        g_zmod4xxx_i2c_completed = false;
+
+        if ((RM_ZMOD4XXX_EVENT_DEV_ERR_POWER_ON_RESET == g_zmod4xxx_i2c_callback_event) ||
+            (RM_ZMOD4XXX_EVENT_DEV_ERR_ACCESS_CONFLICT == g_zmod4xxx_i2c_callback_event))
+        {
+            /* Error during read of sensor status. Please reset device. */
+            while (1)
+            {
+                ;
+            }
+        }
+#endif
+
+        /* Read ADC data from ZMOD4xxx sensor */
+        err = ${zmod4xxx_name}.p_api->read(${zmod4xxx_name}.p_ctrl, &amp;zmod4xxx_raw_data);
+        if (err == FSP_ERR_SENSOR_MEASUREMENT_NOT_FINISHED)
+        {
+#if BSP_CFG_RTOS == 1 // AzureOS
+            tx_thread_sleep(${zmod4xxx_name_upper}_DELAY_50 * TX_TIMER_TICKS_PER_SECOND / ${zmod4xxx_name_upper}_DELAY_MS);
+#elif BSP_CFG_RTOS == 2 // FreeRTOS
+            vTaskDelay(${zmod4xxx_name_upper}_DELAY_50 * configTICK_RATE_HZ / ${zmod4xxx_name_upper}_DELAY_MS);
+#else // Bare Metal
+            R_BSP_SoftwareDelay(${zmod4xxx_name_upper}_DELAY_50, BSP_DELAY_UNITS_MILLISECONDS);
+#endif
+        }
+    }
+    while (err == FSP_ERR_SENSOR_MEASUREMENT_NOT_FINISHED);
+    assert(FSP_SUCCESS == err);
+
+#if ${zmod4xxx_name_upper}_NON_BLOCKING
+    while (!g_zmod4xxx_i2c_completed)
+    {
+        ;
+    }
+    g_zmod4xxx_i2c_completed = false;
+#endif
+
+        /* Check if a device error occurs */
+        err = ${zmod4xxx_name}.p_api->deviceErrorCheck(${zmod4xxx_name}.p_ctrl);
+        assert(FSP_SUCCESS == err);
+#if ${zmod4xxx_name_upper}_NON_BLOCKING
+        while (!g_zmod4xxx_i2c_completed)
+        {
+            ;
+        }
+        g_zmod4xxx_i2c_completed = false;
+
+        if ((RM_ZMOD4XXX_EVENT_DEV_ERR_POWER_ON_RESET == g_zmod4xxx_i2c_callback_event) ||
+            (RM_ZMOD4XXX_EVENT_DEV_ERR_ACCESS_CONFLICT == g_zmod4xxx_i2c_callback_event))
+        {
+            /* Error during read of sensor status. Please reset device. */
+            while (1)
+            {
+                ;
+            }
+        }
+#endif
+
+    /* Calculate Relative IAQ values from ZMOD4xxx ADC data */
+    err = ${zmod4xxx_name}.p_api->relIaqDataCalculate(${zmod4xxx_name}.p_ctrl, &amp;zmod4xxx_raw_data, p_gas_data);
+    if (err == FSP_SUCCESS)
+    {
+        stabilization_complete = true;
+    }
+    else if(err == FSP_ERR_SENSOR_IN_STABILIZATION)
+    {
+        stabilization_complete = false;
+    }
+    else if(err == FSP_ERR_SENSOR_INVALID_DATA)
+    {
+        stabilization_complete = false;
+    }
+    else
+    {
+        assert(false);
+    }
+
+    return stabilization_complete;
+}
+            </content>
+        </template>
+        <template category="function_call" display="Quick Getting Relative IAQ Ultra Low Power Data" id="module.driver.zmod4xxx.quick_getting_rel_iaq_ulp_data" version="1">
+            <platform id="fsp" max="" min="1.1.0"/>
+            <moduleRef id="module.driver.zmod4xxx_on_zmod4xxx">
+                <function id="zmod4xxx_quick_getting_rel_iaq_ulp_data"/>
+            </moduleRef>
+            <content>
+/* Quick getting Relative IAQ Ultra Low Power values for ${zmod4xxx_name:raProperty(module.driver.zmod4xxx.name)}.
+ * - ${zmod4xxx_name} must be setup before calling this function.
+ */
+bool ${zmod4xxx_name}_quick_getting_rel_iaq_ulp_data(rm_zmod4xxx_rel_iaq_data_t * p_gas_data);
+
+/* Quick getting gas data for ${zmod4xxx_name}. */
+bool ${zmod4xxx_name}_quick_getting_rel_iaq_ulp_data(rm_zmod4xxx_rel_iaq_data_t * p_gas_data)
+{
+    fsp_err_t            err;
+    rm_zmod4xxx_raw_data_t zmod4xxx_raw_data;
+    bool stabilization_complete = false;
+
+    /* Clear callback flags */
+#if ${zmod4xxx_name_upper:raProperty(module.driver.zmod4xxx.name_upper)}_IRQ_ENABLE
+    g_zmod4xxx_irq_completed = false;
+#endif
+#if ${zmod4xxx_name_upper}_NON_BLOCKING
+    g_zmod4xxx_i2c_completed = false;
+#endif
+
+    /* Start the measurement */
+    err = ${zmod4xxx_name}.p_api->measurementStart(${zmod4xxx_name}.p_ctrl);
+    assert(FSP_SUCCESS == err);
+#if ${zmod4xxx_name_upper}_NON_BLOCKING
+    while (!g_zmod4xxx_i2c_completed)
+    {
+        ;
+    }
+    g_zmod4xxx_i2c_completed = false;
+#endif
+
+    /* First delay. It should be longer than 1500 ms. See Table 6 in the ZMOD4410 Programming Manual. */
+#if BSP_CFG_RTOS == 1 // AzureOS
+    tx_thread_sleep(${zmod4xxx_name_upper}_DELAY_1500 * TX_TIMER_TICKS_PER_SECOND / ${zmod4xxx_name_upper}_DELAY_MS);
+#elif BSP_CFG_RTOS == 2 // FreeRTOS
+    vTaskDelay(${zmod4xxx_name_upper}_DELAY_1500 * configTICK_RATE_HZ / ${zmod4xxx_name_upper}_DELAY_MS);
+#else // Bare Metal
+    R_BSP_SoftwareDelay(${zmod4xxx_name_upper}_DELAY_1500, BSP_DELAY_UNITS_MILLISECONDS);
+#endif
+
+    do
+    {
+        /* Wait for the measurement to complete */
+#if ${zmod4xxx_name_upper}_IRQ_ENABLE
+        while (!g_zmod4xxx_irq_completed)
+        {
+            ;
+        }
+        g_zmod4xxx_irq_completed = false;
+#else
+        err = ${zmod4xxx_name}.p_api->statusCheck(${zmod4xxx_name}.p_ctrl);
+        assert(FSP_SUCCESS == err);
+#if ${zmod4xxx_name_upper}_NON_BLOCKING
+        while (!g_zmod4xxx_i2c_completed)
+        {
+            ;
+        }
+        g_zmod4xxx_i2c_completed = false;
+#endif
+#endif
+
+        /* Check if a device error occurs */
+        err = ${zmod4xxx_name}.p_api->deviceErrorCheck(${zmod4xxx_name}.p_ctrl);
+        assert(FSP_SUCCESS == err);
+#if ${zmod4xxx_name_upper}_NON_BLOCKING
+        while (!g_zmod4xxx_i2c_completed)
+        {
+            ;
+        }
+        g_zmod4xxx_i2c_completed = false;
+
+        if ((RM_ZMOD4XXX_EVENT_DEV_ERR_POWER_ON_RESET == g_zmod4xxx_i2c_callback_event) ||
+            (RM_ZMOD4XXX_EVENT_DEV_ERR_ACCESS_CONFLICT == g_zmod4xxx_i2c_callback_event))
+        {
+            /* Error during read of sensor status. Please reset device. */
+            while (1)
+            {
+                ;
+            }
+        }
+#endif
+
+        /* Read ADC data from ZMOD4xxx sensor */
+        err = ${zmod4xxx_name}.p_api->read(${zmod4xxx_name}.p_ctrl, &amp;zmod4xxx_raw_data);
+        if (err == FSP_ERR_SENSOR_MEASUREMENT_NOT_FINISHED)
+        {
+#if BSP_CFG_RTOS == 1 // AzureOS
+            tx_thread_sleep(${zmod4xxx_name_upper}_DELAY_50 * TX_TIMER_TICKS_PER_SECOND / ${zmod4xxx_name_upper}_DELAY_MS);
+#elif BSP_CFG_RTOS == 2 // FreeRTOS
+            vTaskDelay(${zmod4xxx_name_upper}_DELAY_50 * configTICK_RATE_HZ / ${zmod4xxx_name_upper}_DELAY_MS);
+#else // Bare Metal
+            R_BSP_SoftwareDelay(${zmod4xxx_name_upper}_DELAY_50, BSP_DELAY_UNITS_MILLISECONDS);
+#endif
+        }
+    }
+    while (err == FSP_ERR_SENSOR_MEASUREMENT_NOT_FINISHED);
+    assert(FSP_SUCCESS == err);
+
+#if ${zmod4xxx_name_upper}_NON_BLOCKING
+    while (!g_zmod4xxx_i2c_completed)
+    {
+        ;
+    }
+    g_zmod4xxx_i2c_completed = false;
+#endif
+
+        /* Check if a device error occurs */
+        err = ${zmod4xxx_name}.p_api->deviceErrorCheck(${zmod4xxx_name}.p_ctrl);
+        assert(FSP_SUCCESS == err);
+#if ${zmod4xxx_name_upper}_NON_BLOCKING
+        while (!g_zmod4xxx_i2c_completed)
+        {
+            ;
+        }
+        g_zmod4xxx_i2c_completed = false;
+
+        if ((RM_ZMOD4XXX_EVENT_DEV_ERR_POWER_ON_RESET == g_zmod4xxx_i2c_callback_event) ||
+            (RM_ZMOD4XXX_EVENT_DEV_ERR_ACCESS_CONFLICT == g_zmod4xxx_i2c_callback_event))
+        {
+            /* Error during read of sensor status. Please reset device. */
+            while (1)
+            {
+                ;
+            }
+        }
+#endif
+
+    /* Calculate Relative IAQ values from ZMOD4xxx ADC data */
+    err = ${zmod4xxx_name}.p_api->relIaqDataCalculate(${zmod4xxx_name}.p_ctrl, &amp;zmod4xxx_raw_data, p_gas_data);
+    if (err == FSP_SUCCESS)
+    {
+        stabilization_complete = true;
+    }
+    else if(err == FSP_ERR_SENSOR_IN_STABILIZATION)
+    {
+        stabilization_complete = false;
+    }
+    else if(err == FSP_ERR_SENSOR_INVALID_DATA)
+    {
+        stabilization_complete = false;
+    }
+    else
+    {
+        assert(false);
+    }
+
+    /* Second Delay. The sum of the first and second delay should amount 90 seconds. See Table 6 in the ZMOD4410 Programming Manual. */
+#if BSP_CFG_RTOS == 1 // AzureOS
+    tx_thread_sleep((${zmod4xxx_name_upper}_DELAY_90000 - ${zmod4xxx_name_upper}_DELAY_1500) * TX_TIMER_TICKS_PER_SECOND / ${zmod4xxx_name_upper}_DELAY_MS);
+#elif BSP_CFG_RTOS == 2 // FreeRTOS
+    vTaskDelay((${zmod4xxx_name_upper}_DELAY_90000 - ${zmod4xxx_name_upper}_DELAY_1500) * configTICK_RATE_HZ / ${zmod4xxx_name_upper}_DELAY_MS);
+#else // Bare Metal
+    R_BSP_SoftwareDelay((${zmod4xxx_name_upper}_DELAY_90000 - ${zmod4xxx_name_upper}_DELAY_1500), BSP_DELAY_UNITS_MILLISECONDS);
+#endif
+
+    return stabilization_complete;
+}
+            </content>
+        </template>
+        <template category="function_call" display="Quick Getting PBAQ Data" id="module.driver.zmod4xxx.quick_getting_pbaq_data" version="1">
+            <platform id="fsp" max="" min="1.1.0"/>
+            <moduleRef id="module.driver.zmod4xxx_on_zmod4xxx">
+                <function id="zmod4xxx_quick_getting_pbaq_data"/>
+            </moduleRef>
+            <content>
+/* Quick getting PBAQ values for ${zmod4xxx_name:raProperty(module.driver.zmod4xxx.name)}.
+ * - ${zmod4xxx_name} must be setup before calling this function.
+ */
+bool ${zmod4xxx_name}_quick_getting_pbaq_data(rm_zmod4xxx_pbaq_data_t * p_gas_data, float temperature, float humidity);
+
+/* Quick getting gas data for ${zmod4xxx_name}. */
+bool ${zmod4xxx_name}_quick_getting_pbaq_data(rm_zmod4xxx_pbaq_data_t * p_gas_data, float temperature, float humidity)
+{
+    fsp_err_t            err;
+    rm_zmod4xxx_raw_data_t zmod4xxx_raw_data;
+    bool stabilization_complete = false;
+
+    /* Clear callback flags */
+#if ${zmod4xxx_name_upper:raProperty(module.driver.zmod4xxx.name_upper)}_IRQ_ENABLE
+    g_zmod4xxx_irq_completed = false;
+#endif
+#if ${zmod4xxx_name_upper}_NON_BLOCKING
+    g_zmod4xxx_i2c_completed = false;
+#endif
+
+    /* Start the measurement */
+    err = ${zmod4xxx_name}.p_api->measurementStart(${zmod4xxx_name}.p_ctrl);
+    assert(FSP_SUCCESS == err);
+#if ${zmod4xxx_name_upper}_NON_BLOCKING
+    while (!g_zmod4xxx_i2c_completed)
+    {
+        ;
+    }
+    g_zmod4xxx_i2c_completed = false;
+#endif
+
+    /* Delay required time. See Table 5 in the ZMOD4410 Programming Manual. */
+#if BSP_CFG_RTOS == 1 // AzureOS
+    tx_thread_sleep(${zmod4xxx_name_upper}_DELAY_5000 * TX_TIMER_TICKS_PER_SECOND / ${zmod4xxx_name_upper}_DELAY_MS);
+#elif BSP_CFG_RTOS == 2 // FreeRTOS
+    vTaskDelay(${zmod4xxx_name_upper}_DELAY_5000 * configTICK_RATE_HZ / ${zmod4xxx_name_upper}_DELAY_MS);
+#else // Bare Metal
+    R_BSP_SoftwareDelay(${zmod4xxx_name_upper}_DELAY_5000, BSP_DELAY_UNITS_MILLISECONDS);
+#endif
+
+    do
+    {
+        /* Wait for the measurement to complete */
+#if ${zmod4xxx_name_upper}_IRQ_ENABLE
+        while (!g_zmod4xxx_irq_completed)
+        {
+            ;
+        }
+        g_zmod4xxx_irq_completed = false;
+#else
+        err = ${zmod4xxx_name}.p_api->statusCheck(${zmod4xxx_name}.p_ctrl);
+        assert(FSP_SUCCESS == err);
+#if ${zmod4xxx_name_upper}_NON_BLOCKING
+        while (!g_zmod4xxx_i2c_completed)
+        {
+            ;
+        }
+        g_zmod4xxx_i2c_completed = false;
+#endif
+#endif
+
+        /* Check if a device error occurs */
+        err = ${zmod4xxx_name}.p_api->deviceErrorCheck(${zmod4xxx_name}.p_ctrl);
+        assert(FSP_SUCCESS == err);
+#if ${zmod4xxx_name_upper}_NON_BLOCKING
+        while (!g_zmod4xxx_i2c_completed)
+        {
+            ;
+        }
+        g_zmod4xxx_i2c_completed = false;
+
+        if ((RM_ZMOD4XXX_EVENT_DEV_ERR_POWER_ON_RESET == g_zmod4xxx_i2c_callback_event) ||
+            (RM_ZMOD4XXX_EVENT_DEV_ERR_ACCESS_CONFLICT == g_zmod4xxx_i2c_callback_event))
+        {
+            /* Error during read of sensor status. Please reset device. */
+            while (1)
+            {
+                ;
+            }
+        }
+#endif
+
+        /* Read ADC data from ZMOD4xxx sensor */
+        err = ${zmod4xxx_name}.p_api->read(${zmod4xxx_name}.p_ctrl, &amp;zmod4xxx_raw_data);
+        if (err == FSP_ERR_SENSOR_MEASUREMENT_NOT_FINISHED)
+        {
+#if BSP_CFG_RTOS == 1 // AzureOS
+            tx_thread_sleep(${zmod4xxx_name_upper}_DELAY_50 * TX_TIMER_TICKS_PER_SECOND / ${zmod4xxx_name_upper}_DELAY_MS);
+#elif BSP_CFG_RTOS == 2 // FreeRTOS
+            vTaskDelay(${zmod4xxx_name_upper}_DELAY_50 * configTICK_RATE_HZ / ${zmod4xxx_name_upper}_DELAY_MS);
+#else // Bare Metal
+            R_BSP_SoftwareDelay(${zmod4xxx_name_upper}_DELAY_50, BSP_DELAY_UNITS_MILLISECONDS);
+#endif
+        }
+    }
+    while (err == FSP_ERR_SENSOR_MEASUREMENT_NOT_FINISHED);
+    assert(FSP_SUCCESS == err);
+
+#if ${zmod4xxx_name_upper}_NON_BLOCKING
+    while (!g_zmod4xxx_i2c_completed)
+    {
+        ;
+    }
+    g_zmod4xxx_i2c_completed = false;
+#endif
+
+        /* Check if a device error occurs */
+        err = ${zmod4xxx_name}.p_api->deviceErrorCheck(${zmod4xxx_name}.p_ctrl);
+        assert(FSP_SUCCESS == err);
+#if ${zmod4xxx_name_upper}_NON_BLOCKING
+        while (!g_zmod4xxx_i2c_completed)
+        {
+            ;
+        }
+        g_zmod4xxx_i2c_completed = false;
+
+        if ((RM_ZMOD4XXX_EVENT_DEV_ERR_POWER_ON_RESET == g_zmod4xxx_i2c_callback_event) ||
+            (RM_ZMOD4XXX_EVENT_DEV_ERR_ACCESS_CONFLICT == g_zmod4xxx_i2c_callback_event))
+        {
+            /* Error during read of sensor status. Please reset device. */
+            while (1)
+            {
+                ;
+            }
+        }
+#endif
+
+    /* Set the current temperature and humidity */
+    err = ${zmod4xxx_name}.p_api->temperatureAndHumiditySet(${zmod4xxx_name}.p_ctrl, temperature, humidity);
+    assert(FSP_SUCCESS == err);
+
+    /* Calculate PBAQ values from ZMOD4xxx ADC data */
+    err = ${zmod4xxx_name}.p_api->pbaqDataCalculate(${zmod4xxx_name}.p_ctrl, &amp;zmod4xxx_raw_data, p_gas_data);
+    if (err == FSP_SUCCESS)
+    {
+        stabilization_complete = true;
+    }
+    else if(err == FSP_ERR_SENSOR_IN_STABILIZATION)
+    {
+        stabilization_complete = false;
+    }
+    else if(err == FSP_ERR_SENSOR_INVALID_DATA)
+    {
+        stabilization_complete = false;
+    }
+    else
+    {
+        assert(false);
+    }
+
+    return stabilization_complete;
+}
+            </content>
+        </template>
+        <template category="function_call" display="Quick Getting NO2 O3 Data" id="module.driver.zmod4xxx.quick_getting_no2_o3_data" version="1">
+            <platform id="fsp" max="" min="1.1.0"/>
+            <moduleRef id="module.driver.zmod4xxx_on_zmod4xxx">
+                <function id="zmod4xxx_quick_getting_no2_o3_data"/>
+            </moduleRef>
+            <content>
+/* Quick getting NO2 O3 values for ${zmod4xxx_name:raProperty(module.driver.zmod4xxx.name)}.
+ * - ${zmod4xxx_name} must be setup before calling this function.
+ */
+bool ${zmod4xxx_name}_quick_getting_no2_o3_data(rm_zmod4xxx_no2_o3_data_t * p_gas_data, float temperature, float humidity);
+
+/* Quick getting gas data for ${zmod4xxx_name}. */
+bool ${zmod4xxx_name}_quick_getting_no2_o3_data(rm_zmod4xxx_no2_o3_data_t * p_gas_data, float temperature, float humidity)
+{
+    fsp_err_t            err;
+    rm_zmod4xxx_raw_data_t zmod4xxx_raw_data;
+    bool stabilization_complete = false;
+
+    /* Clear callback flags */
+#if ${zmod4xxx_name_upper:raProperty(module.driver.zmod4xxx.name_upper)}_IRQ_ENABLE
+    g_zmod4xxx_irq_completed = false;
+#endif
+#if ${zmod4xxx_name_upper}_NON_BLOCKING
+    g_zmod4xxx_i2c_completed = false;
+#endif
+
+    /* Start the measurement */
+    err = ${zmod4xxx_name}.p_api->measurementStart(${zmod4xxx_name}.p_ctrl);
+    assert(FSP_SUCCESS == err);
+#if ${zmod4xxx_name_upper}_NON_BLOCKING
+    while (!g_zmod4xxx_i2c_completed)
+    {
+        ;
+    }
+    g_zmod4xxx_i2c_completed = false;
+#endif
+
+    /* Delay required time. See Table 3 in the ZMOD4510 Programming Manual. */
+#if BSP_CFG_RTOS == 1 // AzureOS
+    tx_thread_sleep(${zmod4xxx_name_upper}_DELAY_6000 * TX_TIMER_TICKS_PER_SECOND / ${zmod4xxx_name_upper}_DELAY_MS);
+#elif BSP_CFG_RTOS == 2 // FreeRTOS
+    vTaskDelay(${zmod4xxx_name_upper}_DELAY_6000 * configTICK_RATE_HZ / ${zmod4xxx_name_upper}_DELAY_MS);
+#else // Bare Metal
+    R_BSP_SoftwareDelay(${zmod4xxx_name_upper}_DELAY_6000, BSP_DELAY_UNITS_MILLISECONDS);
+#endif
+
+    do
+    {
+        /* Wait for the measurement to complete */
+#if ${zmod4xxx_name_upper}_IRQ_ENABLE
+        while (!g_zmod4xxx_irq_completed)
+        {
+            ;
+        }
+        g_zmod4xxx_irq_completed = false;
+#else
+        err = ${zmod4xxx_name}.p_api->statusCheck(${zmod4xxx_name}.p_ctrl);
+        assert(FSP_SUCCESS == err);
+#if ${zmod4xxx_name_upper}_NON_BLOCKING
+        while (!g_zmod4xxx_i2c_completed)
+        {
+            ;
+        }
+        g_zmod4xxx_i2c_completed = false;
+#endif
+#endif
+
+        /* Check if a device error occurs */
+        err = ${zmod4xxx_name}.p_api->deviceErrorCheck(${zmod4xxx_name}.p_ctrl);
+        assert(FSP_SUCCESS == err);
+#if ${zmod4xxx_name_upper}_NON_BLOCKING
+        while (!g_zmod4xxx_i2c_completed)
+        {
+            ;
+        }
+        g_zmod4xxx_i2c_completed = false;
+
+        if ((RM_ZMOD4XXX_EVENT_DEV_ERR_POWER_ON_RESET == g_zmod4xxx_i2c_callback_event) ||
+            (RM_ZMOD4XXX_EVENT_DEV_ERR_ACCESS_CONFLICT == g_zmod4xxx_i2c_callback_event))
+        {
+            /* Error during read of sensor status or Measurement not completed due to unexpected reset. Please reset device. */
+            while (1)
+            {
+                ;
+            }
+        }
+#endif
+
+        /* Read ADC data from ZMOD4xxx sensor */
+        err = ${zmod4xxx_name}.p_api->read(${zmod4xxx_name}.p_ctrl, &amp;zmod4xxx_raw_data);
+        if (err == FSP_ERR_SENSOR_MEASUREMENT_NOT_FINISHED)
+        {
+#if BSP_CFG_RTOS == 1 // AzureOS
+            tx_thread_sleep(${zmod4xxx_name_upper}_DELAY_50 * TX_TIMER_TICKS_PER_SECOND / ${zmod4xxx_name_upper}_DELAY_MS);
+#elif BSP_CFG_RTOS == 2 // FreeRTOS
+            vTaskDelay(${zmod4xxx_name_upper}_DELAY_50 * configTICK_RATE_HZ / ${zmod4xxx_name_upper}_DELAY_MS);
+#else // Bare Metal
+            R_BSP_SoftwareDelay(${zmod4xxx_name_upper}_DELAY_50, BSP_DELAY_UNITS_MILLISECONDS);
+#endif
+        }
+    }
+    while (err == FSP_ERR_SENSOR_MEASUREMENT_NOT_FINISHED);
+    assert(FSP_SUCCESS == err);
+
+#if ${zmod4xxx_name_upper}_NON_BLOCKING
+    while (!g_zmod4xxx_i2c_completed)
+    {
+        ;
+    }
+    g_zmod4xxx_i2c_completed = false;
+#endif
+
+    /* Check if a device error occurs */
+    err = ${zmod4xxx_name}.p_api->deviceErrorCheck(${zmod4xxx_name}.p_ctrl);
+    assert(FSP_SUCCESS == err);
+#if ${zmod4xxx_name_upper}_NON_BLOCKING
+    while (!g_zmod4xxx_i2c_completed)
+    {
+        ;
+    }
+    g_zmod4xxx_i2c_completed = false;
+
+    if ((RM_ZMOD4XXX_EVENT_DEV_ERR_POWER_ON_RESET == g_zmod4xxx_i2c_callback_event) ||
+        (RM_ZMOD4XXX_EVENT_DEV_ERR_ACCESS_CONFLICT == g_zmod4xxx_i2c_callback_event))
+    {
+        /* Check validness of ADC results:
+            * - RM_ZMOD4XXX_EVENT_DEV_ERR_POWER_ON_RESET : Unvalid ADC results due to an unexpected reset.
+            * - RM_ZMOD4XXX_EVENT_DEV_ERR_ACCESS_CONFLICT: Unvalid ADC results due a still running measurement while results readout.
+            *//* Please reset device. */
+        while (1)
+        {
+            ;
+        }
+    }
+#endif
+
+    /* Set the current temperature and humidity */
+    err = ${zmod4xxx_name}.p_api->temperatureAndHumiditySet(${zmod4xxx_name}.p_ctrl, temperature, humidity);
+    assert(FSP_SUCCESS == err);
+
+    /* Calculate NO2 O3 values from ZMOD4xxx ADC data */
+    err = ${zmod4xxx_name}.p_api->no2O3DataCalculate(${zmod4xxx_name}.p_ctrl, &amp;zmod4xxx_raw_data, p_gas_data);
+    if (err == FSP_SUCCESS)
+    {
+        stabilization_complete = true;
+    }
+    else if(err == FSP_ERR_SENSOR_IN_STABILIZATION)
+    {
+        stabilization_complete = false;
+    }
+    else if(err == FSP_ERR_SENSOR_INVALID_DATA)
+    {
+        stabilization_complete = false;
+    }
+    else
+    {
+        assert(false);
+    }
+
+    return stabilization_complete;
+}
+            </content>
+        </template>
+    </developerSupport>
+</raModuleDescription>

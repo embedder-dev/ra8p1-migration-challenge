@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="utf-8"?>
+<raModuleDescription>
+  <device id="R7FA0E1073CNK" irqCount="64">
+    <select bsp="bsp.ra0e1.R7FA0E1073CNK" />
+    <select bsp="bsp.ra0e1" />
+    <select bsp="bsp.ra0e1.fsp" />
+    <select bsp="bsp.ra0e1.events" />
+    <select bsp="bsp.ra" />
+  </device>
+  <config id="config.bsp.ra0e1.R7FA0E1073CNK" path="fsp_cfg/bsp/bsp_mcu_device_pn_cfg.h" version="0">
+    <property id="config.bsp.part_number" display="part_number" default="config.bsp.part_number.value">
+      <option id="config.bsp.part_number.value" display="R7FA0E1073CNK" value="R7FA0E1073CNK" />
+    </property>
+    <property id="config.bsp.rom_size_bytes" display="rom_size_bytes" default="config.bsp.rom_size_bytes.value">
+      <option id="config.bsp.rom_size_bytes.value" display="65536" value="65536" />
+    </property>
+    <property id="config.bsp.rom_size_bytes_hidden" default="65536"/>
+    <property id="config.bsp.ram_size_bytes" display="ram_size_bytes" default="config.bsp.ram_size_bytes.value">
+      <option id="config.bsp.ram_size_bytes.value" display="12288" value="12288" />
+    </property>
+    <property id="config.bsp.data_flash_size_bytes" display="data_flash_size_bytes" default="config.bsp.data_flash_size_bytes.value">
+      <option id="config.bsp.data_flash_size_bytes.value" display="1024" value="1024" />
+    </property>
+    <property id="config.bsp.package_style" display="package_style" default="config.bsp.package_style.value">
+      <option id="config.bsp.package_style.value" display="HWQFN" value="HWQFN" />
+    </property>
+    <property id="config.bsp.package_pins" display="package_pins" default="config.bsp.package_pins.value">
+      <option id="config.bsp.package_pins.value" display="24" value="24" />
+    </property>
+    <property id="config.bsp.irq_count_hidden" default="64"/>
+    <content>
+      #define BSP_MCU_${config.bsp.part_number}
+      #define BSP_MCU_FEATURE_SET ('0')
+      #define BSP_ROM_SIZE_BYTES (${config.bsp.rom_size_bytes})
+      #define BSP_RAM_SIZE_BYTES (${config.bsp.ram_size_bytes})
+      #define BSP_DATA_FLASH_SIZE_BYTES (${config.bsp.data_flash_size_bytes})
+      #define BSP_PACKAGE_${config.bsp.package_style}
+      #define BSP_PACKAGE_PINS (${config.bsp.package_pins})
+    </content>
+  </config>
+  <bsp id="bsp.ra0e1.R7FA0E1073CNK" config="config.bsp.ra0e1.R7FA0E1073CNK" display="R7FA0E1073CNK" version="0">
+    <provides interface="interface.mcu.r7fa0e1073cnk" />
+    <provides interface="interface.mcu.feature_set.0" />
+    <provides interface="interface.mcu.ra0e1.0" />
+    <provides interface="interface.mcu.adc_d.external" />
+    <provides interface="interface.mcu.adc_d.external.0" />
+    <provides interface="interface.mcu.bus.external" />
+    <provides interface="interface.mcu.cgc.external" />
+    <provides interface="interface.mcu.crc.external" />
+    <provides interface="interface.mcu.debug.external" />
+    <provides interface="interface.mcu.dtc.external" />
+    <provides interface="interface.mcu.elc.external" />
+    <provides interface="interface.mcu.flash.external" />
+    <provides interface="interface.mcu.flash_lp.external" />
+    <provides interface="interface.mcu.icu.external" />
+    <provides interface="interface.mcu.icu_ext_irq.external" />
+    <provides interface="interface.mcu.icu_ext_irq.external.0" />
+    <provides interface="interface.mcu.icu_ext_irq.external.1" />
+    <provides interface="interface.mcu.icu_ext_irq.external.2" />
+    <provides interface="interface.mcu.icu_ext_irq.external.3" />
+    <provides interface="interface.mcu.icu_ext_irq.external.4" />
+    <provides interface="interface.mcu.icu_ext_irq.external.5" />
+    <provides interface="interface.mcu.iica.external" />
+    <provides interface="interface.mcu.iica.external.0" />
+    <provides interface="interface.mcu.iwdt.external" />
+    <provides interface="interface.mcu.mstp.external" />
+    <provides interface="interface.mcu.pclbuz.external" />
+    <provides interface="interface.mcu.pfs.external" />
+    <provides interface="interface.mcu.porga.external" />
+    <provides interface="interface.mcu.port.external" />
+    <provides interface="interface.mcu.port.external.0" />
+    <provides interface="interface.mcu.port.external.1" />
+    <provides interface="interface.mcu.port.external.2" />
+    <provides interface="interface.mcu.port.external.3" />
+    <provides interface="interface.mcu.port.external.4" />
+    <provides interface="interface.mcu.port.external.9" />
+    <provides interface="interface.mcu.rsip.external" />
+    <provides interface="interface.mcu.rsip.external.trng" />
+    <provides interface="interface.mcu.rtc_c.external" />
+    <provides interface="interface.mcu.sau.external" />
+    <provides interface="interface.mcu.sau.external.0" />
+    <provides interface="interface.mcu.sau.external.1" />
+    <provides interface="interface.mcu.sau_i2c.external" />
+    <provides interface="interface.mcu.sau_i2c.external.00" />
+    <provides interface="interface.mcu.sau_i2c.external.11" />
+    <provides interface="interface.mcu.sau_i2c.external.20" />
+    <provides interface="interface.mcu.sau_spi.external" />
+    <provides interface="interface.mcu.sau_spi.external.00" />
+    <provides interface="interface.mcu.sau_spi.external.11" />
+    <provides interface="interface.mcu.sau_spi.external.20" />
+    <provides interface="interface.mcu.sau_uart.external" />
+    <provides interface="interface.mcu.sau_uart.external.0" />
+    <provides interface="interface.mcu.sau_uart.external.1" />
+    <provides interface="interface.mcu.sau_uart.external.2" />
+    <provides interface="interface.mcu.sram.external" />
+    <provides interface="interface.mcu.system.external" />
+    <provides interface="interface.mcu.tau.external" />
+    <provides interface="interface.mcu.tau.external.00" />
+    <provides interface="interface.mcu.tau.external.01" />
+    <provides interface="interface.mcu.tau.external.02" />
+    <provides interface="interface.mcu.tau.external.03" />
+    <provides interface="interface.mcu.tau.external.04" />
+    <provides interface="interface.mcu.tau.external.05" />
+    <provides interface="interface.mcu.tau.external.06" />
+    <provides interface="interface.mcu.tau.external.07" />
+    <provides interface="interface.mcu.tml.external" />
+    <provides interface="interface.mcu.tml.external.0" />
+    <provides interface="interface.mcu.uarta.external" />
+    <provides interface="interface.mcu.uarta.external.0" />
+    <provides interface="interface.mcu.uarta_ck.external" />
+    <provides interface="interface.mcu.uarta_ck.external.0" />
+    <enum id="enum.mcu.adc_d.external.channels" default="enum.mcu.adc_d.external.channels.0">
+      <option id="enum.mcu.adc_d.external.channels.0" display="ADC_D0" value="0" />
+    </enum>
+    <enum id="enum.mcu.icu_ext_irq.external.channels" default="enum.mcu.icu_ext_irq.external.channels.0">
+      <option id="enum.mcu.icu_ext_irq.external.channels.0" display="ICU_EXT_IRQ0" value="0" />
+      <option id="enum.mcu.icu_ext_irq.external.channels.1" display="ICU_EXT_IRQ1" value="1" />
+      <option id="enum.mcu.icu_ext_irq.external.channels.2" display="ICU_EXT_IRQ2" value="2" />
+      <option id="enum.mcu.icu_ext_irq.external.channels.3" display="ICU_EXT_IRQ3" value="3" />
+      <option id="enum.mcu.icu_ext_irq.external.channels.4" display="ICU_EXT_IRQ4" value="4" />
+      <option id="enum.mcu.icu_ext_irq.external.channels.5" display="ICU_EXT_IRQ5" value="5" />
+    </enum>
+    <enum id="enum.mcu.iica.external.channels" default="enum.mcu.iica.external.channels.0">
+      <option id="enum.mcu.iica.external.channels.0" display="IICA0" value="0" />
+    </enum>
+    <enum id="enum.mcu.port.external.channels" default="enum.mcu.port.external.channels.0">
+      <option id="enum.mcu.port.external.channels.0" display="PORT0" value="0" />
+      <option id="enum.mcu.port.external.channels.1" display="PORT1" value="1" />
+      <option id="enum.mcu.port.external.channels.2" display="PORT2" value="2" />
+      <option id="enum.mcu.port.external.channels.3" display="PORT3" value="3" />
+      <option id="enum.mcu.port.external.channels.4" display="PORT4" value="4" />
+      <option id="enum.mcu.port.external.channels.9" display="PORT9" value="9" />
+    </enum>
+    <enum id="enum.mcu.sau.external.channels" default="enum.mcu.sau.external.channels.0">
+      <option id="enum.mcu.sau.external.channels.0" display="SAU0" value="0" />
+      <option id="enum.mcu.sau.external.channels.1" display="SAU1" value="1" />
+    </enum>
+    <enum id="enum.mcu.sau_i2c.external.channels" default="enum.mcu.sau_i2c.external.channels.00">
+      <option id="enum.mcu.sau_i2c.external.channels.00" display="SAU_I2C00" value="00" />
+      <option id="enum.mcu.sau_i2c.external.channels.11" display="SAU_I2C11" value="11" />
+      <option id="enum.mcu.sau_i2c.external.channels.20" display="SAU_I2C20" value="20" />
+    </enum>
+    <enum id="enum.mcu.sau_spi.external.channels" default="enum.mcu.sau_spi.external.channels.00">
+      <option id="enum.mcu.sau_spi.external.channels.00" display="SAU_SPI00" value="00" />
+      <option id="enum.mcu.sau_spi.external.channels.11" display="SAU_SPI11" value="11" />
+      <option id="enum.mcu.sau_spi.external.channels.20" display="SAU_SPI20" value="20" />
+    </enum>
+    <enum id="enum.mcu.sau_uart.external.channels" default="enum.mcu.sau_uart.external.channels.0">
+      <option id="enum.mcu.sau_uart.external.channels.0" display="SAU_UART0" value="0" />
+      <option id="enum.mcu.sau_uart.external.channels.1" display="SAU_UART1" value="1" />
+      <option id="enum.mcu.sau_uart.external.channels.2" display="SAU_UART2" value="2" />
+    </enum>
+    <enum id="enum.mcu.tau.external.channels" default="enum.mcu.tau.external.channels.00">
+      <option id="enum.mcu.tau.external.channels.00" display="TAU00" value="00" />
+      <option id="enum.mcu.tau.external.channels.01" display="TAU01" value="01" />
+      <option id="enum.mcu.tau.external.channels.02" display="TAU02" value="02" />
+      <option id="enum.mcu.tau.external.channels.03" display="TAU03" value="03" />
+      <option id="enum.mcu.tau.external.channels.04" display="TAU04" value="04" />
+      <option id="enum.mcu.tau.external.channels.05" display="TAU05" value="05" />
+      <option id="enum.mcu.tau.external.channels.06" display="TAU06" value="06" />
+      <option id="enum.mcu.tau.external.channels.07" display="TAU07" value="07" />
+    </enum>
+    <enum id="enum.mcu.tml.external.channels" default="enum.mcu.tml.external.channels.0">
+      <option id="enum.mcu.tml.external.channels.0" display="TML0" value="0" />
+    </enum>
+    <enum id="enum.mcu.uarta.external.channels" default="enum.mcu.uarta.external.channels.0">
+      <option id="enum.mcu.uarta.external.channels.0" display="UARTA0" value="0" />
+    </enum>
+    <enum id="enum.mcu.uarta_ck.external.channels" default="enum.mcu.uarta_ck.external.channels.0">
+      <option id="enum.mcu.uarta_ck.external.channels.0" display="UARTA_CK0" value="0" />
+    </enum>
+  </bsp>
+</raModuleDescription>

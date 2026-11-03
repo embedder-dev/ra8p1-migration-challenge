@@ -1,0 +1,136 @@
+<?xml version="1.0" ?>
+<raModuleDescription>
+    <module display="Sensor|OB1203 PPG mode (rm_ob1203)" id="module.driver.ob1203_ppg_mode_on_ob1203" version="1" visible="false" url="group___r_m___o_b1203.html">
+        <constraint display="In PPG2 mode, the pulse width and the measurement period are not allowed.">
+            ("${module.driver.ob1203_mode.ppg_mode}" != "module.driver.ob1203_mode.ppg_mode.ppg2") ||
+            (("${module.driver.ob1203_mode.ppg_width_period}" != "module.driver.ob1203_mode.ppg_width_period.130us_0p3125ms") &amp;&amp;
+            ("${module.driver.ob1203_mode.ppg_width_period}" != "module.driver.ob1203_mode.ppg_width_period.247us_0p625ms") &amp;&amp;
+            ("${module.driver.ob1203_mode.ppg_width_period}" != "module.driver.ob1203_mode.ppg_width_period.481us_1ms") &amp;&amp;
+            ("${module.driver.ob1203_mode.ppg_width_period}" != "module.driver.ob1203_mode.ppg_width_period.481us_1p25ms") &amp;&amp;
+            ("${module.driver.ob1203_mode.ppg_width_period}" != "module.driver.ob1203_mode.ppg_width_period.949us_2p5ms"))
+        </constraint>
+        <constraint display="In PPG2 mode, value must be even">
+        (("${module.driver.ob1203_mode.ppg_mode}" != "module.driver.ob1203_mode.ppg_mode.ppg2") ||
+        (("${module.driver.ob1203_mode.ppg_fifo_empty_num}" &amp; 0x01) === 0x00))
+        </constraint>
+        <requires id="module.driver.ob1203.requires.comms_i2c_device" interface="interface.driver.comms_i2c_device" visible="true" display="Requires I2C Communications Device">
+            <override property="module.driver.comms_i2c_device.slave_address" value="0x53"/>
+            <override property="module.driver.comms_i2c_device.address_mode" value="I2C_MASTER_ADDR_MODE_7BIT"/>
+            <override property="module.driver.comms_i2c_device.p_context" value="${module.driver.ob1203_mode.p_context}"/>
+            <override property="module.driver.comms_i2c_device.p_callback" value="rm_ob1203_comms_i2c_callback"/>
+        </requires>
+
+        <provides interface="interface.driver.ob1203_mode" />
+        <provides interface="interface.driver.ob1203_mode_on_ob1203" />
+        <property default="NULL" id="module.driver.ob1203_mode.p_context" />
+        <property default="ob1203" id="module.driver.ob1203_mode.instance_name" />
+        <property default="module.driver.ob1203_mode.ppg_mode.ppg2" display="Operation Mode" id="module.driver.ob1203_mode.ppg_mode" description="Set operation mode.">
+            <option display="PPG1 mode" id="module.driver.ob1203_mode.ppg_mode.ppg1" value="RM_OB1203_PPG_SENSOR_MODE_PPG1"/>
+            <option display="PPG2 mode" id="module.driver.ob1203_mode.ppg_mode.ppg2" value="RM_OB1203_PPG_SENSOR_MODE_PPG2"/>
+        </property>
+        <property default="module.driver.ob1203_mode.ppg_interrupt_type.data" display="Interrupt Type" id="module.driver.ob1203_mode.ppg_interrupt_type" description="Set interrupt type.">
+            <option display="Data" id="module.driver.ob1203_mode.ppg_interrupt_type.data" value="RM_OB1203_PPG_INTERRUPT_TYPE_DATA"/>
+            <option display="FIFO Almost Full" id="module.driver.ob1203_mode.ppg_interrupt_type.fifo_almost_full" value="RM_OB1203_PPG_INTERRUPT_TYPE_FIFO_AFULL"/>
+        </property>
+        <property default="module.driver.ob1203_mode.ppg_gain.mode_1" display="Gain" id="module.driver.ob1203_mode.ppg_gain" description="Set gain of ADC output and noise.">
+            <option display="1" id="module.driver.ob1203_mode.ppg_gain.mode_1" value="RM_OB1203_PPG_PROX_GAIN_1"/>
+            <option display="1.5" id="module.driver.ob1203_mode.ppg_gain.mode_1p5" value="RM_OB1203_PPG_PROX_GAIN_1P5"/>
+            <option display="2" id="module.driver.ob1203_mode.ppg_gain.mode_2" value="RM_OB1203_PPG_PROX_GAIN_2"/>
+            <option display="4" id="module.driver.ob1203_mode.ppg_gain.mode_4" value="RM_OB1203_PPG_PROX_GAIN_4"/>
+        </property>
+        <property default="0x366" display="IR LED Current" id="module.driver.ob1203_mode.ppg_ir_led_current" description="Set Current for IR LED (10bits). Min = 0x000 and Max = 0x3FF">
+            <constraint display="Value must be a non-negative integer">testInteger("${module.driver.ob1203_mode.ppg_ir_led_current}")  &amp;&amp; ("${module.driver.ob1203_mode.ppg_ir_led_current}" &gt;= 0)</constraint>
+            <constraint display="Value must be 10bits or less">("${module.driver.ob1203_mode.ppg_ir_led_current}" &lt;= 0x3FF)</constraint>
+        </property>
+        <property default="0x1B3" display="Red LED Current" id="module.driver.ob1203_mode.ppg_red_led_current" description="Set Current for Red LED (9bits). Min = 0x000 and Max = 0x1FF">
+            <constraint display="Value must be a non-negative integer">testInteger("${module.driver.ob1203_mode.ppg_red_led_current}")  &amp;&amp; ("${module.driver.ob1203_mode.ppg_red_led_current}" &gt;= 0)</constraint>
+            <constraint display="Value must be 9bits or less">("${module.driver.ob1203_mode.ppg_red_led_current}" &lt;= 0x1FF)</constraint>
+        </property>
+        <property default="module.driver.ob1203_mode.ppg_power_save_mode.disabled" display="Power Save Mode" id="module.driver.ob1203_mode.ppg_power_save_mode" description="Set power save mode.">
+            <option display="Enabled" id="module.driver.ob1203_mode.ppg_power_save_mode.enabled" value="RM_OB1203_POWER_SAVE_MODE_ENABLE"/>
+            <option display="Disabled" id="module.driver.ob1203_mode.ppg_power_save_mode.disabled" value="RM_OB1203_POWER_SAVE_MODE_DISABLE"/>
+        </property>
+        <property default="module.driver.ob1203_mode.ppg_led_order.ir_red_order" display="LED Order" id="module.driver.ob1203_mode.ppg_led_order" description="Set LED order.">
+            <option display="IR LED first, Red LED second" id="module.driver.ob1203_mode.ppg_led_order.ir_red_order" value="RM_OB1203_LED_IR_FIRST_RED_SECOND"/>
+            <option display="Red LED first, IR LED second" id="module.driver.ob1203_mode.ppg_led_order.red_ir_order" value="RM_OB1203_LED_RED_FIRST_IR_SECOND"/>
+        </property>
+        <property default="module.driver.ob1203_mode.ppg_ir_led_analog_cancel.disabled" display="IR LED Analog Cancellation" id="module.driver.ob1203_mode.ppg_ir_led_analog_cancel" description="Set analog cancellation level.">
+            <option display="Enabled (50% offset of the full-scale value)" id="module.driver.ob1203_mode.ppg_ir_led_analog_cancel.enabled" value="RM_OB1203_ANALOG_CANCELLATION_ENABLE"/>
+            <option display="Disabled" id="module.driver.ob1203_mode.ppg_ir_led_analog_cancel.disabled" value="RM_OB1203_ANALOG_CANCELLATION_DISABLE"/>
+        </property>
+        <property default="module.driver.ob1203_mode.ppg_red_led_analog_cancel.disabled" display="Red LED Analog Cancellation" id="module.driver.ob1203_mode.ppg_red_led_analog_cancel" description="Set analog cancellation level.">
+            <option display="Enabled (50% offset of the full-scale value)" id="module.driver.ob1203_mode.ppg_red_led_analog_cancel.enabled" value="RM_OB1203_ANALOG_CANCELLATION_ENABLE"/>
+            <option display="Disabled" id="module.driver.ob1203_mode.ppg_red_led_analog_cancel.disabled" value="RM_OB1203_ANALOG_CANCELLATION_DISABLE"/>
+        </property>
+        <property default="module.driver.ob1203_mode.ppg_num_averaged_samples.num_8" display="Number of Averaged PPG Samples" id="module.driver.ob1203_mode.ppg_num_averaged_samples" description="Set number of averaged for PPG samples.">
+            <option display="1 (No averaging)" id="module.driver.ob1203_mode.ppg_num_averaged_samples.num_1" value="RM_OB1203_NUM_AVERAGED_SAMPLES_1"/>
+            <option display="2 consecutives samples are averaged" id="module.driver.ob1203_mode.ppg_num_averaged_samples.num_2" value="RM_OB1203_NUM_AVERAGED_SAMPLES_2"/>
+            <option display="4 consecutives samples are averaged" id="module.driver.ob1203_mode.ppg_num_averaged_samples.num_4" value="RM_OB1203_NUM_AVERAGED_SAMPLES_4"/>
+            <option display="8 consecutives samples are averaged" id="module.driver.ob1203_mode.ppg_num_averaged_samples.num_8" value="RM_OB1203_NUM_AVERAGED_SAMPLES_8"/>
+            <option display="16 consecutives samples are averaged" id="module.driver.ob1203_mode.ppg_num_averaged_samples.num_16" value="RM_OB1203_NUM_AVERAGED_SAMPLES_16"/>
+            <option display="32 consecutives samples are averaged" id="module.driver.ob1203_mode.ppg_num_averaged_samples.num_32" value="RM_OB1203_NUM_AVERAGED_SAMPLES_32"/>
+        </property>
+        <property default="module.driver.ob1203_mode.ppg_width_period.130us_1p25ms" display="Pulse Width and Measurement Period" id="module.driver.ob1203_mode.ppg_width_period" description="Set pulse width and measurement period.">
+            <option display="Pulse width:130us. Measurement Period:0.3125ms. (PPG1 mode only)" id="module.driver.ob1203_mode.ppg_width_period.130us_0p3125ms" value="RM_OB1203_PPG_WIDTH_130US_PERIOD_0P3125MS"/>
+            <option display="Pulse width:130us. Measurement Period:0.625ms" id="module.driver.ob1203_mode.ppg_width_period.130us_0p625ms" value="RM_OB1203_PPG_WIDTH_130US_PERIOD_0P625MS"/>
+            <option display="Pulse width:130us. Measurement Period:1ms" id="module.driver.ob1203_mode.ppg_width_period.130us_1ms" value="RM_OB1203_PPG_WIDTH_130US_PERIOD_1MS"/>
+            <option display="Pulse width:130us. Measurement Period:1.25ms" id="module.driver.ob1203_mode.ppg_width_period.130us_1p25ms" value="RM_OB1203_PPG_WIDTH_130US_PERIOD_1P25MS"/>
+            <option display="Pulse width:130us. Measurement Period:2.5ms" id="module.driver.ob1203_mode.ppg_width_period.130us_2p5ms" value="RM_OB1203_PPG_WIDTH_130US_PERIOD_2P5MS"/>
+            <option display="Pulse width:130us. Measurement Period:5ms" id="module.driver.ob1203_mode.ppg_width_period.130us_5ms" value="RM_OB1203_PPG_WIDTH_130US_PERIOD_5MS"/>
+            <option display="Pulse width:130us. Measurement Period:10ms" id="module.driver.ob1203_mode.ppg_width_period.130us_10ms" value="RM_OB1203_PPG_WIDTH_130US_PERIOD_10MS"/>
+            <option display="Pulse width:130us. Measurement Period:20ms" id="module.driver.ob1203_mode.ppg_width_period.130us_20ms" value="RM_OB1203_PPG_WIDTH_130US_PERIOD_20MS"/>
+            <option display="Pulse width:247us. Measurement Period:0.625ms. (PPG1 mode only)" id="module.driver.ob1203_mode.ppg_width_period.247us_0p625ms" value="RM_OB1203_PPG_WIDTH_247US_PERIOD_0P625MS"/>
+            <option display="Pulse width:247us. Measurement Period:1ms" id="module.driver.ob1203_mode.ppg_width_period.247us_1ms" value="RM_OB1203_PPG_WIDTH_247US_PERIOD_1MS"/>
+            <option display="Pulse width:247us. Measurement Period:1.25ms" id="module.driver.ob1203_mode.ppg_width_period.247us_1p25ms" value="RM_OB1203_PPG_WIDTH_247US_PERIOD_1P25MS"/>
+            <option display="Pulse width:247us. Measurement Period:2.5ms" id="module.driver.ob1203_mode.ppg_width_period.247us_2p5ms" value="RM_OB1203_PPG_WIDTH_247US_PERIOD_2P5MS"/>
+            <option display="Pulse width:247us. Measurement Period:5ms" id="module.driver.ob1203_mode.ppg_width_period.247us_5ms" value="RM_OB1203_PPG_WIDTH_247US_PERIOD_5MS"/>
+            <option display="Pulse width:247us. Measurement Period:10ms" id="module.driver.ob1203_mode.ppg_width_period.247us_10ms" value="RM_OB1203_PPG_WIDTH_247US_PERIOD_10MS"/>
+            <option display="Pulse width:247us. Measurement Period:20ms" id="module.driver.ob1203_mode.ppg_width_period.247us_20ms" value="RM_OB1203_PPG_WIDTH_247US_PERIOD_20MS"/>
+            <option display="Pulse width:481us. Measurement Period:1ms. (PPG1 mode only)" id="module.driver.ob1203_mode.ppg_width_period.481us_1ms" value="RM_OB1203_PPG_WIDTH_481US_PERIOD_1MS"/>
+            <option display="Pulse width:481us. Measurement Period:1.25ms. (PPG1 mode only)" id="module.driver.ob1203_mode.ppg_width_period.481us_1p25ms" value="RM_OB1203_PPG_WIDTH_481US_PERIOD_1P25MS"/>
+            <option display="Pulse width:481us. Measurement Period:2.5ms" id="module.driver.ob1203_mode.ppg_width_period.481us_2p5ms" value="RM_OB1203_PPG_WIDTH_481US_PERIOD_2P5MS"/>
+            <option display="Pulse width:481us. Measurement Period:5ms" id="module.driver.ob1203_mode.ppg_width_period.481us_5ms" value="RM_OB1203_PPG_WIDTH_481US_PERIOD_5MS"/>
+            <option display="Pulse width:481us. Measurement Period:10ms" id="module.driver.ob1203_mode.ppg_width_period.481us_10ms" value="RM_OB1203_PPG_WIDTH_481US_PERIOD_10MS"/>
+            <option display="Pulse width:481us. Measurement Period:20ms" id="module.driver.ob1203_mode.ppg_width_period.481us_20ms" value="RM_OB1203_PPG_WIDTH_481US_PERIOD_20MS"/>
+            <option display="Pulse width:949us. Measurement Period:2.5ms. (PPG1 mode only)" id="module.driver.ob1203_mode.ppg_width_period.949us_2p5ms" value="RM_OB1203_PPG_WIDTH_949US_PERIOD_2P5MS"/>
+            <option display="Pulse width:949us. Measurement Period:5ms" id="module.driver.ob1203_mode.ppg_width_period.949us_5ms" value="RM_OB1203_PPG_WIDTH_949US_PERIOD_5MS"/>
+            <option display="Pulse width:949us. Measurement Period:10ms" id="module.driver.ob1203_mode.ppg_width_period.949us_10ms" value="RM_OB1203_PPG_WIDTH_949US_PERIOD_10MS"/>
+            <option display="Pulse width:949us. Measurement Period:20ms" id="module.driver.ob1203_mode.ppg_width_period.949us_20ms" value="RM_OB1203_PPG_WIDTH_949US_PERIOD_20MS"/>
+        </property>
+        <property default="module.driver.ob1203_mode.ppg_fifo_rollover.enabled" display="FIFO Rollover" id="module.driver.ob1203_mode.ppg_fifo_rollover" description="Set FIFO rollover.">
+            <option display="Enabled" id="module.driver.ob1203_mode.ppg_fifo_rollover.enabled" value="RM_OB1203_FIFO_ROLLOVER_ENABLE"/>
+            <option display="Disabled" id="module.driver.ob1203_mode.ppg_fifo_rollover.disabled" value="RM_OB1203_FIFO_ROLLOVER_DISABLE"/>
+        </property>
+        <property default="0x0C" display="FIFO Almost Full Value" id="module.driver.ob1203_mode.ppg_fifo_empty_num" description="Set the number of empty FIFO words when the FIFO almost full interrupt is issued (4bits). Min = 0x0 and Max = 0xF. In PPG2 Mode, only even values must be used.">
+            <constraint display="Value must be a non-negative integer">testInteger("${module.driver.ob1203_mode.ppg_fifo_empty_num}")  &amp;&amp; ("${module.driver.ob1203_mode.ppg_fifo_empty_num}" &gt;= 0)</constraint>
+            <constraint display="Value must be 4bits or less">("${module.driver.ob1203_mode.ppg_fifo_empty_num}" &lt;= 0xF)</constraint>
+        </property>
+
+        <header>
+/* OB1203 PPG mode */
+extern rm_ob1203_mode_extended_cfg_t ${module.driver.ob1203_mode.instance_name}_extended_cfg;
+        </header>
+
+        <declarations>
+extern rm_ob1203_api_t const  g_ob1203_on_ob1203_ppg;
+rm_ob1203_mode_extended_cfg_t ${module.driver.ob1203_mode.instance_name}_extended_cfg =
+{
+    .p_api = (void *)&amp;g_ob1203_on_ob1203_ppg,
+    .ppg_prox_gain = ${module.driver.ob1203_mode.ppg_gain},
+    .led_order = ${module.driver.ob1203_mode.ppg_led_order},
+    .ppg_sensor_mode = ${module.driver.ob1203_mode.ppg_mode},
+    .ppg_interrupt_type = ${module.driver.ob1203_mode.ppg_interrupt_type},
+    .ppg_ir_led_current = ${module.driver.ob1203_mode.ppg_ir_led_current},
+    .ppg_red_led_current = ${module.driver.ob1203_mode.ppg_red_led_current},
+    .ppg_power_save_mode = ${module.driver.ob1203_mode.ppg_power_save_mode},
+    .ppg_ir_led_ana_can = ${module.driver.ob1203_mode.ppg_ir_led_analog_cancel},
+    .ppg_red_led_ana_can = ${module.driver.ob1203_mode.ppg_red_led_analog_cancel},
+    .ppg_num_averaged_samples = ${module.driver.ob1203_mode.ppg_num_averaged_samples},
+    .ppg_width_period = ${module.driver.ob1203_mode.ppg_width_period},
+    .ppg_fifo_rollover = ${module.driver.ob1203_mode.ppg_fifo_rollover},
+    .ppg_fifo_empty_num = ${module.driver.ob1203_mode.ppg_fifo_empty_num},
+};
+        </declarations>
+
+    </module>
+</raModuleDescription>

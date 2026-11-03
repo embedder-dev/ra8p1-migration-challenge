@@ -1,0 +1,203 @@
+﻿<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.driver.audio_playback_pwm" path="fsp_cfg/rm_audio_playback_pwm_cfg.h" version="0">
+        <property default="config.driver.audio_playback_pwm.param_checking_enable.bsp" display="Parameter Checking" id="config.driver.audio_playback_pwm.param_checking_enable" description="If selected code for parameter checking is included in the build.">
+            <option display="Default (BSP)" id="config.driver.audio_playback_pwm.param_checking_enable.bsp" value="(BSP_CFG_PARAM_CHECKING_ENABLE)"/>
+            <option display="Enabled" id="config.driver.audio_playback_pwm.param_checking_enable.enabled" value="(1)"/>
+            <option display="Disabled" id="config.driver.audio_playback_pwm.param_checking_enable.disabled" value="(0)"/>
+        </property>
+        <property default="config.driver.audio_playback_pwm.dmac_support_enable.disabled" display="DMAC Support" id="config.driver.audio_playback_pwm.dmac_support_enable" description="Select if DMAC will be used.">
+            <option display="Enabled" id="config.driver.audio_playback_pwm.dmac_support_enable.enabled" value="(1)"/>
+            <option display="Disabled" id="config.driver.audio_playback_pwm.dmac_support_enable.disabled" value="(0)"/>
+        </property>
+        <content>
+            #ifdef __cplusplus
+            extern "C" {
+            #endif
+
+            #define AUDIO_PLAYBACK_PWM_CFG_PARAM_CHECKING_ENABLE ${config.driver.audio_playback_pwm.param_checking_enable}
+            #define AUDIO_PLAYBACK_PWM_DMAC_SUPPORT_ENABLE ${config.driver.audio_playback_pwm.dmac_support_enable}
+
+            #ifdef __cplusplus
+            }
+            #endif
+        </content>
+    </config>
+    <module config="config.driver.audio_playback_pwm" display="Audio|${module.driver.audio_playback.name} Audio Playback PWM (rm_audio_playback_pwm)" id="module.driver.audio_playback_on_audio_playback_pwm" version="1" url="group___r_m___a_u_d_i_o___p_l_a_y_b_a_c_k___p_w_m.html">
+        <constraint display="Unique name required for each instance">
+            "${interface.driver.audio_playback.${module.driver.audio_playback.name}}" === "1"
+        </constraint>
+        <constraint display="Requires Transfer Driver">
+            testExists("${module.driver.audio_playback.requires.transfer::module.driver.transfer.name}")
+        </constraint>
+        <constraint display="Requires Timer Driver">
+            testExists("${module.driver.audio_playback.requires.timer::module.driver.timer.name}")
+        </constraint>
+        <constraint display="Callback is required. Enter a function name in Interrupts->Callback.">
+            ("${module.driver.audio_playback.p_callback}" != "NULL")
+        </constraint>
+        <constraint display="DMAC support must be enabled to use DMAC.">
+            ("${config.driver.audio_playback_pwm.dmac_support_enable}" === "config.driver.audio_playback_pwm.dmac_support_enable.enabled") || !testExists("${module.driver.audio_playback.requires.transfer::module.driver.transfer.offset}")
+        </constraint>
+        <constraint display="DMAC 'Activation Source' should be 'GPTn COUNTER OVERFLOW', where n is the channel of the GPT timer running at the sampling frequency.">
+            ("${module.driver.audio_playback.requires.transfer::module.driver.transfer.activation_event}".startsWith("_signal.")) || !testExists("${module.driver.audio_playback.requires.transfer::module.driver.transfer.offset}")||
+           !(testExists("${module.driver.audio_playback.requires.timer::module.driver.timer.gtioca_output_enabled}"))
+        </constraint>
+        <constraint display="DMAC 'Activation Source' should be 'AGTn INT (AGT interrupt)', where n is the channel of the AGT timer running at the sampling frequency.">
+            ("${module.driver.audio_playback.requires.transfer::module.driver.transfer.activation_event}".startsWith("_signal.")) || !testExists("${module.driver.audio_playback.requires.transfer::module.driver.transfer.offset}")||
+           !(testExists("${module.driver.audio_playback.requires.timer::module.driver.timer.agtoa_output_enable}"))
+        </constraint>
+        <constraint display="DTC 'Activation Source' should be 'GPTn COUNTER OVERFLOW', where n is the channel of the GPT timer running at the sampling frequency.">
+            ("_disabled" !== "${module.driver.audio_playback.requires.transfer::module.driver.transfer.activation_source}") ||
+           !(testExists("${module.driver.audio_playback.requires.timer::module.driver.timer.gtioca_output_enabled}"))
+        </constraint>
+        <constraint display="DTC 'Activation Source' should be 'AGTn INT (AGT interrupt)', where n is the channel of the AGT timer running at the sampling frequency.">
+            ("_disabled" !== "${module.driver.audio_playback.requires.transfer::module.driver.transfer.activation_source}") ||
+           !(testExists("${module.driver.audio_playback.requires.timer::module.driver.timer.agtoa_output_enable}"))
+        </constraint>
+        <constraint display="PWM output is not enabled on the selected pin. Select and Enable AGTOA or AGTOB pin for AGT PWM interface.">
+            (("${module.driver.audio_playback.requires.timer::module.driver.timer.agtoa_output_enable}" !== "module.driver.timer.agtoa_output_enable.false") &amp;&amp; ("${module.driver.audio_playback.timer_output_pin}" === "module.driver.audio_playback.timer_output_pin.pin_a")) ||
+            (("${module.driver.audio_playback.requires.timer::module.driver.timer.agtob_output_enable}" !== "module.driver.timer.agtob_output_enable.false") &amp;&amp; ("${module.driver.audio_playback.timer_output_pin}" === "module.driver.audio_playback.timer_output_pin.pin_b")) ||
+            !(testExists("${module.driver.audio_playback.requires.timer::module.driver.timer.agtoa_output_enable}"))
+        </constraint>
+        <constraint display="PWM output is not enabled on the selected pin. Select and Enable GTIOCA or GTIOCB pin for GPT PWM interface">
+            (("${module.driver.audio_playback.requires.timer::module.driver.timer.gtioca_output_enabled}" !== "module.driver.timer.gtioca_output_enabled.false") &amp;&amp; ("${module.driver.audio_playback.timer_output_pin}" === "module.driver.audio_playback.timer_output_pin.pin_a")) ||
+            (("${module.driver.audio_playback.requires.timer::module.driver.timer.gtiocb_output_enabled}" !== "module.driver.timer.gtiocb_output_enabled.false") &amp;&amp; ("${module.driver.audio_playback.timer_output_pin}" === "module.driver.audio_playback.timer_output_pin.pin_b")) ||
+            !(testExists("${module.driver.audio_playback.requires.timer::module.driver.timer.gtioca_output_enabled}"))
+        </constraint>
+
+        <requires id="module.driver.audio_playback.requires.transfer" interface="interface.driver.transfer" display="Add Transfer Driver">
+            <override property="module.driver.transfer.mode" value="module.driver.transfer.mode.mode_normal"/>
+            <override property="module.driver.transfer.dest_addr_mode" value="module.driver.transfer.dest_addr_mode.addr_mode_fixed"/>
+            <override property="module.driver.transfer.src_addr_mode" value="module.driver.transfer.src_addr_mode.addr_mode_incremented"/>
+            <override property="module.driver.transfer.p_src" value="NULL"/>
+            <override property="module.driver.transfer.p_dest" value="NULL"/>
+            <override property="module.driver.transfer.size" value="module.driver.transfer.size.size_4_byte"/>
+            <override property="module.driver.transfer.length" value="0"/>
+            <override property="module.driver.transfer.interrupt" value="module.driver.transfer.interrupt.interrupt_end"/>
+            <override property="module.driver.transfer.num_blocks" value="0"/>
+            <override property="module.driver.transfer.auto_enable" value="module.driver.transfer.auto_enable.false"/>
+            <override property="module.driver.transfer.p_callback" value="AUDIO_${module.driver.audio_playback.name_upper}_DMAC_CALLBACK"/>
+            <override property="module.driver.transfer.p_context" value="AUDIO_${module.driver.audio_playback.name_upper}_DMAC_CONTEXT"/>
+        </requires>
+        <requires id="module.driver.audio_playback.requires.timer" interface="interface.driver.timer" display="Add Timer Driver">
+            <override property="module.driver.timer.mode" value="module.driver.timer.mode.mode_pwm"/>
+            <override property="module.driver.timer.unit" value="module.driver.timer.unit.unit_frequency_hz"/>
+            <override property="module.driver.timer.period" value="${module.driver.audio_playback.speed}"/>
+            <override property="module.driver.timer.p_callback" value="AUDIO_${module.driver.audio_playback.name_upper}_TIMER_CALLBACK"/>
+            <override property="module.driver.timer.p_context" value="AUDIO_${module.driver.audio_playback.name_upper}_TIMER_CONTEXT"/>
+            <override property="module.driver.timer.autostart" value="module.driver.timer.autostart.false"/>
+        </requires>
+
+        <provides interface="interface.driver.audio_playback" />
+        <provides interface="interface.driver.audio_playback.${module.driver.audio_playback.name}" />
+
+        <!-- Module Name -->
+        <property default="g_rm_audio_playback${_instance}" display="General|Name" id="module.driver.audio_playback.name" description="Module name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.audio_playback.name}")</constraint>
+        </property>
+        <property default="44100" display="General|Playback Speed (Hz)" id="module.driver.audio_playback.speed" description="Enter playback sample rate in Hz.">
+            <constraint display="Must be an integer and greater than 0">testInteger("${module.driver.audio_playback.speed}") &amp;&amp; ("${module.driver.audio_playback.speed}" &gt; 0)</constraint>
+        </property>
+        <property default="module.driver.audio_playback.timer_output_pin.pin_a" display="PWM Output Pin" id="module.driver.audio_playback.timer_output_pin" description="Select which timer output pin should be used for audio output.">
+            <option display="Pin A" id="module.driver.audio_playback.timer_output_pin.pin_a" value="(0)"/>
+            <option display="Pin B" id="module.driver.audio_playback.timer_output_pin.pin_b" value="(1)"/>
+        </property>
+        <property default="g_rm_audio_playback${_instance}_callback" display="Interrupts|Callback" id="module.driver.audio_playback.p_callback" description="A user callback function. If this callback function is provided, it is called from the interrupt service routine (ISR) each time the playback completes.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.audio_playback.p_callback}")</constraint>
+        </property>
+        <property default="NULL" id="module.driver.audio_playback.p_context">
+            <export>eval('' +
+            'var string = "${module.driver.audio_playback.p_context}";' +
+            'if ("NULL" !== string){' +
+            'string = "&amp;" + string  ;' +
+            '}' +
+            'String(string)')
+            </export>
+        </property>
+        <property default="" id="module.driver.audio_playback.name_upper">
+            <export>"${module.driver.audio_playback.name}".toUpperCase()</export>
+        </property>
+
+        <header>
+           extern const audio_playback_instance_t ${module.driver.audio_playback.name};
+
+           /** Access the Audio Playback instance using these structures when calling API functions directly (::p_api is not used). */
+           extern audio_playback_pwm_instance_ctrl_t ${module.driver.audio_playback.name}_ctrl;
+           extern const audio_playback_cfg_t ${module.driver.audio_playback.name}_cfg;
+
+           #ifndef ${module.driver.audio_playback.p_callback}
+           void ${module.driver.audio_playback.p_callback}(audio_playback_callback_args_t * p_args);
+           #endif
+
+
+           #define RA_NOT_DEFINED (UINT32_MAX)
+           #if (RA_NOT_DEFINED) != (${module.driver.audio_playback.requires.transfer::module.driver.transfer.offset})
+
+           /* If the transfer module is DMAC, define a DMAC transfer callback. */
+           #include "r_dmac.h"
+           extern void rm_audio_playback_pwm_callback_dmac(dmac_callback_args_t * p_args);
+           #define AUDIO_${module.driver.audio_playback.name_upper}_DMAC_CALLBACK rm_audio_playback_pwm_callback_dmac
+           #define AUDIO_${module.driver.audio_playback.name_upper}_DMAC_CONTEXT &amp;(${module.driver.audio_playback.name}_ctrl)
+           #define AUDIO_${module.driver.audio_playback.name_upper}_TIMER_CALLBACK NULL
+           #define AUDIO_${module.driver.audio_playback.name_upper}_TIMER_CONTEXT NULL
+
+           #else
+           extern void rm_audio_playback_pwm_callback_timer(timer_callback_args_t * p_args);
+           #define AUDIO_${module.driver.audio_playback.name_upper}_DMAC_CALLBACK NULL
+           #define AUDIO_${module.driver.audio_playback.name_upper}_DMAC_CONTEXT NULL
+           #define AUDIO_${module.driver.audio_playback.name_upper}_TIMER_CALLBACK rm_audio_playback_pwm_callback_timer
+           #define AUDIO_${module.driver.audio_playback.name_upper}_TIMER_CONTEXT &amp;(${module.driver.audio_playback.name}_ctrl)
+           #endif
+           #undef RA_NOT_DEFINED
+        </header>
+        <includes>#include &quot;rm_audio_playback_pwm.h&quot;</includes>
+        <declarations>
+#define RA_NOT_DEFINED (UINT32_MAX)
+#if RA_NOT_DEFINED != ${module.driver.audio_playback.requires.timer::module.driver.timer.agtoa_output_enable}
+ #define AUDIO_${module.driver.audio_playback.name_upper}_USE_AGT  (1)
+#else
+ #define AUDIO_${module.driver.audio_playback.name_upper}_USE_AGT  (0)
+#endif
+#undef RA_NOT_DEFINED
+
+audio_playback_pwm_instance_ctrl_t ${module.driver.audio_playback.name}_ctrl;
+
+#define AUDIO_PLAYBACK_PWM_PRV_${module.driver.audio_playback.requires.timer::module.driver.timer.bit_width}
+const audio_playback_pwm_extended_cfg_t ${module.driver.audio_playback.name}_extend =
+{
+#if AUDIO_${module.driver.audio_playback.name_upper}_USE_AGT
+    #if defined(AUDIO_PLAYBACK_PWM_PRV_AGT_COUNTER_BIT_WIDTH_32)
+        .p_timer_duty_reg = (void *) (&amp;R_AGTW${module.driver.audio_playback.requires.timer::module.driver.timer.channel}->AGT32.AGTCMA + ${module.driver.audio_playback.timer_output_pin}),
+        .transfer_size    = TRANSFER_SIZE_4_BYTE,
+    #else
+        .p_timer_duty_reg = (void *) (&amp;R_AGT${module.driver.audio_playback.requires.timer::module.driver.timer.channel}->AGT16.AGTCMA + ${module.driver.audio_playback.timer_output_pin}),
+        .transfer_size    = TRANSFER_SIZE_2_BYTE,
+    #endif
+
+#else
+    .p_timer_duty_reg = (void *) &amp;R_GPT${module.driver.audio_playback.requires.timer::module.driver.timer.channel}->GTCCR[2 + ${module.driver.audio_playback.timer_output_pin}],
+    .transfer_size    = TRANSFER_SIZE_4_BYTE,
+#endif
+
+    .p_lower_lvl_timer = &amp;${module.driver.audio_playback.requires.timer::module.driver.timer.name},
+    .p_lower_lvl_transfer = &amp;${module.driver.audio_playback.requires.transfer::module.driver.transfer.name},
+};
+#undef AUDIO_PLAYBACK_PWM_PRV_AGT${module.driver.audio_playback.requires.timer::module.driver.timer.bit_width}
+
+const audio_playback_cfg_t ${module.driver.audio_playback.name}_cfg =
+{
+    .p_extend       = &amp;${module.driver.audio_playback.name}_extend,
+    .p_callback     = ${module.driver.audio_playback.p_callback},
+    .p_context      = ${module.driver.audio_playback.p_context},
+};
+
+const audio_playback_instance_t ${module.driver.audio_playback.name} =
+{
+    .p_api = &amp;g_audio_playback_on_audio_playback_pwm,
+    .p_ctrl = &amp;${module.driver.audio_playback.name}_ctrl,
+    .p_cfg = &amp;${module.driver.audio_playback.name}_cfg,
+};
+        </declarations>
+    </module>
+</raModuleDescription>

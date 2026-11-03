@@ -1,0 +1,204 @@
+<?xml version="1.0" ?>
+<raModuleDescription>
+    <module id="module.aws.transport_interface.mbedtls_pkcs11" display="Networking|AWS Transport Interface on MbedTLS/PKCS11 (rm_aws_transport_interface_port)" common="1" version="0" url="https://docs.aws.amazon.com/embedded-csdk/latest/lib-ref/libraries/standard/coreMQTT/docs/doxygen/output/html/mqtt_transport_interface.html">
+        <constraint display="Requires FreeRTOS heap implementation 4 or 5">
+          "${interface.freertos.heap_4_or_5}" === "1"
+        </constraint>
+        <constraint display="Mutexes must be enabled in the FreeRTOS thread config under Common|General|Use Mutexes.">
+            "${config.awsfreertos.thread.configuse_mutexes}" === "config.awsfreertos.thread.configuse_mutexes.enabled"
+        </constraint>
+        <constraint display="Requires Sockets Wrapper module">
+            testExists("${interface.aws.sockets_wrapper}")
+        </constraint>
+        <requires id="module.aws.transport_interface.mbedtls_pkcs11.requires.awsfreertos" interface="interface.rtos.awsfreertos" visible="false" display="Requires FreeRTOS"/>
+        <requires id="module.aws.transport_interface.mbedtls_pkcs11.requires.sockets_wrapper" interface="interface.aws.sockets_wrapper" display="Add Sockets Wrapper [Required]"/>
+        <requires id="module.aws.freertosplus.tls.requires.pkcs11" interface="interface.aws.pkcs11" display="Add PKCS11" find="true" />
+        <requires id="module.aws.transport_interface.mbedtls_pkcs11.requires.c_sdk_logging" interface="interface.aws.c_sdk_logging" display="Add AWS c_sdk Logging" find="true" />
+        <requires id="module.aws.transport_interface.mbedtls_pkcs11.requires.dev_mode_key_provisioning" interface="interface.aws.freertos.dev_mode_key_provisioning_mbed_transport_interface" display="Add AWS Demo dev_mode_key_provisioning" find="true" />
+        <provides interface="interface.aws.transportInterface" />
+        <provides interface="interface.aws.transport_interface" />
+        <includes>
+#include "transport_mbedtls_pkcs11.h"
+        </includes>
+    </module>
+    <developerSupport>
+        <api version="1">
+            <platform id="fsp" max="" min="1.1.0"/>
+            <moduleRef id="module.aws.transport_interface.mbedtls_pkcs11"/>
+            <description><![CDATA[<form><p><span color="header" font="header">Overview</span></p><p>The AWS Transport Interface Port module provides examples for configuring and running the MbedTLS/PKCS11 transport interface port.</p></form>]]></description>
+            <function display="CoreMQTT" id="mqtt_using_mbedtls_example">
+                <description><![CDATA[<form><p>This provides a full example for how to configure MQTT with the MbedTLS transport interface.</p></form>]]></description>
+            </function>
+        </api>
+        <template category="function_call" display="CoreMQTT Example" id="module.aws.transport_interface.mbedtls_pkcs11.mqtt_mbedtls_example" version="1">
+            <platform id="fsp" max="" min="1.1.0"/>
+            <moduleRef id="module.aws.transport_interface.mbedtls_pkcs11">
+                <function id="mqtt_using_mbedtls_example"/>
+            </moduleRef>
+            <content>
+/**
+ * @brief Each compilation unit that consumes the NetworkContext must define it.
+ * It should contain a single pointer to the type of your desired transport.
+ * When using multiple transports in the same compilation unit, define this pointer as void *.
+ *
+ * @note Transport stacks are defined in FreeRTOS-Plus/Source/Application-Protocols/network_transport.
+ */
+struct NetworkContext
+{
+    TlsTransportParams_t * pParams;
+};
+
+#define DISABLE_SNI (false)
+#define MQTT_HOST ("mqtt_host_server")
+#define MQTT_HOST_PORT (8883)
+#define MQTT_SEND_TIMEOUT (5000)
+#define MQTT_RECEIVE_TIMEOUT (5000)
+#define MQTT_TOPIC ("example_topic")
+#define MQTT_CLIENT_IDENTIFIER ("client_id")
+#define MQTT_KEEP_ALIVE_SECONDS (60)
+#define MQTT_PAYLOAD ("helloworld")
+#define mqttexampleOUTGOING_PUBLISH_RECORD_LEN (2)
+#define mqttexampleINCOMING_PUBLISH_RECORD_LEN (2)
+
+static const char SERVER_CERTIFICATE_PEM[] =
+    "COPY YOUR PEM CERTIFICATE HERE";
+
+static MQTTPubAckInfo_t pOutgoingPublishRecords[ mqttexampleOUTGOING_PUBLISH_RECORD_LEN ];
+static MQTTPubAckInfo_t pIncomingPublishRecords[ mqttexampleINCOMING_PUBLISH_RECORD_LEN ];
+
+NetworkContext_t networkContext;
+
+/* Callback to handle MQTT events, user should add their own processing */
+static void prvEventCallback( MQTTContext_t * pxMQTTContext,
+                              MQTTPacketInfo_t * pxPacketInfo,
+                              MQTTDeserializedInfo_t * pxDeserializedInfo );
+static void prvEventCallback( MQTTContext_t * pxMQTTContext,
+                              MQTTPacketInfo_t * pxPacketInfo,
+                              MQTTDeserializedInfo_t * pxDeserializedInfo )
+{
+    FSP_PARAMETER_NOT_USED(pxMQTTContext);
+    FSP_PARAMETER_NOT_USED(pxPacketInfo);
+    FSP_PARAMETER_NOT_USED(pxDeserializedInfo);
+}
+
+/* Callback to get current time */
+static uint32_t prvGetTimeMs( void );
+static uint32_t prvGetTimeMs( void )
+{
+    TickType_t xTickCount = 0;
+    uint32_t ulTimeMs = 0UL;
+
+    /* Get the current tick count. */
+    xTickCount = xTaskGetTickCount();
+
+    /* Convert the ticks to milliseconds. */
+    ulTimeMs = ( uint32_t ) xTickCount * (1000U / configTICK_RATE_HZ);
+
+    return ulTimeMs;
+}
+
+void using_mbedtls_mqtt_example();
+
+/* MQTT Example using MbedTLS transport interface
+ * NOTE: If a cellular modem is being used the quick_setup for it should be called first (AWS Cellular Interface on GM (rm_cellular_gm_aws) -> Quick Setup)
+ * NOTE: If using FreeRTOS+TCP the network stack should be initialized before calling this
+ * NOTE: If using WiFi then an AP should be connected to before calling this
+ */
+void using_mbedtls_mqtt_example()
+{
+    ProvisioningParams_t params;
+    NetworkCredentials_t credentials;
+    TransportInterface_t transport;
+    MQTTContext_t mqtt_context;
+    TlsTransportParams_t transport_params;
+    static uint8_t buffer[ 1024 ];
+    MQTTFixedBuffer_t networkBuffer;
+    MQTTConnectInfo_t connectInfo;
+    MQTTPublishInfo_t lwtInfo;
+    bool session_present;
+
+    /* Open little FS flash and format in order to store keys */
+    assert(FSP_SUCCESS == RM_LITTLEFS_FLASH_Open(${littlefs_name:raProperty(module.middleware.rm_littlefs.name)}.p_ctrl, ${littlefs_name}.p_cfg));
+    assert(0 == lfs_format(&amp;${littlefs_name}_lfs, &amp;${littlefs_name}_lfs_cfg));
+    assert(0 == lfs_mount(&amp;${littlefs_name}_lfs, &amp;${littlefs_name}_lfs_cfg));
+
+    /* Initialize the crypto hardware acceleration. */
+    mbedtls_platform_setup(NULL);
+
+    /* Write the keys into a secure region in data flash. */
+    params.pucClientCertificate      = keyCLIENT_CERTIFICATE_PEM;
+    params.ulClientCertificateLength = sizeof(keyCLIENT_CERTIFICATE_PEM);
+    params.pucClientPrivateKey       = keyCLIENT_PRIVATE_KEY_PEM;
+    params.ulClientPrivateKeyLength  = sizeof(keyCLIENT_PRIVATE_KEY_PEM);
+    params.pucJITPCertificate        = NULL;
+    params.ulJITPCertificateLength   = 0;
+    vAlternateKeyProvisioning(&amp;params);
+
+    /* Initialize network context */
+    networkContext.pParams = &amp;transport_params;
+
+    /* Setup network credentials */
+    credentials.pAlpnProtos = NULL;
+    credentials.disableSni = DISABLE_SNI;
+    credentials.pRootCa = ( const unsigned char * ) SERVER_CERTIFICATE_PEM;
+    credentials.rootCaSize = sizeof( SERVER_CERTIFICATE_PEM );
+    credentials.pUserName = NULL;
+    credentials.userNameSize = 0;
+    credentials.pPassword = NULL;
+    credentials.passwordSize = 0;
+    credentials.pClientCertLabel = pkcs11configLABEL_DEVICE_CERTIFICATE_FOR_TLS;
+    credentials.pPrivateKeyLabel = pkcs11configLABEL_DEVICE_PRIVATE_KEY_FOR_TLS;
+
+    /* Set transport interface */
+    transport.pNetworkContext = &amp;networkContext;
+    transport.recv = TLS_FreeRTOS_recv;
+    transport.send = TLS_FreeRTOS_send;
+    transport.writev = NULL;
+
+    /* Connect to a MQTT host */
+    TLS_FreeRTOS_Connect(&amp;networkContext, MQTT_HOST, MQTT_HOST_PORT, &amp;credentials, MQTT_RECEIVE_TIMEOUT, MQTT_SEND_TIMEOUT);
+
+    /* Fill the values for network buffer. */
+    networkBuffer.pBuffer = buffer;
+    networkBuffer.size = 1024;
+
+    /* Initialize MQTT */
+    assert(MQTTSuccess == MQTT_Init(&amp;mqtt_context, &amp;transport, prvGetTimeMs, prvEventCallback, &amp;networkBuffer));
+
+    /*
+     The MQTT_Init function no longer creates buffers to handle QoS > 0 packets, so if planning to use QoS > 0,
+     the MQTT_InitStatefulQoS function must also be called on an MQTTContext_t after calling MQTT_Init on it and
+     before using any other coreMQTT functions with it. If not using QoS > 0, MQTT_InitStatefulQoS does not need to be called.
+    */
+    assert(MQTTSuccess == MQTT_InitStatefulQoS( &amp;mqtt_context,
+                                    pOutgoingPublishRecords,
+                                    mqttexampleOUTGOING_PUBLISH_RECORD_LEN,
+                                    pIncomingPublishRecords,
+                                    mqttexampleINCOMING_PUBLISH_RECORD_LEN ));
+
+    /* Set connection info for MQTT session */
+    connectInfo.cleanSession = true;
+    connectInfo.clientIdentifierLength = sizeof(MQTT_CLIENT_IDENTIFIER) - 1u;
+    connectInfo.pClientIdentifier = MQTT_CLIENT_IDENTIFIER;
+    connectInfo.keepAliveSeconds = MQTT_KEEP_ALIVE_SECONDS;
+    connectInfo.pUserName = NULL;
+    connectInfo.userNameLength = 0U;
+    connectInfo.pPassword = NULL;
+    connectInfo.passwordLength = 0U;
+
+   /* LWT Info. */
+   lwtInfo.pTopicName = MQTT_TOPIC;
+   lwtInfo.topicNameLength = sizeof(MQTT_TOPIC) - 1u;
+   lwtInfo.pPayload = MQTT_PAYLOAD;
+   lwtInfo.payloadLength = strlen(MQTT_PAYLOAD);
+   lwtInfo.qos = MQTTQoS0;
+   lwtInfo.dup = false;
+   lwtInfo.retain = false;
+
+   /* Send MQTT CONNECT packet to broker. */
+   assert(MQTTSuccess == MQTT_Connect(&amp;mqtt_context, &amp;connectInfo, &amp;lwtInfo, 20000, &amp;session_present));
+}
+            </content>
+        </template>
+    </developerSupport>
+</raModuleDescription>

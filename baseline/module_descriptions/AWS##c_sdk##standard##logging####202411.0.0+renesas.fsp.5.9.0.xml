@@ -1,0 +1,27 @@
+<?xml version="1.0" ?>
+<raModuleDescription>
+    <module id="module.aws.c_sdk.logging" display="Networking|AWS Logging" common="1" visible="false" version="0" url="">
+        <requires interface="_rtos" />
+        <provides interface="interface.aws.c_sdk_logging" />
+
+        <declarations>
+#ifndef vLoggingPrintf
+#include &lt;stdarg.h&gt;
+
+void vLoggingPrintf (const char * pcFormat, ...)
+{
+    FSP_PARAMETER_NOT_USED(pcFormat);
+}
+#endif
+
+#ifndef vLoggingPrint
+void vLoggingPrint(const char * pcFormat);
+
+void vLoggingPrint (const char * pcFormat)
+{
+    FSP_PARAMETER_NOT_USED(pcFormat);
+}
+#endif
+        </declarations>
+    </module>
+</raModuleDescription>

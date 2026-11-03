@@ -1,0 +1,23 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<raModuleDescription>
+    <module id="module.azure.ewf.netx" display="Networking|Azure EWF NetX Duo Middleware" common="1" version="0" url="https://azure.github.io/embedded-wireless-framework/html/index.html" visible="false">
+        <constraint display="Hardware TCP/IP support must be enabled in NetX Duo.">
+            ("${config.azure.nxd_src.hardware_tcp_ip}" === "config.azure.nxd_src.hardware_tcp_ip.enable")
+        </constraint>
+        <constraint display="EWF NetX Duo Middleware requires EWF Adapter ">
+            "${interface.azure.ewf.adapter}" === "1"
+        </constraint>
+        <constraint display="Interface capability must be enabled in NetX Duo.">
+            ("${config.azure.nxd_src.interface_capability}" === "config.azure.nxd_src.interface_capability.enable")
+        </constraint>
+        <requires id="module.azure.ewf.netx.requires.ewf_adapter" interface="interface.azure.ewf.adapter" display="Requires EWF Adapter"/>
+        <provides interface="interface.azure.nxd.driver" />
+        <provides interface="interface.azure.nxd.driver.${module.azure.ewf.netx.name}" />
+        <property default="g_netxduo_ewf" id="module.azure.ewf.netx.name" description="Module name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.azure.ewf.netx.name}")</constraint>
+        </property>
+        <includes>
+#include &quot;ewf_middleware_netxduo.h&quot;
+        </includes>
+    </module>
+</raModuleDescription>

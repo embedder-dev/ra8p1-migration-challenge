@@ -1,0 +1,13 @@
+<?xml version="1.0" ?>
+<raConfiguration version="3">
+  <raBspConfiguration>
+    <config id="config.bsp.ra">
+      <property id="config.bsp.common.main_osc_populated" value="config.bsp.common.main_osc_populated.enabled"/>
+      <property id="config.bsp.common.main_osc_clock_source" value="config.bsp.common.main_osc_clock_source.crystal"/>
+      <property id="config.bsp.common.subclock_populated" value="config.bsp.common.subclock_populated.disabled"/>
+    </config>
+  </raBspConfiguration>
+  <raPinConfiguration>
+    <pincfg active="true" name="RA6T2-MCK.pincfg" symbol="g_bsp_pin_cfg"/>
+  </raPinConfiguration>
+</raConfiguration>

@@ -1,0 +1,249 @@
+<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.middleware.rm_levelx_nor_spi" path="fsp_cfg/middleware/rm_levelx_nor_spi_cfg.h" version="0">
+        <property default="config.middleware.rm_levelx_nor_spi.param_checking_enable.bsp" display="Parameter Checking" id="config.middleware.rm_levelx_nor_spi.param_checking_enable" description="Selects if code for parameter checking is to be included in the build.">
+            <option display="Default (BSP)" id="config.middleware.rm_levelx_nor_spi.param_checking_enable.bsp" value="(BSP_CFG_PARAM_CHECKING_ENABLE)"/>
+            <option display="Enabled" id="config.middleware.rm_levelx_nor_spi.param_checking_enable.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.rm_levelx_nor_spi.param_checking_enable.disabled" value="(0)"/>
+        </property>
+        <property default="256" display="Page Buffer Size (bytes)" id="config.middleware.rm_levelx_nor_spi.page_buffer_size" description="When direct read is enabled in LevelX a situation can occur where the driver has to write to SPI memory with the source locaiton also being within the SPI memory address range. In this situation the driver needs a buffer that is at least the same size as a page in order to temporarily store data to write out.">
+            <constraint display="Size should be greater than zero">testInteger("${config.middleware.rm_levelx_nor_spi.page_buffer_size}") &amp;&amp; ("${config.middleware.rm_levelx_nor_spi.page_buffer_size}" &gt; 0)</constraint>
+        </property>
+        <content>
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#define RM_LEVELX_NOR_SPI_CFG_PARAM_CHECKING_ENABLE ${config.middleware.rm_levelx_nor_spi.param_checking_enable}
+#define RM_LEVELX_NOR_SPI_CFG_BUFFER_SIZE (${config.middleware.rm_levelx_nor_spi.page_buffer_size})
+
+#ifdef __cplusplus
+}
+#endif
+        </content>
+    </config>
+    <module config="config.middleware.rm_levelx_nor_spi" display="Storage|${module.middleware.rm_levelx_nor_spi.name} LevelX NOR Port (rm_levelx_nor_spi)" id="module.middleware.rm_levelx_nor_spi" version="1" visible="false" url="group___r_m___l_e_v_e_l_x___n_o_r___s_p_i.html">
+        <constraint display="Requires Lower Layer SPI driver">
+            (testExists("${module.middleware.rm_levelx_nor_spi.requires.spi::module.driver.qspi.name}") ||
+             testExists("${module.middleware.rm_levelx_nor_spi.requires.spi::module.driver.ospi.name}") ||
+             testExists("${module.middleware.rm_levelx_nor_spi.requires.spi::module.driver.ospi_b.name}"))
+        </constraint>
+        <constraint display="Addressing more than one QSPI memory bank (64MB) is not supported by the LevelX NOR SPI driver.">
+            (!testExists("${module.middleware.rm_levelx_nor_spi.requires.spi::module.driver.qspi.name}") ||
+                         ("${module.middleware.rm_levelx_nor_spi.size}" &lt;= (64 * 1024 * 1024)))
+        </constraint>
+        <constraint display="LevelX NOR SPI size must be multiple of SPI memory sector size.">
+            (testInteger("${module.middleware.rm_levelx_nor_spi.size}" / "${module.middleware.rm_levelx_nor_spi.requires.spi::module.driver.qspi.sector_erase_size}") ||
+                testInteger("${module.middleware.rm_levelx_nor_spi.size}" / "${module.middleware.rm_levelx_nor_spi.requires.spi::module.driver.ospi.sector_erase_size}") ||
+                testInteger("${module.middleware.rm_levelx_nor_spi.size}" / "${module.middleware.rm_levelx_nor_spi.requires.spi::module.driver.ospi_b.sector_erase_size}"))
+        </constraint>
+        <constraint display="Page buffer needs to be large enough to hold at least one page.">
+            (testInteger("${config.middleware.rm_levelx_nor_spi.page_buffer_size}") &amp;&amp;
+                ((testExists("${module.middleware.rm_levelx_nor_spi.requires.spi::module.driver.qspi.name}") &amp;&amp;
+                ("${config.middleware.rm_levelx_nor_spi.page_buffer_size}" &gt;= "${module.middleware.rm_levelx_nor_spi.requires.spi::module.driver.qspi.page_size_bytes}")) ||
+                (testExists("${module.middleware.rm_levelx_nor_spi.requires.spi::module.driver.ospi.name}") &amp;&amp;
+                ("${config.middleware.rm_levelx_nor_spi.page_buffer_size}" &gt;= "${module.middleware.rm_levelx_nor_spi.requires.spi::module.driver.ospi.page_size_bytes}")) ||
+                (testExists("${module.middleware.rm_levelx_nor_spi.requires.spi::module.driver.ospi_b.name}") &amp;&amp;
+                ("${config.middleware.rm_levelx_nor_spi.page_buffer_size}" &gt;= "${module.middleware.rm_levelx_nor_spi.requires.spi::module.driver.ospi_b.page_size_bytes}"))))
+        </constraint>
+        <constraint display="Due to hardware limitations 64 bytes is the maximum allowed page write size for OSPI_B. Change page size to be equal to Combination Function setting and a factor of the OSPI flash device's page size.">
+            (!testExists("${module.middleware.rm_levelx_nor_spi.requires.spi::module.driver.ospi_b.name}") ||
+                         ("${module.middleware.rm_levelx_nor_spi.requires.spi::module.driver.ospi_b.page_size_bytes}" &lt;= 64))
+        </constraint>
+        <requires id="module.middleware.rm_levelx_nor_spi.requires.spi" interface="interface.driver.spi_flash" display="Add SPI Flash Memory Driver [Required]" />
+        <provides interface="interface.middleware.rm_levelx_nor_spi" />
+        <property default="g_rm_levelx_nor_spi${_instance}" display="Name" id="module.middleware.rm_levelx_nor_spi.name" description="Module name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.middleware.rm_levelx_nor_spi.name}")</constraint>
+        </property>
+        <property default="g_rm_levelx_nor_spi${_instance}_callback" id="module.middleware.rm_levelx_nor_spi.callback" />
+        <property default="NULL" id="module.middleware.rm_levelx_nor_spi.p_context" />
+        <property default="0" display="Memory Start Adress Offset (bytes)" id="module.middleware.rm_levelx_nor_spi.address_offset" description="Enter the starting offset to use in the SPI memory. The starting address for LevelX memory will be the SPI memory base address plus this offset.">
+            <constraint display="Offset should be greater than or equal to zero">testInteger("${module.middleware.rm_levelx_nor_spi.address_offset}") &amp;&amp; ("${module.middleware.rm_levelx_nor_spi.address_offset}" &gt;= 0)</constraint>
+        </property>
+        <property default="33554432" display="Memory Size (bytes)" id="module.middleware.rm_levelx_nor_spi.size" description="Enter the size that the LevelX Memory should be. This can be smaller than the SPI memory size in order to use a subset of SPI memory.">
+            <constraint display="Size should be greater than zero">testInteger("${module.middleware.rm_levelx_nor_spi.size}") &amp;&amp; ("${module.middleware.rm_levelx_nor_spi.size}" &gt; 0)</constraint>
+        </property>
+        <property default="0xFFFFFFFF" display="Poll Status Count" id="module.middleware.rm_levelx_nor_spi.poll_status_count" description="Number of times to poll for operation complete status for blocking memory operations.">
+            <constraint display="Poll Status Count should be greater than or equal to zero">testInteger("${module.middleware.rm_levelx_nor_spi.poll_status_count}") &amp;&amp; ("${module.middleware.rm_levelx_nor_spi.poll_status_count}" &gt;= 0)</constraint>
+        </property>
+        <property default="" id="module.middleware.rm_levelx_nor_spi.name_upper">
+            <export>"${module.middleware.rm_levelx_nor_spi.name}".toUpperCase()</export>
+        </property>
+        <header>
+/** Access the LevelX NOR SPI instance using these structures when calling functions directly (::p_api is not used). */
+extern rm_levelx_nor_spi_instance_ctrl_t ${module.middleware.rm_levelx_nor_spi.name}_ctrl;
+extern rm_levelx_nor_spi_cfg_t ${module.middleware.rm_levelx_nor_spi.name}_cfg;
+
+#ifndef ${module.middleware.rm_levelx_nor_spi.callback}
+void ${module.middleware.rm_levelx_nor_spi.callback}(rm_levelx_nor_spi_callback_args_t * p_args);
+#endif
+
+UINT ${module.middleware.rm_levelx_nor_spi.name}_initialize(LX_NOR_FLASH *p_nor_flash);
+fsp_err_t ${module.middleware.rm_levelx_nor_spi.name}_close();
+
+#define RA_NOT_DEFINED 0xFFFFFFFF
+#if (RA_NOT_DEFINED != ${module.middleware.rm_levelx_nor_spi.requires.spi::module.driver.qspi.name})
+#define ${module.middleware.rm_levelx_nor_spi.name_upper}_SECTOR_SIZE (${module.middleware.rm_levelx_nor_spi.requires.spi::module.driver.qspi.sector_erase_size})
+#elif (RA_NOT_DEFINED != ${module.middleware.rm_levelx_nor_spi.requires.spi::module.driver.ospi.name})
+#define ${module.middleware.rm_levelx_nor_spi.name_upper}_SECTOR_SIZE (${module.middleware.rm_levelx_nor_spi.requires.spi::module.driver.ospi.sector_erase_size})
+#else
+#define ${module.middleware.rm_levelx_nor_spi.name_upper}_SECTOR_SIZE (${module.middleware.rm_levelx_nor_spi.requires.spi::module.driver.ospi_b.sector_erase_size})
+#endif
+#undef RA_NOT_DEFINED
+        </header>
+        <includes>
+#include "rm_levelx_nor_spi.h"
+        </includes>
+        <declarations>
+rm_levelx_nor_spi_instance_ctrl_t ${module.middleware.rm_levelx_nor_spi.name}_ctrl;
+
+#define RA_NOT_DEFINED 0xFFFFFFFF
+rm_levelx_nor_spi_cfg_t ${module.middleware.rm_levelx_nor_spi.name}_cfg =
+{
+#if (RA_NOT_DEFINED != ${module.middleware.rm_levelx_nor_spi.requires.spi::module.driver.qspi.name})
+    .p_lower_lvl        = &amp;${module.middleware.rm_levelx_nor_spi.requires.spi::module.driver.qspi.name},
+    .base_address       = BSP_FEATURE_QSPI_DEVICE_START_ADDRESS,
+#elif (RA_NOT_DEFINED != ${module.middleware.rm_levelx_nor_spi.requires.spi::module.driver.ospi.name})
+    .p_lower_lvl        = &amp;${module.middleware.rm_levelx_nor_spi.requires.spi::module.driver.ospi.name},
+    .base_address       = BSP_FEATURE_OSPI_DEVICE_${module.middleware.rm_levelx_nor_spi.requires.spi::module.driver.ospi.channel}_START_ADDRESS,
+#else
+    .p_lower_lvl        = &amp;${module.middleware.rm_levelx_nor_spi.requires.spi::module.driver.ospi_b.name},
+    .base_address       = BSP_FEATURE_OSPI_B_DEVICE_${module.middleware.rm_levelx_nor_spi.requires.spi::module.driver.ospi_b.channel}_START_ADDRESS,
+#endif
+    .address_offset     = ${module.middleware.rm_levelx_nor_spi.address_offset},
+    .size               = ${module.middleware.rm_levelx_nor_spi.size},
+    .poll_status_count  = ${module.middleware.rm_levelx_nor_spi.poll_status_count},
+    .p_context          = ${module.middleware.rm_levelx_nor_spi.p_context},
+    .p_callback         = ${module.middleware.rm_levelx_nor_spi.callback}
+};
+#undef RA_NOT_DEFINED
+
+#ifndef LX_DIRECT_READ
+#define FSP_LX_READ_BUFFER_SIZE_WORDS (128U)
+ULONG ${module.middleware.rm_levelx_nor_spi.name}_read_buffer[FSP_LX_READ_BUFFER_SIZE_WORDS] = {0};
+#endif
+
+/** WEAK system error call back */
+#if defined(__ICCARM__)
+#define ${module.middleware.rm_levelx_nor_spi.name}_system_error_WEAK_ATTRIBUTE
+#pragma weak ${module.middleware.rm_levelx_nor_spi.name}_system_error  = ${module.middleware.rm_levelx_nor_spi.name}_system_error_internal
+#elif defined(__GNUC__)
+#define ${module.middleware.rm_levelx_nor_spi.name}_system_error_WEAK_ATTRIBUTE   \
+        __attribute__ ((weak, alias("${module.middleware.rm_levelx_nor_spi.name}_system_error_internal")))
+#endif
+
+UINT ${module.middleware.rm_levelx_nor_spi.name}_system_error(UINT error_code) ${module.middleware.rm_levelx_nor_spi.name}_system_error_WEAK_ATTRIBUTE;
+/*****************************************************************************************************************//**
+* @brief      This is a weak example initialization error function.  It should be overridden by defining a user  function
+*             with the prototype below.
+*             - void ${module.middleware.rm_levelx_nor_spi.name}_system_error(UINT error_code)
+*
+* @param[in]  error_code represents the error that occurred.
+**********************************************************************************************************************/
+UINT ${module.middleware.rm_levelx_nor_spi.name}_system_error_internal(UINT error_code);
+UINT ${module.middleware.rm_levelx_nor_spi.name}_system_error_internal(UINT error_code)
+{
+    FSP_PARAMETER_NOT_USED(error_code);
+
+    /** An error has occurred. Please check function arguments for more information. */
+    BSP_CFG_HANDLE_UNRECOVERABLE_ERROR(0);
+
+    return LX_ERROR;
+}
+
+/* LevelX NOR instance "Read Sector" service */
+static UINT ${module.middleware.rm_levelx_nor_spi.name}_read(ULONG *flash_address, ULONG *destination, ULONG words);
+static UINT ${module.middleware.rm_levelx_nor_spi.name}_read(ULONG *flash_address, ULONG *destination, ULONG words)
+{
+    fsp_err_t err;
+
+    err = RM_LEVELX_NOR_SPI_Read(&amp;${module.middleware.rm_levelx_nor_spi.name}_ctrl, flash_address, destination, words);
+    if (FSP_SUCCESS != err)
+    {
+        return LX_ERROR;
+    }
+
+    return LX_SUCCESS;
+}
+
+/* LevelX NOR instance "Write Sector" service */
+static UINT ${module.middleware.rm_levelx_nor_spi.name}_write(ULONG *flash_address, ULONG *source, ULONG words);
+static UINT ${module.middleware.rm_levelx_nor_spi.name}_write(ULONG *flash_address, ULONG *source, ULONG words)
+{
+    fsp_err_t err;
+
+    err = RM_LEVELX_NOR_SPI_Write(&amp;${module.middleware.rm_levelx_nor_spi.name}_ctrl, flash_address, source, words);
+    if (FSP_SUCCESS != err)
+    {
+        return LX_ERROR;
+    }
+
+    return LX_SUCCESS;
+}
+
+/* LevelX NOR instance "Block Erase" service */
+static UINT ${module.middleware.rm_levelx_nor_spi.name}_block_erase(ULONG block, ULONG block_erase_count);
+static UINT ${module.middleware.rm_levelx_nor_spi.name}_block_erase(ULONG block, ULONG block_erase_count)
+{
+    fsp_err_t err;
+
+    err = RM_LEVELX_NOR_SPI_BlockErase(&amp;${module.middleware.rm_levelx_nor_spi.name}_ctrl, block, block_erase_count);
+    if (FSP_SUCCESS != err)
+    {
+        return LX_ERROR;
+    }
+
+    return LX_SUCCESS;
+}
+
+/* LevelX NOR instance "Block Erased Verify" service */
+static UINT ${module.middleware.rm_levelx_nor_spi.name}_block_erased_verify(ULONG block);
+static UINT ${module.middleware.rm_levelx_nor_spi.name}_block_erased_verify(ULONG block)
+{
+    fsp_err_t err;
+
+    err = RM_LEVELX_NOR_SPI_BlockErasedVerify(&amp;${module.middleware.rm_levelx_nor_spi.name}_ctrl, block);
+    if (FSP_SUCCESS != err)
+    {
+        return LX_ERROR;
+    }
+
+    return LX_SUCCESS;
+}
+
+/* LevelX NOR instance "Driver Initialization" service */
+UINT ${module.middleware.rm_levelx_nor_spi.name}_initialize(LX_NOR_FLASH *p_nor_flash)
+{
+    fsp_err_t err;
+
+    ${module.middleware.rm_levelx_nor_spi.name}_cfg.p_lx_nor_flash = p_nor_flash;
+
+    /* Open the rm_levelx_nor_spi driver */
+    err = RM_LEVELX_NOR_SPI_Open(&amp;${module.middleware.rm_levelx_nor_spi.name}_ctrl, &amp;${module.middleware.rm_levelx_nor_spi.name}_cfg);
+    if (FSP_SUCCESS != err)
+    {
+        return LX_ERROR;
+    }
+
+#ifndef LX_DIRECT_READ
+    /** lx_nor_flash_sector_buffer is used only when LX_DIRECT_READ disabled */
+    p_nor_flash->lx_nor_flash_sector_buffer = ${module.middleware.rm_levelx_nor_spi.name}_ReadBuffer;
+#endif
+
+    p_nor_flash->lx_nor_flash_driver_read                = ${module.middleware.rm_levelx_nor_spi.name}_read;
+    p_nor_flash->lx_nor_flash_driver_write               = ${module.middleware.rm_levelx_nor_spi.name}_write;
+    p_nor_flash->lx_nor_flash_driver_block_erase         = ${module.middleware.rm_levelx_nor_spi.name}_block_erase;
+    p_nor_flash->lx_nor_flash_driver_block_erased_verify = ${module.middleware.rm_levelx_nor_spi.name}_block_erased_verify;
+    p_nor_flash->lx_nor_flash_driver_system_error        = ${module.middleware.rm_levelx_nor_spi.name}_system_error;
+
+    return LX_SUCCESS;
+}
+
+/* LevelX NOR instance "Driver Close" service */
+fsp_err_t ${module.middleware.rm_levelx_nor_spi.name}_close()
+{
+    return RM_LEVELX_NOR_SPI_Close(&amp;${module.middleware.rm_levelx_nor_spi.name}_ctrl);
+}
+        </declarations>
+    </module>
+</raModuleDescription>

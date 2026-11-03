@@ -1,0 +1,93 @@
+<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.middleware.rm_mesh_generic_pl_srv" path="fsp_cfg/rm_mesh_generic_pl_srv_cfg.h" version="0">
+        <content>
+            #ifdef __cplusplus
+            extern "C" {
+            #endif
+
+            #ifdef __cplusplus
+            }
+            #endif
+        </content>
+    </config>
+    <module id="module.middleware.rm_ble_mesh_model_server_on_rm_mesh_generic_pl_srv" display="Networking|BLE Mesh Network modules|BLE Mesh Model Generic Power Level Server (rm_mesh_generic_pl_srv)" config="config.middleware.rm_mesh_generic_pl_srv" version="0" visible="true" url="group___r_m___m_e_s_h___g_e_n_e_r_i_c___p_l___s_r_v.html">
+
+        <!-- <constraint display="Requires Low Level Library Implementation">
+            "${interface.middleware.rm_ble_mesh_access_on_rm_ble_mesh_access}" === "1"
+        </constraint> -->
+        <constraint display="BLE Mesh Model Generic Power Level Server middleware not support R_BLE_SPP module">
+            "${interface.mcu.radio}" === "1"
+        </constraint>
+
+        <requires id="module.middleware.rm_ble_mesh_model_server.requires.rm_ble_mesh_access" interface="interface.middleware.rm_ble_mesh_access_on_rm_ble_mesh_access" visible="true" display="Add BLE Mesh Access Module" find="false"/>
+
+        <provides interface="interface.middleware.rm_ble_mesh_model_server"/>
+        <provides interface="interface.middleware.rm_ble_mesh_model_server_on_rm_mesh_generic_pl_srv"/>
+        <provides interface="interface.middleware.rm_ble_mesh_model_server.${module.middleware.rm_ble_mesh_model_server.name}"/>
+
+        <property display="Name" default="g_rm_mesh_generic_pl_srv${_instance}" id="module.middleware.rm_ble_mesh_model_server.name" description="Module name.">
+            <constraint display="Name Must Be a Valid C Symbol">testSymbol("${module.middleware.rm_ble_mesh_model_server.name}")</constraint>
+        </property>
+
+        <property display="Interrupts|Callback Provided when Timeout Occurs" id="module.middleware.rm_ble_mesh_model_server.p_callback" default="NULL" description="Callback provided when mesh generic power level server ISR occurs">
+            <constraint display="Name Must Be a Valid C Symbol">testSymbol("${module.middleware.rm_ble_mesh_model_server.p_callback}")</constraint>
+        </property>
+
+        <property display="Interrupts|Callback Provided when an Timeout ISR Occurs" id="module.middleware.rm_ble_mesh_model_server.p_timeout_callback" default="NULL" description="Callback provided when mesh generic power level server timeout ISR occurs">
+            <constraint display="Name Must Be a Valid C Symbol">testSymbol("${module.middleware.rm_ble_mesh_model_server.p_timeout_callback}")</constraint>
+        </property>
+
+        <property id="module.middleware.rm_ble_mesh_model_server.p_context" default="NULL">
+            <constraint display="Name Must Be a Valid C Symbol">testSymbol("${module.middleware.rm_ble_mesh_model_server.p_context}")</constraint>
+            <export>eval('' +
+                'var output = "${module.middleware.rm_ble_mesh_model_server.p_context}";' +
+                'if ("NULL" !== output) {' +
+                'output = "&amp;" + output;' +
+                '}' +
+                'output')
+            </export>
+        </property>
+
+        <header>
+/** BLE Mesh Model Generic Power Level on BLE Mesh Model Server Instance. */
+extern const rm_ble_mesh_model_server_instance_t ${module.middleware.rm_ble_mesh_model_server.name};
+
+/** Access the BLE Mesh model generic power level server instance using these structures when calling API functions directly (::p_api is not used). */
+extern rm_mesh_generic_pl_srv_instance_ctrl_t ${module.middleware.rm_ble_mesh_model_server.name}_ctrl;
+extern const rm_ble_mesh_model_server_cfg_t ${module.middleware.rm_ble_mesh_model_server.name}_cfg;
+
+#ifndef ${module.middleware.rm_ble_mesh_model_server.p_callback}
+void ${module.middleware.rm_ble_mesh_model_server.p_callback}(rm_ble_mesh_model_server_callback_args_t * p_args);;
+#endif
+
+#ifndef ${module.middleware.rm_ble_mesh_model_server.p_timeout_callback}
+void ${module.middleware.rm_ble_mesh_model_server.p_timeout_callback}(rm_ble_mesh_model_server_timeout_callback_args_t * p_args);
+#endif
+
+        </header>
+        <includes>
+#include "rm_ble_mesh_model_server_api.h"
+#include "rm_mesh_generic_pl_srv.h"
+        </includes>
+        <declarations>
+rm_mesh_generic_pl_srv_instance_ctrl_t ${module.middleware.rm_ble_mesh_model_server.name}_ctrl;
+
+const rm_ble_mesh_model_server_cfg_t ${module.middleware.rm_ble_mesh_model_server.name}_cfg =
+{
+    .p_access_instance   = &amp;${module.middleware.rm_ble_mesh_model_server.requires.rm_ble_mesh_access::module.middleware.rm_ble_mesh_access.name},
+    .p_callback          = ${module.middleware.rm_ble_mesh_model_server.p_callback},
+    .p_timeout_callback  = ${module.middleware.rm_ble_mesh_model_server.p_timeout_callback},
+    .p_context           = ${module.middleware.rm_ble_mesh_model_server.p_context},
+    .p_extend            = NULL
+};
+
+const rm_ble_mesh_model_server_instance_t ${module.middleware.rm_ble_mesh_model_server.name} =
+{
+    .p_ctrl = &amp;${module.middleware.rm_ble_mesh_model_server.name}_ctrl,
+    .p_cfg  = &amp;${module.middleware.rm_ble_mesh_model_server.name}_cfg,
+    .p_api  = &amp;g_rm_ble_mesh_model_server_on_rm_mesh_generic_pl_srv
+};
+        </declarations>
+    </module>
+</raModuleDescription>

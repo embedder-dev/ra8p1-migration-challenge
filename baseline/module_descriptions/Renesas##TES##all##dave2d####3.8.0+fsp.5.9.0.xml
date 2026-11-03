@@ -1,0 +1,8 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+
+<raModuleDescription>
+    <module config="config.driver.tes.dave2d" display="Graphics|D/AVE 2D (r_drw)" id="module.driver.tes.dave2d" common="1" version="1" url="https://www.tes-dst.com/technology-products/gpus/d/ave-2d/">
+        <requires id="module.driver.drw.requires.drw" interface="interface.mcu.drw" visible="false" display="Requires DRW peripheral" />
+        <provides interface="interface.driver.tes.dave2d" />
+    </module>
+</raModuleDescription>

@@ -1,0 +1,27 @@
+<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.middleware.rm_tz_context" path="fsp_cfg/rm_tz_context_cfg.h" version="0">
+        <property default="8" display="Process Stack Slots" id="config.middleware.rm_tz_context.process_stack_slots" description="The maximum number of threads that can allocate a secure context. For applications using FreeRTOS, the Idle task requires 1 context as well.">
+            <constraint display="Value must be a non-negative integer greater than 0">testInteger("${config.middleware.rm_tz_context.process_stack_slots}")  &amp;&amp; ("${config.middleware.rm_tz_context.process_stack_slots}" &gt;= 1)</constraint>
+        </property>
+        <property default="256" display="Process Stack Size" id="config.middleware.rm_tz_context.process_stack_size" description="The maximum stack size of all non-secure callable functions.">
+            <constraint display="Value must be a non-negative multiple of 8">testInteger("${config.middleware.rm_tz_context.process_stack_size}")  &amp;&amp; ("${config.middleware.rm_tz_context.process_stack_size}" &gt;= 0) &amp;&amp; ("${config.middleware.rm_tz_context.process_stack_size}" % 8 === 0)</constraint>
+        </property>
+        <content>
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#define TZ_PROCESS_STACK_SLOTS ${config.middleware.rm_tz_context.process_stack_slots}
+#define TZ_PROCESS_STACK_SIZE ${config.middleware.rm_tz_context.process_stack_size}
+
+#ifdef __cplusplus
+}
+#endif
+        </content>
+    </config>
+    <module config="config.middleware.rm_tz_context" display="TrustZone|ARM TrustZone Context RA Port (rm_tz_context)" id="module.middleware.rm_tz_context" common="1" version="1" url="https://arm-software.github.io/CMSIS_5/Core/html/group__context__trustzone__functions.html">
+        <requires id="module.middleware.rm_tz_context.requires._project.secure" interface="_project.secure" visible="false" display="Requires secure project" />
+        <provides interface="interface.middleware.rm_tz_context" />
+    </module>
+</raModuleDescription>

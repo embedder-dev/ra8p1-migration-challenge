@@ -1,0 +1,117 @@
+﻿<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.driver.usb_phid" path="fsp_cfg/r_usb_phid_cfg.h" version="0">
+        <property id="config.driver.usb_phid.int_in" display="Interrupt In Pipe" default="config.driver.usb_phid.int_in.pipe6" description="Select the pipe number for input interrupt events.">
+            <option id="config.driver.usb_phid.int_in.pipe6" display="USB PIPE6" value="USB_PIPE6"/>
+            <option id="config.driver.usb_phid.int_in.pipe7" display="USB PIPE7" value="USB_PIPE7"/>
+            <option id="config.driver.usb_phid.int_in.pipe8" display="USB PIPE8" value="USB_PIPE8"/>
+            <option id="config.driver.usb_phid.int_in.pipe9" display="USB PIPE9" value="USB_PIPE9"/>
+        </property>
+        <property id="config.driver.usb_phid.int_out" display="Interrupt Out Pipe" default="config.driver.usb_phid.int_out.pipe7" description="Select the pipe number for output interrupt events.">
+            <option id="config.driver.usb_phid.int_out.pipe6" display="USB PIPE6" value="USB_PIPE6"/>
+            <option id="config.driver.usb_phid.int_out.pipe7" display="USB PIPE7" value="USB_PIPE7"/>
+            <option id="config.driver.usb_phid.int_out.pipe8" display="USB PIPE8" value="USB_PIPE8"/>
+            <option id="config.driver.usb_phid.int_out.pipe9" display="USB PIPE9" value="USB_PIPE9"/>
+        </property>
+        <content>
+            #ifdef __cplusplus
+            extern "C" {
+            #endif
+
+            #if (${interface.driver.phid2} != RA_NOT_DEFINED)
+            #include &quot;r_usb_phid_2ch_cfg.h&quot;
+            #else
+            #define USB_CFG_PHID_INT_IN2 (USB_NULL)
+            #define USB_CFG_PHID_INT_OUT2 (USB_NULL)
+            #endif
+
+            #define USB_CFG_PHID_INT_IN  (${config.driver.usb_phid.int_in})
+            #define USB_CFG_PHID_INT_OUT (${config.driver.usb_phid.int_out})
+
+            #ifdef __cplusplus
+            }
+            #endif
+        </content>
+    </config>
+    <config id="config.driver.usb_phid_class" path="fsp_cfg/r_usb_class_cfg.h" version="0">
+        <content>
+        </content>
+    </config>
+    <module config="config.driver.usb_phid" display="Connectivity|${module.driver.phid.name} USB PHID (r_usb_phid)" id="module.driver.phid_on_usb" version="1" url="group___u_s_b___p_h_i_d.html">
+        <constraint display="Unique name required for each instance">
+            "${interface.driver.phid.${module.driver.phid.name}}" === "1"
+        </constraint>
+        <constraint display="Requires USB Peripheral">
+          "${interface.mcu.usb_fs.external}" === "1"
+        </constraint>
+        <constraint display="Requires USB PIPE6 or PIPE7 for Interrupt IN transfer when using this MCU.">
+            !(("${interface.mcu.usb.pipes.0.4.5.6.7}" === "1") &amp;&amp;
+            ("${config.driver.usb_phid.int_in}" === "config.driver.usb_phid.int_in.pipe8"))
+        </constraint>
+        <constraint display="Requires USB PIPE6 or PIPE7 for Interrupt IN transfer when using this MCU.">
+            !(("${interface.mcu.usb.pipes.0.4.5.6.7}" === "1") &amp;&amp;
+            ("${config.driver.usb_phid.int_in}" === "config.driver.usb_phid.int_in.pipe9"))
+        </constraint>
+        <constraint display="Requires USB PIPE6 or PIPE7 for Interrupt OUT transfer when using this MCU.">
+            !(("${interface.mcu.usb.pipes.0.4.5.6.7}" === "1") &amp;&amp;
+            ("${config.driver.usb_phid.int_out}" === "config.driver.usb_phid.int_out.pipe8"))
+        </constraint>
+        <constraint display="Requires USB PIPE6 or PIPE7 for Interrupt OUT transfer when using this MCU.">
+            !(("${interface.mcu.usb.pipes.0.4.5.6.7}" === "1") &amp;&amp;
+            ("${config.driver.usb_phid.int_out}" === "config.driver.usb_phid.int_out.pipe9"))
+        </constraint>
+        <constraint display="Requires the different USB PIPE number for Interrupt IN transfer and Interrupt OUT transfer.">
+            !(("${config.driver.usb_phid.int_in}" === "config.driver.usb_phid.int_in.pipe6") &amp;&amp;
+            ("${config.driver.usb_phid.int_out}" === "config.driver.usb_phid.int_out.pipe6"))
+        </constraint>
+        <constraint display="Requires the different USB PIPE number for Interrupt IN transfer and Interrupt OUT transfer.">
+            !(("${config.driver.usb_phid.int_in}" === "config.driver.usb_phid.int_in.pipe7") &amp;&amp;
+            ("${config.driver.usb_phid.int_out}" === "config.driver.usb_phid.int_out.pipe7"))
+        </constraint>
+        <constraint display="Requires the different USB PIPE number for Interrupt IN transfer and Interrupt OUT transfer.">
+            !(("${config.driver.usb_phid.int_in}" === "config.driver.usb_phid.int_in.pipe8") &amp;&amp;
+            ("${config.driver.usb_phid.int_out}" === "config.driver.usb_phid.int_out.pipe8"))
+        </constraint>
+        <constraint display="Requires the different USB PIPE number for Interrupt IN transfer and Interrupt OUT transfer.">
+            !(("${config.driver.usb_phid.int_in}" === "config.driver.usb_phid.int_in.pipe9") &amp;&amp;
+            ("${config.driver.usb_phid.int_out}" === "config.driver.usb_phid.int_out.pipe9"))
+        </constraint>
+        <constraint display="Use USBX instead in Azure RTOS projects.">
+            !testExists("${interface.rtos.tx}")
+        </constraint>
+        <requires id="module.driver.phid_on_usb.requires.phid" interface="interface.mcu.usb_fs.external" visible="false" display="Requires USB Peripheral" />
+        <requires id="module.driver.basic_on_usb.requires.basic" interface="interface.driver.basic_on_usb_hid" display="Add USB Driver">
+            <override property="module.driver.usb_basic.usb_mode" value="module.driver.usb_basic.usb_mode.peri"/>
+            <override property="module.driver.usb_basic.usb_classtype" value="module.driver.usb_basic.usb_classtype.phid"/>
+        </requires>
+        <requires id="module.driver.phid_on_usb.ignore.azure_projects" interface="interface.rtos.supports.renesas_usb" visible="false" display="Use Azure USBX for Azure RTOS projects."/>
+        <provides interface="interface.driver.usb" />
+        <provides interface="interface.driver.phid.${module.driver.phid.name}" />
+        <provides interface="interface.driver.phid" />
+        <property default="phid" id="module.driver.phid.phid_interface" description=""/>
+        <property default="g_phid${_instance}" display="Name" id="module.driver.phid.name" description="Module name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.phid.name}")</constraint>
+        </property>
+        <header>
+        /** PHID Driver on USB Instance. */
+        </header>
+        <includes>
+#include "r_usb_phid_api.h"
+        </includes>
+        <declarations>
+        </declarations>
+        <functions>
+        </functions>
+        <api configurable="true">
+            <file>ra/fsp/inc/api/r_usb_phid_api.h</file>
+        </api>
+    </module>
+    <module config="config.driver.usb_phid_class" display="Connectivity|${module.driver.phid_class.name} USB PHID (r_usb_phid_class)" id="module.driver.phid_class_on_usb" visible="false" version="1" url="group___u_s_b___p_h_i_d.html">
+        <property default="g_phid_class${_instance}" display="Name" id="module.driver.phid_class.name" description="Class Module name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.phid_class.name}")</constraint>
+        </property>
+        <api configurable="true">
+            <file>ra/fsp/inc/api/r_usb_phid_api.h</file>
+        </api>
+    </module>
+</raModuleDescription>

@@ -1,0 +1,372 @@
+﻿<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.driver.ether_phy" path="fsp_cfg/r_ether_phy_cfg.h" version="0">
+        <property id="config.driver.ether_phy.param_checking_enable" display="Parameter Checking" default="config.driver.ether_phy.param_checking_enable.bsp" description="If selected code for parameter checking is included in the build.">
+            <option id="config.driver.ether_phy.param_checking_enable.bsp" display="Default (BSP)" value="BSP_CFG_PARAM_CHECKING_ENABLE" />
+            <option id="config.driver.ether_phy.param_checking_enable.enabled" display="Enabled" value="1" />
+            <option id="config.driver.ether_phy.param_checking_enable.disabled" display="Disabled" value="0" />
+        </property>
+        <property id="config.driver.ether_phy.target_ksz8091rnb" display="KSZ8091RNB Target" default="config.driver.ether_phy.target_ksz8091rnb.disabled" description="Select whether to use KSZ8091RNB Phy LSI or not.">
+            <option id="config.driver.ether_phy.target_ksz8091rnb.disabled" display="Disabled" value="0" />
+            <option id="config.driver.ether_phy.target_ksz8091rnb.enabled" display="Enabled" value="1" />
+        </property>
+        <property id="config.driver.ether_phy.target_ksz8041" display="KSZ8041 Target" default="config.driver.ether_phy.target_ksz8041.disabled" description="Select whether to use KSZ8041 Phy LSI or not.">
+            <option id="config.driver.ether_phy.target_ksz8041.disabled" display="Disabled" value="0" />
+            <option id="config.driver.ether_phy.target_ksz8041.enabled" display="Enabled" value="1" />
+        </property>
+        <property id="config.driver.ether_phy.target_dp83620" display="DP83620 Target" default="config.driver.ether_phy.target_dp83620.disabled" description="Select whether to use DP83620 Phy LSI or not.">
+            <option id="config.driver.ether_phy.target_dp83620.disabled" display="Disabled" value="0" />
+            <option id="config.driver.ether_phy.target_dp83620.enabled" display="Enabled" value="1" />
+        </property>
+        <property id="config.driver.ether_phy.target_ics1894" display="ICS1894 Target" default="config.driver.ether_phy.target_ics1894.disabled" description="Select whether to use ICS1894 Phy LSI or not.">
+            <option id="config.driver.ether_phy.target_ics1894.disabled" display="Disabled" value="0" />
+            <option id="config.driver.ether_phy.target_ics1894.enabled" display="Enabled" value="1" />
+        </property>
+        <property id="config.driver.ether_phy.use_custom_phy_lsi" display="User Own Target" default="config.driver.ether_phy.use_custom_phy_lsi.disabled" description="Select whether to use User own Phy LSI or not.">
+            <option id="config.driver.ether_phy.use_custom_phy_lsi.disabled" display="Disabled" value="0" />
+            <option id="config.driver.ether_phy.use_custom_phy_lsi.enabled" display="Enabled" value="1" />
+        </property>
+        <property id="config.driver.ether_phy.use_reference_clock" display="Reference Clock" default="config.driver.ether_phy.use_reference_clock.default" description="Select whether to use the RMII reference clock. Selecting 'Default' will automatically choose the correct option when using a Renesas development board.">
+            <option id="config.driver.ether_phy.use_reference_clock.default" display="Default" value="BOARD_PHY_REF_CLK" />
+            <option id="config.driver.ether_phy.use_reference_clock.enabled" display="Enabled" value="1" />
+            <option id="config.driver.ether_phy.use_reference_clock.disabled" display="Disabled" value="0" />
+        </property>
+        <property id="config.driver.ether_phy.use_reference_clock" display="Reference Clock" default="config.driver.ether_phy.use_reference_clock.default" description="Select whether to use the RMII reference clock. Selecting 'Default' will automatically choose the correct option when using a Renesas development board.">
+            <option id="config.driver.ether_phy.use_reference_clock.default" display="Default" value="BOARD_PHY_REF_CLK" />
+            <option id="config.driver.ether_phy.use_reference_clock.enabled" display="Enabled" value="1" />
+            <option id="config.driver.ether_phy.use_reference_clock.disabled" display="Disabled" value="0" />
+        </property>
+        <property id="config.driver.ether_phy.init_phy_lsi_automatic" display="Automatic Phy LSI Initialization" default="config.driver.ether_phy.init_phy_lsi_automatic.enabled" description="Select whether to initialize the Ethernet Phy LSI in the open function.">
+            <option id="config.driver.ether_phy.init_phy_lsi_automatic.enabled" display="Enabled" value="1" />
+            <option id="config.driver.ether_phy.init_phy_lsi_automatic.disabled" display="Disabled" value="0" />
+        </property>
+        <content>
+            #ifdef __cplusplus
+            extern "C" {
+            #endif
+
+            #define ETHER_PHY_CFG_PARAM_CHECKING_ENABLE             (${config.driver.ether_phy.param_checking_enable})
+#ifndef ETHER_PHY_CFG_TARGET_KSZ8091RNB_ENABLE
+            #define ETHER_PHY_CFG_TARGET_KSZ8091RNB_ENABLE          (${config.driver.ether_phy.target_ksz8091rnb})
+#endif
+#ifndef ETHER_PHY_CFG_TARGET_KSZ8041_ENABLE
+            #define ETHER_PHY_CFG_TARGET_KSZ8041_ENABLE             (${config.driver.ether_phy.target_ksz8041})
+#endif
+#ifndef ETHER_PHY_CFG_TARGET_DP83620_ENABLE
+            #define ETHER_PHY_CFG_TARGET_DP83620_ENABLE             (${config.driver.ether_phy.target_dp83620})
+#endif
+#ifndef ETHER_PHY_CFG_TARGET_ICS1894_ENABLE
+            #define ETHER_PHY_CFG_TARGET_ICS1894_ENABLE             (${config.driver.ether_phy.target_ics1894})
+#endif
+#ifndef ETHER_PHY_CFG_USE_CUSTOM_PHY_LSI_ENABLE
+            #define ETHER_PHY_CFG_USE_CUSTOM_PHY_LSI_ENABLE         (${config.driver.ether_phy.use_custom_phy_lsi})
+#endif
+            #define ETHER_PHY_CFG_USE_REF_CLK                       (${config.driver.ether_phy.use_reference_clock})
+            #define ETHER_PHY_CFG_INIT_PHY_LSI_AUTOMATIC            (${config.driver.ether_phy.init_phy_lsi_automatic})
+
+            #ifdef __cplusplus
+            }
+            #endif
+        </content>
+    </config>
+    <module config="config.driver.ether_phy" display="Networking|${module.driver.ether_phy.name} Ethernet (r_ether_phy)" id="module.driver.ether_phy_on_ether_phy" version="1" url="group___e_t_h_e_r___p_h_y.html">
+        <constraint display="Unique name required for each instance">
+            "${interface.driver.ether_phy.${module.driver.ether_phy.name}}" === "1"
+        </constraint>
+        <constraint display="Requires MCU that supports MII. Change MII type to RMII.">
+          ("${module.driver.ether_phy.mii_type}" === "module.driver.mii_type.rmii") ||
+          ("${interface.mcu.etherc_mii}" === "1")
+        </constraint>
+        <!-- Check that selected Phy LSI type macro is enabled. -->
+        <constraint display="Enable KSZ8091RNB Phy LSI Target">
+          ("${config.driver.ether_phy.target_ksz8091rnb}" === "config.driver.ether_phy.target_ksz8091rnb.enabled") ||
+          (testExists("${interface.board.ether_phy.ksz8091rnb}")  &amp;&amp;  ("${interface.board.ether_phy.ksz8091rnb}" !== "0")) ||
+          ("${module.driver.ether_phy.phy_lsi_type}" !== "module.driver.ether_phy.phy_lsi_type.ksz8091rnb")
+        </constraint>
+        <constraint display="Enable KSZ8041 Phy LSI Target">
+          ("${config.driver.ether_phy.target_ksz8041}" === "config.driver.ether_phy.target_ksz8041.enabled") ||
+          (testExists("${interface.board.ether_phy.ksz8041}")  &amp;&amp;  ("${interface.board.ether_phy.ksz8041}" !== "0")) ||
+          ("${module.driver.ether_phy.phy_lsi_type}" !== "module.driver.ether_phy.phy_lsi_type.ksz8041")
+        </constraint>
+        <constraint display="Enable DP83620 Phy LSI Target">
+          ("${config.driver.ether_phy.target_dp83620}" === "config.driver.ether_phy.target_dp83620.enabled") ||
+          (testExists("${interface.board.ether_phy.dp83620}")  &amp;&amp;  ("${interface.board.ether_phy.dp83620}" !== "0")) ||
+          ("${module.driver.ether_phy.phy_lsi_type}" !== "module.driver.ether_phy.phy_lsi_type.dp83620")
+        </constraint>
+        <constraint display="Enable ICS1894 Phy LSI Target">
+          ("${config.driver.ether_phy.target_ics1894}" === "config.driver.ether_phy.target_ics1894.enabled") ||
+          (testExists("${interface.board.ether_phy.ics1894}")  &amp;&amp;  ("${interface.board.ether_phy.ics1894}" !== "0")) ||
+          ("${module.driver.ether_phy.phy_lsi_type}" !== "module.driver.ether_phy.phy_lsi_type.ics1894")
+        </constraint>
+        <constraint display="Enable User own Phy LSI Target">
+          ("${config.driver.ether_phy.use_custom_phy_lsi}" === "config.driver.ether_phy.use_custom_phy_lsi.enabled") ||
+          ("${module.driver.ether_phy.phy_lsi_type}" !== "module.driver.ether_phy.phy_lsi_type.custom")
+        </constraint>
+        <requires id="module.driver.ether.requires.etherc" interface="interface.mcu.etherc" visible="false" display="Requires ETHERC peripheral" />
+        <provides interface="interface.driver.ether_phy" />
+        <provides interface="interface.driver.ether_phy_on_ether_phy" />
+        <provides interface="interface.driver.ether_phy.${module.driver.ether_phy.name}" />
+        <property default="g_ether_phy${_instance}" display="Name" id="module.driver.ether_phy.name" description="Module name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.ether_phy.name}")</constraint>
+        </property>
+        <property display="Channel" id="module.driver.ether_phy.channel" default="module.driver.ether_phy.channel.0" description="Select the Ethernet controller channel number.">
+            <option id="module.driver.ether_phy.channel.0" display="0" value="0" />
+            <option id="module.driver.ether_phy.channel.1" display="1" value="1" />
+        </property>
+        <property display="PHY-LSI Address" id="module.driver.ether_phy.phy_lsi_address" default="0" description="Specify the address of the PHY-LSI used.">
+            <constraint display="Specify a value between 0 and 31.">testInteger("${module.driver.ether_phy.phy_lsi_address}") &amp;&amp;
+ (("${module.driver.ether_phy.phy_lsi_address}" &gt;= 0) &amp;&amp;("${module.driver.ether_phy.phy_lsi_address}" &lt;= 31))</constraint>
+        </property>
+        <property display="PHY-LSI Reset Completion Timeout" id="module.driver.ether_phy.phy_reset_wait_time" default="0x00020000" description="Specify the number of times to read the PHY-LSI control register while waiting for reset completion. This value should be adjusted experimentally based on the PHY-LSI used.">
+            <constraint display="Specify a value between 0x1 and 0xFFFFFFFF.">testInteger("${module.driver.ether_phy.phy_reset_wait_time}") &amp;&amp;
+ (("${module.driver.ether_phy.phy_reset_wait_time}" &gt;= 1) &amp;&amp;("${module.driver.ether_phy.phy_reset_wait_time}" &lt;= 4294967295))</constraint>
+        </property>
+        <property display="Select MII type" id="module.driver.ether_phy.mii_type" default="module.driver.mii_type.rmii" description="Specify whether to use MII or RMII.">
+            <option id="module.driver.mii_type.mii" display="MII" value="mii" />
+            <option id="module.driver.mii_type.rmii" display="RMII" value="rmii" />
+        </property>
+        <property display="Phy LSI type" id="module.driver.ether_phy.phy_lsi_type" default="module.driver.ether_phy.phy_lsi_type.kit_component" description="Select the Phy LSI target. Selecting 'Kit Component' will automatically choose the correct option when using a Renesas development board.">
+            <option id="module.driver.ether_phy.phy_lsi_type.kit_component" display="Kit Component" value="ETHER_PHY_LSI_TYPE_KIT_COMPONENT" />
+            <option id="module.driver.ether_phy.phy_lsi_type.default" display="DEFAULT" value="ETHER_PHY_LSI_TYPE_DEFAULT" />
+            <option id="module.driver.ether_phy.phy_lsi_type.ksz8091rnb" display="KSZ8091RNB" value="ETHER_PHY_LSI_TYPE_KSZ8091RNB" />
+            <option id="module.driver.ether_phy.phy_lsi_type.ksz8041" display="KSZ8041" value="ETHER_PHY_LSI_TYPE_KSZ8041" />
+            <option id="module.driver.ether_phy.phy_lsi_type.dp83620" display="DP83620" value="ETHER_PHY_LSI_TYPE_DP83620" />
+            <option id="module.driver.ether_phy.phy_lsi_type.ics1894" display="ICS1894" value="ETHER_PHY_LSI_TYPE_ICS1894" />
+            <option id="module.driver.ether_phy.phy_lsi_type.custom" display="User own PHY" value="ETHER_PHY_LSI_TYPE_CUSTOM" />
+        </property>
+        <property display="Port Custom Init Function" id="module.driver.ether_phy.target_init" default="NULL" description="Set the initial function of the PHY-LSI, When using your own PHY-LSI.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.ether_phy.target_init}")</constraint>
+        </property>
+        <property display="Port Custom Link Partner Ability Get Function" id="module.driver.ether_phy.target_link_partner_ability_get" default="NULL" description="Set the link partner ability get function of the PHY-LSI, When using your own PHY-LSI.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.ether_phy.target_link_partner_ability_get}")</constraint>
+        </property>
+        <property display="MII/RMII Register Access Wait-time" id="module.driver.ether_phy.mii_bit_access_wait_time" default="8" description="Specify the bit timing for MII/RMII register accesses during PHY initialization. This value should be adjusted experimentally based on the PHY-LSI used.">
+            <constraint display="Specify a value between 0x1 and 0x7FFFFFFF.">testInteger("${module.driver.ether_phy.mii_bit_access_wait_time}") &amp;&amp;
+ (("${module.driver.ether_phy.mii_bit_access_wait_time}" &gt;= 1) &amp;&amp;("${module.driver.ether_phy.mii_bit_access_wait_time}" &lt;= 2147483647))</constraint>
+        </property>
+        <property display="Flow Control" id="module.driver.ether_phy.flow_control" default="module.driver.ether_phy.flow_control.0" description="Select whether to enable or disable flow control.">
+            <option id="module.driver.ether_phy.flow_control.0" display="Disable" value="ETHER_PHY_FLOW_CONTROL_DISABLE" />
+            <option id="module.driver.ether_phy.flow_control.1" display="Enable" value="ETHER_PHY_FLOW_CONTROL_ENABLE" />
+        </property>
+        <property default="" id="module.driver.ether_phy.mii_type_enum" description="Enum used to configure the mii_type in generated code.">
+            <export><![CDATA[eval('' +
+'"ETHER_PHY_MII_TYPE_" + "${module.driver.ether_phy.mii_type}".toUpperCase();' +
+'')
+]]>         </export>
+        </property>
+        <peripheral name="ETHERC0" component="etherc0.${module.driver.ether_phy.mii_type}" />
+        <!-- For MCU's whose pinmapping files have been generated with MPC Designer Tool -->
+        <peripheral name="ETHER_${module.driver.ether_phy.mii_type}" component="ether_${module.driver.ether_phy.mii_type}" />
+        <symbol id="symbol.driver.ether_phy.name" value="${module.driver.ether_phy.name}"/>
+        <symbol id="symbol.driver.ether_phy.guard.open" value="${module.driver.ether_phy.name}_open_guard"/>
+        <symbol id="symbol.driver.ether_phy.guard.macro.open" value="FSP_GUARD_${module.driver.ether_phy.name}_R_ETHER_PHY_Open"/>
+        <symbol id="symbol.driver.ether_phy.guard.close" value="${module.driver.ether_phy.name}_close_guard"/>
+        <symbol id="symbol.driver.ether_phy.guard.macro.close" value="FSP_GUARD_${module.driver.ether_phy.name}_R_ETHER_PHY_Close"/>
+        <symbol id="symbol.driver.ether_phy.guard.chip_init" value="${module.driver.ether_phy.name}_chip_init_guard"/>
+        <symbol id="symbol.driver.ether_phy.guard.macro.chip_init" value="FSP_GUARD_${module.driver.ether_phy.name}_R_ETHER_PHY_ChipInit"/>
+        <symbol id="symbol.driver.ether_phy.guard.read" value="${module.driver.ether_phy.name}_read_guard"/>
+        <symbol id="symbol.driver.ether_phy.guard.macro.read" value="FSP_GUARD_${module.driver.ether_phy.name}_R_ETHER_PHY_Read"/>
+        <symbol id="symbol.driver.ether_phy.guard.write" value="${module.driver.ether_phy.name}_write_guard"/>
+        <symbol id="symbol.driver.ether_phy.guard.macro.write" value="FSP_GUARD_${module.driver.ether_phy.name}_R_ETHER_PHY_Write"/>
+        <symbol id="symbol.driver.ether_phy.guard.start_auto_negotiate" value="${module.driver.ether_phy.name}_start_auto_negotiate_guard"/>
+        <symbol id="symbol.driver.ether_phy.guard.macro.start_auto_negotiate" value="FSP_GUARD_${module.driver.ether_phy.name}_R_ETHER_PHY_StartAutoNegotiate"/>
+        <symbol id="symbol.driver.ether_phy.guard.link_partner_ability_get" value="${module.driver.ether_phy.name}_link_partner_ability_get_guard"/>
+        <symbol id="symbol.driver.ether_phy.guard.macro.buffer_link_partner_ability_get" value="FSP_GUARD_${module.driver.ether_phy.name}_R_ETHER_PHY_LinkPartnerAbilityGet"/>
+        <symbol id="symbol.driver.ether_phy.guard.link_status_get" value="${module.driver.ether_phy.name}_link_status_get_guard"/>
+        <symbol id="symbol.driver.ether_phy.guard.macro.link_status_get" value="FSP_GUARD_${module.driver.ether_phy.name}_R_ETHER_PHY_LinkStatusGet"/>
+        <symbol id="symbol.driver.ether_phy.nsc_api" value="${module.driver.ether_phy.name}_nsc_api"/>
+        <symbol id="symbol.driver.ether_phy.cfg" value="${module.driver.ether_phy.name}_cfg"/>
+        <symbol id="symbol.driver.ether_phy.ctrl" value="${module.driver.ether_phy.name}_ctrl"/>
+        <header>
+#ifndef ETHER_PHY_LSI_TYPE_KIT_COMPONENT
+  #define ETHER_PHY_LSI_TYPE_KIT_COMPONENT ETHER_PHY_LSI_TYPE_DEFAULT
+#endif
+
+#ifndef ${module.driver.ether_phy.target_init}
+void ${module.driver.ether_phy.target_init}(ether_phy_instance_ctrl_t * p_instance_ctrl);
+#endif
+
+#ifndef ${module.driver.ether_phy.target_link_partner_ability_get}
+bool ${module.driver.ether_phy.target_link_partner_ability_get}(ether_phy_instance_ctrl_t * p_instance_ctrl, uint32_t line_speed_duplex);
+#endif
+
+/** ether_phy on ether_phy Instance. */
+extern const ether_phy_instance_t ${module.driver.ether_phy.name};
+
+/** Access the Ethernet PHY instance using these structures when calling API functions directly (::p_api is not used). */
+extern ether_phy_instance_ctrl_t ${module.driver.ether_phy.name}_ctrl;
+extern const ether_phy_cfg_t ${module.driver.ether_phy.name}_cfg;
+extern const ether_phy_extended_cfg_t ${module.driver.ether_phy.name}_extended_cfg;
+
+        </header>
+        <includes>
+#include "r_ether_phy.h"
+#include "r_ether_phy_api.h"
+        </includes>
+        <declarations>
+ether_phy_instance_ctrl_t ${module.driver.ether_phy.name}_ctrl;
+
+const ether_phy_extended_cfg_t ${module.driver.ether_phy.name}_extended_cfg =
+{
+    .p_target_init                     = ${module.driver.ether_phy.target_init},
+    .p_target_link_partner_ability_get = ${module.driver.ether_phy.target_link_partner_ability_get}
+
+};
+
+const ether_phy_cfg_t ${module.driver.ether_phy.name}_cfg =
+{
+
+    .channel                   = ${module.driver.ether_phy.channel},
+    .phy_lsi_address           = ${module.driver.ether_phy.phy_lsi_address},
+    .phy_reset_wait_time       = ${module.driver.ether_phy.phy_reset_wait_time},
+    .mii_bit_access_wait_time  = ${module.driver.ether_phy.mii_bit_access_wait_time},
+    .phy_lsi_type              = ${module.driver.ether_phy.phy_lsi_type},
+    .flow_control              = ${module.driver.ether_phy.flow_control},
+    .mii_type                  = ${module.driver.ether_phy.mii_type_enum},
+    .p_context                 = NULL,
+    .p_extend                  = &amp;${module.driver.ether_phy.name}_extended_cfg,
+
+};
+/* Instance structure to use this module. */
+const ether_phy_instance_t ${module.driver.ether_phy.name} =
+{
+    .p_ctrl        = &amp;${module.driver.ether_phy.name}_ctrl,
+    .p_cfg         = &amp;${module.driver.ether_phy.name}_cfg,
+    .p_api         = &amp;g_ether_phy_on_ether_phy
+};
+        </declarations>
+        <guard>
+            <header>
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.ether_phy.name}_open_guard(ether_phy_ctrl_t * const p_ctrl, ether_phy_cfg_t const * const p_cfg);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.ether_phy.name}_close_guard(ether_phy_ctrl_t * const p_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.ether_phy.name}_start_auto_negotiate_guard(ether_phy_ctrl_t * const p_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.ether_phy.name}_link_partner_ability_get_guard(ether_phy_ctrl_t * const p_ctrl,
+                                            uint32_t * const         p_line_speed_duplex,
+                                            uint32_t * const         p_local_pause,
+                                            uint32_t * const         p_partner_pause);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.ether_phy.name}_link_status_get_guard (ether_phy_ctrl_t * const p_ctrl);
+            </header>
+            <template name="${module.driver.ether_phy.name}_guard.c">
+                <![CDATA[
+                    #include "guard.h"
+
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.ether_phy.name}_open_guard (ether_phy_ctrl_t * const p_ctrl, ether_phy_cfg_t const * const p_cfg)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+    FSP_PARAMETER_NOT_USED(p_cfg);
+
+    return R_ETHER_PHY_Open(&${module.driver.ether_phy.name}_ctrl, &${module.driver.ether_phy.name}_cfg);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.ether_phy.name}_close_guard (ether_phy_ctrl_t * const p_ctrl)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+
+    return R_ETHER_PHY_Close(&${module.driver.ether_phy.name}_ctrl);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.ether_phy.name}_start_auto_negotiate_guard(ether_phy_ctrl_t * const p_ctrl)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+
+    return R_ETHER_PHY_StartAutoNegotiate(&${module.driver.ether_phy.name}_ctrl);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.ether_phy.name}_link_partner_ability_get_guard (ether_phy_ctrl_t * const p_ctrl,
+                                            uint32_t * const         p_line_speed_duplex,
+                                            uint32_t * const         p_local_pause,
+                                            uint32_t * const         p_partner_pause)
+{
+    /* Verify all pointers are in non-secure memory. */
+    uint32_t * p_line_speed_duplex_checked = cmse_check_pointed_object(p_line_speed_duplex, CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_line_speed_duplex_checked != NULL);
+    uint32_t * p_local_pause_checked = cmse_check_pointed_object(p_local_pause, CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_local_pause_checked != NULL);
+    uint32_t * p_partner_pause_checked = cmse_check_pointed_object(p_partner_pause, CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_partner_pause_checked != NULL);
+
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+
+    return R_ETHER_PHY_LinkPartnerAbilityGet(&${module.driver.ether_phy.name}_ctrl, p_line_speed_duplex_checked, p_local_pause_checked, p_partner_pause_checked);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.ether_phy.name}_link_status_get_guard(ether_phy_ctrl_t * const p_ctrl)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+
+    return R_ETHER_PHY_LinkStatusGet(&${module.driver.ether_phy.name}_ctrl);
+}
+
+                ]]>
+            </template>
+        </guard>
+        <nsc>
+            <header>
+#define FSP_GUARD_${module.driver.ether_phy.name}_R_ETHER_PHY_Open() ${module.driver.ether_phy.name}_open_guard(FSP_SECURE_ARGUMENT, FSP_SECURE_ARGUMENT)
+
+#define FSP_GUARD_${module.driver.ether_phy.name}_R_ETHER_PHY_Close() ${module.driver.ether_phy.name}_close_guard(FSP_SECURE_ARGUMENT)
+
+#define FSP_GUARD_${module.driver.ether_phy.name}_R_ETHER_PHY_StartAutoNegotiate() ${module.driver.ether_phy.name}_start_auto_negotiate_guard(FSP_SECURE_ARGUMENT)
+
+#define FSP_GUARD_${module.driver.ether_phy.name}_R_ETHER_PHY_LinkPartnerAbilityGet(p_line_speed_duplex, p_local_pause, p_partner_pause) ${module.driver.ether_phy.name}_link_partner_ability_get_guard(FSP_SECURE_ARGUMENT, p_line_speed_duplex, p_local_pause, p_partner_pause)
+
+#define FSP_GUARD_${module.driver.ether_phy.name}_R_ETHER_PHY_LinkStatusGet() ${module.driver.ether_phy.name}_buffer_release_guard(FSP_SECURE_ARGUMENT)
+
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.ether_phy.name}_open_guard(ether_phy_ctrl_t * const p_ctrl, ether_phy_cfg_t const * const p_cfg);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.ether_phy.name}_close_guard(ether_phy_ctrl_t * const p_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.ether_phy.name}_start_auto_negotiate_guard(ether_phy_ctrl_t * const p_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.ether_phy.name}_link_partner_ability_get_guard(ether_phy_ctrl_t * const p_ctrl,
+                                            uint32_t * const         p_line_speed_duplex,
+                                            uint32_t * const         p_local_pause,
+                                            uint32_t * const         p_partner_pause);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.ether_phy.name}_link_status_get_guard (ether_phy_ctrl_t * const p_ctrl);
+
+
+extern const ether_phy_instance_t ${module.driver.ether_phy.name};
+            </header>
+            <declarations>
+                <![CDATA[
+static const ether_phy_api_t ${module.driver.ether_phy.name}_nsc_api =
+{
+    .open = ${module.driver.ether_phy.name}_open_guard,
+    .close = ${module.driver.ether_phy.name}_close_guard,
+    .startAutoNegotiate = ${module.driver.ether_phy.name}_start_auto_negotiate_guard,
+    .linkPartnerAbilityGet = ${module.driver.ether_phy.name}_link_partner_ability_get_guard,
+    .linkStatusGet = ${module.driver.ether_phy.name}_link_status_get_guard
+};
+const ether_phy_instance_t ${module.driver.ether_phy.name} =
+{
+    .p_api = &${module.driver.ether_phy.name}_nsc_api,
+    .p_ctrl = FSP_SECURE_ARGUMENT,
+    .p_cfg = FSP_SECURE_ARGUMENT,
+};
+                ]]>
+            </declarations>
+        </nsc>
+        <api configurable="true">
+            <file>ra/fsp/inc/instances/r_ether_phy.h</file>
+            <file>ra/fsp/inc/api/r_ether_phy_api.h</file>
+        </api>
+    </module>
+</raModuleDescription>

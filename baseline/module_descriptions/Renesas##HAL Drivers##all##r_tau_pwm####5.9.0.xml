@@ -1,0 +1,671 @@
+<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.driver.tau_pwm" path="fsp_cfg/r_tau_pwm_cfg.h" version="0">
+        <property default="config.driver.tau_pwm.param_checking_enable.bsp" display="Parameter Checking" id="config.driver.tau_pwm.param_checking_enable" description="If selected code for parameter checking is included in the build.">
+            <option display="Default (BSP)" id="config.driver.tau_pwm.param_checking_enable.bsp" value="(BSP_CFG_PARAM_CHECKING_ENABLE)"/>
+            <option display="Enabled" id="config.driver.tau_pwm.param_checking_enable.enabled" value="(1)"/>
+            <option display="Disabled" id="config.driver.tau_pwm.param_checking_enable.disabled" value="(0)"/>
+        </property>
+        <property default="config.driver.tau_pwm.one_shot_support.disabled" display="One-shot Pulse Output Mode Support" id="config.driver.tau_pwm.one_shot_support" description="Controls whether one-shot pulse output mode support is included in the build. This setting applies globally to all r_tau_pwm_instances. If one shot mode is not used by any instance, disable this setting to reduce ROM usage.">
+            <option display="Disabled" id="config.driver.tau_pwm.one_shot_support.disabled" value="(0)"/>
+            <option display="Enabled" id="config.driver.tau_pwm.one_shot_support.enabled" value="(1)"/>
+        </property>
+        <property default="config.driver.tau_pwm.pwm_support.enabled" display="PWM Output Mode Support" id="config.driver.tau_pwm.pwm_support" description="Controls whether PWM mode support is included in the build. This setting applies globally to all r_tau_pwm_instances. If PWM mode is not used by any instance, disable this setting to reduce ROM usage.">
+            <option display="Disabled" id="config.driver.tau_pwm.pwm_support.disabled" value="(0)"/>
+            <option display="Enabled" id="config.driver.tau_pwm.pwm_support.enabled" value="(1)"/>
+        </property>
+        <property default="config.driver.tau_pwm.multi_slave.disabled" display="Multi-Slave" id="config.driver.tau_pwm.multi_slave" description="Enable support for multiple slaves">
+            <option display="Disabled" id="config.driver.tau_pwm.multi_slave.disabled" value="(0)"/>
+            <option display="Enabled" id="config.driver.tau_pwm.multi_slave.enabled" value="(1)"/>
+        </property>
+        <content>
+        #ifdef __cplusplus
+        extern "C" {
+        #endif
+
+        #define TAU_PWM_CFG_PARAM_CHECKING_ENABLE ${config.driver.tau_pwm.param_checking_enable}
+        #define TAU_PWM_CFG_ONE_SHOT_MODE_ENABLE ${config.driver.tau_pwm.one_shot_support}
+        #define TAU_PWM_CFG_PWM_MODE_ENABLE ${config.driver.tau_pwm.pwm_support}
+        #define TAU_PWM_CFG_MULTI_SLAVE_ENABLE ${config.driver.tau_pwm.multi_slave}
+
+        #ifdef __cplusplus
+        }
+        #endif
+        </content>
+    </config>
+    <module config="config.driver.tau_pwm" display="Timers|${module.driver.timer.name} Timer, Simultaneous Channel Operation (r_tau_pwm)" id="module.driver.timer_on_tau_pwm" version="1" url="group___t_a_u___p_w_m.html">
+
+        <constraint display="Requires TAU peripheral">
+          "${interface.mcu.tau}" === "1"
+        </constraint>
+
+        <constraint display="Support for the selected mode must be enabled in the 'Common' properties.">
+            ("${module.driver.timer.mode}" === "module.driver.timer.mode.one_shot" &amp;&amp;
+            "${config.driver.tau_pwm.one_shot_support}" === "config.driver.tau_pwm.one_shot_support.enabled") ||
+            ("${module.driver.timer.mode}" === "module.driver.timer.mode.pwm" &amp;&amp;
+            "${config.driver.tau_pwm.pwm_support}" === "config.driver.tau_pwm.pwm_support.enabled")
+        </constraint>
+
+        <constraint display="Add at least one slave channel configuration">
+            "${interface.driver.slave_channel.${module.driver.timer.master_channel}}" &gt; "0"
+        </constraint>
+        <constraint id="module.driver.timer.pwm_tau.constraint.slaveNumber">
+          eval('\n'+
+          'var output = 0x0;\n' +
+          'var slave1 = "${module.driver.timer.requires.slave1::module.driver.timer.slave_channel}";\n' +
+          'var slave2 = "${module.driver.timer.requires.slave2::module.driver.timer.slave_channel}";\n' +
+          'var slave3 = "${module.driver.timer.requires.slave3::module.driver.timer.slave_channel}";\n' +
+          'var slave4 = "${module.driver.timer.requires.slave4::module.driver.timer.slave_channel}";\n' +
+          'var slave5 = "${module.driver.timer.requires.slave5::module.driver.timer.slave_channel}";\n' +
+          'var slave6 = "${module.driver.timer.requires.slave6::module.driver.timer.slave_channel}";\n' +
+          'var slave7 = "${module.driver.timer.requires.slave7::module.driver.timer.slave_channel}";\n' +
+          'var maxSlave = 0;\n' +
+          'var slaveArray = [0, 0, 0, 0, 0, 0, 0];\n' +
+          'if (slave1 &gt; 0) {\n' +
+          '  slaveArray[0] = slave1;\n' +
+          '}\n' +
+          'if (slave2 &gt;  0) {\n' +
+          '  slaveArray[1] = slave2;\n' +
+          '}\n' +
+          'if (slave3 &gt;  0) {\n' +
+          '  slaveArray[2] = slave3;\n' +
+          '}\n' +
+          'if (slave4 &gt;  0) {\n' +
+          '  slaveArray[3] = slave4;\n' +
+          '}\n' +
+          'if (slave5 &gt;  0) {\n' +
+          '  slaveArray[4] = slave5;\n' +
+          '}\n' +
+          'if (slave6 &gt;  0) {\n' +
+          '  slaveArray[5] = slave6;\n' +
+          '}\n' +
+          'if (slave7 &gt;  0) {\n' +
+          '  slaveArray[6] = slave7;\n' +
+          '}\n' +
+          'for (var i = 0; i &lt;  7; i++) {\n' +
+          '  if (slaveArray[i] &gt;  0) {\n' +
+          '    if (slaveArray[i] &gt;  maxSlave) {\n' +
+          '      maxSlave = slaveArray[i];\n' +
+          '    } else {\n' +
+          '      output = "Slave " + (i + 1) + " is not in increasing order";\n' +
+          '       i = 7;\n' +
+          '    }\n' +
+          '  }\n' +
+          '}\n' +
+          "output")
+        </constraint>
+        <constraint display="Only one slave channel is allowed in one-shot pulse output mode">
+            "${module.driver.timer.mode}" != "module.driver.timer.mode.one_shot" ||
+            "${interface.driver.slave_channel.${module.driver.timer.master_channel}}" &lt; "2"
+        </constraint>
+
+        <constraint display="Only one slave channel is allowed when multi-slave mode is disabled">
+            "${config.driver.tau_pwm.multi_slave}" == "config.driver.tau_pwm.multi_slave.enabled" ||
+            "${interface.driver.slave_channel.${module.driver.timer.master_channel}}" &lt; "2"
+        </constraint>
+
+        <constraint display="Unique name required for each instance">
+            "${interface.driver.timer.${module.driver.timer.name}}" === "1"
+        </constraint>
+
+        <constraint display="Master channel number must be unique for each instance">
+            "${interface.driver.timer_channel.${module.driver.timer.master_channel}}" === "1"
+        </constraint>
+
+        <constraint display="Master Channel not available on selected MCU">
+            "${interface.mcu.tau.0${module.driver.timer.master_channel}}" === "1"
+        </constraint>
+
+        <constraint display="Clock Source must be PCLK (undivided) when ELC is trigger source">
+            ("${module.driver.timer.mode}" != "module.driver.timer.mode.one_shot") ||
+            (!("${module.driver.timer.trigger_source}".startsWith("_signal."))) ||
+            ((("${module.driver.timer.operation_clock}" === "module.driver.timer.operation_clock.CK00") &amp;&amp;
+            ("${board.clock.peripheral.tau}" === "${board.clock.peripheral.tau.ck00}")) ||
+            (("${module.driver.timer.operation_clock}" === "module.driver.timer.operation_clock.CK01") &amp;&amp;
+            ("${board.clock.peripheral.tau}" === "${board.clock.peripheral.tau.ck01}")))
+        </constraint>
+
+       <constraint display="ELC trigger source is only available in channel 0">
+           "${module.driver.timer.master_channel}" === "0" ||
+           !("${module.driver.timer.trigger_source}".startsWith("_signal."))
+        </constraint>
+
+        <constraint display="ELC signal source selection requires an ELC Driver">
+            (
+                (!testDynamicEnum("${module.driver.timer.trigger_source}", "_signal"))
+            ) || ("1" === "${interface.driver.elc}")
+        </constraint>
+        <!-- Check that input period is not out of range -->
+        <constraint id="module.driver.tau_pwm.constraint.period">
+            eval('' +
+'/* INPUTS */' +
+'    var requested_period      = ${module.driver.timer.period};' +
+'    var requested_unit_string = "${module.driver.timer.unit}";' +
+'    var iclk_clock_hz         = ${board.clock.peripheral.tau};' +
+'    var timer_mode            = "${module.driver.timer.mode}";' +
+'    var operation_clock       = "${module.driver.timer.operation_clock}";'+
+''+
+'    var f_mck = ${board.clock.peripheral.tau.ck00};'+
+'    if ("module.driver.timer.operation_clock.CK01" === operation_clock)' +
+'    {' +
+'        f_mck = ${board.clock.peripheral.tau.ck01};' +
+'    }' +
+''+
+'    var convert_to_ticks = {'+
+'      "module.driver.timer.unit.unit_period_nsec": function (requested_period, f_mck) {  return Math.floor(requested_period / 1000000000 * f_mck); },'+
+'      "module.driver.timer.unit.unit_period_usec": function (requested_period, f_mck) {  return  Math.floor(requested_period / 1000000 * f_mck); },'+
+'      "module.driver.timer.unit.unit_period_msec": function (requested_period, f_mck) {  return  Math.floor(requested_period / 1000 * f_mck); },'+
+'      "module.driver.timer.unit.unit_period_sec": function (requested_period, f_mck) {  return  Math.floor(requested_period * f_mck); },'+
+'      "module.driver.timer.unit.unit_frequency_hz": function (requested_period, f_mck) {  return  Math.floor((1 / requested_period) * f_mck); },'+
+'      "module.driver.timer.unit.unit_frequency_khz": function (requested_period, f_mck) {  return  Math.floor((1 / (requested_period * 1000)) * f_mck); },'+
+'      "module.driver.timer.unit.unit_period_raw_counts": function (requested_period, f_mck) {  return  requested_period; },'+
+'    };'+
+''+
+'    /* Valid period range for each timer mode */'+
+'    var timer_counter_limits = {'+
+'            "module.driver.timer.mode.one_shot": { '+
+'                max: 0x10001,'+
+'                min: function(pclk_is_undivided) { return (pclk_is_undivided) ?  0x00003 : 0x00001 },'+
+'            },'+
+'            "module.driver.timer.mode.pwm": { '+
+'                max: 0x10000,'+
+'                min: function(pclk_is_undivided) { return (pclk_is_undivided) ?  0x00002 : 0x00001 }'+
+'        }'+
+'    };'+
+''+
+'    /* Convert requested period to timer ticks */'+
+'    var ticks = convert_to_ticks[requested_unit_string](requested_period, f_mck);'+
+''+
+'    /* Check calculated period is in valid range */'+
+'    var max = timer_counter_limits[timer_mode].max;'+
+'    var min =  timer_counter_limits[timer_mode].min(iclk_clock_hz == f_mck);'+
+'    var output = null;'+
+'    if (ticks &gt; max || ticks &lt; min)'+
+'    {'+
+'        output = "Requested period not achievable. Valid range: [0x" + min.toString(16) + ", 0x" + max.toString(16) + "] ticks. Actual calculated: 0x" + ticks.toString(16) + " ticks";'+
+'    }'+
+''+
+'    output'+
+'')
+        </constraint>
+
+        <requires id="module.driver.timer.requires.tau_pwm" interface="interface.mcu.tau" visible="false" display="Requires TAU peripheral" />
+        <requires id="module.driver.timer.requires.slave1" interface="interface.driver.timer_channel" display="Add Slave Channel [Optional]" find="false" optional="true" >
+            <!-- <override property="module.driver.timer.slave_channel" value= "1"/> -->
+            <override property="module.driver.timer.master_channel_refer" value="${module.driver.timer.master_channel}"/>
+            <override property="module.driver.timer.mode_refer" value="${module.driver.timer.mode}"/>
+            <override property="module.driver.timer.operation_clock_refer" value="${module.driver.timer.operation_clock}"/>
+            <override property="module.driver.timer.period_refer" value="${module.driver.timer.period_value}"/>
+            <override property="module.driver.timer.unit_refer" value="${module.driver.timer.unit}"/>
+        </requires>
+        <requires id="module.driver.timer.requires.slave2" interface="interface.driver.timer_channel" display="Add Slave Channel [Optional]" find="false" optional="true" >
+            <!-- <override property="module.driver.timer.slave_channel" value= "2"/> -->
+            <override property="module.driver.timer.master_channel_refer" value="${module.driver.timer.master_channel}"/>
+            <override property="module.driver.timer.mode_refer" value="${module.driver.timer.mode}"/>
+            <override property="module.driver.timer.operation_clock_refer" value="${module.driver.timer.operation_clock}"/>
+            <override property="module.driver.timer.period_refer" value="${module.driver.timer.period_value}"/>
+            <override property="module.driver.timer.unit_refer" value="${module.driver.timer.unit}"/>
+        </requires>
+        <requires id="module.driver.timer.requires.slave3" interface="interface.driver.timer_channel" display="Add Slave Channel [Optional]" find="false" optional="true" >
+            <!-- <override property="module.driver.timer.slave_channel" value= "3"/> -->
+            <override property="module.driver.timer.master_channel_refer" value="${module.driver.timer.master_channel}"/>
+            <override property="module.driver.timer.mode_refer" value="${module.driver.timer.mode}"/>
+            <override property="module.driver.timer.operation_clock_refer" value="${module.driver.timer.operation_clock}"/>
+            <override property="module.driver.timer.period_refer" value="${module.driver.timer.period_value}"/>
+            <override property="module.driver.timer.unit_refer" value="${module.driver.timer.unit}"/>
+        </requires>
+        <requires id="module.driver.timer.requires.slave4" interface="interface.driver.timer_channel" display="Add Slave Channel [Optional]" find="false" optional="true" >
+            <!-- <override property="module.driver.timer.slave_channel" value= "4"/> -->
+            <override property="module.driver.timer.master_channel_refer" value="${module.driver.timer.master_channel}"/>
+            <override property="module.driver.timer.mode_refer" value="${module.driver.timer.mode}"/>
+            <override property="module.driver.timer.operation_clock_refer" value="${module.driver.timer.operation_clock}"/>
+            <override property="module.driver.timer.period_refer" value="${module.driver.timer.period_value}"/>
+            <override property="module.driver.timer.unit_refer" value="${module.driver.timer.unit}"/>
+        </requires>
+        <requires id="module.driver.timer.requires.slave5" interface="interface.driver.timer_channel" display="Add Slave Channel [Optional]" find="false" optional="true" >
+            <!-- <override property="module.driver.timer.slave_channel" value= "5"/> -->
+            <override property="module.driver.timer.master_channel_refer" value="${module.driver.timer.master_channel}"/>
+            <override property="module.driver.timer.mode_refer" value="${module.driver.timer.mode}"/>
+            <override property="module.driver.timer.operation_clock_refer" value="${module.driver.timer.operation_clock}"/>
+            <override property="module.driver.timer.period_refer" value="${module.driver.timer.period_value}"/>
+            <override property="module.driver.timer.unit_refer" value="${module.driver.timer.unit}"/>
+        </requires>
+        <requires id="module.driver.timer.requires.slave6" interface="interface.driver.timer_channel" display="Add Slave Channel [Optional]" find="false" optional="true" >
+            <!-- <override property="module.driver.timer.slave_channel" value= "6"/> -->
+            <override property="module.driver.timer.master_channel_refer" value="${module.driver.timer.master_channel}"/>
+            <override property="module.driver.timer.mode_refer" value="${module.driver.timer.mode}"/>
+            <override property="module.driver.timer.operation_clock_refer" value="${module.driver.timer.operation_clock}"/>
+            <override property="module.driver.timer.period_refer" value="${module.driver.timer.period_value}"/>
+            <override property="module.driver.timer.unit_refer" value="${module.driver.timer.unit}"/>
+        </requires>
+        <requires id="module.driver.timer.requires.slave7" interface="interface.driver.timer_channel" display="Add Slave Channel [Optional]" find="false" optional="true" >
+            <!-- <override property="module.driver.timer.slave_channel" value= "7"/> -->
+            <override property="module.driver.timer.master_channel_refer" value="${module.driver.timer.master_channel}"/>
+            <override property="module.driver.timer.mode_refer" value="${module.driver.timer.mode}"/>
+            <override property="module.driver.timer.operation_clock_refer" value="${module.driver.timer.operation_clock}"/>
+            <override property="module.driver.timer.period_refer" value="${module.driver.timer.period_value}"/>
+            <override property="module.driver.timer.unit_refer" value="${module.driver.timer.unit}"/>
+        </requires>
+        <provides interface="interface.driver.timer" />
+        <provides interface="interface.driver.timer.${module.driver.timer.name}" />
+        <provides interface="interface.driver.timer_on_tau_pwm" />
+        <provides interface="interface.driver.timer_channel.${module.driver.timer.master_channel}" />
+
+        <property default="g_timer${_instance}" display="General|Name" id="module.driver.timer.name" description="Module name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.timer.name}")</constraint>
+        </property>
+
+        <property default="module.driver.timer.operation_clock.CK00" display="General|Operation Clock" id="module.driver.timer.operation_clock" description="Select the operation clock">
+            <option display="CK00" id="module.driver.timer.operation_clock.CK00" value="TAU_PWM_OPERATION_CLOCK_CK00"/>
+            <option display="CK01" id="module.driver.timer.operation_clock.CK01" value="TAU_PWM_OPERATION_CLOCK_CK01"/>
+        </property>
+
+        <property default="module.driver.timer.mode.pwm" display="General|Mode" id="module.driver.timer.mode" description="Mode selection.">
+            <option display="One-shot pulse output" id="module.driver.timer.mode.one_shot" value="TIMER_MODE_ONE_SHOT"/>
+            <option display="PWM output" id="module.driver.timer.mode.pwm" value="TIMER_MODE_PWM"/>
+        </property>
+
+        <property default="0" display="General|Master Channel" id="module.driver.timer.master_channel" description="Select the TAU master channel. When two or more master channels are to be used, slave channels with a master channel between them may not be set.">
+            <constraint display="Channel number must be even.">testInteger(Number("${module.driver.timer.master_channel}"))  &amp;&amp; ([0,2,4,6,8].indexOf(${module.driver.timer.master_channel}) !== -1)</constraint>
+            <signal event="event.tau0.tmi0${module.driver.timer.master_channel}" />
+        </property>
+
+        <property default="0x10000" display="General|Period" id="module.driver.timer.period" description="Specify the timer period based on the selected unit. In One-shot pulse output mode this value corresponds to the delay time.\n\nWhen the unit is set to 'Raw Counts', setting the period to 0x10000/0x10001 results in the maximum period for PWM Output function/One-shot pulse output function at the lowest divisor (fastest timer tick). The theoretical calculated period is printed in a comment in the timer_cfg_t structure.">
+            <constraint display="Value must be a non-negative integer">testInteger("${module.driver.timer.period}")  &amp;&amp; ("${module.driver.timer.period}" &gt;= 0) </constraint>
+            <export><![CDATA[eval('' +
+'/* INPUTS */' +
+'    var requested_period      = ${module.driver.timer.period};' +
+'    var requested_unit_string = "${module.driver.timer.unit}";' +
+'    var timer_mode            = "${module.driver.timer.mode}";' +
+'    var operation_clock       = "${module.driver.timer.operation_clock}";'+
+'' +
+'    var f_mck = ${board.clock.peripheral.tau.ck00};'+
+'    var clock_div = "BSP_CFG_TAU_CK00";'+
+'    if ("TAU_PWM_OPERATION_CLOCK_CK01" == operation_clock)' +
+'    {' +
+'        f_mck = ${board.clock.peripheral.tau.ck01};' +
+'        clock_div = "BSP_CFG_TAU_CK01";'+
+'    }' +
+'' +
+'    var convert_to_ticks = {'+
+'      "ns": function (requested_period, f_mck) {  return Math.floor(requested_period / 1000000000 * f_mck); },'+
+'      "us": function (requested_period, f_mck) {  return  Math.floor(requested_period / 1000000 * f_mck); },'+
+'      "ms": function (requested_period, f_mck) {  return  Math.floor(requested_period / 1000 * f_mck); },'+
+'      "s": function (requested_period, f_mck) {  return  Math.floor(requested_period * f_mck); },'+
+'      "hz": function (requested_period, f_mck) {  return  Math.floor((1 / requested_period) * f_mck); },'+
+'      "khz": function (requested_period, f_mck) {  return  Math.floor((1 / (requested_period * 1000)) * f_mck); },'+
+'      "raw": function (requested_period, f_mck) {  return  requested_period; },'+
+'    };'+
+''+
+'    /* Convert requested period to timer ticks */'+
+'    var period_counts = convert_to_ticks[requested_unit_string](requested_period, f_mck);'+
+'' +
+'    var period_setting;'+
+'    if ("TIMER_MODE_ONE_SHOT" == timer_mode) ' +
+'    {' +
+'       period_setting = "/* Actual delay time: ";' +
+'    }' +
+'    else ' +
+'    {' +
+'       period_setting = "/* Actual pulse period: ";' +
+'    }' +
+'' +
+'    var actual_period = period_counts / f_mck;' +
+'    period_setting += actual_period.toString() + " seconds. */" + ' +
+'                     "  .period_counts = (uint32_t) 0x" + period_counts.toString(16) + ' +
+'                     ",  .source_div = (timer_source_div_t)" + clock_div.toString(); '+
+'    period_setting' +
+'')
+]]>            </export>
+        </property>
+
+        <property default="" id="module.driver.timer.period_value" >
+            <export><![CDATA[eval('' +
+'/* INPUTS */' +
+'    var requested_period = ${module.driver.timer.period};' +
+'    requested_period' +
+'')
+]]>            </export>
+        </property>
+
+        <property default="module.driver.timer.unit.unit_period_raw_counts" display="General|Period Unit" id="module.driver.timer.unit" description="Unit of the period specified above">
+            <option display="Raw Counts" id="module.driver.timer.unit.unit_period_raw_counts" value="raw"/>
+            <option display="Nanoseconds" id="module.driver.timer.unit.unit_period_nsec" value="ns"/>
+            <option display="Microseconds" id="module.driver.timer.unit.unit_period_usec" value="us"/>
+            <option display="Milliseconds" id="module.driver.timer.unit.unit_period_msec" value="ms"/>
+            <option display="Seconds" id="module.driver.timer.unit.unit_period_sec" value="s"/>
+            <option display="Hertz" id="module.driver.timer.unit.unit_frequency_hz" value="hz"/>
+            <option display="Kilohertz" id="module.driver.timer.unit.unit_frequency_khz" value="khz"/>
+        </property>
+
+        <property default="module.driver.tau_pwm.trigger_source.input_pin" display="Input (One-shot pulse)|Trigger Source" id="module.driver.timer.trigger_source" description="Select the trigger source for master channel.">
+            <select enum="enum.driver.tau_pwm.trigger_source"/>
+            <select enum="_signal" />
+            <linkConstraint display="Requires an ELC peripheral function for TAU PWM">
+                "${_link}" === "link.tau0${module.driver.timer.master_channel}"
+            </linkConstraint>
+        </property>
+
+        <property default="module.driver.timer.detect_edge._rising" display="Input (One-shot pulse)|Detect Edge" id="module.driver.timer.detect_edge" description="Select the detect edge.">
+            <option display="Falling Edge" id="module.driver.timer.detect_edge._rising" value="TAU_PWM_DETECT_EDGE_FALLING"/>
+            <option display="Rising Edge" id="module.driver.timer.detect_edge._falling" value="TAU_PWM_DETECT_EDGE_RISING"/>
+            <option display="Both Edges" id="module.driver.timer.detect_edge._both" value="TAU_PWM_DETECT_EDGES_BOTH"/>
+        </property>
+
+        <property default="NULL" display="Interrupts|Callback" id="module.driver.timer.p_callback" description="A user callback function can be provided. If provided, the callback function is called from the interrupt service routine (ISR) each time the timer period elapses in PWM mode, and when the timer delay elapses in one-shot mode. If the optional slave channel interrupt is enabled, the callback is also called when the signal switches state during the PWM cycle in PWM mode, and when the pulse output is complete in one-shot mode.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.timer.p_callback}")</constraint>
+        </property>
+
+        <property default="NULL" id="module.driver.timer.p_context" />
+
+        <property default="" display="Interrupts|Interrupt Priority" id="module.driver.timer.master_ipl" description="Timer interrupt priority.">
+            <select enum="enum.mcu.nvic.priorities.mandatory"/>
+            <interrupt event="event.tau0.tmi0${module.driver.timer.master_channel}" isr="tau_pwm_master_tmi_isr"/>
+        </property>
+
+        <peripheral name="TAU0${module.driver.timer.master_channel}" component="tau0${module.driver.timer.master_channel}" pin="tau0${module.driver.timer.master_channel}.ti0${module.driver.timer.master_channel}"/>
+        <symbol id="symbol.driver.timer.cfg" value="${module.driver.timer.name}_cfg"/>
+        <symbol id="symbol.driver.timer.ctrl" value="${module.driver.timer.name}_ctrl"/>
+        <symbol id="symbol.driver.timer.extend" value="${module.driver.timer.name}_extend"/>
+        <header>
+/** TAU PWM Timer Instance */
+extern const timer_instance_t ${module.driver.timer.name};
+
+/** Access the TAU PWM instance using these structures when calling API functions directly (::p_api is not used). */
+extern tau_pwm_instance_ctrl_t ${module.driver.timer.name}_ctrl;
+extern const timer_cfg_t ${module.driver.timer.name}_cfg;
+
+#ifndef ${module.driver.timer.p_callback}
+void ${module.driver.timer.p_callback}(timer_callback_args_t * p_args);
+#endif
+        </header>
+        <includes>#include &quot;r_tau_pwm.h&quot;
+#include &quot;r_timer_api.h&quot;</includes>
+        <declarations>
+tau_pwm_instance_ctrl_t ${module.driver.timer.name}_ctrl;
+
+
+
+
+const tau_pwm_extended_cfg_t ${module.driver.timer.name}_extend =
+{
+    .operation_clock                 = ${module.driver.timer.operation_clock},
+#define TRIGGER_TAU_PWM_SOURCE_PIN_INPUT (0xFFFFFFFF)
+#if (TRIGGER_TAU_PWM_SOURCE_PIN_INPUT == TRIGGER_${module.driver.timer.trigger_source})
+    .trigger_source                  = TAU_PWM_SOURCE_PIN_INPUT,
+#else
+    .trigger_source                  = TAU_PWM_SOURCE_ELC_EVENT,
+#endif
+#undef TRIGGER_TAU_PWM_SOURCE_PIN_INPUT
+    .detect_edge                     = ${module.driver.timer.detect_edge},
+    .p_slave_channel_cfgs       =     {
+#define RA_NOT_DEFINED (0xFFFFFFFF)
+#if (RA_NOT_DEFINED != ${module.driver.timer.requires.slave1::module.driver.timer.slave_channel})
+    &amp;g_timer_channel_cfg${module.driver.timer.requires.slave1::module.driver.timer.slave_channel},
+#endif
+#if (RA_NOT_DEFINED != ${module.driver.timer.requires.slave2::module.driver.timer.slave_channel})
+    &amp;g_timer_channel_cfg${module.driver.timer.requires.slave2::module.driver.timer.slave_channel},
+#endif
+
+#if (RA_NOT_DEFINED != ${module.driver.timer.requires.slave3::module.driver.timer.slave_channel})
+    &amp;g_timer_channel_cfg${module.driver.timer.requires.slave3::module.driver.timer.slave_channel},
+#endif
+
+#if (RA_NOT_DEFINED != ${module.driver.timer.requires.slave4::module.driver.timer.slave_channel})
+    &amp;g_timer_channel_cfg${module.driver.timer.requires.slave4::module.driver.timer.slave_channel},
+#endif
+
+#if (RA_NOT_DEFINED != ${module.driver.timer.requires.slave5::module.driver.timer.slave_channel})
+    &amp;g_timer_channel_cfg${module.driver.timer.requires.slave5::module.driver.timer.slave_channel},
+#endif
+
+#if (RA_NOT_DEFINED != ${module.driver.timer.requires.slave6::module.driver.timer.slave_channel})
+    &amp;g_timer_channel_cfg${module.driver.timer.requires.slave6::module.driver.timer.slave_channel},
+#endif
+
+#if (RA_NOT_DEFINED != ${module.driver.timer.requires.slave7::module.driver.timer.slave_channel})
+    &amp;g_timer_channel_cfg${module.driver.timer.requires.slave7::module.driver.timer.slave_channel},
+#endif
+#undef RA_NOT_DEFINED
+    }
+};
+const timer_cfg_t ${module.driver.timer.name}_cfg =
+{
+    .mode                = ${module.driver.timer.mode},
+    ${module.driver.timer.period},
+    .channel             = ${module.driver.timer.master_channel},
+    .p_callback          = ${module.driver.timer.p_callback},
+    /** If NULL then do not add &amp; */
+#if defined(${module.driver.timer.p_context})
+    .p_context           = ${module.driver.timer.p_context},
+#else
+    .p_context           = &amp;${module.driver.timer.p_context},
+#endif
+    .p_extend            = &amp;${module.driver.timer.name}_extend,
+    .cycle_end_ipl       = ${module.driver.timer.master_ipl},
+#if defined(VECTOR_NUMBER_TAU0_TMI0${module.driver.timer.master_channel})
+    .cycle_end_irq       = VECTOR_NUMBER_TAU0_TMI0${module.driver.timer.master_channel},
+#else
+    .cycle_end_irq       = FSP_INVALID_VECTOR,
+#endif
+};
+/* Instance structure to use this module. */
+const timer_instance_t ${module.driver.timer.name} =
+{
+    .p_ctrl        = &amp;${module.driver.timer.name}_ctrl,
+    .p_cfg         = &amp;${module.driver.timer.name}_cfg,
+    .p_api         = &amp;g_timer_on_tau_pwm
+};
+        </declarations>
+        <api configurable="true">
+            <file>ra/fsp/inc/instances/r_tau_pwm.h</file>
+            <file>ra/fsp/inc/api/r_timer_api.h</file>
+        </api>
+    </module>
+    <module display="Timers|TAU PWM Channel ${module.driver.timer.slave_channel} Configuration (r_tau_pwm)" id="module.driver.timer_channel" version="1" url="group___t_a_u___p_w_m.html" visible="false">
+        <constraint display="Requires TAU peripheral">
+          "${interface.mcu.tau}" === "1"
+        </constraint>
+        <constraint display="Slave channel number must be greater than master channel number">
+          "${module.driver.timer.slave_channel}" &gt; "${module.driver.timer.master_channel_refer}"
+        </constraint>
+
+        <constraint display="Slave channel number must be unique for each instance">
+            "${interface.driver.timer_channel.${module.driver.timer.slave_channel}}" === "1"
+        </constraint>
+        <!-- Check that input pulse width is not out of range -->
+        <constraint id="module.driver.tau_pwm.constraint.pulse_width">
+            eval('' +
+'/* INPUTS */' +
+'    var requested_pulse_width = ${module.driver.timer.pulse_width};' +
+'    var requested_unit_string = "${module.driver.timer.pulse_width_unit}";' +
+'    var iclk_clock_hz         = ${board.clock.peripheral.tau};' +
+'    var operation_clock       = "${module.driver.timer.operation_clock_refer}";'+
+''+
+'    var f_mck = ${board.clock.peripheral.tau.ck00};'+
+'    if ("TAU_PWM_OPERATION_CLOCK_CK01" == operation_clock)' +
+'    {' +
+'        f_mck = ${board.clock.peripheral.tau.ck01};' +
+'    }' +
+''+
+'    var convert_to_ticks = {'+
+'      "module.driver.timer.pulse_width_unit.unit_period_nsec": function (requested_pulse_width, f_mck) {  return Math.floor(requested_pulse_width / 1000000000 * f_mck); },'+
+'      "module.driver.timer.pulse_width_unit.unit_period_usec": function (requested_pulse_width, f_mck) {  return  Math.floor(requested_pulse_width / 1000000 * f_mck); },'+
+'      "module.driver.timer.pulse_width_unit.unit_period_msec": function (requested_pulse_width, f_mck) {  return  Math.floor(requested_pulse_width / 1000 * f_mck); },'+
+'      "module.driver.timer.pulse_width_unit.unit_period_sec": function (requested_pulse_width, f_mck) {  return  Math.floor(requested_pulse_width * f_mck); },'+
+'      "module.driver.timer.pulse_width_unit.unit_frequency_hz": function (requested_pulse_width, f_mck) {  return  Math.floor((1 / requested_pulse_width) * f_mck); },'+
+'      "module.driver.timer.pulse_width_unit.unit_frequency_khz": function (requested_pulse_width, f_mck) {  return  Math.floor((1 / (requested_pulse_width * 1000)) * f_mck); },'+
+'      "module.driver.timer.pulse_width_unit.unit_period_raw_counts": function (requested_pulse_width, f_mck) {  return  requested_pulse_width; },'+
+'    };'+
+''+
+'    /* Valid period range */'+
+'    var max = 0xffff;'+
+'    var min = (iclk_clock_hz == f_mck) ? 0x0001 : 0x0000;'+
+''+
+'    /* Convert requested period to timer ticks */'+
+'    var ticks = convert_to_ticks[requested_unit_string](requested_pulse_width, f_mck);'+
+''+
+'    /* Check calculated pulse width is in valid range */'+
+'    var output = null;'+
+'    if (ticks &gt; max || ticks &lt; min)'+
+'    {'+
+'        output = "Requested pulse width not achievable. Valid range: [0x" + min.toString(16) + ", 0x" + max.toString(16) + "] ticks. Actual calculated: 0x" + ticks.toString(16) + " ticks";'+
+'    }'+
+''+
+'    output'+
+'')
+        </constraint>
+
+        <requires id="interface.driver.timer.requires.tau_pwm" visible="false" interface="interface.mcu.tau" display="Requires TAU peripheral" />
+        <provides interface="interface.driver.timer_channel" />
+        <provides interface="interface.driver.timer_channel.${module.driver.timer.slave_channel}" />
+        <provides interface="interface.driver.slave_channel.${module.driver.timer.slave_channel}" />
+        <provides interface="interface.driver.slave_channel.${module.driver.timer.master_channel_refer}" />
+
+        <property default="1" display="General|Channel" id="module.driver.timer.slave_channel" description="Specify the slave channel.">
+            <constraint display="Value must be between 0 and 7.">
+                testInteger("${module.driver.timer.slave_channel}") &amp;&amp; ("${module.driver.timer.slave_channel}" &gt;= 0) &amp;&amp;
+                ("${module.driver.timer.slave_channel}" &lt;= 7)
+            </constraint>
+            <signal event="event.tau0.tmi0${module.driver.timer.slave_channel}" />
+        </property>
+
+        <property default="module.driver.timer.output_level.low_level" display="Output|Output Level" id="module.driver.timer.output_level" description="Output level of TAU slave channel.">
+            <option display="Start Level Low" id="module.driver.timer.output_level.low_level" value="TAU_PWM_OUTPUT_LEVEL_LOW"/>
+            <option display="Start Level High" id="module.driver.timer.output_level.high_level" value="TAU_PWM_OUTPUT_LEVEL_HIGH"/>
+        </property>
+
+        <property default="module.driver.timer.output_polarity.positive" display="Output|Output Polarity" id="module.driver.timer.output_polarity" description="Output polarity of TAU slave channel.">
+            <option display="Active-high" id="module.driver.timer.output_polarity.positive" value="TAU_PWM_OUTPUT_POLARITY_ACTIVE_HIGH"/>
+            <option display="Active-low" id="module.driver.timer.output_polarity.negative" value="TAU_PWM_OUTPUT_POLARITY_ACTIVE_LOW"/>
+        </property>
+
+        <property default="0xffff" display="Output|One-Shot Pulse Width" id="module.driver.timer.pulse_width" description="Specify the pulse width based on the selected unit.\n\nWhen the unit is set to 'Raw Counts', setting the period to 0xffff results in the maximum period at the lowest divisor (fastest timer tick).">
+            <constraint display="Value must be a non-negative integer">testInteger("${module.driver.timer.pulse_width}")  &amp;&amp; ("${module.driver.timer.pulse_width}" &gt;= 0) </constraint>
+            <export><![CDATA[eval('' +
+'/* INPUTS */' +
+'    var requested_pulse_width = ${module.driver.timer.pulse_width};' +
+'    var requested_unit_string = "${module.driver.timer.pulse_width_unit}";' +
+'    var operation_clock       = "${module.driver.timer.operation_clock_refer}";'+
+'' +
+'    var f_mck = ${board.clock.peripheral.tau.ck00};'+
+'    if ("TAU_PWM_OPERATION_CLOCK_CK01" == operation_clock)' +
+'    {' +
+'        f_mck = ${board.clock.peripheral.tau.ck01};' +
+'    }' +
+'' +
+'    var convert_to_ticks = {'+
+'      "ns": function (requested_pulse_width, f_mck) {  return Math.floor(requested_pulse_width / 1000000000 * f_mck); },'+
+'      "us": function (requested_pulse_width, f_mck) {  return  Math.floor(requested_pulse_width / 1000000 * f_mck); },'+
+'      "ms": function (requested_pulse_width, f_mck) {  return  Math.floor(requested_pulse_width / 1000 * f_mck); },'+
+'      "s": function (requested_pulse_width, f_mck) {  return  Math.floor(requested_pulse_width * f_mck); },'+
+'      "hz": function (requested_pulse_width, f_mck) {  return  Math.floor((1 / requested_pulse_width) * f_mck); },'+
+'      "khz": function (requested_pulse_width, f_mck) {  return  Math.floor((1 / (requested_pulse_width * 1000)) * f_mck); },'+
+'      "raw": function (requested_pulse_width, f_mck) {  return  requested_pulse_width; },'+
+'    };'+
+''+
+'    /* Convert requested period to timer ticks */'+
+'    var pulse_width_counts = convert_to_ticks[requested_unit_string](requested_pulse_width, f_mck);'+
+'' +
+'    var actual_pulse_width = pulse_width_counts / f_mck;' +
+'    var pulse_width_setting = "/* Actual pulse width: " + actual_pulse_width.toString() + " seconds. */" + ' +
+'                     "  .duty_cycle_counts = (uint16_t) 0x" + pulse_width_counts.toString(16);' +
+'    pulse_width_setting' +
+'')
+]]>            </export>
+        </property>
+
+        <property default="module.driver.timer.pulse_width_unit.unit_period_raw_counts" display="Output|One-Shot Pulse Width Unit" id="module.driver.timer.pulse_width_unit" description="Unit of the period specified above">
+            <option display="Raw Counts" id="module.driver.timer.pulse_width_unit.unit_period_raw_counts" value="raw"/>
+            <option display="Nanoseconds" id="module.driver.timer.pulse_width_unit.unit_period_nsec" value="ns"/>
+            <option display="Microseconds" id="module.driver.timer.pulse_width_unit.unit_period_usec" value="us"/>
+            <option display="Milliseconds" id="module.driver.timer.pulse_width_unit.unit_period_msec" value="ms"/>
+            <option display="Seconds" id="module.driver.timer.pulse_width_unit.unit_period_sec" value="s"/>
+            <option display="Hertz" id="module.driver.timer.pulse_width_unit.unit_frequency_hz" value="hz"/>
+            <option display="Kilohertz" id="module.driver.timer.pulse_width_unit.unit_frequency_khz" value="khz"/>
+        </property>
+
+        <property default="50" display="Output|PWM Duty Cycle Percent" id="module.driver.timer.duty_cycle" description="Specify the duty cycle percent for output pulse of slave channel.">
+            <constraint display="Value must be a non-negative integer between 0 and 100">testInteger("${module.driver.timer.duty_cycle}")  &amp;&amp; ("${module.driver.timer.duty_cycle}" &gt;= 0)  &amp;&amp; ("${module.driver.timer.duty_cycle}" &lt;= 100)</constraint>
+            <export><![CDATA[eval('' +
+'/* INPUTS */' +
+'    var requested_period      = ${module.driver.timer.period_refer};' +
+'    var requested_unit_string = "${module.driver.timer.unit_refer}";' +
+'    var operation_clock       = "${module.driver.timer.operation_clock_refer}";'+
+'' +
+'    var f_mck = ${board.clock.peripheral.tau.ck00};'+
+'    if ("TAU_PWM_OPERATION_CLOCK_CK01" == operation_clock)' +
+'    {' +
+'        f_mck = ${board.clock.peripheral.tau.ck01};' +
+'    }' +
+'' +
+'    var convert_to_ticks = {'+
+'      "ns": function (requested_period, f_mck) {  return Math.floor(requested_period / 1000000000 * f_mck); },'+
+'      "us": function (requested_period, f_mck) {  return  Math.floor(requested_period / 1000000 * f_mck); },'+
+'      "ms": function (requested_period, f_mck) {  return  Math.floor(requested_period / 1000 * f_mck); },'+
+'      "s": function (requested_period, f_mck) {  return  Math.floor(requested_period * f_mck); },'+
+'      "hz": function (requested_period, f_mck) {  return  Math.floor((1 / requested_period) * f_mck); },'+
+'      "khz": function (requested_period, f_mck) {  return  Math.floor((1 / (requested_period * 1000)) * f_mck); },'+
+'      "raw": function (requested_period, f_mck) {  return  requested_period; },'+
+'    };'+
+''+
+'    /* Convert requested period to timer ticks */'+
+'    var period_counts = convert_to_ticks[requested_unit_string](requested_period, f_mck);'+
+'' +
+'    var duty_cycle_percent = ${module.driver.timer.duty_cycle};' +
+'    var duty_cycle_counts = Math.floor(period_counts * duty_cycle_percent / 100);' +
+'    if (duty_cycle_counts > 0xffff)' +
+'    {' +
+'        /* If the duty cycle counts is larger than the maximum counter value, set the duty cycle counts to the maximum. */' +
+'        duty_cycle_counts = 0xffff;' +
+'    }' +
+'' +
+'    var duty_cycle_setting = "/* Actual duty cycle percent: " + duty_cycle_percent.toString() + " %. */" + ' +
+'                     "  .duty_cycle_counts = (uint16_t) 0x" + duty_cycle_counts.toString(16);' +
+'    duty_cycle_setting' +
+'')
+]]>            </export>
+        </property>
+
+        <property default="" display="Interrupts|Interrupt Priority" id="module.driver.timer.slave_ipl" description="Timer interrupt priority.">
+            <select enum="enum.mcu.nvic.priorities.optional"/>
+            <interrupt event="event.tau0.tmi0${module.driver.timer.slave_channel}" isr="tau_pwm_slave_tmi_isr"/>
+        </property>
+
+        <property default="" id="module.driver.timer.master_channel_refer" />
+        <property default="" id="module.driver.timer.mode_refer" />
+        <property default="" id="module.driver.timer.operation_clock_refer" />
+        <property default="" id="module.driver.timer.period_refer" />
+        <property default="" id="module.driver.timer.unit_refer" />
+
+        <peripheral name="TAU0${module.driver.timer.slave_channel}" component="tau0${module.driver.timer.slave_channel}" pin="tau0${module.driver.timer.slave_channel}.to0${module.driver.timer.slave_channel}"/>
+
+        <declarations>
+const tau_pwm_channel_cfg_t g_timer_channel_cfg${module.driver.timer.slave_channel} =
+{
+    .channel             = ${module.driver.timer.slave_channel},
+#define OPERATION_TIMER_MODE_ONE_SHOT (0xFFFFFFFF)
+#if (OPERATION_TIMER_MODE_ONE_SHOT == OPERATION_${module.driver.timer.mode_refer})
+    ${module.driver.timer.pulse_width},
+#else
+    ${module.driver.timer.duty_cycle},
+#endif
+#undef OPERATION_TIMER_MODE_ONE_SHOT
+    .output_level        = ${module.driver.timer.output_level},
+    .output_polarity     = ${module.driver.timer.output_polarity},
+    .cycle_end_ipl       = ${module.driver.timer.slave_ipl},
+#if defined(VECTOR_NUMBER_TAU0_TMI0${module.driver.timer.slave_channel})
+    .cycle_end_irq       = VECTOR_NUMBER_TAU0_TMI0${module.driver.timer.slave_channel},
+#else
+    .cycle_end_irq       = FSP_INVALID_VECTOR,
+#endif
+};
+        </declarations>
+        <api configurable="true">
+            <file>ra/fsp/inc/instances/r_tau_pwm.h</file>
+            <file>ra/fsp/inc/api/r_timer_api.h</file>
+            <file>ra/fsp/inc/api/r_elc_api.h</file>
+            <file>ra/fsp/inc/api/r_tau_api.h</file>
+        </api>
+    </module>
+</raModuleDescription>

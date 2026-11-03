@@ -1,0 +1,328 @@
+<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.middleware.rm_ble_mesh_provision" path="fsp_cfg/rm_ble_mesh_provision_cfg.h" version="0">
+        <content>
+            #ifdef __cplusplus
+            extern "C" {
+            #endif
+
+            #ifdef __cplusplus
+            }
+            #endif
+        </content>
+    </config>
+    <module id="module.middleware.rm_ble_mesh_provision_on_rm_ble_mesh_provision" display="Networking|BLE Mesh Network modules|BLE Mesh Provision (rm_ble_mesh_provision)" config="config.middleware.rm_ble_mesh_provision" common="1" version="0" visible="true" url="group___r_m___b_l_e___m_e_s_h___p_r_o_v_i_s_i_o_n.html">
+
+        <constraint display="Requires Low Level Library Implementation">
+            "${interface.middleware.rm_ble_mesh_provision}" === "1"
+        </constraint>
+        <constraint display="BLE Mesh Provision middleware not support R_BLE_SPP module">
+            "${interface.mcu.radio}" === "1"
+        </constraint>
+        <constraint display="Number of elemets are maximum number of access elements or lower">
+            ${module.middleware.rm_ble_mesh_provision.provision_cap_element_num} &lt;= ${module.middleware.rm_ble_mesh_provision.requires.rm_ble_mesh::module.middleware.rm_ble_mesh.maximum_access_element_num}
+        </constraint>
+
+        <requires id="module.middleware.rm_ble_mesh_provision.requires.rm_ble_mesh" interface="interface.middleware.rm_ble_mesh.${module.middleware.rm_ble_mesh.name}" visible="true" display="Add BLE Mesh Bearer Lib" find="true"/>
+
+        <provides interface="interface.middleware.rm_ble_mesh_provision"/>
+        <provides interface="interface.middleware.rm_ble_mesh_provision_on_rm_ble_mesh_provision"/>
+        <provides interface="interface.middleware.rm_ble_mesh_provision.${module.middleware.rm_ble_mesh_provision.name}"/>
+
+        <property display="General|Name" id="module.middleware.rm_ble_mesh_provision.name" default="g_rm_ble_mesh_provision${_instance}" description="Module name.">
+            <constraint display="Name Must Be a Valid C Symbol">testSymbol("${module.middleware.rm_ble_mesh_provision.name}")</constraint>
+        </property>
+
+        <property display="Channel Number" id="module.middleware.rm_ble_mesh_provision.channel" default="0" description="Select channel corresponding to the channel number of the hardware.">
+            <constraint display="Invalid Channel Number">testInteger("${module.middleware.rm_ble_mesh_provision.channel}") &amp;&amp; ("${module.middleware.rm_ble_mesh_provision.channel}" &gt;= 0) &amp;&amp; ("${module.middleware.rm_ble_mesh_provision.channel}" &lt;= 4294967295)</constraint>
+        </property>
+
+        <property display="Provision Capabilities|Number of Elements" id="module.middleware.rm_ble_mesh_provision.provision_cap_element_num" default="1" description="Provision capabilities number of elements.">
+            <constraint display="Invalid Number of Elements">testInteger("${module.middleware.rm_ble_mesh_provision.provision_cap_element_num}") &amp;&amp; ("${module.middleware.rm_ble_mesh_provision.provision_cap_element_num}" &gt; 0) &amp;&amp; ("${module.middleware.rm_ble_mesh_provision.provision_cap_element_num}" &lt;= 255)</constraint>
+        </property>
+
+        <property display="Provision Capabilities|Supported Algorithms" id="module.middleware.rm_ble_mesh_provision.provision_cap_supported_algorithms" default="0" description="Provision capabilities supported algorithms.">
+            <constraint display="Invalid Supported Algorithms">testInteger("${module.middleware.rm_ble_mesh_provision.provision_cap_supported_algorithms}") &amp;&amp; ("${module.middleware.rm_ble_mesh_provision.provision_cap_supported_algorithms}" &gt;= 0) &amp;&amp; ("${module.middleware.rm_ble_mesh_provision.provision_cap_supported_algorithms}" &lt;= 65535)</constraint>
+        </property>
+
+        <property display="Provision Capabilities|Public Key Type" id="module.middleware.rm_ble_mesh_provision.provision_cap_publib_key_type" default="0" description="Provision capabilities public key type.">
+            <constraint display="Invalid Public Key Type">testInteger("${module.middleware.rm_ble_mesh_provision.provision_cap_publib_key_type}") &amp;&amp; ("${module.middleware.rm_ble_mesh_provision.provision_cap_publib_key_type}" &gt;= 0) &amp;&amp; ("${module.middleware.rm_ble_mesh_provision.provision_cap_publib_key_type}" &lt;= 255)</constraint>
+        </property>
+
+        <property display="Provision Capabilities|Static OOB Type" id="module.middleware.rm_ble_mesh_provision.provision_cap_static_oob_type" default="0" description="Provision capabilities static OOB type.">
+            <constraint display="Invalid Static OOB Type">testInteger("${module.middleware.rm_ble_mesh_provision.provision_cap_static_oob_type}") &amp;&amp; ("${module.middleware.rm_ble_mesh_provision.provision_cap_static_oob_type}" &gt;= 0) &amp;&amp; ("${module.middleware.rm_ble_mesh_provision.provision_cap_static_oob_type}" &lt;= 255)</constraint>
+        </property>
+
+        <property display="Provision Capabilities|Output OOB Action" id="module.middleware.rm_ble_mesh_provision.provision_cap_output_oob_action" default="0" description="Provision capabilities output OOB action.">
+            <constraint display="Invalid Output OOB Action">testInteger("${module.middleware.rm_ble_mesh_provision.provision_cap_output_oob_action}") &amp;&amp; ("${module.middleware.rm_ble_mesh_provision.provision_cap_output_oob_action}" &gt;= 0) &amp;&amp; ("${module.middleware.rm_ble_mesh_provision.provision_cap_output_oob_action}" &lt;= 65535)</constraint>
+        </property>
+
+        <property display="Provision Capabilities|Output OOB Size" id="module.middleware.rm_ble_mesh_provision.provision_cap_output_oob_size" default="0" description="Provision capabilities output OOB size.">
+            <constraint display="Invalid Output OOB Size">testInteger("${module.middleware.rm_ble_mesh_provision.provision_cap_output_oob_size}") &amp;&amp; ("${module.middleware.rm_ble_mesh_provision.provision_cap_output_oob_size}" &gt;= 0) &amp;&amp; ("${module.middleware.rm_ble_mesh_provision.provision_cap_output_oob_size}" &lt;= 255)</constraint>
+        </property>
+
+        <property display="Provision Capabilities|Input OOB Action" id="module.middleware.rm_ble_mesh_provision.provision_cap_input_oob_action" default="0" description="Provision capabilities input OOB action.">
+            <constraint display="Invalid Input OOB Action">testInteger("${module.middleware.rm_ble_mesh_provision.provision_cap_input_oob_action}") &amp;&amp; ("${module.middleware.rm_ble_mesh_provision.provision_cap_input_oob_action}" &gt;= 0) &amp;&amp; ("${module.middleware.rm_ble_mesh_provision.provision_cap_input_oob_action}" &lt;= 65535)</constraint>
+        </property>
+
+        <property display="Provision Capabilities|Input OOB Size" id="module.middleware.rm_ble_mesh_provision.provision_cap_input_oob_size" default="0" description="Provision capabilities iutput OOB size.">
+            <constraint display="Invalid Input OOB Size">testInteger("${module.middleware.rm_ble_mesh_provision.provision_cap_input_oob_size}") &amp;&amp; ("${module.middleware.rm_ble_mesh_provision.provision_cap_input_oob_size}" &gt;= 0) &amp;&amp; ("${module.middleware.rm_ble_mesh_provision.provision_cap_input_oob_size}" &lt;= 255)</constraint>
+        </property>
+
+        <property display="Provision Callback" id="module.middleware.rm_ble_mesh_provision.provision_callback" default="NULL" description="Provision callback function name.">
+            <constraint display="Name Must Be a Valid C Symbol.">testSymbol("${module.middleware.rm_ble_mesh_provision.provision_callback}")</constraint>
+        </property>
+
+        <property id="module.middleware.rm_ble_mesh_provision.p_context" default="NULL">
+            <constraint display="Name Must Be a Valid C Symbol">testSymbol("${module.middleware.rm_ble_mesh_provision.p_context}")</constraint>
+            <export>eval('' +
+                'var output = "${module.middleware.rm_ble_mesh_provision.p_context}";' +
+                'if ("NULL" !== output) {' +
+                'output = "&amp;" + output;' +
+                '}' +
+                'output')
+            </export>
+        </property>
+
+        <header>
+/** BLE Mesh Provision on BLE Mesh Probision Instance. */
+extern rm_ble_mesh_provision_instance_ctrl_t ${module.middleware.rm_ble_mesh_provision.name}_ctrl;
+
+/** Access the BLE Mesh provision instance using these structures when calling API functions directly (::p_api is not used). */
+extern const rm_ble_mesh_provision_cfg_t ${module.middleware.rm_ble_mesh_provision.name}_cfg;
+extern const rm_ble_mesh_provision_instance_t ${module.middleware.rm_ble_mesh_provision.name};
+
+#ifndef ${module.middleware.rm_ble_mesh_provision.provision_callback}
+void ${module.middleware.rm_ble_mesh_provision.provision_callback}(rm_ble_mesh_provision_callback_args_t * p_args);
+#endif
+
+        </header>
+        <includes>
+#include "rm_ble_mesh_api.h"
+#include "rm_ble_mesh_provision_api.h"
+#include "rm_ble_mesh_provision.h"
+        </includes>
+        <declarations>
+rm_ble_mesh_provision_data_t ${module.middleware.rm_ble_mesh_provision.name}_data;
+rm_ble_mesh_provision_instance_ctrl_t ${module.middleware.rm_ble_mesh_provision.name}_ctrl;
+
+rm_ble_mesh_provision_capabilities_t ${module.middleware.rm_ble_mesh_provision.name}_capabilities =
+{
+    .num_elements         = ${module.middleware.rm_ble_mesh_provision.provision_cap_element_num},
+    .supported_algorithms = ${module.middleware.rm_ble_mesh_provision.provision_cap_supported_algorithms},
+    .supported_pubkey     = ${module.middleware.rm_ble_mesh_provision.provision_cap_publib_key_type},
+    .supported_soob       = ${module.middleware.rm_ble_mesh_provision.provision_cap_static_oob_type},
+    .output_oob           = { .action = ${module.middleware.rm_ble_mesh_provision.provision_cap_output_oob_action},
+                              .size   = ${module.middleware.rm_ble_mesh_provision.provision_cap_output_oob_size}},
+    .input_oob            = { .action = ${module.middleware.rm_ble_mesh_provision.provision_cap_input_oob_action},
+                              .size   = ${module.middleware.rm_ble_mesh_provision.provision_cap_input_oob_size}},
+};
+
+const rm_ble_mesh_provision_cfg_t ${module.middleware.rm_ble_mesh_provision.name}_cfg =
+{
+    /** the parameters for initialization. */
+    .channel                             = ${module.middleware.rm_ble_mesh_provision.channel},
+    .p_capabilities                      = &amp;${module.middleware.rm_ble_mesh_provision.name}_capabilities,
+    .p_mesh_instance                     = &amp;${module.middleware.rm_ble_mesh_provision.requires.rm_ble_mesh::module.middleware.rm_ble_mesh.name},
+    .p_callback                          = ${module.middleware.rm_ble_mesh_provision.provision_callback},
+    .p_context                           = ${module.middleware.rm_ble_mesh_provision.p_context},
+    .p_extend                            = NULL
+};
+
+/** This structure encompasses everything that is needed to use an instance of this interface. */
+const rm_ble_mesh_provision_instance_t ${module.middleware.rm_ble_mesh_provision.name} =
+{
+    .p_ctrl = &amp;${module.middleware.rm_ble_mesh_provision.name}_ctrl,
+    .p_cfg  = &amp;${module.middleware.rm_ble_mesh_provision.name}_cfg,
+    .p_api  = &amp;g_rm_ble_mesh_provision_on_rm_ble_mesh_provision
+};
+        </declarations>
+    </module>
+
+    <!-- Developer Assistance -->
+    <developerSupport>
+        <template category="none" display="Provision Register function and Setup function" id="module.middleware.rm_ble_mesh_provision.register_and_setup" version="1">
+            <platform id="fsp" max="" min="3.6.0"/>
+            <moduleRef id="module.middleware.rm_ble_mesh_provision_on_rm_ble_mesh_provision"/>
+            <content><![CDATA[
+#define RM_BLE_MESH_PROVISION_PROVISIONING_STATUS_UNREGISTERED    (0)
+#define RM_BLE_MESH_PROVISION_PROVISIONING_STATUS_REGISTERED      (1)
+
+#define RM_BLE_MESH_PROVISION_NETKEY_STATUS_UNGENERATED           (0)
+#define RM_BLE_MESH_PROVISION_NETKEY_STATUS_GENERATED             (1)
+
+#ifndef RM_BLE_MESH_PROVISION_CFG_UNPROVISIONED_BEACON_LIST_SIZE
+/* Size of beacon list to be maintained by provisioner */
+#define RM_BLE_MESH_PROVISION_CFG_UNPROVISIONED_BEACON_LIST_SIZE      (8)
+#endif /* RM_BLE_MESH_PROVISION_CFG_UNPROVISIONED_BEACON_LIST_SIZE */
+
+#ifndef RM_BLE_MESH_PROVISION_CFG_SETUP_TIMEOUT_SECONDS
+/* Beacon setup timeout in seconds */
+#define RM_BLE_MESH_PROVISION_CFG_SETUP_TIMEOUT_SECONDS               (60)
+#endif /* RM_BLE_MESH_PROVISION_CFG_SETUP_TIMEOUT_SECONDS */
+
+/* Registration state of provisioning */
+static uint8_t ${rm_ble_mesh_provision_name:raProperty(module.middleware.rm_ble_mesh_provision.name)}_registration_status = RM_BLE_MESH_PROVISION_PROVISIONING_STATUS_UNREGISTERED;
+
+/* Current role - Provisioner/Device */
+static rm_ble_mesh_provision_role_t ${rm_ble_mesh_provision_name}_role = RM_BLE_MESH_PROVISION_ROLE_DEVICE;
+
+/* Current bearer type - ADV/GATT */
+static rm_ble_mesh_provision_bearer_type_t ${rm_ble_mesh_provision_name}_bearer_type = RM_BLE_MESH_PROVISION_BEARER_TYPE_ADV;
+
+/* Flag for only provisioner to check whether NetKey is already generated. */
+static uint8_t ${rm_ble_mesh_provision_name}_netkey_generation_status = RM_BLE_MESH_PROVISION_NETKEY_STATUS_UNGENERATED;
+
+/* Unprovisioned device beacons list */
+static rm_ble_mesh_provision_device_t ${rm_ble_mesh_provision_name}_beacon_device_list[RM_BLE_MESH_PROVISION_CFG_UNPROVISIONED_BEACON_LIST_SIZE];
+
+/* Unprovisioned device beacons count */
+static uint8_t ${rm_ble_mesh_provision_name}_beacon_device_count = 0;
+
+/* Unprovisioned device identifier */
+static rm_ble_mesh_provision_device_t ${rm_ble_mesh_provision_name}_device_info =
+{
+    /* UUID */
+    .uuid = {0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0xFF},
+
+    /* OOB Flag */
+    .oob = 0x00,
+
+    /*
+     * Encoded URI information.
+     * For example, to give a web address, "https://www.abc.com"
+     * the URI encoded data would be -
+     * 0x17 0x2F 0x2F 0x77 0x77 0x77 0x2E 0x61 0x62 0x63 0x2E 0x63 0x6F 0x6D
+     * where 0x17 is the URI encoding for https:
+     */
+    .uri = NULL
+};
+
+/* Data exchanged during provisioning procedure */
+static rm_ble_mesh_provision_data_t ${rm_ble_mesh_provision_name}_data_struct =
+{
+    /* NetKey */
+    .netkey = {0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0xFF, 0x00},
+
+    /* Index of the NetKey */
+    .keyid = 0x0000,
+
+    /* Flags bitmask */
+    .flags = 0x00,
+
+    /* Current value of the IV index */
+    .iv_index = 0x00000001,
+
+    /* Unicast address of the primary element */
+    .unicast_addr = 0x0100
+};
+
+/* Prototype declaration */
+fsp_err_t ${rm_ble_mesh_provision_name}_register(void);
+fsp_err_t ${rm_ble_mesh_provision_name}_setup(rm_ble_mesh_provision_role_t role, rm_ble_mesh_provision_bearer_type_t bearer_type);
+
+/*
+ * This function fetch the number of elements in local node,
+ * update the device address, and open the ${rm_ble_mesh_provision_name}.
+ * Before executing this function, it is mandatory to register “Foundation Models”.
+ */
+fsp_err_t ${rm_ble_mesh_provision_name}_register(void)
+{
+    fsp_err_t get_device_list_result    = FSP_SUCCESS;
+    fsp_err_t registration_result       = FSP_SUCCESS;
+    uint16_t entry_device_maximum_count = (uint16_t) ${rm_ble_mesh_name:raProperty(module.middleware.rm_ble_mesh.name)}_cfg.maximum_device_keys;
+    rm_ble_mesh_access_provisioned_device_entry_t provisioned_device_list[${rm_ble_mesh_name}_cfg.maximum_device_keys];
+
+    if (RM_BLE_MESH_PROVISION_PROVISIONING_STATUS_REGISTERED == ${rm_ble_mesh_provision_name}_registration_status)
+    {
+        return FSP_SUCCESS;
+    }
+
+    /* Fetch the number of elements in local node */
+    RM_BLE_MESH_ACCESS_GetElementCount(&${rm_ble_mesh_access_name:raProperty(module.middleware.rm_ble_mesh_access.name)}_ctrl, &(${rm_ble_mesh_provision_name}_cfg.p_capabilities->num_elements));
+
+    /* Update the next device address if provisioned devices are present in database */
+    get_device_list_result = RM_BLE_MESH_ACCESS_GetProvisionedDeviceList
+                             (
+                                 &${rm_ble_mesh_access_name}_ctrl,
+                                 provisioned_device_list,
+                                 &entry_device_maximum_count
+                             );
+    if ((FSP_SUCCESS == get_device_list_result) && (0 != entry_device_maximum_count))
+    {
+        ${rm_ble_mesh_provision_name}_data_struct.unicast_addr = (uint16_t)(provisioned_device_list[entry_device_maximum_count - 1].uaddr +
+                               provisioned_device_list[entry_device_maximum_count - 1].num_elements);
+    }
+
+    registration_result = RM_BLE_MESH_PROVISION_Open(&${rm_ble_mesh_provision_name}_ctrl, &${rm_ble_mesh_provision_name}_cfg);
+
+    if (FSP_SUCCESS == registration_result)
+    {
+        ${rm_ble_mesh_provision_name}_registration_status = RM_BLE_MESH_PROVISION_PROVISIONING_STATUS_REGISTERED;
+    }
+
+    return registration_result;
+}
+
+/*
+ * This function set up device for provisioning.
+ * Before executing this function, it is mandatory to register “Foundation Models”
+ * and execute ${rm_ble_mesh_provision_name}_register function.
+ */
+fsp_err_t ${rm_ble_mesh_provision_name}_setup(rm_ble_mesh_provision_role_t role, rm_ble_mesh_provision_bearer_type_t bearer_type)
+{
+    fsp_err_t  result = FSP_SUCCESS;
+    rm_ble_mesh_provision_device_info_t device_info;
+
+    ${rm_ble_mesh_provision_name}_bearer_type = (rm_ble_mesh_provision_bearer_type_t) bearer_type;
+
+    if (RM_BLE_MESH_PROVISION_BEARER_TYPE_GATT & ${rm_ble_mesh_provision_name}_bearer_type)
+    {
+        RM_MESH_BEARER_PLATFORM_SetGattMode(&${rm_mesh_bearer_platform_name:raProperty(module.middleware.rm_mesh_bearer_platform.name)}_ctrl, RM_MESH_BEARER_PLATFORM_GATT_MODE_PROVISION);
+    }
+
+    if (RM_BLE_MESH_PROVISION_ROLE_PROVISIONER != role)
+    {
+        device_info.type = bearer_type;
+        device_info.p_device = &${rm_ble_mesh_provision_name}_device_info;
+        result = RM_BLE_MESH_PROVISION_Setup
+              (
+                  &${rm_ble_mesh_provision_name}_ctrl,
+                  role,
+                  device_info,
+                  RM_BLE_MESH_PROVISION_CFG_SETUP_TIMEOUT_SECONDS
+              );
+
+        ${rm_ble_mesh_provision_name}_role = RM_BLE_MESH_PROVISION_ROLE_DEVICE;
+    }
+    else
+    {
+        if (RM_BLE_MESH_PROVISION_NETKEY_STATUS_UNGENERATED == ${rm_ble_mesh_provision_name}_netkey_generation_status)
+        {
+            RM_BLE_MESH_PROVISION_GenerateRandomizedNumber(&${rm_ble_mesh_provision_name}_ctrl, ${rm_ble_mesh_provision_name}_data_struct.netkey);
+            ${rm_ble_mesh_provision_name}_netkey_generation_status = RM_BLE_MESH_PROVISION_NETKEY_STATUS_GENERATED;
+        }
+
+        device_info.type = bearer_type;
+        device_info.p_device = NULL;
+        result = RM_BLE_MESH_PROVISION_Setup
+              (
+                  &${rm_ble_mesh_provision_name}_ctrl,
+                  role,
+                  device_info,
+                  RM_BLE_MESH_PROVISION_CFG_SETUP_TIMEOUT_SECONDS
+              );
+
+        ${rm_ble_mesh_provision_name}_role = RM_BLE_MESH_PROVISION_ROLE_PROVISIONER;
+        ${rm_ble_mesh_provision_name}_beacon_device_count = 0;
+
+        /* Clear the list of unprovisioned device here */
+        memset(${rm_ble_mesh_provision_name}_beacon_device_list, 0x0, sizeof(${rm_ble_mesh_provision_name}_beacon_device_list));
+    }
+
+    return result;
+}
+]]>            </content>
+        </template>
+    </developerSupport>
+</raModuleDescription>

@@ -1,0 +1,572 @@
+﻿<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.driver.sci_b_i2c" path="fsp_cfg/r_sci_b_i2c_cfg.h" version="0">
+        <property default="config.driver.sci_b_i2c.param_checking_enable.bsp" display="Parameter Checking" id="config.driver.sci_b_i2c.param_checking_enable" description="If selected code for parameter checking is included in the build.">
+            <option display="Default (BSP)" id="config.driver.sci_b_i2c.param_checking_enable.bsp" value="(BSP_CFG_PARAM_CHECKING_ENABLE)"/>
+            <option display="Enabled" id="config.driver.sci_b_i2c.param_checking_enable.enabled" value="(1)"/>
+            <option display="Disabled" id="config.driver.sci_b_i2c.param_checking_enable.disabled" value="(0)"/>
+        </property>
+        <property default="config.driver.sci_b_i2c.dtc_enable.disabled" display="DTC on Transmission and Reception" id="config.driver.sci_b_i2c.dtc_enable" description="If enabled, DTC instances will be included in the build for both transmission and reception.">
+            <option display="Enabled" id="config.driver.sci_b_i2c.dtc_enable.enabled" value="(1)"/>
+            <option display="Disabled" id="config.driver.sci_b_i2c.dtc_enable.disabled" value="(0)"/>
+        </property>
+        <property default="config.driver.sci_b_i2c.addr_mode_10_bit_enable.disabled" display="10-bit slave addressing" id="config.driver.sci_b_i2c.addr_mode_10_bit_enable" description="If enabled, the driver will support 10-bit slave addressing mode along with the default 7-bit slave addressing mode.">
+            <option display="Enabled" id="config.driver.sci_b_i2c.addr_mode_10_bit_enable.enabled" value="(1)"/>
+            <option display="Disabled" id="config.driver.sci_b_i2c.addr_mode_10_bit_enable.disabled" value="(0)"/>
+        </property>
+        <content>
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#define SCI_B_I2C_CFG_PARAM_CHECKING_ENABLE ${config.driver.sci_b_i2c.param_checking_enable}
+#define SCI_B_I2C_CFG_DTC_ENABLE ${config.driver.sci_b_i2c.dtc_enable}
+#define SCI_B_I2C_CFG_ADDR_MODE_10_BIT_ENABLE ${config.driver.sci_b_i2c.addr_mode_10_bit_enable}
+
+#ifdef __cplusplus
+}
+#endif
+        </content>
+    </config>
+    <module config="config.driver.sci_b_i2c" display="Connectivity|${module.driver.i2c.name} I2C Master (r_sci_b_i2c)" id="module.driver.i2c_on_sci_b_i2c" version="1" url="group___s_c_i___b___i2_c.html">
+        <constraint display="Requires SCISPICLK/SCICLK to be enabled on the Clocks tab.">
+            ${board.clock.peripheral.sciclk} &gt; 0 || "${module.driver.i2c.clock_source}" == "module.driver.i2c.clock_source.pclk"
+        </constraint>
+        <constraint display="Unique name required for each instance">
+            "${interface.driver.i2c.${module.driver.i2c.name}}" === "1"
+        </constraint>
+        <constraint display="Requires SCI_B Peripheral">
+          "${interface.mcu.sci_b.external}" === "1"
+        </constraint>
+        <constraint display="Channel not available on selected MCU">
+            "${interface.mcu.sci_b.${module.driver.i2c.channel}}" === "1"
+        </constraint>
+        <constraint display="DTC support must be enabled to use DTC. DTC on TX is required to support DTC on RX">
+            (((!testExists("${module.driver.i2c_on_sci_b_i2c.requires.transfer_tx::module.driver.transfer.name}")) &amp;&amp;
+             (!testExists("${module.driver.i2c_on_sci_b_i2c.requires.transfer_rx::module.driver.transfer.name}"))) ||
+             ((testExists("${module.driver.i2c_on_sci_b_i2c.requires.transfer_tx::module.driver.transfer.name}")) &amp;&amp;
+             ("${config.driver.sci_b_i2c.dtc_enable}" === "config.driver.sci_b_i2c.dtc_enable.enabled")))
+        </constraint>
+        <constraint display="Add DTC TX or RX stack if DTC support is enabled">
+            ((testExists("${module.driver.i2c_on_sci_b_i2c.requires.transfer_tx::module.driver.transfer.name}")) ||
+             (testExists("${module.driver.i2c_on_sci_b_i2c.requires.transfer_rx::module.driver.transfer.name}"))) ||
+             ("${config.driver.sci_b_i2c.dtc_enable}" != "config.driver.sci_b_i2c.dtc_enable.enabled")
+        </constraint>
+        <constraint display="DTC on RX is required. RXI interrupt priority level must be same as TXI and TEI.">
+            (((!testExists("${module.driver.i2c_on_sci_b_i2c.requires.transfer_rx::module.driver.transfer.name}")) &amp;&amp;
+             ("${module.driver.i2c.rx_ipl}" == "_disabled")) ||
+             ((testExists("${module.driver.i2c_on_sci_b_i2c.requires.transfer_rx::module.driver.transfer.name}")) &amp;&amp;
+             ("${module.driver.i2c.ipl}" == "${module.driver.i2c.rx_ipl}") &amp;&amp; ("${module.driver.i2c.rx_ipl}" != "_disabled")))
+        </constraint>
+        <constraint display="Rate value must be a valid non-negative integer with a maximum configurable value of 100kbps in Standard mode">
+            (("${module.driver.i2c.rate_value}" &lt;= 100000) || ("${module.driver.i2c.rate}" != "module.driver.i2c.rate.rate_standard"))
+        </constraint>
+        <constraint display="Rate value must be a valid non-negative integer with a maximum configurable value of 400kbps in Fast-mode">
+            (("${module.driver.i2c.rate_value}" &lt;= 400000) || ("${module.driver.i2c.rate}" != "module.driver.i2c.rate.rate_fast"))
+        </constraint>
+        <constraint display="Maximum configurable value for 7 bit address mode is 0x7F ">
+            ((testInteger("${module.driver.i2c.slave}")  &amp;&amp; ("${module.driver.i2c.slave}" &gt;= 0)&amp;&amp; ("${module.driver.i2c.slave}" &lt;= 127)) || (("${module.driver.i2c.addr_mode}") != ("module.driver.i2c.addr_mode.addr_mode_7bit")))
+        </constraint>
+        <constraint display="Maximum configurable value for 10 bit address mode is 0x3FF ">
+            ((testInteger("${module.driver.i2c.slave}")  &amp;&amp; ("${module.driver.i2c.slave}" &gt;= 0)&amp;&amp; ("${module.driver.i2c.slave}" &lt;= 1023)) || (("${module.driver.i2c.addr_mode}") != ("module.driver.i2c.addr_mode.addr_mode_10bit")))
+        </constraint>
+        <constraint display="Enable 10-bit slave addressing mode">
+            ((("${config.driver.sci_b_i2c.addr_mode_10_bit_enable}") === ("config.driver.sci_b_i2c.addr_mode_10_bit_enable.enabled")) || (("${module.driver.i2c.addr_mode}") != ("module.driver.i2c.addr_mode.addr_mode_10bit")))
+        </constraint>
+        <requires id="module.driver.i2c_on_sci_b_i2c.requires.sci" interface="interface.mcu.sci_b.external" visible="false" display="Requires SCI_B Peripheral" />
+        <requires id="module.driver.i2c_on_sci_b_i2c.requires.transfer_tx" interface="interface.driver.transfer_on_dtc" display="Add DTC Driver for Transmission [Optional]" find="false" optional="true" >
+            <override property="module.driver.transfer.size" value="module.driver.transfer.size.size_1_byte"/>
+            <override property="module.driver.transfer.mode" value="module.driver.transfer.mode.mode_normal"/>
+            <override property="module.driver.transfer.dest_addr_mode" value="module.driver.transfer.dest_addr_mode.addr_mode_fixed"/>
+            <override property="module.driver.transfer.src_addr_mode" value="module.driver.transfer.src_addr_mode.addr_mode_incremented"/>
+            <override property="module.driver.transfer.repeat_area" value="module.driver.transfer.repeat_area.repeat_area_source"/>
+            <override property="module.driver.transfer.p_dest" value="NULL"/>
+            <override property="module.driver.transfer.p_src" value="NULL"/>
+            <override property="module.driver.transfer.length" value="0"/>
+            <override property="module.driver.transfer.interrupt" value="module.driver.transfer.interrupt.interrupt_end"/>
+            <override property="module.driver.transfer.num_blocks" value="0"/>
+            <override property="module.driver.transfer.auto_enable" value="module.driver.transfer.auto_enable.false"/>
+            <override property="module.driver.transfer.p_callback" value="NULL"/>
+            <override property="module.driver.transfer.activation_source" value="_signal.event.sci${module.driver.i2c.channel}.txi"/>
+        </requires>
+        <requires id="module.driver.i2c_on_sci_b_i2c.requires.transfer_rx" interface="interface.driver.transfer_on_dtc" display="Add DTC Driver for Reception [Optional]" find="false" optional="true" >
+            <override property="module.driver.transfer.size" value="module.driver.transfer.size.size_1_byte"/>
+            <override property="module.driver.transfer.mode" value="module.driver.transfer.mode.mode_normal"/>
+            <override property="module.driver.transfer.dest_addr_mode" value="module.driver.transfer.dest_addr_mode.addr_mode_incremented"/>
+            <override property="module.driver.transfer.src_addr_mode" value="module.driver.transfer.src_addr_mode.addr_mode_fixed"/>
+            <override property="module.driver.transfer.repeat_area" value="module.driver.transfer.repeat_area.repeat_area_destination"/>
+            <override property="module.driver.transfer.p_dest" value="NULL"/>
+            <override property="module.driver.transfer.p_src" value="NULL"/>
+            <override property="module.driver.transfer.length" value="0"/>
+            <override property="module.driver.transfer.interrupt" value="module.driver.transfer.interrupt.interrupt_end"/>
+            <override property="module.driver.transfer.num_blocks" value="0"/>
+            <override property="module.driver.transfer.auto_enable" value="module.driver.transfer.auto_enable.false"/>
+            <override property="module.driver.transfer.p_callback" value="NULL"/>
+            <override property="module.driver.transfer.activation_source" value="_signal.event.sci${module.driver.i2c.channel}.rxi"/>
+        </requires>
+        <provides interface="interface.driver.i2c" />
+        <provides interface="interface.driver.i2c_master" />
+        <provides interface="interface.driver.i2c_on_sci_b_i2c" />
+        <provides interface="interface.driver.i2c.${module.driver.i2c.name}" />
+        <provides interface="interface.peripheral.sci${module.driver.i2c.channel}" />
+        <property default="g_i2c${_instance}" display="Name" id="module.driver.i2c.name" description="Module name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.i2c.name}")</constraint>
+        </property>
+        <property default="sci" id="module.driver.i2c.i2c_interface" description=""/>
+        <property default="0" display="Channel" id="module.driver.i2c.channel" description="Select the SCI channel.">
+            <constraint display="Value must be an integer between 0 and 9">testInteger("${module.driver.i2c.channel}")  &amp;&amp; ("${module.driver.i2c.channel}" &gt;= 0) &amp;&amp; ("${module.driver.i2c.channel}" &lt;= 9)</constraint>
+            <signal event="event.sci${module.driver.i2c.channel}.rxi" />
+            <signal event="event.sci${module.driver.i2c.channel}.txi" />
+            <signal event="event.sci${module.driver.i2c.channel}.tei" />
+            <signal event="event.sci${module.driver.i2c.channel}.eri" />
+            <signal event="event.sci${module.driver.i2c.channel}.am" />
+        </property>
+        <property default="0x00" display="Slave Address " id="module.driver.i2c.slave" description="Specify the slave address.">
+            <constraint display="Value must be a hex value">testInteger("${module.driver.i2c.slave}")  &amp;&amp; ("${module.driver.i2c.slave}" &gt;= 0)</constraint>
+        </property>
+        <property default="module.driver.i2c.addr_mode.addr_mode_7bit" display="Address Mode" id="module.driver.i2c.addr_mode" description="Select the address mode.">
+            <option display="7-Bit" id="module.driver.i2c.addr_mode.addr_mode_7bit" value="I2C_MASTER_ADDR_MODE_7BIT"/>
+            <option display="10-Bit" id="module.driver.i2c.addr_mode.addr_mode_10bit" value="I2C_MASTER_ADDR_MODE_10BIT"/>
+        </property>
+        <property default="module.driver.i2c.rate.rate_standard" display="Rate" id="module.driver.i2c.rate" description="Select the I2C data rate.\n\nIf the requested transfer rate cannot be achieved, the settings with the largest possible transfer rate that is less than or equal to the requested transfer rate are used. The theoretical calculated transfer rate and SDA delay are printed in a comment in the generated sci_b_i2c_extended_cfg_t structure.">
+            <option display="Standard" id="module.driver.i2c.rate.rate_standard" value="I2C_MASTER_RATE_STANDARD"/>
+            <option display="Fast-mode" id="module.driver.i2c.rate.rate_fast" value="I2C_MASTER_RATE_FAST"/>
+        </property>
+        <property default="0" display="Custom Rate (bps)" id="module.driver.i2c.rate_value" description="Set a custom bitrate (bps). Set to 0 to use the maximum bitrate for the selected mode.\n\nStandard-mode: up to 100000; Fast-mode: up to 400000">
+            <constraint display="Value must be a non-negative integer">testInteger("${module.driver.i2c.rate_value}")  &amp;&amp; ("${module.driver.i2c.rate_value}" &gt;= 0) </constraint>
+        </property>
+        <property default="0" id="module.driver.i2c.bitrate">
+            <export><![CDATA[eval('' +
+'/* INPUTS */' +
+'    var rate_enum = "${module.driver.i2c.rate}";' +
+'    var bitrate = 0;' +
+'    var rate_value = ${module.driver.i2c.rate_value};' +
+'    var peripheral_clock = ${board.clock.peripheral.sciclk};' +
+'    if ("SCI_B_I2C_CLOCK_SOURCE_PCLK" == "${module.driver.i2c.clock_source}") {' +
+'        peripheral_clock = ${board.clock.peripheral.sci_b};' +
+'    }' +
+'    var use_mddr = ${module.driver.i2c.bitrate_modulation};' +
+'    var sda_delay_ns = ${module.driver.i2c.sda_delay};' +
+'    var divisor = 0;' +
+'    var divisor_bitrate_multiple = 0;' +
+'    var brr     = 0;' +
+'    var cks     = -1;' +
+'    var MDDR_DISABLED = 256;' +
+'    var delta_error = 0;' +
+'    /* MDDR is disabled by default. */' +
+'    var mddr = MDDR_DISABLED;' +
+'' +
+'   if (0 == rate_value)' +
+'   {' +
+'       if ("I2C_MASTER_RATE_FAST" == rate_enum)' +
+'       {' +
+'            bitrate = 400000;' +
+'       }' +
+'       else' +
+'       {' +
+'            bitrate = 100000;' +
+'       }' +
+'   }' +
+'   else' +
+'   {' +
+'       bitrate = rate_value;' +
+'   }' +
+'' +
+'    for (var i = 0; i <= 3; i++)' +
+'    {' +
+'        cks++;' +
+'        divisor_bitrate_multiple = (1 << (2 * (i + 1))) * 8;' +
+'        divisor = divisor_bitrate_multiple * bitrate;' +
+'' +
+'        /* Calculate BRR so that the bit rate is the largest possible value less than or equal to the desired' +
+'         * bitrate. */' +
+'        brr = Math.ceil(peripheral_clock / divisor - 1);' +
+'' +
+'        if (brr <= 255)' +
+'        {' +
+'            break;' +
+'        }' +
+'    }' +
+'' +
+'    actual_bitrate = peripheral_clock / (divisor_bitrate_multiple * (256 / mddr) * (brr + 1));' +
+'    delta_error = bitrate - actual_bitrate;' +
+'' +
+'    if (use_mddr)' +
+'    {' +
+'        for (var temp_brr = brr; temp_brr > 0; temp_brr--)' +
+'        {' +
+'' +
+'            /** Calculate the MDDR (M) value if bit rate modulation is enabled,' +
+'             * The formula to calculate MBBR (from the M and N relationship given in the hardware manual) is as follows' +
+'             * and it must be between 128 and 256.' +
+'             * MDDR = ((divisor * 256) * (BRR + 1)) / PCLK */' +
+'            var temp_mddr = Math.floor(divisor * 256 * (temp_brr + 1) / peripheral_clock);' +
+'' +
+'            /* The maximum value that could result from the calculation above is 256, which is a valid MDDR' +
+'             * value, so only the lower bound is checked. */' +
+'            if (temp_mddr < 128)' +
+'            {' +
+'                break;' +
+'            }' +
+'' +
+'            /* The maximum for MDDR is 256 (MDDR unused). */' +
+'            if (temp_mddr > 256)' +
+'            {' +
+'                continue;' +
+'            }' +
+'' +
+'            var calculated_bitrate = peripheral_clock / (divisor_bitrate_multiple * (256 / temp_mddr) * (temp_brr + 1));' +
+'' +
+'            /** If the bit rate error is less than the previous lowest bit rate error, then store these settings as ' +
+'             * the best value. */' +
+'            if ((bitrate - calculated_bitrate) < delta_error)' +
+'            {' +
+'                actual_bitrate = calculated_bitrate;' +
+'                delta_error = bitrate - actual_bitrate;' +
+'                brr = temp_brr;' +
+'                mddr = temp_mddr;' +
+'            }' +
+'        }' +
+'    }' +
+'' +
+'    /* If MDDR == 256, disable bitrate modulation and set MDDR to a valid value. */' +
+'    if (256 == mddr)' +
+'    {' +
+'        mddr = 255;' +
+'        use_mddr = false;' +
+'    }' +
+'' +
+'    /* Calculate SDA delay. */' +
+'    var sda_delay_clock = peripheral_clock >> cks;' +
+'    var sda_delay_counts = Math.ceil(sda_delay_ns * sda_delay_clock / 1000000000);' +
+'    if (sda_delay_counts > 31)' +
+'    {' +
+'        sda_delay_counts = 31;' +
+'    }' +
+'    var actual_sda_delay_ns = sda_delay_counts * 1000000000 / sda_delay_clock;' +
+'' +
+'    bitrate_setting = "/* Actual calculated bitrate: " + actual_bitrate.toFixed(0) + ". Actual SDA delay: " + actual_sda_delay_ns.toFixed(2) + " ns. */" + ' +
+'                   " .clock_settings.clk_divisor_value = " + cks.toString() +' +
+'                   ", .clock_settings.brr_value = " + brr.toString() +' +
+'                   ", .clock_settings.mddr_value = " + mddr.toString() +' +
+'                   ", .clock_settings.bitrate_modulation = " + use_mddr.toString() +' +
+'                   ", .clock_settings.cycles_value = " + sda_delay_counts.toString();' +
+'    bitrate_setting' +
+'')
+]]>            </export>
+        </property>
+        <property default="300" display="SDA Output Delay (nano seconds)" id="module.driver.i2c.sda_delay" description="Specify the SDA output delay in nanoseconds.">
+            <constraint display="Must be a valid non-negative integer with maximum configurable value of 300">testInteger("${module.driver.i2c.sda_delay}")  &amp;&amp; ("${module.driver.i2c.sda_delay}" &gt;= 0) &amp;&amp; ("${module.driver.i2c.sda_delay}" &lt;= 300)</constraint>
+        </property>
+        <property default="module.driver.i2c.snfr.div_one" display="Noise Filter Clock Select" id="module.driver.i2c.snfr" description="Select the on-chip baud rate generator source clock division setting for the digital noise filter">
+            <option display="The on-chip baud rate generator source clock divided by 1" id="module.driver.i2c.snfr.div_one" value="(1)"/>
+            <option display="The on-chip baud rate generator source clock divided by 2" id="module.driver.i2c.snfr.div_two" value="(2)"/>
+            <option display="The on-chip baud rate generator source clock divided by 4" id="module.driver.i2c.snfr.div_four" value="(3)"/>
+            <option display="The on-chip baud rate generator source clock divided by 8" id="module.driver.i2c.snfr.div_eight" value="(4)"/>
+        </property>
+        <property default="module.driver.i2c.clock_source.pclk" display="Clock Source" id="module.driver.i2c.clock_source" description="Select the clock source for the SCI I2C module.">
+           <select enum="enum.driver.sci_b_i2c.clock_source"/>
+        </property>
+        <property default="module.driver.i2c.bitrate_modulation.true" display="Bit Rate Modulation" id="module.driver.i2c.bitrate_modulation" description="Enabling bitrate modulation reduces the percent error of the actual bitrate with respect to the requested baud rate. It does this by modulating the number of cycles per clock output pulse, so the clock is no longer a square wave.">
+            <option display="Enable" id="module.driver.i2c.bitrate_modulation.true" value="true"/>
+            <option display="Disable" id="module.driver.i2c.bitrate_modulation.false" value="false"/>
+        </property>
+        <property default="sci_b_i2c_master_callback" display="Callback" id="module.driver.i2c.p_callback" description="A user callback function can be provided. If this callback function is provided, it will be called from the interrupt service routine (ISR).">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.i2c.p_callback}")</constraint>
+        </property>
+        <property default="" display="Interrupt Priority Level" id="module.driver.i2c.ipl" description="Select the interrupt priority level. This is set for TXI, RXI (if used), TEI interrupts.">
+            <select enum="enum.mcu.nvic.priorities.mandatory"/>
+            <interrupt event="event.sci${module.driver.i2c.channel}.txi" isr="sci_b_i2c_txi_isr"/>
+            <interrupt event="event.sci${module.driver.i2c.channel}.tei" isr="sci_b_i2c_tei_isr"/>
+        </property>
+        <property default="_disabled" display="RX Interrupt Priority Level [Only used when DTC is enabled]" id="module.driver.i2c.rx_ipl" description="Select the interrupt priority level. This is set for RXI only when DTC is enabled.">
+            <select enum="enum.mcu.nvic.priorities.optional"/>
+            <interrupt event="event.sci${module.driver.i2c.channel}.rxi" isr="sci_b_i2c_rxi_isr"/>
+        </property>
+        <peripheral name="SCI${module.driver.i2c.channel}" component="sci${module.driver.i2c.channel}" pin="sci${module.driver.i2c.channel}.sda" />
+        <peripheral name="SCI${module.driver.i2c.channel}" component="sci${module.driver.i2c.channel}" pin="sci${module.driver.i2c.channel}.scl" />
+                <!-- For MCU's whose pinmapping files have been generated with MPC Designer Tool -->
+        <peripheral name="SCI${module.driver.i2c.channel}" component="sci${module.driver.i2c.channel}" pin="sci${module.driver.i2c.channel}.txd${module.driver.i2c.channel}" />
+        <peripheral name="SCI${module.driver.i2c.channel}" component="sci${module.driver.i2c.channel}" pin="sci${module.driver.i2c.channel}.rxd${module.driver.i2c.channel}" />
+        <symbol id="symbol.driver.i2c.name" value="${module.driver.i2c.name}"/>
+        <symbol id="symbol.driver.i2c.guard.open" value="${module.driver.i2c.name}_open_guard"/>
+        <symbol id="symbol.driver.i2c.guard.macro.open" value="FSP_GUARD_${module.driver.i2c.name}_R_SCI_B_I2C_Open"/>
+        <symbol id="symbol.driver.i2c.guard.close" value="${module.driver.i2c.name}_close_guard"/>
+        <symbol id="symbol.driver.i2c.guard.macro.close" value="FSP_GUARD_${module.driver.i2c.name}_R_SCI_B_I2C_Close"/>
+        <symbol id="symbol.driver.i2c.guard.read" value="${module.driver.i2c.name}_read_guard"/>
+        <symbol id="symbol.driver.i2c.guard.macro.read" value="FSP_GUARD_${module.driver.i2c.name}_R_SCI_B_I2C_Read"/>
+        <symbol id="symbol.driver.i2c.guard.write" value="${module.driver.i2c.name}_write_guard"/>
+        <symbol id="symbol.driver.i2c.guard.macro.write" value="FSP_GUARD_${module.driver.i2c.name}_R_SCI_B_I2C_Write"/>
+        <symbol id="symbol.driver.i2c.guard.abort" value="${module.driver.i2c.name}_abort_guard"/>
+        <symbol id="symbol.driver.i2c.guard.macro.abort" value="FSP_GUARD_${module.driver.i2c.name}_R_SCI_B_I2C_Abort"/>
+        <symbol id="symbol.driver.i2c.guard.slave_address_set" value="${module.driver.i2c.name}_slave_address_set_guard"/>
+        <symbol id="symbol.driver.i2c.guard.macro.slave_address_set" value="FSP_GUARD_${module.driver.i2c.name}_R_SCI_B_I2C_SlaveAddressSet"/>
+        <symbol id="symbol.driver.i2c.guard.callback_set" value="${module.driver.i2c.name}_callback_set_guard"/>
+        <symbol id="symbol.driver.i2c.guard.macro.callback_set" value="FSP_GUARD_${module.driver.i2c.name}_R_SCI_B_I2C_CallbackSet"/>
+        <symbol id="symbol.driver.i2c.guard.status_get" value="${module.driver.i2c.name}_status_get_guard"/>
+        <symbol id="symbol.driver.i2c.guard.macro.status_get" value="FSP_GUARD_${module.driver.i2c.name}_R_SCI_B_I2C_StatusGet"/>
+        <symbol id="symbol.driver.i2c.nsc_api" value="${module.driver.i2c.name}_nsc_api"/>
+        <symbol id="symbol.driver.i2c.cfg" value="${module.driver.i2c.name}_cfg"/>
+        <symbol id="symbol.driver.i2c.cfg_extend" value="${module.driver.i2c.name}_cfg_extend"/>
+        <symbol id="symbol.driver.i2c.ctrl" value="${module.driver.i2c.name}_ctrl"/>
+        <header>
+extern const i2c_master_cfg_t ${module.driver.i2c.name}_cfg;
+/* I2C on SCI Instance. */
+extern const i2c_master_instance_t ${module.driver.i2c.name};
+#ifndef ${module.driver.i2c.p_callback}
+void ${module.driver.i2c.p_callback}(i2c_master_callback_args_t * p_args);
+#endif
+
+extern const sci_b_i2c_extended_cfg_t ${module.driver.i2c.name}_cfg_extend;
+extern sci_b_i2c_instance_ctrl_t ${module.driver.i2c.name}_ctrl;
+        </header>
+        <includes>
+#include &quot;r_sci_b_i2c.h&quot;
+#include &quot;r_i2c_master_api.h&quot;
+        </includes>
+        <declarations>
+#include &quot;r_sci_b_i2c_cfg.h&quot;
+sci_b_i2c_instance_ctrl_t ${module.driver.i2c.name}_ctrl;
+const sci_b_i2c_extended_cfg_t ${module.driver.i2c.name}_cfg_extend =
+{
+    ${module.driver.i2c.bitrate},
+    .clock_settings.snfr_value     = ${module.driver.i2c.snfr},
+    .clock_settings.clock_source   = ${module.driver.i2c.clock_source}
+};
+
+const i2c_master_cfg_t ${module.driver.i2c.name}_cfg =
+{
+    .channel             = ${module.driver.i2c.channel},
+    .rate                = ${module.driver.i2c.rate},
+    .slave               = ${module.driver.i2c.slave},
+    .addr_mode           = ${module.driver.i2c.addr_mode},
+#define RA_NOT_DEFINED (1)
+#if (RA_NOT_DEFINED == ${module.driver.i2c_on_sci_b_i2c.requires.transfer_tx::module.driver.transfer.name})
+    .p_transfer_tx       = NULL,
+#else
+    .p_transfer_tx       = &amp;${module.driver.i2c_on_sci_b_i2c.requires.transfer_tx::module.driver.transfer.name},
+#endif
+#if (RA_NOT_DEFINED == ${module.driver.i2c_on_sci_b_i2c.requires.transfer_rx::module.driver.transfer.name})
+    .p_transfer_rx       = NULL,
+#else
+    .p_transfer_rx       = &amp;${module.driver.i2c_on_sci_b_i2c.requires.transfer_rx::module.driver.transfer.name},
+#endif
+#undef RA_NOT_DEFINED
+    .p_callback          = ${module.driver.i2c.p_callback},
+    .p_context           = NULL,
+#if defined(VECTOR_NUMBER_SCI${module.driver.i2c.channel}_RXI) &amp;&amp; SCI_B_I2C_CFG_DTC_ENABLE
+    .rxi_irq             = VECTOR_NUMBER_SCI${module.driver.i2c.channel}_RXI,
+#else
+    .rxi_irq             = FSP_INVALID_VECTOR,
+#endif
+#if defined(VECTOR_NUMBER_SCI${module.driver.i2c.channel}_TXI)
+    .txi_irq             = VECTOR_NUMBER_SCI${module.driver.i2c.channel}_TXI,
+#else
+    .txi_irq             = FSP_INVALID_VECTOR,
+#endif
+#if defined(VECTOR_NUMBER_SCI${module.driver.i2c.channel}_TEI)
+    .tei_irq             = VECTOR_NUMBER_SCI${module.driver.i2c.channel}_TEI,
+#else
+    .tei_irq             = FSP_INVALID_VECTOR,
+#endif
+    .ipl                 = ${module.driver.i2c.ipl},    /* ${module.driver.i2c.rx_ipl} is unused */
+    .p_extend            = &amp;${module.driver.i2c.name}_cfg_extend,
+};
+/* Instance structure to use this module. */
+const i2c_master_instance_t ${module.driver.i2c.name} =
+{
+    .p_ctrl        = &amp;${module.driver.i2c.name}_ctrl,
+    .p_cfg         = &amp;${module.driver.i2c.name}_cfg,
+    .p_api         = &amp;g_i2c_master_on_sci_b
+};
+
+        </declarations>
+        <guard>
+            <header>
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.i2c.name}_open_guard(i2c_master_ctrl_t *const p_api_ctrl, i2c_master_cfg_t const *const p_cfg);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.i2c.name}_close_guard(i2c_master_ctrl_t *const p_api_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.i2c.name}_read_guard(i2c_master_ctrl_t *const p_api_ctrl, uint8_t *const p_dest, uint32_t const bytes, bool const restart);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.i2c.name}_write_guard(i2c_master_ctrl_t *const p_api_ctrl, uint8_t *const p_src, uint32_t const bytes, bool const restart);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.i2c.name}_abort_guard(i2c_master_ctrl_t *const p_api_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.i2c.name}_slave_address_set_guard(i2c_master_ctrl_t *const p_api_ctrl, uint32_t const slave, i2c_master_addr_mode_t const addr_mode);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.i2c.name}_callback_set_guard(i2c_master_ctrl_t *const p_api_ctrl, void(*p_callback)(i2c_master_callback_args_t *), void const *const p_context, i2c_master_callback_args_t *const p_callback_memory);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.i2c.name}_status_get_guard(i2c_master_ctrl_t *const p_api_ctrl, i2c_master_status_t *p_status);
+
+            </header>
+            <template name="${module.driver.i2c.name}_guard.c">
+                <![CDATA[
+                    #include "guard.h"
+
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.i2c.name}_open_guard (i2c_master_ctrl_t *const p_api_ctrl, i2c_master_cfg_t const *const p_cfg)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+    FSP_PARAMETER_NOT_USED(p_cfg);
+
+    return R_SCI_B_I2C_Open(&${module.driver.i2c.name}_ctrl, &${module.driver.i2c.name}_cfg);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.i2c.name}_close_guard (i2c_master_ctrl_t *const p_api_ctrl)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+
+    return R_SCI_B_I2C_Close(&${module.driver.i2c.name}_ctrl);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.i2c.name}_read_guard (i2c_master_ctrl_t *const p_api_ctrl, uint8_t *const p_dest, uint32_t const bytes, bool const restart)
+{
+    /* Verify all pointers are in non-secure memory. */
+    uint8_t *const p_dest_checked = cmse_check_address_range((void *) p_dest, bytes, CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_dest_checked != NULL);
+
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+
+    return R_SCI_B_I2C_Read(&${module.driver.i2c.name}_ctrl, p_dest_checked, bytes, restart);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.i2c.name}_write_guard (i2c_master_ctrl_t *const p_api_ctrl, uint8_t *const p_src, uint32_t const bytes, bool const restart)
+{
+    /* Verify all pointers are in non-secure memory. */
+    uint8_t *const p_src_checked = cmse_check_address_range((void *) p_src, bytes, CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_src_checked != NULL);
+
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+
+    return R_SCI_B_I2C_Write(&${module.driver.i2c.name}_ctrl, p_src_checked, bytes, restart);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.i2c.name}_abort_guard (i2c_master_ctrl_t *const p_api_ctrl)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+
+    return R_SCI_B_I2C_Abort(&${module.driver.i2c.name}_ctrl);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.i2c.name}_slave_address_set_guard (i2c_master_ctrl_t *const p_api_ctrl, uint32_t const slave, i2c_master_addr_mode_t const addr_mode)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+
+    return R_SCI_B_I2C_SlaveAddressSet(&${module.driver.i2c.name}_ctrl, slave, addr_mode);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.i2c.name}_callback_set_guard (i2c_master_ctrl_t *const p_api_ctrl, void(*p_callback)(i2c_master_callback_args_t *), void const *const p_context, i2c_master_callback_args_t *const p_callback_memory)
+{
+    /* Verify all pointers are in non-secure memory. */
+    void(*p_callback_checked)(i2c_master_callback_args_t *) = (void(*)(i2c_master_callback_args_t *)) cmse_check_address_range((void *) p_callback, sizeof(void *), CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_callback_checked != NULL);
+    i2c_master_callback_args_t *const p_callback_memory_checked = cmse_check_pointed_object(p_callback_memory, CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_callback_memory_checked != NULL);
+
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+    FSP_PARAMETER_NOT_USED(p_context);
+
+    return R_SCI_B_I2C_CallbackSet(&${module.driver.i2c.name}_ctrl, p_callback_checked, p_context, p_callback_memory_checked);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.i2c.name}_status_get_guard (i2c_master_ctrl_t *const p_api_ctrl, i2c_master_status_t *p_status)
+{
+    /* Verify all pointers are in non-secure memory. */
+    i2c_master_status_t * p_status_checked = cmse_check_pointed_object(p_status, CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_status_checked != NULL);
+
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+
+    return R_SCI_B_I2C_StatusGet(&${module.driver.i2c.name}_ctrl, p_status_checked);
+}
+
+                ]]>
+            </template>
+        </guard>
+        <nsc>
+            <header>
+
+#define FSP_GUARD_${module.driver.i2c.name}_R_SCI_B_I2C_Open() ${module.driver.i2c.name}_open_guard(FSP_SECURE_ARGUMENT, FSP_SECURE_ARGUMENT)
+
+#define FSP_GUARD_${module.driver.i2c.name}_R_SCI_B_I2C_Close() ${module.driver.i2c.name}_close_guard(FSP_SECURE_ARGUMENT)
+
+#define FSP_GUARD_${module.driver.i2c.name}_R_SCI_B_I2C_Read(p_dest, bytes, restart) ${module.driver.i2c.name}_read_guard(FSP_SECURE_ARGUMENT, p_dest, bytes, restart)
+
+#define FSP_GUARD_${module.driver.i2c.name}_R_SCI_B_I2C_Write(p_src, bytes, restart) ${module.driver.i2c.name}_write_guard(FSP_SECURE_ARGUMENT, p_src, bytes, restart)
+
+#define FSP_GUARD_${module.driver.i2c.name}_R_SCI_B_I2C_Abort() ${module.driver.i2c.name}_abort_guard(FSP_SECURE_ARGUMENT)
+
+#define FSP_GUARD_${module.driver.i2c.name}_R_SCI_B_I2C_SlaveAddressSet(slave, addr_mode) ${module.driver.i2c.name}_slave_address_set_guard(FSP_SECURE_ARGUMENT, slave, addr_mode)
+
+#define FSP_GUARD_${module.driver.i2c.name}_R_SCI_B_I2C_CallbackSet(p_callback, p_context, p_callback_memory) ${module.driver.i2c.name}_callback_set_guard(FSP_SECURE_ARGUMENT, p_callback, p_context, p_callback_memory)
+
+#define FSP_GUARD_${module.driver.i2c.name}_R_SCI_B_I2C_StatusGet(p_status) ${module.driver.i2c.name}_status_get_guard(FSP_SECURE_ARGUMENT, p_status)
+
+
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.i2c.name}_open_guard(i2c_master_ctrl_t *const p_api_ctrl, i2c_master_cfg_t const *const p_cfg);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.i2c.name}_close_guard(i2c_master_ctrl_t *const p_api_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.i2c.name}_read_guard(i2c_master_ctrl_t *const p_api_ctrl, uint8_t *const p_dest, uint32_t const bytes, bool const restart);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.i2c.name}_write_guard(i2c_master_ctrl_t *const p_api_ctrl, uint8_t *const p_src, uint32_t const bytes, bool const restart);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.i2c.name}_abort_guard(i2c_master_ctrl_t *const p_api_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.i2c.name}_slave_address_set_guard(i2c_master_ctrl_t *const p_api_ctrl, uint32_t const slave, i2c_master_addr_mode_t const addr_mode);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.i2c.name}_callback_set_guard(i2c_master_ctrl_t *const p_api_ctrl, void(*p_callback)(i2c_master_callback_args_t *), void const *const p_context, i2c_master_callback_args_t *const p_callback_memory);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.i2c.name}_status_get_guard(i2c_master_ctrl_t *const p_api_ctrl, i2c_master_status_t *p_status);
+
+
+extern const i2c_master_instance_t ${module.driver.i2c.name};
+            </header>
+            <declarations>
+                <![CDATA[
+static const i2c_master_api_t ${module.driver.i2c.name}_nsc_api =
+{
+    .open = ${module.driver.i2c.name}_open_guard,
+    .close = ${module.driver.i2c.name}_close_guard,
+    .read = ${module.driver.i2c.name}_read_guard,
+    .write = ${module.driver.i2c.name}_write_guard,
+    .abort = ${module.driver.i2c.name}_abort_guard,
+    .slaveAddressSet = ${module.driver.i2c.name}_slave_address_set_guard,
+    .callbackSet = ${module.driver.i2c.name}_callback_set_guard,
+    .statusGet = ${module.driver.i2c.name}_status_get_guard,
+};
+const i2c_master_instance_t ${module.driver.i2c.name} =
+{
+    .p_api = &${module.driver.i2c.name}_nsc_api,
+    .p_ctrl = FSP_SECURE_ARGUMENT,
+    .p_cfg = FSP_SECURE_ARGUMENT,
+};
+                ]]>
+            </declarations>
+        </nsc>
+        <api configurable="true">
+            <file>ra/fsp/inc/instances/r_sci_b_i2c.h</file>
+            <file>ra/fsp/inc/api/r_i2c_master_api.h</file>
+            <file>ra/fsp/inc/api/r_transfer_api.h</file>
+        </api>
+    </module>
+</raModuleDescription>

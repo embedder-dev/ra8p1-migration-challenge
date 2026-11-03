@@ -1,0 +1,30 @@
+<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.middleware.rm_ble_mesh_timer_awsfreertos" path="fsp_cfg/rm_ble_mesh_timer_awsfreertos_cfg.h" version="0" >
+        <content>
+            #ifdef __cplusplus
+            extern "C" {
+            #endif
+
+            #ifdef __cplusplus
+            }
+            #endif
+        </content>
+    </config>
+    <module config="config.middleware.rm_ble_mesh_timer_awsfreertos" display="Networking|BLE Mesh Timer on FreeRTOS (rm_mesh_timer_freertos)" id="module.middleware.rm_ble_mesh_timer_on_rm_ble_mesh_timer_awsfreertos" common="1" visible="false" version="0" url="group___m_e_s_h___t_i_m_e_r___f_r_e_e_r_t_o_s.html">
+
+        <requires id="module.middleware.rm_ble_mesh_timer_on_rm_ble_mesh_timer_awsfreertos.requires.awsfreertos" interface="interface.rtos.awsfreertos" visible="false" display="Requires FreeRTOS"/>
+
+        <provides interface="interface.middleware.rm_ble_mesh_timer" />
+        <provides interface="interface.middleware.rm_ble_mesh_timer_on_rm_ble_mesh_timer_awsfreertos" />
+
+        <header>
+        </header>
+        <includes>
+        </includes>
+        <declarations>
+
+        </declarations>
+    </module>
+</raModuleDescription>
+

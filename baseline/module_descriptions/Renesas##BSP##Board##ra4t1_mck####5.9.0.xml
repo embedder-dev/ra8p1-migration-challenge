@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<raModuleDescription>
+    <config id="config.board.ra4t1mck" path="fsp_cfg/bsp/board_cfg.h" version="0">
+        <content>
+            #include "../../../ra/board/ra4t1_mck/board.h"
+        </content>
+    </config>
+    <board id="board.ra4t1mck" display="RA4|RA4T1|MCK-RA4T1" device="R7FA4T1BB3CFM" config="config.board.ra4t1mck" version="0" debugger="com.renesas.hardwaredebug.rz.jlink">
+        <description>Motor Control Evaluation System for RA4T1 MCU Group&#xA;Visit https://www.renesas.com/us/en/products/microcontrollers-microprocessors/ra-cortex-m-mcus/rtk0ema430s00020bj-mck-ra4t1-renesas-flexible-motor-control-kit-ra4t1-mcu-group to get kit user’s manual, quick start guide, errata, design package, example projects, etc.</description>
+        <capability id="capability.led"/>
+    </board>
+</raModuleDescription>

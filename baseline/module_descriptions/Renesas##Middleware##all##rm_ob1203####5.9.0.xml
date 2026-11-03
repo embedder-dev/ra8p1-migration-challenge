@@ -1,0 +1,497 @@
+<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.driver.ob1203" path="fsp_cfg/rm_ob1203_cfg.h" version="0">
+        <property default="config.driver.ob1203.param_checking_enable.bsp" display="Parameter Checking" id="config.driver.ob1203.param_checking_enable" description="If selected code for parameter checking is included in the build.">
+            <option display="Default (BSP)" id="config.driver.ob1203.param_checking_enable.bsp" value="(BSP_CFG_PARAM_CHECKING_ENABLE)"/>
+            <option display="Enabled" id="config.driver.ob1203.param_checking_enable.enabled" value="(1)"/>
+            <option display="Disabled" id="config.driver.ob1203.param_checking_enable.disabled" value="(0)"/>
+        </property>
+        <content>
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#define RM_OB1203_CFG_PARAM_CHECKING_ENABLE   ${config.driver.ob1203.param_checking_enable}
+
+#ifdef __cplusplus
+}
+#endif
+        </content>
+    </config>
+
+    <module config="config.driver.ob1203" display="Sensor|${module.driver.ob1203.name} OB1203 Light/Proximity/PPG Sensor (rm_ob1203) [Deprecated]" id="module.driver.ob1203_on_ob1203" version="1" url="group___r_m___o_b1203.html">
+        <constraint display="Unique name required for each instance">
+            "${interface.driver.ob1203.${module.driver.ob1203.name}}" === "1"
+        </constraint>
+        <constraint display="Requires OB1203 Operation mode">
+          testExists("${interface.driver.ob1203_mode_on_ob1203}")
+        </constraint>
+        <requires id="module.driver.ob1203.requires.ob1203_mode" interface="interface.driver.ob1203_mode_on_ob1203" visible="false" display="Requires OB1203 Operation mode" find="false">
+            <override property="module.driver.ob1203_mode.p_context" value="${module.driver.ob1203.name}_ctrl"/>
+            <override property="module.driver.ob1203_mode.instance_name" value="${module.driver.ob1203.name}"/>
+        </requires>
+        <requires id="module.driver.ob1203.requires.comms_i2c_device" interface="interface.driver.comms_i2c_device" visible="false">
+        </requires>
+        <requires id="module.driver.ob1203.requires.irq" interface="interface.driver.external_irq_on_icu" display="Add IRQ Driver for measurement [optional]" find="false" optional="true" >
+            <override property="module.driver.external_irq.p_callback" value="rm_ob1203_irq_callback"/>
+        </requires>
+
+        <provides interface="interface.driver.ob1203" />
+        <provides interface="interface.driver.ob1203_on_ob1203" />
+        <provides interface="interface.driver.ob1203.${module.driver.ob1203.name}" />
+        <property default="g_ob1203_sensor${_instance}" display="Name" id="module.driver.ob1203.name" description="Module name.">
+            <constraint display="Name must be a valid C symbol">
+                testSymbol("${module.driver.ob1203.name}")
+            </constraint>
+        </property>
+        <property default="NULL" id="module.driver.ob1203.p_context" />
+        <property default="0xFFFFFFFF" display="Semaphore Timeout (RTOS only)" id="module.driver.ob1203.semaphore_timeout" description="Set timeout for blocking in using RTOS.">
+            <constraint display="Value must be a non-negative integer">testInteger("${module.driver.ob1203.semaphore_timeout}")  &amp;&amp; ("${module.driver.ob1203.semaphore_timeout}" &gt;= 0)</constraint>
+        </property>
+        <property default="ob1203_comms_i2c_callback" display="Comms I2C Callback" id="module.driver.ob1203.p_callback" description="A user COMMS I2C callback function can be provided.">
+            <constraint display="Name must be a valid C symbol">
+                testSymbol("${module.driver.ob1203.p_callback}")
+            </constraint>
+        </property>
+        <property default="ob1203_irq_callback" display="IRQ Callback" id="module.driver.ob1203.p_irq_callback" description="A user IRQ callback function can be provided.">
+            <constraint display="Name must be a valid C symbol">
+                testSymbol("${module.driver.ob1203.p_irq_callback}")
+            </constraint>
+        </property>
+        <property default="" id="module.driver.ob1203.name_upper">
+            <export>"${module.driver.ob1203.name}".toUpperCase()</export>
+        </property>
+
+        <header>
+/* OB1203 Sensor */
+extern const rm_ob1203_instance_t ${module.driver.ob1203.name};
+extern rm_ob1203_instance_ctrl_t ${module.driver.ob1203.name}_ctrl;
+extern const rm_ob1203_cfg_t ${module.driver.ob1203.name}_cfg;
+#ifndef ${module.driver.ob1203.p_callback}
+void ${module.driver.ob1203.p_callback}(rm_ob1203_callback_args_t * p_args);
+#endif
+#ifndef ${module.driver.ob1203.requires.irq::module.driver.external_irq.p_callback}
+void ${module.driver.ob1203.requires.irq::module.driver.external_irq.p_callback}(external_irq_callback_args_t * p_args);
+#endif
+#ifndef ${module.driver.ob1203.p_irq_callback}
+void ${module.driver.ob1203.p_irq_callback}(rm_ob1203_callback_args_t *p_args);
+#endif
+        </header>
+
+        <includes>
+#include &quot;rm_ob1203.h&quot;
+#include &quot;rm_ob1203_api.h&quot;
+        </includes>
+
+        <declarations>
+#if BSP_CFG_RTOS
+#if BSP_CFG_RTOS == 1
+TX_SEMAPHORE ${module.driver.ob1203.name}_semaphore_handle;
+CHAR ${module.driver.ob1203.name}_semaphore_name[] = &quot;${module.driver.ob1203.name} semaphore&quot;;
+#elif BSP_CFG_RTOS == 2
+SemaphoreHandle_t ${module.driver.ob1203.name}_semaphore_handle;
+StaticSemaphore_t ${module.driver.ob1203.name}_semaphore_memory;
+#endif
+
+/* Semaphore to wait for callback  */
+rm_ob1203_semaphore_t ${module.driver.ob1203.name}_semaphore =
+{
+    .p_semaphore_handle = &amp;${module.driver.ob1203.name}_semaphore_handle,
+#if BSP_CFG_RTOS == 1 // ThreadX
+    .p_semaphore_name = &amp;${module.driver.ob1203.name}_semaphore_name[0],
+#elif BSP_CFG_RTOS == 2 // FreeRTOS
+    .p_semaphore_memory = &amp;${module.driver.ob1203.name}_semaphore_memory,
+#endif
+};
+#endif
+
+rm_ob1203_instance_ctrl_t ${module.driver.ob1203.name}_ctrl;
+const rm_ob1203_cfg_t ${module.driver.ob1203.name}_cfg =
+{
+#if BSP_CFG_RTOS
+    .p_semaphore = &amp;${module.driver.ob1203.name}_semaphore,
+#endif
+    .semaphore_timeout = ${module.driver.ob1203.semaphore_timeout},
+    .p_comms_instance = &amp;${module.driver.ob1203.requires.comms_i2c_device::module.driver.comms_i2c_device.name},
+#define RA_NOT_DEFINED (1)
+#if (RA_NOT_DEFINED == ${module.driver.ob1203.requires.irq::module.driver.external_irq.name})
+    .p_irq_instance = NULL,
+    .p_irq_callback = NULL,
+#else
+    .p_irq_instance = &amp;${module.driver.ob1203.requires.irq::module.driver.external_irq.name},
+    .p_irq_callback = ${module.driver.ob1203.p_irq_callback},
+#endif
+#undef RA_NOT_DEFINED
+    .p_comms_callback = ${module.driver.ob1203.p_callback},
+#if defined(${module.driver.ob1203.p_context})
+    .p_context           = ${module.driver.ob1203.p_context},
+#else
+    .p_context           = &amp;${module.driver.ob1203.p_context},
+#endif
+    .p_extend            = (void *)&amp;${module.driver.ob1203.name}_extended_cfg,
+};
+
+const rm_ob1203_instance_t ${module.driver.ob1203.name} =
+{
+    .p_ctrl = &amp;${module.driver.ob1203.name}_ctrl,
+    .p_cfg  = &amp;${module.driver.ob1203.name}_cfg,
+    .p_api  = &amp;g_ob1203_on_ob1203,
+};
+        </declarations>
+    </module>
+
+    <!-- Developer Assistance -->
+    <developerSupport>
+        <api version="1">
+            <platform id="fsp" max="" min="1.1.0"/>
+            <moduleRef id="module.driver.ob1203_on_ob1203"/>
+            <description><![CDATA[<form><p><span color="header" font="header">Overview</span></p><p>OB1203 provides snippets of code for operating the OB1203 Middleware.</p></form>]]></description>
+            <function display="Quick Setup" id="ob1203_quick_setup">
+                <description><![CDATA[<form><p>This function provides quick setup for OB1203 using the properties from the RA configurator.</p></form>]]></description>
+            </function>
+            <function display="Quick Getting Light mode Data" id="ob1203_quick_getting_light_data">
+                <description><![CDATA[<form><p>This function provides quick getting Light mode values for OB1203 using the properties from the RA configurator.</p></form>]]></description>
+            </function>
+            <function display="Quick Getting Proximity mode Data" id="ob1203_quick_getting_proximity_data">
+                <description><![CDATA[<form><p>This function provides quick getting Proximity mode values for OB1203 using the properties from the RA configurator.</p></form>]]></description>
+            </function>
+            <function display="Quick Getting PPG mode Data" id="ob1203_quick_getting_ppg_data">
+                <description><![CDATA[<form><p>This function provides quick getting PPG mode values for OB1203 using the properties from the RA configurator.</p></form>]]></description>
+            </function>
+        </api>
+        <template category="function_call" display="Call Quick Setup" id="module.driver.ob1203.quick_setup" version="1">
+            <platform id="fsp" max="" min="1.1.0"/>
+            <moduleRef id="module.driver.ob1203_on_ob1203">
+                <function id="ob1203_quick_setup"/>
+            </moduleRef>
+            <content>
+/* TODO: Enable if you want to open OB1203 */
+#define ${ob1203_name_upper:raProperty(module.driver.ob1203.name_upper)}_NON_BLOCKING (0)
+#define ${ob1203_name_upper}_IRQ_ENABLE   (0)
+
+#if ${ob1203_name_upper}_NON_BLOCKING
+volatile bool g_ob1203_i2c_completed = false;
+#endif
+#if ${ob1203_name_upper}_IRQ_ENABLE
+volatile bool g_ob1203_irq_completed = false;
+#endif
+
+/* TODO: Enable if you want to use a callback */
+#define ${ob1203_name_upper}_CALLBACK_ENABLE (0)
+#if ${ob1203_name_upper}_CALLBACK_ENABLE
+void ${ob1203_callback:raProperty(module.driver.ob1203.p_callback)}(rm_ob1203_callback_args_t * p_args)
+{
+#if ${ob1203_name_upper}_NON_BLOCKING
+    if (RM_OB1203_EVENT_ERROR != p_args->event)
+    {
+        g_ob1203_i2c_completed = true;
+    }
+#else
+    FSP_PARAMETER_NOT_USED(p_args);
+#endif
+}
+#endif
+
+/* TODO: Enable if you want to use a IRQ callback */
+#define ${ob1203_name_upper}_IRQ_CALLBACK_ENABLE (0)
+#if ${ob1203_name_upper}_IRQ_CALLBACK_ENABLE
+void ${ob1203_irq_callback:raProperty(module.driver.ob1203.p_irq_callback)}(rm_ob1203_callback_args_t * p_args)
+{
+#if ${ob1203_name_upper}_IRQ_ENABLE
+    FSP_PARAMETER_NOT_USED(p_args);
+    g_ob1203_irq_completed = true;
+#else
+    FSP_PARAMETER_NOT_USED(p_args);
+#endif
+}
+#endif
+
+/* Quick setup for ${ob1203_name:raProperty(module.driver.ob1203.name)}.
+ * - ${i2c_bus_name:raProperty(module.driver.comms_i2c_bus.name)} must be setup before calling this function
+ *     (See Developer Assistance -> ${ob1203_name} -> OB1203 ***** on rm_ob1203 -> ${i2c_device_name:raProperty(module.driver.comms_i2c_device.name)} -> ${i2c_bus_name} -> Quick Setup).
+ */
+void ${ob1203_name}_quick_setup(void);
+
+/* Quick setup for ${ob1203_name}. */
+void ${ob1203_name}_quick_setup(void)
+{
+    fsp_err_t err;
+
+    /* Open OB1203 instance, this must be done before calling any OB1203 API */
+    err = ${ob1203_name}.p_api->open(${ob1203_name}.p_ctrl, ${ob1203_name}.p_cfg);
+    assert(FSP_SUCCESS == err);
+}
+            </content>
+        </template>
+
+        <template category="function_call" display="Call Quick Getting Light mode Data" id="module.driver.ob1203.quick_getting_light_mode_data" version="1">
+            <platform id="fsp" max="" min="1.1.0"/>
+            <moduleRef id="module.driver.ob1203_on_ob1203">
+                <function id="ob1203_quick_getting_light_data"/>
+            </moduleRef>
+            <content>
+/* Quick getting Light mode values for ${ob1203_name:raProperty(module.driver.ob1203.name)}.
+ * - ${ob1203_name} must be setup before calling this function.
+ */
+void ${ob1203_name}_quick_getting_light_mode_data(rm_ob1203_light_data_t * p_ob1203_data, rm_ob1203_light_data_type_t data_type);
+
+/* Quick getting Light data for ${ob1203_name}. */
+void ${ob1203_name}_quick_getting_light_mode_data(rm_ob1203_light_data_t * p_ob1203_data, rm_ob1203_light_data_type_t data_type)
+{
+    fsp_err_t            err;
+    rm_ob1203_raw_data_t ob1203_raw_data;
+#if 0 == ${ob1203_name_upper:raProperty(module.driver.ob1203.name_upper)}_IRQ_ENABLE
+    rm_ob1203_device_status_t device_status;
+#endif
+
+    /* Clear I2C callback flag */
+#if ${ob1203_name_upper}_NON_BLOCKING
+    g_ob1203_i2c_completed = false;
+#endif
+
+    /* Start the measurement */
+    /* If the MeasurementStart API is called once, a second call is not required. */
+    err = ${ob1203_name}.p_api->measurementStart(${ob1203_name}.p_ctrl);
+    assert(FSP_SUCCESS == err);
+#if ${ob1203_name_upper}_NON_BLOCKING
+    while (!g_ob1203_i2c_completed)
+    {
+        ;
+    }
+    g_ob1203_i2c_completed = false;
+#endif
+
+    /* If IRQ interrupt is enabled, wait IRQ callback */
+#if ${ob1203_name_upper}_IRQ_ENABLE
+    while (!g_ob1203_irq_completed)
+    {
+        ;
+    }
+    g_ob1203_irq_completed = false;
+#else
+    /* Wait until the measurement is complete */
+    do
+    {
+        /* Get device status */
+        err = ${ob1203_name}.p_api->deviceStatusGet(${ob1203_name}.p_ctrl, &amp;device_status);
+        assert(FSP_SUCCESS == err);
+#if ${ob1203_name_upper}_NON_BLOCKING
+        while (!g_ob1203_i2c_completed)
+        {
+            ;
+        }
+        g_ob1203_i2c_completed = false;
+#endif
+    }
+    while (false == device_status.light_measurement_complete);
+#endif
+
+    /* Read ADC data */
+    err = ${ob1203_name}.p_api->lightRead(${ob1203_name}.p_ctrl, &amp;ob1203_raw_data, data_type);
+    assert(FSP_SUCCESS == err);
+#if ${ob1203_name_upper}_NON_BLOCKING
+    while (!g_ob1203_i2c_completed)
+    {
+        ;
+    }
+    g_ob1203_i2c_completed = false;
+#endif
+
+    /* Calculate Light data */
+    err = ${ob1203_name}.p_api->lightDataCalculate(${ob1203_name}.p_ctrl, &amp;ob1203_raw_data, p_ob1203_data);
+    assert(FSP_SUCCESS == err);
+}
+            </content>
+        </template>
+        <template category="function_call" display="Call Quick Getting Proximity mode Data" id="module.driver.ob1203.quick_getting_proximity_mode_data" version="1">
+            <platform id="fsp" max="" min="1.1.0"/>
+            <moduleRef id="module.driver.ob1203_on_ob1203">
+                <function id="ob1203_quick_getting_proximity_data"/>
+            </moduleRef>
+            <content>
+/* Quick getting Proximity mode values for ${ob1203_name:raProperty(module.driver.ob1203.name)}.
+ * - ${ob1203_name} must be setup before calling this function.
+ */
+void ${ob1203_name}_quick_getting_proximity_mode_data(rm_ob1203_prox_data_t * p_ob1203_data);
+
+/* Quick getting Proximity data for ${ob1203_name}. */
+void ${ob1203_name}_quick_getting_proximity_mode_data(rm_ob1203_prox_data_t * p_ob1203_data)
+{
+    fsp_err_t            err;
+    rm_ob1203_raw_data_t ob1203_raw_data;
+#if 0 == ${ob1203_name_upper:raProperty(module.driver.ob1203.name_upper)}_IRQ_ENABLE
+    rm_ob1203_device_status_t device_status;
+#endif
+
+    /* Clear I2C callback flag */
+#if ${ob1203_name_upper}_NON_BLOCKING
+    g_ob1203_i2c_completed = false;
+#endif
+
+    /* Start the measurement */
+    /* If the MeasurementStart API is called once, a second call is not required. */
+    err = ${ob1203_name}.p_api->measurementStart(${ob1203_name}.p_ctrl);
+    assert(FSP_SUCCESS == err);
+#if ${ob1203_name_upper}_NON_BLOCKING
+    while (!g_ob1203_i2c_completed)
+    {
+        ;
+    }
+    g_ob1203_i2c_completed = false;
+#endif
+
+    /* If IRQ interrupt is enabled, wait IRQ callback */
+#if ${ob1203_name_upper}_IRQ_ENABLE
+    while (!g_ob1203_irq_completed)
+    {
+        ;
+    }
+    g_ob1203_irq_completed = false;
+#else
+    /* Wait until the measurement is complete */
+    do
+    {
+        /* Get device status */
+        err = ${ob1203_name}.p_api->deviceStatusGet(${ob1203_name}.p_ctrl, &amp;device_status);
+        assert(FSP_SUCCESS == err);
+#if ${ob1203_name_upper}_NON_BLOCKING
+        while (!g_ob1203_i2c_completed)
+        {
+            ;
+        }
+        g_ob1203_i2c_completed = false;
+#endif
+    }
+    while (false == device_status.prox_measurement_complete);
+#endif
+
+    /* Read ADC data */
+    err = ${ob1203_name}.p_api->proxRead(${ob1203_name}.p_ctrl, &amp;ob1203_raw_data);
+    assert(FSP_SUCCESS == err);
+#if ${ob1203_name_upper}_NON_BLOCKING
+    while (!g_ob1203_i2c_completed)
+    {
+        ;
+    }
+    g_ob1203_i2c_completed = false;
+#endif
+
+    /* Calculate Proximity data */
+    err = ${ob1203_name}.p_api->proxDataCalculate(${ob1203_name}.p_ctrl, &amp;ob1203_raw_data, p_ob1203_data);
+    assert(FSP_SUCCESS == err);
+}
+            </content>
+        </template>
+        <template category="function_call" display="Call Quick Getting PPG mode Data" id="module.driver.ob1203.quick_getting_ppg_mode_data" version="1">
+            <platform id="fsp" max="" min="1.1.0"/>
+            <moduleRef id="module.driver.ob1203_on_ob1203">
+                <function id="ob1203_quick_getting_ppg_data"/>
+            </moduleRef>
+            <content>
+/* Quick getting PPG mode values for ${ob1203_name:raProperty(module.driver.ob1203.name)}.
+ * - ${ob1203_name} must be setup before calling this function.
+ */
+void ${ob1203_name}_quick_getting_ppg_mode_data(rm_ob1203_ppg_data_t * p_ob1203_data);
+
+/* Quick getting PPG data for ${ob1203_name}. */
+void ${ob1203_name}_quick_getting_ppg_mode_data(rm_ob1203_ppg_data_t * p_ob1203_data)
+{
+    fsp_err_t            err;
+    rm_ob1203_raw_data_t ob1203_raw_data;
+    rm_ob1203_fifo_info_t fifo_info;
+#if 0 == ${ob1203_name_upper:raProperty(module.driver.ob1203.name_upper)}_IRQ_ENABLE
+    rm_ob1203_device_status_t device_status;
+#endif
+
+    /* Clear I2C callback flag */
+#if ${ob1203_name_upper}_NON_BLOCKING
+    g_ob1203_i2c_completed = false;
+#endif
+
+    /* Start the measurement */
+    /* If the MeasurementStart API is called once, a second call is not required. */
+    err = ${ob1203_name}.p_api->measurementStart(${ob1203_name}.p_ctrl);
+    assert(FSP_SUCCESS == err);
+#if ${ob1203_name_upper}_NON_BLOCKING
+    while (!g_ob1203_i2c_completed)
+    {
+        ;
+    }
+    g_ob1203_i2c_completed = false;
+#endif
+
+    /* If IRQ interrupt is enabled, wait IRQ callback */
+#if ${ob1203_name_upper}_IRQ_ENABLE
+    while (!g_ob1203_irq_completed)
+    {
+        ;
+    }
+    g_ob1203_irq_completed = false;
+#else
+
+    /* Wait until the measurement is complete */
+    do
+    {
+        /* Get device status */
+        err = ${ob1203_name}.p_api->deviceStatusGet(${ob1203_name}.p_ctrl, &amp;device_status);
+        assert(FSP_SUCCESS == err);
+#if ${ob1203_name_upper}_NON_BLOCKING
+        while (!g_ob1203_i2c_completed)
+        {
+            ;
+        }
+        g_ob1203_i2c_completed = false;
+#endif
+    }
+    while (false == device_status.ppg_measurement_complete);
+#endif
+
+    /* Read FIFO info. */
+    err = ${ob1203_name}.p_api->fifoInfoGet(${ob1203_name}.p_ctrl, &amp;fifo_info);
+    assert(FSP_SUCCESS == err);
+#if ${ob1203_name_upper}_NON_BLOCKING
+    while (!g_ob1203_i2c_completed)
+    {
+        ;
+    }
+    g_ob1203_i2c_completed = false;
+#endif
+
+    if (0 != fifo_info.overflow_counter)
+    {
+        fifo_info.unread_samples = 0;
+
+        /* Stop the measurement */
+        err = ${ob1203_name}.p_api->measurementStop(${ob1203_name}.p_ctrl);
+        assert(FSP_SUCCESS == err);
+#if ${ob1203_name_upper}_NON_BLOCKING
+        while (!g_ob1203_i2c_completed)
+        {
+            ;
+        }
+        g_ob1203_i2c_completed = false;
+#endif
+    }
+
+    if (0 != fifo_info.unread_samples)
+    {
+        /* Read ADC data */
+        err = ${ob1203_name}.p_api->ppgRead(${ob1203_name}.p_ctrl, &amp;ob1203_raw_data, fifo_info.unread_samples);
+        assert(FSP_SUCCESS == err);
+#if ${ob1203_name_upper}_NON_BLOCKING
+        while (!g_ob1203_i2c_completed)
+        {
+            ;
+        }
+        g_ob1203_i2c_completed = false;
+#endif
+
+	    /* Calculate PPG data */
+	    err = ${ob1203_name}.p_api->ppgDataCalculate(${ob1203_name}.p_ctrl, &amp;ob1203_raw_data, p_ob1203_data);
+	    assert(FSP_SUCCESS == err);
+    }
+}
+            </content>
+        </template>
+    </developerSupport>
+</raModuleDescription>

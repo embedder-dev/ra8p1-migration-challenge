@@ -1,0 +1,7 @@
+<?xml version="1.0" ?>
+<raModuleDescription>
+  <module id="module.aws.freertosplus.crypto" display="Security|FreeRTOS MbedTLS Port" common="1" visible="false" version="0" url="">
+    <requires id="module.driver.freertos_plus_tcp_on_ether.requires.mbedtls" interface="interface.driver.mbedtls" display="Add MbedTLS Implementation"/>
+    <provides interface="interface.aws.freertosplus.crypto" />
+  </module>
+</raModuleDescription>

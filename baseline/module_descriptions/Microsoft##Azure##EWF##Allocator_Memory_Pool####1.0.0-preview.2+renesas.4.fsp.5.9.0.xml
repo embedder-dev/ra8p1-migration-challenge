@@ -1,0 +1,10 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<raModuleDescription>
+    <module config="config.azure.ewf" id="module.azure.ewf.allocator.memory_pool" display="Networking|Azure EWF Memory Pool Allocator" common="1" version="0" url="https://azure.github.io/embedded-wireless-framework/html/index.html" visible="false">
+        <requires id="module.azure.ewf.allocator.memory_pool.requires.bare_metal" interface="interface.rtos.bare_metal" visible="false" display="Requires Bare Metal"/>
+        <provides interface="interface.azure.ewf.allocator" />
+        <includes>
+#include &quot;ewf_allocator_memory_pool.h&quot;
+        </includes>
+    </module>
+</raModuleDescription>

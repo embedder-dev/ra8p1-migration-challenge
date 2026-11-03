@@ -1,0 +1,43 @@
+<?xml version="1.0" ?>
+<raModuleDescription>
+    <module display="Storage|${module.driver.rm_block_media.name} Block Media Custom Implementation (rm_block_media_user)" id="module.custom.block_media" version="1" url="group___r_m___b_l_o_c_k___m_e_d_i_a___u_s_e_r.html">
+        <provides interface="interface.driver.rm_block_media" />
+        <provides interface="interface.driver.rm_block_media_no_usb" />
+        <property default="g_rm_block_media${_instance}" display="Name" id="module.driver.rm_block_media.name" description="Module name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.rm_block_media.name}")</constraint>
+        </property>
+        <header>
+            /** Block Media on Custom Implementation Instance */
+            extern rm_block_media_instance_t ${module.driver.rm_block_media.name};
+
+            /** Access the Block Media Custom Implementation instance using these structures when calling API functions directly (::p_api is not used). */
+            extern rm_block_media_ctrl_t ${module.driver.rm_block_media.name}_ctrl;
+            extern const rm_block_media_cfg_t ${module.driver.rm_block_media.name}_cfg;
+        </header>
+        <includes>
+            #include "rm_block_media_api.h"
+        </includes>
+    </module>
+    <module display="Storage|${module.driver.rm_block_media.name} Block Media Custom Implementation" id="module.custom.block_media_pmsc" visible="false" common="1" version="1" url="group___r_m___b_l_o_c_k___m_e_d_i_a___u_s_e_r.html">
+        <provides interface="interface.driver.rm_block_media_pmsc" />
+        <property default="g_rm_block_media${_instance}" display="Name" id="module.driver.rm_block_media.name" description="Module name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.rm_block_media.name}")</constraint>
+        </property>
+        <property default="${module.driver.rm_block_media.name}" id="module.driver.rm_block_media.p_context"/>
+        <header>
+            /** Block Media on Custom Implementation Instance */
+            extern rm_block_media_instance_t ${module.driver.rm_block_media.name};
+
+            /** Access the Block Media Custom Implementation instance using these structures when calling API functions directly (::p_api is not used). */
+            extern rm_block_media_ctrl_t ${module.driver.rm_block_media.name}_ctrl;
+            extern const rm_block_media_cfg_t ${module.driver.rm_block_media.name}_cfg;
+
+            #if !defined(${module.driver.rm_block_media.p_context})
+            extern rm_block_media_instance_t ${module.driver.rm_block_media.p_context};
+            #endif
+        </header>
+        <includes>
+            #include "rm_block_media_api.h"
+        </includes>
+    </module>
+</raModuleDescription>

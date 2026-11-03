@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<raModuleDescription>
+  <config id="config.board.ra2l2_ek" path="fsp_cfg/bsp/board_cfg.h" version="0">
+    <content>#include "../../../ra/board/ra2l2_ek/board.h"</content>
+  </config>
+  <board config="config.board.ra2l2_ek" device="R7FA2L2094CFM" display="RA2|RA2L2|EK-RA2L2" id="board.ra2l2_ek" version="0" debugger="com.renesas.hardwaredebug.rz.jlink">
+    <description>Evaluation kit for RA2L2 MCU Group&#xA;Visit https://www.renesas.com/ek-ra2l2 to get kit user’s manual, quick start guide, errata, design package, example projects, etc.</description>
+    <capability id="capability.led"/>
+  </board>
+</raModuleDescription>

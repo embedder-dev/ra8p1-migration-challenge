@@ -1,0 +1,115 @@
+<?xml version="1.0" ?>
+<raModuleDescription>
+    <module id="module.middleware.lwip_nic_on_ether" display="Networking|lwIP Wrapper to r_ether (rm_lwip_ether)" config="config.driver.lwip_nic_on_ether" common="1" version="0" visible="false" url="group___r_m___l_w_i_p___e_t_h_e_r.html">
+        <constraint display="'Interrupt event backward compatibility' property of the Ethernet driver should be 'Do not keep compatibility'.">
+            ("${config.driver.ether.interrupt_event_backword_compatibility}" === "config.driver.ether.interrupt_event_backword_compatibility.disabled")
+        </constraint>
+        <constraint display="RX event must be enabled in the ethernet module Interrupts|EESR event|FR.">
+            (testOption("${module.middleware.lwip_nic_on_ether.requires.ether::module.driver.ether.eesr_event_mask}", "module.driver.ether.eesr_event_mask.fr"))
+            &amp;&amp;(testOption("${module.middleware.lwip_nic_on_ether.requires.ether::module.driver.ether.eesr_event_mask}", "module.driver.ether.eesr_event_mask.rde"))
+            &amp;&amp;(testOption("${module.middleware.lwip_nic_on_ether.requires.ether::module.driver.ether.eesr_event_mask}", "module.driver.ether.eesr_event_mask.rfof"))
+        </constraint>
+        <constraint display="This Ethernet port must have the ETHARP flag set. UP and LINK_UP flags must be not set.">
+            !(testOption("${module.middleware.lwip_ether.netif_flags}", "module.middleware.lwip_ether.netif_flags.up"))
+            &amp;&amp; !(testOption("${module.middleware.lwip_ether.netif_flags}", "module.middleware.lwip_ether.netif_flags.link_up"))
+            &amp;&amp; testOption("${module.middleware.lwip_ether.netif_flags}", "module.middleware.lwip_ether.netif_flags.etharp")
+        </constraint>
+        <constraint display="When IGMP or MLD6 is enabled, r_ether multicast must be enable.">
+            (!(testOption("${module.middleware.lwip_ether.netif_flags}", "module.middleware.lwip_ether.netif_flags.igmp"))
+            &amp;&amp; !(testOption("${module.middleware.lwip_ether.netif_flags}", "module.middleware.lwip_ether.netif_flags.mld6")))
+            || ("${module.middleware.lwip_nic_on_ether.requires.ether::module.driver.ether.multicast}" === "module.driver.ether.multicast.1")
+        </constraint>
+        <constraint display="Supported only when LwIP netif TX single pbuf is enabled.">
+            ("${config.middleware.lwip_tcpip.lwip_netif_tx_single_pbuf}" === "config.middleware.lwip_tcpip.lwip_netif_tx_single_pbuf.enabled")
+        </constraint>
+        <requires id="module.middleware.lwip_nic_on_ether.requires.ether" interface="interface.driver.ether" display="Add Ethernet Driver">
+            <override property="module.driver.ether.p_callback" value="rm_lwip_ether_callback"/>
+            <override property="module.driver.ether.zerocopy" value="module.driver.ether.zerocopy.${module.middleware.lwip_ether.zero_copy_mode}"/>
+            <override property="module.driver.ether.padding" value="module.driver.ether.padding.0"/>
+            <override property="module.driver.ether.padding_offset" value="0"/>
+            <override property="module.driver.ether.ether_buffer_size" value="1514"/>
+            <override property="module.driver.ether.p_context" value="&amp;${module.middleware.lwip_ether.name}_instance"/>
+            <override property="module.driver.ether.allocate_rx_buffer" value="module.driver.ether.allocate_rx_buffer.${module.middleware.lwip_ether.allocate_rx_buffer}"/>
+        </requires>
+        <provides interface="interface.middleware.lwip_nic_driver" />
+        <provides interface="interface.middleware.lwip_ether" />
+        <property default="g_lwip_ether0" display="Name" id="module.middleware.lwip_ether.name" description="Module name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.middleware.lwip_ether.name}")</constraint>
+        </property>
+        <property default="1500" display="MTU" id="module.middleware.lwip_ether.mtu" description="MTU size.">
+            <constraint display="Must be an integer from 576 to 1500">testInteger("${module.middleware.lwip_ether.mtu}") &amp;&amp; ("${module.middleware.lwip_ether.mtu}" &gt;= 576) &amp;&amp; ("${module.middleware.lwip_ether.mtu}" &lt;= 1500)</constraint>
+        </property>
+        <property bitmapPrefix="NETIF_FLAG_" default="module.middleware.lwip_ether.netif_flags.broadcast,module.middleware.lwip_ether.netif_flags.etharp" display="Netif flags" id="module.middleware.lwip_ether.netif_flags" description="Flags representing the capabilities of the Ethernet device">
+            <option id="module.middleware.lwip_ether.netif_flags.up" display="UP" value="UP" />
+            <option id="module.middleware.lwip_ether.netif_flags.broadcast" display="BROADCAST" value="BROADCAST" />
+            <option id="module.middleware.lwip_ether.netif_flags.link_up" display="LINK_UP" value="LINK_UP" />
+            <option id="module.middleware.lwip_ether.netif_flags.etharp" display="ETHARP" value="ETHARP" />
+            <option id="module.middleware.lwip_ether.netif_flags.ethernet" display="ETHERNET" value="ETHERNET" />
+            <option id="module.middleware.lwip_ether.netif_flags.igmp" display="IGMP" value="IGMP" />
+            <option id="module.middleware.lwip_ether.netif_flags.mld6" display="MLD6" value="MLD6" />
+        </property>
+        <property default="module.middleware.lwip_ether.zero_copy_mode.disable" display="Zero-copy mode" id="module.middleware.lwip_ether.zero_copy_mode" description="Enable or disable zero-copy mode.">
+            <option id="module.middleware.lwip_ether.zero_copy_mode.disable" display="Disable" value="0" />
+            <option id="module.middleware.lwip_ether.zero_copy_mode.enable" display="Enable" value="1" />
+        </property>
+        <property default="10" display="RX buffer pool size" id="module.middleware.lwip_ether.rx_buffer_pool_size" description="Buffer pool size for zero-copy RX.">
+            <constraint display="Must be a positive integer">testInteger("${module.middleware.lwip_ether.rx_buffer_pool_size}") &amp;&amp; ("${module.middleware.lwip_ether.rx_buffer_pool_size}" &gt;= 0) &amp;&amp; ("${module.driver.ether.num_rx_descriptors}" &lt;= "${module.middleware.lwip_ether.rx_buffer_pool_size}")</constraint>
+        </property>
+        <property default="100" display="Link check interval" id="module.middleware.lwip_ether.link_check_interval" description="Interval for checking link status.">
+            <constraint display="Must be a positive integer">testInteger("${module.middleware.lwip_ether.link_check_interval}") &amp;&amp; ("${module.middleware.lwip_ether.link_check_interval}" &gt; 0)</constraint>
+        </property>
+        <property default="1024" display="RTOS|RX thread stacksize" id="module.middleware.lwip_ether.rx_thread_stacksize" description="Stack size of RX thread.">
+            <constraint display="Must be a positive integer">testInteger("${module.middleware.lwip_ether.rx_thread_stacksize}") &amp;&amp; ("${module.middleware.lwip_ether.rx_thread_stacksize}" &gt; 0)</constraint>
+        </property>
+        <property default="4" display="RTOS|RX thread priority" id="module.middleware.lwip_ether.rx_thread_priority" description="Priority of RX thread.">
+            <constraint display="Must be a positive integer">testInteger("${module.middleware.lwip_ether.rx_thread_priority}") &amp;&amp; ("${module.middleware.lwip_ether.rx_thread_priority}" &gt;= 0)</constraint>
+        </property>
+        <property default="" id="module.middleware.lwip_ether.pbuf_pool_size">
+            <export>eval(
+            'var output = "";' +
+            'if(${module.middleware.lwip_ether.zero_copy_mode}) {' +
+            'output = "${module.middleware.lwip_ether.rx_buffer_pool_size}" - "${module.middleware.lwip_nic_on_ether.requires.ether::module.driver.ether.num_rx_descriptors}";' +
+            '} else {' +
+            'output = "${module.middleware.lwip_ether.rx_buffer_pool_size}";' +
+            '}' +
+            'output')
+            </export>
+        </property>
+        <property default="0" id="module.middleware.lwip_ether.allocate_rx_buffer">
+            <export>(${module.middleware.lwip_ether.zero_copy_mode}=="0") ? "1" : "0"</export>
+        </property>
+        <header>
+/* Instance for lwIP Ethernet Driver */
+extern rm_lwip_ether_instance_t ${module.middleware.lwip_ether.name}_instance;
+extern rm_lwip_ether_ctrl_t ${module.middleware.lwip_ether.name}_ctrl;
+extern rm_lwip_ether_cfg_t ${module.middleware.lwip_ether.name}_cfg;
+        </header>
+        <includes>
+#include "rm_lwip_ether.h"
+        </includes>
+        <declarations>
+        /* RX buffers. */
+        LWIP_MEMPOOL_DECLARE(${module.middleware.lwip_ether.name}_pbuf,  ${module.middleware.lwip_ether.pbuf_pool_size}, sizeof(rm_lwip_rx_pbuf_t), "RX PBUF pool");
+        LWIP_MEMPOOL_DECLARE(${module.middleware.lwip_ether.name}_rx_buffers,  ${module.middleware.lwip_ether.rx_buffer_pool_size}, ${module.middleware.lwip_nic_on_ether.requires.ether::module.driver.ether.ether_buffer_size}, "RX buffers pool");
+        rm_lwip_ether_ctrl_t ${module.middleware.lwip_ether.name}_ctrl;
+
+        rm_lwip_ether_cfg_t ${module.middleware.lwip_ether.name}_cfg =
+        {
+            .p_ether_instance       = (ether_instance_t *)(&amp;${module.middleware.lwip_nic_on_ether.requires.ether::module.driver.ether.name}),
+            .flags                  = ${module.middleware.lwip_ether.netif_flags} 0U,
+            .mtu                    = ${module.middleware.lwip_ether.mtu},
+            .link_check_interval    = ${module.middleware.lwip_ether.link_check_interval},
+            .p_rx_buffers_mempool   = &amp;memp_${module.middleware.lwip_ether.name}_rx_buffers,
+            .p_rx_pbuf_mempool      = &amp;memp_${module.middleware.lwip_ether.name}_pbuf,
+            .input_thread_stacksize = ${module.middleware.lwip_ether.rx_thread_stacksize},
+            .input_thread_priority  = ${module.middleware.lwip_ether.rx_thread_priority},
+        };
+
+        rm_lwip_ether_instance_t ${module.middleware.lwip_ether.name}_instance =
+        {
+            .p_ctrl = &amp;${module.middleware.lwip_ether.name}_ctrl,
+            .p_cfg = &amp;${module.middleware.lwip_ether.name}_cfg,
+        };
+        </declarations>
+    </module>
+</raModuleDescription>

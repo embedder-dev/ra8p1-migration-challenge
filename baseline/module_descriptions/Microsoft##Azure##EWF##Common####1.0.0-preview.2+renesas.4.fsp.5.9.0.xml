@@ -1,0 +1,64 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<raModuleDescription>
+    <config id="config.azure.ewf" path="fsp_cfg/azure/ewf/ewf.config.h" version="0">
+        <property id="config.azure.ewf.parameter_checking" display="Parameter Checking" default="config.azure.ewf.parameter_checking.enabled" description="This enables checking of function parameters. When this is disabled, parameter checking code is not present and the footprint is reduced">
+            <option id="config.azure.ewf.parameter_checking.enabled" display="Enabled" value="#define EWF_PARAMETER_CHECKING" />
+            <option id="config.azure.ewf.parameter_checking.disabled" display="Disabled" value="" />
+        </property>
+        <property id="config.azure.ewf.debug" display="Enable Logging" default="config.azure.ewf.debug.disabled" description="This enables logging and the compilation of debug code. When disabled, logging and debug code is not present and the footprint is reduced.">
+            <option id="config.azure.ewf.debug.enabled" display="Enabled" value="1" />
+            <option id="config.azure.ewf.debug.disabled" display="Disabled" value="0" />
+        </property>
+        <property id="config.azure.ewf.verbose_logging" display="Verbose Logging" default="config.azure.ewf.verbose_logging.disabled" description="This enables verbose logging. Verbose logging will only work if a EWF Log Function is set and logging is enabled.">
+            <option id="config.azure.ewf.verbose_logging.enabled" display="Enabled" value="#define EWF_LOG_VERBOSE" />
+            <option id="config.azure.ewf.verbose_logging.disabled" display="Disabled" value="" />
+        </property>
+        <property display="EWF Log Function" id="config.azure.ewf.log_function" default="printf(__VA_ARGS__)" description="Function the library uses for standard log messages when logging is enabled."/>
+        <property display="EWF Log Error Function" id="config.azure.ewf.error_log_function" default="printf(__VA_ARGS__)" description="Function the library uses for error log messages when logging is enabled."/>
+        <content>
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#include "bsp_api.h"
+
+${config.azure.ewf.parameter_checking}
+${config.azure.ewf.verbose_logging}
+
+#if (1 == ${interface.azure.ewf.platform.threadx})
+#define EWF_PLATFORM_THREADX
+#else
+#define EWF_PLATFORM_BARE_METAL
+#define EWF_PLATFORM_BUSY_WAIT(count)    R_BSP_SoftwareDelay(count, BSP_DELAY_UNITS_MILLISECONDS)
+#endif
+
+#if ${config.azure.ewf.debug}
+#define EWF_DEBUG
+
+#ifndef EWF_LOG
+#define EWF_LOG(...) ${config.azure.ewf.log_function}
+#endif
+
+#ifndef EWF_LOG_ERROR
+#define EWF_LOG_ERROR(...) ${config.azure.ewf.error_log_function}
+#endif
+
+#else
+#define EWF_LOG(...)
+#define EWF_LOG_ERROR(...)
+#endif
+
+
+#ifndef NX_DRIVER_IP_MTU
+#define NX_DRIVER_IP_MTU (1460)
+#endif
+
+#ifdef __cplusplus
+}
+#endif
+        </content>
+    </config>
+    <module config="config.azure.ewf" id="module.azure.ewf.common" display="Networking|Azure Embedded Wireless Framework Common" common="1" version="0" url="https://azure.github.io/embedded-wireless-framework/html/index.html" visible="false">
+        <provides interface="interface.azure.ewf.common" />
+    </module>
+</raModuleDescription>

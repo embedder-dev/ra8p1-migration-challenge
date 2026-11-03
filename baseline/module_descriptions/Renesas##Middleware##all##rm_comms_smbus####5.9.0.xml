@@ -1,0 +1,191 @@
+<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.driver.comms_smbus" path="fsp_cfg/rm_comms_smbus_cfg.h" version="0">
+        <property default="config.driver.comms_smbus.param_checking_enable.bsp" display="Parameter Checking" id="config.driver.comms_smbus.param_checking_enable" description="If selected code for parameter checking is included in the build.">
+            <option display="Default (BSP)" id="config.driver.comms_smbus.param_checking_enable.bsp" value="(BSP_CFG_PARAM_CHECKING_ENABLE)"/>
+            <option display="Enabled" id="config.driver.comms_smbus.param_checking_enable.enabled" value="(1)"/>
+            <option display="Disabled" id="config.driver.comms_smbus.param_checking_enable.disabled" value="(0)"/>
+        </property>
+        <content>
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#define RM_COMMS_SMBUS_CFG_PARAM_CHECKING_ENABLE              ${config.driver.comms_smbus.param_checking_enable}
+
+#ifdef __cplusplus
+}
+#endif
+        </content>
+    </config>
+
+    <!-- SMBUS Resources control -->
+    <module config="config.driver.comms_smbus" display="Connectivity|${module.driver.comms_smbus_resources_control.name} SMBus Resources control (rm_comms_smbus)" id="module.driver.comms_on_smbus_resources_control" version="1" url="group___r_m___c_o_m_m_s___s_m_b_u_s.html" common="100" visible="false">
+
+        <!-- Module constraint -->
+        <constraint display="Requires GPT Overflow Interrupt (INT) enabled">
+            "${module.driver.comms_smbus_resources_control.requires.gpt::module.driver.timer.ipl}" != "_disabled"
+        </constraint>
+        <constraint display="Unique name required for each instance">
+            "${interface.driver.comms_smbus_resources_control.${module.driver.comms_smbus_resources_control.name}}" === "1"
+        </constraint>
+        <constraint display="Requires GPT peripheral">
+            testExists("${module.driver.comms_smbus_resources_control.requires.gpt::module.driver.timer.name}")
+        </constraint>
+        <constraint display="10-bit address mode on IIC must be disabled">
+            ("${config.driver.iic_master.addr_mode_10_bit_enable}" === "config.driver.iic_master.addr_mode_10_bit_enable.disabled") &amp;&amp;
+            ("${config.driver.iic_b_master.addr_mode_10_bit_enable}" === "config.driver.iic_b_master.addr_mode_10_bit_enable.disabled")
+        </constraint>
+        <constraint display="Incorrect IIC variant or IIC stack has not been added. rm_comms_smbus is only compatible with r_iic_master and r_iic_b_master.">
+            (testExists("${interface.peripheral.iic_${module.driver.comms_smbus_resources_control.name}}") &amp;&amp; ("${module.driver.comms_smbus_resources_control.iic_variant}" === "module.driver.comms_smbus_resources_control.iic_variant.iic")) ||
+            (testExists("${interface.peripheral.iicb_${module.driver.comms_smbus_resources_control.name}}") &amp;&amp; ("${module.driver.comms_smbus_resources_control.iic_variant}" === "module.driver.comms_smbus_resources_control.iic_variant.iic_b"))
+        </constraint>
+        <constraint display="DTC support must be disabled">
+            !testExists("${interface.driver.transfer_on_dtc.${module.driver.comms_smbus_resources_control.name}}") &amp;&amp;
+            !testExists("${interface.driver.transfer_on_dtc.${module.driver.comms_smbus_resources_control.name}}")
+        </constraint>
+
+        <!-- Module required - I2C Shared Bus -->
+        <requires id="module.driver.comms_smbus_resources_control.requires.comms_i2c_bus" interface="interface.driver.comms_i2c_bus" display="I2C Shared Bus" find="true">
+            <override property="module.driver.comms_i2c_bus.channel" value="${module.driver.comms_smbus_resources_control.iic_channel}"/>
+            <override property="module.driver.comms_i2c_bus.rate" value="module.driver.comms_i2c_bus.rate.rate_standard"/>
+            <override property="module.driver.comms_i2c_bus.timer" value="${module.driver.comms_smbus_resources_control.name}_timer"/>
+            <override property="module.driver.comms_i2c_bus.name" value="${module.driver.comms_smbus_resources_control.name}_shared_bus"/>
+            <override property="module.driver.comms_i2c_bus.smbus_enabled" value="1"/>
+            <override property="module.driver.comms_i2c_bus.smbus_secret_name" value="${module.driver.comms_smbus_resources_control.name}"/>
+        </requires>
+
+        <!-- Module required - GPT -->
+        <requires id="module.driver.comms_smbus_resources_control.requires.gpt" interface="interface.driver.timer_on_gpt" display="GPT peripheral [Mandatory]" find="true">
+            <override property="module.driver.timer.name" value="${module.driver.comms_smbus_resources_control.name}_timer"/>
+            <override property="module.driver.timer.mode" value="module.driver.timer.mode.mode_one_shot"/>
+            <override property="module.driver.timer.compare_match.a.status" value="module.driver.timer.compare_match.a.status.enabled"/>
+            <override property="module.driver.timer.period" value="0x19"/>
+            <!-- 25 ms -->
+            <override property="module.driver.timer.compare_match.a.value" value="0xa"/>
+            <!-- 10 ms -->
+            <override property="module.driver.timer.unit" value="module.driver.timer.unit.unit_period_msec"/>
+            <override property="module.driver.timer.p_callback" value="rm_comms_smbus_timeout_callback"/>
+            <override property="module.driver.timer.capture_a_ipl" value="${module.driver.comms_smbus_resources_control.requires.gpt::module.driver.timer.ipl}"/>
+            <override property="module.driver.timer.stop_source" value="_signal.event.${module.driver.comms_smbus_resources_control.iic_variant}${module.driver.comms_smbus_resources_control.iic_channel}.txi,_signal.event.${module.driver.comms_smbus_resources_control.iic_variant}${module.driver.comms_smbus_resources_control.iic_channel}.rxi,_signal.event.${module.driver.comms_smbus_resources_control.iic_variant}${module.driver.comms_smbus_resources_control.iic_channel}.tei,_signal.event.${module.driver.comms_smbus_resources_control.iic_variant}${module.driver.comms_smbus_resources_control.iic_channel}.eri"/>
+        </requires>
+
+        <!-- Interface provides -->
+        <provides interface="interface.driver.comms_smbus_resources_control"/>
+        <provides interface="interface.driver.comms_smbus_resources_control.${module.driver.comms_smbus_resources_control.name}"/>
+
+        <!-- Module property -->
+        <property default="g_comms_smbus_rsc_ctrl${_instance}" display="Name" id="module.driver.comms_smbus_resources_control.name" description="Module name."/>
+        <property default="0" display="IIC channel" id="module.driver.comms_smbus_resources_control.iic_channel">
+            <constraint display="Value must be a non-negative integer">testInteger("${module.driver.comms_smbus_resources_control.iic_channel}")  &amp;&amp; ("${module.driver.comms_smbus_resources_control.iic_channel}" &gt;= 0)</constraint>
+        </property>
+        <property default="module.driver.comms_smbus_resources_control.iic_variant.iic" display="IIC variant" id="module.driver.comms_smbus_resources_control.iic_variant" description="IIC variant be used under I2C Shared Bus stack.">
+            <option display="IIC" id="module.driver.comms_smbus_resources_control.iic_variant.iic" value="iic"/>
+            <option display="IIC_B" id="module.driver.comms_smbus_resources_control.iic_variant.iic_b" value="iicb"/>
+        </property>
+
+        <header>
+        </header>
+
+        <includes>
+        </includes>
+
+        <declarations>
+        </declarations>
+    </module>
+
+    <!-- SMBUS Communication Device -->
+    <module config="config.driver.comms_smbus" display="Connectivity|${module.driver.rm_comms.name} SMBus Communication Device (rm_comms_smbus)" id="module.driver.rm_comms_on_smbus" version="1" url="group___r_m___c_o_m_m_s___s_m_b_u_s.html">
+
+        <!-- Module constraint -->
+        <constraint display="Unique name required for each instance">
+            "${interface.driver.rm_comms.${module.driver.rm_comms.name}}" === "1"
+        </constraint>
+        <constraint display="Requires ELC peripheral">
+            testExists("${module.driver.comms_smbus.requires.elc::module.driver.elc.name}")
+        </constraint>
+
+        <!-- Module required - SMBUS Resources control -->
+        <requires id="module.driver.comms_smbus.requires.resources_control" interface="interface.driver.comms_smbus_resources_control" display="SMBus Resources control [Mandatory]" find="true" />
+
+        <!-- Module required - ELC -->
+        <requires id="module.driver.comms_smbus.requires.elc" interface="interface.driver.elc" display="ELC peripheral [Mandatory]" find="true"/>
+
+        <!-- Interface provides -->
+        <provides interface="interface.driver.rm_comms"/>
+        <provides interface="interface.driver.rm_comms.${module.driver.rm_comms.name}"/>
+
+        <!-- Module property -->
+        <property default="g_comms_smbus${_instance}" display="Name" id="module.driver.rm_comms.name" description="Module name."/>
+        <property default="comms_smbus_callback" display="Callback" id="module.driver.comms_smbus.p_callback" description="A user callback function can be provided.">
+            <constraint display="Name must be a valid C symbol">
+                testSymbol("${module.driver.comms_smbus.p_callback}")
+            </constraint>
+        </property>
+        <property default="0xFFFFFFFF" display="Semaphore Timeout (RTOS only)" id="module.driver.comms_smbus.semaphore_timeout" description="Timeout for semaphore operation in using RTOS.">
+            <constraint display="Value must be a non-negative integer">testInteger("${module.driver.comms_smbus.semaphore_timeout}")  &amp;&amp; ("${module.driver.comms_smbus.semaphore_timeout}" &gt;= 0)</constraint>
+        </property>
+        <property default="0x00" display="Slave Address" id="module.driver.comms_smbus.slave_address" description="Specify the slave address.">
+            <constraint display="Value must be non-negative">testInteger("${module.driver.comms_smbus.slave_address}")  &amp;&amp; ("${module.driver.comms_smbus.slave_address}" &gt;= 0)</constraint>
+        </property>
+        <property default="module.driver.comms_smbus.pec_support.pec_enable" display="CRC support" id="module.driver.comms_smbus.pec_support" description="Use CRC-8 algorithm to generate PEC byte for SMBus communication.">
+            <option display="Enable" id="module.driver.comms_smbus.pec_support.pec_enable" value="1"/>
+            <option display="Disable" id="module.driver.comms_smbus.pec_support.pec_disable" value="0"/>
+        </property>
+
+        <header>
+/* SMBUS Communication Device */
+extern const rm_comms_instance_t ${module.driver.rm_comms.name};
+extern rm_comms_smbus_instance_ctrl_t ${module.driver.rm_comms.name}_ctrl;
+extern const rm_comms_cfg_t ${module.driver.rm_comms.name}_cfg;
+
+#ifndef ${module.driver.comms_smbus.p_callback}
+void ${module.driver.comms_smbus.p_callback}(rm_comms_callback_args_t * p_args);
+#endif
+        </header>
+
+        <includes>
+#include &quot;rm_comms_smbus.h&quot;
+#include &quot;rm_comms_api.h&quot;
+        </includes>
+
+        <declarations>
+/* SMBUS Communication Device */
+
+rm_comms_smbus_instance_ctrl_t ${module.driver.rm_comms.name}_ctrl;
+rm_comms_i2c_instance_ctrl_t ${module.driver.rm_comms.name}_i2c_ctrl;
+
+/* Lower level driver configuration */
+const i2c_master_cfg_t ${module.driver.rm_comms.name}_lower_level_cfg =
+{
+    .slave = ${module.driver.comms_smbus.slave_address},
+    .addr_mode = I2C_MASTER_ADDR_MODE_7BIT,
+    .p_callback = rm_comms_smbus_transmission_callback,
+};
+
+rm_comms_smbus_extended_cfg_t ${module.driver.rm_comms.name}_extended_cfg =
+{
+    .pec_enable = ${module.driver.comms_smbus.pec_support},
+    .p_comms_i2c_extend_cfg = &amp;${module.driver.comms_smbus.requires.resources_control::module.driver.comms_smbus_resources_control.name}_shared_bus_extended_cfg,
+    .p_comms_i2c_ctrl = &amp;${module.driver.rm_comms.name}_i2c_ctrl,
+};
+
+const rm_comms_cfg_t ${module.driver.rm_comms.name}_cfg =
+{
+    .semaphore_timeout  = ${module.driver.comms_smbus.semaphore_timeout},
+    .p_lower_level_cfg  = (void*)&amp;${module.driver.rm_comms.name}_lower_level_cfg,
+    .p_extend           = (void*)&amp;${module.driver.rm_comms.name}_extended_cfg,
+    .p_callback         = ${module.driver.comms_smbus.p_callback},
+};
+
+const rm_comms_instance_t ${module.driver.rm_comms.name} =
+{
+    .p_ctrl = &amp;${module.driver.rm_comms.name}_ctrl,
+    .p_cfg  = &amp;${module.driver.rm_comms.name}_cfg,
+    .p_api  = &amp;g_comms_on_comms_smbus,
+};
+        </declarations>
+
+    </module>
+
+</raModuleDescription>

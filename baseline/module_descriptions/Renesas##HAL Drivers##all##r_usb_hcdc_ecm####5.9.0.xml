@@ -1,0 +1,170 @@
+﻿<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.driver.usb_hcdc_ecm" path="fsp_cfg/r_usb_hcdc_cfg.h" version="0">
+        <property id="config.driver.usb_hcdc_ecm.multiple_connection_setting" default="config.driver.usb_hcdc_ecm.multiple_connection_setting.not_supported">
+            <option id="config.driver.usb_hcdc_ecm.multiple_connection_setting.not_supported" display="Disabled" value="USB_CFG_DISABLE" />
+            <option id="config.driver.usb_hcdc_ecm.multiple_connection_setting.supported" display="Enabled" value="USB_CFG_ENABLE" />
+        </property>
+        <property id="config.driver.usb_hcdc_ecm.cdc_device_class_setting" display="Target Peripheral Device Class ID" default="config.driver.usb_hcdc_ecm.cdc_device_class_setting.cdc_device" description="Specify the device class ID of the CDC device to be connected.">
+            <option id="config.driver.usb_hcdc_ecm.cdc_device_class_setting.cdc_device" display="CDC class supported device" value="USB_CFG_CDC" />
+            <option id="config.driver.usb_hcdc_ecm.cdc_device_class_setting.vendor" display="Vendor class device" value="USB_CFG_VEN" />
+        </property>
+        <property id="config.driver.usb_hcdc_ecm.bulk_in" display="Bulk Input Transfer Pipe" default="config.driver.usb_hcdc_ecm.bulk_in.pipe4" description="Select the USB pipe to use for bulk input transfers.">
+            <option id="config.driver.usb_hcdc_ecm.bulk_in.pipe1" display="USB PIPE1" value="USB_PIPE1"/>
+            <option id="config.driver.usb_hcdc_ecm.bulk_in.pipe2" display="USB PIPE2" value="USB_PIPE2"/>
+            <option id="config.driver.usb_hcdc_ecm.bulk_in.pipe3" display="USB PIPE3" value="USB_PIPE3"/>
+            <option id="config.driver.usb_hcdc_ecm.bulk_in.pipe4" display="USB PIPE4" value="USB_PIPE4"/>
+            <option id="config.driver.usb_hcdc_ecm.bulk_in.pipe5" display="USB PIPE5" value="USB_PIPE5"/>
+        </property>
+        <property id="config.driver.usb_hcdc_ecm.bulk_out" display="Bulk Output Transfer Pipe" default="config.driver.usb_hcdc_ecm.bulk_out.pipe5" description="Select the USB pipe to use for bulk output transfers.">
+            <option id="config.driver.usb_hcdc_ecm.bulk_out.pipe1" display="USB PIPE1" value="USB_PIPE1"/>
+            <option id="config.driver.usb_hcdc_ecm.bulk_out.pipe2" display="USB PIPE2" value="USB_PIPE2"/>
+            <option id="config.driver.usb_hcdc_ecm.bulk_out.pipe3" display="USB PIPE3" value="USB_PIPE3"/>
+            <option id="config.driver.usb_hcdc_ecm.bulk_out.pipe4" display="USB PIPE4" value="USB_PIPE4"/>
+            <option id="config.driver.usb_hcdc_ecm.bulk_out.pipe5" display="USB PIPE5" value="USB_PIPE5"/>
+        </property>
+        <property id="config.driver.usb_hcdc_ecm.int_in" display="Interrupt In Pipe" default="config.driver.usb_hcdc_ecm.int_in.pipe6" description="Select the USB pipe to use for interrupts.">
+            <option id="config.driver.usb_hcdc_ecm.int_in.pipe6" display="USB PIPE6" value="USB_PIPE6"/>
+            <option id="config.driver.usb_hcdc_ecm.int_in.pipe7" display="USB PIPE7" value="USB_PIPE7"/>
+            <option id="config.driver.usb_hcdc_ecm.int_in.pipe8" display="USB PIPE8" value="USB_PIPE8"/>
+            <option id="config.driver.usb_hcdc_ecm.int_in.pipe9" display="USB PIPE9" value="USB_PIPE9"/>
+        </property>
+        <content>
+            #ifdef __cplusplus
+            extern "C" {
+            #endif
+
+            #define USB_CFG_HCDC_MULTI (USB_CFG_DISABLE)
+            #define USB_CFG_HCDC_IFCLS (${config.driver.usb_hcdc_ecm.cdc_device_class_setting})
+            #define USB_CFG_HCDC_BULK_IN (${config.driver.usb_hcdc_ecm.bulk_in})
+            #define USB_CFG_HCDC_BULK_OUT (${config.driver.usb_hcdc_ecm.bulk_out})
+            #define USB_CFG_HCDC_INT_IN (${config.driver.usb_hcdc_ecm.int_in})
+            #define USB_CFG_HCDC_BULK_IN2 (0xFU)
+            #define USB_CFG_HCDC_BULK_OUT2 (0x1FU)
+            #define USB_CFG_HCDC_INT_IN2 (0x2FU)
+
+            #ifdef __cplusplus
+            }
+            #endif
+        </content>
+    </config>
+    <config id="config.driver.usb_hcdc_ecm_class" path="fsp_cfg/r_usb_class_cfg.h" version="0">
+        <content>
+        </content>
+    </config>
+    <module config="config.driver.usb_hcdc_ecm" display="Connectivity|${module.driver.ether.name} USB HCDC (r_usb_hcdc_ecm)" id="module.driver.hcdc_ecm_on_usb" version="1" url="group___u_s_b___h_c_d_c___e_c_m.html">
+        <constraint display="Unique name required for each instance">
+            "${interface.driver.hcdc_ecm_on_usb.${module.driver.ether.name}}" === "1"
+        </constraint>
+        <constraint display="Requires Networking|FreeRTOS+TCP">
+          "${interface.driver.freertos_plus_tcp_on_ether}" === "1"
+        </constraint>
+        <constraint display="FreeRTOS xTaskGetHandle function is required. Please enable under Thread|Common|Optional Functions.">
+            ("${config.awsfreertos.thread.include_xtaskgethandle}" === "config.awsfreertos.thread.include_xtaskgethandle.enabled") || !testExists("${interface.rtos.awsfreertos}")
+        </constraint>
+        <constraint display="Requires the heap area of 1024 or more. Please add a heap under BSP|RA Common|Heap size.">
+          ("${config.bsp.common.heap}" &gt;= 1024)
+        </constraint>
+        <constraint display="Requires USB Peripheral">
+          "${interface.mcu.usb_fs.external}" === "1"
+        </constraint>
+        <constraint display="The USB pipe numbers for Bulk Input and Bulk Output must be different.">
+            !(("${config.driver.usb_hcdc_ecm.bulk_in}" === "config.driver.usb_hcdc_ecm.bulk_in.pipe1") &amp;&amp;
+            ("${config.driver.usb_hcdc_ecm.bulk_out}" === "config.driver.usb_hcdc_ecm.bulk_out.pipe1"))
+        </constraint>
+        <constraint display="The USB pipe numbers for Bulk Input and Bulk Output must be different.">
+            !(("${config.driver.usb_hcdc_ecm.bulk_in}" === "config.driver.usb_hcdc_ecm.bulk_in.pipe2") &amp;&amp;
+            ("${config.driver.usb_hcdc_ecm.bulk_out}" === "config.driver.usb_hcdc_ecm.bulk_out.pipe2"))
+        </constraint>
+        <constraint display="The USB pipe numbers for Bulk Input and Bulk Output must be different.">
+            !(("${config.driver.usb_hcdc_ecm.bulk_in}" === "config.driver.usb_hcdc_ecm.bulk_in.pipe3") &amp;&amp;
+            ("${config.driver.usb_hcdc_ecm.bulk_out}" === "config.driver.usb_hcdc_ecm.bulk_out.pipe3"))
+        </constraint>
+        <constraint display="The USB pipe numbers for Bulk Input and Bulk Output must be different.">
+            !(("${config.driver.usb_hcdc_ecm.bulk_in}" === "config.driver.usb_hcdc_ecm.bulk_in.pipe4") &amp;&amp;
+            ("${config.driver.usb_hcdc_ecm.bulk_out}" === "config.driver.usb_hcdc_ecm.bulk_out.pipe4"))
+        </constraint>
+        <constraint display="The USB pipe numbers for Bulk Input and Bulk Output must be different.">
+            !(("${config.driver.usb_hcdc_ecm.bulk_in}" === "config.driver.usb_hcdc_ecm.bulk_in.pipe5") &amp;&amp;
+            ("${config.driver.usb_hcdc_ecm.bulk_out}" === "config.driver.usb_hcdc_ecm.bulk_out.pipe5"))
+        </constraint>
+ 	    <requires id="module.driver.ether_on_usb_ecm.requires.awsfreertos" interface="interface.rtos.awsfreertos" visible="false" display="Requires FreeRTOS"/>
+        <requires id="module.driver.ether.requires.hcdc_ecm" interface="interface.mcu.usb_fs.external" visible="false" display="Requires USB Peripheral" />
+        <requires id="module.driver.basic_on_usb.requires.full_module" interface="interface.mcu.usb.pipes.0.1.2.3.4.5.6.7.8.9" visible="false" display="Requires USB Full Module" />
+        <requires id="module.driver.basic_on_usb.requires.basic" interface="interface.driver.basic_on_usb" display="Add USB Driver">
+            <override property="module.driver.usb_basic.usb_mode" value="module.driver.usb_basic.usb_mode.host"/>
+            <override property="module.driver.usb_basic.usb_classtype" value="module.driver.usb_basic.usb_classtype.hcdc"/>
+            <override property="module.driver.usb_basic.p_usb_reg" value="NULL"/>
+            <override property="module.driver.usb_basic.rtos_callback" value="usb_rtos_callback"/>
+        </requires>
+        <requires id="module.driver.ether.ignore.azure_projects" interface="interface.rtos.supports.renesas_usb" visible="false" display="Use Azure USBX for Azure RTOS projects."/>
+        <provides interface="interface.driver.hcdc_ecm_on_usb.${module.driver.ether.name}" />
+        <provides interface="interface.driver.ether" />
+        <provides interface="interface.driver.hcdc_ecm" />
+        <property default="hcdc_ecm" id="module.driver.ether.hcdc_ecm_interface" description=""/>
+        <property default="g_hcdc_ecm${_instance}" display="Name" id="module.driver.ether.name" description="Module name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.ether.name}")</constraint>
+        </property>
+        <property default="NULL" display="Interrupts|Callback" id="module.driver.ether.p_callback" description="A user callback function. If this callback function is provided, it is called from the interrupt service routine (ISR) each time a interrupt occurs.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.ether.p_callback}")</constraint>
+        </property>
+        <header>
+        /** CDC Driver on USB Instance. */
+extern const ether_api_t g_ether_on_usb_ecm;
+
+#ifndef ${module.driver.ether.p_callback}
+void ${module.driver.ether.p_callback}(ether_callback_args_t * p_args);
+#endif
+
+        </header>
+        <includes>
+#include "r_usb_hcdc_ecm.h"
+        </includes>
+        <declarations>
+            usb_hcdc_ecm_instance_ctrl_t ${module.driver.ether.name}_ctrl;
+
+            const usb_hcdc_ecm_extended_cfg_t ${module.driver.ether.name}_cfg_extend =
+            {
+                .p_usb = &amp;${module.driver.basic_on_usb.requires.basic::module.driver.basic.name},
+            };
+
+            const ether_cfg_t ${module.driver.ether.name}_cfg =
+            {
+                .channel            = 0, // Unused
+                .zerocopy           = (ether_zerocopy_t)0, // Unused
+                .multicast          = (ether_multicast_t)0, // Unused
+                .promiscuous        = (ether_promiscuous_t)0, // Unused
+                .flow_control       = (ether_flow_control_t)0, // Unused
+                .padding            = (ether_padding_t)0, // Unused
+                .padding_offset     = 0, // Unused
+                .broadcast_filter   = 0, // Unused
+                .p_mac_address      = NULL, // Unused
+                .num_tx_descriptors = 1,
+                .num_rx_descriptors = 1,
+                .pp_ether_buffers   = NULL, // Unused
+                .ether_buffer_size  = 1536,
+                .irq                = (IRQn_Type)0, // Unused
+                .interrupt_priority = 0, // Unused
+                .p_callback         = ${module.driver.ether.p_callback},
+                .p_ether_phy_instance = NULL, // Unused
+                .p_context          = NULL, // Unused
+
+                .p_extend           = &amp;${module.driver.ether.name}_cfg_extend,
+            };
+
+/* Instance structure to use this module. */
+const ether_instance_t ${module.driver.ether.name} =
+{
+    .p_ctrl        = &amp;${module.driver.ether.name}_ctrl,
+    .p_cfg         = &amp;${module.driver.ether.name}_cfg,
+    .p_api         = &amp;g_ether_on_usb_ecm
+            };
+
+        </declarations>
+        <functions>
+        </functions>
+        <api configurable="true">
+            <file>ra/fsp/inc/api/r_usb_hcdc_ecm.h</file>
+        </api>
+    </module>
+</raModuleDescription>

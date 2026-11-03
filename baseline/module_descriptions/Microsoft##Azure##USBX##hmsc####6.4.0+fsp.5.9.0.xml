@@ -1,0 +1,36 @@
+﻿<?xml version="1.0" ?>
+<raModuleDescription>
+    <module display="Connectivity|Azure RTOS USBX HMSC" id="module.driver.usbx_hmsc" version="1" visible="false" url="https://github.com/eclipse-threadx/rtos-docs/blob/main/rtos-docs/usbx/index.md">
+        <constraint display="Unique name required for each instance">
+            "${interface.driver.usbx_hmsc.${module.driver.usbx_hmsc.name}}" === "1"
+        </constraint>
+        <constraint display="Requires USB Peripheral">
+          "${interface.mcu.usb_fs.external}" === "1"
+        </constraint>
+        <requires id="module.azure.usbx_hmsc.requires.threadx" interface="interface.rtos.tx" visible="false" display="Requires ThreadX"/>
+        <requires id="module.azure.usbx_basic.requires.full_module" interface="interface.mcu.usb.pipes.0.1.2.3.4.5.6.7.8.9" visible="false" display="Requires USB Full Module" />
+        <requires id="module.driver.usbx_hmsc.requires.usb_basic" interface="interface.middleware.rm_usbx_port" visible="true" display="USBX HMSC">
+            <override property="module.middleware.rm_usbx_port.usb_mode" value="module.middleware.rm_usbx_port.usb_mode.host"/>
+            <override property="module.middleware.rm_usbx_port.usb_classtype" value="module.middleware.rm_usbx_port.usb_classtype.hmsc"/>
+            <override property="module.middleware.rm_usbx_port.p_usb_reg" value="NULL"/>
+        </requires>
+        <provides interface="interface.driver.usbx_hmsc" />
+        <provides interface="interface.driver.usbx_hmsc.${module.driver.usbx_hmsc.name}" />
+        <property default="usbx_hmsc" id="module.driver.usbx_hmsc.usbx_hmsc_interface" description=""/>
+        <property default="g_usbx_hmsc${_instance}" display="Name" id="module.driver.usbx_hmsc.name" description="Module name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.usbx_hmsc.name}")</constraint>
+        </property>
+        <header>
+        /** MSC Driver on USB Instance. */
+        </header>
+        <includes>
+#include "ux_host_class_storage.h"
+        </includes>
+        <declarations>
+        </declarations>
+        <functions>
+        </functions>
+        <api configurable="true">
+        </api>
+    </module>
+</raModuleDescription>

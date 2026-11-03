@@ -1,0 +1,15 @@
+<?xml version="1.0" ?>
+<raModuleDescription>
+    <module id="module.driver.rm_aws_pkcs11_pal_littlefs" display="Networking|AWS PKCS11 PAL on LittleFS (rm_aws_pkcs11_pal_littlefs)" visible="false" version="1" common="1" url="group___a_w_s___p_k_c_s11___p_a_l___l_i_t_t_l_e_f_s.html">
+        <constraint display="Requires LittleFS implementation.">
+            testExists("${module.driver.rm_aws_pkcs11_pal_littlefs.requires.littlefs::module.middleware.stdio_wrapper}")
+        </constraint>
+        <constraint display="LittleFS must have heap allocation enabled.">
+        ("${config.arm.mbed.littlefs.no_malloc}" === "config.arm.mbed.littlefs.no_malloc.enabled")
+        </constraint>
+        <requires id="module.driver.rm_aws_pkcs11_pal_littlefs.requires.littlefs" interface="interface.arm.mbed.littlefs" visible="true" display="Requires LittleFS implementation">
+            <override property="config.arm.mbed.littlefs.thread_safe" value="config.arm.mbed.littlefs.thread_safe.enabled"/>
+        </requires>
+        <provides interface="interface.driver.rm_aws_pkcs11_pal" />
+    </module>
+</raModuleDescription>

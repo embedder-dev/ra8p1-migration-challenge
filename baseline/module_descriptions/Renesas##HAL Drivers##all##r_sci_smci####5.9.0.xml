@@ -1,0 +1,585 @@
+﻿<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.driver.sci_smci" path="fsp_cfg/r_sci_smci_cfg.h" version="0">
+        <property default="config.driver.sci_smci.param_checking_enable.bsp" display="Parameter Checking" id="config.driver.sci_smci.param_checking_enable" description="If selected code for parameter checking is included in the build.">
+            <option display="Default (BSP)" id="config.driver.sci_smci.param_checking_enable.bsp" value="(BSP_CFG_PARAM_CHECKING_ENABLE)"/>
+            <option display="Enabled" id="config.driver.sci_smci.param_checking_enable.enabled" value="(1)"/>
+            <option display="Disabled" id="config.driver.sci_smci.param_checking_enable.disabled" value="(0)"/>
+        </property>
+        <content>
+#ifdef __cplusplus
+extern "C" {
+#endif
+            #define SCI_SMCI_CFG_PARAM_CHECKING_ENABLE ${config.driver.sci_smci.param_checking_enable}
+#ifdef __cplusplus
+}
+#endif
+        </content>
+    </config>
+    <module config="config.driver.sci_smci" display="Connectivity|${module.driver.smci.name} SMCI (r_sci_smci)" id="module.driver.smci_on_sci_smci" version="1" url="group___s_c_i___s_m_c_i.html">
+        <constraint display="Unique name required for each instance">
+            "${interface.driver.smci.${module.driver.smci.name}}" === "1"
+        </constraint>
+        <constraint display="Specified 'Baud Rate' is not available on selected MCU.">
+            testInteger("${module.driver.smci.baudrate}") &amp;&amp; ("${module.driver.smci.baudrate}" &gt; 0) &amp;&amp; ("${module.driver.smci.baudrate}" &lt;= 625000)
+        </constraint>
+        <constraint display="Requires SCI Peripheral">
+          "${interface.mcu.sci.external}" === "1"
+        </constraint>
+        <constraint display="Channel not available on selected MCU">
+            "${interface.mcu.sci.${module.driver.smci.channel}}" === "1"
+        </constraint>
+        <requires id="module.driver.smci_on_sci_smci.requires.sci" interface="interface.mcu.sci.external" visible="false" display="Requires SCI Peripheral" />
+        <provides interface="interface.peripheral.sci${module.driver.smci.channel}" />
+        <provides interface="interface.driver.smci" />
+        <provides interface="interface.driver.smci_on_sci_smci" />
+        <provides interface="interface.driver.smci.${module.driver.smci.name}" />
+        <property default="g_smci${_instance}" display="General|Name" id="module.driver.smci.name" description="Module name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.smci.name}")</constraint>
+        </property>
+        <!-- SCI SMCI interface configuration -->
+        <property default="0" display="General|Channel" id="module.driver.smci.channel" description="Select the SCI channel.">
+            <constraint display="Value must be a non-negative integer">testInteger("${module.driver.smci.channel}") &amp;&amp; ("${module.driver.smci.channel}" &gt;= 0)</constraint>
+            <signal event="event.sci${module.driver.smci.channel}.rxi" />
+            <signal event="event.sci${module.driver.smci.channel}.txi" />
+            <signal event="event.sci${module.driver.smci.channel}.eri" />
+        </property>
+        <property default="9600" display="Baud|Baud Rate" id="module.driver.smci.baudrate" description="Enter the desired baud rate.\n\nIf the requested baud rate cannot be achieved, the settings with the smallest percent error are used. The theoretical calculated baud rate and percent error are printed in a comment in the generated baud_setting_t structure.">
+            <constraint display="Value must be an integer greater than 0">testInteger("${module.driver.smci.baudrate}")   &amp;&amp; ("${module.driver.smci.baudrate}" &gt; 0)</constraint>
+        </property>
+        <property default="module.driver.smci.conversion_integer.F372_5_D1" display="Baud|Clock conversion integer" id="module.driver.smci.conversion_integer" description="Clock rate conversion integer is one of transmission parameters defined by ISO7816-3 as F and also decodes to f-max of the output clock.">
+            <option display="F=372 fmax=4MHz D=1" id="module.driver.smci.conversion_integer.F372_4_D1" value="0x01"/>
+            <option display="F=372 fmax=4MHz D=2" id="module.driver.smci.conversion_integer.F372_4_D2" value="0x02"/>
+            <option display="F=372 fmax=4MHz D=4" id="module.driver.smci.conversion_integer.F372_4_D4" value="0x03"/>
+            <option display="F=372 fmax=5MHz D=1" id="module.driver.smci.conversion_integer.F372_5_D1" value="0x11"/>
+            <option display="F=372 fmax=5MHz D=2" id="module.driver.smci.conversion_integer.F372_5_D2" value="0x12"/>
+            <option display="F=372 fmax=5MHz D=4" id="module.driver.smci.conversion_integer.F372_5_D4" value="0x13"/>
+            <option display="F=744 fmax=8MHz D=2" id="module.driver.smci.conversion_integer.F744_8_D2" value="0x32"/>
+            <option display="F=744 fmax=8MHz D=4" id="module.driver.smci.conversion_integer.F744_8_D4" value="0x33"/>
+            <option display="F=744 fmax=8MHz D=8" id="module.driver.smci.conversion_integer.F744_8_D8" value="0x34"/>
+            <option display="F=1116 fmax=12MHz D=12" id="module.driver.smci.conversion_integer.F1116_D12" value="0x48"/>
+            <option display="F=1488 fmax=16MHz D=4" id="module.driver.smci.conversion_integer.F1488_16_D4" value="0x53"/>
+            <option display="F=1488 fmax=16MHz D=8" id="module.driver.smci.conversion_integer.F1488_16_D8" value="0x54"/>
+            <option display="F=1488 fmax=16MHz D=16" id="module.driver.smci.conversion_integer.F1488_16_D16" value="0x55"/>
+            <option display="F=1860 fmax=20MHz D=20" id="module.driver.smci.conversion_integer.F1860_20" value="0x69"/>
+            <option display="F=512 fmax=5MHz D=1" id="module.driver.smci.conversion_integer.F512_5_D1" value="0x91"/>
+            <option display="F=512 fmax=5MHz D=2" id="module.driver.smci.conversion_integer.F512_5_D2" value="0x92"/>
+            <option display="F=512 fmax=5MHz D=4" id="module.driver.smci.conversion_integer.F512_5_D4" value="0x93"/>
+            <option display="F=512 fmax=5MHz D=8" id="module.driver.smci.conversion_integer.F512_5_D8" value="0x94"/>
+            <option display="F=512 fmax=5MHz D=16" id="module.driver.smci.conversion_integer.F512_5_D16" value="0x95"/>
+            <option display="F=768 fmax=7.5MHz D=12" id="module.driver.smci.conversion_integer.F768_75_D12" value="0xA8"/>
+            <option display="F=1024 fmax=10MHz D=2" id="module.driver.smci.conversion_integer.F1024_10_D2" value="0xB2"/>
+            <option display="F=1024 fmax=10MHz D=4" id="module.driver.smci.conversion_integer.F1024_10_D4" value="0xB3"/>
+            <option display="F=1024 fmax=10MHz D=8" id="module.driver.smci.conversion_integer.F1024_10_D8" value="0xB4"/>
+            <option display="F=1024 fmax=10MHz D=16" id="module.driver.smci.conversion_integer.F1024_10_D16" value="0xB5"/>
+            <option display="F=1024 fmax=10MHz D=32" id="module.driver.smci.conversion_integer.F1024_10_D32" value="0xB6"/>
+            <option display="F=1536 fmax=15MHz D=12" id="module.driver.smci.conversion_integer.F1536_15_D12" value="0xC8"/>
+            <option display="F=2048 fmax=20MHz D=4" id="module.driver.smci.conversion_integer.F2048_20_D4" value="0xD3"/>
+            <option display="F=2048 fmax=20MHz D=8" id="module.driver.smci.conversion_integer.F2048_20_D8" value="0xD4"/>
+            <option display="F=2048 fmax=20MHz D=16" id="module.driver.smci.conversion_integer.F2048_20_D16" value="0xD5"/>
+            <option display="F=2048 fmax=20MHz D=32" id="module.driver.smci.conversion_integer.F2048_20_D32" value="0xD6"/>
+            <option display="F=2048 fmax=20MHz D=64" id="module.driver.smci.conversion_integer.F2048_20_D64" value="0xD7"/>
+        </property>
+        <property default="5" display="Baud|Max Error (%)" id="module.driver.smci.baudrate_max_err" description="Maximum percent error allowed during baud calculation. This is used by the algorithm to determine whether or not to consider using less accurate alternative register settings.\n\nNOTE: The baud calculation does not show an error in the tool if this percent error was not achieved. The calculated percent error is recorded in a comment in the generated baud_setting_t structure.">
+            <constraint display="Must be a valid non negative integer with a maximum configurable value of 100">testInteger("${module.driver.smci.baudrate_max_err}") &amp;&amp; ("${module.driver.smci.baudrate_max_err}" &gt; 0) &amp;&amp; ("${module.driver.smci.baudrate_max_err}" &lt;= 20)</constraint>
+        </property>
+        <property default="" id="module.driver.smci.baud_setting">
+           <export><![CDATA[eval('' +
+' /* INPUTS */' +
+' var peripheral_clock = ${board.clock.peripheral.sci};' +
+' var baudrate = ${module.driver.smci.baudrate};' +
+' var baud_rate_error_max = ${module.driver.smci.baudrate_max_err};' +
+' var base_clock_cyclesIndex = (${module.driver.smci.conversion_integer} & 0xf0)/16;' +
+' var baudrate_adjust_integerIndex =  ${module.driver.smci.conversion_integer} & 0x0F;' +
+' var d_lookup = [' +
+'  0,' +
+'  1,' +
+'  2,' +
+'  4,' +
+'  8,' +
+'  16,' +
+'  32,' +
+'  64,' +
+'  12,' +
+'  20,' +
+'  0,' +
+'  0,' +
+'  0,' +
+'  0,' +
+'  0,' +
+'  0' +
+' ];' +
+' var f_lookup = [' +
+'   {  F:372},' +
+'   {  F:372},' +
+'   {  F:558},' +
+'   {  F:744},' +
+'   {  F:1116},' +
+'   {  F:1488},' +
+'   {  F:1860},' +
+'   {  F:512},' +
+'   {  F:768},' +
+'   {  F:1024},' +
+'   {  F:1536},' +
+'   {  F:2048}' +
+' ];' +
+' var fmax_lookup = [' +
+'  {  fmax:4000000},' +
+'  {  fmax:5000000},' +
+'  {  fmax:6000000},' +
+'  {  fmax:8000000},' +
+'  {  fmax:12000000},' +
+'  {  fmax:16000000},' +
+'  {  fmax:20000000},' +
+'  {  fmax:5000000},' +
+'  {  fmax:7500000},' +
+'  {  fmax:10000000},' +
+'  {  fmax:15000000},' +
+'  {  fmax:20000000},' +
+' ];' +
+' var bdlut = [  ' +
+'  {  bcp2 : 1,    bcp01 : 0,  S: 32 },' +
+'  {  bcp2 : 1,    bcp01 : 1,  S: 64 },' +
+'  {  bcp2 : 0,    bcp01 : 0,  S: 93 },' +
+'  {  bcp2 : 0,    bcp01 : 1,  S: 128 },' +
+'  {  bcp2 : 0,    bcp01 : 2,  S: 186 },' +
+'  {  bcp2 : 1,    bcp01 : 3,  S: 256 },' +
+'  {  bcp2 : 1,    bcp01 : 2,  S: 372 },' +
+'  {  bcp2 : 0,    bcp01 : 3,  S: 512 },' +
+' ];' +
+' var actual_bitrate=0;' +
+' var cks = 0;' +
+' var brr = 13;' +
+' var max_baudrate = 0;' +
+' var divisor = 0;' +
+' var divisor_bitrate_multiple = 0;' +
+' var err_divisor = 0;' +
+' var bit_err = 0;' +
+' var s_value;' +
+' var max_smci_frequency;' +
+' var i=0;' +
+' var s_index=0;' +
+' var bcp2;' +
+' var bcp01;' +
+' var async_baud = bdlut;' +
+' var hit_bit_err = 100;' +
+' var best_brr = 255;' +
+'' +
+'max_smci_frequency = fmax_lookup[base_clock_cyclesIndex].fmax;' +
+'s_value = (f_lookup[base_clock_cyclesIndex].F)/d_lookup[baudrate_adjust_integerIndex];' +
+'' +
+'while ((s_index < 16) && (s_value != async_baud[s_index].S))' +
+'{' +
+'  s_index++;' +
+'}' +
+'if (s_index >= 16)' +
+'{' +
+'  s_value_message = "/* Unsupported F/D ratio: " + s_value + ". */";' +
+'}' +
+' max_baudrate = Math.floor((d_lookup[baudrate_adjust_integerIndex] * max_smci_frequency)/ f_lookup[base_clock_cyclesIndex].F);' +
+' if (baudrate < max_baudrate)' +
+' { ' +
+'   bcp2 = async_baud[s_index].bcp2;' +
+'   bcp01 = async_baud[s_index].bcp01;' +
+'   for (var i = 0; i <= 3; i++)' +
+'   {  ' +
+'      divisor_bitrate_multiple = ((    (1<<((2 * i) + 1)) * s_value));' +
+'      divisor = divisor_bitrate_multiple * baudrate;' +
+'      /* Calculate BRR so that the bit rate is the largest possible value less than or equal to the desired' +
+'      * baudrate.*/' +
+'      brr = Math.floor((peripheral_clock / divisor) - 1);' +
+'      err_divisor = (divisor * (brr + 1));' +
+'      bit_err = (((peripheral_clock * 100) / err_divisor) - 100);' +
+'      if (bit_err < 0)' +
+'      {' +
+'        bit_err = -bit_err;' +
+'      }' +
+'      if ((brr <= 255) && (bit_err < hit_bit_err))' +
+'      {' +
+'        best_brr = brr;' +
+'        cks = i;' +
+'        hit_bit_err = bit_err;' +
+'      }' +
+'   }' +
+'   if (hit_bit_err > baud_rate_error_max)' +
+'   {' +
+'       actual_bitrate = (peripheral_clock /( (1<<((2 * cks) + 1))  * s_value * (best_brr+1)));' +
+'       bitrate_setting = "/* ERROR OUT OF RANGE Baud Rate Target:" + baudrate.toFixed(0)  + " Actual:" +  +  actual_bitrate.toFixed(0) + " Error%:" + hit_bit_err.toFixed(3) + " */" + ' +
+'         "  .computed_baud_rate = " + actual_bitrate.toFixed(0) +' +
+'         ", .smr_smci_clock_bits_b.cks = " + cks.toString() +' +
+'         ", .smr_smci_clock_bits_b.bcp01 = " + bcp01.toString() +' +
+'         ", .scmr_bcp2 = " + bcp2.toString() +' +
+'        ", .brr = " + best_brr.toString();' +
+'   }' +
+'   else' +
+'   {' +
+'       actual_bitrate = (peripheral_clock /( (1<<((2 * cks) + 1))  * s_value * (best_brr+1)));' +
+'       bitrate_setting = "/* Baud Rate Target:" + baudrate.toFixed(0)  + " Actual:" +  +  actual_bitrate.toFixed(0) + " Error%:" + hit_bit_err.toFixed(3) + " */" + ' +
+'       "  .computed_baud_rate = " + actual_bitrate.toFixed(0) +' +
+'       ", .smr_smci_clock_bits_b.cks = " + cks.toString() +' +
+'       ", .smr_smci_clock_bits_b.bcp01 = " + bcp01.toString() +' +
+'       ", .scmr_bcp2 = " + bcp2.toString() +' +
+'       ", .brr = " + best_brr.toString();' +
+'    }' +
+' }' +
+' else' +
+' {' +
+'   bitrate_setting = "/* PARAMETER ERROR!!!! Baud Rate Target:" + baudrate.toFixed(0)  + " Max Baud for selected params:" +  max_baudrate.toFixed(0) + " */" + ' +
+'   "  .computed_baud_rate = 0" +' +
+'   ", .smr_smci_clock_bits_b.cks  = 0" +' +
+'   ", .smr_smci_clock_bits_b.bcp01 = 0" +' +
+'   ", .scmr_bcp2 = 0" +' +
+'   ", .brr = 0";' +
+'}' +
+' bitrate_setting' +
+'')
+]]>            </export>
+        </property>
+        <!-- External defined callback function -->
+        <property default="user_smci_callback" display="Interrupts|Callback" id="module.driver.smci.callback" description="A user callback function can be provided. If this callback function is provided, it will be called from the interrupt service routine (ISR).">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.smci.callback}")</constraint>
+        </property>
+        <property default="" display="Interrupts|Receive Interrupt Priority" id="module.driver.smci.rxi_ipl" description="Select the receive interrupt priority.">
+            <select enum="enum.mcu.nvic.priorities.mandatory"/>
+            <interrupt event="event.sci${module.driver.smci.channel}.rxi" isr="sci_smci_rxi_isr"/>
+        </property>
+        <property default="" display="Interrupts|Transmit Data Empty Interrupt Priority" id="module.driver.smci.txi_ipl" description="Select the transmit interrupt priority.">
+            <select enum="enum.mcu.nvic.priorities.mandatory"/>
+            <interrupt event="event.sci${module.driver.smci.channel}.txi" isr="sci_smci_txi_isr"/>
+        </property>
+        <property default="" display="Interrupts|Error Interrupt Priority" id="module.driver.smci.eri_ipl" description="Select the error interrupt priority.">
+            <select enum="enum.mcu.nvic.priorities.mandatory"/>
+            <interrupt event="event.sci${module.driver.smci.channel}.eri" isr="sci_smci_eri_isr"/>
+        </property>
+        <peripheral name="SCI${module.driver.smci.channel}" component="sci${module.driver.smci.channel}" pin="sci${module.driver.smci.channel}.rxd" />
+        <peripheral name="SCI${module.driver.smci.channel}" component="sci${module.driver.smci.channel}" pin="sci${module.driver.smci.channel}.txd" />
+        <peripheral name="SCI${module.driver.smci.channel}" component="sci${module.driver.smci.channel}" pin="sci${module.driver.smci.channel}.sck" />
+        <!-- For MCU's whose pinmapping files have been generated with MPC Designer Tool -->
+        <peripheral name="SCI${module.driver.smci.channel}" component="sci${module.driver.smci.channel}" pin="sci${module.driver.smci.channel}.rxd${module.driver.smci.channel}" />
+        <peripheral name="SCI${module.driver.smci.channel}" component="sci${module.driver.smci.channel}" pin="sci${module.driver.smci.channel}.txd${module.driver.smci.channel}" />
+        <peripheral name="SCI${module.driver.smci.channel}" component="sci${module.driver.smci.channel}" pin="sci${module.driver.smci.channel}.sck${module.driver.smci.channel}" />
+        <symbol id="symbol.driver.smci.name" value="${module.driver.smci.name}"/>
+        <symbol id="symbol.driver.smci.guard.open" value="${module.driver.smci.name}_open_guard"/>
+        <symbol id="symbol.driver.smci.guard.macro.open" value="FSP_GUARD_${module.driver.smci.name}_R_SCI_SMCI_Open"/>
+        <symbol id="symbol.driver.smci.guard.write" value="${module.driver.smci.name}_write_guard"/>
+        <symbol id="symbol.driver.smci.guard.macro.write" value="FSP_GUARD_${module.driver.smci.name}_R_SCI_SMCI_Write"/>
+        <symbol id="symbol.driver.smci.guard.read" value="${module.driver.smci.name}_read_guard"/>
+        <symbol id="symbol.driver.smci.guard.macro.read" value="FSP_GUARD_${module.driver.smci.name}_R_SCI_SMCI_Read"/>
+        <symbol id="symbol.driver.smci.guard.transfer_mode_set" value="${module.driver.smci.name}_transfer_mode_set_guard"/>
+        <symbol id="symbol.driver.smci.guard.macro.transfer_mode_set" value="FSP_GUARD_${module.driver.smci.name}_R_SCI_SMCI_TransferModeSet"/>
+        <symbol id="symbol.driver.smci.guard.baud_calculate" value="${module.driver.smci.name}_baud_calculate_guard"/>
+        <symbol id="symbol.driver.smci.guard.macro.baud_calculate" value="FSP_GUARD_${module.driver.smci.name}_R_SCI_SMCI_BaudCalculate"/>
+        <symbol id="symbol.driver.smci.guard.baud_set" value="${module.driver.smci.name}_baud_set_guard"/>
+        <symbol id="symbol.driver.smci.guard.macro.baud_set" value="FSP_GUARD_${module.driver.smci.name}_R_SCI_SMCI_BaudSet"/>
+        <symbol id="symbol.driver.smci.guard.status_get" value="${module.driver.smci.name}_status_get_guard"/>
+        <symbol id="symbol.driver.smci.guard.macro.status_get" value="FSP_GUARD_${module.driver.smci.name}_R_SCI_SMCI_StatusGet"/>
+        <symbol id="symbol.driver.smci.guard.clock_control" value="${module.driver.smci.name}_clock_control_guard"/>
+        <symbol id="symbol.driver.smci.guard.macro.clock_control" value="FSP_GUARD_${module.driver.smci.name}_R_SCI_SMCI_ClockControl"/>
+        <symbol id="symbol.driver.smci.guard.callback_set" value="${module.driver.smci.name}_callback_set_guard"/>
+        <symbol id="symbol.driver.smci.guard.macro.callback_set" value="FSP_GUARD_${module.driver.smci.name}_R_SCI_SMCI_CallbackSet"/>
+        <symbol id="symbol.driver.smci.guard.close" value="${module.driver.smci.name}_close_guard"/>
+        <symbol id="symbol.driver.smci.guard.macro.close" value="FSP_GUARD_${module.driver.smci.name}_R_SCI_SMCI_Close"/>
+        <symbol id="symbol.driver.smci.nsc_api" value="${module.driver.smci.name}_nsc_api"/>
+        <symbol id="symbol.driver.smci.baud_setting" value="${module.driver.smci.name}_baud_setting"/>
+        <symbol id="symbol.driver.smci.cfg" value="${module.driver.smci.name}_cfg"/>
+        <symbol id="symbol.driver.smci.cfg_extend" value="${module.driver.smci.name}_cfg_extend"/>
+        <symbol id="symbol.driver.smci.ctrl" value="${module.driver.smci.name}_ctrl"/>
+        <header>
+            /** SMCI on SCI Instance. 1.0*/
+            extern const smci_instance_t      ${module.driver.smci.name};
+
+            /** Access the SMCI instance using these structures when calling API functions directly (::p_api is not used). */
+            extern sci_smci_instance_ctrl_t     ${module.driver.smci.name}_ctrl;
+            extern const smci_cfg_t ${module.driver.smci.name}_cfg;
+            extern const sci_smci_extended_cfg_t ${module.driver.smci.name}_cfg_extend;
+
+            #ifndef ${module.driver.smci.callback}
+            void ${module.driver.smci.callback}(smci_callback_args_t * p_args);
+            #endif
+        </header>
+        <includes>
+            #include &quot;r_sci_smci.h&quot;
+            #include &quot;r_smci_api.h&quot;
+        </includes>
+        <declarations>
+            sci_smci_instance_ctrl_t     ${module.driver.smci.name}_ctrl;
+
+            smci_baud_setting_t          ${module.driver.smci.name}_baud_setting =
+            {
+                ${module.driver.smci.baud_setting}
+            };
+
+            /** SMCI extended configuration for SMCIonSCI HAL driver */
+            const sci_smci_extended_cfg_t ${module.driver.smci.name}_cfg_extend =
+            {
+                .p_smci_baud_setting    = &amp;${module.driver.smci.name}_baud_setting,
+            };
+
+            /** SMCI interface configuration */
+            const smci_cfg_t ${module.driver.smci.name}_cfg =
+            {
+                .channel              = ${module.driver.smci.channel},
+                .p_callback           = ${module.driver.smci.callback},
+                .p_context            = NULL,
+                .p_extend             = &amp;${module.driver.smci.name}_cfg_extend,
+#define RA_NOT_DEFINED (1)
+#undef RA_NOT_DEFINED
+                .rxi_ipl             = ${module.driver.smci.rxi_ipl},
+                .txi_ipl             = ${module.driver.smci.txi_ipl},
+                .eri_ipl             = ${module.driver.smci.eri_ipl},
+#if defined(VECTOR_NUMBER_SCI${module.driver.smci.channel}_RXI)
+                .rxi_irq             = VECTOR_NUMBER_SCI${module.driver.smci.channel}_RXI,
+#else
+                .rxi_irq             = FSP_INVALID_VECTOR,
+#endif
+#if defined(VECTOR_NUMBER_SCI${module.driver.smci.channel}_TXI)
+                .txi_irq             = VECTOR_NUMBER_SCI${module.driver.smci.channel}_TXI,
+#else
+                .txi_irq             = FSP_INVALID_VECTOR,
+#endif
+#if defined(VECTOR_NUMBER_SCI${module.driver.smci.channel}_ERI)
+                .eri_irq             = VECTOR_NUMBER_SCI${module.driver.smci.channel}_ERI,
+#else
+                .eri_irq             = FSP_INVALID_VECTOR,
+#endif
+            };
+
+/* Instance structure to use this module. */
+const smci_instance_t ${module.driver.smci.name} =
+{
+    .p_ctrl        = &amp;${module.driver.smci.name}_ctrl,
+    .p_cfg         = &amp;${module.driver.smci.name}_cfg,
+    .p_api         = &amp;g_smci_on_sci
+};
+        </declarations>
+        <guard>
+            <header>
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.smci.name}_open_guard(smci_ctrl_t *const p_api_ctrl, smci_cfg_t const *const p_cfg);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.smci.name}_write_guard(smci_ctrl_t *const p_api_ctrl, uint8_t const *const p_src, uint32_t const bytes);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.smci.name}_read_guard(smci_ctrl_t *const p_api_ctrl, uint8_t *const p_dest, uint32_t const bytes);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.smci.name}_transfer_mode_set_guard(smci_ctrl_t *const p_api_ctrl, smci_transfer_mode_t const *const p_transfer_mode_params);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.smci.name}_baud_calculate_guard(smci_speed_params_t const *const p_speed_params, uint32_t baud_rate_error_x_1000, void *const p_baud_setting);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.smci.name}_baud_set_guard(smci_ctrl_t *const p_api_ctrl, void const *const p_baud_setting);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.smci.name}_status_get_guard(smci_ctrl_t *const p_api_ctrl, smci_status_t *const p_status);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.smci.name}_clock_control_guard(smci_ctrl_t *const p_api_ctrl, bool clock_enable);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.smci.name}_callback_set_guard(smci_ctrl_t *const p_api_ctrl, void(*p_callback)(smci_callback_args_t *), void const *const p_context, smci_callback_args_t *const p_callback_memory);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.smci.name}_close_guard(smci_ctrl_t *const p_api_ctrl);
+
+            </header>
+            <template name="${module.driver.smci.name}_guard.c">
+                <![CDATA[
+                    #include "guard.h"
+
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.smci.name}_open_guard (smci_ctrl_t *const p_api_ctrl, smci_cfg_t const *const p_cfg)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+    FSP_PARAMETER_NOT_USED(p_cfg);
+
+    return R_SCI_SMCI_Open(&${module.driver.smci.name}_ctrl, &${module.driver.smci.name}_cfg);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.smci.name}_write_guard (smci_ctrl_t *const p_api_ctrl, uint8_t const *const p_src, uint32_t const bytes)
+{
+    /* Verify all pointers are in non-secure memory. */
+    uint8_t const *const p_src_checked = cmse_check_address_range((void *) p_src, bytes, CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_src_checked != NULL);
+
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+
+    return R_SCI_SMCI_Write(&${module.driver.smci.name}_ctrl, p_src_checked, bytes);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.smci.name}_read_guard (smci_ctrl_t *const p_api_ctrl, uint8_t *const p_dest, uint32_t const bytes)
+{
+    /* Verify all pointers are in non-secure memory. */
+    uint8_t *const p_dest_checked = cmse_check_address_range((void *) p_dest, bytes, CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_dest_checked != NULL);
+
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+
+    return R_SCI_SMCI_Read(&${module.driver.smci.name}_ctrl, p_dest_checked, bytes);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.smci.name}_transfer_mode_set_guard (smci_ctrl_t *const p_api_ctrl, smci_transfer_mode_t const *const p_transfer_mode_params)
+{
+    /* Verify all pointers are in non-secure memory. */
+    smci_transfer_mode_t const *const p_transfer_mode_params_checked = cmse_check_pointed_object((smci_transfer_mode_t *) p_transfer_mode_params, CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_transfer_mode_params_checked != NULL);
+
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+
+    return R_SCI_SMCI_TransferModeSet(&${module.driver.smci.name}_ctrl, p_transfer_mode_params_checked);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.smci.name}_baud_calculate_guard (smci_speed_params_t const *const p_speed_params, uint32_t baud_rate_error_x_1000, void *const p_baud_setting)
+{
+    /* Verify all pointers are in non-secure memory. */
+    smci_speed_params_t const *const p_speed_params_checked = cmse_check_pointed_object((smci_speed_params_t *) p_speed_params, CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_speed_params_checked != NULL);
+    void *const p_baud_setting_checked = cmse_check_address_range((void *) p_baud_setting, sizeof(smci_baud_setting_t), CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_baud_setting_checked != NULL);
+
+    /* TODO: add your own security checks here */
+
+    return R_SCI_SMCI_BaudCalculate(p_speed_params_checked, baud_rate_error_x_1000, p_baud_setting_checked);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.smci.name}_baud_set_guard (smci_ctrl_t *const p_api_ctrl, void const *const p_baud_setting)
+{
+    /* Verify all pointers are in non-secure memory. */
+    void const *const p_baud_setting_checked = cmse_check_address_range((void *) p_baud_setting, sizeof(smci_baud_setting_t), CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_baud_setting_checked != NULL);
+
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+
+    return R_SCI_SMCI_BaudSet(&${module.driver.smci.name}_ctrl, p_baud_setting_checked);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.smci.name}_status_get_guard (smci_ctrl_t *const p_api_ctrl, smci_status_t *const p_status)
+{
+    /* Verify all pointers are in non-secure memory. */
+    smci_status_t *const p_status_checked = cmse_check_pointed_object(p_status, CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_status_checked != NULL);
+
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+
+    return R_SCI_SMCI_StatusGet(&${module.driver.smci.name}_ctrl, p_status_checked);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.smci.name}_clock_control_guard (smci_ctrl_t *const p_api_ctrl, bool clock_enable)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+
+    return R_SCI_SMCI_ClockControl(&${module.driver.smci.name}_ctrl, clock_enable);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.smci.name}_callback_set_guard (smci_ctrl_t *const p_api_ctrl, void(*p_callback)(smci_callback_args_t *), void const *const p_context, smci_callback_args_t *const p_callback_memory)
+{
+    /* Verify all pointers are in non-secure memory. */
+    void(*p_callback_checked)(smci_callback_args_t *) = (void(*)(smci_callback_args_t *)) cmse_check_address_range((void *) p_callback, sizeof(void *), CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_callback_checked != NULL);
+    smci_callback_args_t *const p_callback_memory_checked = cmse_check_pointed_object(p_callback_memory, CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_callback_memory_checked != NULL);
+
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+    FSP_PARAMETER_NOT_USED(p_context);
+
+    return R_SCI_SMCI_CallbackSet(&${module.driver.smci.name}_ctrl, p_callback_checked, p_context, p_callback_memory_checked);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.smci.name}_close_guard (smci_ctrl_t *const p_api_ctrl)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+
+    return R_SCI_SMCI_Close(&${module.driver.smci.name}_ctrl);
+}
+
+                ]]>
+            </template>
+        </guard>
+        <nsc>
+            <header>
+
+#define FSP_GUARD_${module.driver.smci.name}_R_SCI_SMCI_Open() ${module.driver.smci.name}_open_guard(FSP_SECURE_ARGUMENT, FSP_SECURE_ARGUMENT)
+
+#define FSP_GUARD_${module.driver.smci.name}_R_SCI_SMCI_Write(p_src, bytes) ${module.driver.smci.name}_write_guard(FSP_SECURE_ARGUMENT, p_src, bytes)
+
+#define FSP_GUARD_${module.driver.smci.name}_R_SCI_SMCI_Read(p_dest, bytes) ${module.driver.smci.name}_read_guard(FSP_SECURE_ARGUMENT, p_dest, bytes)
+
+#define FSP_GUARD_${module.driver.smci.name}_R_SCI_SMCI_TransferModeSet(p_transfer_mode_params) ${module.driver.smci.name}_transfer_mode_set_guard(FSP_SECURE_ARGUMENT, p_transfer_mode_params)
+
+#define FSP_GUARD_${module.driver.smci.name}_R_SCI_SMCI_BaudCalculate(p_speed_params, baud_rate_error_x_1000, p_baud_setting) ${module.driver.smci.name}_baud_calculate_guard(p_speed_params, baud_rate_error_x_1000, p_baud_setting)
+
+#define FSP_GUARD_${module.driver.smci.name}_R_SCI_SMCI_BaudSet(p_baud_setting) ${module.driver.smci.name}_baud_set_guard(FSP_SECURE_ARGUMENT, p_baud_setting)
+
+#define FSP_GUARD_${module.driver.smci.name}_R_SCI_SMCI_StatusGet(p_status) ${module.driver.smci.name}_status_get_guard(FSP_SECURE_ARGUMENT, p_status)
+
+#define FSP_GUARD_${module.driver.smci.name}_R_SCI_SMCI_ClockControl(clock_enable) ${module.driver.smci.name}_clock_control_guard(FSP_SECURE_ARGUMENT, clock_enable)
+
+#define FSP_GUARD_${module.driver.smci.name}_R_SCI_SMCI_CallbackSet(p_callback, p_context, p_callback_memory) ${module.driver.smci.name}_callback_set_guard(FSP_SECURE_ARGUMENT, p_callback, p_context, p_callback_memory)
+
+#define FSP_GUARD_${module.driver.smci.name}_R_SCI_SMCI_Close() ${module.driver.smci.name}_close_guard(FSP_SECURE_ARGUMENT)
+
+
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.smci.name}_open_guard(smci_ctrl_t *const p_api_ctrl, smci_cfg_t const *const p_cfg);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.smci.name}_write_guard(smci_ctrl_t *const p_api_ctrl, uint8_t const *const p_src, uint32_t const bytes);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.smci.name}_read_guard(smci_ctrl_t *const p_api_ctrl, uint8_t *const p_dest, uint32_t const bytes);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.smci.name}_transfer_mode_set_guard(smci_ctrl_t *const p_api_ctrl, smci_transfer_mode_t const *const p_transfer_mode_params);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.smci.name}_baud_calculate_guard(smci_speed_params_t const *const p_speed_params, uint32_t baud_rate_error_x_1000, void *const p_baud_setting);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.smci.name}_baud_set_guard(smci_ctrl_t *const p_api_ctrl, void const *const p_baud_setting);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.smci.name}_status_get_guard(smci_ctrl_t *const p_api_ctrl, smci_status_t *const p_status);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.smci.name}_clock_control_guard(smci_ctrl_t *const p_api_ctrl, bool clock_enable);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.smci.name}_callback_set_guard(smci_ctrl_t *const p_api_ctrl, void(*p_callback)(smci_callback_args_t *), void const *const p_context, smci_callback_args_t *const p_callback_memory);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.smci.name}_close_guard(smci_ctrl_t *const p_api_ctrl);
+
+
+extern const smci_instance_t ${module.driver.smci.name};
+            </header>
+            <declarations>
+                <![CDATA[
+static const smci_api_t ${module.driver.smci.name}_nsc_api =
+{
+    .open = ${module.driver.smci.name}_open_guard,
+    .write = ${module.driver.smci.name}_write_guard,
+    .read = ${module.driver.smci.name}_read_guard,
+    .transferModeSet = ${module.driver.smci.name}_transfer_mode_set_guard,
+    .baudSet = ${module.driver.smci.name}_baud_set_guard,
+    .statusGet = ${module.driver.smci.name}_status_get_guard,
+    .clockControl = ${module.driver.smci.name}_clock_control_guard,
+    .callbackSet = ${module.driver.smci.name}_callback_set_guard,
+    .close = ${module.driver.smci.name}_close_guard,
+};
+const smci_instance_t ${module.driver.smci.name} =
+{
+    .p_api = &${module.driver.smci.name}_nsc_api,
+    .p_ctrl = FSP_SECURE_ARGUMENT,
+    .p_cfg = FSP_SECURE_ARGUMENT,
+};
+                ]]>
+            </declarations>
+        </nsc>
+        <api configurable="true">
+            <file>ra/fsp/inc/instances/r_sci_smci.h</file>
+            <file>ra/fsp/inc/api/r_smci_api.h</file>
+        </api>
+    </module>
+</raModuleDescription>

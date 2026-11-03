@@ -1,0 +1,225 @@
+﻿<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.driver.usb_hmsc" path="fsp_cfg/r_usb_class_cfg.h" version="0">
+        <content>
+        </content>
+    </config>
+    <module config="config.driver.usb_hmsc" display="Connectivity|${module.driver.hmsc.name} USB HMSC (r_usb_hmsc)" id="module.driver.hmsc_on_usb" version="0" url="group___u_s_b___h_m_s_c.html">
+        <constraint display="Unique name required for each instance">
+            "${interface.driver.hmsc.${module.driver.hmsc.name}}" === "1"
+        </constraint>
+        <constraint display="Requires hmsc Peripheral">
+          "${interface.mcu.usb_fs.external}" === "1"
+        </constraint>
+        <constraint display="Use USBX instead in Azure RTOS projects.">
+            !testExists("${interface.rtos.tx}")
+        </constraint>
+        <constraint display="Requires FreeRTOS Plus FAT">
+          "${interface.driver.rm_freertos_plus_fat}" === "1"
+        </constraint>
+        <requires id="module.driver.hmsc_on_usb.requires.hmsc" interface="interface.mcu.usb_fs.external" visible="false" display="Requires USB Peripheral" />
+        <requires id="module.driver.basic_on_usb.requires.full_module" interface="interface.mcu.usb.pipes.0.1.2.3.4.5.6.7.8.9" visible="false" display="Requires USB Full Module" />
+        <requires id="module.driver.basic_on_usb.requires.basic" interface="interface.driver.basic_on_usb" display="Add USB Driver">
+            <override property="module.driver.usb_basic.usb_mode" value="module.driver.usb_basic.usb_mode.host"/>
+            <override property="module.driver.usb_basic.usb_classtype" value="module.driver.usb_basic.usb_classtype.hmsc"/>
+            <override property="module.driver.usb_basic.rtos_callback" value="${module.driver.hmsc.callback}"/>
+            <override property="module.driver.usb_basic.other_context" value="${module.driver.hmsc.context}"/>
+            <override property="module.driver.usb_basic.p_usb_reg" value="NULL"/>
+        </requires>
+        <requires id="module.driver.hmsc_on_usb.ignore.azure_projects" interface="interface.rtos.supports.renesas_usb" visible="false" display="Use Azure USBX for Azure RTOS projects."/>
+        <provides interface="interface.driver.hmsc.${module.driver.hmsc.name}" />
+        <provides interface="interface.driver.hmsc" />
+        <provides interface="interface.driver.hmsc_on_usb" />
+        <property default="hmsc" id="module.driver.hmsc.hmsc_interface" description=""/>
+        <property default="g_hmsc${_instance}" display="Name" id="module.driver.hmsc.name" description="Module name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.hmsc.name}")</constraint>
+        </property>
+        <property default="NULL" display="Context name" id="module.driver.hmsc.context" description="Context name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.hmsc.context}")</constraint>
+        </property>
+        <property default="NULL" display="Callback name" id="module.driver.hmsc.callback" description="Callback name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.hmsc.callback}")</constraint>
+        </property>
+
+        <!-- symbol id -->
+        <symbol id="symbol.driver.hmsc.name" value="${module.driver.hmsc.name}"/>
+        <symbol id="symbol.driver.hmsc.guard.storage_command" value="${module.driver.hmsc.name}_storage_command_guard"/>
+        <symbol id="symbol.driver.hmsc.guard.macro.storage_command" value="FSP_GUARD_${module.driver.hmsc.name}_R_USB_HMSC_StorageCommand"/>
+        <symbol id="symbol.driver.hmsc.guard.drive_number_get" value="${module.driver.hmsc.name}_drive_number_get_guard"/>
+        <symbol id="symbol.driver.hmsc.guard.macro.drive_number_get" value="FSP_GUARD_${module.driver.hmsc.name}_R_USB_HMSC_DriveNumberGet"/>
+        <symbol id="symbol.driver.hmsc.guard.storage_read_sector" value="${module.driver.hmsc.name}_storage_read_sector_guard"/>
+        <symbol id="symbol.driver.hmsc.guard.macro.storage_read_sector" value="FSP_GUARD_${module.driver.hmsc.name}_R_USB_HMSC_StorageReadSector"/>
+        <symbol id="symbol.driver.hmsc.guard.storage_write_sector" value="${module.driver.hmsc.name}_storage_write_sector_guard"/>
+        <symbol id="symbol.driver.hmsc.guard.macro.storage_write_sector" value="FSP_GUARD_${module.driver.hmsc.name}_R_USB_HMSC_StorageWriteSector"/>
+        <symbol id="symbol.driver.hmsc.guard.semaphore_get" value="${module.driver.hmsc.name}_semaphore_get_guard"/>
+        <symbol id="symbol.driver.hmsc.guard.macro.semaphore_get" value="FSP_GUARD_${module.driver.hmsc.name}_R_USB_HMSC_SemaphoreGet"/>
+        <symbol id="symbol.driver.hmsc.guard.semaphore_release" value="${module.driver.hmsc.name}_semaphore_release_guard"/>
+        <symbol id="symbol.driver.hmsc.guard.macro.semaphore_release" value="FSP_GUARD_${module.driver.hmsc.name}_R_USB_HMSC_SemaphoreRelease"/>
+        <symbol id="symbol.driver.hmsc.nsc_api" value="${module.driver.hmsc.name}_nsc_api"/>
+        <symbol id="symbol.driver.hmsc.cfg" value="${module.driver.hmsc.name}_cfg"/>
+        <symbol id="symbol.driver.hmsc.mac_address" value="${module.driver.hmsc.name}_mac_address"/>
+        <symbol id="symbol.driver.hmsc.num_tx_descriptions" value="${module.driver.hmsc.name}_tx_descriptions"/>
+        <symbol id="symbol.driver.hmsc.num_rx_descriptions" value="${module.driver.hmsc.name}_rx_descriptions"/>
+        <symbol id="symbol.driver.hmsc.ctrl" value="${module.driver.basic_on_usb.requires.basic::module.driver.basic.name}_ctrl"/>
+
+        <header>
+        /** MSC Driver on USB Instance. */
+#define usb_hmsc_instance_${module.driver.hmsc.name}   ${module.driver.basic_on_usb.requires.basic::module.driver.basic.name}
+#define usb_hmsc_api_trans_${module.driver.hmsc.name}   ${module.driver.basic_on_usb.requires.basic::module.driver.basic.name}_api_trans
+
+#if 2 == BSP_CFG_RTOS
+#if !defined(${module.driver.hmsc.callback})
+extern void ${module.driver.hmsc.callback}(usb_event_info_t *, usb_hdl_t, usb_onoff_t);
+#endif
+#endif
+
+        </header>
+        <includes>
+#include "r_usb_hmsc_api.h"
+#include "r_usb_hmsc.h"
+        </includes>
+        <declarations>
+        </declarations>
+
+        <guard>
+            <header>
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.hmsc.name}_storage_command_guard(usb_ctrl_t * const p_api_ctrl, uint8_t * buf, uint8_t command, uint8_t destination);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.hmsc.name}_drive_number_get_guard(usb_ctrl_t * const p_api_ctrl, uint8_t * p_drive, uint8_t destination);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.hmsc.name}_storage_read_sector_guard(uint16_t drive_number, uint8_t * const buff, uint32_t sector_number, uint16_t sector_count);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.hmsc.name}_storage_write_sector_guard(uint16_t drive_number, uint8_t const * const buff, uint32_t sector_number, uint16_t sector_count);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.hmsc.name}_semaphore_get_guard(void);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.hmsc.name}_semaphore_release_guard(void);
+
+
+            </header>
+            <template name="${module.driver.hmsc.name}_guard.c">
+                <![CDATA[
+                    #include "guard.h"
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.hmsc.name}_storage_command_guard(usb_ctrl_t * const p_api_ctrl, uint8_t * buf, uint8_t command, uint8_t destination)
+{
+    /* Verify all pointers are in non-secure memory. */
+    uint8_t *const buf_checked = cmse_check_address_range(buf, sizeof(uint8_t), CMSE_AU_NONSECURE);
+    FSP_ASSERT(buf_checked != NULL);
+
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+
+    return R_USB_HMSC_StorageCommand(&${module.driver.basic_on_usb.requires.basic::module.driver.basic.name}_ctrl, buf_checked, command, destination);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.hmsc.name}_drive_number_get_guard(usb_ctrl_t * const p_api_ctrl, uint8_t * p_drive, uint8_t destination)
+{
+    /* Verify all pointers are in non-secure memory. */
+    uint8_t *const p_drive_checked = cmse_check_pointed_object(p_drive, CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_drive_checked != NULL);
+
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+
+    return R_USB_HMSC_DriveNumberGet(&${module.driver.basic_on_usb.requires.basic::module.driver.basic.name}_ctrl, p_drive_checked, destination);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.hmsc.name}_storage_read_sector_guard(uint16_t drive_number, uint8_t * const buff, uint32_t sector_number, uint16_t sector_count)
+{
+    uint32_t sector_size = 512;    ///FIXME
+
+    /* Verify all pointers are in non-secure memory. */
+    uint8_t *const buff_checked = cmse_check_address_range (buff, sizeof(uint8_t) * sector_count * sector_size, CMSE_AU_NONSECURE);
+    FSP_ASSERT (buff_checked != NULL);
+
+    return R_USB_HMSC_StorageReadSector(drive_number, buff_checked, sector_number, sector_count);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.hmsc.name}_storage_write_sector_guard(uint16_t drive_number, uint8_t const * const buff, uint32_t sector_number, uint16_t sector_count)
+{
+    uint32_t sector_size = 512;    ///FIXME
+
+    /* Verify all pointers are in non-secure memory. */
+    uint8_t *const buff_checked = cmse_check_address_range ((void *)buff, sizeof(uint8_t) * sector_count * sector_size, CMSE_AU_NONSECURE);
+    FSP_ASSERT (buff_checked != NULL);
+
+    return R_USB_HMSC_StorageWriteSector(drive_number, buff_checked, sector_number, sector_count);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.hmsc.name}_semaphore_get_guard(void)
+{
+    return R_USB_HMSC_SemaphoreGet();
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.hmsc.name}_semaphore_release_guard(void)
+{
+    return R_USB_HMSC_SemaphoreRelease();
+}
+
+
+                ]]>
+            </template>
+        </guard>
+        <nsc>
+            <header>
+
+#define FSP_GUARD_${module.driver.hmsc.name}_R_USB_HMSC_StorageCommand(buf, command, destination) ${module.driver.hmsc.name}_storage_command_guard(FSP_SECURE_ARGUMENT, buf, command, destination)
+
+#define FSP_GUARD_${module.driver.hmsc.name}_R_USB_HMSC_DriveNumberGet(p_drive, destination) ${module.driver.hmsc.name}_drive_number_get_guard(FSP_SECURE_ARGUMENT, p_drive, destination)
+
+#define FSP_GUARD_${module.driver.hmsc.name}_R_USB_HMSC_StorageReadSector(drive_number, buff, sector_number, sector_count) ${module.driver.hmsc.name}_storage_read_sector_guard(drive_number, buff, sector_number, sector_count)
+
+#define FSP_GUARD_${module.driver.hmsc.name}_R_USB_HMSC_StorageWriteSector(drive_number, buff, sector_number, sector_count) ${module.driver.hmsc.name}_storage_write_sector_guard(drive_number, buff, sector_number, sector_count)
+
+#define FSP_GUARD_${module.driver.hmsc.name}_R_USB_HMSC_SemaphoreGet() ${module.driver.hmsc.name}_semaphore_get_guard()
+
+#define FSP_GUARD_${module.driver.hmsc.name}_R_USB_HMSC_SemaphoreRelease() ${module.driver.hmsc.name}_semaphore_release_guard()
+
+
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.hmsc.name}_storage_command_guard(usb_ctrl_t * const p_api_ctrl, uint8_t * buf, uint8_t command, uint8_t destination);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.hmsc.name}_drive_number_get_guard(usb_ctrl_t * const p_api_ctrl, uint8_t * p_drive, uint8_t destination);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.hmsc.name}_storage_read_sector_guard(uint16_t drive_number, uint8_t * const buff, uint32_t sector_number, uint16_t sector_count);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.hmsc.name}_storage_write_sector_guard(uint16_t drive_number, uint8_t const * const buff, uint32_t sector_number, uint16_t sector_count);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.hmsc.name}_semaphore_get_guard(void);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.hmsc.name}_semaphore_release_guard(void);
+
+
+extern const usb_instance_t ${module.driver.hmsc.name};
+
+            </header>
+            <declarations>
+                <![CDATA[
+
+static const usb_hmsc_api_t ${module.driver.hmsc.name}_nsc_api =
+{
+    .storageCommand        = ${module.driver.hmsc.name}_storage_command_guard,
+    .driveNumberGet        = ${module.driver.hmsc.name}_drive_number_get_guard,
+    .storageReadSector     = ${module.driver.hmsc.name}_storage_read_sector_guard,
+    .storageWriteSector    = ${module.driver.hmsc.name}_storage_write_sector_guard,
+    .semaphoreGet          = ${module.driver.hmsc.name}_semaphore_get_guard,
+    .semaphoreRelease      = ${module.driver.hmsc.name}_semaphore_release_guard,
+};
+const usb_instance_t ${module.driver.hmsc.name} =
+{
+    .p_api = &${module.driver.hmsc.name}_nsc_api,
+    .p_ctrl = FSP_SECURE_ARGUMENT,
+    .p_cfg = FSP_SECURE_ARGUMENT,
+};
+
+
+                ]]>
+            </declarations>
+        </nsc>
+
+    </module>
+</raModuleDescription>

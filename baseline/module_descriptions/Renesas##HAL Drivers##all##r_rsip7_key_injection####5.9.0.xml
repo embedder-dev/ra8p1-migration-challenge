@@ -1,0 +1,16 @@
+<?xml version="1.0" ?>
+<raModuleDescription>
+  <module id="module.driver.rsip7_key_injection" display="Security|Key Injection for PSA Crypto" common="1" version="1" visible="false" url="group___r_s_i_p___k_e_y___i_n_j_e_c_t_i_o_n.html">
+    <requires id="module.driver.rsip.requires.rsip7" interface="interface.mcu.rsip.rsip_e51a" display="Requires RA8 with RSIP_E51A"/>
+    <provides interface="interface.driver.rsip7_key_injection"/>
+    <provides interface="interface.peripheral.rsip"/>
+    <property default="g_rsip7_key_install" display="General|Name" id="module.driver.rsip7_key_injection.name" description="Module name.">
+      <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.rsip7_key_injection.name}")</constraint>
+    </property>
+    <includes>
+      #include &quot;r_rsip_key_injection.h&quot;
+      #include &quot;r_rsip_key_injection_api.h&quot;
+      #include &quot;hw_sce_ra_private.h&quot;
+    </includes>
+  </module>
+</raModuleDescription>

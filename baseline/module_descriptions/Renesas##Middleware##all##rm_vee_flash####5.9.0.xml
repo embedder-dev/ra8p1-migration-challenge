@@ -1,0 +1,374 @@
+﻿<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.middleware.rm_vee_flash" path="fsp_cfg/rm_vee_flash_cfg.h" version="0">
+        <property id="config.middleware.rm_vee_flash.checking" display="Parameter Checking" default="config.middleware.rm_vee_flash.checking.system" description="If selected code for parameter checking is included in the build.">
+            <option id="config.middleware.rm_vee_flash.checking.system" display="Default (BSP)" value="(BSP_CFG_PARAM_CHECKING_ENABLE)" />
+            <option id="config.middleware.rm_vee_flash.checking.enabled" display="Enabled" value="(1)" />
+            <option id="config.middleware.rm_vee_flash.checking.disabled" display="Disabled" value="(0)" />
+        </property>
+        <property id="config.middleware.rm_vee_flash.ref_data_support" display="Reference Data Support" default="config.middleware.rm_vee_flash.ref_data_support.disabled" description="Support writing reference data to the end of the segment.">
+            <option id="config.middleware.rm_vee_flash.ref_data_support.enabled" display="Enabled" value="(1)" />
+            <option id="config.middleware.rm_vee_flash.ref_data_support.disabled" display="Disabled" value="(0)" />
+        </property>
+        <property id="config.middleware.rm_vee_flash.refresh_buf_size" display="Refresh Buffer Size" default="32" description="The size of the internal buffer used to copying data from one flash segment to another during a refresh operation. This is required because data flash to data flash transfers are not supported by the hardware.">
+            <constraint display="Value must be an integer greater than 0 and a multiple of 4 bytes.">testInteger("${config.middleware.rm_vee_flash.refresh_buf_size}")  &amp;&amp; ("${config.middleware.rm_vee_flash.refresh_buf_size}" &gt;= 4) &amp;&amp; (("${config.middleware.rm_vee_flash.refresh_buf_size}" % 4) == 0)</constraint>
+        </property>
+        <content>
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#define RM_VEE_FLASH_CFG_PARAM_CHECKING_ENABLE (${config.middleware.rm_vee_flash.checking})
+
+#define RM_VEE_FLASH_CFG_REF_DATA_SUPPORT (${config.middleware.rm_vee_flash.ref_data_support})
+
+#ifndef RM_VEE_FLASH_REFRESH_BUFFER_SIZE
+ #define RM_VEE_FLASH_REFRESH_BUFFER_SIZE        (${config.middleware.rm_vee_flash.refresh_buf_size})
+#endif
+
+#ifdef __cplusplus
+}
+#endif
+        </content>
+    </config>
+    <module config="config.middleware.rm_vee_flash" display="Storage|Virtual EEPROM on Flash (rm_vee_flash)" id="module.middleware.rm_vee_flash" version="1" url="group___r_m___v_e_e___a_p_i.html">
+        <constraint display="Unique name required for each instance">
+            "${interface.middleware.rm_vee_flash.${module.middleware.rm_vee_flash.name}}" === "1"
+        </constraint>
+        <constraint display="Requires Flash peripheral">
+            testExists("${module.middleware.rm_vee_flash.requires.flash::module.driver.flash.name}")
+        </constraint>
+        <constraint display="Reference Data Support must be enabled when the Reference Data Size is greater than 0, else Reference Data Support must be disabled.">
+        (("${module.middleware.rm_vee_flash.ref_data_size}" &gt; 0) &amp;&amp; ("${config.middleware.rm_vee_flash.ref_data_support}" == "config.middleware.rm_vee_flash.ref_data_support.enabled")) ||
+        (("${module.middleware.rm_vee_flash.ref_data_size}" == 0) &amp;&amp; ("${config.middleware.rm_vee_flash.ref_data_support}" == "config.middleware.rm_vee_flash.ref_data_support.disabled"))
+        </constraint>
+        <requires id="module.middleware.rm_vee_flash.requires.flash" interface="interface.driver.flash" visible="false" display="Add Flash API" find="true">
+            <override property="module.driver.flash.data_flash_bgo" value="module.driver.flash.data_flash_bgo.enabled"/>
+            <override property="module.driver.flash.p_callback" value="rm_vee_flash_callback"/>
+            <override property="module.driver.flash.p_context" value="&amp;${module.middleware.rm_vee_flash.name}_ctrl"/>
+        </requires>
+        <provides interface="interface.middleware.rm_vee" />
+        <provides interface="interface.middleware.rm_vee_flash" />
+        <provides interface="interface.middleware.rm_vee_flash.${module.middleware.rm_vee_flash.name}" />
+        <property default="g_vee${_instance}" display="Name" id="module.middleware.rm_vee_flash.name" description="Module name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.middleware.rm_vee_flash.name}")</constraint>
+        </property>
+        <property id="module.middleware.rm_vee_flash.record_max_id" display="Record Max ID" default="16" description="Set this value to the highest record ID in use.">
+            <constraint display="Value must be an integer.">testInteger("${module.middleware.rm_vee_flash.record_max_id}")</constraint>
+            <constraint display="Value must be greater than or equal to 0.">("${module.middleware.rm_vee_flash.record_max_id}" &gt;= 0)</constraint>
+        </property>
+        <property id="module.middleware.rm_vee_flash.num_segments" display="Number of Segments" default="2" description="Set value to number of segments desired in data flash (minimum 2). The fewer the segments, the fewer refreshes occur, but the longer refreshes take to complete (erase time).">
+            <constraint display="Value must be an integer.">testInteger("${module.middleware.rm_vee_flash.num_segments}")</constraint>
+            <constraint display="Value must be greater than or equal to 2.">("${module.middleware.rm_vee_flash.num_segments}" &gt;= 2)</constraint>
+        </property>
+        <property id="module.middleware.rm_vee_flash.start_addr" display="Start Address" default="BSP_FEATURE_FLASH_DATA_FLASH_START" description="Start address of the flash area used by Virtual EEPROM.">
+        </property>
+        <property id="module.middleware.rm_vee_flash.total_size" display="Total Size" default="BSP_DATA_FLASH_SIZE_BYTES" description="The total size (In bytes) of the flash area used by Virtual EEPROM.">
+        </property>
+        <property id="module.middleware.rm_vee_flash.ref_data_size" display="Reference Data Size" default="0" description="The size of the reference area (In bytes) used by Virtual EEPROM.">
+            <constraint display="Value must be an integer.">testInteger("${module.middleware.rm_vee_flash.ref_data_size}")</constraint>
+            <constraint display="Value must be greater than or equal to 0.">("${module.middleware.rm_vee_flash.ref_data_size}" &gt;= 0)</constraint>
+            <constraint display="Value must be a multiple of 4 bytes (Data flash program size).">("${module.middleware.rm_vee_flash.ref_data_size}" % 4) == 0</constraint>
+        </property>
+        <property default="vee_callback" display="Callback" id="module.middleware.rm_vee_flash.p_callback" description="A user callback function can be provided. If this callback function is provided, it will be called from the flash interrupt service routine (ISR).">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.middleware.rm_vee_flash.p_callback}")</constraint>
+        </property>
+        <property default="NULL" id="module.middleware.rm_vee_flash.p_context" description="Context to be passed to callback" />
+        <symbol id="symbol.middleware.rm_vee_flash.name" value="${module.middleware.rm_vee_flash.name}"/>
+        <symbol id="symbol.middleware.rm_vee_flash.guard.open" value="${module.middleware.rm_vee_flash.name}_open_guard"/>
+        <symbol id="symbol.middleware.rm_vee_flash.guard.macro.open" value="FSP_GUARD_${module.middleware.rm_vee_flash.name}_RM_VEE_FLASH_Open"/>
+        <symbol id="symbol.middleware.rm_vee_flash.guard.record_write" value="${module.middleware.rm_vee_flash.name}_record_write_guard"/>
+        <symbol id="symbol.middleware.rm_vee_flash.guard.macro.record_write" value="FSP_GUARD_${module.middleware.rm_vee_flash.name}_RM_VEE_FLASH_RecordWrite"/>
+        <symbol id="symbol.middleware.rm_vee_flash.guard.record_ptr_get" value="${module.middleware.rm_vee_flash.name}_record_ptr_get_guard"/>
+        <symbol id="symbol.middleware.rm_vee_flash.guard.macro.record_ptr_get" value="FSP_GUARD_${module.middleware.rm_vee_flash.name}_RM_VEE_FLASH_RecordPtrGet"/>
+        <symbol id="symbol.middleware.rm_vee_flash.guard.ref_data_write" value="${module.middleware.rm_vee_flash.name}_ref_data_write_guard"/>
+        <symbol id="symbol.middleware.rm_vee_flash.guard.macro.ref_data_write" value="FSP_GUARD_${module.middleware.rm_vee_flash.name}_RM_VEE_FLASH_RefDataWrite"/>
+        <symbol id="symbol.middleware.rm_vee_flash.guard.ref_data_ptr_get" value="${module.middleware.rm_vee_flash.name}_ref_data_ptr_get_guard"/>
+        <symbol id="symbol.middleware.rm_vee_flash.guard.macro.ref_data_ptr_get" value="FSP_GUARD_${module.middleware.rm_vee_flash.name}_RM_VEE_FLASH_RefDataPtrGet"/>
+        <symbol id="symbol.middleware.rm_vee_flash.guard.status_get" value="${module.middleware.rm_vee_flash.name}_status_get_guard"/>
+        <symbol id="symbol.middleware.rm_vee_flash.guard.macro.status_get" value="FSP_GUARD_${module.middleware.rm_vee_flash.name}_RM_VEE_FLASH_StatusGet"/>
+        <symbol id="symbol.middleware.rm_vee_flash.guard.refresh" value="${module.middleware.rm_vee_flash.name}_refresh_guard"/>
+        <symbol id="symbol.middleware.rm_vee_flash.guard.macro.refresh" value="FSP_GUARD_${module.middleware.rm_vee_flash.name}_RM_VEE_FLASH_Refresh"/>
+        <symbol id="symbol.middleware.rm_vee_flash.guard.format" value="${module.middleware.rm_vee_flash.name}_format_guard"/>
+        <symbol id="symbol.middleware.rm_vee_flash.guard.macro.format" value="FSP_GUARD_${module.middleware.rm_vee_flash.name}_RM_VEE_FLASH_Format"/>
+        <symbol id="symbol.middleware.rm_vee_flash.guard.callback_set" value="${module.middleware.rm_vee_flash.name}_callback_set_guard"/>
+        <symbol id="symbol.middleware.rm_vee_flash.guard.macro.callback_set" value="FSP_GUARD_${module.middleware.rm_vee_flash.name}_RM_VEE_FLASH_CallbackSet"/>
+        <symbol id="symbol.middleware.rm_vee_flash.guard.close" value="${module.middleware.rm_vee_flash.name}_close_guard"/>
+        <symbol id="symbol.middleware.rm_vee_flash.guard.macro.close" value="FSP_GUARD_${module.middleware.rm_vee_flash.name}_RM_VEE_FLASH_Close"/>
+        <symbol id="symbol.middleware.rm_vee_flash.nsc_api" value="${module.middleware.rm_vee_flash.name}_nsc_api"/>
+        <symbol id="symbol.middleware.rm_vee_flash.cfg" value="${module.middleware.rm_vee_flash.name}_cfg"/>
+        <symbol id="symbol.middleware.rm_vee_flash.cfg_ext" value="${module.middleware.rm_vee_flash.name}_cfg_ext"/>
+        <symbol id="symbol.middleware.rm_vee_flash.ctrl" value="${module.middleware.rm_vee_flash.name}_ctrl"/>
+        <symbol id="symbol.middleware.rm_vee_flash.record_offset" value="${module.middleware.rm_vee_flash.name}_record_offset"/>
+        <header>
+extern const rm_vee_instance_t ${module.middleware.rm_vee_flash.name};
+extern rm_vee_flash_instance_ctrl_t ${module.middleware.rm_vee_flash.name}_ctrl;
+extern const rm_vee_cfg_t ${module.middleware.rm_vee_flash.name}_cfg;
+
+/** Callback used by VEE Instance. */
+#ifndef ${module.middleware.rm_vee_flash.p_callback}
+void ${module.middleware.rm_vee_flash.p_callback}(rm_vee_callback_args_t * p_args);
+#endif
+        </header>
+        <includes>
+#include &quot;rm_vee_flash.h&quot;
+        </includes>
+        <declarations>
+rm_vee_flash_instance_ctrl_t ${module.middleware.rm_vee_flash.name}_ctrl;
+
+const rm_vee_flash_cfg_t ${module.middleware.rm_vee_flash.name}_cfg_ext = {
+    .p_flash = &amp;${module.middleware.rm_vee_flash.requires.flash::module.driver.flash.name}
+};
+
+static uint16_t ${module.middleware.rm_vee_flash.name}_record_offset[${module.middleware.rm_vee_flash.record_max_id} + 1] = {0};
+
+const rm_vee_cfg_t ${module.middleware.rm_vee_flash.name}_cfg =
+{
+    .start_addr    = ${module.middleware.rm_vee_flash.start_addr},
+    .num_segments  = ${module.middleware.rm_vee_flash.num_segments},
+    .total_size    = ${module.middleware.rm_vee_flash.total_size},
+    .ref_data_size = ${module.middleware.rm_vee_flash.ref_data_size},
+    .record_max_id = ${module.middleware.rm_vee_flash.record_max_id},
+    .rec_offset = &amp;${module.middleware.rm_vee_flash.name}_record_offset[0],
+    .p_callback    = ${module.middleware.rm_vee_flash.p_callback},
+    .p_context     = ${module.middleware.rm_vee_flash.p_context},
+    .p_extend = &amp;${module.middleware.rm_vee_flash.name}_cfg_ext
+};
+
+/* Instance structure to use this module. */
+const rm_vee_instance_t ${module.middleware.rm_vee_flash.name} =
+{
+    .p_ctrl        = &amp;${module.middleware.rm_vee_flash.name}_ctrl,
+    .p_cfg         = &amp;${module.middleware.rm_vee_flash.name}_cfg,
+    .p_api         = &amp;g_rm_vee_on_flash
+};
+        </declarations>
+        <guard>
+            <header>
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.middleware.rm_vee_flash.name}_open_guard(rm_vee_ctrl_t *const p_api_ctrl, rm_vee_cfg_t const *const p_cfg);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.middleware.rm_vee_flash.name}_record_write_guard(rm_vee_ctrl_t *const p_api_ctrl, uint32_t const rec_id, uint8_t const *const p_rec_data, uint32_t const num_bytes);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.middleware.rm_vee_flash.name}_record_ptr_get_guard(rm_vee_ctrl_t *const p_api_ctrl, uint32_t const rec_id, uint8_t **const pp_rec_data, uint32_t *const p_num_bytes);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.middleware.rm_vee_flash.name}_ref_data_write_guard(rm_vee_ctrl_t *const p_api_ctrl, uint8_t const *const p_ref_data);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.middleware.rm_vee_flash.name}_ref_data_ptr_get_guard(rm_vee_ctrl_t *const p_api_ctrl, uint8_t **const pp_ref_data);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.middleware.rm_vee_flash.name}_status_get_guard(rm_vee_ctrl_t *const p_api_ctrl, rm_vee_status_t *const p_status);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.middleware.rm_vee_flash.name}_refresh_guard(rm_vee_ctrl_t *const p_api_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.middleware.rm_vee_flash.name}_format_guard(rm_vee_ctrl_t *const p_api_ctrl, uint8_t const *const p_ref_data);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.middleware.rm_vee_flash.name}_callback_set_guard(rm_vee_ctrl_t *const p_api_ctrl, void(*p_callback)(rm_vee_callback_args_t *), void const *const p_context, rm_vee_callback_args_t *const p_callback_memory);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.middleware.rm_vee_flash.name}_close_guard(rm_vee_ctrl_t *const p_api_ctrl);
+
+            </header>
+            <template name="${module.middleware.rm_vee_flash.name}_guard.c">
+                <![CDATA[
+                    #include "guard.h"
+
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.middleware.rm_vee_flash.name}_open_guard (rm_vee_ctrl_t *const p_api_ctrl, rm_vee_cfg_t const *const p_cfg)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+    FSP_PARAMETER_NOT_USED(p_cfg);
+
+    return RM_VEE_FLASH_Open(&${module.middleware.rm_vee_flash.name}_ctrl, &${module.middleware.rm_vee_flash.name}_cfg);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.middleware.rm_vee_flash.name}_record_write_guard (rm_vee_ctrl_t *const p_api_ctrl, uint32_t const rec_id, uint8_t const *const p_rec_data, uint32_t const num_bytes)
+{
+    /* Verify all pointers are in non-secure memory. */
+    uint8_t const *const p_rec_data_checked = cmse_check_address_range((void *) p_rec_data, num_bytes, CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_rec_data_checked != NULL);
+
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+
+    return RM_VEE_FLASH_RecordWrite(&${module.middleware.rm_vee_flash.name}_ctrl, rec_id, p_rec_data_checked, num_bytes);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.middleware.rm_vee_flash.name}_record_ptr_get_guard (rm_vee_ctrl_t *const p_api_ctrl, uint32_t const rec_id, uint8_t **const pp_rec_data, uint32_t *const p_num_bytes)
+{
+    /* Verify all pointers are in non-secure memory. */
+    uint8_t **const pp_rec_data_checked = cmse_check_address_range((void *) pp_rec_data, sizeof(uint8_t *), CMSE_AU_NONSECURE);
+    FSP_ASSERT(pp_rec_data_checked != NULL);
+    uint32_t *const p_num_bytes_checked = cmse_check_address_range((void *) p_num_bytes, sizeof(uint32_t *), CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_num_bytes_checked != NULL);
+
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+
+    return RM_VEE_FLASH_RecordPtrGet(&${module.middleware.rm_vee_flash.name}_ctrl, rec_id, pp_rec_data_checked, p_num_bytes_checked);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.middleware.rm_vee_flash.name}_ref_data_write_guard (rm_vee_ctrl_t *const p_api_ctrl, uint8_t const *const p_ref_data)
+{
+    /* Verify all pointers are in non-secure memory. */
+    uint8_t const *const p_ref_data_checked = cmse_check_address_range((void *) p_ref_data, ${module.middleware.rm_vee_flash.name}_cfg.ref_data_size, CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_ref_data_checked != NULL);
+
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+
+    return RM_VEE_FLASH_RefDataWrite(&${module.middleware.rm_vee_flash.name}_ctrl, p_ref_data_checked);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.middleware.rm_vee_flash.name}_ref_data_ptr_get_guard (rm_vee_ctrl_t *const p_api_ctrl, uint8_t **const pp_ref_data)
+{
+    /* Verify all pointers are in non-secure memory. */
+    uint8_t **const pp_ref_data_checked = cmse_check_address_range((void *) pp_ref_data, sizeof(uint8_t *), CMSE_AU_NONSECURE);
+    FSP_ASSERT(pp_ref_data_checked != NULL);
+
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+
+    return RM_VEE_FLASH_RefDataPtrGet(&${module.middleware.rm_vee_flash.name}_ctrl, pp_ref_data_checked);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.middleware.rm_vee_flash.name}_status_get_guard (rm_vee_ctrl_t *const p_api_ctrl, rm_vee_status_t *const p_status)
+{
+    /* Verify all pointers are in non-secure memory. */
+    rm_vee_status_t *const p_status_checked = cmse_check_address_range((void *) p_status, sizeof(rm_vee_status_t), CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_status_checked != NULL);
+
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+
+    return RM_VEE_FLASH_StatusGet(&${module.middleware.rm_vee_flash.name}_ctrl, p_status_checked);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.middleware.rm_vee_flash.name}_refresh_guard (rm_vee_ctrl_t *const p_api_ctrl)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+
+    return RM_VEE_FLASH_Refresh(&${module.middleware.rm_vee_flash.name}_ctrl);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.middleware.rm_vee_flash.name}_format_guard (rm_vee_ctrl_t *const p_api_ctrl, uint8_t const *const p_ref_data)
+{
+    /* Verify all pointers are in non-secure memory. */
+    uint8_t const *const p_ref_data_checked = cmse_check_address_range((void *) p_ref_data, ${module.middleware.rm_vee_flash.name}_cfg.ref_data_size, CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_ref_data_checked != NULL);
+
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+
+    return RM_VEE_FLASH_Format(&${module.middleware.rm_vee_flash.name}_ctrl, p_ref_data_checked);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.middleware.rm_vee_flash.name}_callback_set_guard (rm_vee_ctrl_t *const p_api_ctrl, void(*p_callback)(rm_vee_callback_args_t *), void const *const p_context, rm_vee_callback_args_t *const p_callback_memory)
+{
+    /* Verify all pointers are in non-secure memory. */
+    void(*p_callback_checked)(rm_vee_callback_args_t *) = (void(*)(rm_vee_callback_args_t *)) cmse_check_address_range((void *) p_callback, sizeof(void *), CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_callback_checked != NULL);
+    rm_vee_callback_args_t *const p_callback_memory_checked = cmse_check_pointed_object(p_callback_memory, CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_callback_memory_checked != NULL);
+
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+    FSP_PARAMETER_NOT_USED(p_context);
+
+    return RM_VEE_FLASH_CallbackSet(&${module.middleware.rm_vee_flash.name}_ctrl, p_callback_checked, p_context, p_callback_memory_checked);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.middleware.rm_vee_flash.name}_close_guard (rm_vee_ctrl_t *const p_api_ctrl)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+
+    return RM_VEE_FLASH_Close(&${module.middleware.rm_vee_flash.name}_ctrl);
+}
+
+                ]]>
+            </template>
+        </guard>
+        <nsc>
+            <header>
+
+#define FSP_GUARD_${module.middleware.rm_vee_flash.name}_RM_VEE_FLASH_Open() ${module.middleware.rm_vee_flash.name}_open_guard(FSP_SECURE_ARGUMENT, FSP_SECURE_ARGUMENT)
+
+#define FSP_GUARD_${module.middleware.rm_vee_flash.name}_RM_VEE_FLASH_RecordWrite(rec_id, p_rec_data, num_bytes) ${module.middleware.rm_vee_flash.name}_record_write_guard(FSP_SECURE_ARGUMENT, rec_id, p_rec_data, num_bytes)
+
+#define FSP_GUARD_${module.middleware.rm_vee_flash.name}_RM_VEE_FLASH_RecordPtrGet(rec_id, pp_rec_data, p_num_bytes) ${module.middleware.rm_vee_flash.name}_record_ptr_get_guard(FSP_SECURE_ARGUMENT, rec_id, pp_rec_data, p_num_bytes)
+
+#define FSP_GUARD_${module.middleware.rm_vee_flash.name}_RM_VEE_FLASH_RefDataWrite(p_ref_data) ${module.middleware.rm_vee_flash.name}_ref_data_write_guard(FSP_SECURE_ARGUMENT, p_ref_data)
+
+#define FSP_GUARD_${module.middleware.rm_vee_flash.name}_RM_VEE_FLASH_RefDataPtrGet(pp_ref_data) ${module.middleware.rm_vee_flash.name}_ref_data_ptr_get_guard(FSP_SECURE_ARGUMENT, pp_ref_data)
+
+#define FSP_GUARD_${module.middleware.rm_vee_flash.name}_RM_VEE_FLASH_StatusGet(p_status) ${module.middleware.rm_vee_flash.name}_status_get_guard(FSP_SECURE_ARGUMENT, p_status)
+
+#define FSP_GUARD_${module.middleware.rm_vee_flash.name}_RM_VEE_FLASH_Refresh() ${module.middleware.rm_vee_flash.name}_refresh_guard(FSP_SECURE_ARGUMENT)
+
+#define FSP_GUARD_${module.middleware.rm_vee_flash.name}_RM_VEE_FLASH_Format(p_ref_data) ${module.middleware.rm_vee_flash.name}_format_guard(FSP_SECURE_ARGUMENT, p_ref_data)
+
+#define FSP_GUARD_${module.middleware.rm_vee_flash.name}_RM_VEE_FLASH_CallbackSet(p_callback, p_context, p_callback_memory) ${module.middleware.rm_vee_flash.name}_callback_set_guard(FSP_SECURE_ARGUMENT, p_callback, p_context, p_callback_memory)
+
+#define FSP_GUARD_${module.middleware.rm_vee_flash.name}_RM_VEE_FLASH_Close() ${module.middleware.rm_vee_flash.name}_close_guard(FSP_SECURE_ARGUMENT)
+
+
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.middleware.rm_vee_flash.name}_open_guard(rm_vee_ctrl_t *const p_api_ctrl, rm_vee_cfg_t const *const p_cfg);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.middleware.rm_vee_flash.name}_record_write_guard(rm_vee_ctrl_t *const p_api_ctrl, uint32_t const rec_id, uint8_t const *const p_rec_data, uint32_t const num_bytes);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.middleware.rm_vee_flash.name}_record_ptr_get_guard(rm_vee_ctrl_t *const p_api_ctrl, uint32_t const rec_id, uint8_t **const pp_rec_data, uint32_t *const p_num_bytes);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.middleware.rm_vee_flash.name}_ref_data_write_guard(rm_vee_ctrl_t *const p_api_ctrl, uint8_t const *const p_ref_data);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.middleware.rm_vee_flash.name}_ref_data_ptr_get_guard(rm_vee_ctrl_t *const p_api_ctrl, uint8_t **const pp_ref_data);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.middleware.rm_vee_flash.name}_status_get_guard(rm_vee_ctrl_t *const p_api_ctrl, rm_vee_status_t *const p_status);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.middleware.rm_vee_flash.name}_refresh_guard(rm_vee_ctrl_t *const p_api_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.middleware.rm_vee_flash.name}_format_guard(rm_vee_ctrl_t *const p_api_ctrl, uint8_t const *const p_ref_data);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.middleware.rm_vee_flash.name}_callback_set_guard(rm_vee_ctrl_t *const p_api_ctrl, void(*p_callback)(rm_vee_callback_args_t *), void const *const p_context, rm_vee_callback_args_t *const p_callback_memory);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.middleware.rm_vee_flash.name}_close_guard(rm_vee_ctrl_t *const p_api_ctrl);
+
+
+extern const rm_vee_instance_t ${module.middleware.rm_vee_flash.name};
+            </header>
+            <declarations>
+                <![CDATA[
+static const rm_vee_api_t ${module.middleware.rm_vee_flash.name}_nsc_api =
+{
+    .open = ${module.middleware.rm_vee_flash.name}_open_guard,
+    .recordWrite = ${module.middleware.rm_vee_flash.name}_record_write_guard,
+    .recordPtrGet = ${module.middleware.rm_vee_flash.name}_record_ptr_get_guard,
+    .refDataWrite = ${module.middleware.rm_vee_flash.name}_ref_data_write_guard,
+    .refDataPtrGet = ${module.middleware.rm_vee_flash.name}_ref_data_ptr_get_guard,
+    .statusGet = ${module.middleware.rm_vee_flash.name}_status_get_guard,
+    .refresh = ${module.middleware.rm_vee_flash.name}_refresh_guard,
+    .format = ${module.middleware.rm_vee_flash.name}_format_guard,
+    .close = ${module.middleware.rm_vee_flash.name}_close_guard,
+};
+const rm_vee_instance_t ${module.middleware.rm_vee_flash.name} =
+{
+    .p_api = &${module.middleware.rm_vee_flash.name}_nsc_api,
+    .p_ctrl = FSP_SECURE_ARGUMENT,
+    .p_cfg = FSP_SECURE_ARGUMENT,
+};
+                ]]>
+            </declarations>
+        </nsc>
+    </module>
+</raModuleDescription>

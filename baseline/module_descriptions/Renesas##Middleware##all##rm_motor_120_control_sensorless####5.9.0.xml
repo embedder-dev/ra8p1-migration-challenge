@@ -1,0 +1,594 @@
+﻿<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.middleware.motor_120_control_sensorless" path="fsp_cfg/rm_motor_120_control_sensorless_cfg.h" version="0">
+        <property default="config.middleware.motor_120_control_sensorless.param_checking_enable.bsp" display="Parameter Checking" id="config.middleware.motor_120_control_sensorless.param_checking_enable" description="If selected code for parameter checking is included in the build.">
+            <option display="Default (BSP)" id="config.middleware.motor_120_control_sensorless.param_checking_enable.bsp" value="(BSP_CFG_PARAM_CHECKING_ENABLE)"/>
+            <option display="Enabled" id="config.middleware.motor_120_control_sensorless.param_checking_enable.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.motor_120_control_sensorless.param_checking_enable.disabled" value="(0)"/>
+        </property>
+
+        <content>
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#define MOTOR_120_CONTROL_SENSORLESS_CFG_PARAM_CHECKING_ENABLE   ${config.middleware.motor_120_control_sensorless.param_checking_enable}
+
+#ifdef __cplusplus
+}
+#endif
+        </content>
+    </config>
+    <module config="config.middleware.motor_120_control_sensorless" display="Motor|120-degree conduction control sensorless (rm_motor_120_control_sensorless)" id="module.middleware.motor_120_control_on_motor_120_control_sensorless" version="1" url="group___m_o_t_o_r__120___c_o_n_t_r_o_l___s_e_n_s_o_r_l_e_s_s.html">
+        <constraint display="Requires cyclic timer driver">
+            testExists("${module.middleware.motor_120_control.requires.timer_cyclic::module.driver.timer.name}")
+        </constraint>
+        <constraint display="Requires speed timer driver">
+            testExists("${module.middleware.motor_120_control.requires.timer_calc::module.driver.timer.name}")
+        </constraint>
+        <constraint display="Unique name required for each instance">
+            ("${interface.middleware.motor_120_control.${module.middleware.motor_120_control.name}}" === "1")
+        </constraint>
+
+        <!-- Timer  -->
+        <requires id="module.middleware.motor_120_control.requires.timer_cyclic" interface="interface.driver.timer" find="true" display="Add cyclic timer driver [Mandatory]">
+            <override property="module.driver.timer.mode" value="TIMER_MODE_PERIODIC"/>
+            <override property="module.driver.timer.p_callback" value="rm_motor_120_control_sensorless_speed_cyclic"/>
+            <override property="module.driver.timer.p_context" value="${module.middleware.motor_120_control.name}"/>
+        </requires>
+        <requires id="module.middleware.motor_120_control.requires.timer_calc" interface="interface.driver.timer" find="true" display="Add speed timer driver [Mandatory]">
+            <override property="module.driver.timer.mode" value="TIMER_MODE_PERIODIC"/>
+            <override property="module.driver.timer.p_callback" value="NULL"/>
+            <override property="module.driver.timer.p_context" value="${module.middleware.motor_120_control.name}"/>
+        </requires>
+
+        <!-- Driver Module  -->
+        <requires id="module.middleware.motor_120_control.requires.driver" interface="interface.middleware.motor_120_driver" find="true" display="Add motor 120 driver module [Mandatory]">
+            <override property="module.middleware.motor_120_driver.motor_120_type" value="module.middleware.motor_120_driver.motor_120_type.sensorless"/>
+            <override property="module.middleware.motor_120_driver.callback" value="rm_motor_120_control_sensorless_driver_callback"/>
+            <override property="module.middleware.motor_120_driver.context" value="${module.middleware.motor_120_control.name}"/>
+        </requires>
+
+        <!-- motor_120_control_hall configuration -->
+        <provides interface="interface.middleware.motor_120_control" />
+        <provides interface="interface.middleware.motor_120_control.motor_120_control_on_motor_120_control_sensorless" />
+        <provides interface="interface.middleware.motor_120_control.${module.middleware.motor_120_control.name}" />
+
+        <!-- Module Name -->
+        <property default="g_motor_120_control_sensorless${_instance}" display="General|Name" id="module.middleware.motor_120_control.name" description="Module name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.middleware.motor_120_control.name}")</constraint>
+        </property>
+
+        <!-- General Settings -->
+        <property default="module.middleware.motor_120_control.conduction_type.non_complementary_pwm" display="General|Conduction type" id="module.middleware.motor_120_control.conduction_type" description="Select conduction type">
+              <option display="First 60 degree PWM" id="module.middleware.motor_120_control.conduction_type.non_complementary_pwm" value="MOTOR_120_CONDUCTION_TYPE_FIRST60"/>
+              <option display="Complementary First 60 degree PWM" id="module.middleware.motor_120_control.conduction_type.complementary_pwm" value="MOTOR_120_CONDUCTION_TYPE_COMPLEMENTARY"/>
+        </property>
+        <property default="0.5" display="General|Stop BEMF" id="module.middleware.motor_120_control.f4_stop_bemf" description="Value of stop motor BEMF (U+V+W)">
+            <constraint display="Must be a valid non-negative value.">
+            eval('' +
+            'var input = "${module.middleware.motor_120_control.f4_stop_bemf}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?$","i");' +
+            'var regex_float_with_suffix = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?F$","i");' +
+            ' ( regex_float.test(input) || regex_float_with_suffix.test(input))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${module.middleware.motor_120_control.f4_stop_bemf}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)$","i");' +
+            'if (regex_float.test(output)){' +
+            'output = output + "F";' +
+            '}' +
+            'output')
+            </export>
+        </property>
+        <property default="2000" display="General|Timeout counts (msec)" id="module.middleware.motor_120_control.u4_timeout_cnt" description="Undetected time">
+            <constraint display="Must be a valid integer.">testInteger("${module.middleware.motor_120_control.u4_timeout_cnt}") &amp;&amp; ("${module.middleware.motor_120_control.u4_timeout_cnt}" &gt;= 0)</constraint>
+        </property>
+        <property default="8.0" display="General|Maximum voltage for BOOT (V)" id="module.middleware.motor_120_control.f4_max_boot_v" description="Maximum output voltage for boot mode (V)">
+            <constraint display="Must be a valid non-negative value.">
+            eval('' +
+            'var input = "${module.middleware.motor_120_control.f4_max_boot_v}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?$","i");' +
+            'var regex_float_with_suffix = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?F$","i");' +
+            ' ( regex_float.test(input) || regex_float_with_suffix.test(input))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${module.middleware.motor_120_control.f4_max_boot_v}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)$","i");' +
+            'if (regex_float.test(output)){' +
+            'output = output + "F";' +
+            '}' +
+            'output')
+            </export>
+        </property>
+        <property default="20.0" display="General|Maximum voltage (V)" id="module.middleware.motor_120_control.f4_max_drive_v" description="Maximum output voltage (V)">
+            <constraint display="Must be a valid non-negative value.">
+            eval('' +
+            'var input = "${module.middleware.motor_120_control.f4_max_drive_v}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?$","i");' +
+            'var regex_float_with_suffix = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?F$","i");' +
+            ' ( regex_float.test(input) || regex_float_with_suffix.test(input))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${module.middleware.motor_120_control.f4_max_drive_v}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)$","i");' +
+            'if (regex_float.test(output)){' +
+            'output = output + "F";' +
+            '}' +
+            'output')
+            </export>
+        </property>
+        <property default="3.0" display="General|Minimum voltage (V)" id="module.middleware.motor_120_control.f4_min_drive_v" description="Minimum output voltage (V)">
+            <constraint display="Must be a valid non-negative value.">
+            eval('' +
+            'var input = "${module.middleware.motor_120_control.f4_min_drive_v}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?$","i");' +
+            'var regex_float_with_suffix = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?F$","i");' +
+            ' ( regex_float.test(input) || regex_float_with_suffix.test(input))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${module.middleware.motor_120_control.f4_min_drive_v}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)$","i");' +
+            'if (regex_float.test(output)){' +
+            'output = output + "F";' +
+            '}' +
+            'output')
+            </export>
+        </property>
+        <property default="20.0" display="General|Carrier frequency (kHz)" id="module.middleware.motor_120_control.f4_carrier_freq" description="PWM carrier frequency (kHz)">
+            <constraint display="Must be a valid non-negative value.">
+            eval('' +
+            'var input = "${module.middleware.motor_120_control.f4_carrier_freq}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?$","i");' +
+            'var regex_float_with_suffix = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?F$","i");' +
+            ' ( regex_float.test(input) || regex_float_with_suffix.test(input))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${module.middleware.motor_120_control.f4_carrier_freq}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)$","i");' +
+            'if (regex_float.test(output)){' +
+            'output = output + "F";' +
+            '}' +
+            'output')
+            </export>
+        </property>
+        <property default="0" display="General|Adjusting angle" id="module.middleware.motor_120_control.s4_angle_shift_adjust" description="Adjusting angle">
+            <constraint display="Must be a valid non-negative value.">testInteger("${module.middleware.motor_120_control.s4_angle_shift_adjust}") &amp;&amp; ("${module.middleware.motor_120_control.s4_angle_shift_adjust}" &gt;= 0)</constraint>
+        </property>
+        <property default="1" display="General|Speed PI decimation" id="module.middleware.motor_120_control.u4_speed_pi_decimation" description="Speed PI control decimation count">
+            <constraint display="Must be a valid integer.">testInteger("${module.middleware.motor_120_control.u4_speed_pi_decimation}") &amp;&amp; ("${module.middleware.motor_120_control.u4_speed_pi_decimation}" &gt;= 0)</constraint>
+        </property>
+        <property default="120" display="General|Free run timer frequency (MHz)" id="module.middleware.motor_120_control.u4_free_run_timer_freq" description="Freerun timer frequency (MHz)">
+            <constraint display="Must be a valid integer.">testInteger("${module.middleware.motor_120_control.u4_free_run_timer_freq}") &amp;&amp; ("${module.middleware.motor_120_control.u4_free_run_timer_freq}" &gt;= 0)</constraint>
+        </property>
+        <property default="1.0" display="General|Speed LPF K" id="module.middleware.motor_120_control.f4_speed_lpf_k" description="Speed LPF parameter">
+            <constraint display="Must be a valid non-negative value.">
+            eval('' +
+            'var input = "${module.middleware.motor_120_control.f4_speed_lpf_k}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?$","i");' +
+            'var regex_float_with_suffix = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?F$","i");' +
+            ' ( regex_float.test(input) || regex_float_with_suffix.test(input))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${module.middleware.motor_120_control.f4_speed_lpf_k}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)$","i");' +
+            'if (regex_float.test(output)){' +
+            'output = output + "F";' +
+            '}' +
+            'output')
+            </export>
+        </property>
+        <property default="0.2" display="General|Step of speed change" id="module.middleware.motor_120_control.f4_limit_speed_change" description="Speed reference change step">
+            <constraint display="Must be a valid non-negative value.">
+            eval('' +
+            'var input = "${module.middleware.motor_120_control.f4_limit_speed_change}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?$","i");' +
+            'var regex_float_with_suffix = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?F$","i");' +
+            ' ( regex_float.test(input) || regex_float_with_suffix.test(input))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${module.middleware.motor_120_control.f4_limit_speed_change}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)$","i");' +
+            'if (regex_float.test(output)){' +
+            'output = output + "F";' +
+            '}' +
+            'output')
+            </export>
+        </property>
+        <property default="3.0" display="General|Boot reference voltage (V)" id="module.middleware.motor_120_control.f4_boot_ref_v" description="Voltage reference for boot mode">
+            <constraint display="Must be a valid non-negative value.">
+            eval('' +
+            'var input = "${module.middleware.motor_120_control.f4_boot_ref_v}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?$","i");' +
+            'var regex_float_with_suffix = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?F$","i");' +
+            ' ( regex_float.test(input) || regex_float_with_suffix.test(input))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${module.middleware.motor_120_control.f4_boot_ref_v}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)$","i");' +
+            'if (regex_float.test(output)){' +
+            'output = output + "F";' +
+            '}' +
+            'output')
+            </export>
+        </property>
+        <property default="128" display="General|Voltage lamping time" id="module.middleware.motor_120_control.u4_v_up_time" description="Voltage lamping time">
+            <constraint display="Must be a valid integer.">testInteger("${module.middleware.motor_120_control.u4_v_up_time}") &amp;&amp; ("${module.middleware.motor_120_control.u4_v_up_time}" &gt;= 0)</constraint>
+        </property>
+        <property default="64" display="General|Voltage constant adjust time" id="module.middleware.motor_120_control.u4_v_const_time" description="Voltage constant adjust time value (msec)">
+            <constraint display="Must be a valid integer.">testInteger("${module.middleware.motor_120_control.u4_v_const_time}") &amp;&amp; ("${module.middleware.motor_120_control.u4_v_const_time}" &gt;= 0)</constraint>
+        </property>
+        <property default="150" display="General|Open loop start speed (rpm)" id="module.middleware.motor_120_control.s4_ol_start_rpm" description="Open loop start speed (rpm)">
+            <constraint display="Must be a valid integer value.">testInteger("${module.middleware.motor_120_control.s4_ol_start_rpm}") &amp;&amp; ("${module.middleware.motor_120_control.s4_ol_start_rpm}" &gt;= 0)</constraint>
+        </property>
+        <property default="185" display="General|Open loop mode2 speed (rpm)" id="module.middleware.motor_120_control.s4_ol_mode1_change_rpm" description="to mode2 change speed (rpm)">
+            <constraint display="Must be a valid integer value.">testInteger("${module.middleware.motor_120_control.s4_ol_mode1_change_rpm}") &amp;&amp; ("${module.middleware.motor_120_control.s4_ol_mode1_change_rpm}" &gt;= 0)</constraint>
+        </property>
+        <property default="1000" display="General|Open loop mode3 speed (rpm)" id="module.middleware.motor_120_control.s4_ol_mode2_change_rpm" description="to mode3 change speed (rpm)">
+            <constraint display="Must be a valid integer value.">testInteger("${module.middleware.motor_120_control.s4_ol_mode2_change_rpm}") &amp;&amp; ("${module.middleware.motor_120_control.s4_ol_mode2_change_rpm}" &gt;= 0)</constraint>
+        </property>
+        <property default="3.0" display="General|Open loop start voltage (V)" id="module.middleware.motor_120_control.f4_ol_start_refv" description="start reference voltage (V)">
+            <constraint display="Must be a valid non-negative value.">
+            eval('' +
+            'var input = "${module.middleware.motor_120_control.f4_ol_start_refv}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?$","i");' +
+            'var regex_float_with_suffix = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?F$","i");' +
+            ' ( regex_float.test(input) || regex_float_with_suffix.test(input))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${module.middleware.motor_120_control.f4_ol_start_refv}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)$","i");' +
+            'if (regex_float.test(output)){' +
+            'output = output + "F";' +
+            '}' +
+            'output')
+            </export>
+        </property>
+        <property default="0.25" display="General|Open loop mode1 speed rate" id="module.middleware.motor_120_control.f4_ol_mode1_rate_rpm" description="increase rate of reference speed (rpm/control period)">
+            <constraint display="Must be a valid non-negative value.">
+            eval('' +
+            'var input = "${module.middleware.motor_120_control.f4_ol_mode1_rate_rpm}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?$","i");' +
+            'var regex_float_with_suffix = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?F$","i");' +
+            ' ( regex_float.test(input) || regex_float_with_suffix.test(input))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${module.middleware.motor_120_control.f4_ol_mode1_rate_rpm}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)$","i");' +
+            'if (regex_float.test(output)){' +
+            'output = output + "F";' +
+            '}' +
+            'output')
+            </export>
+        </property>
+        <property default="0.00285" display="General|Open loop mode2 voltage rate" id="module.middleware.motor_120_control.f4_ol_mode2_rate_refv" description="increase rate of reference voltage (v/control period)">
+            <constraint display="Must be a valid non-negative value.">
+            eval('' +
+            'var input = "${module.middleware.motor_120_control.f4_ol_mode2_rate_refv}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?$","i");' +
+            'var regex_float_with_suffix = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?F$","i");' +
+            ' ( regex_float.test(input) || regex_float_with_suffix.test(input))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${module.middleware.motor_120_control.f4_ol_mode2_rate_refv}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)$","i");' +
+            'if (regex_float.test(output)){' +
+            'output = output + "F";' +
+            '}' +
+            'output')
+            </export>
+        </property>
+        <property default="0.71" display="General|Open loop mode2 speed rate" id="module.middleware.motor_120_control.f4_ol_mode2_rate_rpm" description="increase rate of reference speed (rpm/control period)">
+            <constraint display="Must be a valid non-negative value.">
+            eval('' +
+            'var input = "${module.middleware.motor_120_control.f4_ol_mode2_rate_rpm}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?$","i");' +
+            'var regex_float_with_suffix = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?F$","i");' +
+            ' ( regex_float.test(input) || regex_float_with_suffix.test(input))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${module.middleware.motor_120_control.f4_ol_mode2_rate_rpm}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)$","i");' +
+            'if (regex_float.test(output)){' +
+            'output = output + "F";' +
+            '}' +
+            'output')
+            </export>
+        </property>
+        <property default="0.002" display="General|Open loop mode3 voltage rate" id="module.middleware.motor_120_control.f4_ol_mode3_rate_refv" description="increase rate of reference voltage (v/control period)">
+            <constraint display="Must be a valid non-negative value.">
+            eval('' +
+            'var input = "${module.middleware.motor_120_control.f4_ol_mode3_rate_refv}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?$","i");' +
+            'var regex_float_with_suffix = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?F$","i");' +
+            ' ( regex_float.test(input) || regex_float_with_suffix.test(input))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${module.middleware.motor_120_control.f4_ol_mode3_rate_refv}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)$","i");' +
+            'if (regex_float.test(output)){' +
+            'output = output + "F";' +
+            '}' +
+            'output')
+            </export>
+        </property>
+        <property default="6.5" display="General|Open loop maximum voltage (V)" id="module.middleware.motor_120_control.f4_ol_mode3_max_refv" description="openloop maximum voltage (V)">
+            <constraint display="Must be a valid non-negative value.">
+            eval('' +
+            'var input = "${module.middleware.motor_120_control.f4_ol_mode3_max_refv}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?$","i");' +
+            'var regex_float_with_suffix = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?F$","i");' +
+            ' ( regex_float.test(input) || regex_float_with_suffix.test(input))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${module.middleware.motor_120_control.f4_ol_mode3_max_refv}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)$","i");' +
+            'if (regex_float.test(output)){' +
+            'output = output + "F";' +
+            '}' +
+            'output')
+            </export>
+        </property>
+
+        <property default="0.02" display="General|PI control KP" id="module.middleware.motor_120_control.f4_pi_ctrl_kp" description="PI control gain of proportional term">
+            <constraint display="Must be a valid non-negative value.">
+            eval('' +
+            'var input = "${module.middleware.motor_120_control.f4_pi_ctrl_kp}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?$","i");' +
+            'var regex_float_with_suffix = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?F$","i");' +
+            ' ( regex_float.test(input) || regex_float_with_suffix.test(input))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${module.middleware.motor_120_control.f4_pi_ctrl_kp}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)$","i");' +
+            'if (regex_float.test(output)){' +
+            'output = output + "F";' +
+            '}' +
+            'output')
+            </export>
+        </property>
+        <property default="0.004" display="General|PI control KI" id="module.middleware.motor_120_control.f4_pi_ctrl_ki" description="PI control gain of integral term">
+            <constraint display="Must be a valid non-negative value.">
+            eval('' +
+            'var input = "${module.middleware.motor_120_control.f4_pi_ctrl_ki}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?$","i");' +
+            'var regex_float_with_suffix = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?F$","i");' +
+            ' ( regex_float.test(input) || regex_float_with_suffix.test(input))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${module.middleware.motor_120_control.f4_pi_ctrl_ki}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)$","i");' +
+            'if (regex_float.test(output)){' +
+            'output = output + "F";' +
+            '}' +
+            'output')
+            </export>
+        </property>
+        <property default="24.0" display="General|PI control limit" id="module.middleware.motor_120_control.f4_pi_ctrl_ilimit" description="PI control limit of integral term">
+            <constraint display="Must be a valid non-negative value.">
+            eval('' +
+            'var input = "${module.middleware.motor_120_control.f4_pi_ctrl_ilimit}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?$","i");' +
+            'var regex_float_with_suffix = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?F$","i");' +
+            ' ( regex_float.test(input) || regex_float_with_suffix.test(input))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${module.middleware.motor_120_control.f4_pi_ctrl_ilimit}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)$","i");' +
+            'if (regex_float.test(output)){' +
+            'output = output + "F";' +
+            '}' +
+            'output')
+            </export>
+        </property>
+
+        <!-- Motor Parameters Settings -->
+        <property default="2" display="Motor Parameter|Pole pairs" id="module.middleware.motor_120_control.u4_motor_pp" description="Pole pairs">
+            <constraint display="Must be a valid integer.">testInteger("${module.middleware.motor_120_control.u4_motor_pp}") &amp;&amp; ("${module.middleware.motor_120_control.u4_motor_pp}" &gt;= 0)</constraint>
+        </property>
+        <property default="6.447" display="Motor Parameter|Resistance (ohm)" id="module.middleware.motor_120_control.f4_motor_r" description="Resistance">
+            <constraint display="Must be a valid non-negative value.">
+            eval('' +
+            'var input = "${module.middleware.motor_120_control.f4_motor_r}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?$","i");' +
+            'var regex_float_with_suffix = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?F$","i");' +
+            ' ( regex_float.test(input) || regex_float_with_suffix.test(input))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${module.middleware.motor_120_control.f4_motor_r}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)$","i");' +
+            'if (regex_float.test(output)){' +
+            'output = output + "F";' +
+            '}' +
+            'output')
+            </export>
+        </property>
+        <property default="0.0045" display="Motor Parameter|Inductance of d-axis (H)" id="module.middleware.motor_120_control.f4_motor_ld" description="Inductance of d-axis">
+            <constraint display="Must be a valid non-negative value.">
+            eval('' +
+            'var input = "${module.middleware.motor_120_control.f4_motor_ld}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?$","i");' +
+            'var regex_float_with_suffix = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?F$","i");' +
+            ' ( regex_float.test(input) || regex_float_with_suffix.test(input))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${module.middleware.motor_120_control.f4_motor_ld}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)$","i");' +
+            'if (regex_float.test(output)){' +
+            'output = output + "F";' +
+            '}' +
+            'output')
+            </export>
+        </property>
+        <property default="0.0045" display="Motor Parameter|Inductance of q-axis (H)" id="module.middleware.motor_120_control.f4_motor_lq" description="Inductance of q-axis">
+            <constraint display="Must be a valid non-negative value.">
+            eval('' +
+            'var input = "${module.middleware.motor_120_control.f4_motor_lq}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?$","i");' +
+            'var regex_float_with_suffix = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?F$","i");' +
+            ' ( regex_float.test(input) || regex_float_with_suffix.test(input))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${module.middleware.motor_120_control.f4_motor_lq}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)$","i");' +
+            'if (regex_float.test(output)){' +
+            'output = output + "F";' +
+            '}' +
+            'output')
+            </export>
+        </property>
+        <property default="0.02159" display="Motor Parameter|Permanent magnetic flux (Wb)" id="module.middleware.motor_120_control.f4_motor_m" description="Permanent magnetic flux">
+            <constraint display="Must be a valid non-negative value.">
+            eval('' +
+            'var input = "${module.middleware.motor_120_control.f4_motor_m}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?$","i");' +
+            'var regex_float_with_suffix = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?F$","i");' +
+            ' ( regex_float.test(input) || regex_float_with_suffix.test(input))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${module.middleware.motor_120_control.f4_motor_m}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)$","i");' +
+            'if (regex_float.test(output)){' +
+            'output = output + "F";' +
+            '}' +
+            'output')
+            </export>
+        </property>
+        <property default="1.8" display="Motor Parameter|Rotor inertia (kgm^2)" id="module.middleware.motor_120_control.f4_motor_j" description="Rotor inertia">
+            <constraint display="Must be a valid non-negative value.">
+            eval('' +
+            'var input = "${module.middleware.motor_120_control.f4_motor_j}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?$","i");' +
+            'var regex_float_with_suffix = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?F$","i");' +
+            ' ( regex_float.test(input) || regex_float_with_suffix.test(input))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${module.middleware.motor_120_control.f4_motor_j}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)$","i");' +
+            'if (regex_float.test(output)){' +
+            'output = output + "F";' +
+            '}' +
+            'output')
+            </export>
+        </property>
+
+        <!-- Motor Callback Settings -->
+        <property default="NULL" display="Interrupts|Callback" id="module.middleware.motor_120_control.callback" description="callback function">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.middleware.motor_120_control.callback}")</constraint>
+        </property>
+        <property default="NULL" id="module.middleware.motor_120_control.context">
+            <export>eval('' +
+            'var string = "${module.middleware.motor_120_control.context}";' +
+            'if ("NULL" !== string){' +
+            'string = "&amp;" + string  ;' +
+            '}' +
+            'String(string)')
+            </export>
+        </property>
+
+        <!-- Contents -->
+        <header>
+/** Motor 120 control sensorless instance. */
+extern const motor_120_control_instance_t ${module.middleware.motor_120_control.name};
+
+/** Access the motor 120 control sensorless instance using these structures
+ ** when calling API functions directly (::p_api is not used). */
+extern motor_120_control_sensorless_instance_ctrl_t ${module.middleware.motor_120_control.name}_ctrl;
+extern const motor_120_control_cfg_t ${module.middleware.motor_120_control.name}_cfg;
+
+#ifndef ${module.middleware.motor_120_control.callback}
+void ${module.middleware.motor_120_control.callback}(motor_120_control_callback_args_t * p_args);
+#endif
+        </header>
+
+        <includes>
+#include &quot;rm_motor_120_control_sensorless.h&quot;
+        </includes>
+
+        <declarations>
+
+/* Motor 120 control sensorless configuration */
+motor_120_control_sensorless_instance_ctrl_t ${module.middleware.motor_120_control.name}_ctrl;
+
+const motor_120_control_sensorless_extended_cfg_t ${module.middleware.motor_120_control.name}_extend =
+{
+  .p_motor_120_driver_instance = &amp;${module.middleware.motor_120_control.requires.driver::module.middleware.motor_120_driver.name},
+  .p_speed_cyclic_timer_instance = &amp;${module.middleware.motor_120_control.requires.timer_cyclic::module.driver.timer.name},
+  .p_speed_calc_timer_instance = &amp;${module.middleware.motor_120_control.requires.timer_calc::module.driver.timer.name},
+
+  .f4_stop_bemf = ${module.middleware.motor_120_control.f4_stop_bemf},
+  .f4_max_boot_v = ${module.middleware.motor_120_control.f4_max_boot_v},
+  .f4_carrier_freq = ${module.middleware.motor_120_control.f4_carrier_freq},
+  .s4_angle_shift_adjust = ${module.middleware.motor_120_control.s4_angle_shift_adjust},
+  .f4_boot_ref_v = ${module.middleware.motor_120_control.f4_boot_ref_v},
+  .u4_v_up_time = ${module.middleware.motor_120_control.u4_v_up_time},
+  .u4_v_const_time = ${module.middleware.motor_120_control.u4_v_const_time},
+  .s4_ol_start_rpm = ${module.middleware.motor_120_control.s4_ol_start_rpm},
+  .s4_ol_mode1_change_rpm = ${module.middleware.motor_120_control.s4_ol_mode1_change_rpm},
+  .s4_ol_mode2_change_rpm = ${module.middleware.motor_120_control.s4_ol_mode2_change_rpm},
+  .f4_ol_start_refv = ${module.middleware.motor_120_control.f4_ol_start_refv},
+  .f4_ol_mode1_rate_rpm = ${module.middleware.motor_120_control.f4_ol_mode1_rate_rpm},
+  .f4_ol_mode2_rate_refv = ${module.middleware.motor_120_control.f4_ol_mode2_rate_refv},
+  .f4_ol_mode2_rate_rpm = ${module.middleware.motor_120_control.f4_ol_mode2_rate_rpm},
+  .f4_ol_mode3_rate_refv = ${module.middleware.motor_120_control.f4_ol_mode3_rate_refv},
+  .f4_ol_mode3_max_refv = ${module.middleware.motor_120_control.f4_ol_mode3_max_refv},
+};
+
+const motor_120_control_cfg_t ${module.middleware.motor_120_control.name}_cfg =
+{
+  .conduction_type = ${module.middleware.motor_120_control.conduction_type},
+  .u4_timeout_cnt = ${module.middleware.motor_120_control.u4_timeout_cnt},
+  .f4_max_drive_v = ${module.middleware.motor_120_control.f4_max_drive_v},
+  .f4_min_drive_v = ${module.middleware.motor_120_control.f4_min_drive_v},
+  .u4_speed_pi_decimation = ${module.middleware.motor_120_control.u4_speed_pi_decimation},
+  .u4_free_run_timer_freq = ${module.middleware.motor_120_control.u4_free_run_timer_freq},
+  .f4_speed_lpf_k = ${module.middleware.motor_120_control.f4_speed_lpf_k},
+  .f4_limit_speed_change = ${module.middleware.motor_120_control.f4_limit_speed_change},
+  .f4_pi_ctrl_kp = ${module.middleware.motor_120_control.f4_pi_ctrl_kp},
+  .f4_pi_ctrl_ki = ${module.middleware.motor_120_control.f4_pi_ctrl_ki},
+  .f4_pi_ctrl_ilimit = ${module.middleware.motor_120_control.f4_pi_ctrl_ilimit},
+
+  .motor_param.u4_motor_pp = ${module.middleware.motor_120_control.u4_motor_pp},
+  .motor_param.f4_motor_r = ${module.middleware.motor_120_control.f4_motor_r},
+  .motor_param.f4_motor_ld = ${module.middleware.motor_120_control.f4_motor_ld},
+  .motor_param.f4_motor_lq = ${module.middleware.motor_120_control.f4_motor_lq},
+  .motor_param.f4_motor_m = ${module.middleware.motor_120_control.f4_motor_m},
+  .motor_param.f4_motor_j = ${module.middleware.motor_120_control.f4_motor_j},
+
+  .p_callback = ${module.middleware.motor_120_control.callback},
+  .p_context = ${module.middleware.motor_120_control.context},
+  .p_extend = &amp;${module.middleware.motor_120_control.name}_extend,
+};
+
+/* Instance structure to use motor 120 control sensorless module. */
+const motor_120_control_instance_t ${module.middleware.motor_120_control.name} =
+{
+  .p_ctrl = &amp;${module.middleware.motor_120_control.name}_ctrl,
+  .p_cfg  = &amp;${module.middleware.motor_120_control.name}_cfg,
+  .p_api  = &amp;g_motor_120_control_on_motor_120_control_sensorless,
+};
+        </declarations>
+    </module>
+</raModuleDescription>

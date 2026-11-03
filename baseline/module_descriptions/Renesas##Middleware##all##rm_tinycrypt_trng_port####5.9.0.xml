@@ -1,0 +1,10 @@
+<?xml version="1.0" ?>
+<raModuleDescription>
+  <module display="Security|TinyCrypt H/W Acceleration (TRNG Only)" id="module.middleware.rm_tinycrypt_trng_port" visible="false" version="1" url="group___r_m___t_i_n_y_c_r_y_p_t___p_o_r_t.html">
+    <constraint display="Requires SCE Driver">
+          "${interface.driver.sce}" === "1"
+    </constraint>
+    <requires id="module.middleware.rm_tinycrypt_trng_port.requires.sce" interface="interface.driver.trng" visible="true" find="true" display="Accelerate with TRNG" />
+    <provides interface="interface.middleware.rm_tinycrypt_trng_port" />
+  </module>
+</raModuleDescription>

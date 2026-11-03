@@ -1,0 +1,29 @@
+<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.middleware.rm_ble_mesh_os_awsfreertos" path="fsp_cfg/rm_ble_mesh_os_awsfreertos_cfg.h" version="0" >
+        <content>
+            #ifdef __cplusplus
+            extern "C" {
+            #endif
+
+            #ifdef __cplusplus
+            }
+            #endif
+        </content>
+    </config>
+    <module config="config.middleware.rm_ble_mesh_os_awsfreertos" display="Networking|BLE Mesh OS on FreeRTOS (rm_mesh_os_freertos)" id="module.middleware.rm_ble_mesh_os_on_rm_ble_mesh_os_awsfreertos" common="1" visible="false" version="0" url="group___m_e_s_h___o_s___f_r_e_e_r_t_o_s.html">
+        <requires id="module.middleware.rm_ble_mesh_os_on_rm_ble_mesh_os_awsfreertos.requires.awsfreertos" interface="interface.rtos.awsfreertos" visible="false" display="Requires FreeRTOS"/>
+
+        <provides interface="interface.middleware.rm_ble_mesh_os" />
+        <provides interface="interface.middleware.rm_ble_mesh_os_on_rm_ble_mesh_os_awsfreertos" />
+
+        <header>
+        </header>
+        <includes>
+        </includes>
+        <declarations>
+
+        </declarations>
+    </module>
+</raModuleDescription>
+

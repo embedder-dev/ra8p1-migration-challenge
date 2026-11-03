@@ -1,0 +1,27 @@
+<?xml version="1.0" ?>
+<raModuleDescription>
+  <module display="Bootloader|MCUboot External Memory (QSPI)" id="module.driver.rm_mcuboot_external_memory_interface_qspi" visible="false" version="1" url="">
+    <constraint display="QSPI Block Erase 32Kb size must be supported ">
+              "${module.driver.rm_mcuboot_external_memory_interface_qspi.requires.qspi::module.driver.qspi.block_erase_32kb_size}" === "32768" || (!testExists("${module.driver.rm_mcuboot_external_memory_interface_qspi.requires.qspi::module.driver.qspi.name}"))
+    </constraint>
+    <requires id="module.driver.rm_mcuboot_external_memory_interface_qspi.requires.qspi" interface="interface.driver.rm_mcuboot_external_memory" visible="true" display="External Memory Support (QSPI)">
+    </requires>
+    <provides interface="interface.driver.rm_mcuboot_external_memory_interface"/>
+    <provides interface="interface.driver.rm_mcuboot_external_memory_qspi"/>
+    <memory accumulator="BOOTLOADER_SECONDARY_USE_QSPI">
+        1
+    </memory>
+    <includes>
+
+    </includes>
+    <declarations>
+#define RA_NOT_DEFINED (UINT32_MAX)
+#if (RA_NOT_DEFINED) != (${module.driver.rm_mcuboot_external_memory_interface_qspi.requires.qspi::module.driver.qspi.name})
+qspi_instance_ctrl_t * const gp_mcuboot_xspi_ctrl = &amp;${module.driver.rm_mcuboot_external_memory_interface_qspi.requires.qspi::module.driver.qspi.name}_ctrl;
+spi_flash_cfg_t const * const gp_mcuboot_xspi_cfg = &amp;${module.driver.rm_mcuboot_external_memory_interface_qspi.requires.qspi::module.driver.qspi.name}_cfg;
+spi_flash_instance_t const * const gp_mcuboot_xspi_instance = &amp;${module.driver.rm_mcuboot_external_memory_interface_qspi.requires.qspi::module.driver.qspi.name};
+#endif
+#undef RA_NOT_DEFINED
+    </declarations>
+  </module>
+</raModuleDescription>

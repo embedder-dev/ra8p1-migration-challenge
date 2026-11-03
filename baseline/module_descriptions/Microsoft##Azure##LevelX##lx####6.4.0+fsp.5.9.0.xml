@@ -1,0 +1,158 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<raModuleDescription>
+    <config id="config.azure.lx" path="fsp_cfg/azure/lx/lx_user.h" version="0">
+        <property id="config.azure.lx.direct_read" display="NOR|Direct Read" default="config.azure.lx.direct_read.enabled" description="When enabled, this option bypasses the NOR flash driver read routine in favor or reading the NOR memory directly, resulting in a significant performance increase.">
+            <option id="config.azure.lx.direct_read.enabled" display="Enabled (default)" value="#define LX_DIRECT_READ" />
+            <option id="config.azure.lx.direct_read.disabled" display="Disabled" value="" />
+        </property>
+        <property id="config.azure.lx.free_sector_data_verify" display="NOR|Free Sector Data Verify" default="config.azure.lx.free_sector_data_verify.disabled" description="When enabled, this causes the LevelX NOR instance open logic to verify free NOR sectors are all ones.">
+            <option id="config.azure.lx.free_sector_data_verify.enabled" display="Enabled" value="#define LX_FREE_SECTOR_DATA_VERIFY" />
+            <option id="config.azure.lx.free_sector_data_verify.disabled" display="Disabled (default)" value="" />
+        </property>
+        <property default="" display="NAND|Sector Mapping Cache Size" id="config.azure.lx.nand_sector_mapping_cache_size" description="If not set this value defaults to 128 and defines the logical sector mapping cache size. Large values improve performance, but cost memory. The minimum size is 8 and all values must be a power of 2.">
+            <constraint display="Value must be greater than or equal to 8 and a power of 2, or empty">
+                ("${config.azure.lx.nand_sector_mapping_cache_size}".length === 0) ||
+                (("${config.azure.lx.nand_sector_mapping_cache_size}" &gt;= 8) &amp;&amp; (("${config.azure.lx.nand_sector_mapping_cache_size}" &amp; ("${config.azure.lx.nand_sector_mapping_cache_size}" - 1)) === 0))
+            </constraint>
+        </property>
+        <property id="config.azure.lx.nand_flash_direct_mapping_cache" display="NAND|Flash Direct Mapping Cache" default="config.azure.lx.nand_flash_direct_mapping_cache.disabled" description="When enabled, this creates a direct mapping cache, such that there are no cache misses. It also required that LX_NAND_SECTOR_MAPPING_CACHE_SIZE represents the exact number of total pages in your flash device.">
+            <option id="config.azure.lx.nand_flash_direct_mapping_cache.enabled" display="Enabled" value="#define LX_NAND_FLASH_DIRECT_MAPPING_CACHE" />
+            <option id="config.azure.lx.nand_flash_direct_mapping_cache.disabled" display="Disabled (default)" value="" />
+        </property>
+        <property id="config.azure.lx.nor_disable_extended_cache" display="NOR|Extended Cache" default="config.azure.lx.nor_disable_extended_cache.enabled" description="Enables the extended NOR cache.">
+            <option id="config.azure.lx.nor_disable_extended_cache.enabled" display="Enabled (default)" value="" />
+            <option id="config.azure.lx.nor_disable_extended_cache.disabled" display="Disabled" value="#define LX_NOR_DISABLE_EXTENDED_CACHE" />
+        </property>
+        <property default="" display="NOR|Extended Cache Size" id="config.azure.lx.nor_extended_cache_size" description="If not set this value defaults to 8, which represents a maximum of 8 sectors that can be cached in a NOR instance." />
+        <property default="" display="NOR|Sector Mapping Cache Size" id="config.azure.lx.nor_sector_mapping_cache_size" description="If not set this value defaults to 16 and defines the logical sector mapping cache size. Large values improve performance, but cost memory. The minimum size is 8 and all values must be a power of 2.">
+            <constraint display="Value must be greater than or equal to 8 and a power of 2, or empty">
+                ("${config.azure.lx.nor_sector_mapping_cache_size}".length === 0) ||
+                (("${config.azure.lx.nor_sector_mapping_cache_size}" &gt;= 8) &amp;&amp; (("${config.azure.lx.nor_sector_mapping_cache_size}" &amp; ("${config.azure.lx.nor_sector_mapping_cache_size}" - 1)) === 0))
+            </constraint>
+        </property>
+        <property id="config.azure.lx.thread_safe" display="Thread Safe" default="config.azure.lx.thread_safe.disabled" description="When enabled, this makes LevelX thread-safe by using a ThreadX mutex object throughout the API.">
+            <option id="config.azure.lx.thread_safe.enabled" display="Enabled" value="#define LX_THREAD_SAFE_ENABLE" />
+            <option id="config.azure.lx.thread_safe.disabled" display="Disabled (default)" value="" />
+        </property>
+        <property id="config.azure.lx.standalone" display="Standalone Mode" default="config.azure.lx.standalone.disabled" description="When enabled, allows LevelX to be used in standalone mode (without Azure RTOS).">
+            <option id="config.azure.lx.standalone.enabled" display="Enabled" value="#define LX_STANDALONE_ENABLE" />
+            <option id="config.azure.lx.standalone.disabled" display="Disabled (default)" value="" />
+        </property>
+        <content>
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#if (${config.azure.lx.nand_sector_mapping_cache_size}+0)
+#define LX_NAND_SECTOR_MAPPING_CACHE_SIZE (${config.azure.lx.nand_sector_mapping_cache_size})
+#endif
+#if (${config.azure.lx.nor_extended_cache_size}+0)
+#define LX_NOR_EXTENDED_CACHE_SIZE (${config.azure.lx.nor_extended_cache_size})
+#endif
+#if (${config.azure.lx.nor_sector_mapping_cache_size}+0)
+#define LX_NOR_SECTOR_MAPPING_CACHE_SIZE (${config.azure.lx.nor_sector_mapping_cache_size})
+#endif
+${config.azure.lx.direct_read}
+${config.azure.lx.free_sector_data_verify}
+${config.azure.lx.nand_flash_direct_mapping_cache}
+${config.azure.lx.nor_disable_extended_cache}
+${config.azure.lx.thread_safe}
+${config.azure.lx.standalone}
+
+#ifdef __cplusplus
+}
+#endif
+        </content>
+    </config>
+    <module config="config.azure.lx" id="module.azure.lx.nor.spi" display="Storage|Azure RTOS LevelX NOR on SPI Memory" common="100" version="0" url="https://github.com/eclipse-threadx/rtos-docs/blob/main/rtos-docs/levelx/index.md">
+        <constraint display="LevelX Standalone Mode must be enabled under Common properties for Bare Metal projects.">
+            ("${config.azure.lx.standalone}" === "config.azure.lx.standalone.enabled") || (testExists("${interface.rtos.tx}"))
+        </constraint>
+        <requires id="module.azure.lx.nor.requires.threadx" interface="interface.rtos.supports.filex" visible="false" display="Requires ThreadX or Bare Metal project"/>
+        <requires id="module.azure.lx.nor.requires.lx_nor_spi" interface="interface.middleware.rm_levelx_nor_spi" display="Add LevelX NOR SPI Driver">
+            <override property="module.middleware.rm_levelx_nor_spi.callback" value="${module.azure.lx.nor.spi.callback}"/>
+            <override property="module.middleware.rm_levelx_nor_spi.p_context" value="${module.azure.lx.nor.spi.p_context}"/>
+        </requires>
+        <provides interface="interface.azure.lx.nor" />
+        <property default="g_lx_nor${_instance}" display="Name" id="module.azure.lx.nor.spi.name" description="Symbol used for LevelX NOR Instance">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.azure.lx.nor.spi.name}")</constraint>
+        </property>
+        <property default="g_lx_nor${_instance}_busy_callback" display="Busy Callback" id="module.azure.lx.nor.spi.callback" description="A user callback function can be provided. If this callback function is provided, it will be called when waiting for write/erase opeartions as a way for the user to provide a thread wait on an OS.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.azure.lx.nor.spi.callback}")</constraint>
+        </property>
+        <property default="NULL" id="module.azure.lx.nor.spi.p_context" />
+        <property default="${module.azure.lx.nor.requires.lx_nor_spi::module.middleware.rm_levelx_nor_spi.name}_close" id="module.azure.lx.nor.spi.close" />
+        <property default="${module.azure.lx.nor.requires.lx_nor_spi::module.middleware.rm_levelx_nor_spi.name}_initialize" id="module.azure.lx.nor.spi.initialize" />
+        <header>
+extern LX_NOR_FLASH ${module.azure.lx.nor.spi.name};
+        </header>
+        <includes>
+#include "lx_api.h"
+        </includes>
+        <declarations>
+LX_NOR_FLASH ${module.azure.lx.nor.spi.name};
+        </declarations>
+    </module>
+    <developerSupport>
+        <api version="1">
+            <platform id="fsp" max="" min="1.1.0"/>
+            <moduleRef id="module.azure.lx.nor.spi"/>
+            <description><![CDATA[<form><p><span color="header" font="header">Overview</span></p><p>The LevelX NOR SPI module provides snippets of code for configuring LevelX to run on a NOR SPI memory device.</p></form>]]></description>
+            <function display="Quick Setup" id="levelx_nor_spi_quick_setup">
+                <description><![CDATA[<form><p>This function provides quick setup for the LevelX NOR instance using the properties from the RA configurator.</p></form>]]></description>
+            </function>
+        </api>
+        <template category="function_call" display="Call Quick Setup" id="module.azure.lx.nor.spi.quick_setup" version="1">
+            <platform id="fsp" max="" min="1.1.0"/>
+            <moduleRef id="module.azure.lx.nor.spi">
+                <function id="levelx_nor_spi_quick_setup"/>
+            </moduleRef>
+            <content>
+// TODO: Enable if you want to erase memory before opening LevelX
+#define FORMAT_MEMORY (0)
+
+void ${lx_name:raProperty(module.azure.lx.nor.spi.name)}_quick_setup();
+
+/* Quick setup for ${lx_name}.
+ * - lx_nor_flash_initialize() must be called before calling this function.
+ */
+void ${lx_name}_quick_setup()
+{
+    UINT lx_ret_val;
+
+#if FORMAT_MEMORY
+    fsp_err_t fsp_err;
+    spi_flash_status_t status;
+
+    spi_flash_instance_t * p_spi_flash = (spi_flash_instance_t *) ${rm_lx_nor_spi_name:raProperty(module.middleware.rm_levelx_nor_spi.name)}_cfg.p_lower_lvl;
+    fsp_err = p_spi_flash->p_api->open(p_spi_flash->p_ctrl, p_spi_flash->p_cfg);
+    assert(FSP_SUCCESS == fsp_err);
+
+    for (int i = ${rm_lx_nor_spi_name}_cfg.address_offset; i &lt; ${rm_lx_nor_spi_size:raProperty(module.middleware.rm_levelx_nor_spi.size)}; i += ${rm_lx_nor_spi_name_upper:raProperty(module.middleware.rm_levelx_nor_spi.name_upper)}_SECTOR_SIZE)
+    {
+        fsp_err = p_spi_flash->p_api->erase(p_spi_flash->p_ctrl,
+                                     (uint8_t *) ${rm_lx_nor_spi_name}_cfg.base_address + i,
+                                     ${rm_lx_nor_spi_name_upper}_SECTOR_SIZE);
+        assert(FSP_SUCCESS == fsp_err);
+
+        status.write_in_progress = true;
+
+        while (status.write_in_progress)
+        {
+            fsp_err = p_spi_flash->p_api->statusGet(p_spi_flash->p_ctrl, &amp;status);
+            assert(FSP_SUCCESS == fsp_err);
+        }
+    }
+
+    fsp_err = p_spi_flash->p_api->close(p_spi_flash->p_ctrl);
+    assert(FSP_SUCCESS == fsp_err);
+#endif
+
+    /* Open the memory */
+    lx_ret_val = lx_nor_flash_open(&amp;${lx_name}, "${lx_name}", ${rm_lx_nor_spi_name}_initialize);
+    assert(LX_SUCCESS == lx_ret_val);
+}
+            </content>
+        </template>
+    </developerSupport>
+</raModuleDescription>

@@ -1,0 +1,6 @@
+<?xml version="1.0" ?>
+<raModuleDescription>
+    <module display="Bootloader|MCUboot Example Keys (NOT FOR PRODUCTION)" id="module.middleware.mcuboot_keys" version="1" visible="false" url="https://github.com/mcu-tools/mcuboot">
+        <provides interface="interface.middleware.mcuboot.example_keys" />
+    </module>
+</raModuleDescription>

@@ -1,0 +1,138 @@
+<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.arm.mbed.littlefs" path="arm/littlefs/lfs_util.h" version="0">
+        <property default="" description="Add a path to your custom lfs_util.h file. It can be used to override some or all of the configurations defined here, and to define additional configurations." display="Custom lfs_util.h" id="config.arm.mbed.littlefs.custom_lfs_util">
+            <export>eval('' +
+'var input = "${config.arm.mbed.littlefs.custom_lfs_util}";' +
+'if (input != "")' +
+'{' +
+'    input = \'#include "\' + input + \'" \\n#define LFS_CONFIG lfs_util.h \';' +
+'}' +
+'    input' +
+                '')</export>
+        </property>
+        <property default="config.arm.mbed.littlefs.thread_safe.disabled" display="Thread Safe" id="config.arm.mbed.littlefs.thread_safe" description="Enables thread safety in LittleFS.">
+            <option display="Enabled" id="config.arm.mbed.littlefs.thread_safe.enabled" value="(1)"/>
+            <option display="Disabled" id="config.arm.mbed.littlefs.thread_safe.disabled" value="(0)"/>
+        </property>
+        <property default="config.arm.mbed.littlefs.read_only.disabled" display="Read Only" id="config.arm.mbed.littlefs.read_only" description="Enables Read Only mode in LittleFS.">
+            <option display="Enabled" id="config.arm.mbed.littlefs.read_only.enabled" value="(1)"/>
+            <option display="Disabled" id="config.arm.mbed.littlefs.read_only.disabled" value="(0)"/>
+        </property>
+        <property default="config.arm.mbed.littlefs.no_malloc.enabled" display="Use Malloc" id="config.arm.mbed.littlefs.no_malloc" description="Configures the use of malloc by LittleFS.">
+            <option display="Enabled" id="config.arm.mbed.littlefs.no_malloc.enabled" value="(0)"/>
+            <option display="Disabled" id="config.arm.mbed.littlefs.no_malloc.disabled" value="(1)"/>
+        </property>
+        <property default="config.arm.mbed.littlefs.no_assert.enabled" display="Use Assert" id="config.arm.mbed.littlefs.no_assert" description="Configures the use of assert by LittleFS.">
+            <option display="Enabled" id="config.arm.mbed.littlefs.no_assert.enabled" value="(0)"/>
+            <option display="Disabled" id="config.arm.mbed.littlefs.no_assert.disabled" value="(1)"/>
+        </property>
+        <property default="config.arm.mbed.littlefs.no_debug.disabled" display="Debug Messages" id="config.arm.mbed.littlefs.no_debug" description="Configures debug messages.">
+            <option display="Enabled" id="config.arm.mbed.littlefs.no_debug.enabled" value="(0)"/>
+            <option display="Disabled" id="config.arm.mbed.littlefs.no_debug.disabled" value="(1)"/>
+        </property>
+        <property default="config.arm.mbed.littlefs.no_warning.disabled" display="Warning Messages" id="config.arm.mbed.littlefs.no_warning" description="Configures warning messages.">
+            <option display="Enabled" id="config.arm.mbed.littlefs.no_warning.enabled" value="(0)"/>
+            <option display="Disabled" id="config.arm.mbed.littlefs.no_warning.disabled" value="(1)"/>
+        </property>
+        <property default="config.arm.mbed.littlefs.no_error.disabled" display="Error Messages" id="config.arm.mbed.littlefs.no_error" description="Configures error messages.">
+            <option display="Enabled" id="config.arm.mbed.littlefs.no_error.enabled" value="(0)"/>
+            <option display="Disabled" id="config.arm.mbed.littlefs.no_error.disabled" value="(1)"/>
+        </property>
+        <property default="config.arm.mbed.littlefs.yes_trace.disabled" display="Trace Messages" id="config.arm.mbed.littlefs.yes_trace" description="Configures trace messages.">
+            <option display="Enabled" id="config.arm.mbed.littlefs.yes_trace.enabled" value="(1)"/>
+            <option display="Disabled" id="config.arm.mbed.littlefs.yes_trace.disabled" value="(0)"/>
+        </property>
+        <property default="config.arm.mbed.littlefs.no_intrinsics.enabled" display="Intrinsics" id="config.arm.mbed.littlefs.no_intrinsics" description="Configures intrinsic functions such as __builtin_clz.">
+            <option display="Enabled" id="config.arm.mbed.littlefs.no_intrinsics.enabled" value="(0)"/>
+            <option display="Disabled" id="config.arm.mbed.littlefs.no_intrinsics.disabled" value="(1)"/>
+        </property>
+        <property default="g_rm_littlefs0" display="Instance Name for STDIO wrapper" id="config.arm.mbed.littlefs.instance_name" description="The rm_littlefs instance name to use with the STDIO wrapper.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${config.arm.mbed.littlefs.instance_name}")</constraint>
+        </property>
+        <content>
+
+        ${config.arm.mbed.littlefs.custom_lfs_util}
+
+        #ifdef __cplusplus
+        extern "C" {
+        #endif
+
+        #if ${config.arm.mbed.littlefs.no_malloc}
+        #define LFS_NO_MALLOC
+        #endif
+
+        #if ${config.arm.mbed.littlefs.no_assert}
+        #define LFS_NO_ASSERT
+        #endif
+
+        #if ${config.arm.mbed.littlefs.yes_trace}
+        #define LFS_YES_TRACE
+        #endif
+
+        #if ${config.arm.mbed.littlefs.no_debug}
+        #define LFS_NO_DEBUG
+        #endif
+
+        #if ${config.arm.mbed.littlefs.no_warning}
+        #define LFS_NO_WARN
+        #endif
+
+        #if ${config.arm.mbed.littlefs.no_error}
+        #define LFS_NO_ERROR
+        #endif
+
+        #if ${config.arm.mbed.littlefs.no_intrinsics}
+        #define LFS_NO_INTRINSICS
+        #endif
+
+        #if ${config.arm.mbed.littlefs.thread_safe}
+        #define LFS_THREADSAFE
+        #endif
+
+        #if ${config.arm.mbed.littlefs.read_only}
+        #define LFS_READONLY
+        #endif
+
+        /* Defines the LittleFS instance control block to be the stdio wrapper. */
+        #define RM_STDIO_LITTLEFS_CFG_LFS ${config.arm.mbed.littlefs.instance_name}_lfs
+
+        #include "../../ra/arm/littlefs/config/lfs_util.h"
+
+        #ifdef __cplusplus
+        }
+        #endif
+        </content>
+    </config>
+    <module id="module.arm.mbed.littlefs" display="Storage|LittleFS" config="config.arm.mbed.littlefs" common="1" version="0" url="https://github.com/ARMmbed/littlefs">
+        <constraint display="A heap is required to use Malloc with LittleFS. Please add a heap under BSP|RA Common|Heap Size or disable Common|Use Malloc. If LittleFS is configured not to use malloc each file must be given a buffer. Refer to the RM_LITTLEFS_FLASH documentation for more information.">
+        (("${config.bsp.common.heap}" &gt; 0)  || ("${config.arm.mbed.littlefs.no_malloc}" === "config.arm.mbed.littlefs.no_malloc.disabled"))
+        </constraint>
+        <constraint display="Instance Name for STDIO wrapper does not match any LittleFS module name.">
+            "${interface.middleware.rm_littlefs.${config.arm.mbed.littlefs.instance_name}}" === "1"
+        </constraint>
+        <constraint display="When the thread safe option is enabled mutexes must be enabled in the FreeRTOS thread config under Common|General|Use Mutexes.">
+            (("${config.awsfreertos.thread.configuse_mutexes}" === "config.awsfreertos.thread.configuse_mutexes.enabled")
+            || ("${config.arm.mbed.littlefs.thread_safe}" === "config.arm.mbed.littlefs.thread_safe.disabled"))
+            || ("1" != "${interface.rtos.awsfreertos}")
+        </constraint>
+        <constraint display="The thread safe option is only available when using FreeRTOS.">
+            ("${config.arm.mbed.littlefs.thread_safe}" === "config.arm.mbed.littlefs.thread_safe.disabled") ||
+            ("1" == "${interface.rtos.awsfreertos}")
+        </constraint>
+        <constraint display="Requires Littlefs Port">
+            (testExists("${module.arm.mbed.littlefs.requires.littlefs_port::module.middleware.rm_littlefs.name}") ||
+             testExists("${module.arm.mbed.littlefs.requires.littlefs_port::module.middleware.rm_littlefs_spi_flash.name}"))
+        </constraint>
+        <requires id="module.arm.mbed.littlefs.requires.littlefs_port" interface="interface.middleware.littlefs_port" display="Add LittleFS Port [Required]" find="true"/>
+        <provides interface="interface.arm.mbed.littlefs" />
+        <provides interface="interface.stdio.storage" />
+        <property default="stdio_wrapper" id="module.middleware.stdio_wrapper" description="Hidden property for psa_crypto." />
+        <header>
+
+        </header>
+        <includes>
+            #include &quot;lfs_util.h&quot;
+        </includes>
+    </module>
+</raModuleDescription>

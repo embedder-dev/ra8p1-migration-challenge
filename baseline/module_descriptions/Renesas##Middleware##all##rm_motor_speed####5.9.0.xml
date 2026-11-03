@@ -1,0 +1,719 @@
+<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.middleware.motor_speed" path="fsp_cfg/rm_motor_speed_cfg.h" version="0">
+        <property default="config.middleware.motor_speed.param_checking_enable.bsp" display="Parameter Checking" id="config.middleware.motor_speed.param_checking_enable" description="If selected code for parameter checking is included in the build.">
+            <option display="Default (BSP)" id="config.middleware.motor_speed.param_checking_enable.bsp" value="(BSP_CFG_PARAM_CHECKING_ENABLE)"/>
+            <option display="Enabled" id="config.middleware.motor_speed.param_checking_enable.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.motor_speed.param_checking_enable.disabled" value="(0)"/>
+        </property>
+        <property default="config.middleware.motor_speed.position_support.disabled" display="Position Support" id="config.middleware.motor_speed.position_support" description="Enable position algorithm support.">
+            <option display="Enabled" id="config.middleware.motor_speed.position_support.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.motor_speed.position_support.disabled" value="(0)"/>
+        </property>
+
+        <content>
+            #ifdef __cplusplus
+            extern "C" {
+            #endif
+
+            #define MOTOR_SPEED_CFG_PARAM_CHECKING_ENABLE ${config.middleware.motor_speed.param_checking_enable}
+            #define MOTOR_SPEED_CFG_POSITION_SUPPORTED ${config.middleware.motor_speed.position_support}
+
+            #ifdef __cplusplus
+            }
+            #endif
+        </content>
+    </config>
+    <module config="config.middleware.motor_speed" display="Motor| Motor Speed Controller (rm_motor_speed)" id="module.middleware.motor_speed" version="1" url="group___m_o_t_o_r___s_p_e_e_d.html">
+        <constraint display="To use the encoder and induction, the position module must be added and position support enabled under Common properties for this module.">
+        (("${module.middleware.motor_speed.control_type}"==="module.middleware.motor_speed.control_type.sensorless" || "${module.middleware.motor_speed.control_type}"==="module.middleware.motor_speed.control_type.hall")
+        || (testExists("${module.middleware.motor_speed.requires.position::module.middleware.motor_position.name}"))
+        &amp;&amp;("${config.middleware.motor_speed.position_support}"==="config.middleware.motor_speed.position_support.enabled"))
+        </constraint>
+        <constraint display="Sensorless and Hall module must not be selected to use position">
+        (("${module.middleware.motor_speed.control_type}"==="module.middleware.motor_speed.control_type.encoder" || "${module.middleware.motor_speed.control_type}"==="module.middleware.motor_speed.control_type.induction")
+        ||(!testExists("${module.middleware.motor_speed.requires.position::module.middleware.motor_position.name}"))
+        &amp;&amp;("${config.middleware.motor_speed.position_support}"==="config.middleware.motor_speed.position_support.disabled"))
+        </constraint>
+        <constraint display="Requires Timer Driver">
+            testExists("${module.middleware.motor_speed.requires.timer::module.driver.timer.name}")
+        </constraint>
+        <constraint display="Unique name required for each instance">
+            ("${interface.middleware.motor_speed.${module.middleware.motor_speed.name}}" === "1")
+        </constraint>
+
+        <requires id="module.middleware.motor_speed.requires.timer" interface="interface.driver.timer" find="true" display="Add Timer Driver [Mandatory]">
+            <override property="module.driver.timer.mode" value="TIMER_MODE_PERIODIC"/>
+            <override property="module.driver.timer.p_callback" value="rm_motor_speed_cyclic"/>
+            <override property="module.driver.timer.p_context" value="${module.middleware.motor_speed.name}"/>
+        </requires>
+
+        <requires id="module.middleware.motor_speed.requires.position" interface="interface.middleware.motor_position" find="false" optional="true" display="Add Position Module [Optional]">
+        </requires>
+        <provides interface="interface.middleware.motor_speed" />
+        <provides interface="interface.middleware.motor_speed.${module.middleware.motor_speed.name}" />
+
+        <!-- Module Name -->
+        <property default="g_motor_speed${_instance}" display="General|Name" id="module.middleware.motor_speed.name" description="Module name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.middleware.motor_speed.name}")</constraint>
+        </property>
+
+        <!-- General Settings -->
+        <property default="0.0005F" display="General|Speed control period (sec)" id="module.middleware.motor_speed.f_speed_ctrl_period" description="Period of speed control function.">
+            <constraint display="Must be a valid non-negative value">
+            eval('' +
+            'var input = "${module.middleware.motor_speed.f_speed_ctrl_period}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?$","i");' +
+            'var regex_float_with_suffix = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?F$","i");' +
+            ' ( regex_float.test(input) || regex_float_with_suffix.test(input))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${module.middleware.motor_speed.f_speed_ctrl_period}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)$","i");' +
+            'if (regex_float.test(output)){' +
+            'output = output + "F";' +
+            '}' +
+            'output')
+            </export>
+        </property>
+        <property default="0.5F" display="General|Step of speed climbing (rpm)" id="module.middleware.motor_speed.f_limit_speed_change" description="Step of speed change at start of open-loop.">
+            <constraint display="Must be a valid non-negative value">
+            eval('' +
+            'var input = "${module.middleware.motor_speed.f_limit_speed_change}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?$","i");' +
+            'var regex_float_with_suffix = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?F$","i");' +
+            ' ( regex_float.test(input) || regex_float_with_suffix.test(input))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${module.middleware.motor_speed.f_limit_speed_change}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)$","i");' +
+            'if (regex_float.test(output)){' +
+            'output = output + "F";' +
+            '}' +
+            'output')
+            </export>
+        </property>
+        <property default="2650.0F" display="General|Maximum rotational speed (rpm)" id="module.middleware.motor_speed.f_max_speed_rad" description="Maximum rotational speed (Limit speed).">
+            <constraint display="Must be a valid non-negative value.">
+            eval('' +
+            'var input = "${module.middleware.motor_speed.f_max_speed_rad}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?$","i");' +
+            'var regex_float_with_suffix = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?F$","i");' +
+            ' ( regex_float.test(input) || regex_float_with_suffix.test(input))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${module.middleware.motor_speed.f_max_speed_rad}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)$","i");' +
+            'if (regex_float.test(output)){' +
+            'output = output + "F";' +
+            '}' +
+            'output')
+            </export>
+        </property>
+        <property default="10.0F" display="General|Speed LPF omega" id="module.middleware.motor_speed.f_omega_t" description="Design parameter for speed LPF.">
+            <constraint display="Must be a valid non-negative value">
+            eval('' +
+            'var input = "${module.middleware.motor_speed.f_omega_t}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?$","i");' +
+            'var regex_float_with_suffix = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?F$","i");' +
+            ' ( regex_float.test(input) || regex_float_with_suffix.test(input))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${module.middleware.motor_speed.f_omega_t}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)$","i");' +
+            'if (regex_float.test(output)){' +
+            'output = output + "F";' +
+            '}' +
+            'output')
+            </export>
+        </property>
+        <property default="0.42F" display="General|Limit of q-axis current (A)" id="module.middleware.motor_speed.f_iq_limit" description="Limit of q-axis current.">
+            <constraint display="Must be a valid non-negative value">
+            eval('' +
+            'var input = "${module.middleware.motor_speed.f_iq_limit}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?$","i");' +
+            'var regex_float_with_suffix = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?F$","i");' +
+            ' ( regex_float.test(input) || regex_float_with_suffix.test(input))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${module.middleware.motor_speed.f_iq_limit}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)$","i");' +
+            'if (regex_float.test(output)){' +
+            'output = output + "F";' +
+            '}' +
+            'output')
+            </export>
+        </property>
+        <property default="0.20F" display="General|Step of speed feedback at open-loop" id="module.middleware.motor_speed.f_ol_fb_speed_limit_rate" description="Step of speed feedback at open-loop.">
+            <constraint display="Must be a valid non-negative value">
+            eval('' +
+            'var input = "${module.middleware.motor_speed.f_ol_fb_speed_limit_rate}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?$","i");' +
+            'var regex_float_with_suffix = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?F$","i");' +
+            ' ( regex_float.test(input) || regex_float_with_suffix.test(input))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${module.middleware.motor_speed.f_ol_fb_speed_limit_rate}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)$","i");' +
+            'if (regex_float.test(output)){' +
+            'output = output + "F";' +
+            '}' +
+            'output')
+            </export>
+        </property>
+        <property default="100.0F" display="General|Natural frequency" id="module.middleware.motor_speed.f_natural_frequency" description="Natural frequency for disturbance speed observer.">
+            <constraint display="Must be a valid non-negative value.">
+            eval('' +
+            'var input = "${module.middleware.motor_speed.f_natural_frequency}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?$","i");' +
+            'var regex_float_with_suffix = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?F$","i");' +
+            ' ( regex_float.test(input) || regex_float_with_suffix.test(input))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${module.middleware.motor_speed.f_natural_frequency}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)$","i");' +
+            'if (regex_float.test(output)){' +
+            'output = output + "F";' +
+            '}' +
+            'output')
+            </export>
+        </property>
+        <property default="module.middleware.motor_speed.openloop_damping.enable" display="General|Open-loop damping" id="module.middleware.motor_speed.openloop_damping" description="Select enable/disable Open-loop damping control.">
+            <option display="Disable" id="module.middleware.motor_speed.openloop_damping.disable" value="MOTOR_SPEED_OPENLOOP_DAMPING_DISABLE"/>
+            <option display="Enable" id="module.middleware.motor_speed.openloop_damping.enable" value="MOTOR_SPEED_OPENLOOP_DAMPING_ENABLE"/>
+        </property>
+        <property default="module.middleware.motor_speed.fluxweakening.disable" display="General|Flux weakening" id="module.middleware.motor_speed.fluxweakening" description="Select enable/disable flux weakening control.">
+            <option display="Disable" id="module.middleware.motor_speed.fluxweakening.disable" value="MOTOR_SPEED_FLUX_WEAKEN_DISABLE"/>
+            <option display="Enable" id="module.middleware.motor_speed.fluxweakening.enable" value="MOTOR_SPEED_FLUX_WEAKEN_ENABLE"/>
+        </property>
+        <property default="module.middleware.motor_speed.less_switch.enable" display="General|Torque compensation for sensorless transition" id="module.middleware.motor_speed.less_switch" description="Select enable/disable torque compensation for sensorless transition.">
+            <option display="Disable" id="module.middleware.motor_speed.less_switch.disable" value="MOTOR_SPEED_LESS_SWITCH_DISABLE"/>
+            <option display="Enable" id="module.middleware.motor_speed.less_switch.enable" value="MOTOR_SPEED_LESS_SWITCH_ENABLE"/>
+        </property>
+        <property default="module.middleware.motor_speed.observer.enable" display="General|Speed observer" id="module.middleware.motor_speed.observer" description="Select enable/disable Speed observer process.">
+            <option display="Disable" id="module.middleware.motor_speed.observer.disable" value="MOTOR_SPEED_OBSERVER_SWITCH_DISABLE"/>
+            <option display="Enable" id="module.middleware.motor_speed.observer.enable" value="MOTOR_SPEED_OBSERVER_SWITCH_ENABLE"/>
+        </property>
+        <property default="module.middleware.motor_speed.observer_select.normal" display="General|Selection of speed observer" id="module.middleware.motor_speed.observer_select" description="Select speed observer type.">
+            <option display="Normal" id="module.middleware.motor_speed.observer_select.normal" value="MOTOR_SPEED_OBSERVER_SELECT_NORMAL"/>
+            <option display="Disturbance" id="module.middleware.motor_speed.observer_select.disturbance" value="MOTOR_SPEED_OBSERVER_SELECT_DISTURBANCE"/>
+        </property>
+        <property default="module.middleware.motor_speed.ctrl_method.pid" display="General|Control method" id="module.middleware.motor_speed.ctrl_method" description="Select the control method [PID or IPD].">
+            <option display="PID" id="module.middleware.motor_speed.ctrl_method.pid" value="MOTOR_SPEED_METHOD_PID"/>
+            <option display="IPD" id="module.middleware.motor_speed.ctrl_method.ipd" value="MOTOR_SPEED_METHOD_IPD"/>
+        </property>
+        <property id="module.middleware.motor_speed.control_type" display="General|Control type" default="module.middleware.motor_speed.control_type.sensorless">
+            <option display="Sensoreless" id="module.middleware.motor_speed.control_type.sensorless" value="MOTOR_SPEED_CONTROL_TYPE_SENSORLESS"/>
+            <option display="Encoder" id="module.middleware.motor_speed.control_type.encoder" value="MOTOR_SPEED_CONTROL_TYPE_ENCODER"/>
+            <option display="Induction" id="module.middleware.motor_speed.control_type.induction" value="MOTOR_SPEED_CONTROL_TYPE_INDUCTION"/>
+            <option display="Hall" id="module.middleware.motor_speed.control_type.hall" value="MOTOR_SPEED_CONTROL_TYPE_HALL"/>
+        </property>
+
+        <!-- Open Loop Settings -->
+        <property default="0.3F" display="Open-Loop|Step of d-axis current climbing" id="module.middleware.motor_speed.f4_ol_id_up_step" description="Step of d-axis current climbing">
+            <constraint display="Must be a valid non-negative value">
+            eval('' +
+            'var input = "${module.middleware.motor_speed.f4_ol_id_up_step}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?$","i");' +
+            'var regex_float_with_suffix = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?F$","i");' +
+            ' ( regex_float.test(input) || regex_float_with_suffix.test(input))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${module.middleware.motor_speed.f4_ol_id_up_step}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)$","i");' +
+            'if (regex_float.test(output)){' +
+            'output = output + "F";' +
+            '}' +
+            'output')
+            </export>
+        </property>
+        <property default="0.3F" display="Open-Loop|Step of d-axis current descending" id="module.middleware.motor_speed.f4_ol_id_down_step" description="Step of d-axis current descending">
+            <constraint display="Must be a valid non-negative value">
+            eval('' +
+            'var input = "${module.middleware.motor_speed.f4_ol_id_down_step}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?$","i");' +
+            'var regex_float_with_suffix = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?F$","i");' +
+            ' ( regex_float.test(input) || regex_float_with_suffix.test(input))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${module.middleware.motor_speed.f4_ol_id_down_step}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)$","i");' +
+            'if (regex_float.test(output)){' +
+            'output = output + "F";' +
+            '}' +
+            'output')
+            </export>
+        </property>
+        <property default="1.0F" display="Open-Loop|Step of q-axis current descending ratio" id="module.middleware.motor_speed.f4_ol_iq_down_step_ratio" description="Step of q-axis current descending ratio">
+            <constraint display="Must be a valid non-negative value">
+            eval('' +
+            'var input = "${module.middleware.motor_speed.f4_ol_iq_down_step_ratio}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?$","i");' +
+            'var regex_float_with_suffix = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?F$","i");' +
+            ' ( regex_float.test(input) || regex_float_with_suffix.test(input))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${module.middleware.motor_speed.f4_ol_iq_down_step_ratio}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)$","i");' +
+            'if (regex_float.test(output)){' +
+            'output = output + "F";' +
+            '}' +
+            'output')
+            </export>
+        </property>
+        <property default="0.3F" display="Open-Loop|Reference of d-axis current" id="module.middleware.motor_speed.f4_ol_id_ref" description="Reference of d-axis current">
+            <constraint display="Must be a valid non-negative value">
+            eval('' +
+            'var input = "${module.middleware.motor_speed.f4_ol_id_ref}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?$","i");' +
+            'var regex_float_with_suffix = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?F$","i");' +
+            ' ( regex_float.test(input) || regex_float_with_suffix.test(input))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${module.middleware.motor_speed.f4_ol_id_ref}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)$","i");' +
+            'if (regex_float.test(output)){' +
+            'output = output + "F";' +
+            '}' +
+            'output')
+            </export>
+        </property>
+        <property default="600.0F" display="Open-Loop|Threshold of speed control descending" id="module.middleware.motor_speed.f4_id_down_speed_rad" description="When rotational speed reaches this speed, d-axis current is controlled descending.">
+            <constraint display="Must be a valid value">
+            eval('' +
+            'var input = "${module.middleware.motor_speed.f4_id_down_speed_rad}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?$","i");' +
+            'var regex_float_with_suffix = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?F$","i");' +
+            ' ( regex_float.test(input) || regex_float_with_suffix.test(input))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${module.middleware.motor_speed.f4_id_down_speed_rad}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)$","i");' +
+            'if (regex_float.test(output)){' +
+            'output = output + "F";' +
+            '}' +
+            'output')
+            </export>
+        </property>
+        <property default="500.0F" display="Open-Loop|Threshold of speed control climbing" id="module.middleware.motor_speed.f4_id_up_speed_rad" description="Until rotational speed reaches this speed, d-axis current is controlled climbing.">
+            <constraint display="Must be a valid value">
+            eval('' +
+            'var input = "${module.middleware.motor_speed.f4_id_up_speed_rad}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?$","i");' +
+            'var regex_float_with_suffix = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?F$","i");' +
+            ' ( regex_float.test(input) || regex_float_with_suffix.test(input))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${module.middleware.motor_speed.f4_id_up_speed_rad}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)$","i");' +
+            'if (regex_float.test(output)){' +
+            'output = output + "F";' +
+            '}' +
+            'output')
+            </export>
+        </property>
+        <property default="0.025F" display="Open-Loop|Period between open-loop to BEMF (sec)" id="module.middleware.motor_speed.f4_opl2less_sw_time" description="Margin time between open-loop control changes to BEMF PI control.">
+            <constraint display="Must be a valid non-negative value">
+            eval('' +
+            'var input = "${module.middleware.motor_speed.f4_opl2less_sw_time}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?$","i");' +
+            'var regex_float_with_suffix = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?F$","i");' +
+            ' ( regex_float.test(input) || regex_float_with_suffix.test(input))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${module.middleware.motor_speed.f4_opl2less_sw_time}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)$","i");' +
+            'if (regex_float.test(output)){' +
+            'output = output + "F";' +
+            '}' +
+            'output')
+            </export>
+        </property>
+        <property default="10.0F" display="Open-Loop|Phase error(degree) to decide sensor-less switch timing" id="module.middleware.motor_speed.f4_switch_phase_err_rad" description="Phase error(degree) to decide sensor-less switch timing.">
+            <constraint display="Must be a valid value">
+            eval('' +
+            'var input = "${module.middleware.motor_speed.f4_switch_phase_err_rad}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)()([.]{1}[[0-9]+)?$","i");' +
+            'var regex_float_with_suffix = RegExp("^([1-9][0-9]*|0)()([.]{1}[[0-9]+)?F$","i");' +
+            ' ( regex_float.test(input) || regex_float_with_suffix.test(input))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${module.middleware.motor_speed.f4_switch_phase_err_rad}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)()([.]{1}[[0-9]+)$","i");' +
+            'if (regex_float.test(output)){' +
+            'output = output + "F";' +
+            '}' +
+            'output')
+            </export>
+        </property>
+
+        <!-- Design Parameters Settings -->
+        <property default="5.0F" display="Design parameter|Speed PI loop omega" id="module.middleware.motor_speed.f_speed_omega" description="Speed PI loop omega">
+            <constraint display="Must be a valid non-negative value">
+            eval('' +
+            'var input = "${module.middleware.motor_speed.f_speed_omega}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?$","i");' +
+            'var regex_float_with_suffix = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?F$","i");' +
+            ' ( regex_float.test(input) || regex_float_with_suffix.test(input))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${module.middleware.motor_speed.f_speed_omega}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)$","i");' +
+            'if (regex_float.test(output)){' +
+            'output = output + "F";' +
+            '}' +
+            'output')
+            </export>
+        </property>
+        <property default="1.0F" display="Design parameter|Speed PI loop zeta" id="module.middleware.motor_speed.f_speed_zeta" description="Speed PI loop zeta">
+            <constraint display="Must be a valid non-negative value">
+            eval('' +
+            'var input = "${module.middleware.motor_speed.f_speed_zeta}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?$","i");' +
+            'var regex_float_with_suffix = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?F$","i");' +
+            ' ( regex_float.test(input) || regex_float_with_suffix.test(input))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${module.middleware.motor_speed.f_speed_zeta}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)$","i");' +
+            'if (regex_float.test(output)){' +
+            'output = output + "F";' +
+            '}' +
+            'output')
+            </export>
+        </property>
+        <property default="2.5F" display="Design parameter|Estimated d-axis HPF omega" id="module.middleware.motor_speed.f_ed_hpf_omega" description="HPF cutoff frequency for ed (Hz)">
+            <constraint display="Must be a valid non-negative value">
+            eval('' +
+            'var input = "${module.middleware.motor_speed.f_ed_hpf_omega}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?$","i");' +
+            'var regex_float_with_suffix = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?F$","i");' +
+            ' ( regex_float.test(input) || regex_float_with_suffix.test(input))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${module.middleware.motor_speed.f_ed_hpf_omega}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)$","i");' +
+            'if (regex_float.test(output)){' +
+            'output = output + "F";' +
+            '}' +
+            'output')
+            </export>
+        </property>
+        <property default="1.0F" display="Design parameter|Open-loop damping zeta" id="module.middleware.motor_speed.f_ol_damping_zeta" description="Damping ratio of open-loop damping control">
+            <constraint display="Must be a valid non-negative value">
+            eval('' +
+            'var input = "${module.middleware.motor_speed.f_ol_damping_zeta}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?$","i");' +
+            'var regex_float_with_suffix = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?F$","i");' +
+            ' ( regex_float.test(input) || regex_float_with_suffix.test(input))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${module.middleware.motor_speed.f_ol_damping_zeta}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)$","i");' +
+            'if (regex_float.test(output)){' +
+            'output = output + "F";' +
+            '}' +
+            'output')
+            </export>
+        </property>
+        <property default="10.0F" display="Design parameter|Cutoff frequency of phase error LPF" id="module.middleware.motor_speed.f_phase_err_lpf_cut_freq" description="Cutoff frequency of phase error LPF">
+            <constraint display="Must be a valid non-negative value">
+            eval('' +
+            'var input = "${module.middleware.motor_speed.f_phase_err_lpf_cut_freq}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?$","i");' +
+            'var regex_float_with_suffix = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?F$","i");' +
+            ' ( regex_float.test(input) || regex_float_with_suffix.test(input))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${module.middleware.motor_speed.f_phase_err_lpf_cut_freq}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)$","i");' +
+            'if (regex_float.test(output)){' +
+            'output = output + "F";' +
+            '}' +
+            'output')
+            </export>
+        </property>
+
+        <property default="200.0F" display="Design parameter|Speed observer omega" id="module.middleware.motor_speed.sob_omega" description="Speed observer loop omega">
+            <constraint display="Must be a valid non-negative value">
+            eval('' +
+            'var input = "${module.middleware.motor_speed.sob_omega}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?$","i");' +
+            'var regex_float_with_suffix = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?F$","i");' +
+            ' ( regex_float.test(input) || regex_float_with_suffix.test(input))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${module.middleware.motor_speed.sob_omega}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)$","i");' +
+            'if (regex_float.test(output)){' +
+            'output = output + "F";' +
+            '}' +
+            'output')
+            </export>
+        </property>
+        <property default="1.0F" display="Design parameter|Speed observer zeta" id="module.middleware.motor_speed.sob_zeta" description="Speed observer loop zeta">
+            <constraint display="Must be a valid non-negative value">
+            eval('' +
+            'var input = "${module.middleware.motor_speed.sob_zeta}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?$","i");' +
+            'var regex_float_with_suffix = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?F$","i");' +
+            ' ( regex_float.test(input) || regex_float_with_suffix.test(input))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${module.middleware.motor_speed.sob_zeta}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)$","i");' +
+            'if (regex_float.test(output)){' +
+            'output = output + "F";' +
+            '}' +
+            'output')
+            </export>
+        </property>
+
+        <!-- Motor Parameters Settings -->
+        <property default="2" display="Motor Parameter|Pole pairs" id="module.middleware.motor_speed.u2_mtr_pp" description="Pole pairs">
+            <constraint display="Must be a valid integer.">
+            testInteger("${module.middleware.motor_speed.u2_mtr_pp}") &amp;&amp; ("${module.middleware.motor_speed.u2_mtr_pp}" &gt;= 0)
+            </constraint>
+        </property>
+        <property default="8.5F" display="Motor Parameter|Resistance (ohm)" id="module.middleware.motor_speed.f4_mtr_r" description="Resistance">
+            <constraint display="Must be a valid non-negative value">
+            eval('' +
+            'var input = "${module.middleware.motor_speed.f4_mtr_r}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?$","i");' +
+            'var regex_float_with_suffix = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?F$","i");' +
+            ' ( regex_float.test(input) || regex_float_with_suffix.test(input))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${module.middleware.motor_speed.f4_mtr_r}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)$","i");' +
+            'if (regex_float.test(output)){' +
+            'output = output + "F";' +
+            '}' +
+            'output')
+            </export>
+        </property>
+        <property default="0.0045F" display="Motor Parameter|Inductance of d-axis (H)" id="module.middleware.motor_speed.f4_mtr_ld" description="Inductance of d-axis">
+            <constraint display="Must be a valid non-negative value">
+            eval('' +
+            'var input = "${module.middleware.motor_speed.f4_mtr_ld}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?$","i");' +
+            'var regex_float_with_suffix = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?F$","i");' +
+            ' ( regex_float.test(input) || regex_float_with_suffix.test(input))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${module.middleware.motor_speed.f4_mtr_ld}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)$","i");' +
+            'if (regex_float.test(output)){' +
+            'output = output + "F";' +
+            '}' +
+            'output')
+            </export>
+        </property>
+        <property default="0.0045F" display="Motor Parameter|Inductance of q-axis (H)" id="module.middleware.motor_speed.f4_mtr_lq" description="Inductance of q-axis">
+            <constraint display="Must be a valid non-negative value">
+            eval('' +
+            'var input = "${module.middleware.motor_speed.f4_mtr_lq}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?$","i");' +
+            'var regex_float_with_suffix = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?F$","i");' +
+            ' ( regex_float.test(input) || regex_float_with_suffix.test(input))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${module.middleware.motor_speed.f4_mtr_lq}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)$","i");' +
+            'if (regex_float.test(output)){' +
+            'output = output + "F";' +
+            '}' +
+            'output')
+            </export>
+        </property>
+        <property default="0.02159F" display="Motor Parameter|Permanent magnetic flux (Wb)" id="module.middleware.motor_speed.f4_mtr_m" description="Permanent magnetic flux">
+            <constraint display="Must be a valid non-negative value">
+            eval('' +
+            'var input = "${module.middleware.motor_speed.f4_mtr_m}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?$","i");' +
+            'var regex_float_with_suffix = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?F$","i");' +
+            ' ( regex_float.test(input) || regex_float_with_suffix.test(input))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${module.middleware.motor_speed.f4_mtr_m}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)$","i");' +
+            'if (regex_float.test(output)){' +
+            'output = output + "F";' +
+            '}' +
+            'output')
+            </export>
+        </property>
+        <property default="0.0000028F" display="Motor Parameter|Rotor inertia (kgm^2)" id="module.middleware.motor_speed.f4_mtr_j" description="Rotor inertia">
+            <constraint display="Must be a valid non-negative value">
+            eval('' +
+            'var input = "${module.middleware.motor_speed.f4_mtr_j}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?$","i");' +
+            'var regex_float_with_suffix = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?F$","i");' +
+            ' ( regex_float.test(input) || regex_float_with_suffix.test(input))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${module.middleware.motor_speed.f4_mtr_j}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)$","i");' +
+            'if (regex_float.test(output)){' +
+            'output = output + "F";' +
+            '}' +
+            'output')
+            </export>
+        </property>
+
+        <!-- Motor Callback Settings -->
+        <property default="NULL" display="Interrupts|Callback" id="module.middleware.motor_speed.sc_callback" description="A user callback function. If this callback function is provided, it is called at timer interrupt.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.middleware.motor_speed.sc_callback}")
+            </constraint>
+        </property>
+        <property default="NULL" id="module.middleware.motor_speed.sc_context">
+            <export>eval('' +
+            'var string = "${module.middleware.motor_speed.sc_context}";' +
+            'if ("NULL" !== string){' +
+            'string = "&amp;" + string  ;' +
+            '}' +
+            'String(string)')
+            </export>
+        </property>
+
+        <property default="NULL" display="Interrupts|Input data" id="module.middleware.motor_speed.st_input" description="Structure for Speed control Input. If you set this content, Speed Control function read these data automatically. (No need to use Set API.) ">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.middleware.motor_speed.st_input}")
+            </constraint>
+            <export>eval('' +
+            'var string = "${module.middleware.motor_speed.st_input}";' +
+            'if ("NULL" !== string){' +
+            'string = "&amp;" + string  ;' +
+            '}' +
+            'String(string)')
+            </export>
+        </property>
+        <property default="NULL" display="Interrupts|Output data" id="module.middleware.motor_speed.st_output" description="Structure for Speed control Output. If you set this content, Speed Control function write need data automatically. (No need to use Get API.) ">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.middleware.motor_speed.st_output}")
+            </constraint>
+            <export>eval('' +
+            'var string = "${module.middleware.motor_speed.st_output}";' +
+            'if ("NULL" !== string){' +
+            'string = "&amp;" + string  ;' +
+            '}' +
+            'String(string)')
+            </export>
+        </property>
+        <header>
+/** Motor Speed Instance. */
+extern const motor_speed_instance_t ${module.middleware.motor_speed.name};
+
+/** Access the Motor Speed instance using these structures
+    when calling API functions directly (::p_api is not used). */
+extern motor_speed_instance_ctrl_t ${module.middleware.motor_speed.name}_ctrl;
+extern const motor_speed_extended_cfg_t ${module.middleware.motor_speed.name}_extend;
+extern const motor_speed_cfg_t ${module.middleware.motor_speed.name}_cfg;
+
+#ifndef ${module.middleware.motor_speed.sc_callback}
+void ${module.middleware.motor_speed.sc_callback}(motor_speed_callback_args_t * p_args);
+#endif
+        </header>
+
+        <includes>
+#include &quot;rm_motor_speed.h&quot;
+        </includes>
+        <declarations>
+
+/* Motor Speed Configuration */
+motor_speed_instance_ctrl_t ${module.middleware.motor_speed.name}_ctrl;
+
+const motor_speed_extended_cfg_t ${module.middleware.motor_speed.name}_extend =
+{
+  .f_speed_ctrl_period = ${module.middleware.motor_speed.f_speed_ctrl_period},
+  .f_limit_speed_change = ${module.middleware.motor_speed.f_limit_speed_change} * ${module.middleware.motor_speed.u2_mtr_pp},
+  .f_max_speed_rad = ${module.middleware.motor_speed.f_max_speed_rad} * ${module.middleware.motor_speed.u2_mtr_pp},
+  .f_omega_t = ${module.middleware.motor_speed.f_omega_t},
+  .f_id_up_speed_rad = ${module.middleware.motor_speed.f4_id_up_speed_rad} * ${module.middleware.motor_speed.u2_mtr_pp},
+  .f_iq_limit = ${module.middleware.motor_speed.f_iq_limit},
+  .f_ol_fb_speed_limit_rate = ${module.middleware.motor_speed.f_ol_fb_speed_limit_rate},
+  .f_natural_frequency = ${module.middleware.motor_speed.f_natural_frequency},
+  .u1_openloop_damping = ${module.middleware.motor_speed.openloop_damping},
+  .u1_flux_weakening = ${module.middleware.motor_speed.fluxweakening},
+  .u1_less_switch = ${module.middleware.motor_speed.less_switch},
+  .u1_observer_swtich = ${module.middleware.motor_speed.observer},
+  .observer_select = ${module.middleware.motor_speed.observer_select},
+  .u1_ctrl_method = ${module.middleware.motor_speed.ctrl_method},
+  .ol_param.f4_ol_id_up_step = ${module.middleware.motor_speed.f4_ol_id_up_step} / 256.0F,
+  .ol_param.f4_ol_id_down_step = ${module.middleware.motor_speed.f4_ol_id_down_step} / 50.0F,
+  .ol_param.f4_ol_iq_down_step_ratio = ${module.middleware.motor_speed.f4_ol_iq_down_step_ratio},
+  .ol_param.f4_ol_id_ref = ${module.middleware.motor_speed.f4_ol_id_ref},
+  .ol_param.f4_id_down_speed_rad = ${module.middleware.motor_speed.f4_id_down_speed_rad} * ${module.middleware.motor_speed.u2_mtr_pp},
+  .ol_param.f4_id_up_speed_rad = ${module.middleware.motor_speed.f4_id_up_speed_rad} * ${module.middleware.motor_speed.u2_mtr_pp},
+  .ol_param.f4_opl2less_sw_time = ${module.middleware.motor_speed.f4_opl2less_sw_time},
+  .ol_param.f4_switch_phase_err_rad = ${module.middleware.motor_speed.f4_switch_phase_err_rad},
+  .ol_sub_param.f_damp_comp_gain = 0.0F,
+  .ol_sub_param.f_fb_speed_limit_rate = 0.0F,
+  .d_param.f_speed_omega = ${module.middleware.motor_speed.f_speed_omega},
+  .d_param.f_speed_zeta = ${module.middleware.motor_speed.f_speed_zeta},
+  .d_param.f_ed_hpf_omega = ${module.middleware.motor_speed.f_ed_hpf_omega},
+  .d_param.f_ol_damping_zeta = ${module.middleware.motor_speed.f_ol_damping_zeta},
+  .d_param.f_phase_err_lpf_cut_freq = ${module.middleware.motor_speed.f_phase_err_lpf_cut_freq},
+  .d_param.f_observer_omega = ${module.middleware.motor_speed.sob_omega},
+  .d_param.f_observer_zeta = ${module.middleware.motor_speed.sob_zeta},
+  .control_type = ${module.middleware.motor_speed.control_type},
+  .mtr_param.u2_mtr_pp = ${module.middleware.motor_speed.u2_mtr_pp},
+  .mtr_param.f4_mtr_r = ${module.middleware.motor_speed.f4_mtr_r},
+  .mtr_param.f4_mtr_ld = ${module.middleware.motor_speed.f4_mtr_ld},
+  .mtr_param.f4_mtr_lq = ${module.middleware.motor_speed.f4_mtr_lq},
+  .mtr_param.f4_mtr_m = ${module.middleware.motor_speed.f4_mtr_m},
+  .mtr_param.f4_mtr_j = ${module.middleware.motor_speed.f4_mtr_j},
+};
+
+const motor_speed_cfg_t ${module.middleware.motor_speed.name}_cfg =
+{
+  .st_input = ${module.middleware.motor_speed.st_input},
+  .st_output = ${module.middleware.motor_speed.st_output},
+  .p_callback = ${module.middleware.motor_speed.sc_callback},
+  .p_context = ${module.middleware.motor_speed.sc_context},
+  .p_timer_instance = &amp;${module.middleware.motor_speed.requires.timer::module.driver.timer.name},
+#define RA_NOT_DEFINED (1)
+#if (RA_NOT_DEFINED == ${module.middleware.motor_speed.requires.position::module.middleware.motor_position.name})
+  .p_position_instance = NULL,
+#else
+  .p_position_instance = &amp;${module.middleware.motor_speed.requires.position::module.middleware.motor_position.name},
+#endif
+#undef RA_NOT_DEFINED
+  .p_extend = &amp;${module.middleware.motor_speed.name}_extend,
+};
+
+/* Instance structure to use motor speed module. */
+const motor_speed_instance_t ${module.middleware.motor_speed.name} =
+{
+    .p_ctrl = &amp;${module.middleware.motor_speed.name}_ctrl,
+    .p_cfg  = &amp;${module.middleware.motor_speed.name}_cfg,
+    .p_api  = &amp;g_motor_speed_on_motor_speed,
+};
+        </declarations>
+    </module>
+</raModuleDescription>

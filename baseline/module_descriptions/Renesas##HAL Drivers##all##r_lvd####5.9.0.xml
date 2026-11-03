@@ -1,0 +1,289 @@
+<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.driver.lvd" path="fsp_cfg/r_lvd_cfg.h" version="0">
+        <property default="config.driver.lvd.param_checking_enable.bsp" display="Parameter Checking" id="config.driver.lvd.param_checking_enable" description="If selected code for parameter checking is included in the build.">
+            <option display="Default (BSP)" id="config.driver.lvd.param_checking_enable.bsp" value="(BSP_CFG_PARAM_CHECKING_ENABLE)"/>
+            <option display="Enabled" id="config.driver.lvd.param_checking_enable.enabled" value="(1)"/>
+            <option display="Disabled" id="config.driver.lvd.param_checking_enable.disabled" value="(0)"/>
+        </property>
+        <content>
+        #ifdef __cplusplus
+        extern "C" {
+        #endif
+
+        #define LVD_CFG_PARAM_CHECKING_ENABLE ${config.driver.lvd.param_checking_enable}
+
+        #ifdef __cplusplus
+        }
+        #endif
+        </content>
+    </config>
+    <module config="config.driver.lvd" display="Monitoring|${module.driver.lvd.name} Low/Programmable Voltage Detection (r_lvd)" id="module.driver.lvd" version="1" url="group___l_v_d-_p_v_d.html">
+        <constraint display="Unique name required for each instance">
+            "${interface.driver.lvd.${module.driver.lvd.name}}" === "1"
+        </constraint>
+        <constraint display="p_callback will never be called. Requires detection response to be either interrupt or non-maskable interrupt.">
+            "${module.driver.lvd.lvd_monitor_callback}" === "NULL" || ("${module.driver.lvd.detection_response}"=== "module.driver.lvd.detection_response.LVD_RESPONSE_INTERRUPT" || "${module.driver.lvd.detection_response}" === "module.driver.lvd.detection_response.LVD_RESPONSE_NMI")
+        </constraint>
+        <constraint display="p_callback is required when detection_response is an interrupt.">
+            "${module.driver.lvd.lvd_monitor_callback}" != "NULL" || ("${module.driver.lvd.detection_response}" != "module.driver.lvd.detection_response.LVD_RESPONSE_INTERRUPT" &amp;&amp; "${module.driver.lvd.detection_response}" != "module.driver.lvd.detection_response.LVD_RESPONSE_NMI")
+        </constraint>
+        <constraint display="Requires LVD Interrupt to be enabled">
+            "${module.driver.lvd.detection_response}" != "module.driver.lvd.detection_response.LVD_RESPONSE_INTERRUPT" || "${module.driver.lvd.monitor_ipl}" != "_disabled"
+        </constraint>
+        <constraint display="This monitor doesn't support non-maskable interrupt.">
+            ("${module.driver.lvd.monitor_number}" != "module.driver.lvd.monitor_number.LVD_VBAT" &amp;&amp; "${module.driver.lvd.monitor_number}" != "module.driver.lvd.monitor_number.LVD_VRTC" &amp;&amp; "${module.driver.lvd.monitor_number}" != "module.driver.lvd.monitor_number.LVD_EXLVD") ||
+            ("${module.driver.lvd.detection_response}" != "module.driver.lvd.detection_response.LVD_RESPONSE_NMI")
+        </constraint>
+        <constraint display="Negation delay from reset is prohibited on VCC-rising reset.">
+            ("${module.driver.lvd.detection_response}" != "module.driver.lvd.detection_response.LVD_RESPONSE_RESET_ON_RISING" || "${module.driver.lvd.negation_delay}" != "module.driver.lvd.negation_delay.LVD_NEGATION_DELAY_FROM_RESET")
+        </constraint>
+        <constraint display="Negation delay from reset is prohibited on this monitor.">
+            !(("${module.driver.lvd.monitor_number}" === "module.driver.lvd.monitor_number.MONITOR_4" || "${module.driver.lvd.monitor_number}" === "module.driver.lvd.monitor_number.MONITOR_5")
+            &amp;&amp;("${module.driver.lvd.negation_delay}" === "module.driver.lvd.negation_delay.LVD_NEGATION_DELAY_FROM_RESET")
+            &amp;&amp; ("${module.driver.lvd.detection_response}" === "module.driver.lvd.detection_response.LVD_RESPONSE_RESET_ON_RISING" || "${module.driver.lvd.detection_response}" === "module.driver.lvd.detection_response.LVD_RESPONSE_RESET"))
+        </constraint>
+        <constraint display="This monitor doesn't support MCU reset function.">
+            ("${module.driver.lvd.monitor_number}" != "module.driver.lvd.monitor_number.LVD_VBAT" &amp;&amp; "${module.driver.lvd.monitor_number}" != "module.driver.lvd.monitor_number.LVD_VRTC" &amp;&amp; "${module.driver.lvd.monitor_number}" != "module.driver.lvd.monitor_number.LVD_EXLVD") ||
+            ("${module.driver.lvd.detection_response}" != "module.driver.lvd.detection_response.LVD_RESPONSE_RESET")
+        </constraint>
+        <constraint display="This monitor doesn't support interrupt function.">
+            !(("${module.driver.lvd.monitor_number}" === "module.driver.lvd.monitor_number.MONITOR_4" || "${module.driver.lvd.monitor_number}" === "module.driver.lvd.monitor_number.MONITOR_5") &amp;&amp;
+            (("${module.driver.lvd.detection_response}" === "module.driver.lvd.detection_response.LVD_RESPONSE_NMI") || ("${module.driver.lvd.detection_response}" === "module.driver.lvd.detection_response.LVD_RESPONSE_INTERRUPT")))
+        </constraint>
+
+        <provides interface="interface.driver.lvd" />
+        <provides interface="interface.driver.lvd.${module.driver.lvd.name}" />
+        <provides interface="interface.peripheral.lvd${module.driver.lvd.monitor_number}" />
+        <property default="g_lvd${_instance}" display="Name" id="module.driver.lvd.name" description="Module name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.lvd.name}")</constraint>
+        </property>
+
+        <property default="module.driver.lvd.monitor_number.MONITOR_1" display="Monitor Number" id="module.driver.lvd.monitor_number" description="Select the LVD monitor.">
+            <select enum="enum.mcu.lvd.monitor_number" />
+            <signal event="event.lvd.lvd${module.driver.lvd.monitor_number}" />
+        </property>
+        <property default="module.driver.lvd.sample_clock_divisor.LVD_SAMPLE_CLOCK_DISABLED" display="Digital Filter" id="module.driver.lvd.sample_clock_divisor" description="Enable the digital filter and select the digital filter clock divider.">
+            <select enum="enum.mcu.lvd.sample_clock_divisor" />
+        </property>
+        <property default="" display="Voltage Threshold" id="module.driver.lvd.voltage_threshold" description="Select the low voltage detection threshold.">
+            <select enum="enum.mcu.lvd.monitor"/>
+            <select enum="enum.mcu.lvd.monitor_vbat"/>
+            <select enum="enum.mcu.lvd.monitor_vrtc"/>
+            <select enum="enum.mcu.lvd.monitor_exlvd"/>
+        </property>
+        <property default="" display="Detection Response" id="module.driver.lvd.detection_response" description="Select what happens when the voltage crosses the threshold voltage.">
+            <select enum="enum.mcu.lvd.detection_response"/>
+        </property>
+        <property default="" display="Voltage Slope" id="module.driver.lvd.voltage_slope" description="Select interrupt generation on rising voltage, falling voltage or both.">
+            <select enum="enum.mcu.lvd.voltage_slope" />
+        </property>
+        <property default="" display="Negation Delay" id="module.driver.lvd.negation_delay" description="Negation of the monitor signal can either be delayed from the reset event or from voltage returning to normal range.">
+            <select enum="enum.mcu.lvd.negation_delay" />
+        </property>
+        <property default="NULL" display="Monitor Interrupt Callback" id="module.driver.lvd.lvd_monitor_callback" description="A user callback function can be provided. If this callback function is provided, it will be called from the interrupt service routine (ISR) each time the IRQ triggers.">
+            <constraint display="Name must be a valid C symbol.">testSymbol("${module.driver.lvd.lvd_monitor_callback}")</constraint>
+        </property>
+        <property default="" display="LVD Monitor Interrupt Priority" id="module.driver.lvd.monitor_ipl" description="Select the LVD Monitor interrupt priority.">
+            <select enum="enum.mcu.nvic.priorities.optional"/>
+            <interrupt event="event.lvd.lvd${module.driver.lvd.monitor_number}" isr="lvd_lvd_isr"/>
+        </property>
+
+        <symbol id="symbol.driver.lvd.name" value="${module.driver.lvd.name}"/>
+        <symbol id="symbol.driver.lvd.guard.open" value="${module.driver.lvd.name}_open_guard"/>
+        <symbol id="symbol.driver.lvd.guard.macro.open" value="FSP_GUARD_${module.driver.lvd.name}_R_LVD_Open"/>
+        <symbol id="symbol.driver.lvd.guard.close" value="${module.driver.lvd.name}_close_guard"/>
+        <symbol id="symbol.driver.lvd.guard.macro.close" value="FSP_GUARD_${module.driver.lvd.name}_R_LVD_Close"/>
+        <symbol id="symbol.driver.lvd.guard.status_get" value="${module.driver.lvd.name}_status_get_guard"/>
+        <symbol id="symbol.driver.lvd.guard.macro.status_get" value="FSP_GUARD_${module.driver.lvd.name}_R_LVD_StatusGet"/>
+        <symbol id="symbol.driver.lvd.guard.status_clear" value="${module.driver.lvd.name}_status_clear_guard"/>
+        <symbol id="symbol.driver.lvd.guard.macro.status_clear" value="FSP_GUARD_${module.driver.lvd.name}_R_LVD_StatusClear"/>
+        <symbol id="symbol.driver.lvd.guard.callback_set" value="${module.driver.lvd.name}_callback_set_guard"/>
+        <symbol id="symbol.driver.lvd.guard.macro.callback_set" value="FSP_GUARD_${module.driver.lvd.name}_R_LVD_CallbackSet"/>
+        <symbol id="symbol.driver.lvd.nsc_api" value="${module.driver.lvd.name}_nsc_api"/>
+        <symbol id="symbol.driver.lvd.cfg" value="${module.driver.lvd.name}_cfg"/>
+        <symbol id="symbol.driver.lvd.ctrl" value="${module.driver.lvd.name}_ctrl"/>
+        <header>
+/** LVD Instance */
+extern const lvd_instance_t ${module.driver.lvd.name};
+
+/** Access the LVD instance using these structures when calling API functions directly (::p_api is not used). */
+extern lvd_instance_ctrl_t ${module.driver.lvd.name}_ctrl;
+extern const lvd_cfg_t ${module.driver.lvd.name}_cfg;
+
+#ifndef ${module.driver.lvd.lvd_monitor_callback}
+void ${module.driver.lvd.lvd_monitor_callback}(lvd_callback_args_t * p_args);
+#endif
+        </header>
+        <includes>
+#include &quot;r_lvd.h&quot;
+#include &quot;r_lvd_api.h&quot;
+        </includes>
+        <declarations>
+lvd_instance_ctrl_t ${module.driver.lvd.name}_ctrl;
+/* Configuration structure for ${module.driver.lvd.name} */
+const lvd_cfg_t ${module.driver.lvd.name}_cfg =
+{
+    /** LVD settings */
+    .monitor_number               = ${module.driver.lvd.monitor_number},
+    .voltage_threshold            = (lvd_threshold_t) ${module.driver.lvd.voltage_threshold},
+    .detection_response           = ${module.driver.lvd.detection_response},
+    .voltage_slope                = ${module.driver.lvd.voltage_slope},
+    .negation_delay               = ${module.driver.lvd.negation_delay},
+    .sample_clock_divisor         = ${module.driver.lvd.sample_clock_divisor},
+#if defined(VECTOR_NUMBER_LVD_LVD${module.driver.lvd.monitor_number})
+    .irq                          = VECTOR_NUMBER_LVD_LVD${module.driver.lvd.monitor_number},
+#elif (${module.driver.lvd.monitor_number} == 3) &amp;&amp; defined(VECTOR_NUMBER_LVD_VBAT) /* LVD_VBAT interrupt has registered */
+    .irq                          = VECTOR_NUMBER_LVD_VBAT,
+#elif (${module.driver.lvd.monitor_number} == 4) &amp;&amp; defined(VECTOR_NUMBER_LVD_VRTC) /* LVD_VRTC interrupt has registered */
+    .irq                          = VECTOR_NUMBER_LVD_VRTC,
+#elif (${module.driver.lvd.monitor_number} == 5) &amp;&amp; defined(VECTOR_NUMBER_LVD_EXLVD) /* LVD_EXLVD interrupt has registered */
+    .irq                          = VECTOR_NUMBER_LVD_EXLVD,
+#else
+    .irq                          = FSP_INVALID_VECTOR,
+#endif
+    .monitor_ipl                  = ${module.driver.lvd.monitor_ipl},
+    .p_callback                   = ${module.driver.lvd.lvd_monitor_callback},
+    .p_context                    = NULL,
+    .p_extend                     = NULL,
+};
+const lvd_instance_t ${module.driver.lvd.name} =
+{
+    .p_api = &amp;g_lvd_on_lvd,
+    .p_cfg = &amp;${module.driver.lvd.name}_cfg,
+    .p_ctrl = &amp;${module.driver.lvd.name}_ctrl,
+};
+        </declarations>
+        <guard>
+            <header>
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.lvd.name}_open_guard(lvd_ctrl_t *const p_api_ctrl, lvd_cfg_t const *const p_cfg);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.lvd.name}_close_guard(lvd_ctrl_t *const p_api_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.lvd.name}_status_get_guard(lvd_ctrl_t *const p_api_ctrl, lvd_status_t *p_lvd_status);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.lvd.name}_status_clear_guard(lvd_ctrl_t *const p_api_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.lvd.name}_callback_set_guard(lvd_ctrl_t *const p_api_ctrl, void(*p_callback)(lvd_callback_args_t *), void const *const p_context, lvd_callback_args_t *const p_callback_memory);
+
+            </header>
+            <template name="${module.driver.lvd.name}_guard.c">
+                <![CDATA[
+                    #include "guard.h"
+
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.lvd.name}_open_guard (lvd_ctrl_t *const p_api_ctrl, lvd_cfg_t const *const p_cfg)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+    FSP_PARAMETER_NOT_USED(p_cfg);
+
+    return R_LVD_Open(&${module.driver.lvd.name}_ctrl, &${module.driver.lvd.name}_cfg);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.lvd.name}_close_guard (lvd_ctrl_t *const p_api_ctrl)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+
+    return R_LVD_Close(&${module.driver.lvd.name}_ctrl);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.lvd.name}_status_get_guard (lvd_ctrl_t *const p_api_ctrl, lvd_status_t *p_lvd_status)
+{
+    /* Verify all pointers are in non-secure memory. */
+    lvd_status_t * p_lvd_status_checked = cmse_check_pointed_object(p_lvd_status, CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_lvd_status_checked != NULL);
+
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+
+    return R_LVD_StatusGet(&${module.driver.lvd.name}_ctrl, p_lvd_status_checked);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.lvd.name}_status_clear_guard (lvd_ctrl_t *const p_api_ctrl)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+
+    return R_LVD_StatusClear(&${module.driver.lvd.name}_ctrl);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.lvd.name}_callback_set_guard (lvd_ctrl_t *const p_api_ctrl, void(*p_callback)(lvd_callback_args_t *), void const *const p_context, lvd_callback_args_t *const p_callback_memory)
+{
+    /* Verify all pointers are in non-secure memory. */
+    void(*p_callback_checked)(lvd_callback_args_t *) = (void(*)(lvd_callback_args_t *)) cmse_check_address_range((void *) p_callback, sizeof(void *), CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_callback_checked != NULL);
+    lvd_callback_args_t *const p_callback_memory_checked = cmse_check_pointed_object(p_callback_memory, CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_callback_memory_checked != NULL);
+
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+    FSP_PARAMETER_NOT_USED(p_context);
+
+    return R_LVD_CallbackSet(&${module.driver.lvd.name}_ctrl, p_callback_checked, p_context, p_callback_memory_checked);
+}
+
+                ]]>
+            </template>
+        </guard>
+        <nsc>
+            <header>
+
+#define FSP_GUARD_${module.driver.lvd.name}_R_LVD_Open() ${module.driver.lvd.name}_open_guard(FSP_SECURE_ARGUMENT, FSP_SECURE_ARGUMENT)
+
+#define FSP_GUARD_${module.driver.lvd.name}_R_LVD_Close() ${module.driver.lvd.name}_close_guard(FSP_SECURE_ARGUMENT)
+
+#define FSP_GUARD_${module.driver.lvd.name}_R_LVD_StatusGet(p_lvd_status) ${module.driver.lvd.name}_status_get_guard(FSP_SECURE_ARGUMENT, p_lvd_status)
+
+#define FSP_GUARD_${module.driver.lvd.name}_R_LVD_StatusClear() ${module.driver.lvd.name}_status_clear_guard(FSP_SECURE_ARGUMENT)
+
+#define FSP_GUARD_${module.driver.lvd.name}_R_LVD_CallbackSet(p_callback, p_context, p_callback_memory) ${module.driver.lvd.name}_callback_set_guard(FSP_SECURE_ARGUMENT, p_callback, p_context, p_callback_memory)
+
+
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.lvd.name}_open_guard(lvd_ctrl_t *const p_api_ctrl, lvd_cfg_t const *const p_cfg);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.lvd.name}_close_guard(lvd_ctrl_t *const p_api_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.lvd.name}_status_get_guard(lvd_ctrl_t *const p_api_ctrl, lvd_status_t *p_lvd_status);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.lvd.name}_status_clear_guard(lvd_ctrl_t *const p_api_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.lvd.name}_callback_set_guard(lvd_ctrl_t *const p_api_ctrl, void(*p_callback)(lvd_callback_args_t *), void const *const p_context, lvd_callback_args_t *const p_callback_memory);
+
+
+extern const lvd_instance_t ${module.driver.lvd.name};
+            </header>
+            <declarations>
+                <![CDATA[
+static const lvd_api_t ${module.driver.lvd.name}_nsc_api =
+{
+    .open = ${module.driver.lvd.name}_open_guard,
+    .close = ${module.driver.lvd.name}_close_guard,
+    .statusGet = ${module.driver.lvd.name}_status_get_guard,
+    .statusClear = ${module.driver.lvd.name}_status_clear_guard,
+    .callbackSet = ${module.driver.lvd.name}_callback_set_guard,
+};
+const lvd_instance_t ${module.driver.lvd.name} =
+{
+    .p_api = &${module.driver.lvd.name}_nsc_api,
+    .p_ctrl = FSP_SECURE_ARGUMENT,
+    .p_cfg = FSP_SECURE_ARGUMENT,
+};
+                ]]>
+            </declarations>
+        </nsc>
+        <api configurable="true">
+            <file>ra/fsp/inc/instances/r_lvd.h</file>
+            <file>ra/fsp/inc/api/r_lvd_api.h</file>
+        </api>
+    </module>
+
+</raModuleDescription>

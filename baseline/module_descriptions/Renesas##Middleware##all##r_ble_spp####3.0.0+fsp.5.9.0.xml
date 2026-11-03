@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<raModuleDescription>
+    <config id="config.middleware.r_ble_spp" path="fsp_cfg/r_ble_cfg.h" version="0">
+        <content>
+            #ifdef __cplusplus
+            extern "C" {
+            #endif
+
+            #define BLE_CFG_LIBRARY_TYPE     (0)
+            #define BLE_CFG_RYZ012_DEVICE    (1)
+
+            #ifdef __cplusplus
+            }
+            #endif
+        </content>
+    </config>
+    <module config="config.middleware.r_ble_spp" display="Networking|RYZ012 SPP Driver Layer" id="module.middleware.r_ble_spp" common="1" visible="false" version="1" url="group___b_l_e___a_b_s___s_p_p.html">
+        <provides interface="interface.middleware.r_ble_spp" />
+    </module>
+</raModuleDescription>

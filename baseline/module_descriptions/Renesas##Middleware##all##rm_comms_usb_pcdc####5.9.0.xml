@@ -1,0 +1,431 @@
+<?xml version="1.0" ?>
+<raModuleDescription>
+	<config id="config.driver.comms_usb_pcdc" path="fsp_cfg/r_usb_pcdc_cfg.h" version="0">
+        <property default="config.driver.comms_usb_pcdc.param_checking_enable.bsp" display="Parameter Checking" id="config.driver.comms_usb_pcdc.param_checking_enable" description="If selected code for parameter checking is included in the build.">
+            <option display="Default (BSP)" id="config.driver.comms_usb_pcdc.param_checking_enable.bsp" value="(BSP_CFG_PARAM_CHECKING_ENABLE)"/>
+            <option display="Enabled" id="config.driver.comms_usb_pcdc.param_checking_enable.enabled" value="(1)"/>
+            <option display="Disabled" id="config.driver.comms_usb_pcdc.param_checking_enable.disabled" value="(0)"/>
+        </property>
+		<property id="config.driver.comms_usb_pcdc.bulk_in" display="Bulk In Pipe" default="config.driver.comms_usb_pcdc.bulk_in.pipe4" description="Select the USB pipe to use for bulk input transfers.">
+            <option id="config.driver.comms_usb_pcdc.bulk_in.pipe1" display="USB PIPE1" value="USB_PIPE1"/>
+            <option id="config.driver.comms_usb_pcdc.bulk_in.pipe2" display="USB PIPE2" value="USB_PIPE2"/>
+            <option id="config.driver.comms_usb_pcdc.bulk_in.pipe3" display="USB PIPE3" value="USB_PIPE3"/>
+            <option id="config.driver.comms_usb_pcdc.bulk_in.pipe4" display="USB PIPE4" value="USB_PIPE4"/>
+            <option id="config.driver.comms_usb_pcdc.bulk_in.pipe5" display="USB PIPE5" value="USB_PIPE5"/>
+        </property>
+        <property id="config.driver.comms_usb_pcdc.bulk_out" display="Bulk Out Pipe" default="config.driver.comms_usb_pcdc.bulk_out.pipe5" description="Select the USB pipe to use for bulk output transfers.">
+            <option id="config.driver.comms_usb_pcdc.bulk_out.pipe1" display="USB PIPE1" value="USB_PIPE1"/>
+            <option id="config.driver.comms_usb_pcdc.bulk_out.pipe2" display="USB PIPE2" value="USB_PIPE2"/>
+            <option id="config.driver.comms_usb_pcdc.bulk_out.pipe3" display="USB PIPE3" value="USB_PIPE3"/>
+            <option id="config.driver.comms_usb_pcdc.bulk_out.pipe4" display="USB PIPE4" value="USB_PIPE4"/>
+            <option id="config.driver.comms_usb_pcdc.bulk_out.pipe5" display="USB PIPE5" value="USB_PIPE5"/>
+        </property>
+        <property id="config.driver.comms_usb_pcdc.int_in" display="Interrupt In Pipe" default="config.driver.comms_usb_pcdc.int_in.pipe6" description="Select the USB pipe to use for interrupts.">
+            <option id="config.driver.comms_usb_pcdc.int_in.pipe6" display="USB PIPE6" value="USB_PIPE6"/>
+            <option id="config.driver.comms_usb_pcdc.int_in.pipe7" display="USB PIPE7" value="USB_PIPE7"/>
+            <option id="config.driver.comms_usb_pcdc.int_in.pipe8" display="USB PIPE8" value="USB_PIPE8"/>
+            <option id="config.driver.comms_usb_pcdc.int_in.pipe9" display="USB PIPE9" value="USB_PIPE9"/>
+        </property>
+        <content>
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+	#define RM_COMMS_USB_PCDC_CFG_PARAM_CHECKING_ENABLE          ${config.driver.comms_usb_pcdc.param_checking_enable}
+
+	#if (${interface.driver.pcdc2} != RA_NOT_DEFINED)
+		#include &quot;r_usb_pcdc_2ch_cfg.h&quot;
+    #else
+        #define USB_CFG_PCDC_BULK_IN2 (USB_NULL)
+        #define USB_CFG_PCDC_BULK_OUT2 (USB_NULL)
+        #define USB_CFG_PCDC_INT_IN2 (USB_NULL)
+    #endif
+
+    #define USB_CFG_PCDC_BULK_IN (${config.driver.comms_usb_pcdc.bulk_in})
+    #define USB_CFG_PCDC_BULK_OUT (${config.driver.comms_usb_pcdc.bulk_out})
+    #define USB_CFG_PCDC_INT_IN (${config.driver.comms_usb_pcdc.int_in})
+
+#ifdef __cplusplus
+}
+#endif
+        </content>
+    </config>
+    <config id="config.driver.comms_usb_pcdc_class" path="fsp_cfg/rm_comms_usb_pcdc_cfg.h" version="0">
+        <content>
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#include &quot;r_usb_pcdc_cfg.h&quot;
+
+#ifdef __cplusplus
+}
+#endif
+        </content>
+    </config>
+    <!-- USB PCDC Communication Device -->
+    <module config="config.driver.comms_usb_pcdc" display="Connectivity|${module.driver.rm_comms.name} USB PCDC Communication Device (rm_comms_usb_pcdc)" id="module.driver.rm_comms_on_usb_pcdc" version="1" url="group___r_m___c_o_m_m_s___u_s_b___p_c_d_c.html">
+        <!-- USB PCDC Constraint -->
+		<constraint display="Requires USB PIPE4 or PIPE5 for Bulk In transfer when using this MCU.">
+            !(("${interface.mcu.usb.pipes.0.4.5.6.7}" === "1") &amp;&amp;
+            ("${config.driver.comms_usb_pcdc.bulk_in}" === "config.driver.comms_usb_pcdc.bulk_in.pipe1"))
+        </constraint>
+        <constraint display="Requires USB PIPE4 or PIPE5 for Bulk In transfer when using this MCU.">
+            !(("${interface.mcu.usb.pipes.0.4.5.6.7}" === "1") &amp;&amp;
+            ("${config.driver.comms_usb_pcdc.bulk_in}" === "config.driver.comms_usb_pcdc.bulk_in.pipe2"))
+        </constraint>
+        <constraint display="Requires USB PIPE4 or PIPE5 for Bulk In transfer when using this MCU.">
+            !(("${interface.mcu.usb.pipes.0.4.5.6.7}" === "1") &amp;&amp;
+            ("${config.driver.comms_usb_pcdc.bulk_in}" === "config.driver.comms_usb_pcdc.bulk_in.pipe3"))
+        </constraint>
+        <constraint display="Requires USB PIPE4 or PIPE5 for Bulk Out transfer when using this MCU.">
+            !(("${interface.mcu.usb.pipes.0.4.5.6.7}" === "1") &amp;&amp;
+            ("${config.driver.comms_usb_pcdc.bulk_out}" === "config.driver.comms_usb_pcdc.bulk_out.pipe1"))
+        </constraint>
+        <constraint display="Requires USB PIPE4 or PIPE5 for Bulk Out transfer when using this MCU.">
+            !(("${interface.mcu.usb.pipes.0.4.5.6.7}" === "1") &amp;&amp;
+            ("${config.driver.comms_usb_pcdc.bulk_out}" === "config.driver.comms_usb_pcdc.bulk_out.pipe2"))
+        </constraint>
+        <constraint display="Requires USB PIPE4 or PIPE5 for Bulk Out transfer when using this MCU.">
+            !(("${interface.mcu.usb.pipes.0.4.5.6.7}" === "1") &amp;&amp;
+            ("${config.driver.comms_usb_pcdc.bulk_out}" === "config.driver.comms_usb_pcdc.bulk_out.pipe3"))
+        </constraint>
+        <constraint display="Requires USB PIPE6 or PIPE7 for Interrupt In transfer when using this MCU.">
+            !(("${interface.mcu.usb.pipes.0.4.5.6.7}" === "1") &amp;&amp;
+            ("${config.driver.comms_usb_pcdc.int_in}" === "config.driver.comms_usb_pcdc.int_in.pipe8"))
+        </constraint>
+        <constraint display="Requires USB PIPE6 or PIPE7 for Interrupt In transfer when using this MCU.">
+            !(("${interface.mcu.usb.pipes.0.4.5.6.7}" === "1") &amp;&amp;
+            ("${config.driver.comms_usb_pcdc.int_in}" === "config.driver.comms_usb_pcdc.int_in.pipe9"))
+        </constraint>
+        <constraint display="The USB pipe number for Bulk Input and Bulk Output must be different.">
+            !(("${config.driver.comms_usb_pcdc.bulk_in}" === "config.driver.comms_usb_pcdc.bulk_in.pipe1") &amp;&amp;
+            ("${config.driver.comms_usb_pcdc.bulk_out}" === "config.driver.comms_usb_pcdc.bulk_out.pipe1"))
+        </constraint>
+        <constraint display="The USB pipe number for Bulk Input and Bulk Output must be different.">
+            !(("${config.driver.comms_usb_pcdc.bulk_in}" === "config.driver.comms_usb_pcdc.bulk_in.pipe2") &amp;&amp;
+            ("${config.driver.comms_usb_pcdc.bulk_out}" === "config.driver.comms_usb_pcdc.bulk_out.pipe2"))
+        </constraint>
+        <constraint display="The USB pipe number for Bulk Input and Bulk Output must be different.">
+            !(("${config.driver.comms_usb_pcdc.bulk_in}" === "config.driver.comms_usb_pcdc.bulk_in.pipe3") &amp;&amp;
+            ("${config.driver.comms_usb_pcdc.bulk_out}" === "config.driver.comms_usb_pcdc.bulk_out.pipe3"))
+        </constraint>
+        <constraint display="The USB pipe number for Bulk Input and Bulk Output must be different.">
+            !(("${config.driver.comms_usb_pcdc.bulk_in}" === "config.driver.comms_usb_pcdc.bulk_in.pipe4") &amp;&amp;
+            ("${config.driver.comms_usb_pcdc.bulk_out}" === "config.driver.comms_usb_pcdc.bulk_out.pipe4"))
+        </constraint>
+        <constraint display="The USB pipe number for Bulk Input and Bulk Output must be different.">
+            !(("${config.driver.comms_usb_pcdc.bulk_in}" === "config.driver.comms_usb_pcdc.bulk_in.pipe5") &amp;&amp;
+            ("${config.driver.comms_usb_pcdc.bulk_out}" === "config.driver.comms_usb_pcdc.bulk_out.pipe5"))
+        </constraint>
+       <constraint display="Requires a USB Peripheral">
+            testExists("${module.driver.basic_on_usb.requires.basic::module.driver.basic.name}")
+        </constraint>
+
+		<constraint display="Requires USB Peripheral">
+          "${interface.mcu.usb_fs.external}" === "1"
+        </constraint>
+
+		<!-- RM COMMS USB PCDC Constraint -->
+		<constraint display="Unique name required for each instance">
+            "${interface.driver.rm_comms.${module.driver.rm_comms.name}}" === "1"
+        </constraint>
+        <constraint display="Common|General|Use Mutexes must be Enabled in FreeRTOS Thread">
+          ("${config.awsfreertos.thread.configuse_mutexes}" === "config.awsfreertos.thread.configuse_mutexes.enabled") ||
+            !testExists("${interface.rtos.awsfreertos}")
+        </constraint>
+        <constraint display="Common|General|Use Recursive Mutexes must be Enabled in FreeRTOS Thread">
+          ("${config.awsfreertos.thread.configuse_recursive_mutexes}" === "config.awsfreertos.thread.configuse_recursive_mutexes.enabled") ||
+            !testExists("${interface.rtos.awsfreertos}")
+        </constraint>
+
+		<constraint display="Requires a GPT Peripheral">
+			(testExists("${interface.rtos.rtos}") || testExists("${module.driver.comms_usb_pcdc.requires.gpt::module.driver.timer.name}"))
+        </constraint>
+		<constraint display="Removes the GPT Peripheral if RTOS is enabled">
+			!(testExists("${interface.rtos.rtos}") &amp;&amp; testExists("${module.driver.comms_usb_pcdc.requires.gpt::module.driver.timer.name}"))
+        </constraint>
+        <constraint display="Requires GPT Overflow Interrupt enabled">
+            (testExists("${interface.rtos.rtos}") &amp;&amp; testExists("${module.driver.comms_usb_pcdc.requires.gpt::module.driver.timer.name}")) ||
+            "${module.driver.comms_usb_pcdc.requires.gpt::module.driver.timer.ipl}" != "_disabled"
+        </constraint>
+		<constraint display="Interrupt priority level of USB must be higher (numerically lower) than that of GPT Overflow interrupt">
+            eval('' +
+            '   var output = false;' +
+            '   var usb_ipl_str = "${module.driver.basic_on_usb.requires.basic::module.driver.usb_basic.ipl}";' +
+            '   var gpt_ipl_str = "${module.driver.comms_usb_pcdc.requires.gpt::module.driver.timer.ipl}";' +
+			'   var is_hs_mode = "${module.driver.basic_on_usb.requires.basic::module.driver.usb_basic.usb_speed}" == "module.driver.usb_basic.usb_speed.hs";' +
+            '' +
+			'    if (is_hs_mode)' +
+			'    {' +
+			'        usb_ipl_str = "${module.driver.basic_on_usb.requires.basic::module.driver.usb_basic.hsipl}";' +
+			'    }' +
+            '' +
+            '   var usb_ipl_lv = usb_ipl_str.replace("board.icu.common.irq.priority", "");' +
+            '   var gpt_ipl_lv = gpt_ipl_str.replace("board.icu.common.irq.priority", "");' +
+            '' +
+            '   if (' +
+			'		!testExists("${module.driver.comms_usb_pcdc.requires.gpt::module.driver.timer.name}") || ' +
+			'		gpt_ipl_str === "_disabled"  || ' +
+			'		parseInt(gpt_ipl_lv, 10) &gt; parseInt(usb_ipl_lv, 10) || ' +
+			'		(!("${interface.mcu.usb_hs.external}" === "1") &amp;&amp; is_hs_mode)' +
+			'	) {' +
+            '       output = true;' +
+            '   }' +
+            '   else {' +
+            '       output = false;' +
+            '   }' +
+            '' +
+            'output')
+        </constraint>
+		<constraint display="Interrupt period should be less than 3ms">
+            eval(' \n' +
+            '    var output = false; \n' +
+			'    var requested_period = 1; \n' +
+			'    var requested_unit_string = null; \n' +
+			'    var peripheral_clock_hz = 1; \n' +
+			' \n' +
+			'    if (testExists("${module.driver.comms_usb_pcdc.requires.gpt::module.driver.timer.name}")) \n' +
+			'    { \n' +
+			'        requested_period = Number("${module.driver.comms_usb_pcdc.requires.gpt::module.driver.timer.period}"); \n' +
+			'        requested_unit_string = "${module.driver.comms_usb_pcdc.requires.gpt::module.driver.timer.unit}"; \n' +
+			'        peripheral_clock_hz = Number("${board.clock.peripheral.gtclk}");  // NOTE: GPTCLK is before GPT clock selection. GTCLK is after selection  \n' +
+			'    } \n' +
+			' \n' +
+			'    var requested_period_ms = 0; \n' +
+			'    if ("module.driver.timer.unit.unit_period_nsec" == requested_unit_string) \n' +
+			'    { \n' +
+			'        requested_period_ms = requested_period / 1000000; \n' +
+			'    } \n' +
+			'    else if ("module.driver.timer.unit.unit_period_usec" == requested_unit_string) \n' +
+			'    { \n' +
+			'        requested_period_ms = requested_period / 1000; \n' +
+			'    } \n' +
+			'    else if ("module.driver.timer.unit.unit_period_msec" == requested_unit_string) \n' +
+			'    { \n' +
+			'        requested_period_ms = requested_period; \n' +
+			'    } \n' +
+			'    else if ("module.driver.timer.unit.unit_period_sec" == requested_unit_string) \n' +
+			'    { \n' +
+			'        requested_period_ms = requested_period * 1000; \n' +
+			'    } \n' +
+			'    else if ("module.driver.timer.unit.unit_frequency_hz" == requested_unit_string) \n' +
+			'    { \n' +
+			'        requested_period_ms = (1 / requested_period) * 1000; \n' +
+			'    } \n' +
+			'    else if ("module.driver.timer.unit.unit_frequency_khz" == requested_unit_string) \n' +
+			'    { \n' +
+			'        requested_period_ms = (1 / (requested_period * 1000)) * 1000; \n' +
+			'    } \n' +
+			'    else if ("module.driver.timer.unit.unit_period_raw_counts" == requested_unit_string) \n' +
+			'    { \n' +
+			'        requested_period_ms = requested_period * (1 / peripheral_clock_hz) * 1000; \n' +
+			'    } \n' +
+            ' \n' +
+            '   if (requested_period_ms &lt;= 3) { \n' +
+            '       output = true; \n' +
+            '   } \n' +
+            '   else { \n' +
+            '       output = false; \n' +
+            '   } \n' +
+            ' \n' +
+            'output')
+        </constraint>
+
+        <requires id="module.driver.comms_usb_pcdc.requires.pcdc" interface="interface.mcu.usb_fs.external" visible="false" display="Requires USB Peripheral" />
+
+        <requires id="module.driver.comms_usb_pcdc.requires.gpt" interface="interface.driver.timer_on_gpt" display="GPT peripheral [No RTOS]" >
+			<override property="module.driver.timer.p_callback" value="rm_comms_usb_pcdc_timer_handler"/>
+			<override property="module.driver.timer.mode" value="module.driver.timer.mode.mode_periodic"/>
+		</requires>
+		<requires id="module.driver.basic_on_usb.requires.basic" interface="interface.driver.basic_on_usb" display="Add USB Driver">
+            <override property="module.driver.usb_basic.usb_mode" value="module.driver.usb_basic.usb_mode.peri"/>
+            <override property="module.driver.usb_basic.usb_classtype" value="module.driver.usb_basic.usb_classtype.pcdc"/>
+			<override property="module.driver.usb_basic.rtos_callback" value="NULL"/>
+        </requires>
+
+        <requires id="module.driver.comms_usb_pcdc.ignore.azure_projects" interface="interface.rtos.supports.renesas_usb" visible="false" display="Use Azure USBX for Azure RTOS projects."/>
+
+        <provides interface="interface.driver.rm_comms" />
+        <provides interface="interface.driver.rm_comms_on_rm_rai_ds" />
+        <provides interface="interface.driver.rm_comms_on_usb_pcdc" />
+        <provides interface="interface.driver.rm_comms.${module.driver.rm_comms.name}" />
+
+        <property default="g_comms_usb_pcdc${_instance}" display="Name" id="module.driver.rm_comms.name" description="Module name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.rm_comms.name}")</constraint>
+        </property>
+        <property default="module.driver.comms_usb_pcdc.tx_mutex.use" display="RTOS|Recursive Write Mutex" id="module.driver.comms_usb_pcdc.tx_mutex" description="Lock device for writing in using RTOS.">
+            <option display="Do Not Use" id="module.driver.comms_usb_pcdc.tx_mutex.unuse" value="NULL"/>
+            <option display="Use" id="module.driver.comms_usb_pcdc.tx_mutex.use" value="${module.driver.rm_comms.name}_tx_mutex"/>
+        </property>
+        <property default="module.driver.comms_usb_pcdc.rx_mutex.use" display="RTOS|Recursive Read Mutex" id="module.driver.comms_usb_pcdc.rx_mutex" description="Lock device for reading in using RTOS.">
+            <option display="Do Not Use" id="module.driver.comms_usb_pcdc.rx_mutex.unuse" value="NULL"/>
+            <option display="Use" id="module.driver.comms_usb_pcdc.rx_mutex.use" value="${module.driver.rm_comms.name}_rx_mutex"/>
+        </property>
+        <property default="0xFFFFFFFF" display="RTOS|Mutex Timeout" id="module.driver.comms_usb_pcdc.mutex_timeout" description="Timeout for recursive mutex operation in using RTOS.">
+            <constraint display="Value must be a non-negative integer">testInteger("${module.driver.comms_usb_pcdc.mutex_timeout}")  &amp;&amp; ("${module.driver.comms_usb_pcdc.mutex_timeout}" &gt;= 0)</constraint>
+        </property>
+        <property default="module.driver.comms_usb_pcdc.tx_semaphore.use" display="RTOS|Write Semaphore" id="module.driver.comms_usb_pcdc.tx_semaphore" description="Block writing in using RTOS.">
+            <option display="Do Not Use" id="module.driver.comms_usb_pcdc.tx_semaphore.unuse" value="NULL"/>
+            <option display="Use" id="module.driver.comms_usb_pcdc.tx_semaphore.use" value="${module.driver.rm_comms.name}_tx_semaphore"/>
+        </property>
+        <property default="module.driver.comms_usb_pcdc.rx_semaphore.use" display="RTOS|Read Semaphore" id="module.driver.comms_usb_pcdc.rx_semaphore" description="Block reading in using RTOS.">
+            <option display="Do Not Use" id="module.driver.comms_usb_pcdc.rx_semaphore.unuse" value="NULL"/>
+            <option display="Use" id="module.driver.comms_usb_pcdc.rx_semaphore.use" value="${module.driver.rm_comms.name}_rx_semaphore"/>
+        </property>
+        <property default="0xFFFFFFFF" display="RTOS|Semaphore Timeout" id="module.driver.comms_usb_pcdc.semaphore_timeout" description="Timeout for semaphore operation in using RTOS.">
+            <constraint display="Value must be a non-negative integer">testInteger("${module.driver.comms_usb_pcdc.semaphore_timeout}")  &amp;&amp; ("${module.driver.comms_usb_pcdc.semaphore_timeout}" &gt;= 0)</constraint>
+        </property>
+        <property default="module.driver.comms_usb_pcdc.connect_detection.disable" display="USB Connection Detection" id="module.driver.comms_usb_pcdc.connect_detection" description="Enable it only when application wants to process the error of USB host tool not opened.">
+            <option display="Disabled" id="module.driver.comms_usb_pcdc.connect_detection.disable" value="0"/>
+            <option display="Baudrate Configuration" id="module.driver.comms_usb_pcdc.connect_detection.baudrate_config" value="1"/>
+            <option display="Control Line State" id="module.driver.comms_usb_pcdc.connect_detection.ctrl_line_state" value="2"/>
+        </property>
+        <property default="NULL" display="Callback" id="module.driver.comms_usb_pcdc.p_callback" description="A user callback function can be provided.">
+            <constraint display="Name must be a valid C symbol">
+                testSymbol("${module.driver.comms_usb_pcdc.p_callback}")
+            </constraint>
+        </property>
+
+		<property default="NULL" id="module.driver.comms_usb_pcdc.usb_basic_name">
+            <export>eval('"${module.driver.basic_on_usb.requires.basic::module.driver.basic.name}"')
+            </export>
+        </property>
+
+        <header>
+/* USB PCDC Communication Device */
+extern const rm_comms_instance_t ${module.driver.rm_comms.name};
+extern rm_comms_usb_pcdc_instance_ctrl_t ${module.driver.rm_comms.name}_ctrl;
+extern const rm_comms_cfg_t ${module.driver.rm_comms.name}_cfg;
+
+#ifndef ${module.driver.comms_usb_pcdc.p_callback}
+void ${module.driver.comms_usb_pcdc.p_callback}(rm_comms_callback_args_t * p_args);
+#endif
+        </header>
+        <includes>
+#include &quot;../ra/fsp/src/rm_comms_lock/rm_comms_lock.h&quot;
+#include &quot;rm_comms_usb_pcdc.h&quot;
+#include &quot;rm_comms_api.h&quot;
+        </includes>
+        <declarations>
+/* USB PCDC Communication Device */
+
+rm_comms_usb_pcdc_instance_ctrl_t ${module.driver.rm_comms.name}_ctrl;
+
+#if BSP_CFG_RTOS == 1 // ThreadX
+
+ #if !defined(${module.driver.comms_usb_pcdc.tx_mutex})
+ rm_comms_mutex_t ${module.driver.comms_usb_pcdc.tx_mutex} =
+ {
+     .p_name = &quot;${module.driver.rm_comms.name} tx mutex&quot;,
+ };
+ #endif
+
+ #if !defined(${module.driver.comms_usb_pcdc.rx_mutex})
+ rm_comms_mutex_t ${module.driver.comms_usb_pcdc.rx_mutex} =
+ {
+     .p_name = &quot;${module.driver.rm_comms.name} rx mutex&quot;,
+ };
+ #endif
+
+ #if !defined(${module.driver.comms_usb_pcdc.tx_semaphore})
+ rm_comms_semaphore_t ${module.driver.comms_usb_pcdc.tx_semaphore} =
+ {
+     .p_name = &quot;${module.driver.rm_comms.name} tx semaphore&quot;,
+ };
+ #endif
+
+  #if !defined(${module.driver.comms_usb_pcdc.rx_semaphore})
+ rm_comms_semaphore_t ${module.driver.comms_usb_pcdc.rx_semaphore} =
+ {
+     .p_name = &quot;${module.driver.rm_comms.name} rx semaphore&quot;,
+ };
+ #endif
+
+#elif BSP_CFG_RTOS == 2 // FreeRTOS
+
+#if !defined(${module.driver.comms_usb_pcdc.tx_mutex})
+rm_comms_mutex_t ${module.driver.comms_usb_pcdc.tx_mutex};
+#endif
+
+#if !defined(${module.driver.comms_usb_pcdc.rx_mutex})
+rm_comms_mutex_t ${module.driver.comms_usb_pcdc.rx_mutex};
+#endif
+#if !defined(${module.driver.comms_usb_pcdc.tx_semaphore})
+rm_comms_semaphore_t ${module.driver.comms_usb_pcdc.tx_semaphore};
+#endif
+
+#if !defined(${module.driver.comms_usb_pcdc.rx_semaphore})
+rm_comms_semaphore_t ${module.driver.comms_usb_pcdc.rx_semaphore};
+#endif
+
+#else
+
+#endif
+
+rm_comms_usb_pcdc_extended_cfg_t ${module.driver.rm_comms.name}_extended_cfg =
+{
+#if BSP_CFG_RTOS
+
+#if !defined(${module.driver.comms_usb_pcdc.tx_mutex})
+    .p_tx_mutex = &amp;${module.driver.comms_usb_pcdc.tx_mutex},
+#else
+    .p_tx_mutex = NULL,
+#endif
+
+#if !defined(${module.driver.comms_usb_pcdc.rx_mutex})
+    .p_rx_mutex = &amp;${module.driver.comms_usb_pcdc.rx_mutex},
+#else
+    .p_rx_mutex = NULL,
+#endif
+
+#if !defined(${module.driver.comms_usb_pcdc.tx_semaphore})
+    .p_tx_semaphore = &amp;${module.driver.comms_usb_pcdc.tx_semaphore},
+#else
+    .p_tx_semaphore = NULL,
+#endif
+
+#if !defined(${module.driver.comms_usb_pcdc.rx_semaphore})
+    .p_rx_semaphore = &amp;${module.driver.comms_usb_pcdc.rx_semaphore},
+#else
+    .p_rx_semaphore = NULL,
+#endif
+    .mutex_timeout  = ${module.driver.comms_usb_pcdc.mutex_timeout},
+#endif
+#if BSP_CFG_RTOS == 0
+    .p_gpt = &amp;${module.driver.comms_usb_pcdc.requires.gpt::module.driver.timer.name},
+#endif
+    .p_usb = &amp;${module.driver.basic_on_usb.requires.basic::module.driver.basic.name},
+    .connect_detection_en = ${module.driver.comms_usb_pcdc.connect_detection},
+};
+
+const rm_comms_cfg_t ${module.driver.rm_comms.name}_cfg =
+{
+    .semaphore_timeout  = ${module.driver.comms_usb_pcdc.semaphore_timeout},
+    .p_lower_level_cfg  = NULL,
+    .p_extend           = (void*)&amp;${module.driver.rm_comms.name}_extended_cfg,
+    .p_callback         = ${module.driver.comms_usb_pcdc.p_callback},
+};
+
+const rm_comms_instance_t ${module.driver.rm_comms.name} =
+{
+    .p_ctrl = &amp;${module.driver.rm_comms.name}_ctrl,
+    .p_cfg  = &amp;${module.driver.rm_comms.name}_cfg,
+    .p_api  = &amp;g_comms_on_comms_usb_pcdc,
+};
+        </declarations>
+		<functions>
+        </functions>
+		<api configurable="true">
+            <file>ra/fsp/inc/api/r_usb_pcdc_api.h</file>
+        </api>
+    </module>
+    <module config="config.driver.comms_usb_pcdc_class" display="Connectivity|${module.driver.comms_pcdc_class.name} USB PCDC Communication Device (rm_comms_usb_pcdc_class)" visible="false" id="module.driver.comms_usb_pcdc_class_on_usb"  version="1" url="group___r_m___c_o_m_m_s___u_s_b___p_c_d_c.html">
+        <property default="g_comms_pcdc_class${_instance}" display="Name" id="module.driver.comms_usb_pcdc_class.name" description="Class Module name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.comms_usb_pcdc_class.name}")</constraint>
+        </property>
+        <api configurable="true">
+            <file>ra/fsp/inc/api/r_usb_pcdc_api.h</file>
+        </api>
+    </module>
+</raModuleDescription>

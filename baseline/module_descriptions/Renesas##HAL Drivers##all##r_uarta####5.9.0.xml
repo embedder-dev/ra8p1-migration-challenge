@@ -1,0 +1,1325 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+IMPORTANT NOTE:
+Do not modify this file directly.
+
+This file is generated using: scripts/jinja/mdf_render.sh
+-->
+<raModuleDescription>
+    <config id="config.driver.uarta" path="fsp_cfg/r_uarta_cfg.h" version="0">
+        <property default="config.driver.uarta.param_checking_enable.bsp" display="Parameter Checking" id="config.driver.uarta.param_checking_enable" description="If selected code for parameter checking is included in the build.">
+            <option display="Default (BSP)" id="config.driver.uarta.param_checking_enable.bsp" value="(BSP_CFG_PARAM_CHECKING_ENABLE)"/>
+            <option display="Enabled" id="config.driver.uarta.param_checking_enable.enabled" value="(1)"/>
+            <option display="Disabled" id="config.driver.uarta.param_checking_enable.disabled" value="(0)"/>
+        </property>
+        <property default="" display="DTC Support" id="config.driver.uarta.dtc_support" description="Enable DTC support for the UARTA module.">
+            <select enum="enum.driver.uarta.dtc_support" />
+        </property>
+        <property default="config.driver.uarta.rxi_err_mode.generated" display="Receive Error Interrupt Mode" id="config.driver.uarta.rxi_err_mode" description="Selection receive interrupt mode .\nDisabled: The UARTA0_ERRI interrupt is generated when a reception error occurs.\nEnabled: The UARTA0_RXI interrupt is generated when a reception error occurs.">
+            <option display="Disabled" id="config.driver.uarta.rxi_err_mode.not_generated" value="0"/>
+            <option display="Enabled" id="config.driver.uarta.rxi_err_mode.generated" value="1"/>
+        </property>
+        <content>
+            #ifdef __cplusplus
+            extern "C" {
+            #endif
+
+            #define UARTA_CFG_PARAM_CHECKING_ENABLE ${config.driver.uarta.param_checking_enable}
+            #define UARTA_CFG_DTC_SUPPORT_ENABLE ${config.driver.uarta.dtc_support}
+            #define UARTA_CFG_RECEIVE_ERROR_INTERRUPT_MODE ${config.driver.uarta.rxi_err_mode}
+            #ifdef __cplusplus
+            }
+            #endif
+        </content>
+    </config>
+
+    <module config="config.driver.uarta" display="Connectivity|${module.driver.uart.name} UART (r_uarta)" id="module.driver.uart_on_uarta" version="1" url="group___u_a_r_t_a.html">
+        <constraint display="Unique name required for each instance">
+            "${interface.driver.uarta.${module.driver.uart.name}}" === "1"
+        </constraint>
+        <constraint display="Requires Error Interrupt enabled">
+            ("${config.driver.uarta.rxi_err_mode}" === "config.driver.uarta.rxi_err_mode.generated") ||  ("${module.driver.uarta.eri_ipl}" != "_disabled")
+        </constraint>
+        <constraint display="Requires UARTA Peripheral">
+          "${interface.mcu.uarta.external}" === "1"
+        </constraint>
+        <constraint display="Channel not available on selected MCU">
+            "${interface.mcu.uarta.${module.driver.uarta.channel}}" === "1"
+        </constraint>
+        <constraint display="DTC support must be enabled to use DTC">
+            ("${config.driver.uarta.dtc_support}" === "config.driver.uarta.dtc_support.enabled") ||
+            ((!testExists("${module.driver.uart_on_uarta.requires.transfer_tx::module.driver.transfer.name}")) &amp;&amp;
+             (!testExists("${module.driver.uart_on_uarta.requires.transfer_rx::module.driver.transfer.name}")))
+        </constraint>
+        <constraint display="UARTA clock source must be selected on Clocks tab">
+            ("${interface.mcu.uarta.${module.driver.uarta.channel}}" != "1") ||
+            ("${board.clock.peripheral.uarta${module.driver.uarta.channel}}" &gt; 0)
+        </constraint>
+        <constraint id="module.driver.uarta.constraint.baudrate">
+            <![CDATA[eval('/* INPUTS */' +
+'    var uarta_clock_hz        = ${board.clock.peripheral.uarta${module.driver.uarta.channel}};' +
+'    var requested_baudrate    = ${module.driver.uarta.baud};' +
+'' +
+'    /* Refer to hardware manual: Electrical Characteristics > Peripheral Function Characteristics > UART Interface (UARTA) */' +
+'    var mcu_uarta_max_baud    = ${config.bsp.fsp.mcu.uarta.max_baud};' +
+'    var mcu_uarta_min_baud    = 200;' +
+'' +
+'    /* Refer chapter 23.2.8, there is no supported division when the UARTA clock source is SOSC/LOCO. */' +
+'    /* However, cannot get this selection from Clock page directly, so workaround by checking the value uarta_clock_hz with 32768 Hz instead */' +
+'    var min_baud_cal_by_clock = (uarta_clock_hz == 32768) ? Math.ceil(uarta_clock_hz / (2 * 255)) : Math.ceil((uarta_clock_hz/64) / (2 * 255));' +
+'    min_baud_cal_by_clock = (min_baud_cal_by_clock < mcu_uarta_min_baud) ? mcu_uarta_min_baud : min_baud_cal_by_clock;' +
+'' +
+'    var max_baud_cal_by_clock = Math.floor(uarta_clock_hz / (2 * 2));' +
+'    max_baud_cal_by_clock = (max_baud_cal_by_clock > mcu_uarta_max_baud) ? mcu_uarta_max_baud : max_baud_cal_by_clock;' +
+'' +
+'    var output = null;' +
+'    if (uarta_clock_hz > 0)' +
+'    {' +
+'       if ((requested_baudrate > max_baud_cal_by_clock) || (requested_baudrate < min_baud_cal_by_clock))' +
+'       {' +
+'           output = "Requested baud rate not achievable. Valid range: [" + min_baud_cal_by_clock.toString() + ", " + max_baud_cal_by_clock.toString() + "] (bps).";' +
+'       }' +
+'    }' +
+'' +
+'    output')]]>
+        </constraint>
+        <constraint id="module.driver.uarta.constraint.pclk">
+            <![CDATA[eval('/* INPUTS */' +
+'    var pclk_constraint = "${board.clock.peripheral.uarta${module.driver.uarta.channel}.pclk_constraint}";' +
+'' +
+'    var restriction_enable   = "${config.bsp.fsp.mcu.uarta.pclk_restriction_enable}";' +
+'    var uarta_clock_hz   = ${board.clock.peripheral.uarta${module.driver.uarta.channel}};' +
+'' +
+'    var minimum_operation_clock = (uarta_clock_hz == 32768) ? uarta_clock_hz : Math.ceil(uarta_clock_hz/64);' +
+'    var output = null;' +
+'' +
+'    if((minimum_operation_clock > pclk_constraint) && (restriction_enable == "true"))' +
+'    {' +
+'        output = "PCLKB must be greater than or equal to UARTA" + "${module.driver.uarta.channel}" + " operating clock";' +
+'    }' +
+'    output')]]>
+        </constraint>
+        <requires id="module.driver.uart_on_uarta.requires.uarta" interface="interface.mcu.uarta.external" visible="false" display="Requires UARTA Peripheral" />
+        <requires id="module.driver.uart_on_uarta.requires.uarta_dtc_support" interface="interface.mcu.uarta.dtc" visible="false" display="Requires UARTA with DTC" />
+        <requires id="module.driver.uart_on_uarta.requires.transfer_tx" interface="interface.driver.transfer_on_dtc" display="Add DTC Driver for Transmission [Recommended but optional]" find="false" optional="true" >
+            <override property="module.driver.transfer.size" value="module.driver.transfer.size.size_1_byte"/>
+            <override property="module.driver.transfer.mode" value="module.driver.transfer.mode.mode_normal"/>
+            <override property="module.driver.transfer.dest_addr_mode" value="module.driver.transfer.dest_addr_mode.addr_mode_fixed"/>
+            <override property="module.driver.transfer.src_addr_mode" value="module.driver.transfer.src_addr_mode.addr_mode_incremented"/>
+            <override property="module.driver.transfer.repeat_area" value="module.driver.transfer.repeat_area.repeat_area_source"/>
+            <override property="module.driver.transfer.p_dest" value="NULL"/>
+            <override property="module.driver.transfer.p_src" value="NULL"/>
+            <override property="module.driver.transfer.length" value="0"/>
+            <override property="module.driver.transfer.interrupt" value="module.driver.transfer.interrupt.interrupt_end"/>
+            <override property="module.driver.transfer.num_blocks" value="0"/>
+            <override property="module.driver.transfer.auto_enable" value="module.driver.transfer.auto_enable.false"/>
+            <override property="module.driver.transfer.p_callback" value="NULL"/>
+            <override property="module.driver.transfer.activation_source" value="_interrupt.event.uarta${module.driver.uarta.channel}.txi"/>
+        </requires>
+        <requires id="module.driver.uart_on_uarta.requires.transfer_rx" interface="interface.driver.transfer_on_dtc" display="Add DTC Driver for Reception [Not recommended]" find="false">
+            <override property="module.driver.transfer.size" value="module.driver.transfer.size.size_1_byte"/>
+            <override property="module.driver.transfer.mode" value="module.driver.transfer.mode.mode_normal"/>
+            <override property="module.driver.transfer.dest_addr_mode" value="module.driver.transfer.dest_addr_mode.addr_mode_incremented"/>
+            <override property="module.driver.transfer.src_addr_mode" value="module.driver.transfer.src_addr_mode.addr_mode_fixed"/>
+            <override property="module.driver.transfer.repeat_area" value="module.driver.transfer.repeat_area.repeat_area_destination"/>
+            <override property="module.driver.transfer.p_dest" value="NULL"/>
+            <override property="module.driver.transfer.p_src" value="NULL"/>
+            <override property="module.driver.transfer.length" value="0"/>
+            <override property="module.driver.transfer.interrupt" value="module.driver.transfer.interrupt.interrupt_end"/>
+            <override property="module.driver.transfer.num_blocks" value="0"/>
+            <override property="module.driver.transfer.auto_enable" value="module.driver.transfer.auto_enable.false"/>
+            <override property="module.driver.transfer.p_callback" value="NULL"/>
+            <override property="module.driver.transfer.activation_source" value="_interrupt.event.uarta${module.driver.uarta.channel}.rxi"/>
+        </requires>
+        <provides interface="interface.peripheral.uarta${module.driver.uarta.channel}" />
+        <provides interface="interface.driver.uarta" />
+        <provides interface="interface.driver.uart" />
+        <provides interface="interface.driver.uart_on_uarta" />
+        <provides interface="interface.driver.uarta.${module.driver.uart.name}" />
+        <property default="g_uart${_instance}" display="General|Name" id="module.driver.uart.name" description="Module name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.uart.name}")</constraint>
+        </property>
+        <!-- UART interface configuration -->
+        <property default="0" display="General|Channel" id="module.driver.uarta.channel" description="Select the UARTA channel.">
+            <constraint display="Value must be a non-negative integer">testInteger("${module.driver.uarta.channel}") &amp;&amp; ("${module.driver.uarta.channel}" &gt;= 0)</constraint>
+            <signal event="event.uarta${module.driver.uarta.channel}.rxi" />
+            <signal event="event.uarta${module.driver.uarta.channel}.txi" />
+            <signal event="event.uarta${module.driver.uarta.channel}.erri" />
+        </property>
+        <property default="module.driver.uarta.data_bits.data_bits_8" display="General|Data Bits" id="module.driver.uarta.data_bits" description="Select the number of bits per word.">
+            <option display="8bits" id="module.driver.uarta.data_bits.data_bits_8" value="UART_DATA_BITS_8"/>
+            <option display="7bits" id="module.driver.uarta.data_bits.data_bits_7" value="UART_DATA_BITS_7"/>
+            <option display="5bits" id="module.driver.uarta.data_bits.data_bits_5" value="UART_DATA_BITS_5"/>
+        </property>
+        <property default="module.driver.uarta.parity.parity_off" display="General|Parity" id="module.driver.uarta.parity" description="Select the parity mode.">
+            <option display="None" id="module.driver.uarta.parity.parity_off" value="UART_PARITY_OFF"/>
+            <option display="Zero" id="module.driver.uarta.parity.parity_zero" value="UART_PARITY_ZERO"/>
+            <option display="Odd" id="module.driver.uarta.parity.parity_odd" value="UART_PARITY_ODD"/>
+            <option display="Even" id="module.driver.uarta.parity.parity_even" value="UART_PARITY_EVEN"/>
+        </property>
+        <property default="module.driver.uarta.stop_bits.stop_bits_1" display="General|Stop Bits" id="module.driver.uarta.stop_bits" description="Select the number of stop bits. \nNote: For the receive data, only the first 1 bit of the stop bits is checked regardless of the stop bit length.">
+            <option display="1bit" id="module.driver.uarta.stop_bits.stop_bits_1" value="UART_STOP_BITS_1"/>
+            <option display="2bits" id="module.driver.uarta.stop_bits.stop_bits_2" value="UART_STOP_BITS_2"/>
+        </property>
+        <property default="115200" display="Baud|Baud Rate" id="module.driver.uarta.baud" description="Enter the desired baud rate.\n\nIf the requested baud rate cannot be achieved, the settings with the smallest percent error are used. The theoretical calculated baud rate and percent error are printed in a comment in the generated baud_setting_t structure.">
+            <constraint display="Value must be an integer greater than 0">testInteger("${module.driver.uarta.baud}")  &amp;&amp; ("${module.driver.uarta.baud}" &gt; 0)</constraint>
+            <export><![CDATA[eval('/* INPUTS */' +
+'    var uarta_BRGCA_MAX = 255;' +
+'    var uarta_BRGCA_MIN  = 2;' +
+'    var UAT0CK = [1, 2, 4, 8, 16, 32, 64];' +
+'    var UAT0CK_div_count = {' +
+'        0: "UARTA_CLOCK_DIV_1",' +
+'        1: "UARTA_CLOCK_DIV_2",' +
+'        2: "UARTA_CLOCK_DIV_4",' +
+'        3: "UARTA_CLOCK_DIV_8",' +
+'        4: "UARTA_CLOCK_DIV_16",' +
+'        5: "UARTA_CLOCK_DIV_32",' +
+'        6: "UARTA_CLOCK_DIV_64",' +
+'    };' +
+'    var uarta_channel_lut = {' +
+'        0: "BSP_CFG_UARTA0_CLOCK_SOURCE",' +
+'        1: "BSP_CFG_UARTA1_CLOCK_SOURCE",' +
+'    };' +
+'' +
+'    var pclk_constraint = "${board.clock.peripheral.uarta0.pclk_constraint}";' +
+'' +
+'    if("${module.driver.uarta.channel}" == "1")' +
+'    {' +
+'        pclk_constraint = "${board.clock.peripheral.uarta1.pclk_constraint}";' +
+'    }' +
+'' +
+'    /*******************************************************************************************************************//**' +
+'     * Calculates baud rate register settings based on internal clock frequency. Evaluates and determines the best possible' +
+'     * settings set to the baud rate related registers.' +
+'     *' +
+'     * @param[in]  freq_hz                             The source clock frequency for the UARTA internal clock' +
+'     * @param[in]  baudrate                            Baud rate[bps] e.g. 19200, 57600, 115200, etc.' +
+'     * @param[in]  clock_source                        clock source HOCO = 2, MOCO = 3, MOSC = 1, FSXP/LOCO = 0, SOSC = 4.' +
+'     *' +
+'     * @return  {brgca_value,                            Value for the brgca' +
+'     *           UTA0_divider,                           Value for the f(UTA0) divider' +
+'     *           error,                                  % bit rate error' +
+'     **********************************************************************************************************************/' +
+'    function r_uarta_brgca_utack_calculate(freq_hz, baudrate, clock_source) {' +
+'        /** Find the best BRR (bit rate register) value.' +
+'         *  In table async_baud, divisor values are stored for BGDM, ABCS, ABCSE and N values.  Each set of divisors' +
+'         *  is tried, and the settings with the lowest bit rate error are stored. The formula to calculate BRR is as' +
+'         *  follows and it must be 255 or less:' +
+'         *  BRR = (PCLK / (div_coefficient * baud)) - 1' +
+'         */' +
+'        var divisor = 0;' +
+'        var result = {brgca_value : 0, UTA0_divider : "0", bitrateerror : 100};' +
+'        for(var i = 0; i < UAT0CK.length; i++) {' +
+'            var f_uta0_value = (freq_hz/UAT0CK[i]);' +
+'            if(f_uta0_value > pclk_constraint)' +
+'            {' +
+'                continue;' +
+'            }' +
+'            var coefficient_k = Math.round((f_uta0_value / (2 * baudrate)));' +
+'            if((coefficient_k > uarta_BRGCA_MAX) || (coefficient_k < uarta_BRGCA_MIN)){' +
+'                if(clock_source == 0) {' +
+'                    break;' +
+'                }' +
+'                else {' +
+'                    continue;' +
+'                }' +
+'             }' +
+'             var actual_baudrate = (f_uta0_value / (2 * coefficient_k));' +
+'             var bit_err = ((actual_baudrate/baudrate) - 1) * 100;' +
+'             if(bit_err < 0) {' +
+'                    bit_err = -bit_err;' +
+'             }' +
+'             if(bit_err < result.bitrateerror) {' +
+'                    result.brgca_value  = coefficient_k;' +
+'                    result.bitrateerror = bit_err.toFixed(2);' +
+'                     if(clock_source == 0) {' +
+'                         result.UTA0_divider = "UARTA_UTAnCK_LOCO_SETTING"; /* FSXP or LOCO */' +
+'                         break;' +
+'                     }' +
+'                     if(clock_source == 4)' +
+'                     {' +
+'                         result.UTA0_divider = "UARTA_UTAnCK_SOSC_SETTING";' +
+'                         break;' +
+'                     }' +
+'                     else {' +
+'                         result.UTA0_divider = UAT0CK_div_count[i]' +
+'                     }' +
+'             }' +
+'        }' +
+'        return result;' +
+'    }' +
+'    var freq_select_clock = [0];' +
+'    freq_select_clock[0] = r_uarta_brgca_utack_calculate("${board.clock.peripheral.uarta_loco}", "${module.driver.uarta.baud}", 0); /* FSXP or LOCO */' +
+'    freq_select_clock[1] = r_uarta_brgca_utack_calculate("${board.clock.peripheral.uarta_mosc}", "${module.driver.uarta.baud}", 1);' +
+'    freq_select_clock[2] = r_uarta_brgca_utack_calculate("${board.clock.peripheral.uarta_hoco}", "${module.driver.uarta.baud}", 2);' +
+'    freq_select_clock[3] = r_uarta_brgca_utack_calculate("${board.clock.peripheral.uarta_moco}", "${module.driver.uarta.baud}", 3);' +
+'    freq_select_clock[4] = r_uarta_brgca_utack_calculate("${board.clock.peripheral.uarta_subclk}", "${module.driver.uarta.baud}", 4);' +
+'    var delay_time = [0];' +
+'    delay_time[0] = Math.max(1, Math.round(1000000 / ("${board.clock.peripheral.uarta_loco}" >> (freq_select_clock[0].UTA0_divider & 07)))); /* FSXP or LOCO */' +
+'    delay_time[1] = Math.max(1, Math.round(1000000 / ("${board.clock.peripheral.uarta_mosc}" >> (freq_select_clock[1].UTA0_divider & 07))));' +
+'    delay_time[2] = Math.max(1, Math.round(1000000 / ("${board.clock.peripheral.uarta_hoco}" >> (freq_select_clock[2].UTA0_divider & 07))));' +
+'    delay_time[3] = Math.max(1, Math.round(1000000 / ("${board.clock.peripheral.uarta_moco}" >> (freq_select_clock[3].UTA0_divider & 07))));' +
+'    delay_time[4] = Math.max(1, Math.round(1000000 / ("${board.clock.peripheral.uarta_subclk}" >> (freq_select_clock[4].UTA0_divider & 07))));' +
+'    var max_error = [0];' +
+'    var min_error = [0];' +
+'    var error_range   = [0];' +
+'    var num_start_bits = 1;' +
+'    var num_data_bits = {' +
+'        "UART_DATA_BITS_8": 8,' +
+'        "UART_DATA_BITS_7": 7,' +
+'        "UART_DATA_BITS_5": 5,' +
+'    };' +
+'    var num_parity_bits = {' +
+'        "UART_PARITY_OFF":  0,' +
+'        "UART_PARITY_ZERO": 1,' +
+'        "UART_PARITY_ODD":  1,' +
+'        "UART_PARITY_EVEN": 1,' +
+'    };' +
+'    var num_stop_bits = {' +
+'        "UART_STOP_BITS_1": 1,' +
+'        "UART_STOP_BITS_2": 2,' +
+'    };' +
+'    /* Get the total number of start, data, parity, and stop bits */' +
+'    var num_length = num_start_bits + num_data_bits["${module.driver.uarta.data_bits}"] + num_parity_bits["${module.driver.uarta.parity}"] + num_stop_bits["${module.driver.uarta.stop_bits}"];' +
+'    for(var i = 0; i < 5; i++) {' +
+'        var k = freq_select_clock[i].brgca_value;' +
+'        max_error[i] = ((2 * k * num_length)/(((2 * num_length - 1) * k) + 1) - 1) * 100;' +
+'        min_error[i] = ((2 * k * num_length)/(((2 * num_length + 1) * k) - 1) - 1) * 100;' +
+'        if(freq_select_clock[i].bitrateerror != 100) {' +
+'            error_range[i] = min_error[i].toFixed(2) + "% ~ " + max_error[i].toFixed(2) + "% */";' +
+'        }' +
+'        else {' +
+'            error_range[i] = "Invalid Range Error */";' +
+'        }' +
+'    }' +
+'    var uarta_channel = uarta_channel_lut[${module.driver.uarta.channel}];' +
+'    baud_setting =      " #if (" + uarta_channel + " == BSP_CLOCKS_SOURCE_CLOCK_MAIN_OSC)\\n\\n" +' +
+'                        "/* Baud rate calculated with Acutal_Error " + freq_select_clock[1].bitrateerror + "%. */\\n" +' +
+'                        "/* The permissible baud rate error range during reception: " + error_range[1] + "\\n" +' +
+'                        "  .utanck_clock_b.utasel = " + "UARTA_CLOCK_SOURCE_MOSC"  + "\\n" +' +
+'                        ", .utanck_clock_b.utanck = " + freq_select_clock[1].UTA0_divider + "\\n" +' +
+'                        ", .brgca = " + freq_select_clock[1].brgca_value  + "\\n" +' +
+'                        ", .delay_time = " + delay_time[1] + "\\n" +' +
+'                        " #elif (" + uarta_channel + " == BSP_CLOCKS_SOURCE_CLOCK_HOCO)\\n\\n" +' +
+'                        "/* Baud rate calculated with Acutal_Error " + freq_select_clock[2].bitrateerror + "%. */\\n" +' +
+'                        "/* The permissible baud rate error range during reception: " + error_range[2] + "\\n" +' +
+'                        "  .utanck_clock_b.utasel = " + "UARTA_CLOCK_SOURCE_HOCO" + "\\n" +' +
+'                        ", .utanck_clock_b.utanck = " + freq_select_clock[2].UTA0_divider + "\\n" +' +
+'                        ", .brgca = " + freq_select_clock[2].brgca_value + "\\n" +' +
+'                        ", .delay_time = " + delay_time[2]  + "\\n" +' +
+'                        " #elif (" + uarta_channel + " == BSP_CLOCKS_SOURCE_CLOCK_MOCO)\\n\\n" +' +
+'                        "/* Baud rate calculated with Acutal_Error " + freq_select_clock[3].bitrateerror + "%. */ \\n" +' +
+'                        "/* The permissible baud rate error range during reception: " + error_range[3] + "\\n" +' +
+'                        "  .utanck_clock_b.utasel = " + "UARTA_CLOCK_SOURCE_MOCO" + "\\n" +' +
+'                        ", .utanck_clock_b.utanck = " + freq_select_clock[3].UTA0_divider  + "\\n" +' +
+'                        ", .brgca = " + freq_select_clock[3].brgca_value + "\\n" +' +
+'                        ", .delay_time = " + delay_time[3]  + "\\n" +' +
+'                        " #elif ((" + uarta_channel + " == BSP_CFG_FSXP_SOURCE) || (" + uarta_channel + " == BSP_CLOCKS_SOURCE_CLOCK_LOCO))\\n\\n" +' +
+'                        "/* Baud rate calculated with Acutal_Error " + freq_select_clock[0].bitrateerror + "%. */\\n" +' +
+'                        "/* The permissible baud rate error range during reception: " + error_range[0] + "\\n" +' +
+'                        "  .utanck_clock_b.utasel = " + 0 + "\\n" +' +
+'                        ", .utanck_clock_b.utanck = " + freq_select_clock[0].UTA0_divider  + "\\n" +' +
+'                        ", .brgca = " + freq_select_clock[0].brgca_value  + "\\n" +' +
+'                        ", .delay_time = " + delay_time[0]  + "\\n" +' +
+'                        " #elif (" + uarta_channel +" == BSP_CLOCKS_SOURCE_CLOCK_SUBCLOCK)\\n\\n" +' +
+'                        "/* Baud rate calculated with Acutal_Error " + freq_select_clock[4].bitrateerror + "%. */\\n" +' +
+'                        "/* The permissible baud rate error range during reception: " + error_range[4] + "\\n" +' +
+'                        "  .utanck_clock_b.utasel = " + 0 + "\\n" +' +
+'                        ", .utanck_clock_b.utanck = " + freq_select_clock[4].UTA0_divider  + "\\n" +' +
+'                        ", .brgca = " + freq_select_clock[4].brgca_value  + "\\n" +' +
+'                        ", .delay_time = " + delay_time[4]  + "\\n" +' +
+'                        " #endif"')]]></export>
+        </property>
+        <!-- UART Extended configuration -->
+        <property default="module.driver.uarta.order.lsb" display="Extra|Transfer Order" id="module.driver.uarta.order" description="Selection of the transmission/reception order.">
+            <option display="LSB first" id="module.driver.uarta.order.lsb" value="UARTA_DIR_BIT_LSB_FIRST"/>
+            <option display="MSB first" id="module.driver.uarta.order.msb" value="UARTA_DIR_BIT_MSB_FIRST"/>
+        </property>
+        <property default="module.driver.uarta.transfer_level.positive" display="Extra|Transfer level" id="module.driver.uarta.transfer_level" description="Selection of the transmission/reception level.">
+            <option display="Positive logic" id="module.driver.uarta.transfer_level.positive" value="UARTA_ALV_BIT_POSITIVE_LOGIC"/>
+            <option display="Negative logic" id="module.driver.uarta.transfer_level.negative" value="UARTA_ALV_BIT_NEGATIVE_LOGIC"/>
+        </property>
+        <property default="" display="Extra|Clock output" id="module.driver.uarta.clk_out" description="Enable Clock output">
+            <select enum="enum.driver.uarta.clk_out"/>
+        </property>
+        <property default="NULL" display="Interrupts|Callback" id="module.driver.uart.callback" description="A user callback function can be provided. If this callback function is provided, it will be called from the interrupt service routine (ISR).">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.uart.callback}")</constraint>
+        </property>
+        <property default="" display="Interrupts|Receive Interrupt Priority" id="module.driver.uarta.rxi_ipl" description="Select the receive interrupt priority.">
+            <select enum="enum.mcu.nvic.priorities.mandatory"/>
+            <interrupt event="event.uarta${module.driver.uarta.channel}.rxi" isr="uarta_rxi_isr"/>
+        </property>
+        <property default="" display="Interrupts|Transmit Interrupt Priority" id="module.driver.uarta.txi_ipl" description="Select the transmit interrupt priority.">
+            <select enum="enum.mcu.nvic.priorities.mandatory"/>
+            <interrupt event="event.uarta${module.driver.uarta.channel}.txi" isr="uarta_txi_isr"/>
+        </property>
+        <property default="_disabled" display="Interrupts|Error Interrupt Priority" id="module.driver.uarta.eri_ipl" description="Select the error interrupt priority.">
+            <select enum="enum.mcu.nvic.priorities.optional"/>
+            <interrupt event="event.uarta${module.driver.uarta.channel}.erri" isr="uarta_eri_isr"/>
+        </property>
+        <!-- For MCU's whose pinmapping files have been generated with MPC Designer Tool -->
+        <peripheral name="UARTA" component="uarta"/>
+        <peripheral name="UARTA${module.driver.uarta.channel}" component="uarta${module.driver.uarta.channel}"/>
+        <symbol id="symbol.driver.uart.name" value="${module.driver.uart.name}"/>
+        <symbol id="symbol.driver.uart.guard.open" value="${module.driver.uart.name}_open_guard"/>
+        <symbol id="symbol.driver.uart.guard.macro.open" value="FSP_GUARD_${module.driver.uart.name}_R_UARTA_Open"/>
+        <symbol id="symbol.driver.uart.guard.read" value="${module.driver.uart.name}_read_guard"/>
+        <symbol id="symbol.driver.uart.guard.macro.read" value="FSP_GUARD_${module.driver.uart.name}_R_UARTA_Read"/>
+        <symbol id="symbol.driver.uart.guard.write" value="${module.driver.uart.name}_write_guard"/>
+        <symbol id="symbol.driver.uart.guard.macro.write" value="FSP_GUARD_${module.driver.uart.name}_R_UARTA_Write"/>
+        <symbol id="symbol.driver.uart.guard.baud_set" value="${module.driver.uart.name}_baud_set_guard"/>
+        <symbol id="symbol.driver.uart.guard.macro.baud_set" value="FSP_GUARD_${module.driver.uart.name}_R_UARTA_BaudSet"/>
+        <symbol id="symbol.driver.uart.guard.info_get" value="${module.driver.uart.name}_info_get_guard"/>
+        <symbol id="symbol.driver.uart.guard.macro.info_get" value="FSP_GUARD_${module.driver.uart.name}_R_UARTA_InfoGet"/>
+        <symbol id="symbol.driver.uart.guard.close" value="${module.driver.uart.name}_close_guard"/>
+        <symbol id="symbol.driver.uart.guard.macro.close" value="FSP_GUARD_${module.driver.uart.name}_R_UARTA_Close"/>
+        <symbol id="symbol.driver.uart.guard.abort" value="${module.driver.uart.name}_abort_guard"/>
+        <symbol id="symbol.driver.uart.guard.macro.abort" value="FSP_GUARD_${module.driver.uart.name}_R_UARTA_Abort"/>
+        <symbol id="symbol.driver.uart.guard.baud_calculate" value="${module.driver.uart.name}_baud_calculate_guard"/>
+        <symbol id="symbol.driver.uart.guard.macro.baud_calculate" value="FSP_GUARD_${module.driver.uart.name}_R_UARTA_BaudCalculate"/>
+        <symbol id="symbol.driver.uart.guard.callback_set" value="${module.driver.uart.name}_callback_set_guard"/>
+        <symbol id="symbol.driver.uart.guard.macro.callback_set" value="FSP_GUARD_${module.driver.uart.name}_R_UARTA_CallbackSet"/>
+        <symbol id="symbol.driver.uart.guard.read_stop" value="${module.driver.uart.name}_read_stop_guard"/>
+        <symbol id="symbol.driver.uart.guard.macro.read_stop" value="FSP_GUARD_${module.driver.uart.name}_R_UARTA_ReadStop"/>
+        <symbol id="symbol.driver.uart.nsc_api" value="${module.driver.uart.name}_nsc_api"/>
+        <symbol id="symbol.driver.uart.baud_setting" value="${module.driver.uart.name}_baud_setting"/>
+        <symbol id="symbol.driver.uart.cfg" value="${module.driver.uart.name}_cfg"/>
+        <symbol id="symbol.driver.uart.cfg_extend" value="${module.driver.uart.name}_cfg_extend"/>
+        <symbol id="symbol.driver.uart.ctrl" value="${module.driver.uart.name}_ctrl"/>
+        <header>
+            /** UART on UARTA Instance. */
+            extern const uart_instance_t      ${module.driver.uart.name};
+
+            /** Access the UARTA instance using these structures when calling API functions directly (::p_api is not used). */
+            extern uarta_instance_ctrl_t     ${module.driver.uart.name}_ctrl;
+            extern const uart_cfg_t ${module.driver.uart.name}_cfg;
+            extern const uarta_extended_cfg_t ${module.driver.uart.name}_cfg_extend;
+
+            #ifndef ${module.driver.uart.callback}
+            void ${module.driver.uart.callback}(uart_callback_args_t * p_args);
+            #endif
+        </header>
+        <includes>
+            #include &quot;r_uarta.h&quot;
+            #include &quot;r_uart_api.h&quot;
+        </includes>
+        <declarations>
+            uarta_instance_ctrl_t     ${module.driver.uart.name}_ctrl;
+
+            uarta_baud_setting_t      ${module.driver.uart.name}_baud_setting =
+            {
+                ${module.driver.uarta.baud}
+            };
+
+            /** UART extended configuration for UART on UARTA HAL driver */
+            const uarta_extended_cfg_t ${module.driver.uart.name}_cfg_extend =
+            {
+                .transfer_dir            = ${module.driver.uarta.order},
+                .transfer_level          = ${module.driver.uarta.transfer_level},
+                .clock_output            = ${module.driver.uarta.clk_out},
+                .p_baud_setting          = &amp;${module.driver.uart.name}_baud_setting,
+            };
+
+            /** UART interface configuration */
+            const uart_cfg_t ${module.driver.uart.name}_cfg =
+            {
+                .channel             = ${module.driver.uarta.channel},
+                .data_bits           = ${module.driver.uarta.data_bits},
+                .parity              = ${module.driver.uarta.parity},
+                .stop_bits           = ${module.driver.uarta.stop_bits},
+                .p_callback          = ${module.driver.uart.callback},
+                .p_context           = NULL,
+                .p_extend            = &amp;${module.driver.uart.name}_cfg_extend,
+#define RA_NOT_DEFINED (1)
+#if (RA_NOT_DEFINED == ${module.driver.uart_on_uarta.requires.transfer_tx::module.driver.transfer.name})
+                .p_transfer_tx       = NULL,
+#else
+                .p_transfer_tx       = &amp;${module.driver.uart_on_uarta.requires.transfer_tx::module.driver.transfer.name},
+#endif
+#if (RA_NOT_DEFINED == ${module.driver.uart_on_uarta.requires.transfer_rx::module.driver.transfer.name})
+                .p_transfer_rx       = NULL,
+#else
+                .p_transfer_rx       = &amp;${module.driver.uart_on_uarta.requires.transfer_rx::module.driver.transfer.name},
+#endif
+#undef RA_NOT_DEFINED
+                .rxi_ipl             = ${module.driver.uarta.rxi_ipl},
+                .txi_ipl             = ${module.driver.uarta.txi_ipl},
+                .eri_ipl             = ${module.driver.uarta.eri_ipl},
+#if defined(VECTOR_NUMBER_UARTA${module.driver.uarta.channel}_RXI)
+                .rxi_irq             = VECTOR_NUMBER_UARTA${module.driver.uarta.channel}_RXI,
+#else
+                .rxi_irq             = FSP_INVALID_VECTOR,
+#endif
+#if defined(VECTOR_NUMBER_UARTA${module.driver.uarta.channel}_TXI)
+                .txi_irq             = VECTOR_NUMBER_UARTA${module.driver.uarta.channel}_TXI,
+#else
+                .txi_irq             = FSP_INVALID_VECTOR,
+#endif
+#if defined(VECTOR_NUMBER_UARTA${module.driver.uarta.channel}_ERRI)
+                .eri_irq             = VECTOR_NUMBER_UARTA${module.driver.uarta.channel}_ERRI,
+#else
+                .eri_irq             = FSP_INVALID_VECTOR,
+#endif
+            };
+
+/* Instance structure to use this module. */
+const uart_instance_t ${module.driver.uart.name} =
+{
+    .p_ctrl        = &amp;${module.driver.uart.name}_ctrl,
+    .p_cfg         = &amp;${module.driver.uart.name}_cfg,
+    .p_api         = &amp;g_uart_on_uarta
+};
+        </declarations>
+        <guard>
+            <header>
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.uart.name}_open_guard(uart_ctrl_t *const p_api_ctrl, uart_cfg_t const *const p_cfg);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.uart.name}_read_guard(uart_ctrl_t *const p_api_ctrl, uint8_t *const p_dest, uint32_t const bytes);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.uart.name}_write_guard(uart_ctrl_t *const p_api_ctrl, uint8_t const *const p_src, uint32_t const bytes);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.uart.name}_baud_set_guard(uart_ctrl_t *const p_api_ctrl, void const *const p_baud_setting);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.uart.name}_info_get_guard(uart_ctrl_t *const p_api_ctrl, uart_info_t *const p_info);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.uart.name}_close_guard(uart_ctrl_t *const p_api_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.uart.name}_abort_guard(uart_ctrl_t *const p_api_ctrl, uart_dir_t communication_to_abort);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.uart.name}_baud_calculate_guard(uint32_t baudrate, uint32_t baud_rate_percent_error_x1000, uarta_clock_source_t clock_source, uarta_baud_setting_t *const p_baud_setting);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.uart.name}_callback_set_guard(uart_ctrl_t *const p_api_ctrl, void(*p_callback)(uart_callback_args_t *), void const *const p_context, uart_callback_args_t *const p_callback_memory);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.uart.name}_read_stop_guard(uart_ctrl_t *const p_api_ctrl, uint32_t *p_remaining_bytes);
+
+            </header>
+            <template name="${module.driver.uart.name}_guard.c">
+                <![CDATA[
+                    #include "guard.h"
+
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.uart.name}_open_guard (uart_ctrl_t *const p_api_ctrl, uart_cfg_t const *const p_cfg)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+    FSP_PARAMETER_NOT_USED(p_cfg);
+
+    return R_UARTA_Open(&${module.driver.uart.name}_ctrl, &${module.driver.uart.name}_cfg);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.uart.name}_read_guard (uart_ctrl_t *const p_api_ctrl, uint8_t *const p_dest, uint32_t const bytes)
+{
+    /* Verify all pointers are in non-secure memory. */
+    uint8_t *const p_dest_checked = cmse_check_address_range((void *) p_dest, bytes, CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_dest_checked != NULL);
+
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+
+    return R_UARTA_Read(&${module.driver.uart.name}_ctrl, p_dest_checked, bytes);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.uart.name}_write_guard (uart_ctrl_t *const p_api_ctrl, uint8_t const *const p_src, uint32_t const bytes)
+{
+    /* Verify all pointers are in non-secure memory. */
+    uint8_t const *const p_src_checked = cmse_check_address_range((void *) p_src, bytes, CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_src_checked != NULL);
+
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+
+    return R_UARTA_Write(&${module.driver.uart.name}_ctrl, p_src_checked, bytes);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.uart.name}_baud_set_guard (uart_ctrl_t *const p_api_ctrl, void const *const p_baud_setting)
+{
+    /* Verify all pointers are in non-secure memory. */
+    void const *const p_baud_setting_checked = cmse_check_address_range((void *) p_baud_setting, sizeof(uarta_baud_setting_t), CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_baud_setting_checked != NULL);
+
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+
+    return R_UARTA_BaudSet(&${module.driver.uart.name}_ctrl, p_baud_setting_checked);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.uart.name}_info_get_guard (uart_ctrl_t *const p_api_ctrl, uart_info_t *const p_info)
+{
+    /* Verify all pointers are in non-secure memory. */
+    uart_info_t *const p_info_checked = cmse_check_pointed_object(p_info, CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_info_checked != NULL);
+
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+
+    return R_UARTA_InfoGet(&${module.driver.uart.name}_ctrl, p_info_checked);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.uart.name}_close_guard (uart_ctrl_t *const p_api_ctrl)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+
+    return R_UARTA_Close(&${module.driver.uart.name}_ctrl);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.uart.name}_abort_guard (uart_ctrl_t *const p_api_ctrl, uart_dir_t communication_to_abort)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+
+    return R_UARTA_Abort(&${module.driver.uart.name}_ctrl, communication_to_abort);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.uart.name}_baud_calculate_guard (uint32_t baudrate, uint32_t baud_rate_percent_error_x1000, uarta_clock_source_t clock_source, uarta_baud_setting_t *const p_baud_setting)
+{
+    /* Verify all pointers are in non-secure memory. */
+    uarta_baud_setting_t *const p_baud_setting_checked = cmse_check_pointed_object(p_baud_setting, CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_baud_setting_checked != NULL);
+
+    /* TODO: add your own security checks here */
+
+    return R_UARTA_BaudCalculate(baudrate, baud_rate_percent_error_x1000, clock_source, p_baud_setting_checked);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.uart.name}_callback_set_guard (uart_ctrl_t *const p_api_ctrl, void(*p_callback)(uart_callback_args_t *), void const *const p_context, uart_callback_args_t *const p_callback_memory)
+{
+    /* Verify all pointers are in non-secure memory. */
+    void(*p_callback_checked)(uart_callback_args_t *) = (void(*)(uart_callback_args_t *)) cmse_check_address_range((void *) p_callback, sizeof(void *), CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_callback_checked != NULL);
+    uart_callback_args_t *const p_callback_memory_checked = cmse_check_pointed_object(p_callback_memory, CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_callback_memory_checked != NULL);
+
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+    FSP_PARAMETER_NOT_USED(p_context);
+
+    return R_UARTA_CallbackSet(&${module.driver.uart.name}_ctrl, p_callback_checked, p_context, p_callback_memory_checked);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.uart.name}_read_stop_guard (uart_ctrl_t *const p_api_ctrl, uint32_t *p_remaining_bytes)
+{
+    /* Verify all pointers are in non-secure memory. */
+    uint32_t * p_remaining_bytes_checked = cmse_check_address_range((void *) p_remaining_bytes, sizeof(uint32_t), CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_remaining_bytes_checked != NULL);
+
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+
+    return R_UARTA_ReadStop(&${module.driver.uart.name}_ctrl, p_remaining_bytes_checked);
+}
+
+                ]]>
+            </template>
+        </guard>
+        <nsc>
+            <header>
+
+#define FSP_GUARD_${module.driver.uart.name}_R_UARTA_Open() ${module.driver.uart.name}_open_guard(FSP_SECURE_ARGUMENT, FSP_SECURE_ARGUMENT)
+
+#define FSP_GUARD_${module.driver.uart.name}_R_UARTA_Read(p_dest, bytes) ${module.driver.uart.name}_read_guard(FSP_SECURE_ARGUMENT, p_dest, bytes)
+
+#define FSP_GUARD_${module.driver.uart.name}_R_UARTA_Write(p_src, bytes) ${module.driver.uart.name}_write_guard(FSP_SECURE_ARGUMENT, p_src, bytes)
+
+#define FSP_GUARD_${module.driver.uart.name}_R_UARTA_BaudSet(p_baud_setting) ${module.driver.uart.name}_baud_set_guard(FSP_SECURE_ARGUMENT, p_baud_setting)
+
+#define FSP_GUARD_${module.driver.uart.name}_R_UARTA_InfoGet(p_info) ${module.driver.uart.name}_info_get_guard(FSP_SECURE_ARGUMENT, p_info)
+
+#define FSP_GUARD_${module.driver.uart.name}_R_UARTA_Close() ${module.driver.uart.name}_close_guard(FSP_SECURE_ARGUMENT)
+
+#define FSP_GUARD_${module.driver.uart.name}_R_UARTA_Abort(communication_to_abort) ${module.driver.uart.name}_abort_guard(FSP_SECURE_ARGUMENT, communication_to_abort)
+
+#define FSP_GUARD_${module.driver.uart.name}_R_UARTA_BaudCalculate(baudrate, baud_rate_percent_error_x1000, clock_source, p_baud_setting) ${module.driver.uart.name}_baud_calculate_guard(baudrate, baud_rate_percent_error_x1000, clock_source, p_baud_setting)
+
+#define FSP_GUARD_${module.driver.uart.name}_R_UARTA_CallbackSet(p_callback, p_context, p_callback_memory) ${module.driver.uart.name}_callback_set_guard(FSP_SECURE_ARGUMENT, p_callback, p_context, p_callback_memory)
+
+#define FSP_GUARD_${module.driver.uart.name}_R_UARTA_ReadStop(p_remaining_bytes) ${module.driver.uart.name}_read_stop_guard(FSP_SECURE_ARGUMENT, p_remaining_bytes)
+
+
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.uart.name}_open_guard(uart_ctrl_t *const p_api_ctrl, uart_cfg_t const *const p_cfg);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.uart.name}_read_guard(uart_ctrl_t *const p_api_ctrl, uint8_t *const p_dest, uint32_t const bytes);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.uart.name}_write_guard(uart_ctrl_t *const p_api_ctrl, uint8_t const *const p_src, uint32_t const bytes);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.uart.name}_baud_set_guard(uart_ctrl_t *const p_api_ctrl, void const *const p_baud_setting);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.uart.name}_info_get_guard(uart_ctrl_t *const p_api_ctrl, uart_info_t *const p_info);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.uart.name}_close_guard(uart_ctrl_t *const p_api_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.uart.name}_abort_guard(uart_ctrl_t *const p_api_ctrl, uart_dir_t communication_to_abort);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.uart.name}_baud_calculate_guard(uint32_t baudrate, uint32_t baud_rate_percent_error_x1000, uarta_clock_source_t clock_source, uarta_baud_setting_t *const p_baud_setting);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.uart.name}_callback_set_guard(uart_ctrl_t *const p_api_ctrl, void(*p_callback)(uart_callback_args_t *), void const *const p_context, uart_callback_args_t *const p_callback_memory);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.uart.name}_read_stop_guard(uart_ctrl_t *const p_api_ctrl, uint32_t *p_remaining_bytes);
+
+
+extern const uart_instance_t ${module.driver.uart.name};
+            </header>
+            <declarations>
+                <![CDATA[
+static const uart_api_t ${module.driver.uart.name}_nsc_api =
+{
+    .open = ${module.driver.uart.name}_open_guard,
+    .read = ${module.driver.uart.name}_read_guard,
+    .write = ${module.driver.uart.name}_write_guard,
+    .baudSet = ${module.driver.uart.name}_baud_set_guard,
+    .infoGet = ${module.driver.uart.name}_info_get_guard,
+    .close = ${module.driver.uart.name}_close_guard,
+    .communicationAbort = ${module.driver.uart.name}_abort_guard,
+    .callbackSet = ${module.driver.uart.name}_callback_set_guard,
+    .readStop = ${module.driver.uart.name}_read_stop_guard,
+};
+const uart_instance_t ${module.driver.uart.name} =
+{
+    .p_api = &${module.driver.uart.name}_nsc_api,
+    .p_ctrl = FSP_SECURE_ARGUMENT,
+    .p_cfg = FSP_SECURE_ARGUMENT,
+};
+                ]]>
+            </declarations>
+        </nsc>
+        <api configurable="true">
+            <file>ra/fsp/inc/instances/r_uarta.h</file>
+            <file>ra/fsp/inc/api/r_transfer_api.h</file>
+            <file>ra/fsp/inc/api/r_uart_api.h</file>
+        </api>
+    </module>
+
+    <module config="config.driver.uarta" display="Connectivity|${module.driver.uart.name} UART (r_uarta)" id="module.driver.uart_on_uarta_nodtc" version="1" url="group___u_a_r_t_a.html">
+        <constraint display="Unique name required for each instance">
+            "${interface.driver.uarta.${module.driver.uart.name}}" === "1"
+        </constraint>
+        <constraint display="Requires Error Interrupt enabled">
+            ("${config.driver.uarta.rxi_err_mode}" === "config.driver.uarta.rxi_err_mode.generated") ||  ("${module.driver.uarta.eri_ipl}" != "_disabled")
+        </constraint>
+        <constraint display="Requires UARTA Peripheral">
+          "${interface.mcu.uarta.external}" === "1"
+        </constraint>
+        <constraint display="Channel not available on selected MCU">
+            "${interface.mcu.uarta.${module.driver.uarta.channel}}" === "1"
+        </constraint>
+        <constraint display="UARTA clock source must be selected on Clocks tab">
+            ("${interface.mcu.uarta.${module.driver.uarta.channel}}" != "1") ||
+            ("${board.clock.peripheral.uarta${module.driver.uarta.channel}}" &gt; 0)
+        </constraint>
+        <constraint id="module.driver.uarta.constraint.baudrate">
+            <![CDATA[eval('/* INPUTS */' +
+'    var uarta_clock_hz        = ${board.clock.peripheral.uarta${module.driver.uarta.channel}};' +
+'    var requested_baudrate    = ${module.driver.uarta.baud};' +
+'' +
+'    /* Refer to hardware manual: Electrical Characteristics > Peripheral Function Characteristics > UART Interface (UARTA) */' +
+'    var mcu_uarta_max_baud    = ${config.bsp.fsp.mcu.uarta.max_baud};' +
+'    var mcu_uarta_min_baud    = 200;' +
+'' +
+'    /* Refer chapter 23.2.8, there is no supported division when the UARTA clock source is SOSC/LOCO. */' +
+'    /* However, cannot get this selection from Clock page directly, so workaround by checking the value uarta_clock_hz with 32768 Hz instead */' +
+'    var min_baud_cal_by_clock = (uarta_clock_hz == 32768) ? Math.ceil(uarta_clock_hz / (2 * 255)) : Math.ceil((uarta_clock_hz/64) / (2 * 255));' +
+'    min_baud_cal_by_clock = (min_baud_cal_by_clock < mcu_uarta_min_baud) ? mcu_uarta_min_baud : min_baud_cal_by_clock;' +
+'' +
+'    var max_baud_cal_by_clock = Math.floor(uarta_clock_hz / (2 * 2));' +
+'    max_baud_cal_by_clock = (max_baud_cal_by_clock > mcu_uarta_max_baud) ? mcu_uarta_max_baud : max_baud_cal_by_clock;' +
+'' +
+'    var output = null;' +
+'    if (uarta_clock_hz > 0)' +
+'    {' +
+'       if ((requested_baudrate > max_baud_cal_by_clock) || (requested_baudrate < min_baud_cal_by_clock))' +
+'       {' +
+'           output = "Requested baud rate not achievable. Valid range: [" + min_baud_cal_by_clock.toString() + ", " + max_baud_cal_by_clock.toString() + "] (bps).";' +
+'       }' +
+'    }' +
+'' +
+'    output')]]>
+        </constraint>
+        <constraint id="module.driver.uarta.constraint.pclk">
+            <![CDATA[eval('/* INPUTS */' +
+'    var pclk_constraint = "${board.clock.peripheral.uarta${module.driver.uarta.channel}.pclk_constraint}";' +
+'' +
+'    var restriction_enable   = "${config.bsp.fsp.mcu.uarta.pclk_restriction_enable}";' +
+'    var uarta_clock_hz   = ${board.clock.peripheral.uarta${module.driver.uarta.channel}};' +
+'' +
+'    var minimum_operation_clock = (uarta_clock_hz == 32768) ? uarta_clock_hz : Math.ceil(uarta_clock_hz/64);' +
+'    var output = null;' +
+'' +
+'    if((minimum_operation_clock > pclk_constraint) && (restriction_enable == "true"))' +
+'    {' +
+'        output = "PCLKB must be greater than or equal to UARTA" + "${module.driver.uarta.channel}" + " operating clock";' +
+'    }' +
+'    output')]]>
+        </constraint>
+        <requires id="module.driver.uart_on_uarta.requires.uarta" interface="interface.mcu.uarta.external" visible="false" display="Requires UARTA Peripheral" />
+        <requires id="module.driver.uart_on_uarta.requires.uarta_dtc_support" interface="interface.mcu.uarta.nodtc" visible="false" display="Requires UARTA without DTC" />
+        <provides interface="interface.peripheral.uarta${module.driver.uarta.channel}" />
+        <provides interface="interface.driver.uarta" />
+        <provides interface="interface.driver.uart" />
+        <provides interface="interface.driver.uart_on_uarta" />
+        <provides interface="interface.driver.uarta.${module.driver.uart.name}" />
+        <property default="g_uart${_instance}" display="General|Name" id="module.driver.uart.name" description="Module name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.uart.name}")</constraint>
+        </property>
+        <!-- UART interface configuration -->
+        <property default="0" display="General|Channel" id="module.driver.uarta.channel" description="Select the UARTA channel.">
+            <constraint display="Value must be a non-negative integer">testInteger("${module.driver.uarta.channel}") &amp;&amp; ("${module.driver.uarta.channel}" &gt;= 0)</constraint>
+            <signal event="event.uarta${module.driver.uarta.channel}.rxi" />
+            <signal event="event.uarta${module.driver.uarta.channel}.txi" />
+            <signal event="event.uarta${module.driver.uarta.channel}.erri" />
+        </property>
+        <property default="module.driver.uarta.data_bits.data_bits_8" display="General|Data Bits" id="module.driver.uarta.data_bits" description="Select the number of bits per word.">
+            <option display="8bits" id="module.driver.uarta.data_bits.data_bits_8" value="UART_DATA_BITS_8"/>
+            <option display="7bits" id="module.driver.uarta.data_bits.data_bits_7" value="UART_DATA_BITS_7"/>
+            <option display="5bits" id="module.driver.uarta.data_bits.data_bits_5" value="UART_DATA_BITS_5"/>
+        </property>
+        <property default="module.driver.uarta.parity.parity_off" display="General|Parity" id="module.driver.uarta.parity" description="Select the parity mode.">
+            <option display="None" id="module.driver.uarta.parity.parity_off" value="UART_PARITY_OFF"/>
+            <option display="Zero" id="module.driver.uarta.parity.parity_zero" value="UART_PARITY_ZERO"/>
+            <option display="Odd" id="module.driver.uarta.parity.parity_odd" value="UART_PARITY_ODD"/>
+            <option display="Even" id="module.driver.uarta.parity.parity_even" value="UART_PARITY_EVEN"/>
+        </property>
+        <property default="module.driver.uarta.stop_bits.stop_bits_1" display="General|Stop Bits" id="module.driver.uarta.stop_bits" description="Select the number of stop bits. \nNote: For the receive data, only the first 1 bit of the stop bits is checked regardless of the stop bit length.">
+            <option display="1bit" id="module.driver.uarta.stop_bits.stop_bits_1" value="UART_STOP_BITS_1"/>
+            <option display="2bits" id="module.driver.uarta.stop_bits.stop_bits_2" value="UART_STOP_BITS_2"/>
+        </property>
+        <property default="115200" display="Baud|Baud Rate" id="module.driver.uarta.baud" description="Enter the desired baud rate.\n\nIf the requested baud rate cannot be achieved, the settings with the smallest percent error are used. The theoretical calculated baud rate and percent error are printed in a comment in the generated baud_setting_t structure.">
+            <constraint display="Value must be an integer greater than 0">testInteger("${module.driver.uarta.baud}")  &amp;&amp; ("${module.driver.uarta.baud}" &gt; 0)</constraint>
+            <export><![CDATA[eval('/* INPUTS */' +
+'    var uarta_BRGCA_MAX = 255;' +
+'    var uarta_BRGCA_MIN  = 2;' +
+'    var UAT0CK = [1, 2, 4, 8, 16, 32, 64];' +
+'    var UAT0CK_div_count = {' +
+'        0: "UARTA_CLOCK_DIV_1",' +
+'        1: "UARTA_CLOCK_DIV_2",' +
+'        2: "UARTA_CLOCK_DIV_4",' +
+'        3: "UARTA_CLOCK_DIV_8",' +
+'        4: "UARTA_CLOCK_DIV_16",' +
+'        5: "UARTA_CLOCK_DIV_32",' +
+'        6: "UARTA_CLOCK_DIV_64",' +
+'    };' +
+'    var uarta_channel_lut = {' +
+'        0: "BSP_CFG_UARTA0_CLOCK_SOURCE",' +
+'        1: "BSP_CFG_UARTA1_CLOCK_SOURCE",' +
+'    };' +
+'' +
+'    var pclk_constraint = "${board.clock.peripheral.uarta0.pclk_constraint}";' +
+'' +
+'    if("${module.driver.uarta.channel}" == "1")' +
+'    {' +
+'        pclk_constraint = "${board.clock.peripheral.uarta1.pclk_constraint}";' +
+'    }' +
+'' +
+'    /*******************************************************************************************************************//**' +
+'     * Calculates baud rate register settings based on internal clock frequency. Evaluates and determines the best possible' +
+'     * settings set to the baud rate related registers.' +
+'     *' +
+'     * @param[in]  freq_hz                             The source clock frequency for the UARTA internal clock' +
+'     * @param[in]  baudrate                            Baud rate[bps] e.g. 19200, 57600, 115200, etc.' +
+'     * @param[in]  clock_source                        clock source HOCO = 2, MOCO = 3, MOSC = 1, FSXP/LOCO = 0, SOSC = 4.' +
+'     *' +
+'     * @return  {brgca_value,                            Value for the brgca' +
+'     *           UTA0_divider,                           Value for the f(UTA0) divider' +
+'     *           error,                                  % bit rate error' +
+'     **********************************************************************************************************************/' +
+'    function r_uarta_brgca_utack_calculate(freq_hz, baudrate, clock_source) {' +
+'        /** Find the best BRR (bit rate register) value.' +
+'         *  In table async_baud, divisor values are stored for BGDM, ABCS, ABCSE and N values.  Each set of divisors' +
+'         *  is tried, and the settings with the lowest bit rate error are stored. The formula to calculate BRR is as' +
+'         *  follows and it must be 255 or less:' +
+'         *  BRR = (PCLK / (div_coefficient * baud)) - 1' +
+'         */' +
+'        var divisor = 0;' +
+'        var result = {brgca_value : 0, UTA0_divider : "0", bitrateerror : 100};' +
+'        for(var i = 0; i < UAT0CK.length; i++) {' +
+'            var f_uta0_value = (freq_hz/UAT0CK[i]);' +
+'            if(f_uta0_value > pclk_constraint)' +
+'            {' +
+'                continue;' +
+'            }' +
+'            var coefficient_k = Math.round((f_uta0_value / (2 * baudrate)));' +
+'            if((coefficient_k > uarta_BRGCA_MAX) || (coefficient_k < uarta_BRGCA_MIN)){' +
+'                if(clock_source == 0) {' +
+'                    break;' +
+'                }' +
+'                else {' +
+'                    continue;' +
+'                }' +
+'             }' +
+'             var actual_baudrate = (f_uta0_value / (2 * coefficient_k));' +
+'             var bit_err = ((actual_baudrate/baudrate) - 1) * 100;' +
+'             if(bit_err < 0) {' +
+'                    bit_err = -bit_err;' +
+'             }' +
+'             if(bit_err < result.bitrateerror) {' +
+'                    result.brgca_value  = coefficient_k;' +
+'                    result.bitrateerror = bit_err.toFixed(2);' +
+'                     if(clock_source == 0) {' +
+'                         result.UTA0_divider = "UARTA_UTAnCK_LOCO_SETTING"; /* FSXP or LOCO */' +
+'                         break;' +
+'                     }' +
+'                     if(clock_source == 4)' +
+'                     {' +
+'                         result.UTA0_divider = "UARTA_UTAnCK_SOSC_SETTING";' +
+'                         break;' +
+'                     }' +
+'                     else {' +
+'                         result.UTA0_divider = UAT0CK_div_count[i]' +
+'                     }' +
+'             }' +
+'        }' +
+'        return result;' +
+'    }' +
+'    var freq_select_clock = [0];' +
+'    freq_select_clock[0] = r_uarta_brgca_utack_calculate("${board.clock.peripheral.uarta_loco}", "${module.driver.uarta.baud}", 0); /* FSXP or LOCO */' +
+'    freq_select_clock[1] = r_uarta_brgca_utack_calculate("${board.clock.peripheral.uarta_mosc}", "${module.driver.uarta.baud}", 1);' +
+'    freq_select_clock[2] = r_uarta_brgca_utack_calculate("${board.clock.peripheral.uarta_hoco}", "${module.driver.uarta.baud}", 2);' +
+'    freq_select_clock[3] = r_uarta_brgca_utack_calculate("${board.clock.peripheral.uarta_moco}", "${module.driver.uarta.baud}", 3);' +
+'    freq_select_clock[4] = r_uarta_brgca_utack_calculate("${board.clock.peripheral.uarta_subclk}", "${module.driver.uarta.baud}", 4);' +
+'    var delay_time = [0];' +
+'    delay_time[0] = Math.max(1, Math.round(1000000 / ("${board.clock.peripheral.uarta_loco}" >> (freq_select_clock[0].UTA0_divider & 07)))); /* FSXP or LOCO */' +
+'    delay_time[1] = Math.max(1, Math.round(1000000 / ("${board.clock.peripheral.uarta_mosc}" >> (freq_select_clock[1].UTA0_divider & 07))));' +
+'    delay_time[2] = Math.max(1, Math.round(1000000 / ("${board.clock.peripheral.uarta_hoco}" >> (freq_select_clock[2].UTA0_divider & 07))));' +
+'    delay_time[3] = Math.max(1, Math.round(1000000 / ("${board.clock.peripheral.uarta_moco}" >> (freq_select_clock[3].UTA0_divider & 07))));' +
+'    delay_time[4] = Math.max(1, Math.round(1000000 / ("${board.clock.peripheral.uarta_subclk}" >> (freq_select_clock[4].UTA0_divider & 07))));' +
+'    var max_error = [0];' +
+'    var min_error = [0];' +
+'    var error_range   = [0];' +
+'    var num_start_bits = 1;' +
+'    var num_data_bits = {' +
+'        "UART_DATA_BITS_8": 8,' +
+'        "UART_DATA_BITS_7": 7,' +
+'        "UART_DATA_BITS_5": 5,' +
+'    };' +
+'    var num_parity_bits = {' +
+'        "UART_PARITY_OFF":  0,' +
+'        "UART_PARITY_ZERO": 1,' +
+'        "UART_PARITY_ODD":  1,' +
+'        "UART_PARITY_EVEN": 1,' +
+'    };' +
+'    var num_stop_bits = {' +
+'        "UART_STOP_BITS_1": 1,' +
+'        "UART_STOP_BITS_2": 2,' +
+'    };' +
+'    /* Get the total number of start, data, parity, and stop bits */' +
+'    var num_length = num_start_bits + num_data_bits["${module.driver.uarta.data_bits}"] + num_parity_bits["${module.driver.uarta.parity}"] + num_stop_bits["${module.driver.uarta.stop_bits}"];' +
+'    for(var i = 0; i < 5; i++) {' +
+'        var k = freq_select_clock[i].brgca_value;' +
+'        max_error[i] = ((2 * k * num_length)/(((2 * num_length - 1) * k) + 1) - 1) * 100;' +
+'        min_error[i] = ((2 * k * num_length)/(((2 * num_length + 1) * k) - 1) - 1) * 100;' +
+'        if(freq_select_clock[i].bitrateerror != 100) {' +
+'            error_range[i] = min_error[i].toFixed(2) + "% ~ " + max_error[i].toFixed(2) + "% */";' +
+'        }' +
+'        else {' +
+'            error_range[i] = "Invalid Range Error */";' +
+'        }' +
+'    }' +
+'    var uarta_channel = uarta_channel_lut[${module.driver.uarta.channel}];' +
+'    baud_setting =      " #if (" + uarta_channel + " == BSP_CLOCKS_SOURCE_CLOCK_MAIN_OSC)\\n\\n" +' +
+'                        "/* Baud rate calculated with Acutal_Error " + freq_select_clock[1].bitrateerror + "%. */\\n" +' +
+'                        "/* The permissible baud rate error range during reception: " + error_range[1] + "\\n" +' +
+'                        "  .utanck_clock_b.utasel = " + "UARTA_CLOCK_SOURCE_MOSC"  + "\\n" +' +
+'                        ", .utanck_clock_b.utanck = " + freq_select_clock[1].UTA0_divider + "\\n" +' +
+'                        ", .brgca = " + freq_select_clock[1].brgca_value  + "\\n" +' +
+'                        ", .delay_time = " + delay_time[1] + "\\n" +' +
+'                        " #elif (" + uarta_channel + " == BSP_CLOCKS_SOURCE_CLOCK_HOCO)\\n\\n" +' +
+'                        "/* Baud rate calculated with Acutal_Error " + freq_select_clock[2].bitrateerror + "%. */\\n" +' +
+'                        "/* The permissible baud rate error range during reception: " + error_range[2] + "\\n" +' +
+'                        "  .utanck_clock_b.utasel = " + "UARTA_CLOCK_SOURCE_HOCO" + "\\n" +' +
+'                        ", .utanck_clock_b.utanck = " + freq_select_clock[2].UTA0_divider + "\\n" +' +
+'                        ", .brgca = " + freq_select_clock[2].brgca_value + "\\n" +' +
+'                        ", .delay_time = " + delay_time[2]  + "\\n" +' +
+'                        " #elif (" + uarta_channel + " == BSP_CLOCKS_SOURCE_CLOCK_MOCO)\\n\\n" +' +
+'                        "/* Baud rate calculated with Acutal_Error " + freq_select_clock[3].bitrateerror + "%. */ \\n" +' +
+'                        "/* The permissible baud rate error range during reception: " + error_range[3] + "\\n" +' +
+'                        "  .utanck_clock_b.utasel = " + "UARTA_CLOCK_SOURCE_MOCO" + "\\n" +' +
+'                        ", .utanck_clock_b.utanck = " + freq_select_clock[3].UTA0_divider  + "\\n" +' +
+'                        ", .brgca = " + freq_select_clock[3].brgca_value + "\\n" +' +
+'                        ", .delay_time = " + delay_time[3]  + "\\n" +' +
+'                        " #elif ((" + uarta_channel + " == BSP_CFG_FSXP_SOURCE) || (" + uarta_channel + " == BSP_CLOCKS_SOURCE_CLOCK_LOCO))\\n\\n" +' +
+'                        "/* Baud rate calculated with Acutal_Error " + freq_select_clock[0].bitrateerror + "%. */\\n" +' +
+'                        "/* The permissible baud rate error range during reception: " + error_range[0] + "\\n" +' +
+'                        "  .utanck_clock_b.utasel = " + 0 + "\\n" +' +
+'                        ", .utanck_clock_b.utanck = " + freq_select_clock[0].UTA0_divider  + "\\n" +' +
+'                        ", .brgca = " + freq_select_clock[0].brgca_value  + "\\n" +' +
+'                        ", .delay_time = " + delay_time[0]  + "\\n" +' +
+'                        " #elif (" + uarta_channel +" == BSP_CLOCKS_SOURCE_CLOCK_SUBCLOCK)\\n\\n" +' +
+'                        "/* Baud rate calculated with Acutal_Error " + freq_select_clock[4].bitrateerror + "%. */\\n" +' +
+'                        "/* The permissible baud rate error range during reception: " + error_range[4] + "\\n" +' +
+'                        "  .utanck_clock_b.utasel = " + 0 + "\\n" +' +
+'                        ", .utanck_clock_b.utanck = " + freq_select_clock[4].UTA0_divider  + "\\n" +' +
+'                        ", .brgca = " + freq_select_clock[4].brgca_value  + "\\n" +' +
+'                        ", .delay_time = " + delay_time[4]  + "\\n" +' +
+'                        " #endif"')]]></export>
+        </property>
+        <!-- UART Extended configuration -->
+        <property default="module.driver.uarta.order.lsb" display="Extra|Transfer Order" id="module.driver.uarta.order" description="Selection of the transmission/reception order.">
+            <option display="LSB first" id="module.driver.uarta.order.lsb" value="UARTA_DIR_BIT_LSB_FIRST"/>
+            <option display="MSB first" id="module.driver.uarta.order.msb" value="UARTA_DIR_BIT_MSB_FIRST"/>
+        </property>
+        <property default="module.driver.uarta.transfer_level.positive" display="Extra|Transfer level" id="module.driver.uarta.transfer_level" description="Selection of the transmission/reception level.">
+            <option display="Positive logic" id="module.driver.uarta.transfer_level.positive" value="UARTA_ALV_BIT_POSITIVE_LOGIC"/>
+            <option display="Negative logic" id="module.driver.uarta.transfer_level.negative" value="UARTA_ALV_BIT_NEGATIVE_LOGIC"/>
+        </property>
+        <property default="" display="Extra|Clock output" id="module.driver.uarta.clk_out" description="Enable Clock output">
+            <select enum="enum.driver.uarta.clk_out"/>
+        </property>
+        <property default="NULL" display="Interrupts|Callback" id="module.driver.uart.callback" description="A user callback function can be provided. If this callback function is provided, it will be called from the interrupt service routine (ISR).">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.uart.callback}")</constraint>
+        </property>
+        <property default="" display="Interrupts|Receive Interrupt Priority" id="module.driver.uarta.rxi_ipl" description="Select the receive interrupt priority.">
+            <select enum="enum.mcu.nvic.priorities.mandatory"/>
+            <interrupt event="event.uarta${module.driver.uarta.channel}.rxi" isr="uarta_rxi_isr"/>
+        </property>
+        <property default="" display="Interrupts|Transmit Interrupt Priority" id="module.driver.uarta.txi_ipl" description="Select the transmit interrupt priority.">
+            <select enum="enum.mcu.nvic.priorities.mandatory"/>
+            <interrupt event="event.uarta${module.driver.uarta.channel}.txi" isr="uarta_txi_isr"/>
+        </property>
+        <property default="_disabled" display="Interrupts|Error Interrupt Priority" id="module.driver.uarta.eri_ipl" description="Select the error interrupt priority.">
+            <select enum="enum.mcu.nvic.priorities.optional"/>
+            <interrupt event="event.uarta${module.driver.uarta.channel}.erri" isr="uarta_eri_isr"/>
+        </property>
+        <!-- For MCU's whose pinmapping files have been generated with MPC Designer Tool -->
+        <peripheral name="UARTA" component="uarta"/>
+        <peripheral name="UARTA${module.driver.uarta.channel}" component="uarta${module.driver.uarta.channel}"/>
+        <symbol id="symbol.driver.uart.name" value="${module.driver.uart.name}"/>
+        <symbol id="symbol.driver.uart.guard.open" value="${module.driver.uart.name}_open_guard"/>
+        <symbol id="symbol.driver.uart.guard.macro.open" value="FSP_GUARD_${module.driver.uart.name}_R_UARTA_Open"/>
+        <symbol id="symbol.driver.uart.guard.read" value="${module.driver.uart.name}_read_guard"/>
+        <symbol id="symbol.driver.uart.guard.macro.read" value="FSP_GUARD_${module.driver.uart.name}_R_UARTA_Read"/>
+        <symbol id="symbol.driver.uart.guard.write" value="${module.driver.uart.name}_write_guard"/>
+        <symbol id="symbol.driver.uart.guard.macro.write" value="FSP_GUARD_${module.driver.uart.name}_R_UARTA_Write"/>
+        <symbol id="symbol.driver.uart.guard.baud_set" value="${module.driver.uart.name}_baud_set_guard"/>
+        <symbol id="symbol.driver.uart.guard.macro.baud_set" value="FSP_GUARD_${module.driver.uart.name}_R_UARTA_BaudSet"/>
+        <symbol id="symbol.driver.uart.guard.info_get" value="${module.driver.uart.name}_info_get_guard"/>
+        <symbol id="symbol.driver.uart.guard.macro.info_get" value="FSP_GUARD_${module.driver.uart.name}_R_UARTA_InfoGet"/>
+        <symbol id="symbol.driver.uart.guard.close" value="${module.driver.uart.name}_close_guard"/>
+        <symbol id="symbol.driver.uart.guard.macro.close" value="FSP_GUARD_${module.driver.uart.name}_R_UARTA_Close"/>
+        <symbol id="symbol.driver.uart.guard.abort" value="${module.driver.uart.name}_abort_guard"/>
+        <symbol id="symbol.driver.uart.guard.macro.abort" value="FSP_GUARD_${module.driver.uart.name}_R_UARTA_Abort"/>
+        <symbol id="symbol.driver.uart.guard.baud_calculate" value="${module.driver.uart.name}_baud_calculate_guard"/>
+        <symbol id="symbol.driver.uart.guard.macro.baud_calculate" value="FSP_GUARD_${module.driver.uart.name}_R_UARTA_BaudCalculate"/>
+        <symbol id="symbol.driver.uart.guard.callback_set" value="${module.driver.uart.name}_callback_set_guard"/>
+        <symbol id="symbol.driver.uart.guard.macro.callback_set" value="FSP_GUARD_${module.driver.uart.name}_R_UARTA_CallbackSet"/>
+        <symbol id="symbol.driver.uart.guard.read_stop" value="${module.driver.uart.name}_read_stop_guard"/>
+        <symbol id="symbol.driver.uart.guard.macro.read_stop" value="FSP_GUARD_${module.driver.uart.name}_R_UARTA_ReadStop"/>
+        <symbol id="symbol.driver.uart.nsc_api" value="${module.driver.uart.name}_nsc_api"/>
+        <symbol id="symbol.driver.uart.baud_setting" value="${module.driver.uart.name}_baud_setting"/>
+        <symbol id="symbol.driver.uart.cfg" value="${module.driver.uart.name}_cfg"/>
+        <symbol id="symbol.driver.uart.cfg_extend" value="${module.driver.uart.name}_cfg_extend"/>
+        <symbol id="symbol.driver.uart.ctrl" value="${module.driver.uart.name}_ctrl"/>
+        <header>
+            /** UART on UARTA Instance. */
+            extern const uart_instance_t      ${module.driver.uart.name};
+
+            /** Access the UARTA instance using these structures when calling API functions directly (::p_api is not used). */
+            extern uarta_instance_ctrl_t     ${module.driver.uart.name}_ctrl;
+            extern const uart_cfg_t ${module.driver.uart.name}_cfg;
+            extern const uarta_extended_cfg_t ${module.driver.uart.name}_cfg_extend;
+
+            #ifndef ${module.driver.uart.callback}
+            void ${module.driver.uart.callback}(uart_callback_args_t * p_args);
+            #endif
+        </header>
+        <includes>
+            #include &quot;r_uarta.h&quot;
+            #include &quot;r_uart_api.h&quot;
+        </includes>
+        <declarations>
+            uarta_instance_ctrl_t     ${module.driver.uart.name}_ctrl;
+
+            uarta_baud_setting_t      ${module.driver.uart.name}_baud_setting =
+            {
+                ${module.driver.uarta.baud}
+            };
+
+            /** UART extended configuration for UART on UARTA HAL driver */
+            const uarta_extended_cfg_t ${module.driver.uart.name}_cfg_extend =
+            {
+                .transfer_dir            = ${module.driver.uarta.order},
+                .transfer_level          = ${module.driver.uarta.transfer_level},
+                .clock_output            = ${module.driver.uarta.clk_out},
+                .p_baud_setting          = &amp;${module.driver.uart.name}_baud_setting,
+            };
+
+            /** UART interface configuration */
+            const uart_cfg_t ${module.driver.uart.name}_cfg =
+            {
+                .channel             = ${module.driver.uarta.channel},
+                .data_bits           = ${module.driver.uarta.data_bits},
+                .parity              = ${module.driver.uarta.parity},
+                .stop_bits           = ${module.driver.uarta.stop_bits},
+                .p_callback          = ${module.driver.uart.callback},
+                .p_context           = NULL,
+                .p_extend            = &amp;${module.driver.uart.name}_cfg_extend,
+                .p_transfer_tx       = NULL,
+                .p_transfer_rx       = NULL,
+                .rxi_ipl             = ${module.driver.uarta.rxi_ipl},
+                .txi_ipl             = ${module.driver.uarta.txi_ipl},
+                .eri_ipl             = ${module.driver.uarta.eri_ipl},
+#if defined(VECTOR_NUMBER_UARTA${module.driver.uarta.channel}_RXI)
+                .rxi_irq             = VECTOR_NUMBER_UARTA${module.driver.uarta.channel}_RXI,
+#else
+                .rxi_irq             = FSP_INVALID_VECTOR,
+#endif
+#if defined(VECTOR_NUMBER_UARTA${module.driver.uarta.channel}_TXI)
+                .txi_irq             = VECTOR_NUMBER_UARTA${module.driver.uarta.channel}_TXI,
+#else
+                .txi_irq             = FSP_INVALID_VECTOR,
+#endif
+#if defined(VECTOR_NUMBER_UARTA${module.driver.uarta.channel}_ERRI)
+                .eri_irq             = VECTOR_NUMBER_UARTA${module.driver.uarta.channel}_ERRI,
+#else
+                .eri_irq             = FSP_INVALID_VECTOR,
+#endif
+            };
+
+/* Instance structure to use this module. */
+const uart_instance_t ${module.driver.uart.name} =
+{
+    .p_ctrl        = &amp;${module.driver.uart.name}_ctrl,
+    .p_cfg         = &amp;${module.driver.uart.name}_cfg,
+    .p_api         = &amp;g_uart_on_uarta
+};
+        </declarations>
+        <guard>
+            <header>
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.uart.name}_open_guard(uart_ctrl_t *const p_api_ctrl, uart_cfg_t const *const p_cfg);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.uart.name}_read_guard(uart_ctrl_t *const p_api_ctrl, uint8_t *const p_dest, uint32_t const bytes);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.uart.name}_write_guard(uart_ctrl_t *const p_api_ctrl, uint8_t const *const p_src, uint32_t const bytes);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.uart.name}_baud_set_guard(uart_ctrl_t *const p_api_ctrl, void const *const p_baud_setting);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.uart.name}_info_get_guard(uart_ctrl_t *const p_api_ctrl, uart_info_t *const p_info);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.uart.name}_close_guard(uart_ctrl_t *const p_api_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.uart.name}_abort_guard(uart_ctrl_t *const p_api_ctrl, uart_dir_t communication_to_abort);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.uart.name}_baud_calculate_guard(uint32_t baudrate, uint32_t baud_rate_percent_error_x1000, uarta_clock_source_t clock_source, uarta_baud_setting_t *const p_baud_setting);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.uart.name}_callback_set_guard(uart_ctrl_t *const p_api_ctrl, void(*p_callback)(uart_callback_args_t *), void const *const p_context, uart_callback_args_t *const p_callback_memory);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.uart.name}_read_stop_guard(uart_ctrl_t *const p_api_ctrl, uint32_t *p_remaining_bytes);
+
+            </header>
+            <template name="${module.driver.uart.name}_guard.c">
+                <![CDATA[
+                    #include "guard.h"
+
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.uart.name}_open_guard (uart_ctrl_t *const p_api_ctrl, uart_cfg_t const *const p_cfg)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+    FSP_PARAMETER_NOT_USED(p_cfg);
+
+    return R_UARTA_Open(&${module.driver.uart.name}_ctrl, &${module.driver.uart.name}_cfg);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.uart.name}_read_guard (uart_ctrl_t *const p_api_ctrl, uint8_t *const p_dest, uint32_t const bytes)
+{
+    /* Verify all pointers are in non-secure memory. */
+    uint8_t *const p_dest_checked = cmse_check_address_range((void *) p_dest, bytes, CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_dest_checked != NULL);
+
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+
+    return R_UARTA_Read(&${module.driver.uart.name}_ctrl, p_dest_checked, bytes);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.uart.name}_write_guard (uart_ctrl_t *const p_api_ctrl, uint8_t const *const p_src, uint32_t const bytes)
+{
+    /* Verify all pointers are in non-secure memory. */
+    uint8_t const *const p_src_checked = cmse_check_address_range((void *) p_src, bytes, CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_src_checked != NULL);
+
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+
+    return R_UARTA_Write(&${module.driver.uart.name}_ctrl, p_src_checked, bytes);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.uart.name}_baud_set_guard (uart_ctrl_t *const p_api_ctrl, void const *const p_baud_setting)
+{
+    /* Verify all pointers are in non-secure memory. */
+    void const *const p_baud_setting_checked = cmse_check_address_range((void *) p_baud_setting, sizeof(uarta_baud_setting_t), CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_baud_setting_checked != NULL);
+
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+
+    return R_UARTA_BaudSet(&${module.driver.uart.name}_ctrl, p_baud_setting_checked);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.uart.name}_info_get_guard (uart_ctrl_t *const p_api_ctrl, uart_info_t *const p_info)
+{
+    /* Verify all pointers are in non-secure memory. */
+    uart_info_t *const p_info_checked = cmse_check_pointed_object(p_info, CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_info_checked != NULL);
+
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+
+    return R_UARTA_InfoGet(&${module.driver.uart.name}_ctrl, p_info_checked);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.uart.name}_close_guard (uart_ctrl_t *const p_api_ctrl)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+
+    return R_UARTA_Close(&${module.driver.uart.name}_ctrl);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.uart.name}_abort_guard (uart_ctrl_t *const p_api_ctrl, uart_dir_t communication_to_abort)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+
+    return R_UARTA_Abort(&${module.driver.uart.name}_ctrl, communication_to_abort);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.uart.name}_baud_calculate_guard (uint32_t baudrate, uint32_t baud_rate_percent_error_x1000, uarta_clock_source_t clock_source, uarta_baud_setting_t *const p_baud_setting)
+{
+    /* Verify all pointers are in non-secure memory. */
+    uarta_baud_setting_t *const p_baud_setting_checked = cmse_check_pointed_object(p_baud_setting, CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_baud_setting_checked != NULL);
+
+    /* TODO: add your own security checks here */
+
+    return R_UARTA_BaudCalculate(baudrate, baud_rate_percent_error_x1000, clock_source, p_baud_setting_checked);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.uart.name}_callback_set_guard (uart_ctrl_t *const p_api_ctrl, void(*p_callback)(uart_callback_args_t *), void const *const p_context, uart_callback_args_t *const p_callback_memory)
+{
+    /* Verify all pointers are in non-secure memory. */
+    void(*p_callback_checked)(uart_callback_args_t *) = (void(*)(uart_callback_args_t *)) cmse_check_address_range((void *) p_callback, sizeof(void *), CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_callback_checked != NULL);
+    uart_callback_args_t *const p_callback_memory_checked = cmse_check_pointed_object(p_callback_memory, CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_callback_memory_checked != NULL);
+
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+    FSP_PARAMETER_NOT_USED(p_context);
+
+    return R_UARTA_CallbackSet(&${module.driver.uart.name}_ctrl, p_callback_checked, p_context, p_callback_memory_checked);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.uart.name}_read_stop_guard (uart_ctrl_t *const p_api_ctrl, uint32_t *p_remaining_bytes)
+{
+    /* Verify all pointers are in non-secure memory. */
+    uint32_t * p_remaining_bytes_checked = cmse_check_address_range((void *) p_remaining_bytes, sizeof(uint32_t), CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_remaining_bytes_checked != NULL);
+
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+
+    return R_UARTA_ReadStop(&${module.driver.uart.name}_ctrl, p_remaining_bytes_checked);
+}
+
+                ]]>
+            </template>
+        </guard>
+        <nsc>
+            <header>
+
+#define FSP_GUARD_${module.driver.uart.name}_R_UARTA_Open() ${module.driver.uart.name}_open_guard(FSP_SECURE_ARGUMENT, FSP_SECURE_ARGUMENT)
+
+#define FSP_GUARD_${module.driver.uart.name}_R_UARTA_Read(p_dest, bytes) ${module.driver.uart.name}_read_guard(FSP_SECURE_ARGUMENT, p_dest, bytes)
+
+#define FSP_GUARD_${module.driver.uart.name}_R_UARTA_Write(p_src, bytes) ${module.driver.uart.name}_write_guard(FSP_SECURE_ARGUMENT, p_src, bytes)
+
+#define FSP_GUARD_${module.driver.uart.name}_R_UARTA_BaudSet(p_baud_setting) ${module.driver.uart.name}_baud_set_guard(FSP_SECURE_ARGUMENT, p_baud_setting)
+
+#define FSP_GUARD_${module.driver.uart.name}_R_UARTA_InfoGet(p_info) ${module.driver.uart.name}_info_get_guard(FSP_SECURE_ARGUMENT, p_info)
+
+#define FSP_GUARD_${module.driver.uart.name}_R_UARTA_Close() ${module.driver.uart.name}_close_guard(FSP_SECURE_ARGUMENT)
+
+#define FSP_GUARD_${module.driver.uart.name}_R_UARTA_Abort(communication_to_abort) ${module.driver.uart.name}_abort_guard(FSP_SECURE_ARGUMENT, communication_to_abort)
+
+#define FSP_GUARD_${module.driver.uart.name}_R_UARTA_BaudCalculate(baudrate, baud_rate_percent_error_x1000, clock_source, p_baud_setting) ${module.driver.uart.name}_baud_calculate_guard(baudrate, baud_rate_percent_error_x1000, clock_source, p_baud_setting)
+
+#define FSP_GUARD_${module.driver.uart.name}_R_UARTA_CallbackSet(p_callback, p_context, p_callback_memory) ${module.driver.uart.name}_callback_set_guard(FSP_SECURE_ARGUMENT, p_callback, p_context, p_callback_memory)
+
+#define FSP_GUARD_${module.driver.uart.name}_R_UARTA_ReadStop(p_remaining_bytes) ${module.driver.uart.name}_read_stop_guard(FSP_SECURE_ARGUMENT, p_remaining_bytes)
+
+
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.uart.name}_open_guard(uart_ctrl_t *const p_api_ctrl, uart_cfg_t const *const p_cfg);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.uart.name}_read_guard(uart_ctrl_t *const p_api_ctrl, uint8_t *const p_dest, uint32_t const bytes);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.uart.name}_write_guard(uart_ctrl_t *const p_api_ctrl, uint8_t const *const p_src, uint32_t const bytes);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.uart.name}_baud_set_guard(uart_ctrl_t *const p_api_ctrl, void const *const p_baud_setting);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.uart.name}_info_get_guard(uart_ctrl_t *const p_api_ctrl, uart_info_t *const p_info);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.uart.name}_close_guard(uart_ctrl_t *const p_api_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.uart.name}_abort_guard(uart_ctrl_t *const p_api_ctrl, uart_dir_t communication_to_abort);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.uart.name}_baud_calculate_guard(uint32_t baudrate, uint32_t baud_rate_percent_error_x1000, uarta_clock_source_t clock_source, uarta_baud_setting_t *const p_baud_setting);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.uart.name}_callback_set_guard(uart_ctrl_t *const p_api_ctrl, void(*p_callback)(uart_callback_args_t *), void const *const p_context, uart_callback_args_t *const p_callback_memory);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.uart.name}_read_stop_guard(uart_ctrl_t *const p_api_ctrl, uint32_t *p_remaining_bytes);
+
+
+extern const uart_instance_t ${module.driver.uart.name};
+            </header>
+            <declarations>
+                <![CDATA[
+static const uart_api_t ${module.driver.uart.name}_nsc_api =
+{
+    .open = ${module.driver.uart.name}_open_guard,
+    .read = ${module.driver.uart.name}_read_guard,
+    .write = ${module.driver.uart.name}_write_guard,
+    .baudSet = ${module.driver.uart.name}_baud_set_guard,
+    .infoGet = ${module.driver.uart.name}_info_get_guard,
+    .close = ${module.driver.uart.name}_close_guard,
+    .communicationAbort = ${module.driver.uart.name}_abort_guard,
+    .callbackSet = ${module.driver.uart.name}_callback_set_guard,
+    .readStop = ${module.driver.uart.name}_read_stop_guard,
+};
+const uart_instance_t ${module.driver.uart.name} =
+{
+    .p_api = &${module.driver.uart.name}_nsc_api,
+    .p_ctrl = FSP_SECURE_ARGUMENT,
+    .p_cfg = FSP_SECURE_ARGUMENT,
+};
+                ]]>
+            </declarations>
+        </nsc>
+        <api configurable="true">
+            <file>ra/fsp/inc/instances/r_uarta.h</file>
+            <file>ra/fsp/inc/api/r_transfer_api.h</file>
+            <file>ra/fsp/inc/api/r_uart_api.h</file>
+        </api>
+    </module>
+
+</raModuleDescription>

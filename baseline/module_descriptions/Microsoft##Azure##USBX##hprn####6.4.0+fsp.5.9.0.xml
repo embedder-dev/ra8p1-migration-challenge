@@ -1,0 +1,248 @@
+﻿<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.driver.usbx_hprn" path="fsp_cfg/r_usb_hprn_cfg.h" version="0">
+        <property id="config.driver.usbx_hprn.bulk_in" display="Bulk In Pipe" default="config.driver.usbx_hprn.bulk_in.pipe4" description="Select the USB pipe to use for bulk in transfer.">
+            <option id="config.driver.usbx_hprn.bulk_in.pipe1" display="USB PIPE1" value="USB_PIPE1"/>
+            <option id="config.driver.usbx_hprn.bulk_in.pipe2" display="USB PIPE2" value="USB_PIPE2"/>
+            <option id="config.driver.usbx_hprn.bulk_in.pipe3" display="USB PIPE3" value="USB_PIPE3"/>
+            <option id="config.driver.usbx_hprn.bulk_in.pipe4" display="USB PIPE4" value="USB_PIPE4"/>
+            <option id="config.driver.usbx_hprn.bulk_in.pipe5" display="USB PIPE5" value="USB_PIPE5"/>
+        </property>
+        <property id="config.driver.usbx_hprn.bulk_out" display="Bulk Out Pipe" default="config.driver.usbx_hprn.bulk_out.pipe5" description="Select the USB pipe to use for bulk out transfer.">
+            <option id="config.driver.usbx_hprn.bulk_out.pipe1" display="USB PIPE1" value="USB_PIPE1"/>
+            <option id="config.driver.usbx_hprn.bulk_out.pipe2" display="USB PIPE2" value="USB_PIPE2"/>
+            <option id="config.driver.usbx_hprn.bulk_out.pipe3" display="USB PIPE3" value="USB_PIPE3"/>
+            <option id="config.driver.usbx_hprn.bulk_out.pipe4" display="USB PIPE4" value="USB_PIPE4"/>
+            <option id="config.driver.usbx_hprn.bulk_out.pipe5" display="USB PIPE5" value="USB_PIPE5"/>
+        </property>
+        <property id="config.driver.usbx_hprn.bulk_in2" display="Bulk In Pipe 2" default="config.driver.usbx_hprn.bulk_in2.pipe_no_use" description="Select the USB pipe to use for bulk in transfer only when using USB Hub.">
+            <option id="config.driver.usbx_hprn.bulk_in2.pipe1" display="USB PIPE1" value="USB_PIPE1"/>
+            <option id="config.driver.usbx_hprn.bulk_in2.pipe2" display="USB PIPE2" value="USB_PIPE2"/>
+            <option id="config.driver.usbx_hprn.bulk_in2.pipe3" display="USB PIPE3" value="USB_PIPE3"/>
+            <option id="config.driver.usbx_hprn.bulk_in2.pipe4" display="USB PIPE4" value="USB_PIPE4"/>
+            <option id="config.driver.usbx_hprn.bulk_in2.pipe5" display="USB PIPE5" value="USB_PIPE5"/>
+            <option id="config.driver.usbx_hprn.bulk_in2.pipe_no_use" display="NO USE" value="USB_NULL"/>
+        </property>
+        <property id="config.driver.usbx_hprn.bulk_out2" display="Bulk Out Pipe 2" default="config.driver.usbx_hprn.bulk_out2.pipe_no_use" description="Select the USB pipe to use for bulk out transfer only when using USB Hub.">
+            <option id="config.driver.usbx_hprn.bulk_out2.pipe1" display="USB PIPE1" value="USB_PIPE1"/>
+            <option id="config.driver.usbx_hprn.bulk_out2.pipe2" display="USB PIPE2" value="USB_PIPE2"/>
+            <option id="config.driver.usbx_hprn.bulk_out2.pipe3" display="USB PIPE3" value="USB_PIPE3"/>
+            <option id="config.driver.usbx_hprn.bulk_out2.pipe4" display="USB PIPE4" value="USB_PIPE4"/>
+            <option id="config.driver.usbx_hprn.bulk_out2.pipe5" display="USB PIPE5" value="USB_PIPE5"/>
+            <option id="config.driver.usbx_hprn.bulk_out2.pipe_no_use" display="NO USE" value="USB_NULL"/>
+        </property>
+        <content>
+            #ifdef __cplusplus
+            extern "C" {
+            #endif
+
+            #define USB_CFG_HPRN_BULK_IN (${config.driver.usbx_hprn.bulk_in})
+            #define USB_CFG_HPRN_BULK_OUT (${config.driver.usbx_hprn.bulk_out})
+            #define USB_CFG_HPRN_BULK_IN2 (${config.driver.usbx_hprn.bulk_in2})
+            #define USB_CFG_HPRN_BULK_OUT2 (${config.driver.usbx_hprn.bulk_out2})
+
+            #if ((USB_CFG_HPRN_BULK_IN2 != USB_NULL) &amp;&amp; (USB_CFG_HPRN_BULK_OUT2 != USB_NULL))
+                #define USB_CFG_HPRN_MULTI USB_CFG_ENABLE
+            #else
+                #define USB_CFG_HPRN_MULTI USB_CFG_DISABLE
+            #endif
+
+            #ifdef __cplusplus
+            }
+            #endif
+        </content>
+    </config>
+    <module config="config.driver.usbx_hprn" display="Connectivity|Azure RTOS USBX HPRN" id="module.driver.usbx_hprn" version="1" url="https://github.com/eclipse-threadx/rtos-docs/blob/main/rtos-docs/usbx/index.md">
+        <constraint display="Unique name required for each instance">
+            "${interface.driver.usbx_hprn.${module.driver.usbx_hprn.name}}" === "1"
+        </constraint>
+        <constraint display="Requires USB Peripheral">
+          "${interface.mcu.usb_fs.external}" === "1"
+        </constraint>
+        <constraint display="The USB pipe numbers for Bulk Input and Bulk Output must be different.">
+            !(("${config.driver.usbx_hprn.bulk_in}" === "config.driver.usbx_hprn.bulk_in.pipe1") &amp;&amp;
+            ("${config.driver.usbx_hprn.bulk_out}" === "config.driver.usbx_hprn.bulk_out.pipe1"))
+        </constraint>
+        <constraint display="The USB pipe numbers for Bulk Input and Bulk Output must be different.">
+            !(("${config.driver.usbx_hprn.bulk_in}" === "config.driver.usbx_hprn.bulk_in.pipe2") &amp;&amp;
+            ("${config.driver.usbx_hprn.bulk_out}" === "config.driver.usbx_hprn.bulk_out.pipe2"))
+        </constraint>
+        <constraint display="The USB pipe numbers for Bulk Input and Bulk Output must be different.">
+            !(("${config.driver.usbx_hprn.bulk_in}" === "config.driver.usbx_hprn.bulk_in.pipe3") &amp;&amp;
+            ("${config.driver.usbx_hprn.bulk_out}" === "config.driver.usbx_hprn.bulk_out.pipe3"))
+        </constraint>
+        <constraint display="The USB pipe numbers for Bulk Input and Bulk Output must be different.">
+            !(("${config.driver.usbx_hprn.bulk_in}" === "config.driver.usbx_hprn.bulk_in.pipe4") &amp;&amp;
+            ("${config.driver.usbx_hprn.bulk_out}" === "config.driver.usbx_hprn.bulk_out.pipe4"))
+        </constraint>
+        <constraint display="The USB pipe numbers for Bulk Input and Bulk Output must be different.">
+            !(("${config.driver.usbx_hprn.bulk_in}" === "config.driver.usbx_hprn.bulk_in.pipe5") &amp;&amp;
+            ("${config.driver.usbx_hprn.bulk_out}" === "config.driver.usbx_hprn.bulk_out.pipe5"))
+        </constraint>
+        <constraint display="The USB pipe numbers for Bulk In and Bulk Out must be different.">
+            !(("${config.driver.usbx_hprn.bulk_in2}" === "config.driver.usbx_hprn.bulk_in2.pipe1") &amp;&amp;
+            ("${config.driver.usbx_hprn.bulk_out2}" === "config.driver.usbx_hprn.bulk_out2.pipe1"))
+        </constraint>
+        <constraint display="The USB pipe numbers for Bulk In and Bulk Out must be different.">
+            !(("${config.driver.usbx_hprn.bulk_in2}" === "config.driver.usbx_hprn.bulk_in2.pipe2") &amp;&amp;
+            ("${config.driver.usbx_hprn.bulk_out2}" === "config.driver.usbx_hprn.bulk_out2.pipe2"))
+        </constraint>
+        <constraint display="The USB pipe numbers for Bulk In and Bulk Out must be different.">
+            !(("${config.driver.usbx_hprn.bulk_in2}" === "config.driver.usbx_hprn.bulk_in2.pipe3") &amp;&amp;
+            ("${config.driver.usbx_hprn.bulk_out2}" === "config.driver.usbx_hprn.bulk_out2.pipe3"))
+        </constraint>
+        <constraint display="The USB pipe numbers for Bulk In and Bulk Out must be different.">
+            !(("${config.driver.usbx_hprn.bulk_in2}" === "config.driver.usbx_hprn.bulk_in2.pipe4") &amp;&amp;
+            ("${config.driver.usbx_hprn.bulk_out2}" === "config.driver.usbx_hprn.bulk_out2.pipe4"))
+        </constraint>
+        <constraint display="The USB pipe numbers for Bulk In and Bulk Out must be different.">
+            !(("${config.driver.usbx_hprn.bulk_in2}" === "config.driver.usbx_hprn.bulk_in2.pipe5") &amp;&amp;
+            ("${config.driver.usbx_hprn.bulk_out2}" === "config.driver.usbx_hprn.bulk_out2.pipe5"))
+        </constraint>
+        <constraint display="The USB pipe numbers for Bulk In must be different.">
+            !(("${config.driver.usbx_hprn.bulk_in}" === "config.driver.usbx_hprn.bulk_in.pipe1") &amp;&amp;
+            ("${config.driver.usbx_hprn.bulk_in2}" === "config.driver.usbx_hprn.bulk_in2.pipe1"))
+        </constraint>
+        <constraint display="The USB pipe numbers for Bulk In must be different.">
+            !(("${config.driver.usbx_hprn.bulk_in}" === "config.driver.usbx_hprn.bulk_in.pipe2") &amp;&amp;
+            ("${config.driver.usbx_hprn.bulk_in2}" === "config.driver.usbx_hprn.bulk_in2.pipe2"))
+        </constraint>
+        <constraint display="The USB pipe numbers for Bulk In must be different.">
+            !(("${config.driver.usbx_hprn.bulk_in}" === "config.driver.usbx_hprn.bulk_in.pipe3") &amp;&amp;
+            ("${config.driver.usbx_hprn.bulk_in2}" === "config.driver.usbx_hprn.bulk_in2.pipe3"))
+        </constraint>
+        <constraint display="The USB pipe numbers for Bulk In must be different.">
+            !(("${config.driver.usbx_hprn.bulk_in}" === "config.driver.usbx_hprn.bulk_in.pipe4") &amp;&amp;
+            ("${config.driver.usbx_hprn.bulk_in2}" === "config.driver.usbx_hprn.bulk_in2.pipe4"))
+        </constraint>
+        <constraint display="The USB pipe numbers for Bulk In must be different.">
+            !(("${config.driver.usbx_hprn.bulk_in}" === "config.driver.usbx_hprn.bulk_in.pipe5") &amp;&amp;
+            ("${config.driver.usbx_hprn.bulk_in2}" === "config.driver.usbx_hprn.bulk_in2.pipe5"))
+        </constraint>
+        <constraint display="The USB pipe numbers for Bulk In and Bulk Out must be different.">
+            !(("${config.driver.usbx_hprn.bulk_in}" === "config.driver.usbx_hprn.bulk_in.pipe1") &amp;&amp;
+            ("${config.driver.usbx_hprn.bulk_out2}" === "config.driver.usbx_hprn.bulk_out2.pipe1"))
+        </constraint>
+        <constraint display="The USB pipe numbers for Bulk In and Bulk Out must be different.">
+            !(("${config.driver.usbx_hprn.bulk_in}" === "config.driver.usbx_hprn.bulk_in.pipe2") &amp;&amp;
+            ("${config.driver.usbx_hprn.bulk_out2}" === "config.driver.usbx_hprn.bulk_out2.pipe2"))
+        </constraint>
+        <constraint display="The USB pipe numbers for Bulk In and Bulk Out must be different.">
+            !(("${config.driver.usbx_hprn.bulk_in}" === "config.driver.usbx_hprn.bulk_in.pipe3") &amp;&amp;
+            ("${config.driver.usbx_hprn.bulk_out2}" === "config.driver.usbx_hprn.bulk_out2.pipe3"))
+        </constraint>
+        <constraint display="The USB pipe numbers for Bulk In and Bulk Out must be different.">
+            !(("${config.driver.usbx_hprn.bulk_in}" === "config.driver.usbx_hprn.bulk_in.pipe4") &amp;&amp;
+            ("${config.driver.usbx_hprn.bulk_out2}" === "config.driver.usbx_hprn.bulk_out2.pipe4"))
+        </constraint>
+        <constraint display="The USB pipe numbers for Bulk In and Bulk Out must be different.">
+            !(("${config.driver.usbx_hprn.bulk_in}" === "config.driver.usbx_hprn.bulk_in.pipe5") &amp;&amp;
+            ("${config.driver.usbx_hprn.bulk_out2}" === "config.driver.usbx_hprn.bulk_out2.pipe5"))
+        </constraint>
+        <constraint display="The USB pipe numbers for Bulk In and Bulk Out must be different.">
+            !(("${config.driver.usbx_hprn.bulk_in2}" === "config.driver.usbx_hprn.bulk_in2.pipe1") &amp;&amp;
+            ("${config.driver.usbx_hprn.bulk_out}" === "config.driver.usbx_hprn.bulk_out.pipe1"))
+        </constraint>
+        <constraint display="The USB pipe numbers for Bulk In and Bulk Out must be different.">
+            !(("${config.driver.usbx_hprn.bulk_in2}" === "config.driver.usbx_hprn.bulk_in2.pipe2") &amp;&amp;
+            ("${config.driver.usbx_hprn.bulk_out}" === "config.driver.usbx_hprn.bulk_out.pipe2"))
+        </constraint>
+        <constraint display="The USB pipe numbers for Bulk In and Bulk Out must be different.">
+            !(("${config.driver.usbx_hprn.bulk_in2}" === "config.driver.usbx_hprn.bulk_in2.pipe3") &amp;&amp;
+            ("${config.driver.usbx_hprn.bulk_out}" === "config.driver.usbx_hprn.bulk_out.pipe3"))
+        </constraint>
+        <constraint display="The USB pipe numbers for Bulk In and Bulk Out must be different.">
+            !(("${config.driver.usbx_hprn.bulk_in2}" === "config.driver.usbx_hprn.bulk_in2.pipe4") &amp;&amp;
+            ("${config.driver.usbx_hprn.bulk_out}" === "config.driver.usbx_hprn.bulk_out.pipe4"))
+        </constraint>
+        <constraint display="The USB pipe numbers for Bulk In and Bulk Out must be different.">
+            !(("${config.driver.usbx_hprn.bulk_in2}" === "config.driver.usbx_hprn.bulk_in2.pipe5") &amp;&amp;
+            ("${config.driver.usbx_hprn.bulk_out}" === "config.driver.usbx_hprn.bulk_out.pipe5"))
+        </constraint>
+        <constraint display="The USB pipe numbers for Bulk Out must be different.">
+            !(("${config.driver.usbx_hprn.bulk_out}" === "config.driver.usbx_hprn.bulk_out.pipe1") &amp;&amp;
+            ("${config.driver.usbx_hprn.bulk_out2}" === "config.driver.usbx_hprn.bulk_out2.pipe1"))
+        </constraint>
+        <constraint display="The USB pipe numbers for Bulk Out must be different.">
+            !(("${config.driver.usbx_hprn.bulk_out}" === "config.driver.usbx_hprn.bulk_out.pipe2") &amp;&amp;
+            ("${config.driver.usbx_hprn.bulk_out2}" === "config.driver.usbx_hprn.bulk_out2.pipe2"))
+        </constraint>
+        <constraint display="The USB pipe numbers for Bulk Out must be different.">
+            !(("${config.driver.usbx_hprn.bulk_out}" === "config.driver.usbx_hprn.bulk_out.pipe3") &amp;&amp;
+            ("${config.driver.usbx_hprn.bulk_out2}" === "config.driver.usbx_hprn.bulk_out2.pipe3"))
+        </constraint>
+        <constraint display="The USB pipe numbers for Bulk Out must be different.">
+            !(("${config.driver.usbx_hprn.bulk_out}" === "config.driver.usbx_hprn.bulk_out.pipe4") &amp;&amp;
+            ("${config.driver.usbx_hprn.bulk_out2}" === "config.driver.usbx_hprn.bulk_out2.pipe4"))
+        </constraint>
+        <constraint display="The USB pipe numbers for Bulk Out must be different.">
+            !(("${config.driver.usbx_hprn.bulk_out}" === "config.driver.usbx_hprn.bulk_out.pipe5") &amp;&amp;
+            ("${config.driver.usbx_hprn.bulk_out2}" === "config.driver.usbx_hprn.bulk_out2.pipe5"))
+        </constraint>
+        <constraint display="The user can not specify NO USE when using USB Hub.">
+            !(("${config.driver.usbx_hprn.bulk_in2}" === "config.driver.usbx_hprn.bulk_in2.pipe_no_use") &amp;&amp;
+            ("${config.driver.usbx_hprn.bulk_out2}" === "config.driver.usbx_hprn.bulk_out2.pipe1"))
+        </constraint>
+        <constraint display="The user can not specify NO USE when using USB Hub.">
+            !(("${config.driver.usbx_hprn.bulk_in2}" === "config.driver.usbx_hprn.bulk_in2.pipe_no_use") &amp;&amp;
+            ("${config.driver.usbx_hprn.bulk_out2}" === "config.driver.usbx_hprn.bulk_out2.pipe2"))
+        </constraint>
+        <constraint display="The user can not specify NO USE when using USB Hub.">
+            !(("${config.driver.usbx_hprn.bulk_in2}" === "config.driver.usbx_hprn.bulk_in2.pipe_no_use") &amp;&amp;
+            ("${config.driver.usbx_hprn.bulk_out2}" === "config.driver.usbx_hprn.bulk_out2.pipe3"))
+        </constraint>
+        <constraint display="The user can not specify NO USE when using USB Hub.">
+            !(("${config.driver.usbx_hprn.bulk_in2}" === "config.driver.usbx_hprn.bulk_in2.pipe_no_use") &amp;&amp;
+            ("${config.driver.usbx_hprn.bulk_out2}" === "config.driver.usbx_hprn.bulk_out2.pipe4"))
+        </constraint>
+        <constraint display="The user can not specify NO USE when using USB Hub.">
+            !(("${config.driver.usbx_hprn.bulk_in2}" === "config.driver.usbx_hprn.bulk_in2.pipe_no_use") &amp;&amp;
+            ("${config.driver.usbx_hprn.bulk_out2}" === "config.driver.usbx_hprn.bulk_out2.pipe5"))
+        </constraint>
+        <constraint display="The user can not specify NO USE when using USB Hub.">
+            !(("${config.driver.usbx_hprn.bulk_out2}" === "config.driver.usbx_hprn.bulk_out2.pipe_no_use") &amp;&amp;
+            ("${config.driver.usbx_hprn.bulk_in2}" === "config.driver.usbx_hprn.bulk_in2.pipe1"))
+        </constraint>
+        <constraint display="The user can not specify NO USE when using USB Hub.">
+            !(("${config.driver.usbx_hprn.bulk_out2}" === "config.driver.usbx_hprn.bulk_out2.pipe_no_use") &amp;&amp;
+            ("${config.driver.usbx_hprn.bulk_in2}" === "config.driver.usbx_hprn.bulk_in2.pipe2"))
+        </constraint>
+        <constraint display="The user can not specify NO USE when using USB Hub.">
+            !(("${config.driver.usbx_hprn.bulk_out2}" === "config.driver.usbx_hprn.bulk_out2.pipe_no_use") &amp;&amp;
+            ("${config.driver.usbx_hprn.bulk_in2}" === "config.driver.usbx_hprn.bulk_in2.pipe3"))
+        </constraint>
+        <constraint display="The user can not specify NO USE when using USB Hub.">
+            !(("${config.driver.usbx_hprn.bulk_out2}" === "config.driver.usbx_hprn.bulk_out2.pipe_no_use") &amp;&amp;
+            ("${config.driver.usbx_hprn.bulk_in2}" === "config.driver.usbx_hprn.bulk_in2.pipe4"))
+        </constraint>
+        <constraint display="The user can not specify NO USE when using USB Hub.">
+            !(("${config.driver.usbx_hprn.bulk_out2}" === "config.driver.usbx_hprn.bulk_out2.pipe_no_use") &amp;&amp;
+            ("${config.driver.usbx_hprn.bulk_in2}" === "config.driver.usbx_hprn.bulk_int.pipe5"))
+        </constraint>
+        <requires id="module.azure.usbx_hprn.requires.threadx" interface="interface.rtos.tx" visible="false" display="Requires ThreadX"/>
+        <requires id="module.azure.usbx_basic.requires.full_module" interface="interface.mcu.usb.pipes.0.1.2.3.4.5.6.7.8.9" visible="false" display="Requires USB Full Module" />
+        <requires id="module.driver.usbx_hprn.requires.usb_basic" interface="interface.middleware.rm_usbx_port" visible="true" display="USBX HPRN">
+            <override property="module.middleware.rm_usbx_port.usb_mode" value="module.middleware.rm_usbx_port.usb_mode.host"/>
+            <override property="module.middleware.rm_usbx_port.usb_classtype" value="module.middleware.rm_usbx_port.usb_classtype.hprn"/>
+            <override property="module.middleware.rm_usbx_port.p_usb_reg" value="NULL"/>
+        </requires>
+        <provides interface="interface.driver.usbx_hprn" />
+        <provides interface="interface.driver.usbx_hprn.${module.driver.usbx_hprn.name}" />
+        <property default="usbx_hprn" id="module.driver.usbx_hprn.usbx_hprn_interface" description=""/>
+        <property default="g_usbx_hprn${_instance}" display="Name" id="module.driver.usbx_hprn.name" description="Module name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.usbx_hprn.name}")</constraint>
+        </property>
+        <header>
+        /** Printer Driver on USB Instance. */
+        </header>
+        <includes>
+#include "ux_host_class_printer.h"
+        </includes>
+        <declarations>
+        </declarations>
+        <functions>
+        </functions>
+        <api configurable="true">
+        </api>
+    </module>
+</raModuleDescription>

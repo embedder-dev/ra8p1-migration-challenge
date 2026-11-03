@@ -1,0 +1,152 @@
+<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.driver.acmplp" path="fsp_cfg/r_acmplp_cfg.h" version="0">
+        <property default="config.driver.acmplp.param_checking_enable.bsp" display="Parameter Checking" id="config.driver.acmplp.param_checking_enable" description="If selected code for parameter checking is included in the build.">
+            <option display="Default (BSP)" id="config.driver.acmplp.param_checking_enable.bsp" value="(BSP_CFG_PARAM_CHECKING_ENABLE)"/>
+            <option display="Enabled" id="config.driver.acmplp.param_checking_enable.enabled" value="(1)"/>
+            <option display="Disabled" id="config.driver.acmplp.param_checking_enable.disabled" value="(0)"/>
+        </property>
+        <property default="config.driver.comparator.vref_select2.ivref1" display="Reference Voltage Selection for ACMPLP1 (Standard mode only)" id="config.driver.comparator.vref_select2" description="ACMPLP1 may optionally be configured to use IVREF0 as a reference input instead of IVREF1. Note that if IVREF0 is selected, ACMPLP0 and ACMPLP1 must use the same setting for IVREF.">
+            <option display="IVREF0" id="config.driver.comparator.vref_select2.ivref0" value="(1)"/>
+            <option display="IVREF1" id="config.driver.comparator.vref_select2.ivref1" value="(0)"/>
+        </property>
+        <content>
+        #ifdef __cplusplus
+        extern "C" {
+        #endif
+
+        #define ACMPLP_CFG_PARAM_CHECKING_ENABLE ${config.driver.acmplp.param_checking_enable}
+        #define ACMPLP_CFG_CH1_IVREF0_ENABLE ${config.driver.comparator.vref_select2}
+
+        #ifdef __cplusplus
+        }
+        #endif
+        </content>
+    </config>
+    <module config="config.driver.acmplp" display="Analog|${module.driver.comparator.name} Comparator, Low-Power (r_acmplp)" id="module.driver.comparator_on_acmplp" version="1" url="group___a_c_m_p_l_p.html">
+        <constraint display="Unique name required for each instance">
+            ("${interface.driver.comparator.${module.driver.comparator.name}}" === "1")
+        </constraint>
+        <constraint display="Requires ACMPLP peripheral">
+          "${interface.mcu.acmplp}" === "1"
+        </constraint>
+        <constraint display="Requires Comparator Interrupt (INT) enabled">
+            "${module.driver.comparator.p_callback}" === "NULL" || "${module.driver.comparator.ipl}" != "_disabled"
+        </constraint>
+        <constraint display="Channel not available on selected MCU">
+            "${interface.mcu.acmplp.${module.driver.comparator.channel}}" === "1"
+        </constraint>
+        <requires id="interface.driver.comparator.requires.acmplp" visible="false" interface="interface.mcu.acmplp" display="Requires ACMPLP peripheral" />
+        <provides interface="interface.driver.comparator" />
+        <provides interface="interface.driver.comparator_on_acmplp" />
+        <provides interface="interface.driver.comparator.${module.driver.comparator.name}" />
+        <provides interface="interface.driver.comparator_on_acmplp.${module.driver.comparator.channel}" />
+        <property default="g_comparator${_instance}" display="Name" id="module.driver.comparator.name" description="Module name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.comparator.name}")</constraint>
+        </property>
+        <property default="0" display="Channel" id="module.driver.comparator.channel" description="Select the hardware channel.">
+            <constraint display="Value must be a non-negative integer">testInteger("${module.driver.comparator.channel}")  &amp;&amp; ("${module.driver.comparator.channel}" &gt;= 0)</constraint>
+            <signal event="event.acmplp${module.driver.comparator.channel}.int" />
+        </property>
+        <property default="module.driver.comparator.mode.mode_normal" display="Mode" id="module.driver.comparator.mode" description="In standard mode, comparator output is high if VCMP > VREF.  In window mode, comparator output is high if VCMP is outside the range of VREF0 to VREF1.">
+            <option display="Standard" id="module.driver.comparator.mode.mode_normal" value="COMPARATOR_MODE_NORMAL"/>
+            <option display="Window" id="module.driver.comparator.mode.mode_window" value="COMPARATOR_MODE_WINDOW"/>
+        </property>
+        <property default="module.driver.comparator.trigger.trigger_both_edge" display="Trigger" id="module.driver.comparator.trigger" description="The trigger specifies when a comparator callback event should occur.  Unused if the interrupt priority is disabled or the callback is NULL.">
+            <option display="Rising" id="module.driver.comparator.trigger.trigger_rising" value="COMPARATOR_TRIGGER_RISING"/>
+            <option display="Falling" id="module.driver.comparator.trigger.trigger_falling" value="COMPARATOR_TRIGGER_FALLING"/>
+            <option display="Both Edge" id="module.driver.comparator.trigger.trigger_both_edge" value="COMPARATOR_TRIGGER_BOTH_EDGE"/>
+        </property>
+        <property default="module.driver.comparator.filter.filter_off" display="Filter" id="module.driver.comparator.filter" description="Select the PCLK divisor for the hardware digital debounce filter. Larger divisors provide a longer debounce and take longer for the output to update.">
+            <option display="No sampling (bypass)" id="module.driver.comparator.filter.filter_off" value="COMPARATOR_FILTER_OFF"/>
+            <option display="Sampling at PCLKB" id="module.driver.comparator.filter.filter_1" value="COMPARATOR_FILTER_1"/>
+            <option display="Sampling at PCLKB/8" id="module.driver.comparator.filter.filter_8" value="COMPARATOR_FILTER_8"/>
+            <option display="Sampling at PCLKB/32" id="module.driver.comparator.filter.filter_32" value="COMPARATOR_FILTER_32"/>
+        </property>
+        <property default="module.driver.comparator.invert.polarity_invert_off" display="Output Polarity" id="module.driver.comparator.invert" description="When enabled comparator output is inverted. This affects the output read from R_ACMPLP_StatusGet(), the pin output level, and the edge trigger.">
+            <option display="Not Inverted" id="module.driver.comparator.invert.polarity_invert_off" value="COMPARATOR_POLARITY_INVERT_OFF"/>
+            <option display="Inverted" id="module.driver.comparator.invert.polarity_invert_on" value="COMPARATOR_POLARITY_INVERT_ON"/>
+        </property>
+        <property default="module.driver.comparator.pin_output.pin_output_off" display="Pin Output (VCOUT)" id="module.driver.comparator.pin_output" description="Turn this on to include the output from this comparator on VCOUT.  The comparator output on VCOUT is OR'd with output from all other ACMPHS and ACMPLP comparators.">
+            <option display="Disabled" id="module.driver.comparator.pin_output.pin_output_off" value="COMPARATOR_PIN_OUTPUT_OFF"/>
+            <option display="Enabled" id="module.driver.comparator.pin_output.pin_output_on" value="COMPARATOR_PIN_OUTPUT_ON"/>
+        </property>
+        <property default="module.driver.comparator.vref_select.disable" display="Vref (Standard mode only)" id="module.driver.comparator.vref_select" description="If reference voltage selection is enabled then internal reference voltage is used as comparator input">
+            <option display="Enabled" id="module.driver.comparator.vref_select.enable" value="1"/>
+            <option display="Disabled" id="module.driver.comparator.vref_select.disable" value="0"/>
+        </property>
+        <property default="NULL" display="Callback" id="module.driver.comparator.p_callback" description="Define this function in the application. It is called when the Trigger event occurs.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.comparator.p_callback}")</constraint>
+        </property>
+        <property default="" display="Comparator Interrupt Priority" id="module.driver.comparator.ipl" description="Select the interrupt priority for the comparator interrupt.">
+            <select enum="enum.mcu.nvic.priorities.optional"/>
+            <interrupt event="event.acmplp${module.driver.comparator.channel}.int" isr="comp_lp_int_isr"/>
+        </property>
+        <property default="" display="Analog Input Voltage Source (IVCMP)" id="module.driver.comparator.ivcmp" description="Select the comparator input source. Only options for the configured channel are valid.">
+            <select enum="enum.driver.acmplp.ivcmp"/>
+        </property>
+        <property default="" display="Reference Voltage Input Source (IVREF)" id="module.driver.comparator.ivref" description="Select the comparator reference voltage source.\n\nIf channel 1 is seleected and the 'Reference Voltage Selection (ACMPLP1)' config option is set to IVREF0, select one of the Channel 0 options. In all other cases, only options for the configured channel are valid.">
+            <select enum="enum.driver.acmplp.ivref"/>
+        </property>
+        <peripheral name="ACMPLP" component="acmp0" />
+        <peripheral name="ACMPLP" component="acmplp${module.driver.comparator.channel}" />
+        <!-- only for legacy MCU's where component name and id are set as cmp0 -->
+        <peripheral name="CMP0" component="cmp0" />
+        <header>
+/** Comparator Instance. */
+extern const comparator_instance_t ${module.driver.comparator.name};
+
+/** Access the Comparator instance using these structures when calling API functions directly (::p_api is not used). */
+extern acmplp_instance_ctrl_t ${module.driver.comparator.name}_ctrl;
+extern const comparator_cfg_t ${module.driver.comparator.name}_cfg;
+
+#ifndef ${module.driver.comparator.p_callback}
+void ${module.driver.comparator.p_callback}(comparator_callback_args_t * p_args);
+#endif
+        </header>
+        <includes>
+#include &quot;r_acmplp.h&quot;
+#include &quot;r_comparator_api.h&quot;
+        </includes>
+        <declarations>
+
+r_acmplp_extended_cfg_t ${module.driver.comparator.name}_extend =
+{
+    .input_voltage       = ${module.driver.comparator.ivcmp},
+    .reference_voltage   = ${module.driver.comparator.ivref},
+};
+
+acmplp_instance_ctrl_t ${module.driver.comparator.name}_ctrl;
+const comparator_cfg_t ${module.driver.comparator.name}_cfg =
+{
+    .channel             = ${module.driver.comparator.channel},
+    .mode                = ${module.driver.comparator.mode},
+    .trigger             = ${module.driver.comparator.trigger},
+    .filter              = ${module.driver.comparator.filter},
+    .invert              = ${module.driver.comparator.invert},
+    .vref_select         = ${module.driver.comparator.vref_select},
+    .pin_output          = ${module.driver.comparator.pin_output},
+    .ipl                 = ${module.driver.comparator.ipl},
+#if defined(VECTOR_NUMBER_ACMPLP${module.driver.comparator.channel}_INT)
+    .irq                 = VECTOR_NUMBER_ACMPLP${module.driver.comparator.channel}_INT,
+#else
+    .irq                 = FSP_INVALID_VECTOR,
+#endif
+    .p_callback          = ${module.driver.comparator.p_callback},
+    .p_context           = NULL,
+    .p_extend            = &amp;${module.driver.comparator.name}_extend,
+};
+/* Instance structure to use this module. */
+const comparator_instance_t ${module.driver.comparator.name} =
+{
+    .p_ctrl        = &amp;${module.driver.comparator.name}_ctrl,
+    .p_cfg         = &amp;${module.driver.comparator.name}_cfg,
+    .p_api         = &amp;g_comparator_on_acmplp
+};
+        </declarations>
+        <api configurable="true">
+            <file>ra/fsp/inc/instances/r_acmplp.h</file>
+            <file>ra/fsp/inc/api/r_comparator_api.h</file>
+        </api>
+    </module>
+</raModuleDescription>

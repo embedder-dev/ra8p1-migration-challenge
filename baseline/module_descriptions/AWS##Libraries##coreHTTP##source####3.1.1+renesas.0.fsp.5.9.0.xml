@@ -1,0 +1,57 @@
+<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.aws.coreHttps" path="aws/core_http_config.h" version="0">
+        <property default="" description="Add a path to your custom core_http_config.h file. It can be used to override some or all of the configurations defined here, and to define additional configurations." display="Custom core_http_config.h" id="config.aws.coreHttps.custom_http_config">
+            <export>eval('' +
+'var input = "${config.aws.coreHttps.custom_http_config}";' +
+'if (input != "")' +
+'{' +
+'    input = \'#include "\' + input + \'"\';' +
+'}' +
+'    input' +
+                '')</export>
+        </property>
+        <property display="HTTP Receive Retry Timeout (ms)" id="config.aws.coreHttps.http_recv_retry_timeout" default="10" description="The maximum duration between non-empty network reads while receiving an HTTP response via the HTTPClient_Send API function.">
+            <constraint display="Must be a positive integer.">testInteger("${config.aws.coreHttps.http_recv_retry_timeout}")  &amp;&amp; ("${config.aws.coreHttps.http_recv_retry_timeout}" &gt;= 1)</constraint>
+        </property>
+        <property display="HTTP Send Retry Timeout (ms)" id="config.aws.coreHttps.http_send_retry_timeout" default="10" description="The maximum duration between non-empty network transmissions while sending an HTTP request via the HTTPClient_Send API function.">
+            <constraint display="Must be a positive integer">testInteger("${config.aws.coreHttps.http_send_retry_timeout}")  &amp;&amp; ("${config.aws.coreHttps.http_send_retry_timeout}" &gt;= 1)</constraint>
+        </property>
+        <property display="HTTP User Agent Value" id="config.aws.coreHttps.http_user_agent_value" default="my-platform-name" description="The HTTP header User-Agent value."/>
+        <content>
+${config.aws.coreHttps.custom_http_config}
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#ifndef HTTP_RECV_RETRY_TIMEOUT_MS
+#define HTTP_RECV_RETRY_TIMEOUT_MS            (${config.aws.coreHttps.http_recv_retry_timeout})
+#endif
+
+#ifndef HTTP_SEND_RETRY_TIMEOUT_MS
+#define HTTP_SEND_RETRY_TIMEOUT_MS            (${config.aws.coreHttps.http_send_retry_timeout})
+#endif
+
+#ifndef HTTP_USER_AGENT_VALUE
+#define HTTP_USER_AGENT_VALUE                 ("${config.aws.coreHttps.http_user_agent_value}")
+#endif
+
+#ifdef __cplusplus
+}
+#endif
+        </content>
+    </config>
+    <module id="module.aws.coreHttps" display="Networking|AWS Core HTTP" config="config.aws.coreHttps" common="1" visible="false" version="0" url="_f_r_e_e_r_t_o_s__m_i_g_r_a_t_i_o_n.html">
+        <constraint display="This stack is no longer supported. Please add a new AWS Core HTTP stack, migrate settings, and remove this stack."/>
+        <requires id="module.aws.coreHttps.requires.awsfreertos" interface="interface.rtos.awsfreertos" visible="false" display="Requires FreeRTOS"/>
+        <requires id="module.aws.coreHttps.requires.transport_interface" interface="interface.aws.transport_interface" display="Add Transport Interface" find="true"/>
+        <provides interface="interface.aws.coreHttps" />
+    </module>
+    <module id="module.aws.coreHttpsLib" display="Networking|AWS Core HTTP" config="config.aws.coreHttps" common="1" visible="true" version="0" url="https://docs.aws.amazon.com/freertos/latest/userguide/core-http.html">
+        <requires id="module.aws.coreHttpsLib.requires.awsfreertos" interface="interface.rtos.awsfreertos" visible="false" display="Requires FreeRTOS"/>
+        <requires id="module.aws.coreHttpsLib.requires.transport_interface" interface="interface.aws.transportInterface" display="Add Transport Interface" find="true"/>
+        <provides interface="interface.aws.coreHttps" />
+        <provides interface="interface.aws.newcoreHttps" />
+    </module>
+</raModuleDescription>

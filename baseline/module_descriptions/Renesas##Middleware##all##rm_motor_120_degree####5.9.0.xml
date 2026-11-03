@@ -1,0 +1,182 @@
+﻿<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.middleware.motor_120_degree" path="fsp_cfg/rm_motor_120_degree_cfg.h" version="0">
+        <property default="config.middleware.motor_120_degree.param_checking_enable.bsp" display="Parameter Checking" id="config.middleware.motor_120_degree.param_checking_enable" description="If selected code for parameter checking is included in the build.">
+            <option display="Default (BSP)" id="config.middleware.motor_120_degree.param_checking_enable.bsp" value="(BSP_CFG_PARAM_CHECKING_ENABLE)"/>
+            <option display="Enabled" id="config.middleware.motor_120_degree.param_checking_enable.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.motor_120_degree.param_checking_enable.disabled" value="(0)"/>
+        </property>
+
+        <content>
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#define MOTOR_120_DEGREE_CFG_PARAM_CHECKING_ENABLE   ${config.middleware.motor_120_degree.param_checking_enable}
+
+#ifdef __cplusplus
+}
+#endif
+        </content>
+    </config>
+    <module config="config.middleware.motor_120_degree" display="Motor|Motor 120 degree control (rm_motor_120_degree)" id="module.middleware.motor_120_degree" version="1" url="group___m_o_t_o_r__120___d_e_g_r_e_e.html">
+        <constraint display="Unique name required for each instance">
+            ("${interface.middleware.motor_120_degree.${module.middleware.motor_120_degree.name}}" === "1")
+        </constraint>
+        <constraint display="Requires motor 120 control module">
+            testExists("${module.middleware.motor_120_degree.requires.control::module.middleware.motor_120_control.name}")
+        </constraint>
+
+        <!-- 120 Control Module  -->
+        <requires id="module.middleware.motor_120_degree.requires.control" interface="interface.middleware.motor_120_control" find="true" display="Add motor 120 control module [Mandatory]">
+            <override property="module.middleware.motor_120_control.callback" value="rm_motor_120_degree_120_control_callback"/>
+            <override property="module.middleware.motor_120_control.context" value="${module.middleware.motor_120_degree.name}"/>
+        </requires>
+
+        <provides interface="interface.middleware.motor_120_degree" />
+        <provides interface="interface.middleware.motor_120_degree.${module.middleware.motor_120_degree.name}" />
+
+        <!-- Module Name -->
+        <property default="g_motor_120_degree${_instance}" display="General|Name" id="module.middleware.motor_120_degree.name" description="Module name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.middleware.motor_120_degree.name}")</constraint>
+        </property>
+
+        <!-- General Settings -->
+        <property default="4.0" display="General|Limit of over current (A)" id="module.middleware.motor_120_degree.f_over_current" description="Limit of over current.(Detection threshold)">
+            <constraint display="Must be a valid value">
+            eval('' +
+            'var input = "${module.middleware.motor_120_degree.f_over_current}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?$","i");' +
+            'var regex_float_with_suffix = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?F$","i");' +
+            ' ( regex_float.test(input) || regex_float_with_suffix.test(input))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${module.middleware.motor_120_degree.f_over_current}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)$","i");' +
+            'if (regex_float.test(output)){' +
+            'output = output + "F";' +
+            '}' +
+            'output')
+            </export>
+        </property>
+        <property default="28.0" display="General|Limit of over voltage (V)" id="module.middleware.motor_120_degree.f_over_voltage" description="Limit of over voltage.(Detection threshold)">
+            <constraint display="Must be a valid value">
+            eval('' +
+            'var input = "${module.middleware.motor_120_degree.f_over_voltage}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?$","i");' +
+            'var regex_float_with_suffix = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?F$","i");' +
+            ' ( regex_float.test(input) || regex_float_with_suffix.test(input))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${module.middleware.motor_120_degree.f_over_voltage}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)$","i");' +
+            'if (regex_float.test(output)){' +
+            'output = output + "F";' +
+            '}' +
+            'output')
+            </export>
+        </property>
+        <property default="3000.0" display="General|Limit of over speed (rpm)" id="module.middleware.motor_120_degree.f_over_speed" description="Limit of over speed.(Detection threshold)">
+            <constraint display="Must be a valid value">
+            eval('' +
+            'var input = "${module.middleware.motor_120_degree.f_over_speed}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?$","i");' +
+            'var regex_float_with_suffix = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?F$","i");' +
+            ' ( regex_float.test(input) || regex_float_with_suffix.test(input))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${module.middleware.motor_120_degree.f_over_speed}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)$","i");' +
+            'if (regex_float.test(output)){' +
+            'output = output + "F";' +
+            '}' +
+            'output')
+            </export>
+        </property>
+        <property default="14.0" display="General|Limit of low voltage (V)" id="module.middleware.motor_120_degree.f_low_voltage" description="Limit of low voltage.(Detection threshold)">
+            <constraint display="Must be a valid value">
+            eval('' +
+            'var input = "${module.middleware.motor_120_degree.f_low_voltage}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?$","i");' +
+            'var regex_float_with_suffix = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?F$","i");' +
+            ' ( regex_float.test(input) || regex_float_with_suffix.test(input))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${module.middleware.motor_120_degree.f_low_voltage}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)$","i");' +
+            'if (regex_float.test(output)){' +
+            'output = output + "F";' +
+            '}' +
+            'output')
+            </export>
+        </property>
+
+        <!-- Motor Callback Settings -->
+        <property default="NULL" display="Interrupts|Callback" id="module.middleware.motor_120_degree.callback" description="A user callback function.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.middleware.motor_120_degree.callback}")</constraint>
+        </property>
+        <property default="NULL" id="module.middleware.motor_120_degree.context">
+            <export>eval('' +
+            'var string = "${module.middleware.motor_120_degree.context}";' +
+            'if ("NULL" !== string){' +
+            'string = "&amp;" + string  ;' +
+            '}' +
+            'String(string)')
+            </export>
+        </property>
+
+        <!-- Contents -->
+        <header>
+/** Motor 120 degree instance. */
+extern const motor_instance_t ${module.middleware.motor_120_degree.name};
+
+/** Access the Motor 120 degree instance using these structures
+ ** when calling API functions directly (::p_api is not used). */
+extern motor_120_degree_instance_ctrl_t ${module.middleware.motor_120_degree.name}_ctrl;
+extern const motor_cfg_t ${module.middleware.motor_120_degree.name}_cfg;
+
+#ifndef ${module.middleware.motor_120_degree.callback}
+void ${module.middleware.motor_120_degree.callback}(motor_callback_args_t * p_args);
+#endif
+        </header>
+
+        <includes>
+#include &quot;rm_motor_120_degree.h&quot;
+        </includes>
+
+        <declarations>
+
+/* Motor 120 degree configuration */
+motor_120_degree_instance_ctrl_t ${module.middleware.motor_120_degree.name}_ctrl;
+
+const motor_120_degree_extended_cfg_t ${module.middleware.motor_120_degree.name}_extend =
+{
+  .p_motor_120_control_instance = &amp;${module.middleware.motor_120_degree.requires.control::module.middleware.motor_120_control.name},
+  .f_overcurrent_limit = ${module.middleware.motor_120_degree.f_over_current} * 1.414213562F * 1.5F,
+  .f_overvoltage_limit = ${module.middleware.motor_120_degree.f_over_voltage},
+  .f_overspeed_limit = ${module.middleware.motor_120_degree.f_over_speed},
+  .f_lowvoltage_limit = ${module.middleware.motor_120_degree.f_low_voltage},
+};
+
+const motor_cfg_t ${module.middleware.motor_120_degree.name}_cfg =
+{
+  .p_callback = ${module.middleware.motor_120_degree.callback},
+  .p_context = ${module.middleware.motor_120_degree.context},
+  .p_extend = &amp;${module.middleware.motor_120_degree.name}_extend,
+};
+
+/* Instance structure to use Motor 120 Degree module. */
+const motor_instance_t ${module.middleware.motor_120_degree.name} =
+{
+  .p_ctrl = &amp;${module.middleware.motor_120_degree.name}_ctrl,
+  .p_cfg  = &amp;${module.middleware.motor_120_degree.name}_cfg,
+  .p_api  = &amp;g_motor_on_motor_120_degree,
+};
+        </declarations>
+    </module>
+</raModuleDescription>
+

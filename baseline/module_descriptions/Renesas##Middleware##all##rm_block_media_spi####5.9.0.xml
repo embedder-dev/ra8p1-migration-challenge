@@ -1,0 +1,132 @@
+﻿<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.driver.rm_block_media_spi" path="driver/rm_block_media_spi_cfg.h" version="0">
+        <property id="config.driver.rm_block_media_spi.param_checking_enable" default="config.driver.rm_block_media_spi.param_checking_enable.bsp" display="Parameter Checking" description="If selected, code for parameter checking is included in the build">
+            <option display="Default (BSP)" id="config.driver.rm_block_media_spi.param_checking_enable.bsp" value="(BSP_CFG_PARAM_CHECKING_ENABLE)"/>
+            <option display="Enabled" id="config.driver.rm_block_media_spi.param_checking_enable.enabled" value="(1)"/>
+            <option display="Disabled" id="config.driver.rm_block_media_spi.param_checking_enable.disabled" value="(0)"/>
+        </property>
+        <content>
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#define RM_BLOCK_MEDIA_SPI_CFG_PARAM_CHECKING_ENABLE ${config.driver.rm_block_media_spi.param_checking_enable}
+
+#ifdef __cplusplus
+}
+#endif
+        </content>
+    </config>
+    <module id="module.driver.rm_block_media_on_rm_block_media_spi" config="config.driver.rm_block_media_spi" display="Storage|${module.driver.rm_block_media.name} Block Media SPI Flash (rm_block_media_spi)" version="1" url="group___r_m___b_l_o_c_k___m_e_d_i_a___s_p_i.html">
+        <constraint display="Unique name required for each instance">
+            "${interface.driver.rm_block_media.${module.driver.rm_block_media.name}}" === "1"
+        </constraint>
+        <constraint display="Requires Lower Layer SPI driver">
+            (testExists("${module.driver.rm_block_media.requires.spi::module.driver.qspi.name}") ||
+             testExists("${module.driver.rm_block_media.requires.spi::module.driver.ospi.name}") ||
+             testExists("${module.driver.rm_block_media.requires.spi::module.driver.ospi_b.name}"))
+        </constraint>
+        <!-- Block size property constraint references lower level driver configuraiton, which requries it to be a 'general' constraint. -->
+        <constraint display="Minimum block size is 4096. Value must be equal to sector or block size, and a multiple of page size, defined by the lower level SPI driver.">
+            (testInteger("${module.driver.rm_block_media.block_size}")  &amp;&amp; ("${module.driver.rm_block_media.block_size}" &gt;= 4096) &amp;&amp;
+            (testInteger("${module.driver.rm_block_media.block_size}" /  "${module.driver.rm_block_media.requires.spi::module.driver.qspi.page_size_bytes}") ||
+             testInteger("${module.driver.rm_block_media.block_size}" /  "${module.driver.rm_block_media.requires.spi::module.driver.ospi.page_size_bytes}") ||
+             testInteger("${module.driver.rm_block_media.block_size}" /  "${module.driver.rm_block_media.requires.spi::module.driver.ospi_b.page_size_bytes}")) &amp;&amp;
+                       (("${module.driver.rm_block_media.block_size}" == "${module.driver.rm_block_media.requires.spi::module.driver.qspi.sector_erase_size}") ||
+                        ("${module.driver.rm_block_media.block_size}" == "${module.driver.rm_block_media.requires.spi::module.driver.qspi.block_erase_32kb_size}") ||
+                        ("${module.driver.rm_block_media.block_size}" == "${module.driver.rm_block_media.requires.spi::module.driver.ospi.sector_erase_size}") ||
+                        ("${module.driver.rm_block_media.block_size}" == "${module.driver.rm_block_media.requires.spi::module.driver.ospi.block_erase_size}") ||
+                        ("${module.driver.rm_block_media.block_size}" == "${module.driver.rm_block_media.requires.spi::module.driver.ospi_b.sector_erase_size}") ||
+                        ("${module.driver.rm_block_media.block_size}" == "${module.driver.rm_block_media.requires.spi::module.driver.ospi_b.block_erase_size}")))
+        </constraint>
+        <constraint display="Must be multiple of block_size. Minimum base address is 0, maximum is block_size * (block_count-1).">
+            (testInteger("${module.driver.rm_block_media.base_address}")  &amp;&amp;
+                        ("${module.driver.rm_block_media.base_address}" &gt;= 0) &amp;&amp;
+                        ("${module.driver.rm_block_media.base_address}" &lt;= ("${module.driver.rm_block_media.block_size}" * ("${module.driver.rm_block_media.block_count}"-1))) &amp;&amp;
+           ((testInteger("${module.driver.rm_block_media.base_address}" /  "${module.driver.rm_block_media.block_size}")) ||
+            (testInteger("${module.driver.rm_block_media.base_address}" /  "${module.driver.rm_block_media.block_size}"))))
+        </constraint>
+        <constraint display="Addressing more than one QSPI memory bank (64MB) is not currently supported by the Block Media SPI driver.">
+            (!testExists("${module.driver.rm_block_media.requires.spi::module.driver.qspi.name}") ||
+                         (${module.driver.rm_block_media.block_size} * ${module.driver.rm_block_media.block_count} &lt;= (64 * 1024 * 1024)))
+        </constraint>
+        <constraint display="Due to hardware limitations 64 bytes is the maximum allowed page write size for OSPI_B. Change page size to be equal to Combination Function setting and a factor of the OSPI flash device's page size.">
+            (!testExists("${module.driver.rm_block_media.requires.spi::module.driver.ospi_b.name}") ||
+                         ("${module.driver.rm_block_media.requires.spi::module.driver.ospi_b.page_size_bytes}" &lt;= 64))
+        </constraint>
+        <requires id="module.driver.rm_block_media.requires.spi" interface="interface.driver.spi_flash" display="Add SPI Flash Memory Driver [Required]" />
+        <provides interface="interface.driver.rm_block_media" />
+        <provides interface="interface.driver.rm_block_media_spi_on_rm_block_media" />
+        <provides interface="interface.driver.rm_block_media_pmsc" />
+        <provides interface="interface.driver.rm_block_media.${module.driver.rm_block_media.name}" />
+        <provides interface="interface.driver.rm_block_media_no_usb" />
+
+        <property id="module.driver.rm_block_media.name" display="Module Instance Name" default="g_rm_block_media${_instance}" description="Module name">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.rm_block_media.name}")</constraint>
+        </property>
+        <property id="module.driver.rm_block_media.block_size" display="Block size (bytes)" default="4096" description="Specify the size of a block in bytes.">
+        </property>
+        <property id="module.driver.rm_block_media.block_count" display="Block count" default="8192" description="Number of blocks available for use by this driver instance.">
+            <constraint display="Minimum block count is 1, maximum is defined by hardware and software design.">
+                    (testInteger("${module.driver.rm_block_media.block_count}")  &amp;&amp; ("${module.driver.rm_block_media.block_count}" &gt; 0))
+            </constraint>
+        </property>
+        <property id="module.driver.rm_block_media.base_address" display="Base Address" default="0" description="Base address offset (bytes) for instance memory region.">
+        </property>
+        <property id="module.driver.rm_block_media.callback" default="NULL" display="Callback Function" description="A user callback function can be provided. If this callback is provided, it will be called after the completion of Read, Write, and Erase operations, or anytime these functions are waiting on hardware.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.rm_block_media.callback}")</constraint>
+        </property>
+        <property default="NULL" id="module.driver.rm_block_media.p_context" />
+        <header>
+            /* Block Media on SPI Instance */
+            extern rm_block_media_instance_t ${module.driver.rm_block_media.name};
+
+            /* Access the Block Media SPI instance using these structures when calling API functions directly (::p_api is not used). */
+            extern rm_block_media_spi_instance_ctrl_t ${module.driver.rm_block_media.name}_ctrl;
+            extern const rm_block_media_cfg_t ${module.driver.rm_block_media.name}_cfg;
+
+            #ifndef ${module.driver.rm_block_media.callback}
+            void ${module.driver.rm_block_media.callback}(rm_block_media_callback_args_t * p_args);
+            #endif
+        </header>
+        <includes>
+            #include &quot;rm_block_media_spi.h&quot;
+        </includes>
+        <declarations>
+            rm_block_media_spi_instance_ctrl_t ${module.driver.rm_block_media.name}_ctrl;
+
+            #define RA_NOT_DEFINED 0xFFFFFFFF
+            static const rm_block_media_spi_extended_cfg_t ${module.driver.rm_block_media.name}_extended_cfg =
+            {
+            #if (RA_NOT_DEFINED != ${module.driver.rm_block_media.requires.spi::module.driver.qspi.name})
+                .p_spi             = &amp;${module.driver.rm_block_media.requires.spi::module.driver.qspi.name},
+                .base_address      = BSP_FEATURE_QSPI_DEVICE_START_ADDRESS + ${module.driver.rm_block_media.base_address},
+            #elif (RA_NOT_DEFINED != ${module.driver.rm_block_media.requires.spi::module.driver.ospi.name})
+                .p_spi             = &amp;${module.driver.rm_block_media.requires.spi::module.driver.ospi.name},
+                .base_address      = BSP_FEATURE_OSPI_DEVICE_${module.driver.rm_block_media.requires.spi::module.driver.ospi.channel}_START_ADDRESS + ${module.driver.rm_block_media.base_address},
+            #else
+                .p_spi             = &amp;${module.driver.rm_block_media.requires.spi::module.driver.ospi_b.name},
+                .base_address      = BSP_FEATURE_OSPI_B_DEVICE_${module.driver.rm_block_media.requires.spi::module.driver.ospi_b.channel}_START_ADDRESS + ${module.driver.rm_block_media.base_address},
+            #endif
+                .block_count_total = ${module.driver.rm_block_media.block_count},
+                .block_size_bytes  = ${module.driver.rm_block_media.block_size},
+            };
+            #undef RA_NOT_DEFINED
+
+            const rm_block_media_cfg_t ${module.driver.rm_block_media.name}_cfg =
+            {
+                .p_callback        = ${module.driver.rm_block_media.callback},
+                .p_context         = ${module.driver.rm_block_media.p_context},
+                .p_extend          = &amp;${module.driver.rm_block_media.name}_extended_cfg
+            };
+            rm_block_media_instance_t ${module.driver.rm_block_media.name} =
+            {
+                .p_ctrl = &amp;${module.driver.rm_block_media.name}_ctrl,
+
+                .p_cfg =  &amp;${module.driver.rm_block_media.name}_cfg,
+                .p_api =  &amp;g_rm_block_media_on_spi
+            };
+        </declarations>
+    </module>
+</raModuleDescription>

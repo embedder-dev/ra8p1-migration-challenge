@@ -1,0 +1,30 @@
+﻿<?xml version="1.0" ?>
+<raModuleDescription>
+    <module id="module.driver.freertos_plus_tcp_on_ether" display="Networking|FreeRTOS+TCP Wrapper to r_ether (rm_freertos_plus_tcp)" config="config.driver.freertos_plus_tcp_on_ether" common="1" version="0" visible="false" url="group___f_r_e_e_r_t_o_s___p_l_u_s___t_c_p.html">
+        <constraint display="Set the 'Interrupt event backward compatibility' property in the Ether driver configuration to 'Do not keep compatibility'.">
+           ("${config.driver.ether.interrupt_event_backword_compatibility}" != "config.driver.ether.interrupt_event_backword_compatibility.enabled")||
+           (!(testExists("${module.driver.freertos_plus_tcp_on_ether.requires.ether::module.driver.ether.channel}")))
+        </constraint>
+        <constraint display="A heap is required to use rand and srand. Please add a heap under BSP|RA Common|Heap Size\n\nA minimum of 4K (0x1000) is recommended if standard library functions are to be used.">
+            ("${config.bsp.common.heap}" &gt; 0)
+        </constraint>
+        <requires id="module.driver.freertos_plus_tcp_on_ether.requires.ether" interface="interface.driver.ether" display="Add Ethernet Driver">
+            <override property="module.driver.ether.p_callback" value="vEtherISRCallback"/>
+            <override property="module.driver.ether.zerocopy" value="ETHER_ZEROCOPY_DISABLE"/>
+            <!-- FIX ME ethernetdriver override property -->
+        </requires>
+        <requires id="module.driver.freertos_plus_tcp_on_ether.requires.bufferallocation2" interface="interface.freertos.bufferallocation2" display="Add Buffer Allocation"/>
+        <requires id="module.driver.freertos_plus_tcp_on_ether.requires.awsfreertos" interface="interface.rtos.awsfreertos" visible="false" display="Requires FreeRTOS"/>
+        <provides interface="interface.driver.freertos_plus_tcp_on_ether" />
+        <header>
+extern ether_instance_t const * gp_freertos_ether;
+        </header>
+        <includes>
+#include "FreeRTOSIPConfig.h"
+        </includes>
+        <declarations>
+ether_instance_t const * gp_freertos_ether = &amp;${module.driver.freertos_plus_tcp_on_ether.requires.ether::module.driver.ether.name};
+        </declarations>
+
+    </module>
+</raModuleDescription>

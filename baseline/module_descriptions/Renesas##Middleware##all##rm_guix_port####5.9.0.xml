@@ -1,0 +1,246 @@
+﻿<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.middleware.rm_guix_port" path="fsp_cfg/middleware/rm_guix_port_cfg.h" version="0">
+        <property default="config.middleware.rm_guix_port.dave2d_buffer_cache.enable" display="DRW Buffer Cache" id="config.middleware.rm_guix_port.dave2d_buffer_cache" description="Enabling this option significantly improves DRW Engine performance. Set to Disabled only if Display underflow events are triggered under high graphics load.">
+            <option display="Enabled" id="config.middleware.rm_guix_port.dave2d_buffer_cache.enable" value="true"/>
+            <option display="Disabled" id="config.middleware.rm_guix_port.dave2d_buffer_cache.disable" value="false"/>
+        </property>
+        <content>
+            #ifdef __cplusplus
+            extern "C" {
+            #endif
+
+            #define RM_GUIX_PORT_CFG_DRW_BURST_WRITE_ENABLE ${config.middleware.rm_guix_port.dave2d_buffer_cache}
+
+            #ifdef __cplusplus
+            }
+            #endif
+        </content>
+    </config>
+    <module config="config.middleware.rm_guix_port" display="Graphics|Azure RTOS GUIX Port (rm_guix_port)" id="module.middleware.rm_guix_port" common="1" version="1" visible="false" url="group___r_m___g_u_i_x___p_o_r_t.html">
+        <constraint display="Module instances must have unique names">
+            "${interface.middleware.rm_guix_port.${module.middleware.rm_guix_port.name}}" === "1"
+        </constraint>
+        <constraint display="GUIX requires a Display driver.">
+            testExists("${module.middleware.rm_guix_port.requires.display::module.driver.display.name}")
+        </constraint>
+        <constraint display="A JPEG driver is required when JPEG Codec Support is enabled.">
+           ("${config.azure.gx.use_jpeg}" == "config.azure.gx.use_jpeg.disable") || (("${config.azure.gx.use_jpeg}" == "config.azure.gx.use_jpeg.enable") &amp;&amp; (testExists("${module.middleware.rm_guix_port.requires.jpeg::module.driver.jpeg.name}")))
+        </constraint>
+        <constraint display="A DRW Engine driver is required when DRW Engine Support is enabled.">
+           ("${config.azure.gx.use_drw}" == "config.azure.gx.use_drw.disable") || (("${config.azure.gx.use_drw}" == "config.azure.gx.use_drw.enable") &amp;&amp; (testExists("${module.middleware.rm_guix_port.requires.dave2d_port::module.driver.drw.handle_name}")))
+        </constraint>
+        <constraint display="Vertical sync (GLCDC Line Detect) interrupt must be enabled.">
+          !("${module.middleware.rm_guix_port.requires.display::module.driver.display.line_detect_ipl}" == "_disabled")
+        </constraint>
+        <constraint display="The JPEG output pixel format must match the Display input format.">
+            ((!testExists("${module.middleware.rm_guix_port.requires.jpeg::module.driver.jpeg.name}")) || (("${module.middleware.rm_guix_port.display_cfg_inheritance}" == "module.middleware.rm_guix_port.display_cfg_inheritance.layer1") &amp;&amp;
+            ((("${module.middleware.rm_guix_port.requires.display::module.driver.display.input0.format}" == "module.driver.display.input0.format.in_format_16bits_rgb565") &amp;&amp; ("${module.middleware.rm_guix_port.requires.jpeg::module.driver.jpeg.decode.pixel_format}" == "module.driver.jpeg.decode.pixel_format.rgb565")) || ((("${module.middleware.rm_guix_port.requires.display::module.driver.display.input0.format}" == "module.driver.display.input0.format.in_format_32bits_argb8888") || ("${module.middleware.rm_guix_port.requires.display::module.driver.display.input0.format}" == "module.driver.display.input0.format.in_format_32bits_rgb888")) &amp;&amp; ("${module.middleware.rm_guix_port.requires.jpeg::module.driver.jpeg.decode.pixel_format}" == "module.driver.jpeg.decode.pixel_format.argb8888")))) ||
+            (("${module.middleware.rm_guix_port.display_cfg_inheritance}" == "module.middleware.rm_guix_port.display_cfg_inheritance.layer2") &amp;&amp; ((("${module.middleware.rm_guix_port.requires.display::module.driver.display.input1.format}" == "module.driver.display.input1.format.in_format_16bits_rgb565") &amp;&amp; ("${module.middleware.rm_guix_port.requires.jpeg::module.driver.jpeg.decode.pixel_format}" == "module.driver.jpeg.decode.pixel_format.rgb565")) || ((("${module.middleware.rm_guix_port.requires.display::module.driver.display.input1.format}" == "module.driver.display.input1.format.in_format_32bits_argb8888") || ("${module.middleware.rm_guix_port.requires.display::module.driver.display.input1.format}" == "module.driver.display.input1.format.in_format_32bits_rgb888")) &amp;&amp; ("${module.middleware.rm_guix_port.requires.jpeg::module.driver.jpeg.decode.pixel_format}" == "module.driver.jpeg.decode.pixel_format.argb8888")))))
+        </constraint>
+        <constraint display="The GUIX Canvas Buffer must be used when Screen Orientation is set to FLIP (180 degrees).">
+            (("${module.middleware.rm_guix_port.rotation_angle}" != "module.middleware.rm_guix_port.rotation_angle.angle180") || ("${module.middleware.rm_guix_port.p_canvas.used}" == "module.middleware.rm_guix_port.p_canvas.used.true"))
+        </constraint>
+        <requires interface="_rtos" />
+        <requires id="module.middleware.rm_guix_port.requires.display" interface="interface.driver.display" display="Add Display Driver">
+            <override property="module.driver.display.callback" value= "_rm_guix_port_display_callback"/>
+        </requires>
+        <requires id="module.middleware.rm_guix_port.requires.jpeg" interface="interface.driver.jpeg" display="Add JPEG Codec Driver [Recommended but optional]" optional="true" >
+            <override property="module.driver.jpeg.decode.p_callback" value= "_gx_renesas_jpeg_callback"/>
+        </requires>
+        <requires id="module.middleware.rm_guix_port.requires.dave2d_port" interface="interface.driver.dave2d_port" display="Add DRW Engine Driver" />
+        <provides interface="interface.middleware.rm_guix_port" />
+        <provides interface="interface.middleware.rm_guix_port_on_rm_guix_port" />
+        <provides interface="interface.middleware.rm_guix_port.${module.middleware.rm_guix_port.name}" />
+        <property id="module.middleware.rm_guix_port.name" display="Name" default="g_rm_guix_port${_instance}" description="Module name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.middleware.rm_guix_port.name}")</constraint>
+        </property>
+        <property id="module.middleware.rm_guix_port.display_cfg_inheritance" display="Target Display Layer" default="module.middleware.rm_guix_port.display_cfg_inheritance.layer1" description="Specify which graphics screen to inherit the buffer and display dimensions from.">
+            <option display="Graphics Layer 1" id="module.middleware.rm_guix_port.display_cfg_inheritance.layer1" value="1"/>
+            <option display="Graphics Layer 2" id="module.middleware.rm_guix_port.display_cfg_inheritance.layer2" value="2"/>
+        </property>
+        <property id="module.middleware.rm_guix_port.p_callback" display="Callback Function" default="NULL" description="If a callback function is provided it will be called when Display events occur.">
+            <constraint display="Must be a valid C symbol">testSymbol("${module.middleware.rm_guix_port.p_callback}")</constraint>
+        </property>
+        <property id="module.middleware.rm_guix_port.rotation_angle" display="Display Rotation|Screen Orientation" default="module.middleware.rm_guix_port.rotation_angle.angle0" description="Select the display orientation specified in the GUIX Studio project. The Canvas Buffer must be enabled when rotating 180 degrees (FLIP).">
+            <option display="None" id="module.middleware.rm_guix_port.rotation_angle.angle0" value="GX_SCREEN_ROTATION_NONE"/>
+            <option display="CW (90 degrees)" id="module.middleware.rm_guix_port.rotation_angle.angle90" value="GX_SCREEN_ROTATION_CW"/>
+            <option display="FLIP (180 degrees)" id="module.middleware.rm_guix_port.rotation_angle.angle180" value="GX_SCREEN_ROTATION_FLIP"/>
+            <option display="CCW (270 degrees)" id="module.middleware.rm_guix_port.rotation_angle.angle270" value="GX_SCREEN_ROTATION_CCW"/>
+        </property>
+        <property default="module.middleware.rm_guix_port.p_canvas.used.false" display="Display Rotation|Use Canvas Buffer" id="module.middleware.rm_guix_port.p_canvas.used" description="When screen rotation is set to 180 degrees (FLIP), a canvas buffer must be used. The canvas buffer size will be the same as a frame buffer for the display module.">
+            <option display="Enabled" id="module.middleware.rm_guix_port.p_canvas.used.true" value="true"/>
+            <option display="Disabled" id="module.middleware.rm_guix_port.p_canvas.used.false" value="false"/>
+        </property>
+        <property id="module.middleware.rm_guix_port.canvas_section" display="Display Rotation|Canvas Buffer Memory Section" default="bss" description="Specify the memory section where the GUIX Canvas Buffer will be allocated.">
+            <constraint display="This property must be a valid section name">
+                testSymbol("${module.middleware.rm_guix_port.canvas_section}")
+            </constraint>
+        </property>
+        <property id="module.middleware.rm_guix_port.jpegbuffer_size" display="JPEG Decoding|Work Buffer Size" default="0xC800" description="Specify the JPEG work buffer size in bytes. A larger buffer can reduce JPEG decode/draw times. The buffer will not be allocated if JPEG Codec support is disabled.\n\nUnless you are sure of the subsampling used in and the size of the input JPEG images it is recommended to allocate at least 16 framebuffer lines of memory.">
+            <constraint display="Must be a positive integer greater than 0">testInteger("${module.middleware.rm_guix_port.jpegbuffer_size}") &amp;&amp; ("${module.middleware.rm_guix_port.jpegbuffer_size}" &gt; 0) </constraint>
+        </property>
+        <property id="module.middleware.rm_guix_port.jpegWB_section" display="JPEG Decoding|Buffer Memory Section" default="bss" description="Specify the memory section where the JPEG Work Buffer will be allocated.">
+            <constraint display="This property must be a valid section name">
+                testSymbol("${module.middleware.rm_guix_port.jpegWB_section}")
+            </constraint>
+        </property>
+        <header>
+            #ifndef ${module.middleware.rm_guix_port.p_callback}
+            extern void ${module.middleware.rm_guix_port.p_callback}(rm_guix_port_callback_args_t * p_arg);
+            #endif
+
+            /* Initial canvas pointer to be set via gx_canvas_memory_define */
+            extern GX_COLOR * rm_guix_port_canvas;
+            /* Display and JPEG Codec callback prototypes for GUIX */
+            extern void _rm_guix_port_display_callback(display_callback_args_t * p_args);
+            #if GX_USE_RENESAS_JPEG
+            extern void _gx_renesas_jpeg_callback (jpeg_callback_args_t * p_args);
+            #endif
+        </header>
+        <includes>
+            #include &quot;rm_guix_port.h&quot;
+        </includes>
+        <declarations>
+            #if (${module.middleware.rm_guix_port.p_canvas.used})
+             #define GUIX_CANVAS (${module.middleware.rm_guix_port.name}_canvas)
+            #else
+             #define GUIX_CANVAS (NULL)
+            #endif
+
+            /* Display Driver Frame Buffer A Configuration */
+            #if (${module.middleware.rm_guix_port.display_cfg_inheritance} == 1) /* Inherit Frame Buffer Name from Graphics Screen 1 */
+              #define GUIX_FRAMEBUFFER_A (&amp;${module.middleware.rm_guix_port.requires.display::module.driver.display.input0.buffer_name}[0]) /* Always array[0] is used */
+            #else /* Inherit Frame Buffer Name from Graphics Screen 2 */
+             #define GUIX_FRAMEBUFFER_A (&amp;${module.middleware.rm_guix_port.requires.display::module.driver.display.input1.buffer_name}[0]) /* Always array[0] is used */
+            #endif
+
+            /* Display Driver Frame Buffer B Configuration */
+            #if (${module.middleware.rm_guix_port.display_cfg_inheritance} == 1) /* Inherit Frame Buffer Name from Graphics Screen 1 */
+             #if (${module.middleware.rm_guix_port.requires.display::module.driver.display.input0.buffer_number} &gt; 1) /* Multiple frame buffers are used for Graphics Screen 1 */
+              #define GUIX_FRAMEBUFFER_B (&amp;${module.middleware.rm_guix_port.requires.display::module.driver.display.input0.buffer_name}[1]) /* Always array[1] is used */
+             #else /* Single Frame Buffer is used for Graphics Screen 1 */
+              #define GUIX_FRAMEBUFFER_B (NULL)
+             #endif
+            #else /* Inherit Frame Buffer Name from Graphics Screen 2 */
+             #if (${module.middleware.rm_guix_port.requires.display::module.driver.display.input1.buffer_number} &gt; 1) /* Multiple frame buffers are used for Graphics Screen 2 */
+              #define GUIX_FRAMEBUFFER_B (&amp;${module.middleware.rm_guix_port.requires.display::module.driver.display.input1.buffer_name}[1]) /* Always array[1] is used */
+             #else /* Single Frame Buffer is used for Graphics Screen 2 */
+              #define GUIX_FRAMEBUFFER_B (NULL)
+             #endif
+            #endif
+
+            /* GUIX Canvas Buffer */
+            #if ${module.middleware.rm_guix_port.p_canvas.used}
+              #if (${module.middleware.rm_guix_port.display_cfg_inheritance} == 1) /* Inherit buffer size from Graphics Screen 1 */
+                uint8_t ${module.middleware.rm_guix_port.name}_canvas[sizeof(${module.middleware.rm_guix_port.requires.display::module.driver.display.input0.buffer_name}[0])] BSP_ALIGN_VARIABLE(4) BSP_PLACE_IN_SECTION(&quot;.${module.middleware.rm_guix_port.canvas_section}&quot;);
+              #else /* Inherit buffer size from Graphics Screen 2 */
+                uint8_t ${module.middleware.rm_guix_port.name}_canvas[sizeof(${module.middleware.rm_guix_port.requires.display::module.driver.display.input1.buffer_name}[0])] BSP_ALIGN_VARIABLE(4) BSP_PLACE_IN_SECTION(&quot;.${module.middleware.rm_guix_port.canvas_section}&quot;);
+              #endif
+            #endif
+
+            /* JPEG Work Buffer */
+            #if (GX_USE_RENESAS_JPEG) &amp;&amp; (${module.middleware.rm_guix_port.jpegbuffer_size})
+                uint8_t ${module.middleware.rm_guix_port.name}_jpegbuffer[${module.middleware.rm_guix_port.jpegbuffer_size}] BSP_ALIGN_VARIABLE(64) BSP_PLACE_IN_SECTION(&quot;.${module.middleware.rm_guix_port.jpegWB_section}&quot;);
+            #endif
+
+            /** GUIX Port module control block instance */
+            rm_guix_port_instance_ctrl_t _g_guix_port_ctrl;
+
+            /** GUIX Port module configuration */
+            const rm_guix_port_cfg_t  _g_guix_port_cfg =
+            {
+                /* Display Instance Configuration */
+                .p_display_instance    = (display_instance_t *)&amp;${module.middleware.rm_guix_port.requires.display::module.driver.display.name},
+
+                /* GUIX Canvas Configuration */
+                .p_canvas        = GUIX_CANVAS,
+
+                /* Display Driver Frame Buffer A Configuration */
+                .p_framebuffer_a = GUIX_FRAMEBUFFER_A,
+                .p_framebuffer_b = GUIX_FRAMEBUFFER_B,
+            #if (${module.middleware.rm_guix_port.display_cfg_inheritance} == 1) /* Inherit Frame Buffer Name from Graphics Screen 1 */
+	            .inherit_frame_layer = DISPLAY_FRAME_LAYER_1,
+            #else /* Inherit Frame Buffer Name from Graphics Screen 2 */
+	            .inherit_frame_layer = DISPLAY_FRAME_LAYER_2,
+            #endif
+
+
+
+                /* User Callback Configuration */
+                .p_callback      = ${module.middleware.rm_guix_port.p_callback},
+
+                /* JPEG Work Buffer Configuration */
+            #if GX_USE_RENESAS_JPEG
+                .p_jpegbuffer    = ${module.middleware.rm_guix_port.name}_jpegbuffer,
+                .jpegbuffer_size = ${module.middleware.rm_guix_port.jpegbuffer_size},
+                .p_jpeg_instance = (void *)&amp;${module.middleware.rm_guix_port.requires.jpeg::module.driver.jpeg.name},
+            #else
+                .p_jpegbuffer    = NULL,
+                .jpegbuffer_size = 0,
+                .p_jpeg_instance = NULL,
+            #endif
+
+                /* Screen Rotation Angle Configuration */
+                .rotation_angle  = ${module.middleware.rm_guix_port.rotation_angle},
+            };
+
+            #if ${module.middleware.rm_guix_port.p_canvas.used}
+              GX_COLOR * rm_guix_port_canvas = (GX_COLOR *) GUIX_CANVAS;
+            #else
+              #if (${module.middleware.rm_guix_port.display_cfg_inheritance} == 1) &amp;&amp; (${module.middleware.rm_guix_port.requires.display::module.driver.display.input0.buffer_number} &gt; 1)
+                GX_COLOR * rm_guix_port_canvas = (GX_COLOR *) GUIX_FRAMEBUFFER_B;
+              #else /* Single Frame Buffer is used for Graphics Screen 1 */
+                GX_COLOR * rm_guix_port_canvas = (GX_COLOR *) GUIX_FRAMEBUFFER_A;
+              #endif
+            #endif
+
+        </declarations>
+        <api configurable="true">
+            <file>ra/fsp/inc/instances/rm_guix_port.h</file>
+        </api>
+    </module>
+    <developerSupport>
+        <template category="none" display="Quick Setup" id="module.middleware.rm_guix_port.quick_setup" version="1">
+            <platform id="fsp" max="" min="1.1.0"/>
+            <moduleRef id="module.middleware.rm_guix_port"/>
+            <content>
+/* TODO: Include GUIX Studio project headers here */
+// #include "[...]_resources.h"
+// #include "[...]_specifications.h"
+
+/* Root window memory */
+static GX_WINDOW_ROOT * p_window_root;
+
+void guix_port_quick_setup (void);
+
+/* GUIX Quick Setup function */
+void guix_port_quick_setup()
+{
+    /* Initialize GUIX */
+    gx_system_initialize();
+
+    /* Configure GUIX Studio project main display */
+    gx_studio_display_configure(MAIN_DISPLAY,
+                                rm_guix_port_hw_initialize,
+                                LANGUAGE_ENGLISH,
+                                MAIN_DISPLAY_THEME_1,
+                                &amp;p_window_root);
+
+    /* Set pointer to first buffer */
+    gx_canvas_memory_define(p_window_root->gx_window_root_canvas,
+                            rm_guix_port_canvas,
+                            p_window_root->gx_window_root_canvas->gx_canvas_memory_size);
+
+    /* Create and show the root window
+    * TODO: Replace [...] with the name of your main window widget */
+    gx_studio_named_widget_create("[...]", (GX_WIDGET *) p_window_root, GX_NULL);
+    gx_widget_show(p_window_root);
+
+    /* Start GUIX */
+    gx_system_start();
+}
+            </content>
+        </template>
+    </developerSupport>
+</raModuleDescription>

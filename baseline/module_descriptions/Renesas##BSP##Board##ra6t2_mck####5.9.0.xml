@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<raModuleDescription>
+    <config id="config.board.ra6t2mck" path="fsp_cfg/bsp/board_cfg.h" version="0">
+        <content>
+            #include "../../../ra/board/ra6t2_mck/board.h"
+        </content>
+    </config>
+    <board id="board.ra6t2mck" display="RA6|RA6T2|MCK-RA6T2" device="R7FA6T2BD3CFP" config="config.board.ra6t2mck" version="0" debugger="com.renesas.hardwaredebug.rz.jlink">
+        <description>Motor Control Evaluation System for RA6T2 MCU Group&#xA;Visit https://www.renesas.com/us/en/products/microcontrollers-microprocessors/ra-cortex-m-mcus/rtk0ema270s00020bj-mck-ra6t2-renesas-flexible-motor-control-kit-ra6t2-mcu-group to get kit user’s manual, quick start guide, errata, design package, example projects, etc.</description>
+        <capability id="capability.led"/>
+    </board>
+</raModuleDescription>

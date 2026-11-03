@@ -1,0 +1,28 @@
+<?xml version="1.0" ?>
+<raModuleDescription>
+    <module id="module.middleware.lwip_sys_freertos" display="Networking|lwIP system freertos Ethernet (rm_lwip_sys_freertos)" config="config.middleware.lwip_sys_freertos" common="1" version="0" visible="false" url="group___r_m___l_w_i_p___s_y_s___f_r_e_e_r_t_o_s.html">
+        <constraint display="Dynamic Allocation must be enabled in the FreeRTOS thread config under Memory Allocation|Support Dynamic Allocation.">
+            "${config.awsfreertos.thread.configsupport_dynamic_allocation}" === "config.awsfreertos.thread.configsupport_dynamic_allocation.enabled"
+        </constraint>
+        <constraint display="Recursive mutexes must be enabled in the FreeRTOS thread config under General|Use Recursive Mutexes.">
+            "${config.awsfreertos.thread.configuse_recursive_mutexes}" === "config.awsfreertos.thread.configuse_recursive_mutexes.enabled"
+        </constraint>
+        <constraint display="Mutexes must be enabled in the FreeRTOS thread config under Common|General|Use Mutexes.">
+            "${config.awsfreertos.thread.configuse_mutexes}" === "config.awsfreertos.thread.configuse_mutexes.enabled"
+        </constraint>
+        <constraint display="Compatibility must be enabled in the FreeRTOS thread config under General|Enable Backward Compatibility">
+            "${config.awsfreertos.thread.configenable_backward_compatibility}" === "config.awsfreertos.thread.configenable_backward_compatibility.enabled"
+        </constraint>
+        <constraint display="LwIP freertos does not work by itself. Please add LwIP system FreeRTOS port.">
+            ("1" == "${interface.lwip.port.freertos}")
+        </constraint>
+        <requires id="module.middleware.lwip_sys_freertos.requires.awsfreertos" interface="interface.rtos.awsfreertos" visible="false" display="Requires FreeRTOS"/>
+        <provides interface="interface.middleware.lwip_sys_port" />
+        <provides interface="interface.middleware.lwip_sys_freertos" />
+        <declarations>
+#if LWIP_PROVIDE_ERRNO
+        int errno;
+#endif
+        </declarations>
+    </module>
+</raModuleDescription>

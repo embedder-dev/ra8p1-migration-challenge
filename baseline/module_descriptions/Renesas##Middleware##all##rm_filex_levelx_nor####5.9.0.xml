@@ -1,0 +1,73 @@
+﻿<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.middleware.rm_filex_levelx_nor" path="fsp_cfg/middleware/rm_filex_levelx_nor_cfg.h" version="0">
+        <property default="config.middleware.rm_filex_levelx_nor.param_checking_enable.bsp" display="Parameter Checking" id="config.middleware.rm_filex_levelx_nor.param_checking_enable" description="Selects if code for parameter checking is to be included in the build.">
+            <option display="Default (BSP)" id="config.middleware.rm_filex_levelx_nor.param_checking_enable.bsp" value="(BSP_CFG_PARAM_CHECKING_ENABLE)"/>
+            <option display="Enabled" id="config.middleware.rm_filex_levelx_nor.param_checking_enable.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.rm_filex_levelx_nor.param_checking_enable.disabled" value="(0)"/>
+        </property>
+        <content>
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#define RM_FILEX_LEVELX_NOR_CFG_PARAM_CHECKING_ENABLE ${config.middleware.rm_filex_levelx_nor.param_checking_enable}
+
+#ifdef __cplusplus
+}
+#endif
+        </content>
+    </config>
+    <module config="config.middleware.rm_filex_levelx_nor" display="Storage|${module.middleware.rm_filex_levelx_nor.name} FileX I/O (rm_filex_levelx_nor)" visible="false" id="module.middleware.rm_filex_levelx_nor" version="1" url="group___r_m___f_i_l_e_x___l_e_v_e_l_x___n_o_r.html">
+        <requires id="module.middleware.rm_filex_levelx_nor.requires.lx_nor" interface="interface.azure.lx.nor" display="Add LevelX NOR">
+            <override property="module.azure.lx.nor.spi.callback" value="rm_filex_levelx_nor_spi_callback"/>
+            <override property="module.azure.lx.nor.spi.p_context" value="&amp;${module.middleware.rm_filex_levelx_nor.name}_ctrl"/>
+        </requires>
+        <provides interface="interface.middleware.rm_filex_levelx_nor" />
+        <provides interface="interface.azure.fx.driver" />
+        <property default="g_rm_filex_levelx_nor${_instance}" display="Name" id="module.middleware.rm_filex_levelx_nor.name" description="Module name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.middleware.rm_filex_levelx_nor.name}")</constraint>
+        </property>
+        <property default="g_rm_filex_levelx_nor_${_instance}_callback" display="Callback" id="module.middleware.rm_filex_levelx_nor.callback" description="A user callback function can be provided. If this callback function is provided, it will be called during operations by the lower level block media as a way for the user to provide their desired waiting functionality.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.middleware.rm_filex_levelx_nor.callback}")</constraint>
+        </property>
+        <property default="g_rm_filex_levelx_nor_${_instance}" display="LevelX NOR Name (String)" id="module.middleware.rm_filex_levelx_nor.nor_name" description="String name to be input into LevelX API.">
+        </property>
+        <property default="" id="module.middleware.rm_filex_levelx_nor.name_upper">
+            <export>"${module.middleware.rm_filex_levelx_nor.name}".toUpperCase()</export>
+        </property>
+        <header>
+extern const rm_filex_levelx_nor_instance_t ${module.middleware.rm_filex_levelx_nor.name}_instance;
+
+/** Access the FileX LevelX NOR instance using these structures when calling API functions directly (::p_api is not used). */
+extern rm_filex_levelx_nor_instance_ctrl_t ${module.middleware.rm_filex_levelx_nor.name}_ctrl;
+extern const rm_filex_levelx_nor_cfg_t ${module.middleware.rm_filex_levelx_nor.name}_cfg;
+
+#ifndef ${module.middleware.rm_filex_levelx_nor.callback}
+void ${module.middleware.rm_filex_levelx_nor.callback}(rm_filex_levelx_nor_callback_args_t * p_args);
+#endif
+        </header>
+        <includes>
+#include "rm_filex_levelx_nor.h"
+        </includes>
+        <declarations>
+rm_filex_levelx_nor_instance_ctrl_t ${module.middleware.rm_filex_levelx_nor.name}_ctrl;
+
+const rm_filex_levelx_nor_cfg_t ${module.middleware.rm_filex_levelx_nor.name}_cfg =
+{
+    .close                 = ${module.middleware.rm_filex_levelx_nor.requires.lx_nor::module.azure.lx.nor.spi.close},
+    .nor_driver_initialize = ${module.middleware.rm_filex_levelx_nor.requires.lx_nor::module.azure.lx.nor.spi.initialize},
+    .p_nor_flash           = &amp;${module.middleware.rm_filex_levelx_nor.requires.lx_nor::module.azure.lx.nor.spi.name},
+    .p_nor_flash_name      = "${module.middleware.rm_filex_levelx_nor.nor_name}",
+    .p_callback            = ${module.middleware.rm_filex_levelx_nor.callback},
+    .p_context             = NULL
+};
+
+const rm_filex_levelx_nor_instance_t ${module.middleware.rm_filex_levelx_nor.name}_instance =
+{
+    .p_ctrl = &amp;${module.middleware.rm_filex_levelx_nor.name}_ctrl,
+    .p_cfg  = &amp;${module.middleware.rm_filex_levelx_nor.name}_cfg
+};
+        </declarations>
+    </module>
+</raModuleDescription>

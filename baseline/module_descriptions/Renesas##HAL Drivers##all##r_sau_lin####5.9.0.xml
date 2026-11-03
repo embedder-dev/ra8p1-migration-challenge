@@ -1,0 +1,333 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+IMPORTANT NOTE:
+Do not modify this file directly.
+
+This file is generated using: scripts/jinja/mdf_render.sh
+-->
+<raModuleDescription>
+    <config id="config.driver.sau_lin" path="fsp_cfg/r_sau_lin_cfg.h" version="0">
+        <property default="config.driver.sau_lin.param_checking_enable.bsp" display="Parameter Checking" id="config.driver.sau_lin.param_checking_enable" description="If selected code for parameter checking is included in the build.">
+            <option display="Default (BSP)" id="config.driver.sau_lin.param_checking_enable.bsp" value="(BSP_CFG_PARAM_CHECKING_ENABLE)"/>
+            <option display="Enabled" id="config.driver.sau_lin.param_checking_enable.enabled" value="(1)"/>
+            <option display="Disabled" id="config.driver.sau_lin.param_checking_enable.disabled" value="(0)"/>
+        </property>
+        <property default="config.driver.sau_lin.checksum_support.enabled" display="Checksum Support" id="config.driver.sau_lin.checksum_support" description="When set to 'Disabled', code for checksum generation and validation is excluded from the build. Disable only when checksum generation and validation is not required for any LIN instance.">
+            <option display="Enabled" id="config.driver.sau_lin.checksum_support.enabled" value="(1)" />
+            <option display="Disabled" id="config.driver.sau_lin.checksum_support.disabled" value="(0)" />
+        </property>
+        <property default="config.driver.sau_lin.master_support.disabled" display="Master Support" id="config.driver.sau_lin.master_support" description="Select whether code for master support is included in the build.">
+            <option display="Enabled" id="config.driver.sau_lin.master_support.enabled" value="(1)" />
+            <option display="Disabled" id="config.driver.sau_lin.master_support.disabled" value="(0)" />
+        </property>
+        <property default="config.driver.sau_lin.slave_support.enabled" display="Slave Support" id="config.driver.sau_lin.slave_support" description="Select whether code for slave support is included in the build.">
+            <option display="Enabled" id="config.driver.sau_lin.slave_support.enabled" value="(1)" />
+            <option display="Disabled" id="config.driver.sau_lin.slave_support.disabled" value="(0)" />
+        </property>
+        <property default="config.driver.sau_lin.wakeup_support.disabled" display="Wake-up Support" id="config.driver.sau_lin.wakeup_support" description="Select whether code for LIN bus sleep and wake-up signal detection is included in the build. Enable when at least one LIN instance requires sleep/wake-up support.">
+            <option display="Enabled" id="config.driver.sau_lin.wakeup_support.enabled" value="(1)" />
+            <option display="Disabled" id="config.driver.sau_lin.wakeup_support.disabled" value="(0)" />
+        </property>
+        <property default="config.driver.sau_lin.auto_synchronization_support.enabled" display="Auto Synchronization Support" id="config.driver.sau_lin.auto_synchronization_support" description="When set to 'Disabled', code for auto synchronization is excluded from the build. Enable when at least one LIN slave instance is using auto synchronization.">
+            <option display="Enabled" id="config.driver.sau_lin.auto_synchronization_support.enabled" value="(1)" />
+            <option display="Disabled" id="config.driver.sau_lin.auto_synchronization_support.disabled" value="(0)" />
+        </property>
+        <content>
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#define SAU_LIN_CFG_PARAM_CHECKING_ENABLE    ${config.driver.sau_lin.param_checking_enable}
+#define SAU_LIN_CFG_CHECKSUM_SUPPORT_ENABLE  ${config.driver.sau_lin.checksum_support}
+#define SAU_LIN_CFG_MASTER_SUPPORT_ENABLE    ${config.driver.sau_lin.master_support}
+#define SAU_LIN_CFG_SLAVE_SUPPORT_ENABLE     ${config.driver.sau_lin.slave_support}
+#define SAU_LIN_CFG_WAKEUP_SUPPORT_ENABLE    ${config.driver.sau_lin.wakeup_support}
+#define SAU_LIN_AUTO_SYNC_SUPPORT_ENABLE     ${config.driver.sau_lin.auto_synchronization_support}
+
+#ifdef __cplusplus
+}
+#endif
+        </content>
+    </config>
+    <module config="config.driver.sau_lin" display="Connectivity|${module.driver.lin.name} LIN (r_sau_lin)" id="module.driver.lin_on_sau_lin" version="1" url="group___s_a_u___l_i_n.html">
+        <constraint display="Unique name required for each instance">
+            "${interface.driver.lin.${module.driver.lin.name}}" === "1"
+        </constraint>
+        <constraint display="Requires SAU Peripheral">
+            "${interface.mcu.sau.external}" === "1"
+        </constraint>
+        <constraint display="Requires SAU UART Module">
+            (testExists("${module.driver.sau_lin.requires.sau_uart::module.driver.uart.name}"))
+        </constraint>
+        <constraint display="Requires callback to be a C function name (not NULL).">
+            (testSymbol("${module.driver.lin.p_callback}") &amp;&amp; "${module.driver.lin.p_callback}" != "NULL")
+        </constraint>
+        <constraint display="Please enable Common|Extra Input Mode Support for TAU">
+            ("${module.driver.sau_lin.mode}" === "module.driver.sau_lin.mode.mode_master") || (!testExists("${module.driver.sau_lin.requires.tau::module.driver.timer.name}")) || ("${config.driver.tau.extra_input_support_enable}" === "config.driver.tau.extra_input_support_enable.enabled")
+        </constraint>
+        <!-- TAU is required for build when slave support is enabled. Don't show this constraint if user has selected slave mode, because 'Please add the TAU module in slave mode' will be displayed in that case.  -->
+        <constraint display="Please create at least one slave instance when Common|Slave Support is enabled. If slave support is not required, disable Common|Slave Support.">
+            (testExists("${interface.driver.timer_on_tau}")) || ("${module.driver.sau_lin.mode}" === "module.driver.sau_lin.mode.mode_slave") || ("${config.driver.sau_lin.slave_support}" === "config.driver.sau_lin.slave_support.disabled")
+        </constraint>
+        <constraint display="Please add the TAU module in slave mode.">
+            (testExists("${module.driver.sau_lin.requires.tau::module.driver.timer.name}")) || ("${module.driver.sau_lin.mode}" !== "module.driver.sau_lin.mode.mode_slave")
+        </constraint>
+        <constraint display="Please remove the TAU module in master mode.">
+            (!testExists("${module.driver.sau_lin.requires.tau::module.driver.timer.name}")) || ("${module.driver.sau_lin.mode}" !== "module.driver.sau_lin.mode.mode_master")
+        </constraint>
+        <constraint display="Please enable Common|Slave Support to use slave mode.">
+            ("${module.driver.sau_lin.mode}" === "module.driver.sau_lin.mode.mode_master") || ("${config.driver.sau_lin.slave_support}"==="config.driver.sau_lin.slave_support.enabled")
+        </constraint>
+        <constraint display="Please enable Common|Master Support to use master mode.">
+            ("${module.driver.sau_lin.mode}" === "module.driver.sau_lin.mode.mode_slave") || ("${config.driver.sau_lin.master_support}"==="config.driver.sau_lin.master_support.enabled")
+        </constraint>
+        <constraint display="Please disable Common|Enable Fixed Baudrate for UART">
+            (!testExists("${module.driver.sau_lin.requires.sau_uart::module.driver.uart.name}")) ||("${config.driver.sau_uart.fixed_baudrate_enable}" === "config.driver.sau_uart.fixed_baudrate_enable.disabled")
+        </constraint>
+        <!-- Wake-up support enabled is required when ICU is used for this instance -->
+        <constraint display="Please enable Common|Wake-up Support to use ICU module. Otherwise if wake-up support is not needed, remove the ICU module.">
+            (("${config.driver.sau_lin.wakeup_support}" === "config.driver.sau_lin.wakeup_support.enabled") ||
+            ( !testExists("${module.driver.sau_lin.requires.icu::module.driver.external_irq.name}")))
+        </constraint>
+        <!-- If wakeup support is enabled but this instance doesn't use ICU, either at least one other instance must be using ICU (to bring in r_icu.h), or wakeup support must be disabled. -->
+        <constraint display="Please disable Common|Wake-up Support if wake-up is not used by any LIN instance. Otherwise, add the ICU module.">
+            (testExists("${interface.driver.external_irq_on_icu}")) || ("${config.driver.sau_lin.wakeup_support}" === "config.driver.sau_lin.wakeup_support.disabled")        </constraint>
+        <constraint display="Common|Auto Synchronization Support must be enabled to use Auto Synchronization.">
+            (("${config.driver.sau_lin.auto_synchronization_support}" === "config.driver.sau_lin.auto_synchronization_support.enabled") ||
+            ("${module.driver.sau_lin.auto_synchronization}" === "module.driver.sau_lin.auto_synchronization.disabled"))
+        </constraint>
+        <constraint display="Auto Synchronization must be disabled in master mode.">
+            "${module.driver.sau_lin.mode}" === "module.driver.sau_lin.mode.mode_slave" || ("${module.driver.sau_lin.auto_synchronization}" === "module.driver.sau_lin.auto_synchronization.disabled")
+        </constraint>
+        <constraint id="module.driver.lin.constraint.baudrate.tau.limit">
+            <![CDATA[eval('/* TAU Clock Frequency must be 6.25x greater than the baud rate for the slave to measure the sync byte within +/- 2% error */' +
+'var operation_clock_tau = {' +
+'    "module.driver.timer.operation_clock.CK00": "${board.clock.peripheral.tau.ck00}",' +
+'    "module.driver.timer.operation_clock.CK01": "${board.clock.peripheral.tau.ck01}",' +
+'    "module.driver.timer.operation_clock.CK02": "${board.clock.peripheral.tau.ck02}",' +
+'    "module.driver.timer.operation_clock.CK03": "${board.clock.peripheral.tau.ck03}",' +
+'};' +
+'function check_bitrate_valid(f_mck,baud){' +
+'    var message = null;' +
+'    var min_tau_f_mck = Math.floor(baud*25/4);' +
+'    if (("module.driver.sau_lin.mode.mode_slave" == mode) && (f_mck < min_tau_f_mck))' +
+'    {' +
+'        message = "TAU Operation Clock Frequency must be at least "+ min_tau_f_mck + "Hz for sync byte measurement at the selected baud rate.";' +
+'    }' +
+'    return message;' +
+'}' +
+'var mode = "${module.driver.sau_lin.mode}";' +
+'var operation_clock = "${module.driver.sau_lin.requires.tau::module.driver.timer.operation_clock}";' +
+'var f_mck=operation_clock_tau[operation_clock];' +
+'var baud="${module.driver.sau_lin.requires.sau_uart::module.driver.uart.baud}";' +
+'' +
+'check_bitrate_valid(f_mck,baud)')]]>
+        </constraint>
+        <requires id="module.driver.lin_on_sau_lin.requires.sau" interface="interface.mcu.sau.external" visible="false" display="Requires SAU Peripheral" />
+        <requires id="module.driver.sau_lin.requires.sau_uart" interface="interface.driver.uart_on_sau_uart" display="Add SAU UART Driver for LIN [Required]" find="true" optional="false" >
+            <override property="module.driver.uart.channel" value="${module.driver.lin.uart.channel}"/>
+            <override property="module.driver.uart.data_bits" value="module.driver.uart.data_bits.data_bits_8"/>
+            <override property="module.driver.uart.baud" value="${module.driver.lin.baud}"/>
+            <override property="module.driver.uart.parity" value="module.driver.uart.parity.parity_off"/>
+            <override property="module.driver.uart.stop_bits" value="module.driver.uart.stop_bits.stop_bits_1"/>
+            <override property="module.driver.uart.data_direct" value="module.driver.uart.data_direct.data_direct_lsb"/>
+            <override property="module.driver.uart.signallevel" value="module.driver.uart.signallevel.standard"/>
+            <override property="module.driver.uart.callback" value="r_sau_lin_uart_callback"/>
+            <!-- p_api is overridden to avoid including the API structure because SAU LIN calls it's dependencies directly -->
+            <override property="module.driver.uart.p_api" value="NULL"/>
+            <override property="module.driver.uart.sau_lin.mode" value="${module.driver.sau_lin.mode}"/>
+        </requires>
+        <requires id="module.driver.sau_lin.requires.tau" interface="interface.driver.timer_on_tau" display="Add TAU Peripheral [Required in Slave Mode]" find="true" optional="true" >
+            <override property="module.driver.timer.channel" value="${module.driver.lin.tau.channel}"/>
+            <override property="module.driver.timer.func" value="module.driver.timer.func.func_low_level_measure"/>
+            <override property="module.driver.timer.input_source" value="module.driver.timer.input_source.rxd${module.driver.lin.uart.channel}_pin_source"/>
+            <override property="module.driver.timer.trigger_edge" value="module.driver.timer.trigger_edge.trigger_edge_both"/>
+            <override property="module.driver.timer.higher_8bit_ipl" value="_disabled"/>
+            <override property="module.driver.timer.bit_mode_timer" value="module.driver.timer.bit_mode_timer.16bit_timer"/>
+            <override property="module.driver.timer.period" value="0x10000"/>
+            <override property="module.driver.timer.higher8bitperiod" value="0x100"/>
+            <override property="module.driver.timer.unit" value="module.driver.timer.unit.unit_period_raw_counts"/>
+            <override property="module.driver.timer.higher8bitunit" value="module.driver.timer.higher8bitunit.unit_period_raw_counts"/>
+            <override property="module.driver.timer.initial_output" value="module.driver.timer.initial_output.disabled"/>
+            <override property="module.driver.timer.opirq" value="module.driver.timer.opirq.reset"/>
+            <override property="module.driver.timer.p_callback" value="r_sau_lin_tau_callback"/>
+            <!-- p_api is overridden to avoid including the API structure because SAU LIN calls it's dependencies directly -->
+            <override property="module.driver.timer.p_api" value="NULL"/>
+        </requires>
+        <requires id="module.driver.sau_lin.requires.icu" interface="interface.driver.external_irq_on_icu" display="Add ICU Driver for LIN [Optional]" find="false" optional="true" >
+            <override property="module.driver.external_irq.channel" value="${module.driver.lin.icu.channel}"/>
+            <override property="module.driver.external_irq.trigger" value="module.driver.external_irq.trigger.trig_falling"/>
+            <override property="module.driver.external_irq.p_callback" value="NULL"/>
+            <!-- p_api is overridden to avoid including the API structure because SAU LIN calls it's dependencies directly -->
+            <override property="module.driver.external_irq.p_api" value="NULL"/>
+        </requires>
+        <provides interface="interface.driver.lin" />
+        <provides interface="interface.driver.lin_on_sau_lin" />
+        <provides interface="interface.driver.lin.${module.driver.lin.name}" />
+        <property default="g_lin${_instance}" display="Name" id="module.driver.lin.name" description="Module name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.lin.name}")</constraint>
+        </property>
+        <property default="module.driver.sau_lin.mode.mode_slave" display="Mode" id="module.driver.sau_lin.mode" description="Select the LIN mode.">
+            <option display="Master" id="module.driver.sau_lin.mode.mode_master" value="LIN_MODE_MASTER" />
+            <option display="Slave" id="module.driver.sau_lin.mode.mode_slave" value="LIN_MODE_SLAVE" />
+        </property>
+        <property default="sau_lin${_instance}_callback" display="Callback" id="module.driver.lin.p_callback" description="A user callback function must be provided. It will be called from the interrupt service routine (ISR) in order to notify the application of LIN transmission/reception events and errors.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.lin.p_callback}")</constraint>
+        </property>
+        <!-- IDE-84154: Default should be "" -->
+        <property default="2" display="UART Channel" id="module.driver.lin.uart.channel" description="Select the LIN UART Channel.">
+            <select enum="enum.driver.sau.lin.uart.channel"/>
+        </property>
+        <!-- IDE-84154: Default should be "" -->
+        <property default="7" display="TAU Channel" id="module.driver.lin.tau.channel" description="Select the LIN TAU Channel.">
+            <select enum="enum.driver.sau.lin.tau.channel"/>
+        </property>
+        <!-- IDE-84154: Default should be "" -->
+        <property default="0" display="ICU Channel" id="module.driver.lin.icu.channel" description="Select the LIN ICU Channel.">
+            <select enum="enum.driver.sau.lin.icu.channel"/>
+        </property>
+        <property default="19200" display="Baud Rate" id="module.driver.lin.baud" description="Select the LIN Baudrate.">
+            <constraint display="Value must be an integer greater than 0">testInteger("${module.driver.lin.baud}") &amp;&amp; ("${module.driver.lin.baud}" &gt; 0) </constraint>
+        </property>
+        <property default="module.driver.sau_lin.auto_synchronization.enabled" display="Auto Synchronization" id="module.driver.sau_lin.auto_synchronization" description="Enable LIN synchronization to the master's clock by measuring pulse intervals between the falling edges of the input signal from the RXDn pin during reception of the LIN sync byte.">
+            <option display="Disable" id="module.driver.sau_lin.auto_synchronization.disabled" value="SAU_LIN_AUTO_SYNCHRONIZATION_DISABLE" />
+            <option display="Enable" id="module.driver.sau_lin.auto_synchronization.enabled" value="SAU_LIN_AUTO_SYNCHRONIZATION_ENABLE" />
+        </property>
+        <property default="NULL" id="module.driver.sau.lin.timer">
+            <export><![CDATA[eval('var mode_support = "${module.driver.sau_lin.mode}";' +
+'var timer = "NULL";' +
+'if (mode_support == "LIN_MODE_SLAVE") {' +
+'   timer = "&"+"${module.driver.sau_lin.requires.tau::module.driver.timer.name}";' +
+'}' +
+'timer')]]></export>
+        </property>
+        <property default="20000000" id="module.driver.sau.lin.timer.clock">
+            <export><![CDATA[eval('var f_mck_tc = 20000000;' +
+'if (mode_support == "LIN_MODE_SLAVE") {' +
+'   var operation_clock_tc = "${module.driver.sau_lin.requires.tau::module.driver.timer.operation_clock}";' +
+'   f_mck_tc=operation_clock_tau[operation_clock_tc];' +
+'}' +
+'f_mck_tc')]]></export>
+        </property>
+        <property default="" id="module.driver.sau_lin.break_field_baud">
+            <export><![CDATA[eval('/* Converter for SAU unit to configured operation clock frequency */' +
+'var fclk_freq_by_unit_get = {' +
+'    "0": function (operation_clock) { return operation_clock === "0" ? ${board.clock.peripheral.sau.ck00} : ${board.clock.peripheral.sau.ck01}; },' +
+'    "1": function (operation_clock) { return operation_clock === "0" ? ${board.clock.peripheral.sau.ck10} : ${board.clock.peripheral.sau.ck11}; },' +
+'};' +
+'' +
+'/* Function to calculate SDR.STCLK register value. Note: This function does not check whether the value is in range. */' +
+'function stclk_calculate(f_mck, bitrate)' +
+'{' +
+'    return Math.round(f_mck / (2 * bitrate)) - 1;' +
+'}' +
+'' +
+'/* Function to calculate SAU unit value */' +
+'function sau_unit_calculate(channel) {' +
+'    return Math.floor(channel / 2);' +
+'}' +
+'function stclk_calculate_break_field(f_mck, bitrate)' +
+'{' +
+'    return Math.ceil(f_mck / (2 * bitrate)) - 1;' +
+'}' +
+'' +
+'var stclk_limits = { min : 2, max : 127 };' +
+'var f_iclk = ${board.clock.peripheral.sau};' +
+'var prs = Math.floor(Math.log(f_iclk/f_mck)/Math.log(2));' +
+'' +
+'' +
+'function bitrate_calculate(bitrate, sau_unit, operation_clock, stclk_limits) {' +
+'    /* Look up SAU operation clock frequency */' +
+'    var f_mck = fclk_freq_by_unit_get[sau_unit](operation_clock);' +
+'' +
+'    /* Calculate SDR.STCLK register value */' +
+'    var stclk = stclk_calculate_break_field(f_mck, bitrate);' +
+'' +
+'    /* Cap the setting within the valid register range */' +
+'    stclk = Math.min(stclk, stclk_limits.max);' +
+'    stclk = Math.max(stclk, stclk_limits.min);' +
+'' +
+'   /* Calculate actual bitrate with this SDR.STCLK value for printing in the comment */' +
+'    var actual_bitrate = f_mck / (2 * (stclk + 1));' +
+'' +
+'    return "/* Actual calculated bitrate: " + actual_bitrate.toFixed(0) + " */\\n" +' +
+'        ".stclk = " + stclk.toString();' +
+'}' +
+'' +
+'var bitrate_break_field = Math.floor(bitrate * 9 / 13);' +
+'var c_bitrate_break_field = bitrate_calculate(bitrate_break_field, sau_unit, operation_clock, stclk_limits);' +
+'c_bitrate_break_field += ",\\n.prs = " + prs.toString();' +
+'' +
+'c_bitrate_break_field')]]></export>
+        </property>
+        <header>
+extern const lin_cfg_t ${module.driver.lin.name}_cfg;
+/* LIN on SAU Instance. */
+extern const lin_instance_t ${module.driver.lin.name};
+
+#ifndef ${module.driver.lin.p_callback}
+void ${module.driver.lin.p_callback}(lin_callback_args_t * p_args);
+#endif
+
+extern const sau_lin_extended_cfg_t ${module.driver.lin.name}_cfg_extend;
+extern sau_lin_instance_ctrl_t ${module.driver.lin.name}_ctrl;
+        </header>
+        <includes>
+#include &quot;r_sau_lin.h&quot;
+#include &quot;r_lin_api.h&quot;
+#include &lt;stdlib.h&gt;
+        </includes>
+        <declarations>
+#include &quot;r_sau_lin_cfg.h&quot;
+sau_lin_instance_ctrl_t ${module.driver.lin.name}_ctrl;
+
+sau_uart_baudrate_setting_t  ${module.driver.lin.name}_break_field_baud_setting =
+{
+     ${module.driver.sau_lin.break_field_baud},
+     .operation_clock = ${module.driver.sau_lin.requires.sau_uart::module.driver.uart.operation_clock},
+};
+
+const sau_lin_extended_cfg_t ${module.driver.lin.name}_cfg_extend =
+{
+    .p_uart  = &amp;${module.driver.sau_lin.requires.sau_uart::module.driver.uart.name},
+#define RA_NOT_DEFINED (1)
+#if (RA_NOT_DEFINED == ${module.driver.sau_lin.requires.icu::module.driver.external_irq.name})
+    .p_icu   = NULL,
+#else
+    .p_icu   = &amp;${module.driver.sau_lin.requires.icu::module.driver.external_irq.name},
+#endif
+#undef RA_NOT_DEFINED
+#if SAU_LIN_CFG_MASTER_SUPPORT_ENABLE
+    .p_break_field_baudrate = &amp;${module.driver.lin.name}_break_field_baud_setting,
+#endif
+#if SAU_LIN_CFG_SLAVE_SUPPORT_ENABLE
+    .p_timer = ${module.driver.sau.lin.timer},
+    .timer_clock_frequency = ${module.driver.sau.lin.timer.clock},
+    .auto_synchronization = ${module.driver.sau_lin.auto_synchronization},
+#endif
+};
+
+const lin_cfg_t ${module.driver.lin.name}_cfg =
+{
+    .mode        = ${module.driver.sau_lin.mode},
+    .p_callback  = ${module.driver.lin.p_callback},
+    .p_extend    = &amp;${module.driver.lin.name}_cfg_extend,
+};
+
+/* Instance structure to use this module. */
+const lin_instance_t ${module.driver.lin.name} =
+{
+    .p_ctrl      = &amp;${module.driver.lin.name}_ctrl,
+    .p_cfg       = &amp;${module.driver.lin.name}_cfg,
+    .p_api       = &amp;g_lin_on_sau_lin
+};
+        </declarations>
+        <api configurable="true">
+            <file>ra/fsp/inc/instances/r_sau_lin.h</file>
+            <file>ra/fsp/inc/api/r_timer_api.h</file>
+            <file>ra/fsp/inc/api/r_external_irq_api.h</file>
+            <file>ra/fsp/inc/api/r_uart_api.h</file>
+            <file>ra/fsp/inc/api/r_lin_api.h</file>
+        </api>
+    </module>
+</raModuleDescription>

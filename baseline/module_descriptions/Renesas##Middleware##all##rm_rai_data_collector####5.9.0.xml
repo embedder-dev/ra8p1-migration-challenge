@@ -1,0 +1,659 @@
+<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.middleware.rai_data_collector" path="fsp_cfg/rm_rai_data_collector_cfg.h" version="0">
+        <property default="config.middleware.rai_data_collector.param_checking_enable.bsp" display="Parameter Checking" id="config.middleware.rai_data_collector.param_checking_enable" description="If selected code for parameter checking is included in the build.">
+            <option display="Default (BSP)" id="config.middleware.rai_data_collector.param_checking_enable.bsp" value="(BSP_CFG_PARAM_CHECKING_ENABLE)"/>
+            <option display="Enabled" id="config.middleware.rai_data_collector.param_checking_enable.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.rai_data_collector.param_checking_enable.disabled" value="(0)"/>
+        </property>
+        <property default="16" display="Max Number Of Channels" id="config.middleware.rai_data_collector.max_channels" description="Max number of channels.">
+            <constraint display=" Value must be a positive integer less than or equal to 16">
+                testInteger("${config.middleware.rai_data_collector.max_channels}")  &amp;&amp; (${config.middleware.rai_data_collector.max_channels} &gt;= 0)  &amp;&amp; (${config.middleware.rai_data_collector.max_channels} &lt;= 16)
+            </constraint>
+        </property>
+        <content>
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#define RM_RAI_DATA_COLLECTOR_CFG_PARAM_CHECKING_ENABLE           (${config.middleware.rai_data_collector.param_checking_enable})
+
+#define RM_RAI_DATA_COLLECTOR_CFG_MAX_CHANNELS                    (${config.middleware.rai_data_collector.max_channels})
+
+#ifdef __cplusplus
+}
+#endif
+        </content>
+    </config>
+
+    <module config="config.middleware.rai_data_collector" display="AI|${module.middleware.rai_data_collector.name} Data Collector (rm_rai_data_collector)" id="module.middleware.rai_data_collector_on_rai_data_collector" version="1" url="group___r_m___r_a_i___d_a_t_a___c_o_l_l_e_c_t_o_r.html" common="8">
+        <constraint display="Unique name required for each instance">
+            "${interface.middleware.rai_data_collector.${module.middleware.rai_data_collector.name}}" === "1"
+        </constraint>
+        <constraint display="Max number of channels must be greater than or equal to channels under snapshot mode and data feed mode">
+            (${config.middleware.rai_data_collector.max_channels} &gt;= ${module.middleware.rai_data_collector.snapshot_mode.channels} + ${module.middleware.rai_data_collector.data_feed_mode.channels})
+        </constraint>
+        <constraint display="Snapshot mode channels + data feed mode channels must be greater than or equal to 1">
+            (${module.middleware.rai_data_collector.snapshot_mode.channels} + ${module.middleware.rai_data_collector.data_feed_mode.channels} &gt;= 1)
+        </constraint>
+        <constraint display="DTC stack needs to be added when there are snapshot mode channels. It needs to be removed if there is no snapshot mode channel.">
+            testExists("${module.middleware.rai_data_collector.requires.transfer::module.driver.transfer.name}") ? ("${module.middleware.rai_data_collector.snapshot_mode.channels}" !== "0") : ("${module.middleware.rai_data_collector.snapshot_mode.channels}" === "0")
+        </constraint>
+        <requires id="module.middleware.rai_data_collector.requires.transfer" interface="interface.driver.transfer_on_dtc" display="DTC Driver required for Snapshot Mode" find="false" optional="true">
+            <override property="module.driver.transfer.size" value="module.driver.transfer.size.size_1_byte"/>
+            <override property="module.driver.transfer.mode" value="module.driver.transfer.mode.mode_normal"/>
+            <override property="module.driver.transfer.dest_addr_mode" value="module.driver.transfer.dest_addr_mode.addr_mode_incremented"/>
+            <override property="module.driver.transfer.src_addr_mode" value="module.driver.transfer.src_addr_mode.addr_mode_incremented"/>
+            <override property="module.driver.transfer.repeat_area" value="module.driver.transfer.repeat_area.repeat_area_source"/>
+            <override property="module.driver.transfer.p_dest" value="NULL"/>
+            <override property="module.driver.transfer.p_src" value="NULL"/>
+            <override property="module.driver.transfer.length" value="0"/>
+            <override property="module.driver.transfer.interrupt" value="module.driver.transfer.interrupt.interrupt_end"/>
+            <override property="module.driver.transfer.num_blocks" value="1"/>
+            <override property="module.driver.transfer.number_of_descriptors" value="0"/>
+            <override property="module.driver.transfer.auto_enable" value="module.driver.transfer.auto_enable.false"/>
+        </requires>
+        <requires id="module.middleware.rai_data_collector.requires.timer" interface="interface.driver.timer" display="Add Timer Driver for DTC Transfer" find="false" optional="true">
+            <override property="module.driver.timer.mode" value="module.driver.timer.mode.mode_periodic"/>
+            <override property="module.driver.timer.p_callback" value="NULL"/>
+            <override property="module.driver.timer.autostart" value="module.driver.timer.autostart.false"/>
+        </requires>
+        <provides interface="interface.middleware.rai_data_collector" />
+        <provides interface="interface.middleware.rai_data_collector.rai_data_collector_on_rai_data_collector" />
+        <provides interface="interface.middleware.rai_data_collector.${module.middleware.rai_data_collector.name}" />
+        <property display="General|Name" id="module.middleware.rai_data_collector.name" default="g_rai_data_collector${_instance}" description="Module name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.middleware.rai_data_collector.name}")</constraint>
+        </property>
+        <property display="General|ID" id="module.middleware.rai_data_collector.instance" default="${_instance}" description="Instance ID">
+            <constraint display="Value must be a positive integer.">
+                testInteger("${module.middleware.rai_data_collector.instance}")  &amp;&amp; (${module.middleware.rai_data_collector.instance} &gt;= 0)
+            </constraint>
+        </property>
+        <property id="module.middleware.rai_data_collector.name_upper" default="">
+            <export>"${module.middleware.rai_data_collector.name}".toUpperCase()</export>
+        </property>
+        <property display="General|Frame Buffer Length" id="module.middleware.rai_data_collector.frame_buf_length" default="100" description="Length of frame buffers in data samples.">
+            <constraint display="Value must be a positive integer greater than 0">
+                testInteger("${module.middleware.rai_data_collector.frame_buf_length}")  &amp;&amp; (${module.middleware.rai_data_collector.frame_buf_length} &gt; 0)
+            </constraint>
+        </property>
+        <property display="General|Data Ready Callback" id="module.middleware.rai_data_collector.p_callback" default="rai_data_collector${_instance}_callback" description="Callback function on data ready.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.middleware.rai_data_collector.p_callback}")</constraint>
+        </property>
+        <property display="General|Error Callback" id="module.middleware.rai_data_collector.p_error_callback" default="rai_data_collector${_instance}_error_callback" description="Callback function for error events.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.middleware.rai_data_collector.p_error_callback}")</constraint>
+        </property>
+        <property id="module.middleware.rai_data_collector.p_context" default="NULL" />
+        <property id="module.middleware.rai_data_collector.channel_ready_mask" default="1">
+            <export>
+                <![CDATA[eval('' +
+                '// Used to calculate channel_ready_mask \n ' +
+                'var snapshot_channels = ${module.middleware.rai_data_collector.snapshot_mode.channels}; \n' +
+                'var channel_ready_mask = 0; \n' +
+                'var channels = ${module.middleware.rai_data_collector.data_feed_mode.channels} + (snapshot_channels > 0 ? 1 : 0); \n' +
+                'for(var i = 0; i < channels; i++) \n' +
+                '{ \n' +
+                '    channel_ready_mask |= 1 << i; \n' +
+                '} \n' +
+                'channel_ready_mask')]]>
+            </export>
+        </property>
+        <property display="Data Feed Mode|Channels" id="module.middleware.rai_data_collector.data_feed_mode.channels" default="0" description="Number of Data Feed Mode channels.">
+            <constraint display=" Value must be an integer between 0 and 8">
+                testInteger("${module.middleware.rai_data_collector.data_feed_mode.channels}")  &amp;&amp; (${module.middleware.rai_data_collector.data_feed_mode.channels} &lt;= 8) &amp;&amp; (${module.middleware.rai_data_collector.data_feed_mode.channels} &gt;= 0)
+            </constraint>
+        </property>
+        <property display="Data Feed Mode|Channel 0|Name" id="module.middleware.rai_data_collector.data_feed_mode.channel0.name" default="dc${_instance}_data_feed_ch0" description="Channel name">
+            <constraint display="Must be valid C variable name">testSymbol("${module.middleware.rai_data_collector.data_feed_mode.channel0.name}")</constraint>
+        </property>
+        <property display="Data Feed Mode|Channel 0|Data Type" id="module.middleware.rai_data_collector.data_feed_mode.channel0.type" default="enum.driver.fsp_common.data_type.uint8" description="Channel Data Type">
+            <select enum="enum.driver.fsp_common.data_type"/>
+        </property>
+        <property id="module.middleware.rai_data_collector.data_feed_mode.channel0.type_upper" default="">
+            <export>"${module.middleware.rai_data_collector.data_feed_mode.channel0.type}".toUpperCase()</export>
+        </property>
+        <property display="Data Feed Mode|Channel 1|Name" id="module.middleware.rai_data_collector.data_feed_mode.channel1.name" default="dc${_instance}_data_feed_ch1" description="Channel name">
+            <constraint display="Must be valid C variable name">testSymbol("${module.middleware.rai_data_collector.data_feed_mode.channel1.name}")</constraint>
+        </property>
+        <property display="Data Feed Mode|Channel 1|Data Type" id="module.middleware.rai_data_collector.data_feed_mode.channel1.type" default="enum.driver.fsp_common.data_type.uint8" description="Channel Data Type">
+            <select enum="enum.driver.fsp_common.data_type"/>
+        </property>
+        <property id="module.middleware.rai_data_collector.data_feed_mode.channel1.type_upper" default="">
+            <export>"${module.middleware.rai_data_collector.data_feed_mode.channel1.type}".toUpperCase()</export>
+        </property>
+        <property display="Data Feed Mode|Channel 2|Name" id="module.middleware.rai_data_collector.data_feed_mode.channel2.name" default="dc${_instance}_data_feed_ch2" description="Channel name">
+            <constraint display="Must be valid C variable name">testSymbol("${module.middleware.rai_data_collector.data_feed_mode.channel2.name}")</constraint>
+        </property>
+        <property display="Data Feed Mode|Channel 2|Data Type" id="module.middleware.rai_data_collector.data_feed_mode.channel2.type" default="enum.driver.fsp_common.data_type.uint8" description="Channel Data Type">
+            <select enum="enum.driver.fsp_common.data_type"/>
+        </property>
+        <property id="module.middleware.rai_data_collector.data_feed_mode.channel2.type_upper" default="">
+            <export>"${module.middleware.rai_data_collector.data_feed_mode.channel2.type}".toUpperCase()</export>
+        </property>
+        <property display="Data Feed Mode|Channel 3|Name" id="module.middleware.rai_data_collector.data_feed_mode.channel3.name" default="dc${_instance}_data_feed_ch3" description="Channel name">
+            <constraint display="Must be valid C variable name">testSymbol("${module.middleware.rai_data_collector.data_feed_mode.channel3.name}")</constraint>
+        </property>
+        <property display="Data Feed Mode|Channel 3|Data Type" id="module.middleware.rai_data_collector.data_feed_mode.channel3.type" default="enum.driver.fsp_common.data_type.uint8" description="Channel Data Type">
+            <select enum="enum.driver.fsp_common.data_type"/>
+        </property>
+        <property id="module.middleware.rai_data_collector.data_feed_mode.channel3.type_upper" default="">
+            <export>"${module.middleware.rai_data_collector.data_feed_mode.channel3.type}".toUpperCase()</export>
+        </property>
+        <property display="Data Feed Mode|Channel 4|Name" id="module.middleware.rai_data_collector.data_feed_mode.channel4.name" default="dc${_instance}_data_feed_ch4" description="Channel name">
+            <constraint display="Must be valid C variable name">testSymbol("${module.middleware.rai_data_collector.data_feed_mode.channel4.name}")</constraint>
+        </property>
+        <property display="Data Feed Mode|Channel 4|Data Type" id="module.middleware.rai_data_collector.data_feed_mode.channel4.type" default="enum.driver.fsp_common.data_type.uint8" description="Channel Data Type">
+            <select enum="enum.driver.fsp_common.data_type"/>
+        </property>
+        <property id="module.middleware.rai_data_collector.data_feed_mode.channel4.type_upper" default="">
+            <export>"${module.middleware.rai_data_collector.data_feed_mode.channel4.type}".toUpperCase()</export>
+        </property>
+        <property display="Data Feed Mode|Channel 5|Name" id="module.middleware.rai_data_collector.data_feed_mode.channel5.name" default="dc${_instance}_data_feed_ch5" description="Channel name">
+            <constraint display="Must be valid C variable name">testSymbol("${module.middleware.rai_data_collector.data_feed_mode.channel5.name}")</constraint>
+        </property>
+        <property display="Data Feed Mode|Channel 5|Data Type" id="module.middleware.rai_data_collector.data_feed_mode.channel5.type" default="enum.driver.fsp_common.data_type.uint8" description="Channel Data Type">
+            <select enum="enum.driver.fsp_common.data_type"/>
+        </property>
+        <property id="module.middleware.rai_data_collector.data_feed_mode.channel5.type_upper" default="">
+            <export>"${module.middleware.rai_data_collector.data_feed_mode.channel5.type}".toUpperCase()</export>
+        </property>
+        <property display="Data Feed Mode|Channel 6|Name" id="module.middleware.rai_data_collector.data_feed_mode.channel6.name" default="dc${_instance}_data_feed_ch6" description="Channel name">
+            <constraint display="Must be valid C variable name">testSymbol("${module.middleware.rai_data_collector.data_feed_mode.channel6.name}")</constraint>
+        </property>
+        <property display="Data Feed Mode|Channel 6|Data Type" id="module.middleware.rai_data_collector.data_feed_mode.channel6.type" default="enum.driver.fsp_common.data_type.uint8" description="Channel Data Type">
+            <select enum="enum.driver.fsp_common.data_type"/>
+        </property>
+        <property id="module.middleware.rai_data_collector.data_feed_mode.channel6.type_upper" default="">
+            <export>"${module.middleware.rai_data_collector.data_feed_mode.channel6.type}".toUpperCase()</export>
+        </property>
+        <property display="Data Feed Mode|Channel 7|Name" id="module.middleware.rai_data_collector.data_feed_mode.channel7.name" default="dc${_instance}_data_feed_ch7" description="Channel name">
+            <constraint display="Must be valid C variable name">testSymbol("${module.middleware.rai_data_collector.data_feed_mode.channel7.name}")</constraint>
+        </property>
+        <property display="Data Feed Mode|Channel 7|Data Type" id="module.middleware.rai_data_collector.data_feed_mode.channel7.type" default="enum.driver.fsp_common.data_type.uint8" description="Channel Data Type">
+            <select enum="enum.driver.fsp_common.data_type"/>
+        </property>
+        <property id="module.middleware.rai_data_collector.data_feed_mode.channel7.type_upper" default="">
+            <export>"${module.middleware.rai_data_collector.data_feed_mode.channel7.type}".toUpperCase()</export>
+        </property>
+        <property display="Snapshot Mode|Channels" id="module.middleware.rai_data_collector.snapshot_mode.channels" default="0" description="Number of snapshot mode channels.">
+            <constraint display=" Value must be an integer between 0 and 8">
+                testInteger("${module.middleware.rai_data_collector.snapshot_mode.channels}")  &amp;&amp; (${module.middleware.rai_data_collector.snapshot_mode.channels} &lt;= 8) &amp;&amp; (${module.middleware.rai_data_collector.snapshot_mode.channels} &gt;= 0)
+            </constraint>
+        </property>
+        <property display="Snapshot Mode|DTC Transfer Count" id="module.middleware.rai_data_collector.snapshot_mode.count" default="1" description="DTC transfer count on each activation">
+            <constraint display="Value must be a positive integer greater than 0">
+                testInteger("${module.middleware.rai_data_collector.snapshot_mode.count}")  &amp;&amp; (${module.middleware.rai_data_collector.snapshot_mode.count} &gt; 0)
+            </constraint>
+        </property>
+        <property display="Snapshot Mode|Channel 0|Name" id="module.middleware.rai_data_collector.snapshot_mode.channel0.name" default="dc${_instance}_snapshot_ch0" description="Channel name">
+            <constraint display="Must be valid C variable name">testSymbol("${module.middleware.rai_data_collector.snapshot_mode.channel0.name}")</constraint>
+        </property>
+        <property display="Snapshot Mode|Channel 0|Data Type" id="module.middleware.rai_data_collector.snapshot_mode.channel0.type" default="enum.driver.fsp_common.data_type.uint8" description="Channel Data Type">
+            <select enum="enum.driver.fsp_common.data_type"/>
+        </property>
+        <property id="module.middleware.rai_data_collector.snapshot_mode.channel0.type_upper" default="">
+            <export>"${module.middleware.rai_data_collector.snapshot_mode.channel0.type}".toUpperCase()</export>
+        </property>
+        <property display="Snapshot Mode|Channel 1|Name" id="module.middleware.rai_data_collector.snapshot_mode.channel1.name" default="dc${_instance}_snapshot_ch1" description="Channel name">
+            <constraint display="Must be valid C variable name">testSymbol("${module.middleware.rai_data_collector.snapshot_mode.channel1.name}")</constraint>
+        </property>
+        <property display="Snapshot Mode|Channel 1|Data Type" id="module.middleware.rai_data_collector.snapshot_mode.channel1.type" default="enum.driver.fsp_common.data_type.uint8" description="Channel Data Type">
+            <select enum="enum.driver.fsp_common.data_type"/>
+        </property>
+        <property id="module.middleware.rai_data_collector.snapshot_mode.channel1.type_upper" default="">
+            <export>"${module.middleware.rai_data_collector.snapshot_mode.channel1.type}".toUpperCase()</export>
+        </property>
+        <property display="Snapshot Mode|Channel 2|Name" id="module.middleware.rai_data_collector.snapshot_mode.channel2.name" default="dc${_instance}_snapshot_ch2" description="Channel name">
+            <constraint display="Must be valid C variable name">testSymbol("${module.middleware.rai_data_collector.snapshot_mode.channel2.name}")</constraint>
+        </property>
+        <property display="Snapshot Mode|Channel 2|Data Type" id="module.middleware.rai_data_collector.snapshot_mode.channel2.type" default="enum.driver.fsp_common.data_type.uint8" description="Channel Data Type">
+            <select enum="enum.driver.fsp_common.data_type"/>
+        </property>
+        <property id="module.middleware.rai_data_collector.snapshot_mode.channel2.type_upper" default="">
+            <export>"${module.middleware.rai_data_collector.snapshot_mode.channel2.type}".toUpperCase()</export>
+        </property>
+        <property display="Snapshot Mode|Channel 3|Name" id="module.middleware.rai_data_collector.snapshot_mode.channel3.name" default="dc${_instance}_snapshot_ch3" description="Channel name">
+            <constraint display="Must be valid C variable name">testSymbol("${module.middleware.rai_data_collector.snapshot_mode.channel3.name}")</constraint>
+        </property>
+        <property display="Snapshot Mode|Channel 3|Data Type" id="module.middleware.rai_data_collector.snapshot_mode.channel3.type" default="enum.driver.fsp_common.data_type.uint8" description="Channel Data Type">
+            <select enum="enum.driver.fsp_common.data_type"/>
+        </property>
+        <property id="module.middleware.rai_data_collector.snapshot_mode.channel3.type_upper" default="">
+            <export>"${module.middleware.rai_data_collector.snapshot_mode.channel3.type}".toUpperCase()</export>
+        </property>
+        <property display="Snapshot Mode|Channel 4|Name" id="module.middleware.rai_data_collector.snapshot_mode.channel4.name" default="dc${_instance}_snapshot_ch4" description="Channel name">
+            <constraint display="Must be valid C variable name">testSymbol("${module.middleware.rai_data_collector.snapshot_mode.channel4.name}")</constraint>
+        </property>
+        <property display="Snapshot Mode|Channel 4|Data Type" id="module.middleware.rai_data_collector.snapshot_mode.channel4.type" default="enum.driver.fsp_common.data_type.uint8" description="Channel Data Type">
+            <select enum="enum.driver.fsp_common.data_type"/>
+        </property>
+        <property id="module.middleware.rai_data_collector.snapshot_mode.channel4.type_upper" default="">
+            <export>"${module.middleware.rai_data_collector.snapshot_mode.channel4.type}".toUpperCase()</export>
+        </property>
+        <property display="Snapshot Mode|Channel 5|Name" id="module.middleware.rai_data_collector.snapshot_mode.channel5.name" default="dc${_instance}_snapshot_ch5" description="Channel name">
+            <constraint display="Must be valid C variable name">testSymbol("${module.middleware.rai_data_collector.snapshot_mode.channel5.name}")</constraint>
+        </property>
+        <property display="Snapshot Mode|Channel 5|Data Type" id="module.middleware.rai_data_collector.snapshot_mode.channel5.type" default="enum.driver.fsp_common.data_type.uint8" description="Channel Data Type">
+            <select enum="enum.driver.fsp_common.data_type"/>
+        </property>
+        <property id="module.middleware.rai_data_collector.snapshot_mode.channel5.type_upper" default="">
+            <export>"${module.middleware.rai_data_collector.snapshot_mode.channel5.type}".toUpperCase()</export>
+        </property>
+        <property display="Snapshot Mode|Channel 6|Name" id="module.middleware.rai_data_collector.snapshot_mode.channel6.name" default="dc${_instance}_snapshot_ch6" description="Channel name">
+            <constraint display="Must be valid C variable name">testSymbol("${module.middleware.rai_data_collector.snapshot_mode.channel6.name}")</constraint>
+        </property>
+        <property display="Snapshot Mode|Channel 6|Data Type" id="module.middleware.rai_data_collector.snapshot_mode.channel6.type" default="enum.driver.fsp_common.data_type.uint8" description="Channel Data Type">
+            <select enum="enum.driver.fsp_common.data_type"/>
+        </property>
+        <property id="module.middleware.rai_data_collector.snapshot_mode.channel6.type_upper" default="">
+            <export>"${module.middleware.rai_data_collector.snapshot_mode.channel6.type}".toUpperCase()</export>
+        </property>
+        <property display="Snapshot Mode|Channel 7|Name" id="module.middleware.rai_data_collector.snapshot_mode.channel7.name" default="dc${_instance}_snapshot_ch7" description="Channel name">
+            <constraint display="Must be valid C variable name">testSymbol("${module.middleware.rai_data_collector.snapshot_mode.channel7.name}")</constraint>
+        </property>
+        <property display="Snapshot Mode|Channel 7|Data Type" id="module.middleware.rai_data_collector.snapshot_mode.channel7.type" default="enum.driver.fsp_common.data_type.uint8" description="Channel Data Type">
+            <select enum="enum.driver.fsp_common.data_type"/>
+        </property>
+        <property id="module.middleware.rai_data_collector.snapshot_mode.channel7.type_upper" default="">
+            <export>"${module.middleware.rai_data_collector.snapshot_mode.channel7.type}".toUpperCase()</export>
+        </property>
+        <header>
+/* RAI Data Collector Interface */
+extern const rai_data_collector_instance_t ${module.middleware.rai_data_collector.name};
+
+/** Access the RAI Data Collector instance using these structures
+    when calling API functions directly (::p_api is not used). */
+extern rai_data_collector_instance_ctrl_t ${module.middleware.rai_data_collector.name}_ctrl;
+
+extern const rai_data_collector_cfg_t ${module.middleware.rai_data_collector.name}_cfg;
+
+#ifndef ${module.middleware.rai_data_collector.p_callback}
+void ${module.middleware.rai_data_collector.p_callback}(const rai_data_collector_callback_args_t * p_args);
+#endif
+
+#ifndef ${module.middleware.rai_data_collector.p_error_callback}
+void ${module.middleware.rai_data_collector.p_error_callback}(const rai_data_collector_error_callback_args_t * p_args);
+#endif
+
+fsp_err_t ${module.middleware.rai_data_collector.name}_init();
+        </header>
+
+        <includes>
+#include &quot;rm_rai_data_collector.h&quot;
+        </includes>
+
+        <declarations>
+
+#define ${module.middleware.rai_data_collector.name_upper}_PING_PONG_BUFFER_LENGTH   (${module.middleware.rai_data_collector.frame_buf_length} * RAI_DATA_COLLECTOR_PING_PONG_BUFFER_SIZE)
+#define ${module.middleware.rai_data_collector.name_upper}_CHANNELS  (${module.middleware.rai_data_collector.snapshot_mode.channels} + ${module.middleware.rai_data_collector.data_feed_mode.channels})
+#define ${module.middleware.rai_data_collector.name_upper}_VIRT_CHANNELS (${module.middleware.rai_data_collector.data_feed_mode.channels} + 1)
+
+#if ${module.middleware.rai_data_collector.snapshot_mode.channels} > 0
+${module.middleware.rai_data_collector.snapshot_mode.channel0.type} ${module.middleware.rai_data_collector.name}_snapshot_channel0_frame_buffer[${module.middleware.rai_data_collector.name_upper}_PING_PONG_BUFFER_LENGTH] BSP_ALIGN_VARIABLE(RAI_DATA_COLLECTOR_PING_PONG_BUFFER_SIZE * ((RAI_DATA_COLLECTOR_DATA_TYPE_${module.middleware.rai_data_collector.snapshot_mode.channel0.type_upper} != RAI_DATA_COLLECTOR_DATA_TYPE_DOUBLE) ? 2 : 4));
+#endif
+
+#if ${module.middleware.rai_data_collector.snapshot_mode.channels} > 1
+${module.middleware.rai_data_collector.snapshot_mode.channel1.type} ${module.middleware.rai_data_collector.name}_snapshot_channel1_frame_buffer[${module.middleware.rai_data_collector.name_upper}_PING_PONG_BUFFER_LENGTH] BSP_ALIGN_VARIABLE(RAI_DATA_COLLECTOR_PING_PONG_BUFFER_SIZE * ((RAI_DATA_COLLECTOR_DATA_TYPE_${module.middleware.rai_data_collector.snapshot_mode.channel1.type_upper} != RAI_DATA_COLLECTOR_DATA_TYPE_DOUBLE) ? 2 : 4));
+#endif
+
+#if ${module.middleware.rai_data_collector.snapshot_mode.channels} > 2
+${module.middleware.rai_data_collector.snapshot_mode.channel2.type} ${module.middleware.rai_data_collector.name}_snapshot_channel2_frame_buffer[${module.middleware.rai_data_collector.name_upper}_PING_PONG_BUFFER_LENGTH] BSP_ALIGN_VARIABLE(RAI_DATA_COLLECTOR_PING_PONG_BUFFER_SIZE * ((RAI_DATA_COLLECTOR_DATA_TYPE_${module.middleware.rai_data_collector.snapshot_mode.channel2.type_upper} != RAI_DATA_COLLECTOR_DATA_TYPE_DOUBLE) ? 2 : 4));
+#endif
+
+#if ${module.middleware.rai_data_collector.snapshot_mode.channels} > 3
+${module.middleware.rai_data_collector.snapshot_mode.channel3.type} ${module.middleware.rai_data_collector.name}_snapshot_channel3_frame_buffer[${module.middleware.rai_data_collector.name_upper}_PING_PONG_BUFFER_LENGTH] BSP_ALIGN_VARIABLE(RAI_DATA_COLLECTOR_PING_PONG_BUFFER_SIZE * ((RAI_DATA_COLLECTOR_DATA_TYPE_${module.middleware.rai_data_collector.snapshot_mode.channel3.type_upper} != RAI_DATA_COLLECTOR_DATA_TYPE_DOUBLE) ? 2 : 4));
+#endif
+
+#if ${module.middleware.rai_data_collector.snapshot_mode.channels} > 4
+${module.middleware.rai_data_collector.snapshot_mode.channel4.type} ${module.middleware.rai_data_collector.name}_snapshot_channel4_frame_buffer[${module.middleware.rai_data_collector.name_upper}_PING_PONG_BUFFER_LENGTH] BSP_ALIGN_VARIABLE(RAI_DATA_COLLECTOR_PING_PONG_BUFFER_SIZE * ((RAI_DATA_COLLECTOR_DATA_TYPE_${module.middleware.rai_data_collector.snapshot_mode.channel4.type_upper} != RAI_DATA_COLLECTOR_DATA_TYPE_DOUBLE) ? 2 : 4));
+#endif
+
+#if ${module.middleware.rai_data_collector.snapshot_mode.channels} > 5
+${module.middleware.rai_data_collector.snapshot_mode.channel5.type} ${module.middleware.rai_data_collector.name}_snapshot_channel5_frame_buffer[${module.middleware.rai_data_collector.name_upper}_PING_PONG_BUFFER_LENGTH] BSP_ALIGN_VARIABLE(RAI_DATA_COLLECTOR_PING_PONG_BUFFER_SIZE * ((RAI_DATA_COLLECTOR_DATA_TYPE_${module.middleware.rai_data_collector.snapshot_mode.channel5.type_upper} != RAI_DATA_COLLECTOR_DATA_TYPE_DOUBLE) ? 2 : 4));
+#endif
+
+#if ${module.middleware.rai_data_collector.snapshot_mode.channels} > 6
+${module.middleware.rai_data_collector.snapshot_mode.channel6.type} ${module.middleware.rai_data_collector.name}_snapshot_channel6_frame_buffer[${module.middleware.rai_data_collector.name_upper}_PING_PONG_BUFFER_LENGTH] BSP_ALIGN_VARIABLE(RAI_DATA_COLLECTOR_PING_PONG_BUFFER_SIZE * ((RAI_DATA_COLLECTOR_DATA_TYPE_${module.middleware.rai_data_collector.snapshot_mode.channel6.type_upper} != RAI_DATA_COLLECTOR_DATA_TYPE_DOUBLE) ? 2 : 4));
+#endif
+
+#if ${module.middleware.rai_data_collector.snapshot_mode.channels} > 7
+${module.middleware.rai_data_collector.snapshot_mode.channel7.type} ${module.middleware.rai_data_collector.name}_snapshot_channel7_frame_buffer[${module.middleware.rai_data_collector.name_upper}_PING_PONG_BUFFER_LENGTH] BSP_ALIGN_VARIABLE(RAI_DATA_COLLECTOR_PING_PONG_BUFFER_SIZE * ((RAI_DATA_COLLECTOR_DATA_TYPE_${module.middleware.rai_data_collector.snapshot_mode.channel7.type_upper} != RAI_DATA_COLLECTOR_DATA_TYPE_DOUBLE) ? 2 : 4));
+#endif
+
+#if ${module.middleware.rai_data_collector.data_feed_mode.channels} > 0
+${module.middleware.rai_data_collector.data_feed_mode.channel0.type} ${module.middleware.rai_data_collector.name}_data_feed_channel0_frame_buffer[${module.middleware.rai_data_collector.name_upper}_PING_PONG_BUFFER_LENGTH] BSP_ALIGN_VARIABLE(RAI_DATA_COLLECTOR_PING_PONG_BUFFER_SIZE * ((RAI_DATA_COLLECTOR_DATA_TYPE_${module.middleware.rai_data_collector.data_feed_mode.channel0.type_upper} != RAI_DATA_COLLECTOR_DATA_TYPE_DOUBLE) ? 2 : 4));
+#endif
+
+#if ${module.middleware.rai_data_collector.data_feed_mode.channels} > 1
+${module.middleware.rai_data_collector.data_feed_mode.channel1.type} ${module.middleware.rai_data_collector.name}_data_feed_channel1_frame_buffer[${module.middleware.rai_data_collector.name_upper}_PING_PONG_BUFFER_LENGTH] BSP_ALIGN_VARIABLE(RAI_DATA_COLLECTOR_PING_PONG_BUFFER_SIZE * ((RAI_DATA_COLLECTOR_DATA_TYPE_${module.middleware.rai_data_collector.data_feed_mode.channel1.type_upper} != RAI_DATA_COLLECTOR_DATA_TYPE_DOUBLE) ? 2 : 4));
+#endif
+
+#if ${module.middleware.rai_data_collector.data_feed_mode.channels} > 2
+${module.middleware.rai_data_collector.data_feed_mode.channel2.type} ${module.middleware.rai_data_collector.name}_data_feed_channel2_frame_buffer[${module.middleware.rai_data_collector.name_upper}_PING_PONG_BUFFER_LENGTH] BSP_ALIGN_VARIABLE(RAI_DATA_COLLECTOR_PING_PONG_BUFFER_SIZE * ((RAI_DATA_COLLECTOR_DATA_TYPE_${module.middleware.rai_data_collector.data_feed_mode.channel2.type_upper} != RAI_DATA_COLLECTOR_DATA_TYPE_DOUBLE) ? 2 : 4));
+#endif
+
+#if ${module.middleware.rai_data_collector.data_feed_mode.channels} > 3
+${module.middleware.rai_data_collector.data_feed_mode.channel3.type} ${module.middleware.rai_data_collector.name}_data_feed_channel3_frame_buffer[${module.middleware.rai_data_collector.name_upper}_PING_PONG_BUFFER_LENGTH] BSP_ALIGN_VARIABLE(RAI_DATA_COLLECTOR_PING_PONG_BUFFER_SIZE * ((RAI_DATA_COLLECTOR_DATA_TYPE_${module.middleware.rai_data_collector.data_feed_mode.channel3.type_upper} != RAI_DATA_COLLECTOR_DATA_TYPE_DOUBLE) ? 2 : 4));
+#endif
+
+#if ${module.middleware.rai_data_collector.data_feed_mode.channels} > 4
+${module.middleware.rai_data_collector.data_feed_mode.channel4.type} ${module.middleware.rai_data_collector.name}_data_feed_channel4_frame_buffer[${module.middleware.rai_data_collector.name_upper}_PING_PONG_BUFFER_LENGTH] BSP_ALIGN_VARIABLE(RAI_DATA_COLLECTOR_PING_PONG_BUFFER_SIZE * ((RAI_DATA_COLLECTOR_DATA_TYPE_${module.middleware.rai_data_collector.data_feed_mode.channel4.type_upper} != RAI_DATA_COLLECTOR_DATA_TYPE_DOUBLE) ? 2 : 4));
+#endif
+
+#if ${module.middleware.rai_data_collector.data_feed_mode.channels} > 5
+${module.middleware.rai_data_collector.data_feed_mode.channel5.type} ${module.middleware.rai_data_collector.name}_data_feed_channel5_frame_buffer[${module.middleware.rai_data_collector.name_upper}_PING_PONG_BUFFER_LENGTH] BSP_ALIGN_VARIABLE(RAI_DATA_COLLECTOR_PING_PONG_BUFFER_SIZE * ((RAI_DATA_COLLECTOR_DATA_TYPE_${module.middleware.rai_data_collector.data_feed_mode.channel5.type_upper} != RAI_DATA_COLLECTOR_DATA_TYPE_DOUBLE) ? 2 : 4));
+#endif
+
+#if ${module.middleware.rai_data_collector.data_feed_mode.channels} > 6
+${module.middleware.rai_data_collector.data_feed_mode.channel6.type} ${module.middleware.rai_data_collector.name}_data_feed_channel6_frame_buffer[${module.middleware.rai_data_collector.name_upper}_PING_PONG_BUFFER_LENGTH] BSP_ALIGN_VARIABLE(RAI_DATA_COLLECTOR_PING_PONG_BUFFER_SIZE * ((RAI_DATA_COLLECTOR_DATA_TYPE_${module.middleware.rai_data_collector.data_feed_mode.channel6.type_upper} != RAI_DATA_COLLECTOR_DATA_TYPE_DOUBLE) ? 2 : 4));
+#endif
+
+#if ${module.middleware.rai_data_collector.data_feed_mode.channels} > 7
+${module.middleware.rai_data_collector.data_feed_mode.channel7.type} ${module.middleware.rai_data_collector.name}_data_feed_channel7_frame_buffer[${module.middleware.rai_data_collector.name_upper}_PING_PONG_BUFFER_LENGTH] BSP_ALIGN_VARIABLE(RAI_DATA_COLLECTOR_PING_PONG_BUFFER_SIZE * ((RAI_DATA_COLLECTOR_DATA_TYPE_${module.middleware.rai_data_collector.data_feed_mode.channel7.type_upper} != RAI_DATA_COLLECTOR_DATA_TYPE_DOUBLE) ? 2 : 4));
+#endif
+
+rai_data_collector_frame_buffer_t ${module.middleware.rai_data_collector.name}_frame_buf[${module.middleware.rai_data_collector.name_upper}_CHANNELS] =
+{
+
+#if ${module.middleware.rai_data_collector.data_feed_mode.channels} > 0
+    {
+        .p_buf = ${module.middleware.rai_data_collector.name}_data_feed_channel0_frame_buffer,
+        .data_type = RAI_DATA_COLLECTOR_DATA_TYPE_${module.middleware.rai_data_collector.data_feed_mode.channel0.type_upper},
+    },
+#endif
+#if ${module.middleware.rai_data_collector.data_feed_mode.channels} > 1
+    {
+        .p_buf = ${module.middleware.rai_data_collector.name}_data_feed_channel1_frame_buffer,
+        .data_type = RAI_DATA_COLLECTOR_DATA_TYPE_${module.middleware.rai_data_collector.data_feed_mode.channel1.type_upper},
+    },
+#endif
+#if ${module.middleware.rai_data_collector.data_feed_mode.channels} > 2
+    {
+        .p_buf = ${module.middleware.rai_data_collector.name}_data_feed_channel2_frame_buffer,
+        .data_type = RAI_DATA_COLLECTOR_DATA_TYPE_${module.middleware.rai_data_collector.data_feed_mode.channel2.type_upper},
+    },
+#endif
+#if ${module.middleware.rai_data_collector.data_feed_mode.channels} > 3
+    {
+        .p_buf = ${module.middleware.rai_data_collector.name}_data_feed_channel3_frame_buffer,
+        .data_type = RAI_DATA_COLLECTOR_DATA_TYPE_${module.middleware.rai_data_collector.data_feed_mode.channel3.type_upper},
+    },
+#endif
+#if ${module.middleware.rai_data_collector.data_feed_mode.channels} > 4
+    {
+        .p_buf = ${module.middleware.rai_data_collector.name}_data_feed_channel4_frame_buffer,
+        .data_type = RAI_DATA_COLLECTOR_DATA_TYPE_${module.middleware.rai_data_collector.data_feed_mode.channel4.type_upper},
+    },
+#endif
+#if ${module.middleware.rai_data_collector.data_feed_mode.channels} > 5
+    {
+        .p_buf = ${module.middleware.rai_data_collector.name}_data_feed_channel5_frame_buffer,
+        .data_type = RAI_DATA_COLLECTOR_DATA_TYPE_${module.middleware.rai_data_collector.data_feed_mode.channel5.type_upper},
+    },
+#endif
+#if ${module.middleware.rai_data_collector.data_feed_mode.channels} > 6
+    {
+        .p_buf = ${module.middleware.rai_data_collector.name}_data_feed_channel6_frame_buffer,
+        .data_type = RAI_DATA_COLLECTOR_DATA_TYPE_${module.middleware.rai_data_collector.data_feed_mode.channel6.type_upper},
+    },
+#endif
+#if ${module.middleware.rai_data_collector.data_feed_mode.channels} > 7
+    {
+        .p_buf = ${module.middleware.rai_data_collector.name}_data_feed_channel7_frame_buffer,
+        .data_type = RAI_DATA_COLLECTOR_DATA_TYPE_${module.middleware.rai_data_collector.data_feed_mode.channel7.type_upper},
+    },
+#endif
+
+#if ${module.middleware.rai_data_collector.snapshot_mode.channels} > 0
+    {
+        .p_buf = ${module.middleware.rai_data_collector.name}_snapshot_channel0_frame_buffer,
+        .data_type = RAI_DATA_COLLECTOR_DATA_TYPE_${module.middleware.rai_data_collector.snapshot_mode.channel0.type_upper},
+    },
+#endif
+#if ${module.middleware.rai_data_collector.snapshot_mode.channels} > 1
+    {
+        .p_buf = ${module.middleware.rai_data_collector.name}_snapshot_channel1_frame_buffer,
+        .data_type = RAI_DATA_COLLECTOR_DATA_TYPE_${module.middleware.rai_data_collector.snapshot_mode.channel1.type_upper},
+    },
+#endif
+#if ${module.middleware.rai_data_collector.snapshot_mode.channels} > 2
+    {
+        .p_buf = ${module.middleware.rai_data_collector.name}_snapshot_channel2_frame_buffer,
+        .data_type = RAI_DATA_COLLECTOR_DATA_TYPE_${module.middleware.rai_data_collector.snapshot_mode.channel2.type_upper},
+    },
+#endif
+#if ${module.middleware.rai_data_collector.snapshot_mode.channels} > 3
+    {
+        .p_buf = ${module.middleware.rai_data_collector.name}_snapshot_channel3_frame_buffer,
+        .data_type = RAI_DATA_COLLECTOR_DATA_TYPE_${module.middleware.rai_data_collector.snapshot_mode.channel3.type_upper},
+    },
+#endif
+#if ${module.middleware.rai_data_collector.snapshot_mode.channels} > 4
+    {
+        .p_buf = ${module.middleware.rai_data_collector.name}_snapshot_channel4_frame_buffer,
+        .data_type = RAI_DATA_COLLECTOR_DATA_TYPE_${module.middleware.rai_data_collector.snapshot_mode.channel4.type_upper},
+    },
+#endif
+#if ${module.middleware.rai_data_collector.snapshot_mode.channels} > 5
+    {
+        .p_buf = ${module.middleware.rai_data_collector.name}_snapshot_channel5_frame_buffer,
+        .data_type = RAI_DATA_COLLECTOR_DATA_TYPE_${module.middleware.rai_data_collector.snapshot_mode.channel5.type_upper},
+    },
+#endif
+#if ${module.middleware.rai_data_collector.snapshot_mode.channels} > 6
+    {
+        .p_buf = ${module.middleware.rai_data_collector.name}_snapshot_channel6_frame_buffer,
+        .data_type = RAI_DATA_COLLECTOR_DATA_TYPE_${module.middleware.rai_data_collector.snapshot_mode.channel6.type_upper},
+    },
+#endif
+#if ${module.middleware.rai_data_collector.snapshot_mode.channels} > 7
+    {
+        .p_buf = ${module.middleware.rai_data_collector.name}_snapshot_channel7_frame_buffer,
+        .data_type = RAI_DATA_COLLECTOR_DATA_TYPE_${module.middleware.rai_data_collector.snapshot_mode.channel7.type_upper},
+    },
+#endif
+};
+
+#if ${module.middleware.rai_data_collector.snapshot_mode.channels} > 0
+transfer_info_t ${module.middleware.rai_data_collector.name}_info[${module.middleware.rai_data_collector.snapshot_mode.channels}] DTC_TRANSFER_INFO_ALIGNMENT =
+{
+
+#if ${module.middleware.rai_data_collector.snapshot_mode.channels} > 0
+    {
+        .transfer_settings_word_b.dest_addr_mode = TRANSFER_ADDR_MODE_INCREMENTED,
+        .transfer_settings_word_b.src_addr_mode  = TRANSFER_ADDR_MODE_INCREMENTED,
+        .transfer_settings_word_b.repeat_area    = TRANSFER_REPEAT_AREA_SOURCE,
+        .transfer_settings_word_b.irq            = TRANSFER_IRQ_END,
+        .transfer_settings_word_b.chain_mode = (${module.middleware.rai_data_collector.snapshot_mode.channels} == 1) ? TRANSFER_CHAIN_MODE_DISABLED : TRANSFER_CHAIN_MODE_EACH,
+        .transfer_settings_word_b.mode       = TRANSFER_MODE_BLOCK,
+        .p_src      = (void const *) NULL,
+        .num_blocks = 1,
+        .transfer_settings_word_b.size = (RAI_DATA_COLLECTOR_DATA_TYPE_${module.middleware.rai_data_collector.snapshot_mode.channel0.type_upper} != RAI_DATA_COLLECTOR_DATA_TYPE_DOUBLE) ? (transfer_size_t)  ((RAI_DATA_COLLECTOR_DATA_TYPE_${module.middleware.rai_data_collector.snapshot_mode.channel0.type_upper} &amp; RAI_DATA_COLLECTOR_DATA_TYPE_SIZE_MASK) >> 1) : TRANSFER_SIZE_4_BYTE,
+        .length     = (RAI_DATA_COLLECTOR_DATA_TYPE_${module.middleware.rai_data_collector.snapshot_mode.channel0.type_upper} != RAI_DATA_COLLECTOR_DATA_TYPE_DOUBLE) ? ${module.middleware.rai_data_collector.snapshot_mode.count} : (${module.middleware.rai_data_collector.snapshot_mode.count} * 2),
+        .p_dest     = ${module.middleware.rai_data_collector.name}_snapshot_channel0_frame_buffer,
+    },
+#endif
+
+#if ${module.middleware.rai_data_collector.snapshot_mode.channels} > 1
+    {
+        .transfer_settings_word_b.dest_addr_mode = TRANSFER_ADDR_MODE_INCREMENTED,
+        .transfer_settings_word_b.src_addr_mode  = TRANSFER_ADDR_MODE_INCREMENTED,
+        .transfer_settings_word_b.repeat_area    = TRANSFER_REPEAT_AREA_SOURCE,
+        .transfer_settings_word_b.irq            = TRANSFER_IRQ_END,
+        .transfer_settings_word_b.chain_mode = (${module.middleware.rai_data_collector.snapshot_mode.channels} == 2) ? TRANSFER_CHAIN_MODE_DISABLED : TRANSFER_CHAIN_MODE_EACH,
+        .transfer_settings_word_b.mode       = TRANSFER_MODE_BLOCK,
+        .p_src      = (void const *) NULL,
+        .num_blocks = 1,
+        .transfer_settings_word_b.size = (RAI_DATA_COLLECTOR_DATA_TYPE_${module.middleware.rai_data_collector.snapshot_mode.channel1.type_upper} != RAI_DATA_COLLECTOR_DATA_TYPE_DOUBLE) ? (transfer_size_t)  ((RAI_DATA_COLLECTOR_DATA_TYPE_${module.middleware.rai_data_collector.snapshot_mode.channel1.type_upper} &amp; RAI_DATA_COLLECTOR_DATA_TYPE_SIZE_MASK) >> 1) : TRANSFER_SIZE_4_BYTE,
+        .length     = (RAI_DATA_COLLECTOR_DATA_TYPE_${module.middleware.rai_data_collector.snapshot_mode.channel1.type_upper} != RAI_DATA_COLLECTOR_DATA_TYPE_DOUBLE) ? ${module.middleware.rai_data_collector.snapshot_mode.count} : (${module.middleware.rai_data_collector.snapshot_mode.count} * 2),
+        .p_dest     = ${module.middleware.rai_data_collector.name}_snapshot_channel1_frame_buffer,
+    },
+#endif
+
+#if ${module.middleware.rai_data_collector.snapshot_mode.channels} > 2
+    {
+        .transfer_settings_word_b.dest_addr_mode = TRANSFER_ADDR_MODE_INCREMENTED,
+        .transfer_settings_word_b.src_addr_mode  = TRANSFER_ADDR_MODE_INCREMENTED,
+        .transfer_settings_word_b.repeat_area    = TRANSFER_REPEAT_AREA_SOURCE,
+        .transfer_settings_word_b.irq            = TRANSFER_IRQ_END,
+        .transfer_settings_word_b.chain_mode = (${module.middleware.rai_data_collector.snapshot_mode.channels} == 3) ? TRANSFER_CHAIN_MODE_DISABLED : TRANSFER_CHAIN_MODE_EACH,
+        .transfer_settings_word_b.mode       = TRANSFER_MODE_BLOCK,
+        .p_src      = (void const *) NULL,
+        .num_blocks = 1,
+        .transfer_settings_word_b.size = (RAI_DATA_COLLECTOR_DATA_TYPE_${module.middleware.rai_data_collector.snapshot_mode.channel2.type_upper} != RAI_DATA_COLLECTOR_DATA_TYPE_DOUBLE) ? (transfer_size_t)  ((RAI_DATA_COLLECTOR_DATA_TYPE_${module.middleware.rai_data_collector.snapshot_mode.channel2.type_upper} &amp; RAI_DATA_COLLECTOR_DATA_TYPE_SIZE_MASK) >> 1) : TRANSFER_SIZE_4_BYTE,
+        .length     = (RAI_DATA_COLLECTOR_DATA_TYPE_${module.middleware.rai_data_collector.snapshot_mode.channel2.type_upper} != RAI_DATA_COLLECTOR_DATA_TYPE_DOUBLE) ? ${module.middleware.rai_data_collector.snapshot_mode.count} : (${module.middleware.rai_data_collector.snapshot_mode.count} * 2),
+        .p_dest     = ${module.middleware.rai_data_collector.name}_snapshot_channel2_frame_buffer,
+    },
+#endif
+
+#if ${module.middleware.rai_data_collector.snapshot_mode.channels} > 3
+    {
+        .transfer_settings_word_b.dest_addr_mode = TRANSFER_ADDR_MODE_INCREMENTED,
+        .transfer_settings_word_b.src_addr_mode  = TRANSFER_ADDR_MODE_INCREMENTED,
+        .transfer_settings_word_b.repeat_area    = TRANSFER_REPEAT_AREA_SOURCE,
+        .transfer_settings_word_b.irq            = TRANSFER_IRQ_END,
+        .transfer_settings_word_b.chain_mode = (${module.middleware.rai_data_collector.snapshot_mode.channels} == 4) ? TRANSFER_CHAIN_MODE_DISABLED : TRANSFER_CHAIN_MODE_EACH,
+        .transfer_settings_word_b.mode       = TRANSFER_MODE_BLOCK,
+        .p_src      = (void const *) NULL,
+        .num_blocks = 1,
+        .transfer_settings_word_b.size = (RAI_DATA_COLLECTOR_DATA_TYPE_${module.middleware.rai_data_collector.snapshot_mode.channel3.type_upper} != RAI_DATA_COLLECTOR_DATA_TYPE_DOUBLE) ? (transfer_size_t)  ((RAI_DATA_COLLECTOR_DATA_TYPE_${module.middleware.rai_data_collector.snapshot_mode.channel3.type_upper} &amp; RAI_DATA_COLLECTOR_DATA_TYPE_SIZE_MASK) >> 1) : TRANSFER_SIZE_4_BYTE,
+        .length     = (RAI_DATA_COLLECTOR_DATA_TYPE_${module.middleware.rai_data_collector.snapshot_mode.channel3.type_upper} != RAI_DATA_COLLECTOR_DATA_TYPE_DOUBLE) ? ${module.middleware.rai_data_collector.snapshot_mode.count} : (${module.middleware.rai_data_collector.snapshot_mode.count} * 2),
+        .p_dest     = ${module.middleware.rai_data_collector.name}_snapshot_channel3_frame_buffer,
+    },
+#endif
+
+#if ${module.middleware.rai_data_collector.snapshot_mode.channels} > 4
+    {
+        .transfer_settings_word_b.dest_addr_mode = TRANSFER_ADDR_MODE_INCREMENTED,
+        .transfer_settings_word_b.src_addr_mode  = TRANSFER_ADDR_MODE_INCREMENTED,
+        .transfer_settings_word_b.repeat_area    = TRANSFER_REPEAT_AREA_SOURCE,
+        .transfer_settings_word_b.irq            = TRANSFER_IRQ_END,
+        .transfer_settings_word_b.chain_mode = (${module.middleware.rai_data_collector.snapshot_mode.channels} == 5) ? TRANSFER_CHAIN_MODE_DISABLED : TRANSFER_CHAIN_MODE_EACH,
+        .transfer_settings_word_b.mode       = TRANSFER_MODE_BLOCK,
+        .p_src      = (void const *) NULL,
+        .num_blocks = 1,
+        .transfer_settings_word_b.size = (RAI_DATA_COLLECTOR_DATA_TYPE_${module.middleware.rai_data_collector.snapshot_mode.channel4.type_upper} != RAI_DATA_COLLECTOR_DATA_TYPE_DOUBLE) ? (transfer_size_t)  ((RAI_DATA_COLLECTOR_DATA_TYPE_${module.middleware.rai_data_collector.snapshot_mode.channel4.type_upper} &amp; RAI_DATA_COLLECTOR_DATA_TYPE_SIZE_MASK) >> 1) : TRANSFER_SIZE_4_BYTE,
+        .length     = (RAI_DATA_COLLECTOR_DATA_TYPE_${module.middleware.rai_data_collector.snapshot_mode.channel4.type_upper} != RAI_DATA_COLLECTOR_DATA_TYPE_DOUBLE) ? ${module.middleware.rai_data_collector.snapshot_mode.count} : (${module.middleware.rai_data_collector.snapshot_mode.count} * 2),
+        .p_dest     = ${module.middleware.rai_data_collector.name}_snapshot_channel4_frame_buffer,
+    },
+#endif
+
+#if ${module.middleware.rai_data_collector.snapshot_mode.channels} > 5
+    {
+        .transfer_settings_word_b.dest_addr_mode = TRANSFER_ADDR_MODE_INCREMENTED,
+        .transfer_settings_word_b.src_addr_mode  = TRANSFER_ADDR_MODE_INCREMENTED,
+        .transfer_settings_word_b.repeat_area    = TRANSFER_REPEAT_AREA_SOURCE,
+        .transfer_settings_word_b.irq            = TRANSFER_IRQ_END,
+        .transfer_settings_word_b.chain_mode = (${module.middleware.rai_data_collector.snapshot_mode.channels} == 6) ? TRANSFER_CHAIN_MODE_DISABLED : TRANSFER_CHAIN_MODE_EACH,
+        .transfer_settings_word_b.mode       = TRANSFER_MODE_BLOCK,
+        .p_src      = (void const *) NULL,
+        .num_blocks = 1,
+        .transfer_settings_word_b.size = (RAI_DATA_COLLECTOR_DATA_TYPE_${module.middleware.rai_data_collector.snapshot_mode.channel5.type_upper} != RAI_DATA_COLLECTOR_DATA_TYPE_DOUBLE) ? (transfer_size_t)  ((RAI_DATA_COLLECTOR_DATA_TYPE_${module.middleware.rai_data_collector.snapshot_mode.channel5.type_upper} &amp; RAI_DATA_COLLECTOR_DATA_TYPE_SIZE_MASK) >> 1) : TRANSFER_SIZE_4_BYTE,
+        .length     = (RAI_DATA_COLLECTOR_DATA_TYPE_${module.middleware.rai_data_collector.snapshot_mode.channel5.type_upper} != RAI_DATA_COLLECTOR_DATA_TYPE_DOUBLE) ? ${module.middleware.rai_data_collector.snapshot_mode.count} : (${module.middleware.rai_data_collector.snapshot_mode.count} * 2),
+        .p_dest     = ${module.middleware.rai_data_collector.name}_snapshot_channel5_frame_buffer,
+    },
+#endif
+
+#if ${module.middleware.rai_data_collector.snapshot_mode.channels} > 6
+    {
+        .transfer_settings_word_b.dest_addr_mode = TRANSFER_ADDR_MODE_INCREMENTED,
+        .transfer_settings_word_b.src_addr_mode  = TRANSFER_ADDR_MODE_INCREMENTED,
+        .transfer_settings_word_b.repeat_area    = TRANSFER_REPEAT_AREA_SOURCE,
+        .transfer_settings_word_b.irq            = TRANSFER_IRQ_END,
+        .transfer_settings_word_b.chain_mode = (${module.middleware.rai_data_collector.snapshot_mode.channels} == 7) ? TRANSFER_CHAIN_MODE_DISABLED : TRANSFER_CHAIN_MODE_EACH,
+        .transfer_settings_word_b.mode       = TRANSFER_MODE_BLOCK,
+        .p_src      = (void const *) NULL,
+        .num_blocks = 1,
+        .transfer_settings_word_b.size = (RAI_DATA_COLLECTOR_DATA_TYPE_${module.middleware.rai_data_collector.snapshot_mode.channel6.type_upper} != RAI_DATA_COLLECTOR_DATA_TYPE_DOUBLE) ? (transfer_size_t)  ((RAI_DATA_COLLECTOR_DATA_TYPE_${module.middleware.rai_data_collector.snapshot_mode.channel6.type_upper} &amp; RAI_DATA_COLLECTOR_DATA_TYPE_SIZE_MASK) >> 1) : TRANSFER_SIZE_4_BYTE,
+        .length     = (RAI_DATA_COLLECTOR_DATA_TYPE_${module.middleware.rai_data_collector.snapshot_mode.channel6.type_upper} != RAI_DATA_COLLECTOR_DATA_TYPE_DOUBLE) ? ${module.middleware.rai_data_collector.snapshot_mode.count} : (${module.middleware.rai_data_collector.snapshot_mode.count} * 2),
+        .p_dest     = ${module.middleware.rai_data_collector.name}_snapshot_channel6_frame_buffer,
+    },
+#endif
+
+#if ${module.middleware.rai_data_collector.snapshot_mode.channels} > 7
+    {
+        .transfer_settings_word_b.dest_addr_mode = TRANSFER_ADDR_MODE_INCREMENTED,
+        .transfer_settings_word_b.src_addr_mode  = TRANSFER_ADDR_MODE_INCREMENTED,
+        .transfer_settings_word_b.repeat_area    = TRANSFER_REPEAT_AREA_SOURCE,
+        .transfer_settings_word_b.irq            = TRANSFER_IRQ_END,
+        .transfer_settings_word_b.chain_mode =  TRANSFER_CHAIN_MODE_DISABLED,
+        .transfer_settings_word_b.mode       = TRANSFER_MODE_BLOCK,
+        .p_src      = (void const *) NULL,
+        .num_blocks = 1,
+        .transfer_settings_word_b.size = (RAI_DATA_COLLECTOR_DATA_TYPE_${module.middleware.rai_data_collector.snapshot_mode.channel7.type_upper} != RAI_DATA_COLLECTOR_DATA_TYPE_DOUBLE) ? (transfer_size_t)  ((RAI_DATA_COLLECTOR_DATA_TYPE_${module.middleware.rai_data_collector.snapshot_mode.channel7.type_upper} &amp; RAI_DATA_COLLECTOR_DATA_TYPE_SIZE_MASK) >> 1) : TRANSFER_SIZE_4_BYTE,
+        .length     = (RAI_DATA_COLLECTOR_DATA_TYPE_${module.middleware.rai_data_collector.snapshot_mode.channel7.type_upper} != RAI_DATA_COLLECTOR_DATA_TYPE_DOUBLE) ? ${module.middleware.rai_data_collector.snapshot_mode.count} : (${module.middleware.rai_data_collector.snapshot_mode.count} * 2),
+        .p_dest     = ${module.middleware.rai_data_collector.name}_snapshot_channel7_frame_buffer,
+    },
+#endif
+};
+#endif
+
+rai_data_collector_frame_buffer_handle_t ${module.middleware.rai_data_collector.name}_frame_buf_hnd[${module.middleware.rai_data_collector.name_upper}_VIRT_CHANNELS];
+
+rai_data_collector_extended_cfg_t ${module.middleware.rai_data_collector.name}_extended_cfg =
+{
+    .p_ping_pong_buf = ${module.middleware.rai_data_collector.name}_frame_buf,
+    .p_ping_pong_buf_hnd = ${module.middleware.rai_data_collector.name}_frame_buf_hnd,
+#if ${module.middleware.rai_data_collector.snapshot_mode.channels} > 0
+    .p_transfer_info = ${module.middleware.rai_data_collector.name}_info,
+#else
+    .p_transfer_info = NULL,
+#endif
+};
+
+rai_data_collector_instance_ctrl_t ${module.middleware.rai_data_collector.name}_ctrl;
+
+const rai_data_collector_snapshot_cfg_t ${module.middleware.rai_data_collector.name}_ss_cfg =
+{
+    .channels = ${module.middleware.rai_data_collector.snapshot_mode.channels},
+    .transfer_len = ${module.middleware.rai_data_collector.snapshot_mode.count},
+    #define RA_NOT_DEFINED (1)
+    #if (RA_NOT_DEFINED == ${module.middleware.rai_data_collector.requires.timer::module.driver.timer.name})
+    .p_timer = NULL,
+    #else
+    .p_timer = &amp;${module.middleware.rai_data_collector.requires.timer::module.driver.timer.name},
+    #endif
+    #if (RA_NOT_DEFINED == ${module.middleware.rai_data_collector.requires.transfer::module.driver.transfer.name})
+    .p_transfer = NULL,
+    #else
+    .p_transfer = &amp;${module.middleware.rai_data_collector.requires.transfer::module.driver.transfer.name},
+    #endif
+    #undef RA_NOT_DEFINED
+};
+
+const rai_data_collector_data_feed_cfg_t ${module.middleware.rai_data_collector.name}_df_cfg =
+{
+    .channels = ${module.middleware.rai_data_collector.data_feed_mode.channels},
+};
+
+const rai_data_collector_cfg_t ${module.middleware.rai_data_collector.name}_cfg =
+{
+    .instance_id = ${module.middleware.rai_data_collector.instance},
+    .channels = ${module.middleware.rai_data_collector.name_upper}_CHANNELS,
+    .channel_ready_mask = ${module.middleware.rai_data_collector.channel_ready_mask},
+    .virt_channels = ${module.middleware.rai_data_collector.name_upper}_VIRT_CHANNELS,
+    .required_frame_len = ${module.middleware.rai_data_collector.frame_buf_length},
+    .p_snapshot_cfg = &amp;${module.middleware.rai_data_collector.name}_ss_cfg,
+    .p_data_feed_cfg = &amp;${module.middleware.rai_data_collector.name}_df_cfg,
+    .p_extend = &amp;${module.middleware.rai_data_collector.name}_extended_cfg,
+    .p_callback = ${module.middleware.rai_data_collector.p_callback},
+    .p_error_callback = ${module.middleware.rai_data_collector.p_error_callback},
+    /** If NULL then do not add &amp; */
+#if defined(${module.middleware.rai_data_collector.p_context})
+    .p_context = ${module.middleware.rai_data_collector.p_context},
+#else
+    .p_context = &amp;${module.middleware.rai_data_collector.p_context},
+#endif
+};
+
+/* Instance structure to use Data Collector module. */
+const rai_data_collector_instance_t ${module.middleware.rai_data_collector.name} =
+{
+  .p_ctrl = &amp;${module.middleware.rai_data_collector.name}_ctrl,
+  .p_cfg  = &amp;${module.middleware.rai_data_collector.name}_cfg,
+  .p_api  = &amp;g_dc_on_rai_data_collector,
+};
+
+        </declarations>
+    </module>
+</raModuleDescription>

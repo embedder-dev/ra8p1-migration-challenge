@@ -1,0 +1,196 @@
+<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.driver.comms_uart" path="fsp_cfg/rm_comms_uart_cfg.h" version="0">
+        <property default="config.driver.comms_uart.param_checking_enable.bsp" display="Parameter Checking" id="config.driver.comms_uart.param_checking_enable" description="If selected code for parameter checking is included in the build.">
+            <option display="Default (BSP)" id="config.driver.comms_uart.param_checking_enable.bsp" value="(BSP_CFG_PARAM_CHECKING_ENABLE)"/>
+            <option display="Enabled" id="config.driver.comms_uart.param_checking_enable.enabled" value="(1)"/>
+            <option display="Disabled" id="config.driver.comms_uart.param_checking_enable.disabled" value="(0)"/>
+        </property>
+
+        <content>
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#define RM_COMMS_UART_CFG_PARAM_CHECKING_ENABLE          ${config.driver.comms_uart.param_checking_enable}
+
+#ifdef __cplusplus
+}
+#endif
+        </content>
+    </config>
+
+    <!-- UART Communication Device -->
+    <module config="config.driver.comms_uart" display="Connectivity|${module.driver.rm_comms.name} UART Communication Device (rm_comms_uart)" id="module.driver.rm_comms_on_uart" version="1" url="group___r_m___c_o_m_m_s___u_a_r_t.html">
+        <constraint display="Unique name required for each instance">
+            "${interface.driver.rm_comms.${module.driver.rm_comms.name}}" === "1"
+        </constraint>
+        <constraint display="Common|General|Use Mutexes must be Enabled in FreeRTOS Thread">
+          ("${config.awsfreertos.thread.configuse_mutexes}" === "config.awsfreertos.thread.configuse_mutexes.enabled") ||
+            !testExists("${interface.rtos.awsfreertos}")
+        </constraint>
+        <constraint display="Common|General|Use Recursive Mutexes must be Enabled in FreeRTOS Thread">
+          ("${config.awsfreertos.thread.configuse_recursive_mutexes}" === "config.awsfreertos.thread.configuse_recursive_mutexes.enabled") ||
+            !testExists("${interface.rtos.awsfreertos}")
+        </constraint>
+        <constraint display="Requires a UART Peripheral">
+            testExists("${interface.driver.uart}")
+        </constraint>
+        <requires id="module.driver.comms_uart.requires.uart" interface="interface.driver.uart" display="" find="true">
+            <override property="module.driver.uart.callback" value="NULL"/>
+        </requires>
+        <provides interface="interface.driver.rm_comms" />
+        <provides interface="interface.driver.rm_comms_on_rm_rai_ds" />
+        <provides interface="interface.driver.rm_comms_on_uart" />
+        <provides interface="interface.driver.rm_comms.${module.driver.rm_comms.name}" />
+        <property default="g_comms_uart${_instance}" display="Name" id="module.driver.rm_comms.name" description="Module name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.rm_comms.name}")</constraint>
+        </property>
+        <property default="module.driver.comms_uart.tx_mutex.use" display="RTOS|Recursive Write Mutex" id="module.driver.comms_uart.tx_mutex" description="Lock device for writing in using RTOS.">
+            <option display="Do Not Use" id="module.driver.comms_uart.tx_mutex.unuse" value="NULL"/>
+            <option display="Use" id="module.driver.comms_uart.tx_mutex.use" value="${module.driver.rm_comms.name}_tx_mutex"/>
+        </property>
+        <property default="module.driver.comms_uart.rx_mutex.use" display="RTOS|Recursive Read Mutex" id="module.driver.comms_uart.rx_mutex" description="Lock device for reading in using RTOS.">
+            <option display="Do Not Use" id="module.driver.comms_uart.rx_mutex.unuse" value="NULL"/>
+            <option display="Use" id="module.driver.comms_uart.rx_mutex.use" value="${module.driver.rm_comms.name}_rx_mutex"/>
+        </property>
+        <property default="0xFFFFFFFF" display="RTOS|Mutex Timeout" id="module.driver.comms_uart.mutex_timeout" description="Timeout for recursive mutex operation in using RTOS.">
+            <constraint display="Value must be a non-negative integer">testInteger("${module.driver.comms_uart.mutex_timeout}")  &amp;&amp; ("${module.driver.comms_uart.mutex_timeout}" &gt;= 0)</constraint>
+        </property>
+        <property default="module.driver.comms_uart.tx_semaphore.use" display="RTOS|Write Semaphore" id="module.driver.comms_uart.tx_semaphore" description="Block writing in using RTOS.">
+            <option display="Do Not Use" id="module.driver.comms_uart.tx_semaphore.unuse" value="NULL"/>
+            <option display="Use" id="module.driver.comms_uart.tx_semaphore.use" value="${module.driver.rm_comms.name}_tx_semaphore"/>
+        </property>
+        <property default="module.driver.comms_uart.rx_semaphore.use" display="RTOS|Read Semaphore" id="module.driver.comms_uart.rx_semaphore" description="Block reading in using RTOS.">
+            <option display="Do Not Use" id="module.driver.comms_uart.rx_semaphore.unuse" value="NULL"/>
+            <option display="Use" id="module.driver.comms_uart.rx_semaphore.use" value="${module.driver.rm_comms.name}_rx_semaphore"/>
+        </property>
+        <property default="0xFFFFFFFF" display="RTOS|Semaphore Timeout" id="module.driver.comms_uart.semaphore_timeout" description="Timeout for semaphore operation in using RTOS.">
+            <constraint display="Value must be a non-negative integer">testInteger("${module.driver.comms_uart.semaphore_timeout}")  &amp;&amp; ("${module.driver.comms_uart.semaphore_timeout}" &gt;= 0)</constraint>
+        </property>
+        <property default="NULL" display="Callback" id="module.driver.comms_uart.p_callback" description="A user callback function can be provided.">
+            <constraint display="Name must be a valid C symbol">
+                testSymbol("${module.driver.comms_uart.p_callback}")
+            </constraint>
+        </property>
+
+        <header>
+/* UART Communication Device */
+extern const rm_comms_instance_t ${module.driver.rm_comms.name};
+extern rm_comms_uart_instance_ctrl_t ${module.driver.rm_comms.name}_ctrl;
+extern const rm_comms_cfg_t ${module.driver.rm_comms.name}_cfg;
+
+#ifndef ${module.driver.comms_uart.p_callback}
+void ${module.driver.comms_uart.p_callback}(rm_comms_callback_args_t * p_args);
+#endif
+        </header>
+        <includes>
+#include &quot;../ra/fsp/src/rm_comms_lock/rm_comms_lock.h&quot;
+#include &quot;rm_comms_uart.h&quot;
+#include &quot;rm_comms_api.h&quot;
+        </includes>
+        <declarations>
+/* UART Communication Device */
+
+rm_comms_uart_instance_ctrl_t ${module.driver.rm_comms.name}_ctrl;
+
+#if BSP_CFG_RTOS == 1 // ThreadX
+
+ #if !defined(${module.driver.comms_uart.tx_mutex})
+ rm_comms_mutex_t ${module.driver.comms_uart.tx_mutex} =
+ {
+     .p_name = &quot;${module.driver.rm_comms.name} tx mutex&quot;,
+ };
+ #endif
+
+ #if !defined(${module.driver.comms_uart.rx_mutex})
+ rm_comms_mutex_t ${module.driver.comms_uart.rx_mutex} =
+ {
+     .p_name = &quot;${module.driver.rm_comms.name} rx mutex&quot;,
+ };
+ #endif
+
+ #if !defined(${module.driver.comms_uart.tx_semaphore})
+ rm_comms_semaphore_t ${module.driver.comms_uart.tx_semaphore} =
+ {
+     .p_name = &quot;${module.driver.rm_comms.name} tx semaphore&quot;,
+ };
+ #endif
+
+  #if !defined(${module.driver.comms_uart.rx_semaphore})
+ rm_comms_semaphore_t ${module.driver.comms_uart.rx_semaphore} =
+ {
+     .p_name = &quot;${module.driver.rm_comms.name} rx semaphore&quot;,
+ };
+ #endif
+
+#elif BSP_CFG_RTOS == 2 // FreeRTOS
+
+#if !defined(${module.driver.comms_uart.tx_mutex})
+rm_comms_mutex_t ${module.driver.comms_uart.tx_mutex};
+#endif
+
+#if !defined(${module.driver.comms_uart.rx_mutex})
+rm_comms_mutex_t ${module.driver.comms_uart.rx_mutex};
+#endif
+#if !defined(${module.driver.comms_uart.tx_semaphore})
+rm_comms_semaphore_t ${module.driver.comms_uart.tx_semaphore};
+#endif
+
+#if !defined(${module.driver.comms_uart.rx_semaphore})
+rm_comms_semaphore_t ${module.driver.comms_uart.rx_semaphore};
+#endif
+
+#else
+
+#endif
+
+rm_comms_uart_extended_cfg_t ${module.driver.rm_comms.name}_extended_cfg =
+{
+#if BSP_CFG_RTOS
+
+#if !defined(${module.driver.comms_uart.tx_mutex})
+    .p_tx_mutex = &amp;${module.driver.comms_uart.tx_mutex},
+#else
+    .p_tx_mutex = NULL,
+#endif
+
+#if !defined(${module.driver.comms_uart.rx_mutex})
+    .p_rx_mutex = &amp;${module.driver.comms_uart.rx_mutex},
+#else
+    .p_rx_mutex = NULL,
+#endif
+
+#if !defined(${module.driver.comms_uart.tx_semaphore})
+    .p_tx_semaphore = &amp;${module.driver.comms_uart.tx_semaphore},
+#else
+    .p_tx_semaphore = NULL,
+#endif
+
+#if !defined(${module.driver.comms_uart.rx_semaphore})
+    .p_rx_semaphore = &amp;${module.driver.comms_uart.rx_semaphore},
+#else
+    .p_rx_semaphore = NULL,
+#endif
+    .mutex_timeout  = ${module.driver.comms_uart.mutex_timeout},
+#endif
+    .p_uart = &amp;${module.driver.comms_uart.requires.uart::module.driver.uart.name},
+};
+
+const rm_comms_cfg_t ${module.driver.rm_comms.name}_cfg =
+{
+    .semaphore_timeout  = ${module.driver.comms_uart.semaphore_timeout},
+    .p_lower_level_cfg  = NULL,
+    .p_extend           = (void*)&amp;${module.driver.rm_comms.name}_extended_cfg,
+    .p_callback         = ${module.driver.comms_uart.p_callback},
+};
+
+const rm_comms_instance_t ${module.driver.rm_comms.name} =
+{
+    .p_ctrl = &amp;${module.driver.rm_comms.name}_ctrl,
+    .p_cfg  = &amp;${module.driver.rm_comms.name}_cfg,
+    .p_api  = &amp;g_comms_on_comms_uart,
+};
+        </declarations>
+    </module>
+</raModuleDescription>

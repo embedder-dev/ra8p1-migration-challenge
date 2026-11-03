@@ -1,0 +1,261 @@
+﻿<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.middleware.motor_inertia_estimate" path="fsp_cfg/rm_motor_inertia_estimate_cfg.h" version="0">
+        <property default="config.middleware.motor_inertia_estimate.param_checking_enable.bsp" display="Parameter Checking" id="config.middleware.motor_inertia_estimate.param_checking_enable" description="If selected code for parameter checking is included in the build.">
+            <option display="Default (BSP)" id="config.middleware.motor_inertia_estimate.param_checking_enable.bsp" value="(BSP_CFG_PARAM_CHECKING_ENABLE)"/>
+            <option display="Enabled" id="config.middleware.motor_inertia_estimate.param_checking_enable.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.motor_inertia_estimate.param_checking_enable.disabled" value="(0)"/>
+        </property>
+
+        <content>
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#define MOTOR_INERTIA_ESTIMATE_CFG_PARAM_CHECKING_ENABLE   ${config.middleware.motor_inertia_estimate.param_checking_enable}
+
+#ifdef __cplusplus
+}
+#endif
+        </content>
+    </config>
+    <module config="config.middleware.motor_inertia_estimate" display="Motor| Motor inertia estimation (rm_motor_inertia_estimate)" id="module.middleware.motor_inertia_estimate" version="1" url="group___m_o_t_o_r___i_n_e_r_t_i_a___e_s_t_i_m_a_t_e.html">
+        <constraint display="Unique name required for each instance">
+            ("${interface.middleware.motor_inertia_estimate.${module.middleware.motor_inertia_estimate.name}}" === "1")
+        </constraint>
+        <constraint display="High threshold should be greater than low threshold">
+            ("${module.middleware.motor_inertia_estimate.high_thresh}" &gt; "${module.middleware.motor_inertia_estimate.low_thresh}")
+        </constraint>
+        <!-- motor_inertia_estimate configuration -->
+        <provides interface="interface.middleware.motor_inertia_estimate" />
+        <provides interface="interface.middleware.motor_inertia_estimate.${module.middleware.motor_inertia_estimate.name}" />
+
+        <!-- Module Name -->
+        <property default="g_motor_inertia_estimate${_instance}" display="General|Name" id="module.middleware.motor_inertia_estimate.name" description="Module name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.middleware.motor_inertia_estimate.name}")</constraint>
+        </property>
+
+        <property display="Moved position distance to measure (degree)" id="module.middleware.motor_inertia_estimate.pos_degree" default="360" description="Moved position distance to measure inertia (degree)">
+            <constraint display="Must be set -360 to -10 or 10 to 360.">
+                testInteger("${module.middleware.motor_inertia_estimate.pos_degree}") &amp;&amp; ((("${module.middleware.motor_inertia_estimate.pos_degree}" &gt;= -360) &amp;&amp; ("${module.middleware.motor_inertia_estimate.pos_degree}" &lt;= -10)) ||
+                (("${module.middleware.motor_inertia_estimate.pos_degree}" &gt;= 10) &amp;&amp; ("${module.middleware.motor_inertia_estimate.pos_degree}" &lt;= 360)))</constraint>
+        </property>
+        <property display="Maximum speed (rpm)" id="module.middleware.motor_inertia_estimate.max_speed_rpm" default="500" description="Maximum rotation speed (rpm)">
+            <constraint display="Must be set over 60.">testInteger("${module.middleware.motor_inertia_estimate.max_speed_rpm}") &amp;&amp; ("${module.middleware.motor_inertia_estimate.max_speed_rpm}" &gt; 60)</constraint>
+        </property>
+        <property display="Acceleration time" id="module.middleware.motor_inertia_estimate.accel_time" default="0.3" description="Acceleration time">
+            <constraint display="Must be a valid non-negative value.">
+            eval('' +
+            'var input = "${module.middleware.motor_inertia_estimate.accel_time}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?$","i");' +
+            'var regex_float_with_suffix = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?F$","i");' +
+            ' ( regex_float.test(input) || regex_float_with_suffix.test(input))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${module.middleware.motor_inertia_estimate.accel_time}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)$","i");' +
+            'if (regex_float.test(output)){' +
+            'output = output + "F";' +
+            '}' +
+            'output')
+            </export>
+        </property>
+        <property display="Motor inertia" id="module.middleware.motor_inertia_estimate.rotor_inertia" default="0.0000041" description="Motor inertia">
+            <constraint display="Must be a valid non-negative value.">
+            eval('' +
+            'var input = "${module.middleware.motor_inertia_estimate.rotor_inertia}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?$","i");' +
+            'var regex_float_with_suffix = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?F$","i");' +
+            ' ( regex_float.test(input) || regex_float_with_suffix.test(input))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${module.middleware.motor_inertia_estimate.rotor_inertia}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)$","i");' +
+            'if (regex_float.test(output)){' +
+            'output = output + "F";' +
+            '}' +
+            'output')
+            </export>
+        </property>
+        <property display="Low threshold to judge speed" id="module.middleware.motor_inertia_estimate.low_thresh" default="0.1" description="Low threshold to judge speed reached">
+            <constraint display="Must be set 0.1 to 0.5.">
+            eval('' +
+            'var input = "${module.middleware.motor_inertia_estimate.low_thresh}";' +
+            'var regex_float = RegExp("^0[.]{1}(1[0-9]*|2[0-9]*|3[0-9]*|4[0-9]*|5)?$","i");' +
+            'var regex_float_with_suffix = RegExp("^0[.]{1}(1[0-9]*|2[0-9]*|3[0-9]*|4[0-9]*|5)?F$","i");' +
+            ' ( regex_float.test(input) || regex_float_with_suffix.test(input))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${module.middleware.motor_inertia_estimate.low_thresh}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)$","i");' +
+            'if (regex_float.test(output)){' +
+            'output = output + "F";' +
+            '}' +
+            'output')
+            </export>
+        </property>
+        <property display="High threshold to judge speed" id="module.middleware.motor_inertia_estimate.high_thresh" default="0.9" description="High threshold to judge speed reached">
+            <constraint display="Must be set 0.5 to 0.9, and greater than low threshold">
+            eval('' +
+            'var input = "${module.middleware.motor_inertia_estimate.high_thresh}";' +
+            'var regex_float = RegExp("^0[.]{1}(5[0-9]*|6[0-9]*|7[0-9]*|8[0-9]*|9)?$","i");' +
+            'var regex_float_with_suffix = RegExp("^0[.]{1}(5[0-9]*|6[0-9]*|7[0-9]*|8[0-9]*|9)?F$","i");' +
+            ' ( regex_float.test(input) || regex_float_with_suffix.test(input))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${module.middleware.motor_inertia_estimate.high_thresh}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)$","i");' +
+            'if (regex_float.test(output)){' +
+            'output = output + "F";' +
+            '}' +
+            'output')
+            </export>
+        </property>
+        <property display="Time to wait moving stability (sec)" id="module.middleware.motor_inertia_estimate.chg_mode_time" default="0.8" description="Time to wait moving stability">
+            <constraint display="Must be a valid non-negative value.">
+            eval('' +
+            'var input = "${module.middleware.motor_inertia_estimate.chg_mode_time}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?$","i");' +
+            'var regex_float_with_suffix = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?F$","i");' +
+            ' ( regex_float.test(input) || regex_float_with_suffix.test(input))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${module.middleware.motor_inertia_estimate.chg_mode_time}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)$","i");' +
+            'if (regex_float.test(output)){' +
+            'output = output + "F";' +
+            '}' +
+            'output')
+            </export>
+        </property>
+        <property display="Cyclic period of current control (sec)" id="module.middleware.motor_inertia_estimate.crnt_ctrl_period" default="0.00005" description="Cyclic period of current control (sec)">
+            <constraint display="Must be a valid non-negative value.">
+            eval('' +
+            'var input = "${module.middleware.motor_inertia_estimate.crnt_ctrl_period}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?$","i");' +
+            'var regex_float_with_suffix = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?F$","i");' +
+            ' ( regex_float.test(input) || regex_float_with_suffix.test(input))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${module.middleware.motor_inertia_estimate.crnt_ctrl_period}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)$","i");' +
+            'if (regex_float.test(output)){' +
+            'output = output + "F";' +
+            '}' +
+            'output')
+            </export>
+        </property>
+        <property display="Cyclic period of speed control (sec)" id="module.middleware.motor_inertia_estimate.spd_ctrl_period" default="0.0005" description="Cyclic period of speed control (sec)">
+            <constraint display="Must be a valid non-negative value.">
+            eval('' +
+            'var input = "${module.middleware.motor_inertia_estimate.spd_ctrl_period}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?$","i");' +
+            'var regex_float_with_suffix = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?F$","i");' +
+            ' ( regex_float.test(input) || regex_float_with_suffix.test(input))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${module.middleware.motor_inertia_estimate.spd_ctrl_period}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)$","i");' +
+            'if (regex_float.test(output)){' +
+            'output = output + "F";' +
+            '}' +
+            'output')
+            </export>
+        </property>
+        <property display="Motor pole pairs" id="module.middleware.motor_inertia_estimate.motor_pp" default="4" description="Motor pole pairs">
+            <constraint display="Must be a valid non-negative value.">testInteger("${module.middleware.motor_inertia_estimate.motor_pp}") &amp;&amp; ("${module.middleware.motor_inertia_estimate.motor_pp}" &gt;= 0)</constraint>
+        </property>
+        <property display="Motor magnet flux (Wb)" id="module.middleware.motor_inertia_estimate.motor_m" default="0.00623" description="Motor magnet flux (Wb)">
+            <constraint display="Must be a valid non-negative value.">
+            eval('' +
+            'var input = "${module.middleware.motor_inertia_estimate.motor_m}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?$","i");' +
+            'var regex_float_with_suffix = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?F$","i");' +
+            ' ( regex_float.test(input) || regex_float_with_suffix.test(input))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${module.middleware.motor_inertia_estimate.motor_m}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)$","i");' +
+            'if (regex_float.test(output)){' +
+            'output = output + "F";' +
+            '}' +
+            'output')
+            </export>
+        </property>
+        <property display="Interval time" id="module.middleware.motor_inertia_estimate.pos_interval" default="400.0" description="Interval time. Please set same value as Position control">
+            <constraint display="Must be a valid non-negative value.">
+            eval('' +
+            'var input = "${module.middleware.motor_inertia_estimate.pos_interval}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?$","i");' +
+            'var regex_float_with_suffix = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?F$","i");' +
+            ' ( regex_float.test(input) || regex_float_with_suffix.test(input))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${module.middleware.motor_inertia_estimate.pos_interval}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)$","i");' +
+            'if (regex_float.test(output)){' +
+            'output = output + "F";' +
+            '}' +
+            'output')
+            </export>
+        </property>
+
+        <header>
+/** Motor Inertia Estimate Instance */
+extern const motor_inertia_estimate_instance_t ${module.middleware.motor_inertia_estimate.name};
+
+/** Access the Motor Inertia Estimate instance using these structures
+    when calling API functions directly (::p_api is not used). */
+extern motor_inertia_estimate_instance_ctrl_t ${module.middleware.motor_inertia_estimate.name}_ctrl;
+extern const motor_inertia_estimate_extended_cfg_t ${module.middleware.motor_inertia_estimate.name}_extend;
+extern const motor_inertia_estimate_cfg_t ${module.middleware.motor_inertia_estimate.name}_cfg;
+        </header>
+
+        <includes>
+#include &quot;rm_motor_inertia_estimate.h&quot;
+        </includes>
+
+        <declarations>
+/* Motor Inertia Estimate Configuration */
+motor_inertia_estimate_instance_ctrl_t ${module.middleware.motor_inertia_estimate.name}_ctrl;
+const motor_inertia_estimate_extended_cfg_t ${module.middleware.motor_inertia_estimate.name}_extend =
+{
+  .s2_move_degree = ${module.middleware.motor_inertia_estimate.pos_degree},
+  .u2_J_max_speed_rpm = ${module.middleware.motor_inertia_estimate.max_speed_rpm}U,
+  .f_accel_time = ${module.middleware.motor_inertia_estimate.accel_time},
+  .f_rotor_inertia = ${module.middleware.motor_inertia_estimate.rotor_inertia},
+  .f_judge_low_threshold = ${module.middleware.motor_inertia_estimate.low_thresh},
+  .f_judge_high_threshold = ${module.middleware.motor_inertia_estimate.high_thresh},
+  .f_change_mode_time = ${module.middleware.motor_inertia_estimate.chg_mode_time} / ${module.middleware.motor_inertia_estimate.spd_ctrl_period},
+  .f_current_ctrl_period = ${module.middleware.motor_inertia_estimate.crnt_ctrl_period},
+  .f_speed_ctrl_period = ${module.middleware.motor_inertia_estimate.spd_ctrl_period},
+  .u1_motor_polepairs = ${module.middleware.motor_inertia_estimate.motor_pp}U,
+  .f_motor_m = ${module.middleware.motor_inertia_estimate.motor_m},
+  .f_position_interval = ${module.middleware.motor_inertia_estimate.pos_interval},
+};
+
+const motor_inertia_estimate_cfg_t ${module.middleware.motor_inertia_estimate.name}_cfg =
+{
+  .p_context    = NULL,
+  .p_extend     = &amp;${module.middleware.motor_inertia_estimate.name}_extend,
+};
+
+/* Instance structure to use Motor inertia estimate module. */
+const motor_inertia_estimate_instance_t ${module.middleware.motor_inertia_estimate.name} =
+{
+  .p_ctrl   = &amp;${module.middleware.motor_inertia_estimate.name}_ctrl,
+  .p_cfg    = &amp;${module.middleware.motor_inertia_estimate.name}_cfg,
+  .p_api    = &amp;g_motor_inertia_estimate_on_motor_inertia_estimate,
+};
+        </declarations>
+    </module>
+</raModuleDescription>

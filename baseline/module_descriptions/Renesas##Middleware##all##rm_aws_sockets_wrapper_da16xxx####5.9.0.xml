@@ -1,0 +1,13 @@
+<?xml version="1.0" ?>
+<raModuleDescription>
+    <module id="module.aws.sockets_wrapper.wifi_da16xxx" display="Networking|AWS DA16xxx WiFi Sockets Wrapper (rm_aws_sockets_wrapper_da16xxx)" common="1" version="0" visible="false" url="https://docs.aws.amazon.com/embedded-csdk/latest/lib-ref/libraries/standard/coreMQTT/docs/doxygen/output/html/mqtt_transport_interface.html">
+        <requires id="module.aws.sockets_wrapper.wifi_da16xxx.requires.awsfreertos" interface="interface.rtos.awsfreertos" visible="false" display="Requires FreeRTOS"/>
+        <requires id="module.aws.sockets_wrapper.wifi_da16xxx.requires.wifi" interface="interface.driver.wifi_da16xxx" display="Add WiFi" find="true" />
+        <requires id="module.aws.sockets_wrapper.wifi_da16xxx.requires.mbedtls_bio.cellular" interface="interface.aws.mbedtls_bio.plus_tcp" display="Add MbedTLS Bio" find="true" />
+        <provides interface="interface.aws.sockets_wrapper" />
+        <provides interface="interface.aws.sockets_wrapper.wifi" />
+        <includes>
+#include "tcp_sockets_wrapper.h"
+        </includes>
+    </module>
+</raModuleDescription>

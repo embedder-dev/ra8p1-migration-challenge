@@ -1,0 +1,852 @@
+<?xml version="1.0" encoding="utf-8"?>
+<raModuleDescription>
+    <bsp id="bsp.ra2a2.events" config="config.bsp.ra2a2.events" display="RA2A2 event data" version="0">
+        <scope id="scope.dtc" interruptOnly="true" />
+        <scope id="scope.snooze" />
+        <scope id="scope.sstby" />
+        <event id="event.adc0.compare.match" display="ADC|ADC0|ADC0 COMPARE MATCH (Compare match)" value="ADC0_COMPARE_MATCH" scope="eventlink,scope.dtc,scope.snooze">
+        <constraint display ="Requires an interrupt channel in group 0 or 4">
+        <![CDATA[
+            [0, 8, 16, 24, 4, 12, 20, 28].indexOf(${event.adc0.compare.match}) !== -1
+        ]]>
+        </constraint></event>
+        <event id="event.adc0.compare.mismatch" display="ADC|ADC0|ADC0 COMPARE MISMATCH (Compare mismatch)" value="ADC0_COMPARE_MISMATCH" scope="eventlink,scope.dtc,scope.snooze">
+        <constraint display ="Requires an interrupt channel in group 1 or 5">
+        <![CDATA[
+            [1, 9, 17, 25, 5, 13, 21, 29].indexOf(${event.adc0.compare.mismatch}) !== -1
+        ]]>
+        </constraint></event>
+        <event id="event.adc0.scan.end" display="ADC|ADC0|ADC0 SCAN END (End of A/D scanning operation)" value="ADC0_SCAN_END" scope="interrupt,eventlink,scope.dtc">
+        <constraint display ="Requires an interrupt channel in group 0 or 4">
+        <![CDATA[
+            [0, 8, 16, 24, 4, 12, 20, 28].indexOf(${event.adc0.scan.end}) !== -1
+        ]]>
+        </constraint></event>
+        <event id="event.adc0.scan.end.b" display="ADC|ADC0|ADC0 SCAN END B (A/D scan end interrupt for group B)" value="ADC0_SCAN_END_B" scope="interrupt,scope.dtc">
+        <constraint display ="Requires an interrupt channel in group 1 or 5">
+        <![CDATA[
+            [1, 9, 17, 25, 5, 13, 21, 29].indexOf(${event.adc0.scan.end.b}) !== -1
+        ]]>
+        </constraint></event>
+        <event id="event.adc0.window.a" display="ADC|ADC0|ADC0 WINDOW A (Window A Compare match interrupt)" value="ADC0_WINDOW_A" scope="interrupt">
+        <constraint display ="Requires an interrupt channel in group 2 or 6">
+        <![CDATA[
+            [2, 10, 18, 26, 6, 14, 22, 30].indexOf(${event.adc0.window.a}) !== -1
+        ]]>
+        </constraint></event>
+        <event id="event.adc0.window.b" display="ADC|ADC0|ADC0 WINDOW B (Window B Compare match interrupt)" value="ADC0_WINDOW_B" scope="interrupt">
+        <constraint display ="Requires an interrupt channel in group 3 or 7">
+        <![CDATA[
+            [3, 11, 19, 27, 7, 15, 23, 31].indexOf(${event.adc0.window.b}) !== -1
+        ]]>
+        </constraint></event>
+        <event id="event.aes.int" display="AES|AES INT (AES Interrupt)" value="AES_INT" scope="interrupt,scope.dtc">
+        <constraint display ="Requires an interrupt channel in group 0 or 4">
+        <![CDATA[
+            [0, 8, 16, 24, 4, 12, 20, 28].indexOf(${event.aes.int}) !== -1
+        ]]>
+        </constraint></event>
+        <event id="event.agt0.compare.a" display="AGT|AGT0|AGT0 COMPARE A (Compare match A)" value="AGT0_COMPARE_A" scope="eventlink"></event>
+        <event id="event.agt0.compare.b" display="AGT|AGT0|AGT0 COMPARE B (Compare match B)" value="AGT0_COMPARE_B" scope="eventlink"></event>
+        <event id="event.agt0.int" display="AGT|AGT0|AGT0 INT (AGT interrupt)" value="AGT0_INT" scope="interrupt,eventlink,scope.snooze,scope.sstby" irqSlot="51"></event>
+        <event id="event.agt1.compare.a" display="AGT|AGT1|AGT1 COMPARE A (Compare match A)" value="AGT1_COMPARE_A" scope="eventlink"></event>
+        <event id="event.agt1.compare.b" display="AGT|AGT1|AGT1 COMPARE B (Compare match B)" value="AGT1_COMPARE_B" scope="eventlink"></event>
+        <event id="event.agt1.int" display="AGT|AGT1|AGT1 INT (AGT interrupt)" value="AGT1_INT" scope="interrupt,eventlink,scope.snooze,scope.sstby" irqSlot="52"></event>
+        <event id="event.agt2.compare.a" display="AGT|AGT2|AGT2 COMPARE A (Compare match A)" value="AGT2_COMPARE_A" scope="interrupt,eventlink,scope.dtc">
+        <constraint display ="Requires an interrupt channel in group 0 or 4">
+        <![CDATA[
+            [0, 8, 16, 24, 4, 12, 20, 28].indexOf(${event.agt2.compare.a}) !== -1
+        ]]>
+        </constraint></event>
+        <event id="event.agt2.compare.b" display="AGT|AGT2|AGT2 COMPARE B (Compare match B)" value="AGT2_COMPARE_B" scope="interrupt,eventlink,scope.dtc">
+        <constraint display ="Requires an interrupt channel in group 1 or 5">
+        <![CDATA[
+            [1, 9, 17, 25, 5, 13, 21, 29].indexOf(${event.agt2.compare.b}) !== -1
+        ]]>
+        </constraint></event>
+        <event id="event.agt2.int" display="AGT|AGT2|AGT2 INT (AGT interrupt)" value="AGT2_INT" scope="interrupt,eventlink,scope.snooze,scope.sstby" irqSlot="53"></event>
+        <event id="event.agt3.compare.a" display="AGT|AGT3|AGT3 COMPARE A (Compare match A)" value="AGT3_COMPARE_A" scope="interrupt,eventlink,scope.dtc">
+        <constraint display ="Requires an interrupt channel in group 2 or 6">
+        <![CDATA[
+            [2, 10, 18, 26, 6, 14, 22, 30].indexOf(${event.agt3.compare.a}) !== -1
+        ]]>
+        </constraint></event>
+        <event id="event.agt3.compare.b" display="AGT|AGT3|AGT3 COMPARE B (Compare match B)" value="AGT3_COMPARE_B" scope="interrupt,eventlink,scope.dtc">
+        <constraint display ="Requires an interrupt channel in group 3 or 7">
+        <![CDATA[
+            [3, 11, 19, 27, 7, 15, 23, 31].indexOf(${event.agt3.compare.b}) !== -1
+        ]]>
+        </constraint></event>
+        <event id="event.agt3.int" display="AGT|AGT3|AGT3 INT (AGT interrupt)" value="AGT3_INT" scope="interrupt,eventlink,scope.snooze,scope.sstby" irqSlot="54"></event>
+        <event id="event.agt4.compare.a" display="AGT|AGT4|AGT4 COMPARE A (Compare match A)" value="AGT4_COMPARE_A" scope="interrupt,eventlink,scope.dtc">
+        <constraint display ="Requires an interrupt channel in group 0 or 4">
+        <![CDATA[
+            [0, 8, 16, 24, 4, 12, 20, 28].indexOf(${event.agt4.compare.a}) !== -1
+        ]]>
+        </constraint></event>
+        <event id="event.agt4.compare.b" display="AGT|AGT4|AGT4 COMPARE B (Compare match B)" value="AGT4_COMPARE_B" scope="interrupt,eventlink,scope.dtc">
+        <constraint display ="Requires an interrupt channel in group 1 or 5">
+        <![CDATA[
+            [1, 9, 17, 25, 5, 13, 21, 29].indexOf(${event.agt4.compare.b}) !== -1
+        ]]>
+        </constraint></event>
+        <event id="event.agt4.int" display="AGT|AGT4|AGT4 INT (AGT interrupt)" value="AGT4_INT" scope="interrupt,eventlink,scope.snooze,scope.sstby" irqSlot="55"></event>
+        <event id="event.agt5.compare.a" display="AGT|AGT5|AGT5 COMPARE A (Compare match A)" value="AGT5_COMPARE_A" scope="interrupt,eventlink,scope.dtc">
+        <constraint display ="Requires an interrupt channel in group 2 or 6">
+        <![CDATA[
+            [2, 10, 18, 26, 6, 14, 22, 30].indexOf(${event.agt5.compare.a}) !== -1
+        ]]>
+        </constraint></event>
+        <event id="event.agt5.compare.b" display="AGT|AGT5|AGT5 COMPARE B (Compare match B)" value="AGT5_COMPARE_B" scope="interrupt,eventlink,scope.dtc">
+        <constraint display ="Requires an interrupt channel in group 3 or 7">
+        <![CDATA[
+            [3, 11, 19, 27, 7, 15, 23, 31].indexOf(${event.agt5.compare.b}) !== -1
+        ]]>
+        </constraint></event>
+        <event id="event.agt5.int" display="AGT|AGT5|AGT5 INT (AGT interrupt)" value="AGT5_INT" scope="interrupt,eventlink,scope.snooze,scope.sstby" irqSlot="56"></event>
+        <event id="event.agt6.compare.a" display="AGT|AGT6|AGT6 COMPARE A (Compare match A)" value="AGT6_COMPARE_A" scope="interrupt,eventlink,scope.dtc">
+        <constraint display ="Requires an interrupt channel in group 0 or 4">
+        <![CDATA[
+            [0, 8, 16, 24, 4, 12, 20, 28].indexOf(${event.agt6.compare.a}) !== -1
+        ]]>
+        </constraint></event>
+        <event id="event.agt6.compare.b" display="AGT|AGT6|AGT6 COMPARE B (Compare match B)" value="AGT6_COMPARE_B" scope="interrupt,eventlink,scope.dtc">
+        <constraint display ="Requires an interrupt channel in group 1 or 5">
+        <![CDATA[
+            [1, 9, 17, 25, 5, 13, 21, 29].indexOf(${event.agt6.compare.b}) !== -1
+        ]]>
+        </constraint></event>
+        <event id="event.agt6.int" display="AGT|AGT6|AGT6 INT (AGT interrupt)" value="AGT6_INT" scope="interrupt,eventlink,scope.snooze,scope.sstby" irqSlot="57"></event>
+        <event id="event.agt7.compare.a" display="AGT|AGT7|AGT7 COMPARE A (Compare match A)" value="AGT7_COMPARE_A" scope="interrupt,eventlink,scope.dtc">
+        <constraint display ="Requires an interrupt channel in group 2 or 6">
+        <![CDATA[
+            [2, 10, 18, 26, 6, 14, 22, 30].indexOf(${event.agt7.compare.a}) !== -1
+        ]]>
+        </constraint></event>
+        <event id="event.agt7.compare.b" display="AGT|AGT7|AGT7 COMPARE B (Compare match B)" value="AGT7_COMPARE_B" scope="interrupt,eventlink,scope.dtc">
+        <constraint display ="Requires an interrupt channel in group 3 or 7">
+        <![CDATA[
+            [3, 11, 19, 27, 7, 15, 23, 31].indexOf(${event.agt7.compare.b}) !== -1
+        ]]>
+        </constraint></event>
+        <event id="event.agt7.int" display="AGT|AGT7|AGT7 INT (AGT interrupt)" value="AGT7_INT" scope="interrupt,eventlink,scope.snooze,scope.sstby" irqSlot="58"></event>
+        <event id="event.agtw0.compare.a" display="AGTW|AGTW0|AGTW0 COMPARE A (Compare match A)" value="AGTW0_COMPARE_A" scope="interrupt,eventlink,scope.dtc">
+        <constraint display ="Requires an interrupt channel in group 0">
+        <![CDATA[
+            [0, 8, 16, 24].indexOf(${event.agtw0.compare.a}) !== -1
+        ]]>
+        </constraint></event>
+        <event id="event.agtw0.compare.b" display="AGTW|AGTW0|AGTW0 COMPARE B (Compare match B)" value="AGTW0_COMPARE_B" scope="interrupt,eventlink,scope.dtc">
+        <constraint display ="Requires an interrupt channel in group 1">
+        <![CDATA[
+            [1, 9, 17, 25].indexOf(${event.agtw0.compare.b}) !== -1
+        ]]>
+        </constraint></event>
+        <event id="event.agtw0.int" display="AGTW|AGTW0|AGTW0 INT (AGTW interrupt)" value="AGTW0_INT" scope="interrupt,eventlink,scope.dtc,scope.snooze,scope.sstby">
+        <constraint display ="Requires an interrupt channel in group 3">
+        <![CDATA[
+            [3, 11, 19, 27].indexOf(${event.agtw0.int}) !== -1
+        ]]>
+        </constraint></event>
+        <event id="event.agtw1.compare.a" display="AGTW|AGTW1|AGTW1 COMPARE A (Compare match A)" value="AGTW1_COMPARE_A" scope="interrupt,eventlink,scope.dtc,scope.snooze,scope.sstby">
+        <constraint display ="Requires an interrupt channel in group 1 or 5">
+        <![CDATA[
+            [1, 9, 17, 25, 5, 13, 21, 29].indexOf(${event.agtw1.compare.a}) !== -1
+        ]]>
+        </constraint></event>
+        <event id="event.agtw1.compare.b" display="AGTW|AGTW1|AGTW1 COMPARE B (Compare match B)" value="AGTW1_COMPARE_B" scope="interrupt,eventlink,scope.dtc,scope.snooze,scope.sstby">
+        <constraint display ="Requires an interrupt channel in group 2 or 6">
+        <![CDATA[
+            [2, 10, 18, 26, 6, 14, 22, 30].indexOf(${event.agtw1.compare.b}) !== -1
+        ]]>
+        </constraint></event>
+        <event id="event.agtw1.int" display="AGTW|AGTW1|AGTW1 INT (AGTW interrupt)" value="AGTW1_INT" scope="interrupt,eventlink,scope.dtc,scope.snooze,scope.sstby">
+        <constraint display ="Requires an interrupt channel in group 0 or 4">
+        <![CDATA[
+            [0, 8, 16, 24, 4, 12, 20, 28].indexOf(${event.agtw1.int}) !== -1
+        ]]>
+        </constraint></event>
+        <event id="event.cac.frequency.error" display="CAC|CAC FREQUENCY ERROR (Frequency error interrupt)" value="CAC_FREQUENCY_ERROR" scope="interrupt">
+        <constraint display ="Requires an interrupt channel in group 1 or 5">
+        <![CDATA[
+            [1, 9, 17, 25, 5, 13, 21, 29].indexOf(${event.cac.frequency.error}) !== -1
+        ]]>
+        </constraint></event>
+        <event id="event.cac.measurement.end" display="CAC|CAC MEASUREMENT END (Measurement end interrupt)" value="CAC_MEASUREMENT_END" scope="interrupt">
+        <constraint display ="Requires an interrupt channel in group 2 or 6">
+        <![CDATA[
+            [2, 10, 18, 26, 6, 14, 22, 30].indexOf(${event.cac.measurement.end}) !== -1
+        ]]>
+        </constraint></event>
+        <event id="event.cac.overflow" display="CAC|CAC OVERFLOW (Overflow interrupt)" value="CAC_OVERFLOW" scope="interrupt">
+        <constraint display ="Requires an interrupt channel in group 3 or 7">
+        <![CDATA[
+            [3, 11, 19, 27, 7, 15, 23, 31].indexOf(${event.cac.overflow}) !== -1
+        ]]>
+        </constraint></event>
+        <event id="event.cgc.mosc.stop" display="CGC|CGC MOSC STOP (Main Clock oscillation stop)" value="CGC_MOSC_STOP" scope="interrupt,eventlink">
+        <constraint display ="Requires an interrupt channel in group 6">
+        <![CDATA[
+            [6, 14, 22, 30].indexOf(${event.cgc.mosc.stop}) !== -1
+        ]]>
+        </constraint></event>
+        <event id="event.cgc.mostd.stop" display="CGC|CGC MOSTD STOP (Main Clock oscillation stop)" value="CGC_MOSTD_STOP" scope="interrupt" irqSlot="45"></event>
+        <event id="event.cgc.sosc.stop" display="CGC|CGC SOSC STOP (Sub oscillation stop)" value="CGC_SOSC_STOP" scope="interrupt,scope.snooze,scope.sstby" irqSlot="44"></event>
+        <event id="event.doc.int" display="DOC|DOC INT (Data operation circuit interrupt)" value="DOC_INT" scope="interrupt,eventlink,scope.snooze">
+        <constraint display ="Requires an interrupt channel in group 1 or 5">
+        <![CDATA[
+            [1, 9, 17, 25, 5, 13, 21, 29].indexOf(${event.doc.int}) !== -1
+        ]]>
+        </constraint></event>
+        <event id="event.dtc.complete" display="DTC|DTC COMPLETE (DTC transfer complete)" value="DTC_COMPLETE" scope="interrupt,scope.snooze">
+        <constraint display ="Requires an interrupt channel in group 0 or 4">
+        <![CDATA[
+            [0, 8, 16, 24, 4, 12, 20, 28].indexOf(${event.dtc.complete}) !== -1
+        ]]>
+        </constraint></event>
+        <event id="event.dtc.end" display="DTC|DTC END (DTC transfer end)" value="DTC_END" scope="eventlink"></event>
+        <event id="event.elc.software.event.0" display="ELC|ELC SOFTWARE EVENT 0 (Software event 0)" value="ELC_SOFTWARE_EVENT_0" scope="interrupt,eventlink,scope.dtc">
+        <constraint display ="Requires an interrupt channel in group 2 or 6">
+        <![CDATA[
+            [2, 10, 18, 26, 6, 14, 22, 30].indexOf(${event.elc.software.event.0}) !== -1
+        ]]>
+        </constraint></event>
+        <event id="event.elc.software.event.1" display="ELC|ELC SOFTWARE EVENT 1 (Software event 1)" value="ELC_SOFTWARE_EVENT_1" scope="interrupt,eventlink,scope.dtc">
+        <constraint display ="Requires an interrupt channel in group 3 or 7">
+        <![CDATA[
+            [3, 11, 19, 27, 7, 15, 23, 31].indexOf(${event.elc.software.event.1}) !== -1
+        ]]>
+        </constraint></event>
+        <event id="event.fcu.frdyi" display="FCU|FCU FRDYI (Flash ready interrupt)" value="FCU_FRDYI" scope="interrupt">
+        <constraint display ="Requires an interrupt channel in group 2 or 6">
+        <![CDATA[
+            [2, 10, 18, 26, 6, 14, 22, 30].indexOf(${event.fcu.frdyi}) !== -1
+        ]]>
+        </constraint></event>
+        <event id="event.gpt4.capture.compare.a" display="GPT|GPT4|GPT4 CAPTURE COMPARE A (Capture/Compare match A)" value="GPT4_CAPTURE_COMPARE_A" scope="interrupt,eventlink,scope.dtc">
+        <constraint display ="Requires an interrupt channel in group 0">
+        <![CDATA[
+            (${_destinations}.indexOf("destination.dtc") === -1) ? (${event.gpt4.capture.compare.a} === 62) : ([0, 8, 16, 24].indexOf(${event.gpt4.capture.compare.a}) !== -1)
+        ]]>
+        </constraint></event>
+        <event id="event.gpt4.capture.compare.b" display="GPT|GPT4|GPT4 CAPTURE COMPARE B (Capture/Compare match B)" value="GPT4_CAPTURE_COMPARE_B" scope="interrupt,eventlink,scope.dtc">
+        <constraint display ="Requires an interrupt channel in group 1">
+        <![CDATA[
+            [1, 9, 17, 25].indexOf(${event.gpt4.capture.compare.b}) !== -1
+        ]]>
+        </constraint></event>
+        <event id="event.gpt4.compare.c" display="GPT|GPT4|GPT4 COMPARE C (Compare match C)" value="GPT4_COMPARE_C" scope="interrupt,eventlink,scope.dtc">
+        <constraint display ="Requires an interrupt channel in group 2">
+        <![CDATA[
+            [2, 10, 18, 26].indexOf(${event.gpt4.compare.c}) !== -1
+        ]]>
+        </constraint></event>
+        <event id="event.gpt4.compare.d" display="GPT|GPT4|GPT4 COMPARE D (Compare match D)" value="GPT4_COMPARE_D" scope="interrupt,eventlink,scope.dtc">
+        <constraint display ="Requires an interrupt channel in group 3">
+        <![CDATA[
+            [3, 11, 19, 27].indexOf(${event.gpt4.compare.d}) !== -1
+        ]]>
+        </constraint></event>
+        <event id="event.gpt4.counter.overflow" display="GPT|GPT4|GPT4 COUNTER OVERFLOW (Overflow)" value="GPT4_COUNTER_OVERFLOW" scope="interrupt,eventlink,scope.dtc">
+        <constraint display ="Requires an interrupt channel in group 6">
+        <![CDATA[
+            [6, 14, 22, 30].indexOf(${event.gpt4.counter.overflow}) !== -1
+        ]]>
+        </constraint></event>
+        <event id="event.gpt4.counter.underflow" display="GPT|GPT4|GPT4 COUNTER UNDERFLOW (Underflow)" value="GPT4_COUNTER_UNDERFLOW" scope="interrupt,eventlink,scope.dtc">
+        <constraint display ="Requires an interrupt channel in group 7">
+        <![CDATA[
+            [7, 15, 23, 31].indexOf(${event.gpt4.counter.underflow}) !== -1
+        ]]>
+        </constraint></event>
+        <event id="event.gpt5.capture.compare.a" display="GPT|GPT5|GPT5 CAPTURE COMPARE A (Capture/Compare match A)" value="GPT5_CAPTURE_COMPARE_A" scope="interrupt,eventlink,scope.dtc">
+        <constraint display ="Requires an interrupt channel in group 4">
+        <![CDATA[
+            (${_destinations}.indexOf("destination.dtc") === -1) ? (${event.gpt5.capture.compare.a} === 63) : ([4, 12, 20, 28].indexOf(${event.gpt5.capture.compare.a}) !== -1)
+        ]]>
+        </constraint></event>
+        <event id="event.gpt5.capture.compare.b" display="GPT|GPT5|GPT5 CAPTURE COMPARE B (Capture/Compare match B)" value="GPT5_CAPTURE_COMPARE_B" scope="interrupt,eventlink,scope.dtc">
+        <constraint display ="Requires an interrupt channel in group 5">
+        <![CDATA[
+            [5, 13, 21, 29].indexOf(${event.gpt5.capture.compare.b}) !== -1
+        ]]>
+        </constraint></event>
+        <event id="event.gpt5.compare.c" display="GPT|GPT5|GPT5 COMPARE C (Compare match C)" value="GPT5_COMPARE_C" scope="interrupt,eventlink,scope.dtc">
+        <constraint display ="Requires an interrupt channel in group 6">
+        <![CDATA[
+            [6, 14, 22, 30].indexOf(${event.gpt5.compare.c}) !== -1
+        ]]>
+        </constraint></event>
+        <event id="event.gpt5.compare.d" display="GPT|GPT5|GPT5 COMPARE D (Compare match D)" value="GPT5_COMPARE_D" scope="interrupt,eventlink,scope.dtc">
+        <constraint display ="Requires an interrupt channel in group 7">
+        <![CDATA[
+            [7, 15, 23, 31].indexOf(${event.gpt5.compare.d}) !== -1
+        ]]>
+        </constraint></event>
+        <event id="event.gpt5.counter.overflow" display="GPT|GPT5|GPT5 COUNTER OVERFLOW (Overflow)" value="GPT5_COUNTER_OVERFLOW" scope="interrupt,eventlink,scope.dtc">
+        <constraint display ="Requires an interrupt channel in group 2">
+        <![CDATA[
+            [2, 10, 18, 26].indexOf(${event.gpt5.counter.overflow}) !== -1
+        ]]>
+        </constraint></event>
+        <event id="event.gpt5.counter.underflow" display="GPT|GPT5|GPT5 COUNTER UNDERFLOW (Underflow)" value="GPT5_COUNTER_UNDERFLOW" scope="interrupt,eventlink,scope.dtc">
+        <constraint display ="Requires an interrupt channel in group 3">
+        <![CDATA[
+            [3, 11, 19, 27].indexOf(${event.gpt5.counter.underflow}) !== -1
+        ]]>
+        </constraint></event>
+        <event id="event.gpt6.capture.compare.a" display="GPT|GPT6|GPT6 CAPTURE COMPARE A (Capture/Compare match A)" value="GPT6_CAPTURE_COMPARE_A" scope="interrupt,eventlink,scope.dtc">
+        <constraint display ="Requires an interrupt channel in group 0">
+        <![CDATA[
+            (${_destinations}.indexOf("destination.dtc") === -1) ? (${event.gpt6.capture.compare.a} === 64) : ([0, 8, 16, 24].indexOf(${event.gpt6.capture.compare.a}) !== -1)
+        ]]>
+        </constraint></event>
+        <event id="event.gpt6.capture.compare.b" display="GPT|GPT6|GPT6 CAPTURE COMPARE B (Capture/Compare match B)" value="GPT6_CAPTURE_COMPARE_B" scope="interrupt,eventlink,scope.dtc">
+        <constraint display ="Requires an interrupt channel in group 1">
+        <![CDATA[
+            [1, 9, 17, 25].indexOf(${event.gpt6.capture.compare.b}) !== -1
+        ]]>
+        </constraint></event>
+        <event id="event.gpt6.compare.c" display="GPT|GPT6|GPT6 COMPARE C (Compare match C)" value="GPT6_COMPARE_C" scope="interrupt,eventlink,scope.dtc">
+        <constraint display ="Requires an interrupt channel in group 2">
+        <![CDATA[
+            [2, 10, 18, 26].indexOf(${event.gpt6.compare.c}) !== -1
+        ]]>
+        </constraint></event>
+        <event id="event.gpt6.compare.d" display="GPT|GPT6|GPT6 COMPARE D (Compare match D)" value="GPT6_COMPARE_D" scope="interrupt,eventlink,scope.dtc">
+        <constraint display ="Requires an interrupt channel in group 3">
+        <![CDATA[
+            [3, 11, 19, 27].indexOf(${event.gpt6.compare.d}) !== -1
+        ]]>
+        </constraint></event>
+        <event id="event.gpt6.counter.overflow" display="GPT|GPT6|GPT6 COUNTER OVERFLOW (Overflow)" value="GPT6_COUNTER_OVERFLOW" scope="interrupt,eventlink,scope.dtc">
+        <constraint display ="Requires an interrupt channel in group 6">
+        <![CDATA[
+            [6, 14, 22, 30].indexOf(${event.gpt6.counter.overflow}) !== -1
+        ]]>
+        </constraint></event>
+        <event id="event.gpt6.counter.underflow" display="GPT|GPT6|GPT6 COUNTER UNDERFLOW (Underflow)" value="GPT6_COUNTER_UNDERFLOW" scope="interrupt,eventlink,scope.dtc">
+        <constraint display ="Requires an interrupt channel in group 7">
+        <![CDATA[
+            [7, 15, 23, 31].indexOf(${event.gpt6.counter.underflow}) !== -1
+        ]]>
+        </constraint></event>
+        <event id="event.gpt7.capture.compare.a" display="GPT|GPT7|GPT7 CAPTURE COMPARE A (Capture/Compare match A)" value="GPT7_CAPTURE_COMPARE_A" scope="interrupt,eventlink,scope.dtc">
+        <constraint display ="Requires an interrupt channel in group 4">
+        <![CDATA[
+            (${_destinations}.indexOf("destination.dtc") === -1) ? (${event.gpt7.capture.compare.a} === 65) : ([4, 12, 20, 28].indexOf(${event.gpt7.capture.compare.a}) !== -1)
+        ]]>
+        </constraint></event>
+        <event id="event.gpt7.capture.compare.b" display="GPT|GPT7|GPT7 CAPTURE COMPARE B (Capture/Compare match B)" value="GPT7_CAPTURE_COMPARE_B" scope="interrupt,eventlink,scope.dtc">
+        <constraint display ="Requires an interrupt channel in group 5">
+        <![CDATA[
+            [5, 13, 21, 29].indexOf(${event.gpt7.capture.compare.b}) !== -1
+        ]]>
+        </constraint></event>
+        <event id="event.gpt7.compare.c" display="GPT|GPT7|GPT7 COMPARE C (Compare match C)" value="GPT7_COMPARE_C" scope="interrupt,eventlink,scope.dtc">
+        <constraint display ="Requires an interrupt channel in group 6">
+        <![CDATA[
+            [6, 14, 22, 30].indexOf(${event.gpt7.compare.c}) !== -1
+        ]]>
+        </constraint></event>
+        <event id="event.gpt7.compare.d" display="GPT|GPT7|GPT7 COMPARE D (Compare match D)" value="GPT7_COMPARE_D" scope="interrupt,eventlink,scope.dtc">
+        <constraint display ="Requires an interrupt channel in group 7">
+        <![CDATA[
+            [7, 15, 23, 31].indexOf(${event.gpt7.compare.d}) !== -1
+        ]]>
+        </constraint></event>
+        <event id="event.gpt7.counter.overflow" display="GPT|GPT7|GPT7 COUNTER OVERFLOW (Overflow)" value="GPT7_COUNTER_OVERFLOW" scope="interrupt,eventlink,scope.dtc">
+        <constraint display ="Requires an interrupt channel in group 2">
+        <![CDATA[
+            [2, 10, 18, 26].indexOf(${event.gpt7.counter.overflow}) !== -1
+        ]]>
+        </constraint></event>
+        <event id="event.gpt7.counter.underflow" display="GPT|GPT7|GPT7 COUNTER UNDERFLOW (Underflow)" value="GPT7_COUNTER_UNDERFLOW" scope="interrupt,eventlink,scope.dtc">
+        <constraint display ="Requires an interrupt channel in group 3">
+        <![CDATA[
+            [3, 11, 19, 27].indexOf(${event.gpt7.counter.underflow}) !== -1
+        ]]>
+        </constraint></event>
+        <event id="event.gpt8.capture.compare.a" display="GPT|GPT8|GPT8 CAPTURE COMPARE A (Capture/Compare match A)" value="GPT8_CAPTURE_COMPARE_A" scope="interrupt,eventlink,scope.dtc">
+        <constraint display ="Requires an interrupt channel in group 0">
+        <![CDATA[
+            (${_destinations}.indexOf("destination.dtc") === -1) ? (${event.gpt8.capture.compare.a} === 66) : ([0, 8, 16, 24].indexOf(${event.gpt8.capture.compare.a}) !== -1)
+        ]]>
+        </constraint></event>
+        <event id="event.gpt8.capture.compare.b" display="GPT|GPT8|GPT8 CAPTURE COMPARE B (Capture/Compare match B)" value="GPT8_CAPTURE_COMPARE_B" scope="interrupt,eventlink,scope.dtc">
+        <constraint display ="Requires an interrupt channel in group 1">
+        <![CDATA[
+            [1, 9, 17, 25].indexOf(${event.gpt8.capture.compare.b}) !== -1
+        ]]>
+        </constraint></event>
+        <event id="event.gpt8.compare.c" display="GPT|GPT8|GPT8 COMPARE C (Compare match C)" value="GPT8_COMPARE_C" scope="interrupt,eventlink,scope.dtc">
+        <constraint display ="Requires an interrupt channel in group 2">
+        <![CDATA[
+            [2, 10, 18, 26].indexOf(${event.gpt8.compare.c}) !== -1
+        ]]>
+        </constraint></event>
+        <event id="event.gpt8.compare.d" display="GPT|GPT8|GPT8 COMPARE D (Compare match D)" value="GPT8_COMPARE_D" scope="interrupt,eventlink,scope.dtc">
+        <constraint display ="Requires an interrupt channel in group 3">
+        <![CDATA[
+            [3, 11, 19, 27].indexOf(${event.gpt8.compare.d}) !== -1
+        ]]>
+        </constraint></event>
+        <event id="event.gpt8.counter.overflow" display="GPT|GPT8|GPT8 COUNTER OVERFLOW (Overflow)" value="GPT8_COUNTER_OVERFLOW" scope="interrupt,eventlink,scope.dtc">
+        <constraint display ="Requires an interrupt channel in group 6">
+        <![CDATA[
+            [6, 14, 22, 30].indexOf(${event.gpt8.counter.overflow}) !== -1
+        ]]>
+        </constraint></event>
+        <event id="event.gpt8.counter.underflow" display="GPT|GPT8|GPT8 COUNTER UNDERFLOW (Underflow)" value="GPT8_COUNTER_UNDERFLOW" scope="interrupt,eventlink,scope.dtc">
+        <constraint display ="Requires an interrupt channel in group 7">
+        <![CDATA[
+            [7, 15, 23, 31].indexOf(${event.gpt8.counter.underflow}) !== -1
+        ]]>
+        </constraint></event>
+        <event id="event.gpt9.capture.compare.a" display="GPT|GPT9|GPT9 CAPTURE COMPARE A (Capture/Compare match A)" value="GPT9_CAPTURE_COMPARE_A" scope="interrupt,eventlink,scope.dtc">
+        <constraint display ="Requires an interrupt channel in group 4">
+        <![CDATA[
+            (${_destinations}.indexOf("destination.dtc") === -1) ? (${event.gpt9.capture.compare.a} === 67) : ([4, 12, 20, 28].indexOf(${event.gpt9.capture.compare.a}) !== -1)
+        ]]>
+        </constraint></event>
+        <event id="event.gpt9.capture.compare.b" display="GPT|GPT9|GPT9 CAPTURE COMPARE B (Capture/Compare match B)" value="GPT9_CAPTURE_COMPARE_B" scope="interrupt,eventlink,scope.dtc">
+        <constraint display ="Requires an interrupt channel in group 5">
+        <![CDATA[
+            [5, 13, 21, 29].indexOf(${event.gpt9.capture.compare.b}) !== -1
+        ]]>
+        </constraint></event>
+        <event id="event.gpt9.compare.c" display="GPT|GPT9|GPT9 COMPARE C (Compare match C)" value="GPT9_COMPARE_C" scope="interrupt,eventlink,scope.dtc">
+        <constraint display ="Requires an interrupt channel in group 6">
+        <![CDATA[
+            [6, 14, 22, 30].indexOf(${event.gpt9.compare.c}) !== -1
+        ]]>
+        </constraint></event>
+        <event id="event.gpt9.compare.d" display="GPT|GPT9|GPT9 COMPARE D (Compare match D)" value="GPT9_COMPARE_D" scope="interrupt,eventlink,scope.dtc">
+        <constraint display ="Requires an interrupt channel in group 7">
+        <![CDATA[
+            [7, 15, 23, 31].indexOf(${event.gpt9.compare.d}) !== -1
+        ]]>
+        </constraint></event>
+        <event id="event.gpt9.counter.overflow" display="GPT|GPT9|GPT9 COUNTER OVERFLOW (Overflow)" value="GPT9_COUNTER_OVERFLOW" scope="interrupt,eventlink,scope.dtc">
+        <constraint display ="Requires an interrupt channel in group 2">
+        <![CDATA[
+            [2, 10, 18, 26].indexOf(${event.gpt9.counter.overflow}) !== -1
+        ]]>
+        </constraint></event>
+        <event id="event.gpt9.counter.underflow" display="GPT|GPT9|GPT9 COUNTER UNDERFLOW (Underflow)" value="GPT9_COUNTER_UNDERFLOW" scope="interrupt,eventlink,scope.dtc">
+        <constraint display ="Requires an interrupt channel in group 3">
+        <![CDATA[
+            [3, 11, 19, 27].indexOf(${event.gpt9.counter.underflow}) !== -1
+        ]]>
+        </constraint></event>
+        <event id="event.gpt.uvwedge" display="GPT|GPT UVWEDGE (UVW edge event)" value="GPT_UVWEDGE" scope="interrupt,eventlink">
+        <constraint display ="Requires an interrupt channel in group 0 or 4">
+        <![CDATA[
+            [0, 8, 16, 24, 4, 12, 20, 28].indexOf(${event.gpt.uvwedge}) !== -1
+        ]]>
+        </constraint></event>
+        <event id="event.icu.irq0" display="ICU|ICU IRQ0 (External pin interrupt 0)" value="ICU_IRQ0" scope="interrupt,eventlink,scope.dtc,scope.snooze,scope.sstby">
+        <constraint display ="Requires an interrupt channel in group 0 or 4">
+        <![CDATA[
+            (${_destinations}.indexOf("destination.dtc") === -1) ? (${event.icu.irq0} === 32) : ([0, 8, 16, 24, 4, 12, 20, 28].indexOf(${event.icu.irq0}) !== -1)
+        ]]>
+        </constraint></event>
+        <event id="event.icu.irq1" display="ICU|ICU IRQ1 (External pin interrupt 1)" value="ICU_IRQ1" scope="interrupt,eventlink,scope.dtc,scope.snooze,scope.sstby">
+        <constraint display ="Requires an interrupt channel in group 1 or 5">
+        <![CDATA[
+            (${_destinations}.indexOf("destination.dtc") === -1) ? (${event.icu.irq1} === 33) : ([1, 9, 17, 25, 5, 13, 21, 29].indexOf(${event.icu.irq1}) !== -1)
+        ]]>
+        </constraint></event>
+        <event id="event.icu.irq10" display="ICU|ICU IRQ10 (External pin interrupt 10)" value="ICU_IRQ10" scope="interrupt,eventlink,scope.snooze,scope.sstby" irqSlot="42"></event>
+        <event id="event.icu.irq11" display="ICU|ICU IRQ11 (External pin interrupt 11)" value="ICU_IRQ11" scope="interrupt,eventlink,scope.snooze,scope.sstby" irqSlot="43"></event>
+        <event id="event.icu.irq2" display="ICU|ICU IRQ2 (External pin interrupt 2)" value="ICU_IRQ2" scope="interrupt,eventlink,scope.dtc,scope.snooze,scope.sstby">
+        <constraint display ="Requires an interrupt channel in group 2 or 6">
+        <![CDATA[
+            (${_destinations}.indexOf("destination.dtc") === -1) ? (${event.icu.irq2} === 34) : ([2, 10, 18, 26, 6, 14, 22, 30].indexOf(${event.icu.irq2}) !== -1)
+        ]]>
+        </constraint></event>
+        <event id="event.icu.irq3" display="ICU|ICU IRQ3 (External pin interrupt 3)" value="ICU_IRQ3" scope="interrupt,eventlink,scope.dtc,scope.snooze,scope.sstby">
+        <constraint display ="Requires an interrupt channel in group 3 or 7">
+        <![CDATA[
+            (${_destinations}.indexOf("destination.dtc") === -1) ? (${event.icu.irq3} === 35) : ([3, 11, 19, 27, 7, 15, 23, 31].indexOf(${event.icu.irq3}) !== -1)
+        ]]>
+        </constraint></event>
+        <event id="event.icu.irq4" display="ICU|ICU IRQ4 (External pin interrupt 4)" value="ICU_IRQ4" scope="interrupt,eventlink,scope.dtc,scope.snooze,scope.sstby">
+        <constraint display ="Requires an interrupt channel in group 4">
+        <![CDATA[
+            (${_destinations}.indexOf("destination.dtc") === -1) ? (${event.icu.irq4} === 36) : ([4, 12, 20, 28].indexOf(${event.icu.irq4}) !== -1)
+        ]]>
+        </constraint></event>
+        <event id="event.icu.irq5" display="ICU|ICU IRQ5 (External pin interrupt 5)" value="ICU_IRQ5" scope="interrupt,eventlink,scope.dtc,scope.snooze,scope.sstby">
+        <constraint display ="Requires an interrupt channel in group 5">
+        <![CDATA[
+            (${_destinations}.indexOf("destination.dtc") === -1) ? (${event.icu.irq5} === 37) : ([5, 13, 21, 29].indexOf(${event.icu.irq5}) !== -1)
+        ]]>
+        </constraint></event>
+        <event id="event.icu.irq6" display="ICU|ICU IRQ6 (External pin interrupt 6)" value="ICU_IRQ6" scope="interrupt,eventlink,scope.dtc,scope.snooze,scope.sstby">
+        <constraint display ="Requires an interrupt channel in group 6">
+        <![CDATA[
+            (${_destinations}.indexOf("destination.dtc") === -1) ? (${event.icu.irq6} === 38) : ([6, 14, 22, 30].indexOf(${event.icu.irq6}) !== -1)
+        ]]>
+        </constraint></event>
+        <event id="event.icu.irq7" display="ICU|ICU IRQ7 (External pin interrupt 7)" value="ICU_IRQ7" scope="interrupt,eventlink,scope.dtc,scope.snooze,scope.sstby">
+        <constraint display ="Requires an interrupt channel in group 7">
+        <![CDATA[
+            (${_destinations}.indexOf("destination.dtc") === -1) ? (${event.icu.irq7} === 39) : ([7, 15, 23, 31].indexOf(${event.icu.irq7}) !== -1)
+        ]]>
+        </constraint></event>
+        <event id="event.icu.irq8" display="ICU|ICU IRQ8 (External pin interrupt 8)" value="ICU_IRQ8" scope="interrupt,eventlink,scope.snooze,scope.sstby" irqSlot="40"></event>
+        <event id="event.icu.irq9" display="ICU|ICU IRQ9 (External pin interrupt 9)" value="ICU_IRQ9" scope="interrupt,eventlink,scope.snooze,scope.sstby" irqSlot="41"></event>
+        <event id="event.icu.snooze.cancel" display="ICU|ICU SNOOZE CANCEL (Canceling from Snooze mode)" value="ICU_SNOOZE_CANCEL" scope="interrupt,scope.snooze">
+        <constraint display ="Requires an interrupt channel in group 0 or 4">
+        <![CDATA[
+            [0, 8, 16, 24, 4, 12, 20, 28].indexOf(${event.icu.snooze.cancel}) !== -1
+        ]]>
+        </constraint></event>
+        <event id="event.iic0.eri" display="IIC|IIC0|IIC0 ERI (Transfer error)" value="IIC0_ERI" scope="interrupt,eventlink">
+        <constraint display ="Requires an interrupt channel in group 3 or 7">
+        <![CDATA[
+            [3, 11, 19, 27, 7, 15, 23, 31].indexOf(${event.iic0.eri}) !== -1
+        ]]>
+        </constraint></event>
+        <event id="event.iic0.rxi" display="IIC|IIC0|IIC0 RXI (Receive data full)" value="IIC0_RXI" scope="interrupt,eventlink,scope.dtc">
+        <constraint display ="Requires an interrupt channel in group 0 or 4">
+        <![CDATA[
+            [0, 8, 16, 24, 4, 12, 20, 28].indexOf(${event.iic0.rxi}) !== -1
+        ]]>
+        </constraint></event>
+        <event id="event.iic0.tei" display="IIC|IIC0|IIC0 TEI (Transmit end)" value="IIC0_TEI" scope="interrupt,eventlink">
+        <constraint display ="Requires an interrupt channel in group 2 or 6">
+        <![CDATA[
+            [2, 10, 18, 26, 6, 14, 22, 30].indexOf(${event.iic0.tei}) !== -1
+        ]]>
+        </constraint></event>
+        <event id="event.iic0.txi" display="IIC|IIC0|IIC0 TXI (Transmit data empty)" value="IIC0_TXI" scope="interrupt,eventlink,scope.dtc">
+        <constraint display ="Requires an interrupt channel in group 1 or 5">
+        <![CDATA[
+            [1, 9, 17, 25, 5, 13, 21, 29].indexOf(${event.iic0.txi}) !== -1
+        ]]>
+        </constraint></event>
+        <event id="event.iic0.wui" display="IIC|IIC0|IIC0 WUI (Wakeup interrupt)" value="IIC0_WUI" scope="interrupt,scope.snooze,scope.sstby">
+        <constraint display ="Requires an interrupt channel in group 0 or 4">
+        <![CDATA[
+            [0, 8, 16, 24, 4, 12, 20, 28].indexOf(${event.iic0.wui}) !== -1
+        ]]>
+        </constraint></event>
+        <event id="event.iic1.eri" display="IIC|IIC1|IIC1 ERI (Transfer error)" value="IIC1_ERI" scope="interrupt,eventlink">
+        <constraint display ="Requires an interrupt channel in group 5">
+        <![CDATA[
+            [5, 13, 21, 29].indexOf(${event.iic1.eri}) !== -1
+        ]]>
+        </constraint></event>
+        <event id="event.iic1.rxi" display="IIC|IIC1|IIC1 RXI (Receive data full)" value="IIC1_RXI" scope="interrupt,eventlink,scope.dtc">
+        <constraint display ="Requires an interrupt channel in group 0">
+        <![CDATA[
+            [0, 8, 16, 24].indexOf(${event.iic1.rxi}) !== -1
+        ]]>
+        </constraint></event>
+        <event id="event.iic1.tei" display="IIC|IIC1|IIC1 TEI (Transmit end)" value="IIC1_TEI" scope="interrupt,eventlink">
+        <constraint display ="Requires an interrupt channel in group 4">
+        <![CDATA[
+            [4, 12, 20, 28].indexOf(${event.iic1.tei}) !== -1
+        ]]>
+        </constraint></event>
+        <event id="event.iic1.txi" display="IIC|IIC1|IIC1 TXI (Transmit data empty)" value="IIC1_TXI" scope="interrupt,eventlink,scope.dtc">
+        <constraint display ="Requires an interrupt channel in group 1">
+        <![CDATA[
+            [1, 9, 17, 25].indexOf(${event.iic1.txi}) !== -1
+        ]]>
+        </constraint></event>
+        <event id="event.ioport.event.1" display="IOPORT|IOPORT EVENT 1 (Port 1 event)" value="IOPORT_EVENT_1" scope="interrupt,eventlink,scope.dtc">
+        <constraint display ="Requires an interrupt channel in group 1">
+        <![CDATA[
+            [1, 9, 17, 25].indexOf(${event.ioport.event.1}) !== -1
+        ]]>
+        </constraint></event>
+        <event id="event.ioport.event.2" display="IOPORT|IOPORT EVENT 2 (Port 2 event)" value="IOPORT_EVENT_2" scope="interrupt,eventlink,scope.dtc">
+        <constraint display ="Requires an interrupt channel in group 2">
+        <![CDATA[
+            [2, 10, 18, 26].indexOf(${event.ioport.event.2}) !== -1
+        ]]>
+        </constraint></event>
+        <event id="event.iwdt.underflow" display="IWDT|IWDT UNDERFLOW (IWDT underflow)" value="IWDT_UNDERFLOW" scope="interrupt,eventlink,scope.snooze,scope.sstby">
+        <constraint display ="Requires an interrupt channel in group 3 or 7">
+        <![CDATA[
+            (${_destinations}.indexOf("destination.dtc") === -1) ? (${event.iwdt.underflow} === 50) : ([3, 11, 19, 27, 7, 15, 23, 31].indexOf(${event.iwdt.underflow}) !== -1)
+        ]]>
+        </constraint></event>
+        <event id="event.lpm.snooze.request" display="LPM|LPM SNOOZE REQUEST (Snooze entry)" value="LPM_SNOOZE_REQUEST" scope="eventlink,scope.dtc">
+        <constraint display ="Requires an interrupt channel in group 3 or 7">
+        <![CDATA[
+            [3, 11, 19, 27, 7, 15, 23, 31].indexOf(${event.lpm.snooze.request}) !== -1
+        ]]>
+        </constraint></event>
+        <event id="event.lvd.lvd1" display="LVD|LVD LVD1 (Voltage monitor 1 interrupt)" value="LVD_LVD1" scope="interrupt,eventlink,scope.snooze,scope.sstby">
+        <constraint display ="Requires an interrupt channel in group 0 or 4">
+        <![CDATA[
+            (${_destinations}.indexOf("destination.dtc") === -1) ? (${event.lvd.lvd1} === 49) : ([0, 8, 16, 24, 4, 12, 20, 28].indexOf(${event.lvd.lvd1}) !== -1)
+        ]]>
+        </constraint></event>
+        <event id="event.lvd.lvd2" display="LVD|LVD LVD2 (Voltage monitor 2 interrupt)" value="LVD_LVD2" scope="interrupt,eventlink,scope.snooze,scope.sstby">
+        <constraint display ="Requires an interrupt channel in group 1 or 5">
+        <![CDATA[
+            [1, 9, 17, 25, 5, 13, 21, 29].indexOf(${event.lvd.lvd2}) !== -1
+        ]]>
+        </constraint></event>
+        <event id="event.lvd.lvd3" display="LVD|LVD LVD3 (EXLVDVBAT monitor interrupt)" value="LVD_LVD3" scope="interrupt,scope.snooze,scope.sstby" irqSlot="46"></event>
+        <event id="event.lvd.lvd4" display="LVD|LVD LVD4 (RTC monitor interrupt)" value="LVD_LVD4" scope="interrupt,scope.snooze,scope.sstby" irqSlot="47"></event>
+        <event id="event.lvd.lvd5" display="LVD|LVD LVD5 (EXLVD monitor interrupt)" value="LVD_LVD5" scope="interrupt,scope.snooze,scope.sstby" irqSlot="48"></event>
+        <event id="event.macl.overflow" display="MACL|MACL OVERFLOW (Multiply-accumulate overflow)" value="MACL_OVERFLOW" scope="interrupt" irqSlot="61"></event>
+        <event id="event.poeg0.event" display="POEG|POEG0|POEG0 EVENT (Port Output disable 0 interrupt)" value="POEG0_EVENT" scope="interrupt">
+        <constraint display ="Requires an interrupt channel in group 2 or 6">
+        <![CDATA[
+            [2, 10, 18, 26, 6, 14, 22, 30].indexOf(${event.poeg0.event}) !== -1
+        ]]>
+        </constraint></event>
+        <event id="event.poeg1.event" display="POEG|POEG1|POEG1 EVENT (Port Output disable 1 interrupt)" value="POEG1_EVENT" scope="interrupt">
+        <constraint display ="Requires an interrupt channel in group 3 or 7">
+        <![CDATA[
+            [3, 11, 19, 27, 7, 15, 23, 31].indexOf(${event.poeg1.event}) !== -1
+        ]]>
+        </constraint></event>
+        <event id="event.rtc.alarm.0" display="RTC|RTC ALARM 0 (Alarm 0 interrupt)" value="RTC_ALARM_0" scope="interrupt,scope.snooze,scope.sstby">
+        <constraint display ="Requires an interrupt channel in group 1 or 5">
+        <![CDATA[
+            [1, 9, 17, 25, 5, 13, 21, 29].indexOf(${event.rtc.alarm.0}) !== -1
+        ]]>
+        </constraint></event>
+        <event id="event.rtc.alarm.1" display="RTC|RTC ALARM 1 (Alarm 1 interrupt)" value="RTC_ALARM_1" scope="interrupt,scope.snooze,scope.sstby">
+        <constraint display ="Requires an interrupt channel in group 2 or 3">
+        <![CDATA[
+            [2, 10, 18, 26, 3, 11, 19, 27].indexOf(${event.rtc.alarm.1}) !== -1
+        ]]>
+        </constraint></event>
+        <event id="event.rtc.carry" display="RTC|RTC CARRY (Carry interrupt)" value="RTC_CARRY" scope="interrupt">
+        <constraint display ="Requires an interrupt channel in group 3 or 7">
+        <![CDATA[
+            [3, 11, 19, 27, 7, 15, 23, 31].indexOf(${event.rtc.carry}) !== -1
+        ]]>
+        </constraint></event>
+        <event id="event.rtc.period" display="RTC|RTC PERIOD (Periodic interrupt)" value="RTC_PERIOD" scope="interrupt,eventlink,scope.snooze,scope.sstby">
+        <constraint display ="Requires an interrupt channel in group 2 or 6">
+        <![CDATA[
+            [2, 10, 18, 26, 6, 14, 22, 30].indexOf(${event.rtc.period}) !== -1
+        ]]>
+        </constraint></event>
+        <event id="event.sci0.am" display="SCI|SCI0|SCI0 AM (Address match event)" value="SCI0_AM" scope="interrupt,eventlink,scope.snooze">
+        <constraint display ="Requires an interrupt channel in group 0 or 4">
+        <![CDATA[
+            [0, 8, 16, 24, 4, 12, 20, 28].indexOf(${event.sci0.am}) !== -1
+        ]]>
+        </constraint></event>
+        <event id="event.sci0.eri" display="SCI|SCI0|SCI0 ERI (Receive error)" value="SCI0_ERI" scope="interrupt,eventlink">
+        <constraint display ="Requires an interrupt channel in group 3 or 7">
+        <![CDATA[
+            [3, 11, 19, 27, 7, 15, 23, 31].indexOf(${event.sci0.eri}) !== -1
+        ]]>
+        </constraint></event>
+        <event id="event.sci0.rxi" display="SCI|SCI0|SCI0 RXI (Receive data full)" value="SCI0_RXI" scope="interrupt,eventlink,scope.dtc">
+        <constraint display ="Requires an interrupt channel in group 0 or 4">
+        <![CDATA[
+            [0, 8, 16, 24, 4, 12, 20, 28].indexOf(${event.sci0.rxi}) !== -1
+        ]]>
+        </constraint></event>
+        <event id="event.sci0.rxi.or.eri" display="SCI|SCI0|SCI0 RXI OR ERI (Receive data full/Receive error)" value="SCI0_RXI_OR_ERI" scope="scope.snooze"></event>
+        <event id="event.sci0.tei" display="SCI|SCI0|SCI0 TEI (Transmit end)" value="SCI0_TEI" scope="interrupt,eventlink">
+        <constraint display ="Requires an interrupt channel in group 2 or 6">
+        <![CDATA[
+            [2, 10, 18, 26, 6, 14, 22, 30].indexOf(${event.sci0.tei}) !== -1
+        ]]>
+        </constraint></event>
+        <event id="event.sci0.txi" display="SCI|SCI0|SCI0 TXI (Transmit data empty)" value="SCI0_TXI" scope="interrupt,eventlink,scope.dtc">
+        <constraint display ="Requires an interrupt channel in group 1 or 5">
+        <![CDATA[
+            [1, 9, 17, 25, 5, 13, 21, 29].indexOf(${event.sci0.txi}) !== -1
+        ]]>
+        </constraint></event>
+        <event id="event.sci1.am" display="SCI|SCI1|SCI1 AM (Address match event)" value="SCI1_AM" scope="interrupt,eventlink">
+        <constraint display ="Requires an interrupt channel in group 5">
+        <![CDATA[
+            [5, 13, 21, 29].indexOf(${event.sci1.am}) !== -1
+        ]]>
+        </constraint></event>
+        <event id="event.sci1.eri" display="SCI|SCI1|SCI1 ERI (Receive error)" value="SCI1_ERI" scope="interrupt,eventlink">
+        <constraint display ="Requires an interrupt channel in group 3">
+        <![CDATA[
+            [3, 11, 19, 27].indexOf(${event.sci1.eri}) !== -1
+        ]]>
+        </constraint></event>
+        <event id="event.sci1.rxi" display="SCI|SCI1|SCI1 RXI (Receive data full)" value="SCI1_RXI" scope="interrupt,eventlink,scope.dtc">
+        <constraint display ="Requires an interrupt channel in group 0">
+        <![CDATA[
+            [0, 8, 16, 24].indexOf(${event.sci1.rxi}) !== -1
+        ]]>
+        </constraint></event>
+        <event id="event.sci1.tei" display="SCI|SCI1|SCI1 TEI (Transmit end)" value="SCI1_TEI" scope="interrupt,eventlink">
+        <constraint display ="Requires an interrupt channel in group 2">
+        <![CDATA[
+            [2, 10, 18, 26].indexOf(${event.sci1.tei}) !== -1
+        ]]>
+        </constraint></event>
+        <event id="event.sci1.txi" display="SCI|SCI1|SCI1 TXI (Transmit data empty)" value="SCI1_TXI" scope="interrupt,eventlink,scope.dtc">
+        <constraint display ="Requires an interrupt channel in group 1">
+        <![CDATA[
+            [1, 9, 17, 25].indexOf(${event.sci1.txi}) !== -1
+        ]]>
+        </constraint></event>
+        <event id="event.sci2.am" display="SCI|SCI2|SCI2 AM (Address match event)" value="SCI2_AM" scope="interrupt,eventlink">
+        <constraint display ="Requires an interrupt channel in group 1">
+        <![CDATA[
+            [1, 9, 17, 25].indexOf(${event.sci2.am}) !== -1
+        ]]>
+        </constraint></event>
+        <event id="event.sci2.eri" display="SCI|SCI2|SCI2 ERI (Receive error)" value="SCI2_ERI" scope="interrupt,eventlink">
+        <constraint display ="Requires an interrupt channel in group 7">
+        <![CDATA[
+            [7, 15, 23, 31].indexOf(${event.sci2.eri}) !== -1
+        ]]>
+        </constraint></event>
+        <event id="event.sci2.rxi" display="SCI|SCI2|SCI2 RXI (Receive data full)" value="SCI2_RXI" scope="interrupt,eventlink,scope.dtc">
+        <constraint display ="Requires an interrupt channel in group 4">
+        <![CDATA[
+            [4, 12, 20, 28].indexOf(${event.sci2.rxi}) !== -1
+        ]]>
+        </constraint></event>
+        <event id="event.sci2.tei" display="SCI|SCI2|SCI2 TEI (Transmit end)" value="SCI2_TEI" scope="interrupt,eventlink">
+        <constraint display ="Requires an interrupt channel in group 6">
+        <![CDATA[
+            [6, 14, 22, 30].indexOf(${event.sci2.tei}) !== -1
+        ]]>
+        </constraint></event>
+        <event id="event.sci2.txi" display="SCI|SCI2|SCI2 TXI (Transmit data empty)" value="SCI2_TXI" scope="interrupt,eventlink,scope.dtc">
+        <constraint display ="Requires an interrupt channel in group 5">
+        <![CDATA[
+            [5, 13, 21, 29].indexOf(${event.sci2.txi}) !== -1
+        ]]>
+        </constraint></event>
+        <event id="event.sci3.am" display="SCI|SCI3|SCI3 AM (Address match event)" value="SCI3_AM" scope="interrupt,eventlink">
+        <constraint display ="Requires an interrupt channel in group 6">
+        <![CDATA[
+            [6, 14, 22, 30].indexOf(${event.sci3.am}) !== -1
+        ]]>
+        </constraint></event>
+        <event id="event.sci3.eri" display="SCI|SCI3|SCI3 ERI (Receive error)" value="SCI3_ERI" scope="interrupt,eventlink">
+        <constraint display ="Requires an interrupt channel in group 3">
+        <![CDATA[
+            [3, 11, 19, 27].indexOf(${event.sci3.eri}) !== -1
+        ]]>
+        </constraint></event>
+        <event id="event.sci3.rxi" display="SCI|SCI3|SCI3 RXI (Receive data full)" value="SCI3_RXI" scope="interrupt,eventlink,scope.dtc">
+        <constraint display ="Requires an interrupt channel in group 0">
+        <![CDATA[
+            [0, 8, 16, 24].indexOf(${event.sci3.rxi}) !== -1
+        ]]>
+        </constraint></event>
+        <event id="event.sci3.tei" display="SCI|SCI3|SCI3 TEI (Transmit end)" value="SCI3_TEI" scope="interrupt,eventlink">
+        <constraint display ="Requires an interrupt channel in group 2">
+        <![CDATA[
+            [2, 10, 18, 26].indexOf(${event.sci3.tei}) !== -1
+        ]]>
+        </constraint></event>
+        <event id="event.sci3.txi" display="SCI|SCI3|SCI3 TXI (Transmit data empty)" value="SCI3_TXI" scope="interrupt,eventlink,scope.dtc">
+        <constraint display ="Requires an interrupt channel in group 1">
+        <![CDATA[
+            [1, 9, 17, 25].indexOf(${event.sci3.txi}) !== -1
+        ]]>
+        </constraint></event>
+        <event id="event.sci9.am" display="SCI|SCI9|SCI9 AM (Address match event)" value="SCI9_AM" scope="interrupt,eventlink">
+        <constraint display ="Requires an interrupt channel in group 3">
+        <![CDATA[
+            [3, 11, 19, 27].indexOf(${event.sci9.am}) !== -1
+        ]]>
+        </constraint></event>
+        <event id="event.sci9.eri" display="SCI|SCI9|SCI9 ERI (Receive error)" value="SCI9_ERI" scope="interrupt,eventlink">
+        <constraint display ="Requires an interrupt channel in group 7">
+        <![CDATA[
+            [7, 15, 23, 31].indexOf(${event.sci9.eri}) !== -1
+        ]]>
+        </constraint></event>
+        <event id="event.sci9.rxi" display="SCI|SCI9|SCI9 RXI (Receive data full)" value="SCI9_RXI" scope="interrupt,eventlink,scope.dtc">
+        <constraint display ="Requires an interrupt channel in group 4">
+        <![CDATA[
+            [4, 12, 20, 28].indexOf(${event.sci9.rxi}) !== -1
+        ]]>
+        </constraint></event>
+        <event id="event.sci9.tei" display="SCI|SCI9|SCI9 TEI (Transmit end)" value="SCI9_TEI" scope="interrupt,eventlink">
+        <constraint display ="Requires an interrupt channel in group 6">
+        <![CDATA[
+            [6, 14, 22, 30].indexOf(${event.sci9.tei}) !== -1
+        ]]>
+        </constraint></event>
+        <event id="event.sci9.txi" display="SCI|SCI9|SCI9 TXI (Transmit data empty)" value="SCI9_TXI" scope="interrupt,eventlink,scope.dtc">
+        <constraint display ="Requires an interrupt channel in group 5">
+        <![CDATA[
+            [5, 13, 21, 29].indexOf(${event.sci9.txi}) !== -1
+        ]]>
+        </constraint></event>
+        <event id="event.sdadc0.adi" display="SDADC|SDADC0|SDADC0 ADI (End of SD A/D conversion (type 1))" value="SDADC0_ADI" scope="interrupt,eventlink,scope.dtc">
+        <constraint display ="Requires an interrupt channel in group 5 or 7">
+        <![CDATA[
+            [5, 13, 21, 29, 7, 15, 23, 31].indexOf(${event.sdadc0.adi}) !== -1
+        ]]>
+        </constraint></event>
+        <event id="event.sdadc0.adi2" display="SDADC|SDADC0|SDADC0 ADI2 (End of SD A/D conversion (type 2))" value="SDADC0_ADI2" scope="interrupt,eventlink,scope.dtc">
+        <constraint display ="Requires an interrupt channel in group 5 or 7">
+        <![CDATA[
+            [5, 13, 21, 29, 7, 15, 23, 31].indexOf(${event.sdadc0.adi2}) !== -1
+        ]]>
+        </constraint></event>
+        <event id="event.sdadc0.adzc0" display="SDADC|SDADC0|SDADC0 ADZC0 (Zero-cross detection interrupt 0 (ch 1, ch 2))" value="SDADC0_ADZC0" scope="interrupt,eventlink" irqSlot="59"></event>
+        <event id="event.sdadc0.adzc1" display="SDADC|SDADC0|SDADC0 ADZC1 (Zero-cross detection interrupt 1 (ch 0, ch 3))" value="SDADC0_ADZC1" scope="interrupt,eventlink" irqSlot="60"></event>
+        <event id="event.spi0.eri" display="SPI|SPI0|SPI0 ERI (Error)" value="SPI0_ERI" scope="interrupt,eventlink">
+        <constraint display ="Requires an interrupt channel in group 3 or 7">
+        <![CDATA[
+            [3, 11, 19, 27, 7, 15, 23, 31].indexOf(${event.spi0.eri}) !== -1
+        ]]>
+        </constraint></event>
+        <event id="event.spi0.idle" display="SPI|SPI0|SPI0 IDLE (Idle)" value="SPI0_IDLE" scope="interrupt,eventlink">
+        <constraint display ="Requires an interrupt channel in group 2 or 6">
+        <![CDATA[
+            [2, 10, 18, 26, 6, 14, 22, 30].indexOf(${event.spi0.idle}) !== -1
+        ]]>
+        </constraint></event>
+        <event id="event.spi0.rxi" display="SPI|SPI0|SPI0 RXI (Receive buffer full)" value="SPI0_RXI" scope="interrupt,eventlink,scope.dtc">
+        <constraint display ="Requires an interrupt channel in group 0 or 4">
+        <![CDATA[
+            [0, 8, 16, 24, 4, 12, 20, 28].indexOf(${event.spi0.rxi}) !== -1
+        ]]>
+        </constraint></event>
+        <event id="event.spi0.tei" display="SPI|SPI0|SPI0 TEI (Transmission complete event)" value="SPI0_TEI" scope="interrupt,eventlink">
+        <constraint display ="Requires an interrupt channel in group 2 or 6">
+        <![CDATA[
+            [2, 10, 18, 26, 6, 14, 22, 30].indexOf(${event.spi0.tei}) !== -1
+        ]]>
+        </constraint></event>
+        <event id="event.spi0.txi" display="SPI|SPI0|SPI0 TXI (Transmit buffer empty)" value="SPI0_TXI" scope="interrupt,eventlink,scope.dtc">
+        <constraint display ="Requires an interrupt channel in group 1 or 5">
+        <![CDATA[
+            [1, 9, 17, 25, 5, 13, 21, 29].indexOf(${event.spi0.txi}) !== -1
+        ]]>
+        </constraint></event>
+        <event id="event.trng.rdreq" display="TRNG|TRNG RDREQ (TRNG Read Request)" value="TRNG_RDREQ" scope="interrupt">
+        <constraint display ="Requires an interrupt channel in group 2 or 6">
+        <![CDATA[
+            [2, 10, 18, 26, 6, 14, 22, 30].indexOf(${event.trng.rdreq}) !== -1
+        ]]>
+        </constraint></event>
+        <event id="event.wdt.underflow" display="WDT|WDT UNDERFLOW (WDT underflow)" value="WDT_UNDERFLOW" scope="interrupt,eventlink">
+        <constraint display ="Requires an interrupt channel in group 0 or 4">
+        <![CDATA[
+            [0, 8, 16, 24, 4, 12, 20, 28].indexOf(${event.wdt.underflow}) !== -1
+        ]]>
+        </constraint></event>
+        <link id="link.gpta" display="GPT (A)" value="GPT_A" />
+        <link id="link.gptb" display="GPT (B)" value="GPT_B" />
+        <link id="link.gptc" display="GPT (C)" value="GPT_C" />
+        <link id="link.gptd" display="GPT (D)" value="GPT_D" />
+        <link id="link.adc0" display="ADC12A" value="ADC0" />
+        <link id="link.adc0b" display="ADC12B" value="ADC0_B" />
+        <link id="link.ioport1" display="PORT1" value="IOPORT1" />
+        <link id="link.ioport2" display="PORT2" value="IOPORT2" />
+    </bsp>
+</raModuleDescription>

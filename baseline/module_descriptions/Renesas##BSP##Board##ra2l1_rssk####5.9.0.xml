@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<raModuleDescription>
+  <config id="config.board.ra2l1_rssk" path="fsp_cfg/bsp/board_cfg.h" version="0">
+    <content>#include "../../../ra/board/ra2l1_rssk/board.h"</content>
+  </config>
+  <board config="config.board.ra2l1_rssk" device="R7FA2L1AB2DFP" display="RA2|RA2L1|RSSK-RA2L1" id="board.ra2l1_rssk" version="0" debugger="com.renesas.hardwaredebug.rz.jlink">
+    <capability id="capability.led"/>
+  </board>
+</raModuleDescription>

@@ -1,0 +1,596 @@
+﻿<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.driver.ether" path="fsp_cfg/r_ether_cfg.h" version="0">
+        <property id="config.driver.ether.param_checking_enable" display="Parameter Checking" default="config.driver.ether.param_checking_enable.bsp" description="If selected code for parameter checking is included in the build.">
+            <option id="config.driver.ether.param_checking_enable.bsp" display="Default (BSP)" value="BSP_CFG_PARAM_CHECKING_ENABLE" />
+            <option id="config.driver.ether.param_checking_enable.enabled" display="Enabled" value="(1)" />
+            <option id="config.driver.ether.param_checking_enable.disabled" display="Disabled" value="(0)" />
+        </property>
+        <property id="config.driver.ether.link_present" display="ET0_LINKSTA Pin Status Flag" default="config.driver.ether.link_present.0" description="Specify the polarity of the link signal output by the PHY-LSI.
+When 0 is specified, link-up and link-down correspond respectively to the fall and rise of the LINKSTA signal.
+When 1 is specified, link-up and link-down correspond respectively to the rise and fall of the LINKSTA signal.">
+            <option id="config.driver.ether.link_present.0" display="Fall -> Rise" value="0" />
+            <option id="config.driver.ether.link_present.1" display="Rise -> Fall" value="1" />
+        </property>
+        <property id="config.driver.ether.use_linksta" display="Link Signal Change Flag" default="config.driver.ether.use_linksta.0" description="Use LINKSTA signal for detect link status changes
+0 = unused  (use PHY-LSI status register)
+1 = use     (use LINKSTA signal)">
+            <option id="config.driver.ether.use_linksta.0" display="Unused" value="0" />
+            <option id="config.driver.ether.use_linksta.1" display="Used" value="1" />
+        </property>
+        <property id="config.driver.ether.interrupt_event_backword_compatibility" display="Interrupt event backward compatibility" default="config.driver.ether.interrupt_event_backword_compatibility.enabled" description="Keep backword compatibility of interrupt events.
+0 = Do not keep compatibility, use separate events for each cause of interrupt.
+1 = Keep compatibility, use common events for all interrupts.">
+            <option id="config.driver.ether.interrupt_event_backword_compatibility.disabled" display="Do not keep compatibility" value="0" />
+            <option id="config.driver.ether.interrupt_event_backword_compatibility.enabled" display="Keep compatibility" value="1" />
+        </property>
+        <content>
+            #ifdef __cplusplus
+            extern "C" {
+            #endif
+
+            #define ETHER_CFG_PARAM_CHECKING_ENABLE (${config.driver.ether.param_checking_enable})
+            #define ETHER_CFG_LINK_PRESENT (${config.driver.ether.link_present})
+            #define ETHER_CFG_USE_LINKSTA (${config.driver.ether.use_linksta})
+            #define ETHER_CFG_KEEP_INTERRUPT_EVENT_BACKWORD_COMPATIBILITY (${config.driver.ether.interrupt_event_backword_compatibility})
+
+            #ifdef __cplusplus
+            }
+            #endif
+        </content>
+    </config>
+    <module config="config.driver.ether" display="Networking|${module.driver.ether.name} Ethernet (r_ether)" id="module.driver.ether_on_ether" version="1" url="group___e_t_h_e_r.html">
+        <constraint display="Unique name required for each instance">
+            "${interface.driver.ether.${module.driver.ether.name}}" === "1"
+        </constraint>
+        <constraint display="Secure projects is not supported in this MCU">
+            ("${_project.secure}" !== "1" || testExists("${interface.mcu.ether.supports.tz_secure}"))
+        </constraint>
+        <requires id="module.driver.ether.requires.ether_phy" interface="interface.driver.ether_phy_on_ether_phy" display="Add Ethernet PHY Driver">
+            <override property="module.driver.ether_phy.flow_control" value="module.driver.ether.flow_control"/>
+            <override property="module.driver.ether_phy.channel" value="module.driver.ether.channel"/>
+        </requires>
+        <provides interface="interface.driver.ether" />
+        <provides interface="interface.driver.ether_on_ether" />
+        <provides interface="interface.driver.ether.${module.driver.ether.name}" />
+        <property default="g_ether${_instance}" display="General|Name" id="module.driver.ether.name" description="Module name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.ether.name}")</constraint>
+        </property>
+        <property display="General|Channel" id="module.driver.ether.channel" default="module.driver.ether.channel.0" description="Select the ether channel number.">
+            <option id="module.driver.ether.channel.0" display="0" value="0" />
+        </property>
+        <property default="00:11:22:33:44:55" display="General|MAC address" id="module.driver.ether.mac_address" description="MAC address of this channel.">
+            <constraint display="Must be a valid MAC address">eval('' +
+            'var input = "${module.driver.ether.mac_address}";' +
+            'var regex = RegExp("^[0-9A-F]\{2\}\(:[0-9A-F]\{2\}\)\{5\}$","i");' +
+            '(regex.test(input) &amp;&amp; ( 17 === input.length) )')
+            </constraint>
+            <export>"0x" + "${module.driver.ether.mac_address}".replace(/\:/g,",0x")</export>            <!-- replace all colons with commas on export and add 0x to mark as hex -->
+        </property>
+        <property display="General|Zero-copy Mode" id="module.driver.ether.zerocopy" default="module.driver.ether.zerocopy.0" description="Enable or disable zero-copy mode.">
+            <option id="module.driver.ether.zerocopy.0" display="Disable" value="ETHER_ZEROCOPY_DISABLE" />
+            <option id="module.driver.ether.zerocopy.1" display="Enable" value="ETHER_ZEROCOPY_ENABLE" />
+        </property>
+        <property display="General|Flow control functionality" id="module.driver.ether.flow_control" default="module.driver.ether.flow_control.0" description="Enable or disable flow control.">
+            <option id="module.driver.ether.flow_control.0" display="Disable" value="ETHER_FLOW_CONTROL_DISABLE" />
+            <option id="module.driver.ether.flow_control.1" display="Enable" value="ETHER_FLOW_CONTROL_ENABLE" />
+        </property>
+        <property display="Filters|Multicast Mode" id="module.driver.ether.multicast" default="module.driver.ether.multicast.1" description="Enable or disable multicast frame reception.">
+            <option id="module.driver.ether.multicast.0" display="Disable" value="ETHER_MULTICAST_DISABLE" />
+            <option id="module.driver.ether.multicast.1" display="Enable" value="ETHER_MULTICAST_ENABLE" />
+        </property>
+        <property display="Filters|Promiscuous Mode" id="module.driver.ether.promiscuous" default="module.driver.ether.promiscuous.0" description="Enable this option to receive packets addressed to other NICs.">
+            <option id="module.driver.ether.promiscuous.0" display="Disable" value="ETHER_PROMISCUOUS_DISABLE" />
+            <option id="module.driver.ether.promiscuous.1" display="Enable" value="ETHER_PROMISCUOUS_ENABLE" />
+        </property>
+        <property display="Filters|Broadcast filter" id="module.driver.ether.broadcast_filter" default="0" description="Limit of the number of broadcast frames received continuously">
+            <constraint display="Must be a valid non-negative integer with maximum configurable value of 65535. ">testInteger("${module.driver.ether.broadcast_filter}") &amp;&amp; ("${module.driver.ether.broadcast_filter}" &gt;= 0) &amp;&amp; ("${module.driver.ether.broadcast_filter}" &lt;= 65535)</constraint>
+        </property>
+        <property display="Buffers|Number of TX buffer" id="module.driver.ether.num_tx_descriptors" default="1" description="Number of transmit buffers">
+            <constraint display="Must be an integer from 1 to 8">testInteger("${module.driver.ether.num_tx_descriptors}") &amp;&amp; ("${module.driver.ether.num_tx_descriptors}" &gt;= 1) &amp;&amp; ("${module.driver.ether.num_tx_descriptors}" &lt;= 8)</constraint>
+        </property>
+        <property display="Buffers|Number of RX buffer" id="module.driver.ether.num_rx_descriptors" default="1" description="Number of receive buffers">
+            <constraint display="Must be an integer from 1 to 8">testInteger("${module.driver.ether.num_rx_descriptors}") &amp;&amp; ("${module.driver.ether.num_rx_descriptors}" &gt;= 1) &amp;&amp; ("${module.driver.ether.num_rx_descriptors}" &lt;= 8)</constraint>
+        </property>
+        <property display="Buffers|Allocate RX buffer" id="module.driver.ether.allocate_rx_buffer" default="module.driver.ether.allocate_rx_buffer.1" description="Allocates the RX buffer when generating the configuration structure">
+            <option id="module.driver.ether.allocate_rx_buffer.0" display="Disable" value="false" />
+            <option id="module.driver.ether.allocate_rx_buffer.1" display="Enable" value="true" />
+        </property>
+        <property display="Buffers|Buffer size" id="module.driver.ether.ether_buffer_size" default="1514" description="Size of Ethernet buffer">
+            <constraint display="Must be at least 1514 which is the maximum Ethernet frame size.">testInteger("${module.driver.ether.ether_buffer_size}") &amp;&amp; ("${module.driver.ether.ether_buffer_size}" &gt;= 1514)</constraint>
+            <export>eval('' +
+            'var padding_size_dict = {ETHER_PADDING_DISABLE: 0,ETHER_PADDING_1BYTE: 1,ETHER_PADDING_2BYTE: 2,ETHER_PADDING_3BYTE: 3};' +
+            'var output = "";' +
+            'var ether_buffer_size = ${module.driver.ether.ether_buffer_size};' +
+            'var ether_padding = "${module.driver.ether.padding}";' +
+            'var ether_padding_size = padding_size_dict[ether_padding];' +
+            'output = (Math.ceil((ether_padding_size + ether_buffer_size) / 32) * 32);' +
+            'String(output)')
+            </export>
+        </property>
+        <property display="Buffers|Padding size" id="module.driver.ether.padding" default="module.driver.ether.padding.0" description="The padding size that is automatically inserted into the received packets">
+            <option id="module.driver.ether.padding.0" display="Disable" value="ETHER_PADDING_DISABLE" />
+            <option id="module.driver.ether.padding.1" display="1 Byte" value="ETHER_PADDING_1BYTE" />
+            <option id="module.driver.ether.padding.2" display="2 Bytes" value="ETHER_PADDING_2BYTE" />
+            <option id="module.driver.ether.padding.3" display="3 Bytes" value="ETHER_PADDING_3BYTE" />
+        </property>
+        <property display="Buffers|Padding offset" id="module.driver.ether.padding_offset" default="0" description="The offset into a receive buffer to insert padding bytes.">
+            <constraint display="Must be less than 64 bytes.">testInteger("${module.driver.ether.padding_offset}") &amp;&amp; ("${module.driver.ether.padding_offset}" &lt; 64) &amp;&amp; ("${module.driver.ether.padding_offset}" &gt;= 0)</constraint>
+        </property>
+        <property id="module.driver.ether.section_of_buffers" default="ETHER_BUFFER_PLACE_IN_SECTION"/>
+        <!-- This is keeping for backward compatibility. -->
+        <property id="module.driver.ether.buffer_correction_size" default="${module.driver.ether.ether_buffer_size}"/>
+        <property id="module.driver.ether.ether_buffer" default="">
+            <export>eval('' +
+            'var output = "";' +
+            'var section_of_buffers = "${module.driver.ether.section_of_buffers}";' +
+            'var num_tx_buffers = ${module.driver.ether.num_tx_descriptors};' +
+            'var num_rx_buffers = ${module.driver.ether.num_rx_descriptors};' +
+            'var ether_buffer_size = ${module.driver.ether.ether_buffer_size};' +
+            'var padding_size_dict = {ETHER_PADDING_DISABLE: 0,ETHER_PADDING_1BYTE: 1,ETHER_PADDING_2BYTE: 2,ETHER_PADDING_3BYTE: 3};' +
+            'var ether_padding = "${module.driver.ether.padding}";' +
+            'var ether_padding_size = padding_size_dict[ether_padding];' +
+            'var ether_buffer_correction_size;' +
+            'var num_total_buffers;' +
+            'if ("ETHER_ZEROCOPY_ENABLE" == "${module.driver.ether.zerocopy}"){' +
+            '    num_tx_buffers = 0;' +
+            '    if ("true" != "${module.driver.ether.allocate_rx_buffer}"){' +
+            '    num_rx_buffers = 0;' +
+            '    }' +
+            '}' +
+            'num_total_buffers = num_tx_buffers + num_rx_buffers;' +
+            'ether_buffer_correction_size = (Math.ceil((ether_padding_size + ether_buffer_size) / 32) * 32);' +
+            'for (var i= 0 ; i &lt; num_tx_buffers + num_rx_buffers ; i++){' +
+            '    output += "__attribute__\(\(__aligned__\(32\)\)\)uint8_t ${module.driver.ether.name}_ether_buffer" + i + "\[" + ether_buffer_correction_size + "\]" + section_of_buffers + ";\\n";' +
+            '}' +
+            'output')
+            </export>
+        </property>
+        <property id="module.driver.ether.array_of_buffers" default="">
+            <export>eval('' +
+            'var output = "";' +
+            'var num_tx_buffers = ${module.driver.ether.num_tx_descriptors};' +
+            'var num_rx_buffers = ${module.driver.ether.num_rx_descriptors};' +
+            'var num_total_buffers;' +
+            'if ("ETHER_ZEROCOPY_ENABLE" == "${module.driver.ether.zerocopy}"){' +
+            '    num_tx_buffers = 0;' +
+            '    if ("true" != "${module.driver.ether.allocate_rx_buffer}"){' +
+            '        num_rx_buffers = 0;' +
+            '    }' +
+            '}' +
+            'num_total_buffers = num_tx_buffers + num_rx_buffers;' +
+            'if (0 &lt; num_total_buffers){' +
+            '    output += "uint8_t *pp_${module.driver.ether.name}_ether_buffers\[" + String(num_total_buffers) + "\] \= {\\n";' +
+            '    for (var i= 0 ; i &lt; num_total_buffers ; i++){' +
+            '        output += "\(uint8_t *\) &amp;${module.driver.ether.name}_ether_buffer" + i + "\[0\],\\n";' +
+            '    }' +
+            '    output += "};";' +
+            '}' +
+            'output')
+            </export>
+        </property>
+        <property id="module.driver.ether.symbol_name_of_array" default="">
+            <export>eval('' +
+            'var output = "";' +
+            'var num_tx_buffers = ${module.driver.ether.num_tx_descriptors};' +
+            'var num_rx_buffers = ${module.driver.ether.num_rx_descriptors};' +
+            'var num_total_buffers;' +
+            'if ("ETHER_ZEROCOPY_ENABLE" == "${module.driver.ether.zerocopy}"){' +
+            '    num_tx_buffers = 0;' +
+            '    if ("true" != "${module.driver.ether.allocate_rx_buffer}"){' +
+            '        num_rx_buffers = 0;' +
+            '    }' +
+            '}' +
+            'num_total_buffers = num_tx_buffers + num_rx_buffers;' +
+            'if (0 &lt; num_total_buffers){' +
+            '    output += "pp_${module.driver.ether.name}_ether_buffers";' +
+            '}else{' +
+            '    output += "NULL";' +
+            '}' +
+            'output')
+            </export>
+        </property>
+        <property bitmapPrefix="ETHER_EESR_EVENT_MASK_" default="module.driver.ether.eesr_event_mask.rfof,module.driver.ether.eesr_event_mask.rde,module.driver.ether.eesr_event_mask.fr,module.driver.ether.eesr_event_mask.tc,module.driver.ether.eesr_event_mask.tfuf,module.driver.ether.eesr_event_mask.tde" display="Interrupts|EESR event" id="module.driver.ether.eesr_event_mask" description="Select event list for each bit of EESR.">
+            <option display="CERF" id="module.driver.ether.eesr_event_mask.cerf" value="CERF"/>
+            <option display="PRE" id="module.driver.ether.eesr_event_mask.pre" value="PRE"/>
+            <option display="RTSF" id="module.driver.ether.eesr_event_mask.rtsf" value="RTSF"/>
+            <option display="RTLF" id="module.driver.ether.eesr_event_mask.rtlf" value="RTLF"/>
+            <option display="RRF" id="module.driver.ether.eesr_event_mask.rrf" value="RRF"/>
+            <option display="RMAF" id="module.driver.ether.eesr_event_mask.rmaf" value="RMAF"/>
+            <option display="TRO" id="module.driver.ether.eesr_event_mask.tro" value="TRO"/>
+            <option display="CD" id="module.driver.ether.eesr_event_mask.cd" value="CD"/>
+            <option display="DLC" id="module.driver.ether.eesr_event_mask.dlc" value="DLC"/>
+            <option display="CND" id="module.driver.ether.eesr_event_mask.cnd" value="CND"/>
+            <option display="RFOF" id="module.driver.ether.eesr_event_mask.rfof" value="RFOF"/>
+            <option display="RDE" id="module.driver.ether.eesr_event_mask.rde" value="RDE"/>
+            <option display="FR" id="module.driver.ether.eesr_event_mask.fr" value="FR"/>
+            <option display="TFUF" id="module.driver.ether.eesr_event_mask.tfuf" value="TFUF"/>
+            <option display="TDE" id="module.driver.ether.eesr_event_mask.tde" value="TDE"/>
+            <option display="TC" id="module.driver.ether.eesr_event_mask.tc" value="TC"/>
+            <option display="ECI" id="module.driver.ether.eesr_event_mask.eci" value="ECI"/>
+            <option display="ADE" id="module.driver.ether.eesr_event_mask.ade" value="ADE"/>
+            <option display="RFCOF" id="module.driver.ether.eesr_event_mask.rfcof" value="RFCOF"/>
+            <option display="RABT" id="module.driver.ether.eesr_event_mask.rabt" value="RABT"/>
+            <option display="TABT" id="module.driver.ether.eesr_event_mask.tabt" value="TABT"/>
+            <option display="TWB" id="module.driver.ether.eesr_event_mask.twb" value="TWB"/>
+        </property>
+        <property bitmapPrefix="ETHER_ECSR_EVENT_MASK_" default="" display="Interrupts|ECSR event" id="module.driver.ether.ecsr_event_mask" description="Select event list for each bit of ECSR.">
+            <option display="ICD" id="module.driver.ether.ecsr_event_mask.icd" value="ICD"/>
+            <option display="MPD" id="module.driver.ether.ecsr_event_mask.mpd" value="MPD"/>
+            <option display="LCHNG" id="module.driver.ether.ecsr_event_mask.lchng" value="LCHNG"/>
+            <option display="PSRTO" id="module.driver.ether.ecsr_event_mask.psrto" value="PSRTO"/>
+            <option display="BFR" id="module.driver.ether.ecsr_event_mask.bfr" value="BFR"/>
+        </property>
+        <property default="" display="Interrupts|Interrupt priority" id="module.driver.ether.interrupt_priority" description="Select the EDMAC interrupt priority.">
+            <select enum="enum.mcu.nvic.priorities.mandatory"/>
+            <interrupt event="event.edmac${module.driver.ether.channel}.eint" isr="ether_eint_isr"/>
+        </property>
+        <property display="Interrupts|Callback" id="module.driver.ether.p_callback" default="NULL" description="Callback provided when an ISR occurs">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.ether.p_callback}")</constraint>
+        </property>
+        <property id="module.driver.ether.p_context" default="NULL">
+            <constraint display="Must be a valid C symbol">testSymbol("${module.driver.ether.p_context}")</constraint>
+        </property>
+        <memory accumulator="RAM_NS_BUFFER_LENGTH">
+            <!-- Allocate non-secure memory for flat projects, which use secure memory by default. The Ethernet peripheral is always non-secure, and it accesses the descriptors directly, so the descriptors must be in non-secure memory. -->
+            eval('' +
+            'var output = 0;' +
+            'var num_tx_buffers = ${module.driver.ether.num_tx_descriptors};' +
+            'var num_rx_buffers = ${module.driver.ether.num_rx_descriptors};' +
+            'var ether_buffer_size = ${module.driver.ether.ether_buffer_size};' +
+            'var padding_size_dict = {ETHER_PADDING_DISABLE: 0,ETHER_PADDING_1BYTE: 1,ETHER_PADDING_2BYTE: 2,ETHER_PADDING_3BYTE: 3};' +
+            'var ether_padding = "${module.driver.ether.padding}";' +
+            'var ether_padding_size = padding_size_dict[ether_padding];' +
+            'var ether_buffer_correction_size;' +
+            'var num_total_buffers;' +
+            '/* Calculate discrptor memory size. */' +
+            'if("${_project.nonsecure}" === "1"){' +
+            '    output = 0;' +
+            '}else{' +
+            '    output += (16 * (${module.driver.ether.num_rx_descriptors} + ${module.driver.ether.num_tx_descriptors}));' +
+            '    /* Calculate buffer number. */' +
+            '    if ("ETHER_ZEROCOPY_ENABLE" == "${module.driver.ether.zerocopy}"){' +
+            '        num_tx_buffers = 0;' +
+            '        if ("true" != "${module.driver.ether.allocate_rx_buffer}"){' +
+            '            num_rx_buffers = 0;' +
+            '        }' +
+            '    }' +
+            '    num_total_buffers = num_tx_buffers + num_rx_buffers;' +
+            '    ether_buffer_correction_size = (Math.ceil((ether_padding_size + ether_buffer_size) / 32) * 32);' +
+            '    /* Calculate buffer size. */' +
+            '    output += (num_total_buffers * ether_buffer_correction_size);' +
+            '}' +
+            'String(output)')
+        </memory>
+        <symbol id="symbol.driver.ether.name" value="${module.driver.ether.name}"/>
+        <symbol id="symbol.driver.ether.guard.open" value="${module.driver.ether.name}_open_guard"/>
+        <symbol id="symbol.driver.ether.guard.macro.open" value="FSP_GUARD_${module.driver.ether.name}_R_ETHER_Open"/>
+        <symbol id="symbol.driver.ether.guard.close" value="${module.driver.ether.name}_close_guard"/>
+        <symbol id="symbol.driver.ether.guard.macro.close" value="FSP_GUARD_${module.driver.ether.name}_R_ETHER_Close"/>
+        <symbol id="symbol.driver.ether.guard.read" value="${module.driver.ether.name}_read_guard"/>
+        <symbol id="symbol.driver.ether.guard.macro.read" value="FSP_GUARD_${module.driver.ether.name}_R_ETHER_Read"/>
+        <symbol id="symbol.driver.ether.guard.buffer_release" value="${module.driver.ether.name}_buffer_release_guard"/>
+        <symbol id="symbol.driver.ether.guard.macro.buffer_release" value="FSP_GUARD_${module.driver.ether.name}_R_ETHER_BufferRelease"/>
+        <symbol id="symbol.driver.ether.guard.rx_buffer_update" value="${module.driver.ether.name}_rx_buffer_update_guard"/>
+        <symbol id="symbol.driver.ether.guard.macro.rx_buffer_update" value="FSP_GUARD_${module.driver.ether.name}_R_ETHER_RxBufferUpdate"/>
+        <symbol id="symbol.driver.ether.guard.write" value="${module.driver.ether.name}_write_guard"/>
+        <symbol id="symbol.driver.ether.guard.macro.write" value="FSP_GUARD_${module.driver.ether.name}_R_ETHER_Write"/>
+        <symbol id="symbol.driver.ether.guard.link_process" value="${module.driver.ether.name}_link_process_guard"/>
+        <symbol id="symbol.driver.ether.guard.macro.link_process" value="FSP_GUARD_${module.driver.ether.name}_R_ETHER_LinkProcess"/>
+        <symbol id="symbol.driver.ether.guard.wake_on_lan_enable" value="${module.driver.ether.name}_wake_on_lan_enable_guard"/>
+        <symbol id="symbol.driver.ether.guard.macro.wake_on_lan_enable" value="FSP_GUARD_${module.driver.ether.name}_R_ETHER_WakeOnLANEnable"/>
+        <symbol id="symbol.driver.ether.guard.tx_status_get" value="${module.driver.ether.name}_tx_status_get_guard"/>
+        <symbol id="symbol.driver.ether.guard.macro.tx_status_get" value="FSP_GUARD_${module.driver.ether.name}_R_ETHER_TxStatusGet"/>
+        <symbol id="symbol.driver.ether.guard.callback_set" value="${module.driver.ether.name}_callback_set_guard"/>
+        <symbol id="symbol.driver.ether.guard.macro.callback_set" value="FSP_GUARD_${module.driver.ether.name}_R_ETHER_CallbackSet"/>
+        <symbol id="symbol.driver.ether.nsc_api" value="${module.driver.ether.name}_nsc_api"/>
+        <symbol id="symbol.driver.ether.cfg" value="${module.driver.ether.name}_cfg"/>
+        <symbol id="symbol.driver.ether.ctrl" value="${module.driver.ether.name}_ctrl"/>
+        <header>
+#if (BSP_FEATURE_TZ_HAS_TRUSTZONE == 1) &amp;&amp; (BSP_TZ_SECURE_BUILD != 1) &amp;&amp; (BSP_TZ_NONSECURE_BUILD != 1) &amp;&amp; (BSP_FEATURE_ETHER_SUPPORTS_TZ_SECURE == 0)
+#define ETHER_BUFFER_PLACE_IN_SECTION BSP_PLACE_IN_SECTION(".ns_buffer.eth")
+#else
+#define ETHER_BUFFER_PLACE_IN_SECTION
+#endif
+
+/** ether on ether Instance. */
+extern const ether_instance_t ${module.driver.ether.name};
+
+/** Access the Ethernet instance using these structures when calling API functions directly (::p_api is not used). */
+extern ether_instance_ctrl_t ${module.driver.ether.name}_ctrl;
+extern const ether_cfg_t ${module.driver.ether.name}_cfg;
+
+#ifndef ${module.driver.ether.p_callback}
+void ${module.driver.ether.p_callback}(ether_callback_args_t * p_args);
+#endif
+        </header>
+        <includes>
+#include "r_ether.h"
+#include "r_ether_api.h"
+        </includes>
+        <macros>
+        </macros>
+        <declarations>
+            ether_instance_ctrl_t ${module.driver.ether.name}_ctrl;
+
+            uint8_t ${module.driver.ether.name}_mac_address[6] = { ${module.driver.ether.mac_address} };
+
+            __attribute__((__aligned__(16))) ether_instance_descriptor_t ${module.driver.ether.name}_tx_descriptors[${module.driver.ether.num_tx_descriptors}] ${module.driver.ether.section_of_buffers};
+            __attribute__((__aligned__(16))) ether_instance_descriptor_t ${module.driver.ether.name}_rx_descriptors[${module.driver.ether.num_rx_descriptors}] ${module.driver.ether.section_of_buffers};
+
+            ${module.driver.ether.ether_buffer}
+
+            ${module.driver.ether.array_of_buffers}
+
+            const ether_extended_cfg_t ${module.driver.ether.name}_extended_cfg_t =
+            {
+                .p_rx_descriptors   = ${module.driver.ether.name}_rx_descriptors,
+                .p_tx_descriptors   = ${module.driver.ether.name}_tx_descriptors,
+                .eesr_event_filter     = (${module.driver.ether.eesr_event_mask} 0U),
+                .ecsr_event_filter     = (${module.driver.ether.ecsr_event_mask} 0U),
+            };
+
+            const ether_cfg_t ${module.driver.ether.name}_cfg =
+            {
+                .channel            = ${module.driver.ether.channel},
+                .zerocopy           = ${module.driver.ether.zerocopy},
+                .multicast          = ${module.driver.ether.multicast},
+                .promiscuous        = ${module.driver.ether.promiscuous},
+                .flow_control       = ${module.driver.ether.flow_control},
+                .padding            = ${module.driver.ether.padding},
+                .padding_offset     = ${module.driver.ether.padding_offset},
+                .broadcast_filter   = ${module.driver.ether.broadcast_filter},
+                .p_mac_address      = ${module.driver.ether.name}_mac_address,
+
+                .num_tx_descriptors = ${module.driver.ether.num_tx_descriptors},
+                .num_rx_descriptors = ${module.driver.ether.num_rx_descriptors},
+
+                .pp_ether_buffers   = ${module.driver.ether.symbol_name_of_array},
+
+                .ether_buffer_size  = ${module.driver.ether.ether_buffer_size},
+
+#if defined(VECTOR_NUMBER_EDMAC${module.driver.ether.channel}_EINT)
+                .irq                = VECTOR_NUMBER_EDMAC${module.driver.ether.channel}_EINT,
+#else
+                .irq                = FSP_INVALID_VECTOR,
+#endif
+
+                .interrupt_priority = ${module.driver.ether.interrupt_priority},
+
+                .p_callback         = ${module.driver.ether.p_callback},
+                .p_ether_phy_instance = &amp;${module.driver.ether.requires.ether_phy::module.driver.ether_phy.name},
+                .p_context          = ${module.driver.ether.p_context},
+                .p_extend           = &amp;${module.driver.ether.name}_extended_cfg_t,
+            };
+
+/* Instance structure to use this module. */
+const ether_instance_t ${module.driver.ether.name} =
+{
+    .p_ctrl        = &amp;${module.driver.ether.name}_ctrl,
+    .p_cfg         = &amp;${module.driver.ether.name}_cfg,
+    .p_api         = &amp;g_ether_on_ether
+};
+        </declarations>
+        <guard>
+            <header>
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.ether.name}_open_guard(ether_ctrl_t * const p_ctrl, ether_cfg_t const * const p_cfg);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.ether.name}_close_guard(ether_ctrl_t * const p_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.ether.name}_read_guard(ether_ctrl_t * const p_ctrl, void * const p_buffer, uint32_t * const length_bytes);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.ether.name}_buffer_release_guard(ether_ctrl_t * const p_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.ether.name}_rx_buffer_update_guard(ether_ctrl_t * const p_ctrl, void * const p_buffer);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.ether.name}_write_guard(ether_ctrl_t * const p_ctrl, void * const p_buffer, uint32_t const frame_length);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.ether.name}_link_process_guard(ether_ctrl_t * const p_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.ether.name}_wake_on_lan_enable_guard(ether_ctrl_t * const p_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.ether.name}_tx_status_get_guard(ether_ctrl_t * const p_ctrl, void * const p_buffer_address);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.ether.name}_callback_set_guard(ether_ctrl_t * const          p_api_ctrl,
+                              void (                      * p_callback)(ether_callback_args_t *),
+                              void const * const            p_context,
+                              ether_callback_args_t * const p_callback_memory);
+            </header>
+            <template name="${module.driver.ether.name}_guard.c">
+                <![CDATA[
+                    #include "guard.h"
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.ether.name}_open_guard (ether_ctrl_t * const p_ctrl, ether_cfg_t const * const p_cfg)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+    FSP_PARAMETER_NOT_USED(p_cfg);
+
+    return R_ETHER_Open(&${module.driver.ether.name}_ctrl, &${module.driver.ether.name}_cfg);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.ether.name}_close_guard (ether_ctrl_t * const p_ctrl)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+
+    return R_ETHER_Close(&${module.driver.ether.name}_ctrl);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.ether.name}_read_guard (ether_ctrl_t * const p_ctrl, void * const p_buffer, uint32_t * const length_bytes)
+{
+    /* Verify all pointers are in non-secure memory. */
+    uint8_t *const p_buffer_checked = cmse_check_address_range((void *) p_buffer, ${module.driver.ether.name}_cfg.ether_buffer_size, CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_buffer_checked != NULL);
+
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+
+    return R_ETHER_Read(&${module.driver.ether.name}_ctrl, p_buffer, length_bytes);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.ether.name}_buffer_release_guard (ether_ctrl_t * const p_ctrl)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+
+    return R_ETHER_BufferRelease(&${module.driver.ether.name}_ctrl);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.ether.name}_rx_buffer_update_guard (ether_ctrl_t * const p_ctrl, void * const p_buffer)
+{
+    /* Verify all pointers are in non-secure memory. */
+    uint8_t *const p_buffer_checked = cmse_check_address_range((void *) p_buffer, ${module.driver.ether.name}_cfg.ether_buffer_size, CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_buffer_checked != NULL);
+
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+
+    return R_ETHER_RxBufferUpdate(&${module.driver.ether.name}_ctrl, p_buffer);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.ether.name}_write_guard (ether_ctrl_t * const p_ctrl, void * const p_buffer, uint32_t const frame_length)
+{
+    /* Verify all pointers are in non-secure memory. */
+    uint8_t *const p_buffer_checked = cmse_check_address_range((void *) p_buffer, frame_length, CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_buffer_checked != NULL);
+
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+
+    return R_ETHER_Write(&${module.driver.ether.name}_ctrl, p_buffer_checked, frame_length);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.ether.name}_link_process_guard (ether_ctrl_t * const p_ctrl)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+
+    return R_ETHER_LinkProcess(&${module.driver.ether.name}_ctrl);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.ether.name}_wake_on_lan_enable_guard(ether_ctrl_t * const p_ctrl)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+
+    return R_ETHER_WakeOnLANEnable(&${module.driver.ether.name}_ctrl);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.ether.name}_tx_status_get_guard(ether_ctrl_t * const p_ctrl, void * const p_buffer_address)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+
+    return R_ETHER_TxStatusGet(&${module.driver.ether.name}_ctrl, p_buffer_address);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.ether.name}_callback_set_guard(ether_ctrl_t * const          p_api_ctrl,
+                              void (                      * p_callback)(ether_callback_args_t *),
+                              void const * const            p_context,
+                              ether_callback_args_t * const p_callback_memory)
+{
+    /* Verify all pointers are in non-secure memory. */
+    void(*p_callback_checked)(ether_callback_args_t *) = (void(*)(ether_callback_args_t *)) cmse_check_address_range((void *) p_callback, sizeof(void *), CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_callback_checked != NULL);
+    ether_callback_args_t *const p_callback_memory_checked = cmse_check_pointed_object(p_callback_memory, CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_callback_memory_checked != NULL);
+
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+
+    return R_ETHER_CallbackSet(&${module.driver.ether.name}_ctrl, p_callback_checked, p_context, p_callback_memory_checked);
+}
+
+                ]]>
+        	</template>
+        </guard>
+        <nsc>
+            <header>
+#define FSP_GUARD_${module.driver.ether.name}_R_ETHER_Open() ${module.driver.ether.name}_open_guard(FSP_SECURE_ARGUMENT, FSP_SECURE_ARGUMENT)
+
+#define FSP_GUARD_${module.driver.ether.name}_R_ETHER_Close() ${module.driver.ether.name}_close_guard(FSP_SECURE_ARGUMENT)
+
+#define FSP_GUARD_${module.driver.ether.name}_R_ETHER_Read(p_buffer, length_bytes) ${module.driver.ether.name}_read_guard(FSP_SECURE_ARGUMENT, p_buffer, length_bytes)
+
+#define FSP_GUARD_${module.driver.ether.name}_R_ETHER_BufferRelease() ${module.driver.ether.name}_buffer_release_guard(FSP_SECURE_ARGUMENT)
+
+#define FSP_GUARD_${module.driver.ether.name}_R_ETHER_RxBufferUpdate(p_buffer) ${module.driver.ether.name}_rx_buffer_update_guard(FSP_SECURE_ARGUMENT, p_buffer)
+
+#define FSP_GUARD_${module.driver.ether.name}_R_ETHER_Write(p_buffer, flame_length) ${module.driver.ether.name}_write_guard(FSP_SECURE_ARGUMENT, p_buffer, flame_length)
+
+#define FSP_GUARD_${module.driver.ether.name}_R_ETHER_LinkProcess() ${module.driver.ether.name}_link_process_guard(FSP_SECURE_ARGUMENT)
+
+#define FSP_GUARD_${module.driver.ether.name}_R_ETHER_WakeOnLANEnable() ${module.driver.ether.name}_wake_on_lan_enable_guard(FSP_SECURE_ARGUMENT)
+
+#define FSP_GUARD_${module.driver.ether.name}_R_ETHER_TxStatusGet(p_buffer_address) ${module.driver.ether.name}_tx_status_get_guard(FSP_SECURE_ARGUMENT, p_buffer_address)
+
+#define FSP_GUARD_${module.driver.ether.name}_R_ETHER_CallbackSet(p_callback, p_context, p_callback_memory) ${module.driver.ether.name}_callback_set_guard(FSP_SECURE_ARGUMENT, p_callback, p_context, p_callback_memory)
+
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.ether.name}_open_guard(ether_ctrl_t * const p_ctrl, ether_cfg_t const * const p_cfg);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.ether.name}_close_guard(ether_ctrl_t * const p_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.ether.name}_read_guard(ether_ctrl_t * const p_ctrl, void * const p_buffer, uint32_t * const length_bytes);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.ether.name}_buffer_release_guard(ether_ctrl_t * const p_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.ether.name}_rx_buffer_update_guard(ether_ctrl_t * const p_ctrl, void * const p_buffer);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.ether.name}_write_guard(ether_ctrl_t * const p_ctrl, void * const p_buffer, uint32_t const frame_length);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.ether.name}_link_process_guard(ether_ctrl_t * const p_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.ether.name}_wake_on_lan_enable_guard(ether_ctrl_t * const p_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.ether.name}_tx_status_get_guard(ether_ctrl_t * const p_ctrl, void * const p_buffer_address);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.ether.name}_callback_set_guard(ether_ctrl_t * const          p_api_ctrl,
+                              void (                      * p_callback)(ether_callback_args_t *),
+                              void const * const            p_context,
+                              ether_callback_args_t * const p_callback_memory);
+
+
+extern const ether_instance_t ${module.driver.ether.name};
+            </header>
+            <declarations>
+                <![CDATA[
+static const ether_api_t ${module.driver.ether.name}_nsc_api =
+{
+    .open = ${module.driver.ether.name}_open_guard,
+    .close = ${module.driver.ether.name}_close_guard,
+    .read = ${module.driver.ether.name}_read_guard,
+    .bufferRelease = ${module.driver.ether.name}_buffer_release_guard,
+    .rxBufferUpdate = ${module.driver.ether.name}_rx_buffer_update_guard,
+    .write = ${module.driver.ether.name}_write_guard,
+    .linkProcess = ${module.driver.ether.name}_link_process_guard,
+    .wakeOnLANEnable = ${module.driver.ether.name}_wake_on_lan_enable_guard,
+    .txStatusGet = ${module.driver.ether.name}_tx_status_get_guard,
+    .callbackSet = ${module.driver.ether.name}_callback_set_guard
+};
+const ether_instance_t ${module.driver.ether.name} =
+{
+    .p_api = &${module.driver.ether.name}_nsc_api,
+    .p_ctrl = FSP_SECURE_ARGUMENT,
+    .p_cfg = FSP_SECURE_ARGUMENT,
+};
+                ]]>
+            </declarations>
+        </nsc>
+        <api configurable="true">
+            <file>ra/fsp/inc/instances/r_ether.h</file>
+            <file>ra/fsp/inc/api/r_ether_api.h</file>
+        </api>
+    </module>
+</raModuleDescription>

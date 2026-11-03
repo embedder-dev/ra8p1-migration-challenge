@@ -1,0 +1,136 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<raModuleDescription>
+    <module display="Security|Azure RTOS NetX Crypto" id="module.azure.nxd_nx_crypto" common="1" version="0" url="https://github.com/eclipse-threadx/rtos-docs/blob/main/rtos-docs/netx-duo/netx-duo-crypto/chapter1.md">
+        <constraint display="A NetX Crypto implementation must be added.">
+            ${interface.nx_crypto_implementation} > 0
+        </constraint>
+        <requires id="module.azure.nxd_nx_crypto.requires.threadx" interface="interface.rtos.tx" visible="false" display="Requires ThreadX"/>
+        <requires id="module.azure.nxd_nx_crypto.requires.nx_crypto_implementation" interface="interface.nx_crypto_implementation" visible="true" display="Add NetX Crypto SW Only or HW/SW Implementation" />
+        <provides interface="interface.nx_crypto" />
+    </module>
+    <developerSupport>
+        <api version="1">
+            <platform id="fsp" max="" min="1.0.0"/>
+            <moduleRef id="module.azure.nxd_nx_crypto"/>
+            <description><![CDATA[<form><p><span color="header" font="header">Overview</span></p><p>Please refer to the NetXDuo - NetX Crypto API documentation https://github.com/eclipse-threadx/rtos-docs/blob/main/rtos-docs/netx-duo/netx-duo-crypto/chapter4.md for details on API usage.</p></form>]]></description>
+            <function display="Initialization Quick Setup" id="netx_crypto_initialization">
+                <description><![CDATA[<form><p>Initialize hardware Secure Crypto Engine (SCE).</p></form>]]></description>
+            </function>
+            <function display="Hash Quick Setup" id="netx_crypto_hash_quick_setup">
+                <description><![CDATA[<form><p>This function provides details on using the Hashing algorithms available with NetX Crypto.</p></form>]]></description>
+            </function>
+        </api>
+        <template category="function_call" display="Call Initialization Quick Setup" id="module.azure.nxd_nx_crypto.initialize" version="1">
+            <platform id="fsp" max="" min="1.0.0"/>
+            <moduleRef id="module.azure.nxd_nx_crypto">
+                <function id="netx_crypto_initialization"/>
+            </moduleRef>
+            <content>
+    /* Setup the platform; initialize the SCE and the TRNG */
+    uint32_t err = nx_crypto_initialize();
+    assert(NX_CRYPTO_SUCCESS == err);
+            </content>
+        </template>
+        <template category="function_call" display="Hash Quick Setup" id="module.azure.nxd_nx_crypto.hash_example" version="1">
+            <platform id="fsp" max="" min="1.0.0"/>
+            <moduleRef id="module.azure.nxd_nx_crypto">
+                <function id="netx_crypto_hash_quick_setup"/>
+            </moduleRef>
+            <content>
+#define SHA_256_HASH_SIZE_BYTES   (32U)
+
+void nx_crypto_hash_quick_setup(void);
+void nx_crypto_hash_quick_setup()
+{
+    uint8_t  metadata[sizeof(NX_CRYPTO_SHA256)];
+    uint32_t metadata_size = sizeof(NX_CRYPTO_SHA256);
+    void   * handler       = NULL;
+
+    /* The following pre-defined crypto methods are available:
+     * - crypto_method_md5
+     * - crypto_method_sha1
+     * - crypto_method_sha224    (Hardware accelerated option available)
+     * - crypto_method_sha256    (Hardware accelerated option available)
+     * - crypto_method_sha384
+     * - crypto_method_sha512
+     * Set p_crypto_method_hash with any of the above or create your own crypto method.
+     */
+    extern NX_CRYPTO_METHOD crypto_method_sha256; /* Defined in nx_crypto_methods.c */
+    NX_CRYPTO_METHOD *p_crypto_method_hash = &amp;crypto_method_sha256;
+
+
+    /* Set the input message to be hashed here.
+     * This can be multiple bytes in length and can be passed together or in chunks
+     * to the nx_crypto_operation API with NX_CRYPTO_HASH_UPDATE option as shown below
+     */
+    uint32_t plain_input_message[] = {0xf00dcafe};
+
+    /* Set the size of this buffer in words based on the hash algorithm chosen above. */
+    uint32_t output_hash[SHA_256_HASH_SIZE_BYTES / sizeof(uint32_t)];
+
+    /* nx_crypto_initialize() must be called before any cryptography algorithm specific APIs are invoked. */
+    uint32_t err = p_crypto_method_hash->nx_crypto_init(p_crypto_method_hash, NX_CRYPTO_NULL, 0, &amp;handler, metadata, metadata_size);
+    assert(NX_CRYPTO_SUCCESS == err);
+
+    /* NetX Crypto hash operation - NX_CRYPTO_HASH_INITIALIZE */
+    err = p_crypto_method_hash->nx_crypto_operation(NX_CRYPTO_HASH_INITIALIZE,
+                                                handler,
+                                                p_crypto_method_hash,
+                                                NX_CRYPTO_NULL,
+                                                0,
+                                                NX_CRYPTO_NULL,
+                                                0,
+                                                NX_CRYPTO_NULL,
+                                                NX_CRYPTO_NULL,
+                                                0,
+                                                metadata,
+                                                metadata_size,
+                                                NX_CRYPTO_NULL,
+                                                NX_CRYPTO_NULL);
+    assert(NX_CRYPTO_SUCCESS == err);
+
+    /* NetX Crypto hash operation - NX_CRYPTO_HASH_UPDATE,
+     * call this multiple times if needed to hash multiple data batches / data stream
+     */
+    err = p_crypto_method_hash->nx_crypto_operation(NX_CRYPTO_HASH_UPDATE,
+                                                handler,
+                                                p_crypto_method_hash,
+                                                NX_CRYPTO_NULL,
+                                                0,
+                                                (uint8_t *)  plain_input_message,
+                                                sizeof(plain_input_message),
+                                                NX_CRYPTO_NULL,
+                                                NX_CRYPTO_NULL,
+                                                0,
+                                                metadata,
+                                                metadata_size,
+                                                NX_CRYPTO_NULL,
+                                                NX_CRYPTO_NULL);
+    assert(NX_CRYPTO_SUCCESS == err);
+
+    /* NetX Crypto hash operation - NX_CRYPTO_HASH_CALCULATE */
+    err = p_crypto_method_hash->nx_crypto_operation(NX_CRYPTO_HASH_CALCULATE,
+                                                handler,
+                                                p_crypto_method_hash,
+                                                NX_CRYPTO_NULL,
+                                                0,
+                                                NX_CRYPTO_NULL,
+                                                0,
+                                                NX_CRYPTO_NULL,
+                                                (uint8_t *) output_hash,
+                                                SHA_256_HASH_SIZE_BYTES,
+                                                metadata,
+                                                metadata_size,
+                                                NX_CRYPTO_NULL,
+                                                NX_CRYPTO_NULL);
+
+    assert(NX_CRYPTO_SUCCESS == err);
+
+    /* Cleanup metadata */
+    err = p_crypto_method_hash->nx_crypto_cleanup(metadata);
+    assert(NX_CRYPTO_SUCCESS == err);
+}
+            </content>
+        </template>
+    </developerSupport>
+</raModuleDescription>

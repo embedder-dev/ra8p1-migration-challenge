@@ -1,0 +1,33 @@
+﻿<?xml version="1.0" ?>
+<raModuleDescription>
+    <module config="config.driver.usb_hvnd" display="Connectivity|${module.driver.hvnd.name} USB Host Vendor class (r_usb_hvnd)" id="module.driver.hvnd_on_usb" version="1" url="group___u_s_b___h_v_n_d.html">
+        <constraint display="Unique name required for each instance">
+            "${interface.driver.hvnd.${module.driver.hvnd.name}}" === "1"
+        </constraint>
+        <constraint display="Requires USB Peripheral">
+          "${interface.mcu.usb_fs.external}" === "1"
+        </constraint>
+        <constraint display="Use USBX instead in Azure RTOS projects.">
+            !testExists("${interface.rtos.tx}")
+        </constraint>
+        <requires id="module.driver.hvnd_on_usb.requires.hvnd" interface="interface.mcu.usb_fs.external" visible="false" display="Requires USB Peripheral" />
+        <requires id="module.driver.basic_on_usb.requires.full_module" interface="interface.mcu.usb.pipes.0.1.2.3.4.5.6.7.8.9" visible="false" display="Requires USB Full Module" />
+        <requires id="module.driver.basic_on_usb.requires.basic" interface="interface.driver.basic_on_usb" display="Add USB Driver">
+            <override property="module.driver.usb_basic.usb_mode" value="module.driver.usb_basic.usb_mode.host"/>
+            <override property="module.driver.usb_basic.usb_classtype" value="module.driver.usb_basic.usb_classtype.hvnd"/>
+            <override property="module.driver.usb_basic.p_usb_reg" value="NULL"/>
+        </requires>
+        <requires id="module.driver.hvnd_on_usb.ignore.azure_projects" interface="interface.rtos.supports.renesas_usb" visible="false" display="Use Azure USBX for Azure RTOS projects."/>
+        <provides interface="interface.driver.hvnd.${module.driver.hvnd.name}" />
+        <provides interface="interface.driver.hvnd" />
+        <property default="hvnd" id="module.driver.hvnd.hvnd_interface" description=""/>
+        <property default="g_hvnd${_instance}" display="Name" id="module.driver.hvnd.name" description="Module name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.hvnd.name}")</constraint>
+        </property>
+    </module>
+    <module config="config.driver.usb_hvnd_class" display="Connectivity|${module.driver.hvnd_class.name} USB Host Vendor class (r_usb_hvnd)" id="module.driver.hvnd_class_on_usb" visible="false" version="1" url="group___u_s_b___h_v_n_d.html">
+        <property default="g_hvnd_class${_instance}" display="Name" id="module.driver.hvnd_class.name" description="Class Module name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.hvnd_class.name}")</constraint>
+        </property>
+    </module>
+</raModuleDescription>

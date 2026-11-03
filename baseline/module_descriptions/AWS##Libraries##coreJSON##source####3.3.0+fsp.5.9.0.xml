@@ -1,0 +1,6 @@
+<?xml version="1.0" ?>
+<raModuleDescription>
+    <module id="module.aws.corejson" display="Networking|AWS Core JSON" common="1" version="0" visible="false" url="https://github.com/FreeRTOS/coreJSON/">
+        <provides interface="interface.aws.corejson" />
+    </module>
+</raModuleDescription>

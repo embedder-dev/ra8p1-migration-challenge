@@ -1,0 +1,231 @@
+<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.middleware.rrh62000" path="fsp_cfg/rm_rrh62000_cfg.h" version="0">
+        <property default="config.middleware.rrh62000.param_checking_enable.bsp" display="Parameter Checking" id="config.middleware.rrh62000.param_checking_enable" description="If selected code for parameter checking is included in the build.">
+            <option display="Default (BSP)" id="config.middleware.rrh62000.param_checking_enable.bsp" value="(BSP_CFG_PARAM_CHECKING_ENABLE)"/>
+            <option display="Enabled" id="config.middleware.rrh62000.param_checking_enable.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.rrh62000.param_checking_enable.disabled" value="(0)"/>
+        </property>
+        <content>
+            #ifdef __cplusplus
+            extern "C" {
+            #endif
+
+            #define RM_RRH62000_CFG_PARAM_CHECKING_ENABLE   ${config.middleware.rrh62000.param_checking_enable}
+
+            #ifdef __cplusplus
+            }
+            #endif
+        </content>
+    </config>
+    <module config="config.middleware.rrh62000" display="Sensor|${module.middleware.air_sensor.name} RRH62000 All-in-one Air Quality Module (rm_rrh62000)" id="module.middleware.air_sensor_on_rrh62000" version="1" url="group___r_m___r_r_h62000.html">
+        <constraint display="Unique name required for each instance">
+            "${interface.middleware.air_sensor.${module.middleware.air_sensor.name}}" === "1"
+        </constraint>
+        <constraint display="RRH62000 needs clock stretching, but is not supported by SAU I2C.">
+            "${interface.driver.i2c_on_sau_i2c}" != "1"
+        </constraint>
+        <requires id="module.middleware.air_sensor.requires.comms_i2c_device" interface="interface.driver.comms_i2c_device" visible="true" display="Requires I2C Communications Device">
+            <override property="module.driver.comms_i2c_device.slave_address" value="0x69"/>
+            <override property="module.driver.comms_i2c_device.address_mode" value="I2C_MASTER_ADDR_MODE_7BIT"/>
+            <override property="module.driver.comms_i2c_device.p_context" value="${module.middleware.air_sensor.name}_ctrl"/>
+            <override property="module.driver.comms_i2c_device.p_callback" value="rm_rrh62000_comms_i2c_callback"/>
+        </requires>
+
+        <provides interface="interface.middleware.air_sensor" />
+        <provides interface="interface.middleware.air_sensor_on_rrh62000" />
+        <provides interface="interface.middleware.air_sensor.${module.middleware.air_sensor.name}" />
+        <property default="g_rrh62000_sensor${_instance}" display="Name" id="module.middleware.air_sensor.name" description="Module name.">
+            <constraint display="Name must be a valid C symbol">
+                testSymbol("${module.middleware.air_sensor.name}")
+            </constraint>
+        </property>
+        <property default="NULL" id="module.middleware.air_sensor.p_context" />
+        <property default="10" display="Number of moving average [times]" id="module.middleware.rrh62000.moving_average" description="Set number of moving average. Min = 1 and Max = 60.">
+            <constraint display="Value must be 1 or more">("${module.middleware.rrh62000.moving_average}" &gt;= 1)</constraint>
+            <constraint display="Value must be 60 or less">("${module.middleware.rrh62000.moving_average}" &lt;= 60)</constraint>
+        </property>
+        <property default="86" display="Fan speed control [%]" id="module.middleware.rrh62000.fan_speed_control" description="Set fan speed control. Min = 60 and Max = 100.">
+            <constraint display="Value must be 60 or more">("${module.middleware.rrh62000.fan_speed_control}" &gt;= 60)</constraint>
+            <constraint display="Value must be 100 or less">("${module.middleware.rrh62000.fan_speed_control}" &lt;= 100)</constraint>
+        </property>
+        <property default="rrh62000_comms_i2c_callback" display="Comms I2C Callback" id="module.middleware.air_sensor.p_callback" description="A user COMMS I2C callback function can be provided.">
+            <constraint display="Name must be a valid C symbol">
+                testSymbol("${module.middleware.air_sensor.p_callback}")
+            </constraint>
+        </property>
+        <property default="" id="module.middleware.air_sensor.name_upper">
+            <export>"${module.middleware.air_sensor.name}".toUpperCase()</export>
+        </property>
+
+        <header>
+/* AIR Sensor on RRH62000 Module Instance. */
+/** Access the RRH62000 Module instance using these structures when calling API functions directly (::p_api is not used). */
+extern rm_rrh62000_instance_ctrl_t ${module.middleware.air_sensor.name}_ctrl;
+extern const rm_air_sensor_cfg_t ${module.middleware.air_sensor.name}_cfg;
+#ifndef ${module.middleware.air_sensor.p_callback}
+void ${module.middleware.air_sensor.p_callback}(rm_air_sensor_callback_args_t * p_args);
+#endif
+        </header>
+
+        <includes>
+#include &quot;rm_rrh62000.h&quot;
+#include &quot;rm_air_sensor_api.h&quot;
+        </includes>
+
+        <declarations>
+rm_rrh62000_instance_ctrl_t ${module.middleware.air_sensor.name}_ctrl;
+rm_rrh62000_extended_cfg_t ${module.middleware.air_sensor.name}_extended_cfg =
+{
+    .moving_average = ${module.middleware.rrh62000.moving_average},
+    .fan_speed = ${module.middleware.rrh62000.fan_speed_control},
+};
+const rm_air_sensor_cfg_t ${module.middleware.air_sensor.name}_cfg =
+{
+    .p_comms_instance = &amp;${module.middleware.air_sensor.requires.comms_i2c_device::module.driver.comms_i2c_device.name},
+    .p_comms_callback = ${module.middleware.air_sensor.p_callback},
+#if defined(${module.middleware.air_sensor.p_context})
+    .p_context           = ${module.middleware.air_sensor.p_context},
+#else
+    .p_context           = &amp;${module.middleware.air_sensor.p_context},
+#endif
+    .p_extend            = (void *)&amp;${module.middleware.air_sensor.name}_extended_cfg,
+};
+
+const rm_air_sensor_instance_t ${module.middleware.air_sensor.name} =
+{
+    .p_ctrl = &amp;${module.middleware.air_sensor.name}_ctrl,
+    .p_cfg  = &amp;${module.middleware.air_sensor.name}_cfg,
+    .p_api  = &amp;g_air_sensor_on_rrh62000,
+};
+        </declarations>
+    </module>
+
+    <!-- Developer Assistance -->
+    <developerSupport>
+        <api version="1">
+            <platform id="fsp" max="" min="1.1.0"/>
+            <moduleRef id="module.middleware.air_sensor_on_rrh62000"/>
+            <description><![CDATA[<form><p><span color="header" font="header">Overview</span></p><p>RRH62000 provides snippets of code for operating the RRH62000 Middleware.</p></form>]]></description>
+            <function display="Quick Setup" id="rrh62000_quick_setup">
+                <description><![CDATA[<form><p>This function provides quick setup for RRH62000 using the properties from the RA configurator.</p></form>]]></description>
+            </function>
+            <function display="Quick Getting Data" id="rrh62000_quick_getting_data">
+                <description><![CDATA[<form><p>This function provides quick getting values for RRH62000 using the properties from the RA configurator.</p></form>]]></description>
+            </function>
+        </api>
+        <template category="function_call" display="Call Quick Setup" id="module.middleware.air_sensor_on_rrh62000.quick_setup" version="1">
+            <platform id="fsp" max="" min="1.1.0"/>
+            <moduleRef id="module.middleware.air_sensor_on_rrh62000">
+                <function id="rrh62000_quick_setup"/>
+            </moduleRef>
+            <content>
+/* TODO: Enable if you want to open RRH62000 */
+#define ${rrh62000_name_upper:raProperty(module.middleware.air_sensor.name_upper)}_NON_BLOCKING (0)
+
+#if ${rrh62000_name_upper}_NON_BLOCKING
+volatile bool g_rrh62000_i2c_completed = false;
+#endif
+
+/* TODO: Enable if you want to use a I2C callback */
+#define ${rrh62000_name_upper}_I2C_CALLBACK_ENABLE (0)
+#if ${rrh62000_name_upper}_I2C_CALLBACK_ENABLE
+void ${rrh62000_callback:raProperty(module.middleware.air_sensor.p_callback)}(rm_air_sensor_callback_args_t * p_args)
+{
+#if ${rrh62000_name_upper}_NON_BLOCKING
+    if (RM_AIR_SENSOR_EVENT_ERROR != p_args->event)
+    {
+        g_rrh62000_i2c_completed = true;
+    }
+#else
+    FSP_PARAMETER_NOT_USED(p_args);
+#endif
+}
+#endif
+
+/* Delay */
+#define ${rrh62000_name_upper}_DELAY_1000     (1000)
+
+/* Quick setup for ${rrh62000_name:raProperty(module.middleware.air_sensor.name)}.
+ * - ${i2c_bus_name:raProperty(module.driver.comms_i2c_bus.name)} must be setup before calling this function
+ *     (See Developer Assistance -> ${rrh62000_name} -> ${i2c_device_name:raProperty(module.driver.comms_i2c_device.name)} -> ${i2c_bus_name} -> Quick Setup).
+ */
+void ${rrh62000_name}_quick_setup(void);
+
+/* Quick setup for ${rrh62000_name}. */
+void ${rrh62000_name}_quick_setup(void)
+{
+    fsp_err_t err;
+
+    /* Open RRH62000 sensor instance, this must be done before calling any RRH62000 API */
+    err = RM_RRH62000_Open(&amp;${rrh62000_name}_ctrl, &amp;${rrh62000_name}_cfg);
+    assert(FSP_SUCCESS == err);
+}
+            </content>
+        </template>
+        <template category="function_call" display="Quick Getting Data" id="module.middleware.air_sensor_on_rrh62000.quick_getting_data" version="1">
+            <platform id="fsp" max="" min="1.1.0"/>
+            <moduleRef id="module.middleware.air_sensor_on_rrh62000">
+                <function id="rrh62000_quick_getting_data"/>
+            </moduleRef>
+            <content>
+/* Quick getting values for ${rrh62000_name:raProperty(module.middleware.air_sensor.name)}.
+ * - ${rrh62000_name} must be setup before calling this function.
+ */
+void ${rrh62000_name}_quick_getting_data(rm_air_sensor_data_t * p_data);
+
+/* Quick getting gas data for ${rrh62000_name}. */
+void ${rrh62000_name}_quick_getting_data(rm_air_sensor_data_t * p_data)
+{
+    fsp_err_t            err;
+    rm_air_sensor_raw_data_t rrh62000_raw_data;
+
+    /* Clear the callback flag */
+#if ${rrh62000_name_upper:raProperty(module.middleware.air_sensor.name_upper)}_NON_BLOCKING
+    g_rrh62000_i2c_completed = false;
+#endif
+
+    do
+    {
+        /* Wait for the measurement to complete */
+        err = RM_RRH62000_StatusCheck(&amp;${rrh62000_name}_ctrl);
+        assert(FSP_SUCCESS == err);
+#if ${rrh62000_name_upper}_NON_BLOCKING
+        while (!g_rrh62000_i2c_completed)
+        {
+            ;
+        }
+        g_rrh62000_i2c_completed = false;
+#endif
+        /* Read measurement data from RRh62000 sensor */
+        err = RM_RRH62000_Read(&amp;${rrh62000_name}_ctrl, &amp;rrh62000_raw_data);
+        if (err == FSP_ERR_SENSOR_MEASUREMENT_NOT_FINISHED)
+        {
+#if BSP_CFG_RTOS == 1 // AzureOS
+            tx_thread_sleep(${rrh62000_name_upper}_DELAY_1000 * TX_TIMER_TICKS_PER_SECOND / ${rrh62000_name_upper}_DELAY_MS);
+#elif BSP_CFG_RTOS == 2 // FreeRTOS
+            vTaskDelay(${rrh62000_name_upper}_DELAY_1000 * configTICK_RATE_HZ / ${rrh62000_name_upper}_DELAY_MS);
+#else // Bare Metal
+            R_BSP_SoftwareDelay(${rrh62000_name_upper}_DELAY_1000, BSP_DELAY_UNITS_MILLISECONDS);
+#endif
+        }
+    }
+    while (err == FSP_ERR_SENSOR_MEASUREMENT_NOT_FINISHED);
+    assert(FSP_SUCCESS == err);
+
+#if ${rrh62000_name_upper}_NON_BLOCKING
+    while (!g_rrh62000_i2c_completed)
+    {
+        ;
+    }
+    g_rrh62000_i2c_completed = false;
+#endif
+
+    /* Calculate values from RRH62000 measurement data */
+    err = RM_RRH62000_DataCalculate(&amp;${rrh62000_name}_ctrl, &amp;rrh62000_raw_data, p_data);
+    assert(FSP_SUCCESS == err);
+}
+            </content>
+        </template>
+    </developerSupport>
+</raModuleDescription>

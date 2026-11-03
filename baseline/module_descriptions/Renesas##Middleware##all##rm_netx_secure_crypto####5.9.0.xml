@@ -1,0 +1,125 @@
+<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.middleware.rm_netx_secure_crypto" path="fsp_cfg/middleware/rm_netx_secure_crypto_cfg.h" version="0">
+        <property default="config.middleware.rm_netx_secure_crypto.standalone.enabled" description="Defines NX_CRYPTO_STANDALONE_ENABLE." display="Standalone Usage" id="config.middleware.rm_netx_secure_crypto.standalone">
+            <option display="Use Standalone Crypto Only" id="config.middleware.rm_netx_secure_crypto.standalone.enabled" value="1"/>
+            <option display="Use with TLS" id="config.middleware.rm_netx_secure_crypto.standalone.disabled" value="0"/>
+        </property>
+        <property default="config.middleware.rm_netx_secure_crypto.trng.enabled" description="Enables NETX_SECURE_CRYPTO_NX_CRYPTO_METHODS_TRNG_ALT." display="Hardware Acceleration|TRNG" id="config.middleware.rm_netx_secure_crypto.trng">
+            <option display="Enabled" id="config.middleware.rm_netx_secure_crypto.trng.enabled" value="1" />
+            <option display="Disabled" id="config.middleware.rm_netx_secure_crypto.trng.disabled" value="0" />
+        </property>
+        <property default="" description="Enables NETX_SECURE_CRYPTO_NX_CRYPTO_METHODS_SHA256_ALT." display="Hardware Acceleration|Hash|SHA256/224" id="config.middleware.rm_netx_secure_crypto.sha256_alt">
+            <select enum="enum.mcu.netx_secure_crypto.sha256_alt" />
+        </property>
+        <property default="" description="Enables NETX_SECURE_CRYPTO_NX_CRYPTO_METHODS_AES_ALT" display="Hardware Acceleration|Cipher|AES" id="config.middleware.rm_netx_secure_crypto.aes_alt">
+            <select enum="enum.mcu.netx_secure_crypto.aes_alt" />
+        </property>
+        <property default="" description="Enables NETX_SECURE_CRYPTO_NX_CRYPTO_METHODS_ECC_ALT" display="Hardware Acceleration|Public Key Cryptography (PKC)|ECC| ECC" id="config.middleware.rm_netx_secure_crypto.ecp_alt">
+            <select enum="enum.mcu.netx_secure_crypto.ecp_alt" />
+        </property>
+        <property default="3016" description="Sets value of NX_CRYPTO_ECDSA_SCRATCH_BUFFER_SIZE" display="Hardware Acceleration|Public Key Cryptography (PKC)|ECC| ECDSA Scratch Buffer Size (Bytes)" id="config.middleware.rm_netx_secure_crypto.ecdsa.scratch_buffer_size">
+            <constraint display="Value must be an integer">testInteger("${config.middleware.rm_netx_secure_crypto.ecdsa.scratch_buffer_size}")</constraint>
+        </property>
+        <property default="2464" description="Sets value of NX_CRYPTO_ECDH_SCRATCH_BUFFER_SIZE" display="Hardware Acceleration|Public Key Cryptography (PKC)|ECC| ECDH Scratch Buffer Size (Bytes)" id="config.middleware.rm_netx_secure_crypto.ecdh.scratch_buffer_size">
+            <constraint display="Value must be an integer">testInteger("${config.middleware.rm_netx_secure_crypto.ecdh.scratch_buffer_size}")</constraint>
+        </property>
+        <property default="" description="Enables/Disables RSA HW support" display="Hardware Acceleration|Public Key Cryptography (PKC)|RSA|RSA" id="config.middleware.rm_netx_secure_crypto.rsa_alt">
+            <select enum="enum.mcu.netx_secure_crypto.rsa_alt" />
+        </property>
+        <property default="" description="Enables NETX_SECURE_CRYPTO_NX_CRYPTO_METHODS_RSA_1024_ALT to allow HW support" display="Hardware Acceleration|Public Key Cryptography (PKC)|RSA|RSA 1024 (HW)" id="config.middleware.rm_netx_secure_crypto.rsa_1024_alt">
+            <select enum="enum.mcu.netx_secure_crypto.rsa_1024_alt" />
+        </property>
+        <property default="" description="Enables NETX_SECURE_CRYPTO_NX_CRYPTO_METHODS_RSA_2048_ALT to allow HW support" display="Hardware Acceleration|Public Key Cryptography (PKC)|RSA|RSA 2048 (HW)" id="config.middleware.rm_netx_secure_crypto.rsa_2048_alt">
+            <select enum="enum.mcu.netx_secure_crypto.rsa_2048_alt" />
+        </property>
+        <property default="" description="Enables NETX_SECURE_CRYPTO_NX_CRYPTO_METHODS_RSA_3072_ALT to allow HW support" display="Hardware Acceleration|Public Key Cryptography (PKC)|RSA|RSA 3072 Verify/Encryption (HW)" id="config.middleware.rm_netx_secure_crypto.rsa_3072_alt">
+            <select enum="enum.mcu.netx_secure_crypto.rsa_3072" />
+        </property>
+        <property default="" description="Enables RSA NETX_SECURE_CRYPTO_NX_CRYPTO_METHODS_RSA_4096_ALT to allow HW support" display="Hardware Acceleration|Public Key Cryptography (PKC)|RSA|RSA 4096 Verify/Encryption (HW)" id="config.middleware.rm_netx_secure_crypto.rsa_4096_alt">
+            <select enum="enum.mcu.netx_secure_crypto.rsa_4096" />
+        </property>
+        <property default="" description="Sets value of NX_CRYPTO_RSA_SCRATCH_BUFFER_SIZE" display="Hardware Acceleration|Public Key Cryptography (PKC)|RSA|RSA Scratch Buffer Size (Bytes)" id="config.middleware.rm_netx_secure_crypto.rsa.scratch_buffer_size">
+            <select enum="enum.mcu.netx_secure_crypto.rsa.scratch_buffer_size" />
+        </property>
+        <content>
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#if (${config.middleware.rm_netx_secure_crypto.standalone})
+#define NX_CRYPTO_STANDALONE_ENABLE
+#endif
+#define NETX_SECURE_CRYPTO_NX_CRYPTO_METHODS_SHA256_ALT   (${config.middleware.rm_netx_secure_crypto.sha256_alt})
+#define NETX_SECURE_CRYPTO_NX_CRYPTO_METHODS_AES_ALT      (${config.middleware.rm_netx_secure_crypto.aes_alt})
+#define NETX_SECURE_CRYPTO_NX_CRYPTO_METHODS_TRNG_ALT     (${config.middleware.rm_netx_secure_crypto.trng})
+#define NETX_SECURE_CRYPTO_NX_CRYPTO_METHODS_ECC_ALT      (${config.middleware.rm_netx_secure_crypto.ecp_alt})
+#define NETX_SECURE_CRYPTO_NX_CRYPTO_METHODS_RSA_1024_ALT (${config.middleware.rm_netx_secure_crypto.rsa_1024_alt})
+#define NETX_SECURE_CRYPTO_NX_CRYPTO_METHODS_RSA_2048_ALT (${config.middleware.rm_netx_secure_crypto.rsa_2048_alt})
+#define NETX_SECURE_CRYPTO_NX_CRYPTO_METHODS_RSA_3072_ALT (${config.middleware.rm_netx_secure_crypto.rsa_3072_alt})
+#define NETX_SECURE_CRYPTO_NX_CRYPTO_METHODS_RSA_4096_ALT (${config.middleware.rm_netx_secure_crypto.rsa_4096_alt})
+#define NETX_SECURE_CRYPTO_HW_ACCELERATE                  (NETX_SECURE_CRYPTO_NX_CRYPTO_METHODS_SHA256_ALT | \
+                                                           NETX_SECURE_CRYPTO_NX_CRYPTO_METHODS_AES_ALT | \
+                                                           NETX_SECURE_CRYPTO_NX_CRYPTO_METHODS_TRNG_ALT | \
+                                                           NETX_SECURE_CRYPTO_NX_CRYPTO_METHODS_ECC_ALT  | \
+                                                           NETX_SECURE_CRYPTO_NX_CRYPTO_METHODS_RSA_2048_ALT | \
+                                                           NETX_SECURE_CRYPTO_NX_CRYPTO_METHODS_RSA_3072_ALT | \
+                                                           NETX_SECURE_CRYPTO_NX_CRYPTO_METHODS_RSA_4096_ALT)
+#define NX_CRYPTO_ECDH_SCRATCH_BUFFER_SIZE                 (${config.middleware.rm_netx_secure_crypto.ecdh.scratch_buffer_size})
+#define NX_CRYPTO_ECDSA_SCRATCH_BUFFER_SIZE                (${config.middleware.rm_netx_secure_crypto.ecdsa.scratch_buffer_size})
+#define NETX_SECURE_CRYPTO_SOFTWARE_ONLY                   (0U)
+#if (${config.middleware.rm_netx_secure_crypto.rsa_alt}) /* Use RSA HW */
+#if (1U == NETX_SECURE_CRYPTO_NX_CRYPTO_METHODS_RSA_4096_ALT)
+ #define NX_CRYPTO_MAX_RSA_MODULUS_SIZE  (4096)
+#elif (1U == NETX_SECURE_CRYPTO_NX_CRYPTO_METHODS_RSA_3072_ALT)
+ #define NX_CRYPTO_MAX_RSA_MODULUS_SIZE  (3072)
+#elif (1U == NETX_SECURE_CRYPTO_NX_CRYPTO_METHODS_RSA_2048_ALT)
+ #define NX_CRYPTO_MAX_RSA_MODULUS_SIZE  (2048)
+#else
+ #define NX_CRYPTO_MAX_RSA_MODULUS_SIZE  (1024)
+#endif
+#else /* Use RSA SW */
+ #define NX_CRYPTO_MAX_RSA_MODULUS_SIZE  (${config.middleware.rm_netx_secure_crypto.rsa.scratch_buffer_size})
+#endif
+
+/* Definition of the NX_CRYPTO_ECDH_MAX_KEY_SIZE is provided in both rm_netx_secure_crypto_cfg.h and nx_user.h
+to support larger buffer size to hold the wrapped keys, irrespective of whether NX_CRYPTO_STANDALONE_ENABLE
+is defined. */
+#ifndef NX_CRYPTO_ECDH_MAX_KEY_SIZE
+#define NX_CRYPTO_ECDH_MAX_KEY_SIZE      (80)
+#endif
+
+#ifdef __cplusplus
+}
+#endif
+        </content>
+    </config>
+    <module config="config.middleware.rm_netx_secure_crypto" display="Security|Azure RTOS NetX Crypto HW Acceleration (rm_netx_secure_crypto)" id="module.middleware.rm_netx_secure_crypto" visible="false" version="1" url="group___r_m___n_e_t_x___s_e_c_u_r_e___c_r_y_p_t_o.html">
+        <constraint display="Requires SCE Peripheral">
+          "${interface.driver.sce}" === "1"
+        </constraint>
+        <constraint display="NetX Crypto implementation must be configured as standalone when used without NetX Secure stack.">
+        "${config.middleware.rm_netx_secure_crypto.standalone}" === "config.middleware.rm_netx_secure_crypto.standalone.enabled" || "${interface.nx_secure}" &gt;= "1"
+        </constraint>
+        <constraint display="Atleast one of RSA 1024, 2048, 3072 or 4096 must be enabled to use HW implementation">
+        "${config.middleware.rm_netx_secure_crypto.rsa_alt}" === "config.driver.psa_crypto.rsa_alt.disabled" || (("${config.middleware.rm_netx_secure_crypto.rsa_2048_alt}" === "config.middleware.rm_netx_secure_crypto.rsa_2048_alt.enabled") || ("${config.middleware.rm_netx_secure_crypto.rsa_3072_alt}" === "config.driver.psa_crypto.rsa_3072.enabled") || ("${config.middleware.rm_netx_secure_crypto.rsa_4096_alt}" === "config.driver.psa_crypto.rsa_4096.enabled") || ("${config.middleware.rm_netx_secure_crypto.rsa_1024_alt}" === "config.driver.psa_crypto.rsa_1024_alt.enabled"))
+        </constraint>
+        <constraint display="RSA 1024, 2048, 3072 and 4096 must be disabled to use SW implementation">
+        "${config.middleware.rm_netx_secure_crypto.rsa_alt}" === "config.driver.psa_crypto.rsa_alt.enabled" || (("${config.middleware.rm_netx_secure_crypto.rsa_2048_alt}" === "config.middleware.rm_netx_secure_crypto.rsa_2048_alt.disabled") &amp;&amp; ("${config.middleware.rm_netx_secure_crypto.rsa_3072_alt}" === "config.driver.psa_crypto.rsa_3072.disabled") &amp;&amp; ("${config.middleware.rm_netx_secure_crypto.rsa_4096_alt}" === "config.driver.psa_crypto.rsa_4096.disabled") &amp;&amp; ("${config.middleware.rm_netx_secure_crypto.rsa_1024_alt}" === "config.driver.psa_crypto.rsa_1024_alt.disabled"))
+        </constraint>
+        <constraint display="RSA scratch buffer size value cannot be disabled when using the SW implementation">
+        "${config.middleware.rm_netx_secure_crypto.rsa_alt}" === "config.driver.psa_crypto.rsa_alt.enabled" || "${config.middleware.rm_netx_secure_crypto.rsa.scratch_buffer_size}" != "config.middleware.rm_netx_secure_crypto.rsa.scratch_buffer_size.disabled"
+        </constraint>
+        <constraint display="RSA scratch buffer size value must be disabled when using the SCE HW implementation">
+        "${config.middleware.rm_netx_secure_crypto.rsa_alt}" === "config.driver.psa_crypto.rsa_alt.disabled" || "${config.middleware.rm_netx_secure_crypto.rsa.scratch_buffer_size}" === "config.middleware.rm_netx_secure_crypto.rsa.scratch_buffer_size.disabled"
+        </constraint>
+        <constraint display="A minimum main stack of 0x1000 is required to use ECC and RSA (Software or Hardware).">("${config.bsp.common.main}" &gt;= 0x1000)</constraint>
+        <requires id="module.middleware.rm_netx_secure_crypto.requires.threadx" interface="interface.rtos.tx" visible="false" display="Requires ThreadX"/>
+        <requires id="module.middleware.rm_netx_secure_crypto.requires.sce_for_nx" interface="interface.driver.sce_for_nx" visible="false" display="Requires SCE Driver" />
+        <provides interface="interface.middleware.rm_netx_secure_crypto" />
+        <provides interface="interface.nx_crypto_implementation" />
+        <includes>
+#include &quot;rm_netx_secure_crypto.h&quot;
+        </includes>
+    </module>
+</raModuleDescription>

@@ -1,0 +1,72 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<raModuleDescription>
+    <module config="config.azure.nxd_iot" display="Networking|Azure RTOS NetX Duo IoT Middleware" id="module.azure.nxd.azure_iot" common="1" version="1" url="https://github.com/eclipse-threadx/rtos-docs/blob/main/rtos-docs/netx-duo/index.md">
+        <constraint display ="NetX Duo Azure IoT Middleware Requires NetX Duo">("${interface.azure.nxd.common}" &gt;= "1")</constraint>
+        <constraint display ="NetX Duo Azure IoT Middleware Requires NetX Duo Secure">("${interface.nx_secure}" &gt;= "1")</constraint>
+        <constraint display ="NetX Duo Azure IoT Middleware Requires NetX Secure to be enabled">"${config.azure.nxd_mqtt_client.secure}" === "config.azure.nxd_mqtt_client.secure.enable"</constraint>
+        <constraint display ="NetX Duo Azure IoT Middleware Requires IP Packet Filter to be enabled">"${config.azure.nxd_src.ip_packet_filter}" === "config.azure.nxd_src.ip_packet_filter.enabled"</constraint>
+        <constraint display ="NetX Duo Azure IoT Middleware Requires MQTT Cloud to be enabled">"${config.azure.nxd_mqtt_client.cloud}" === "config.azure.nxd_mqtt_client.cloud.enable"</constraint>
+
+        <requires id="module.azure.nxd.azure_iot.requires.threadx" interface="interface.rtos.tx" visible="false" display="Requires ThreadX"/>
+        <requires id="module.azure.nxd.azure_iot.requires.nx_secure" interface="interface.nx_secure" display="Requires NetX Secure"/>
+        <requires id="module.azure.nxd.azure_iot.requires.nx_dns_client" interface="interface.azure.nxd_dns_client" display="Requires NetX Duo DNS Client"/>
+        <provides interface="interface.azure.nxd.azure_iot" />
+        <header>
+        void azure_iot_quick_setup();
+        extern NX_AZURE_IOT nx_azure_iot;
+        </header>
+        <includes>
+         #include "nx_azure_iot.h"
+        </includes>
+        <declarations>
+        NX_AZURE_IOT    nx_azure_iot;
+        </declarations>
+    </module>
+    <developerSupport>
+        <api version="1">
+            <platform id="fsp" max="" min="1.1.0"/>
+            <moduleRef id="module.azure.nxd.azure_iot"/>
+            <description><![CDATA[<form><p><span color="header" font="header">Overview</span></p><p>The Azure IoT module provides snippets of code for setting up a NetX Duo Azure IoT Instance.</p></form>]]></description>
+            <function display="Quick Setup" id="azure_iot_quick_setup">
+                <description><![CDATA[<form><p>This function provides quick setup for the Azure IoT instance using the properties from the RA configurator.</p></form>]]></description>
+            </function>
+        </api>
+        <template category="function_call" display="Call Quick Setup" id="module.azure.nxd.azure_iot.quick_setup" version="1">
+            <platform id="fsp" max="" min="1.1.0"/>
+            <moduleRef id="module.azure.nxd.azure_iot">
+                <function id="azure_iot_quick_setup"/>
+            </moduleRef>
+            <content>
+
+static UINT azure_iot_quick_setup_time_get(ULONG *az_iot_time)
+{
+    /* Return number of seconds since Unix Epoch (1/1/1970 00:00:00).
+       Note: User needs to implement own time function to get the real time on device, such as: SNTP.  */
+	 *az_iot_time =  (tx_time_get() / TX_TIMER_TICKS_PER_SECOND);
+
+    return(NX_SUCCESS);
+}
+
+void azure_iot_quick_setup()
+{
+    /* Quick setup for Azure IoT handler.
+        * - For example projects, see: https://github.com/azure-rtos/netxduo/tree/master/addons/azure_iot/samples
+        *
+        * - ${dns_client_name:raProperty(module.azure.nxd_dns_client.name)} and its dependencies must be setup before calling this function
+        *     (See Developer Assistance -> Azure RTOS NetX Duo IoT Middleware -> ${dns_client_name} -> Quick Setup)
+        * - nx_system_initialize() must be called before calling this function.
+        */
+    UINT status = nx_azure_iot_create(&amp;nx_azure_iot,
+                (UCHAR *)"Azure IoT",
+                &amp;${ip_name:raProperty(module.azure.nxd.ip.name)},
+                &amp;${packet_pool_name:raProperty(module.azure.nxd.packet_pool.name)},
+                &amp;${dns_client_name},
+                ${ip_name}_stack_memory, sizeof(${ip_name}_stack_memory),
+                ${ip_name_upper:raProperty(module.azure.nxd.ip.name_upper)}_TASK_PRIORITY,
+                azure_iot_quick_setup_time_get);
+    assert(NX_AZURE_IOT_SUCCESS == status);
+}
+            </content>
+        </template>
+    </developerSupport>
+</raModuleDescription>

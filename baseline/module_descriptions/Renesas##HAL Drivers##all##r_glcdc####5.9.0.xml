@@ -1,0 +1,1179 @@
+﻿<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.driver.glcdc" path="fsp_cfg/r_glcdc_cfg.h" version="0">
+        <property default="config.driver.glcdc.param_checking_enable.bsp" display="Parameter Checking" id="config.driver.glcdc.param_checking_enable" description="If selected, code for parameter checking is included in the build.">
+            <option display="Default (BSP)" id="config.driver.glcdc.param_checking_enable.bsp" value="(BSP_CFG_PARAM_CHECKING_ENABLE)"/>
+            <option display="Enabled" id="config.driver.glcdc.param_checking_enable.enabled" value="(1)"/>
+            <option display="Disabled" id="config.driver.glcdc.param_checking_enable.disabled" value="(0)"/>
+        </property>
+        <property default="config.driver.glcdc.color_correction_enable.off" display="Color Correction" id="config.driver.glcdc.color_correction_enable" description="If selected, code to adjust brightness, contrast and gamma settings is included in the build.  When disabled all color correction configuration options are ignored.">
+            <option display="On" id="config.driver.glcdc.color_correction_enable.on" value="(true)"/>
+            <option display="Off" id="config.driver.glcdc.color_correction_enable.off" value="(false)"/>
+        </property>
+        <content>
+            #ifdef __cplusplus
+            extern "C" {
+            #endif
+
+            #define GLCDC_CFG_PARAM_CHECKING_ENABLE   ${config.driver.glcdc.param_checking_enable}
+            #define GLCDC_CFG_COLOR_CORRECTION_ENABLE ${config.driver.glcdc.color_correction_enable}
+
+            /* Enable DSI function handling */
+            #if (RA_NOT_DEFINED != ${interface.driver.mipi_dsi})
+            #define GLCDC_CFG_USING_DSI
+            #endif
+
+            #ifdef __cplusplus
+            }
+            #endif
+        </content>
+    </config>
+    <module config="config.driver.glcdc" display="Graphics|${module.driver.display.name} Graphics LCD (r_glcdc)" id="module.driver.display_on_glcdc" version="1"  common="1" url="group___g_l_c_d_c.html">
+        <constraint display="Only one instance of GLCDC is permitted">
+          "${interface.driver.display_on_glcdc}" === "1"
+        </constraint>
+        <constraint display="Requires GLCDC peripheral">
+          "${interface.mcu.glcdc.external}" === "1"
+        </constraint>
+        <constraint display="Common | Color Correction has to be enabled to use Color Correction Options (Brightness, Contrast, Gamma-Red, Gamma-Green, Gamma-Blue).">
+          (("${config.driver.glcdc.color_correction_enable}" === ("config.driver.glcdc.color_correction_enable.on")) || ("${module.driver.display.output.brightness.enable}" === ("module.driver.display.output.brightness.false")) &amp;&amp; ("${module.driver.display.output.contrast.enable}" === ("module.driver.display.output.contrast.false")) &amp;&amp; ("${module.driver.display.output.gamma.r.enable}" === ("module.driver.display.output.gamma.r.enable.off")) &amp;&amp; ("${module.driver.display.output.gamma.g.enable}" === ("module.driver.display.output.gamma.g.enable.off")) &amp;&amp; ("${module.driver.display.output.gamma.b.enable}" === ("module.driver.display.output.gamma.b.enable.off")))
+        </constraint>
+
+        <!-- MIPI DSI Constraints -->
+        <constraint display="TCON|Hsync pin select must be GLCDC_TCON_PIN_1 when MIPI DSI is present in the stack.">
+            ("${interface.driver.mipi_dsi}" != "1") ||
+            ("${module.driver.display.tcon_hsync}" == "module.driver.display.tcon_hsync.tcon_pin_1")
+        </constraint>
+        <constraint display="TCON|Vsync pin select must be GLCDC_TCON_PIN_0 when MIPI DSI is present in the stack.">
+            ("${interface.driver.mipi_dsi}" != "1") ||
+            ("${module.driver.display.tcon_vsync}" == "module.driver.display.tcon_vsync.tcon_pin_0")
+        </constraint>
+        <constraint display="TCON|Data enable (DE) pin select must be GLCDC_TCON_PIN_2 when MIPI DSI is present in the stack.">
+            ("${interface.driver.mipi_dsi}" != "1") ||
+            ("${module.driver.display.tcon_de}" == "module.driver.display.tcon_de.tcon_pin_2")
+        </constraint>
+        <constraint display="Output|Format|Color order must be DISPLAY_COLOR_ORDER_RGB when MIPI DSI is present in the stack.">
+            ("${interface.driver.mipi_dsi}" != "1") ||
+            ("${module.driver.display.output.color_order}" == "module.driver.display.output.color_order.color_order_rgb")
+        </constraint>
+        <constraint display="Output|Format|Endian must be DISPLAY_ENDIAN_LITTLE when MIPI DSI is present in the stack.">
+            ("${interface.driver.mipi_dsi.${module.driver.display_on_glcdc.requires.dsi::module.driver.mipi_dsi.name}}" != "1") ||
+            ("${module.driver.display.output.endian}" == "module.driver.display.output.endian.endian_little")
+        </constraint>
+        <constraint display="Invalid GLCDC output format configured for use with MIPI DSI present in the stack. GLCDC output format must be configured to RGB565, RGB666, or RGB888.">
+            ("${interface.driver.mipi_dsi}" != "1") ||
+            ("${module.driver.display.output.format}" == "module.driver.display.output.format.out_format_24bits_rgb888") ||
+            ("${module.driver.display.output.format}" == "module.driver.display.output.format.out_format_18bits_rgb666") ||
+            ("${module.driver.display.output.format}" == "module.driver.display.output.format.out_format_16bits_rgb565")
+        </constraint>
+        <constraint display="LCDCLK must be enabled and greater than 0 when TCON|Panel clock source is set to Internal clock (GLCDCLK)">
+            !testExists("${board.clock.peripheral.lcdclk}") ||
+            (Number("${board.clock.peripheral.lcdclk}") &gt; 0) ||
+            ("${module.driver.display.clksrc}" != "module.driver.display.clksrc.clk_src_internal")
+        </constraint>
+        <requires id="module.driver.display_on_glcdc.requires.glcdc" interface="interface.mcu.glcdc.external" visible="false" display="Requires GLCDC peripheral" />
+        <requires id="module.driver.display_on_glcdc.requires.dsi" interface="interface.driver.mipi_dsi" visible="true" find="false" optional="true" display="MIPI DSI Output (Optional)">
+            <override property="module.driver.mipi_dsi.display.vertical_active_lines"    value="${module.driver.display.output.vtiming.display_cyc}" />
+            <override property="module.driver.mipi_dsi.display.vertical_sync_polarity"   value="(${module.driver.display.output.vtiming.sync_polarity} != DISPLAY_SIGNAL_POLARITY_HIACTIVE)" />
+            <override property="module.driver.mipi_dsi.display.vertical_sync_lines"      value="${module.driver.display.output.vtiming.sync_width}" />
+            <override property="module.driver.mipi_dsi.display.vtiming.back_porch"       value="${module.driver.display.output.vtiming.back_porch}"/>
+            <override property="module.driver.mipi_dsi.display.vtiming.total_cyc"        value="${module.driver.display.output.vtiming.total_cyc}" />
+            <override property="module.driver.mipi_dsi.display.vtiming.display_cyc"      value="${module.driver.display.output.vtiming.display_cyc}" />
+
+            <override property="module.driver.mipi_dsi.display.horizontal_active_lines"  value="${module.driver.display.output.htiming.display_cyc}" />
+            <override property="module.driver.mipi_dsi.display.horizontal_sync_polarity" value="(${module.driver.display.output.htiming.sync_polarity} != DISPLAY_SIGNAL_POLARITY_HIACTIVE)" />
+            <override property="module.driver.mipi_dsi.display.horizontal_sync_lines"    value="${module.driver.display.output.htiming.sync_width}" />
+            <override property="module.driver.mipi_dsi.display.htiming.back_porch"       value="${module.driver.display.output.htiming.back_porch}" />
+            <override property="module.driver.mipi_dsi.display.htiming.total_cyc"        value="${module.driver.display.output.htiming.total_cyc}" />
+            <override property="module.driver.mipi_dsi.display.htiming.display_cyc"      value="${module.driver.display.output.htiming.display_cyc}" />
+
+            <override property="module.driver.mipi_dsi.display.clksrc"                   value="${module.driver.display.clksrc}" />
+            <override property="module.driver.mipi_dsi.display.clock_div_ratio"          value="${module.driver.display.clock_div_ratio}" />
+            <override property="module.driver.mipi_dsi.display.output.format"            value="${module.driver.display.output.format}" />
+        </requires>
+
+        <provides interface="interface.driver.display" />
+        <provides interface="interface.driver.display_on_glcdc" />
+        <provides interface="interface.driver.display.${module.driver.display.name}" />
+        <provides interface="interface.peripheral.glcdc" />
+
+        <!-- Display interface instance name configuration -->
+        <property default="g_display${_instance}" display="General|Name" id="module.driver.display.name" description="Module name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.display.name}")</constraint>
+        </property>
+
+        <!-- External defined callback function -->
+        <property default="NULL" display="Interrupts|Callback Function" id="module.driver.display.callback" description="A user callback function can be defined here.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.display.callback}")</constraint>
+        </property>
+
+        <!-- Interrupt configuration -->
+        <property default="board.icu.common.irq.priority12" display="Interrupts|Line Detect Interrupt Priority" id="module.driver.display.line_detect_ipl" description="Select the line detect (Vsync) interrupt priority.">
+            <select enum="enum.mcu.nvic.priorities.optional"/>
+            <interrupt event="event.glcdc.line.detect" isr="glcdc_line_detect_isr"/>
+        </property>
+        <property default="" display="Interrupts|Underflow 1 Interrupt Priority" id="module.driver.display.underflow_1_ipl" description="Select the underflow interrupt priority for layer 1.">
+            <select enum="enum.mcu.nvic.priorities.optional"/>
+            <interrupt event="event.glcdc.underflow.1" isr="glcdc_underflow_1_isr"/>
+        </property>
+        <property default="" display="Interrupts|Underflow 2 Interrupt Priority" id="module.driver.display.underflow_2_ipl" description="Select the underflow interrupt priority for layer 2.">
+            <select enum="enum.mcu.nvic.priorities.optional"/>
+            <interrupt event="event.glcdc.underflow.2" isr="glcdc_underflow_2_isr"/>
+        </property>
+
+        <!-- Graphics Layer 1 input configurations -->
+        <property default="module.driver.display.input0.enable.true" display="Input|Graphics Layer 1|General|Enabled" id="module.driver.display.input0.enable" description="Specify Used if the graphics layer 1 is used. If so a framebuffer will be automatically generated based on the specified height and horizontal stride.">
+            <option display="Yes" id="module.driver.display.input0.enable.true" value="true"/>
+            <option display="No" id="module.driver.display.input0.enable.false" value="false"/>
+        </property>
+        <property default="480" display="Input|Graphics Layer 1|General|Horizontal size" id="module.driver.display.input0.hsize" description="Specify the number of horizontal pixels.">
+            <constraint display="Value must be an integer from 16 to 2040"> testInteger("${module.driver.display.input0.hsize}")  &amp;&amp; ("${module.driver.display.input0.hsize}" &gt;= 16) &amp;&amp; ("${module.driver.display.input0.hsize}" &lt;= 2040)
+            </constraint>
+        </property>
+        <property default="854" display="Input|Graphics Layer 1|General|Vertical size" id="module.driver.display.input0.vsize" description="Specify the number of vertical pixels.">
+            <constraint display="Value must be an integer from 16 to 2043"> testInteger("${module.driver.display.input0.vsize}")  &amp;&amp; ("${module.driver.display.input0.vsize}" &gt;= 16) &amp;&amp; ("${module.driver.display.input0.vsize}" &lt;= 2043)
+            </constraint>
+        </property>
+        <property default="0" display="Input|Graphics Layer 1|General|Horizontal position" id="module.driver.display.layer0.coordinate.x" description="Specify the horizontal offset in pixels of the graphics layer from the background layer.">
+            <constraint display="Must be a valid non-negative integer with a maximum configurable value of 4091"> testInteger("${module.driver.display.layer0.coordinate.x}")  &amp;&amp; ("${module.driver.display.layer0.coordinate.x}" &gt;= 0) &amp;&amp; ("${module.driver.display.layer0.coordinate.x}" &lt;= 4091)
+            </constraint>
+        </property>
+        <property default="0" display="Input|Graphics Layer 1|General|Vertical position" id="module.driver.display.layer0.coordinate.y" description="Specify the vertical offset in pixels of the graphics layer from the background layer.">
+            <constraint display="Must be a valid non-negative integer with a maximum configurable value of 4094"> testInteger("${module.driver.display.layer0.coordinate.y}")  &amp;&amp; ("${module.driver.display.layer0.coordinate.y}" &gt;= 0) &amp;&amp; ("${module.driver.display.layer0.coordinate.y}" &lt;= 4094)
+            </constraint>
+        </property>
+        <property default="fb_background" display="Input|Graphics Layer 1|Framebuffer|Framebuffer name" id="module.driver.display.input0.buffer_name" description="Specify the name for the framebuffer for Layer 1.">
+            <constraint display="This property must be a valid C symbol"> testSymbol("${module.driver.display.input0.buffer_name}")
+            </constraint>
+        </property>
+        <property default="2" display="Input|Graphics Layer 1|Framebuffer|Number of framebuffers" id="module.driver.display.input0.buffer_number" description="Number of framebuffers allocated for Graphics Layer 1.">
+            <constraint display="Must be a valid non-negative integer"> testInteger("${module.driver.display.input0.buffer_number}") &amp;&amp; ("${module.driver.display.input0.buffer_number}" &gt; 0)
+            </constraint>
+        </property>
+        <property default=".sdram" display="Input|Graphics Layer 1|Framebuffer|Section for framebuffer allocation" id="module.driver.display.input0.section" description="Specify the section in which to allocate the framebuffer. When Arm Compiler 6 is used to place this memory in on-chip SRAM, the section name must be .bss or start with .bss. to avoid consuming unnecessary ROM space." />
+        <property default="module.driver.display.input0.format.in_format_16bits_rgb565" display="Input|Graphics Layer 1|General|Color format" id="module.driver.display.input0.format" description="Specify the graphics layer Input format. If selecting CLUT formats, you must write the CLUT table data before starting output.">
+            <option display="ARGB8888 (32-bit)" id="module.driver.display.input0.format.in_format_32bits_argb8888" value="DISPLAY_IN_FORMAT_32BITS_ARGB8888"/>
+            <option display="RGB888 (32-bit)" id="module.driver.display.input0.format.in_format_32bits_rgb888" value="DISPLAY_IN_FORMAT_32BITS_RGB888"/>
+            <option display="RGB565 (16-bit)" id="module.driver.display.input0.format.in_format_16bits_rgb565" value="DISPLAY_IN_FORMAT_16BITS_RGB565"/>
+            <option display="ARGB1555 (16-bit)" id="module.driver.display.input0.format.in_format_16bits_argb1555" value="DISPLAY_IN_FORMAT_16BITS_ARGB1555"/>
+            <option display="ARGB4444 (16-bit)" id="module.driver.display.input0.format.in_format_16bits_argb4444" value="DISPLAY_IN_FORMAT_16BITS_ARGB4444"/>
+            <option display="CLUT8 (8-bit)" id="module.driver.display.input0.format.in_format_clut8" value="DISPLAY_IN_FORMAT_CLUT8"/>
+            <option display="CLUT4 (4-bit)" id="module.driver.display.input0.format.in_format_clut4" value="DISPLAY_IN_FORMAT_CLUT4"/>
+            <option display="CLUT1 (1-bit)" id="module.driver.display.input0.format.in_format_clut1" value="DISPLAY_IN_FORMAT_CLUT1"/>
+        </property>
+        <property default="module.driver.display.input0.line_descending_enable.false" display="Input|Graphics Layer 1|General|Line descending mode" id="module.driver.display.input0.line_descending_enable" description="Select Used if the framebuffer starts from the bottom of the line.">
+            <option display="Enabled" id="module.driver.display.input0.line_descending_enable.true" value="true"/>
+            <option display="Disabled" id="module.driver.display.input0.line_descending_enable.false" value="false"/>
+        </property>
+        <property default="module.driver.display.input0.lines_repeat_enable.false" display="Input|Graphics Layer 1|Line Repeat|Enable" id="module.driver.display.input0.lines_repeat_enable" description="Select On if the display will be repeated from a smaller section of the framebuffer.">
+            <option display="On" id="module.driver.display.input0.lines_repeat_enable.true" value="true"/>
+            <option display="Off" id="module.driver.display.input0.lines_repeat_enable.false" value="false"/>
+        </property>
+        <property default="0" display="Input|Graphics Layer 1|Line Repeat|Repeat count" id="module.driver.display.input0.lines_repeat_times" description="Specify the number of times the image is repeated.">
+            <constraint display="Must be a valid non-negative integer with a maximum configurable value of 65535 i.e (vertical size) x (lines repeat times) must be equal to the panel vertical size"> testInteger("${module.driver.display.input0.lines_repeat_times}")  &amp;&amp; ("${module.driver.display.input0.lines_repeat_times}" &gt;= 0) &amp;&amp; ("${module.driver.display.input0.lines_repeat_times}" &lt;= 65535)
+            </constraint>
+        </property>
+        <property default="module.driver.display.layer0.fade_control.fade_control_none" display="Input|Graphics Layer 1|Fading|Mode" id="module.driver.display.layer0.fade_control" description="Select the fade method.">
+            <option display="None" id="module.driver.display.layer0.fade_control.fade_control_none" value="DISPLAY_FADE_CONTROL_NONE"/>
+            <option display="Fade-in" id="module.driver.display.layer0.fade_control.fade_control_fadein" value="DISPLAY_FADE_CONTROL_FADEIN"/>
+            <option display="Fade-out" id="module.driver.display.layer0.fade_control.fade_control_fadeout" value="DISPLAY_FADE_CONTROL_FADEOUT"/>
+        </property>
+        <property default="0" display="Input|Graphics Layer 1|Fading|Speed" id="module.driver.display.layer0.fade_speed" description="Specify the number of frames for the fading transition to complete.">
+            <constraint display="Value must be an integer from 0 to 255"> testInteger("${module.driver.display.layer0.fade_speed}")  &amp;&amp; ("${module.driver.display.layer0.fade_speed}" &gt;= 0) &amp;&amp; ("${module.driver.display.layer0.fade_speed}" &lt;= 255)
+            </constraint>
+        </property>
+
+        <!-- Graphics Layer 2 input configurations -->
+        <property default="module.driver.display.input1.enable.false" display="Input|Graphics Layer 2|General|Enabled" id="module.driver.display.input1.enable" description="Specify Used if the graphics layer 2 is used. If so a framebuffer will be automatically generated based on the specified height and horizontal stride.">
+            <option display="Yes" id="module.driver.display.input1.enable.true" value="true"/>
+            <option display="No" id="module.driver.display.input1.enable.false" value="false"/>
+        </property>
+        <property default="480" display="Input|Graphics Layer 2|General|Horizontal size" id="module.driver.display.input1.hsize" description="Specify the number of horizontal pixels.">
+            <constraint display="Value must be be an integer from 16 to 2040"> testInteger("${module.driver.display.input1.hsize}")  &amp;&amp; ("${module.driver.display.input1.hsize}" &gt;= 16) &amp;&amp; ("${module.driver.display.input1.hsize}" &lt;= 2040)
+            </constraint>
+        </property>
+        <property default="854" display="Input|Graphics Layer 2|General|Vertical size" id="module.driver.display.input1.vsize" description="Specify the number of vertical pixels.">
+            <constraint display="Value must be be an integer from 16 to 2043"> testInteger("${module.driver.display.input1.vsize}")  &amp;&amp; ("${module.driver.display.input1.vsize}" &gt;= 16) &amp;&amp; ("${module.driver.display.input1.vsize}" &lt;= 2043)
+            </constraint>
+        </property>
+        <property default="0" display="Input|Graphics Layer 2|General|Horizontal position" id="module.driver.display.layer1.coordinate.x" description="Specify the horizontal offset in pixels of the graphics layer from the background layer.">
+            <constraint display="Must be a valid non-negative integer with a maximum configurable value of 4091"> testInteger("${module.driver.display.layer1.coordinate.x}")  &amp;&amp; ("${module.driver.display.layer1.coordinate.x}" &gt;= 0) &amp;&amp; ("${module.driver.display.layer1.coordinate.x}" &lt;= 4091)
+            </constraint>
+        </property>
+        <property default="0" display="Input|Graphics Layer 2|General|Vertical position" id="module.driver.display.layer1.coordinate.y" description="Specify the vertical offset in pixels of the graphics layer from the background layer.">
+            <constraint display="Must be a valid non-negative integer with a maximum configurable value of 4094"> testInteger("${module.driver.display.layer1.coordinate.y}")  &amp;&amp; ("${module.driver.display.layer1.coordinate.y}" &gt;= 0) &amp;&amp; ("${module.driver.display.layer1.coordinate.y}" &lt;= 4094)
+            </constraint>
+        </property>
+        <property default="fb_foreground" display="Input|Graphics Layer 2|Framebuffer|Framebuffer name" id="module.driver.display.input1.buffer_name" description="Specify the name for the framebuffer for Layer 2.">
+            <constraint display="This property must be a valid C symbol"> testSymbol("${module.driver.display.input1.buffer_name}")
+            </constraint>
+        </property>
+        <property default="2" display="Input|Graphics Layer 2|Framebuffer|Number of framebuffers" id="module.driver.display.input1.buffer_number" description="Number of framebuffers allocated for Graphics Layer 2.">
+            <constraint display="Must be a valid non-negative integer"> testInteger("${module.driver.display.input1.buffer_number}") &amp;&amp; ("${module.driver.display.input1.buffer_number}" &gt; 0)
+            </constraint>
+        </property>
+        <property default=".sdram" display="Input|Graphics Layer 2|Framebuffer|Section for framebuffer allocation" id="module.driver.display.input1.section" description="Specify the section in which to allocate the framebuffer. When Arm Compiler 6 is used to place this memory in on-chip SRAM, the section name must be .bss or start with .bss. to avoid consuming unnecessary ROM space." />
+        <property default="module.driver.display.input1.format.in_format_16bits_rgb565" display="Input|Graphics Layer 2|General|Color format" id="module.driver.display.input1.format" description="Specify the graphics layer Input format. If selecting CLUT formats, you must write the CLUT table data before starting output.">
+            <option display="ARGB8888 (32-bit)" id="module.driver.display.input1.format.in_format_32bits_argb8888" value="DISPLAY_IN_FORMAT_32BITS_ARGB8888"/>
+            <option display="RGB888 (32-bit)" id="module.driver.display.input1.format.in_format_32bits_rgb888" value="DISPLAY_IN_FORMAT_32BITS_RGB888"/>
+            <option display="RGB565 (16-bit)" id="module.driver.display.input1.format.in_format_16bits_rgb565" value="DISPLAY_IN_FORMAT_16BITS_RGB565"/>
+            <option display="ARGB1555 (16-bit)" id="module.driver.display.input1.format.in_format_16bits_argb1555" value="DISPLAY_IN_FORMAT_16BITS_ARGB1555"/>
+            <option display="ARGB4444 (16-bit)" id="module.driver.display.input1.format.in_format_16bits_argb4444" value="DISPLAY_IN_FORMAT_16BITS_ARGB4444"/>
+            <option display="CLUT8 (8-bit)" id="module.driver.display.input1.format.in_format_clut8" value="DISPLAY_IN_FORMAT_CLUT8"/>
+            <option display="CLUT4 (4-bit)" id="module.driver.display.input1.format.in_format_clut4" value="DISPLAY_IN_FORMAT_CLUT4"/>
+            <option display="CLUT1 (1-bit)" id="module.driver.display.input1.format.in_format_clut1" value="DISPLAY_IN_FORMAT_CLUT1"/>
+        </property>
+        <property default="module.driver.display.input1.line_descending_enable.false" display="Input|Graphics Layer 2|General|Line descending mode" id="module.driver.display.input1.line_descending_enable" description="Select Used if the framebuffer starts from the bottom of the line.">
+            <option display="Enabled" id="module.driver.display.input1.line_descending_enable.true" value="true"/>
+            <option display="Disabled" id="module.driver.display.input1.line_descending_enable.false" value="false"/>
+        </property>
+        <property default="module.driver.display.input1.lines_repeat_enable.false" display="Input|Graphics Layer 2|Line Repeat|Enable" id="module.driver.display.input1.lines_repeat_enable" description="Select On if the display will be repeated from a smaller section of the framebuffer.">
+            <option display="On" id="module.driver.display.input1.lines_repeat_enable.true" value="true"/>
+            <option display="Off" id="module.driver.display.input1.lines_repeat_enable.false" value="false"/>
+        </property>
+        <property default="0" display="Input|Graphics Layer 2|Line Repeat|Repeat count" id="module.driver.display.input1.lines_repeat_times" description="Specify the number of times the image is repeated.">
+            <constraint display="Must be a valid non-negative integer with a maximum configurable value of 65535 i.e (vertical size) x (lines repeat times) must be equal to the panel vertical size"> testInteger("${module.driver.display.input1.lines_repeat_times}")  &amp;&amp; ("${module.driver.display.input1.lines_repeat_times}" &gt;= 0) &amp;&amp; ("${module.driver.display.input1.lines_repeat_times}" &lt;= 65535)
+            </constraint>
+        </property>
+        <property default="module.driver.display.layer1.fade_control.fade_control_none" display="Input|Graphics Layer 2|Fading|Mode" id="module.driver.display.layer1.fade_control" description="Select the fade method.">
+            <option display="None" id="module.driver.display.layer1.fade_control.fade_control_none" value="DISPLAY_FADE_CONTROL_NONE"/>
+            <option display="Fade-in" id="module.driver.display.layer1.fade_control.fade_control_fadein" value="DISPLAY_FADE_CONTROL_FADEIN"/>
+            <option display="Fade-out" id="module.driver.display.layer1.fade_control.fade_control_fadeout" value="DISPLAY_FADE_CONTROL_FADEOUT"/>
+        </property>
+        <property default="0" display="Input|Graphics Layer 2|Fading|Speed" id="module.driver.display.layer1.fade_speed" description="Specify the number of frames for the fading transition to complete.">
+            <constraint display="Value must be an integer from 0 to 255"> testInteger("${module.driver.display.layer1.fade_speed}")  &amp;&amp; ("${module.driver.display.layer1.fade_speed}" &gt;= 0) &amp;&amp; ("${module.driver.display.layer1.fade_speed}" &lt;= 255)
+            </constraint>
+        </property>
+
+        <!-- Output control block configurations -->
+        <property default="559" display="Output|Timing|Horizontal total cycles" id="module.driver.display.output.htiming.total_cyc" description="Specify the total cycles in a horizontal line. Set to the number of cycles defined in the data sheet of LCD panel sheet in your system">
+            <constraint display="Value must be an integer from 24 to 2047"> testInteger("${module.driver.display.output.htiming.total_cyc}")  &amp;&amp; ("${module.driver.display.output.htiming.total_cyc}" &gt;= 24) &amp;&amp; ("${module.driver.display.output.htiming.total_cyc}" &lt;= 2047)
+            </constraint>
+        </property>
+        <property default="480" display="Output|Timing|Horizontal active video cycles" id="module.driver.display.output.htiming.display_cyc" description="Specify the number of active video cycles in a horizontal line (including front and back porch). Set to the number of cycles defined in the data sheet of LCD panel sheet in your system.">
+            <constraint display="Value must be an integer from 16 to 2040"> testInteger("${module.driver.display.output.htiming.display_cyc}")  &amp;&amp; ("${module.driver.display.output.htiming.display_cyc}" &gt;= 16) &amp;&amp; ("${module.driver.display.output.htiming.display_cyc}" &lt;= 2040)
+            </constraint>
+        </property>
+        <property default="5" display="Output|Timing|Horizontal back porch cycles" id="module.driver.display.output.htiming.back_porch" description="Specify the number of back porch cycles in a horizontal line. Back porch starts from the beginning of Hsync cycles, which means back porch cycles contain Hsync cycles. Set to the number of cycles defined in the data sheet of LCD panel sheet in your system.">
+            <constraint display="Value must be an integer from 5 to 2029"> testInteger("${module.driver.display.output.htiming.back_porch}")  &amp;&amp; ("${module.driver.display.output.htiming.back_porch}" &gt;= 5) &amp;&amp; ("${module.driver.display.output.htiming.back_porch}" &lt;= 2029)
+            </constraint>
+        </property>
+        <property default="2" display="Output|Timing|Horizontal sync signal cycles" id="module.driver.display.output.htiming.sync_width" description="Specify the number of Hsync signal assertion cycles. Set to the number of cycles defined in the data sheet of LCD panel sheet in your system.">
+            <constraint display="Value must be an integer from 0 to 2046"> testInteger("${module.driver.display.output.htiming.sync_width}")  &amp;&amp; ("${module.driver.display.output.htiming.sync_width}" &gt;= 0) &amp;&amp; ("${module.driver.display.output.htiming.sync_width}" &lt;= 2046)
+            </constraint>
+        </property>
+        <property default="module.driver.display.output.htiming.sync_polarity.signal_polarity_loactive" display="Output|Timing|Horizontal sync signal polarity" id="module.driver.display.output.htiming.sync_polarity" description="Select the polarity of Hsync signal to match your system.">
+            <option display="Low active" id="module.driver.display.output.htiming.sync_polarity.signal_polarity_loactive" value="DISPLAY_SIGNAL_POLARITY_LOACTIVE"/>
+            <option display="High active" id="module.driver.display.output.htiming.sync_polarity.signal_polarity_hiactive" value="DISPLAY_SIGNAL_POLARITY_HIACTIVE"/>
+        </property>
+        <property default="894" display="Output|Timing|Vertical total lines" id="module.driver.display.output.vtiming.total_cyc" description="Specify number of total lines in a frame (including front and back porch).">
+            <constraint display="Value must be an integer from 20 to 2047"> testInteger("${module.driver.display.output.vtiming.total_cyc}")  &amp;&amp; ("${module.driver.display.output.vtiming.total_cyc}" &gt;= 20) &amp;&amp; ("${module.driver.display.output.vtiming.total_cyc}" &lt;= 2047)
+            </constraint>
+        </property>
+        <property default="854" display="Output|Timing|Vertical active video lines" id="module.driver.display.output.vtiming.display_cyc" description="Specify the number of active video lines in a frame.">
+            <constraint display="Value must be an integer from 16 to 2043">
+            testInteger("${module.driver.display.output.vtiming.display_cyc}")  &amp;&amp;
+            ("${module.driver.display.output.vtiming.display_cyc}" &gt;= 16) &amp;&amp;
+            ("${module.driver.display.output.vtiming.display_cyc}" &lt;= 2043)
+            </constraint>
+        </property>
+        <property default="20" display="Output|Timing|Vertical back porch lines" id="module.driver.display.output.vtiming.back_porch" description="Specify the number of back porch lines in a frame. Back porch starts from the beginning of Vsync lines, which means back porch lines contain Vsync lines.">
+            <constraint display="Value must be an integer from 3 to 2030">
+            testInteger("${module.driver.display.output.vtiming.back_porch}")  &amp;&amp;
+            ("${module.driver.display.output.vtiming.back_porch}" &gt;= 3) &amp;&amp;
+            ("${module.driver.display.output.vtiming.back_porch}" &lt;= 2030)
+            </constraint>
+        </property>
+        <property default="3" display="Output|Timing|Vertical sync signal lines" id="module.driver.display.output.vtiming.sync_width" description="Specify the Vsync signal assertion lines in a frame.">
+            <constraint display="Value must be an integer from 0 to 2046"> testInteger("${module.driver.display.output.vtiming.sync_width}")  &amp;&amp; ("${module.driver.display.output.vtiming.sync_width}" &gt;= 0) &amp;&amp; ("${module.driver.display.output.vtiming.sync_width}" &lt;= 2046)
+            </constraint>
+        </property>
+        <property default="module.driver.display.output.vtiming.sync_polarity.signal_polarity_loactive" display="Output|Timing|Vertical sync signal polarity" id="module.driver.display.output.vtiming.sync_polarity" description="Select the polarity of Vsync signal to match to your system.">
+            <option display="Low active" id="module.driver.display.output.vtiming.sync_polarity.signal_polarity_loactive" value="DISPLAY_SIGNAL_POLARITY_LOACTIVE"/>
+            <option display="High active" id="module.driver.display.output.vtiming.sync_polarity.signal_polarity_hiactive" value="DISPLAY_SIGNAL_POLARITY_HIACTIVE"/>
+        </property>
+        <property default="module.driver.display.output.data_enable_polarity.signal_polarity_hiactive" display="Output|Timing|Data Enable Signal Polarity" id="module.driver.display.output.data_enable_polarity" description="Select the polarity of Data Enable signal to match to your system.">
+            <option display="Low active" id="module.driver.display.output.data_enable_polarity.signal_polarity_loactive" value="DISPLAY_SIGNAL_POLARITY_LOACTIVE"/>
+            <option display="High active" id="module.driver.display.output.data_enable_polarity.signal_polarity_hiactive" value="DISPLAY_SIGNAL_POLARITY_HIACTIVE"/>
+        </property>
+        <property default="module.driver.display.output.sync_edge.signal_sync_edge_falling" display="Output|Timing|Sync edge" id="module.driver.display.output.sync_edge" description="Select the polarity of Sync signals to match to your system.">
+            <option display="Rising edge" id="module.driver.display.output.sync_edge.signal_sync_edge_rising" value="DISPLAY_SIGNAL_SYNC_EDGE_RISING"/>
+            <option display="Falling edge" id="module.driver.display.output.sync_edge.signal_sync_edge_falling" value="DISPLAY_SIGNAL_SYNC_EDGE_FALLING"/>
+        </property>
+        <property default="module.driver.display.output.format.out_format_24bits_rgb888" display="Output|Format|Color format" id="module.driver.display.output.format" description="Specify the graphics layer output format to match to your LCD panel.">
+            <option display="24bits RGB888" id="module.driver.display.output.format.out_format_24bits_rgb888" value="DISPLAY_OUT_FORMAT_24BITS_RGB888"/>
+            <option display="18bits RGB666" id="module.driver.display.output.format.out_format_18bits_rgb666" value="DISPLAY_OUT_FORMAT_18BITS_RGB666"/>
+            <option display="16bits RGB565" id="module.driver.display.output.format.out_format_16bits_rgb565" value="DISPLAY_OUT_FORMAT_16BITS_RGB565"/>
+            <option display="8bits serial" id="module.driver.display.output.format.out_format_8bits_serial" value="DISPLAY_OUT_FORMAT_8BITS_SERIAL"/>
+        </property>
+        <property default="module.driver.display.output.color_order.color_order_rgb" display="Output|Format|Color order" id="module.driver.display.output.color_order" description="Select data order for output signal to LCD panel.">
+            <option display="RGB" id="module.driver.display.output.color_order.color_order_rgb" value="DISPLAY_COLOR_ORDER_RGB"/>
+            <option display="BGR" id="module.driver.display.output.color_order.color_order_bgr" value="DISPLAY_COLOR_ORDER_BGR"/>
+        </property>
+        <property default="module.driver.display.output.endian.endian_little" display="Output|Format|Endian" id="module.driver.display.output.endian" description="Select data endianness for output signal to LCD panel.">
+            <option display="Little endian" id="module.driver.display.output.endian.endian_little" value="DISPLAY_ENDIAN_LITTLE"/>
+            <option display="Big endian" id="module.driver.display.output.endian.endian_big" value="DISPLAY_ENDIAN_BIG"/>
+        </property>
+        <property default="255" display="Output|Background|Alpha" id="module.driver.display.output.bg_color.byte.a" description="Alpha component of the background color.">
+            <constraint display="Value must be an integer from 0 to 255"> testInteger("${module.driver.display.output.bg_color.byte.a}")  &amp;&amp; ("${module.driver.display.output.bg_color.byte.a}" &gt;= 0) &amp;&amp; ("${module.driver.display.output.bg_color.byte.a}" &lt;= 255)
+            </constraint>
+        </property>
+        <property default="0" display="Output|Background|Red" id="module.driver.display.output.bg_color.byte.r" description="Red component of the background color.">
+            <constraint display="Value must be an integer from 0 to 255"> testInteger("${module.driver.display.output.bg_color.byte.r}")  &amp;&amp; ("${module.driver.display.output.bg_color.byte.r}" &gt;= 0) &amp;&amp; ("${module.driver.display.output.bg_color.byte.r}" &lt;= 255)
+            </constraint>
+        </property>
+        <property default="0" display="Output|Background|Green" id="module.driver.display.output.bg_color.byte.g" description="Green component of the background color.">
+            <constraint display="Value must be an integer from 0 to 255"> testInteger("${module.driver.display.output.bg_color.byte.g}")  &amp;&amp; ("${module.driver.display.output.bg_color.byte.g}" &gt;= 0) &amp;&amp; ("${module.driver.display.output.bg_color.byte.g}" &lt;= 255)
+            </constraint>
+        </property>
+        <property default="0" display="Output|Background|Blue" id="module.driver.display.output.bg_color.byte.b" description="Blue component of the background color.">
+            <constraint display="Value must be an integer from 0 to 255"> testInteger("${module.driver.display.output.bg_color.byte.b}")  &amp;&amp; ("${module.driver.display.output.bg_color.byte.b}" &gt;= 0) &amp;&amp; ("${module.driver.display.output.bg_color.byte.b}" &lt;= 255)
+            </constraint>
+        </property>
+
+        <!-- CLUT configurations -->
+        <property default="module.driver.display.clut.enable.false" display="CLUT|Enabled" id="module.driver.display.clut.enable" description="Specify Used if selecting CLUT formats for a graphics layer input format. If used, a buffer (CLUT_buffer) will be automatically generated based on the selected pixel width.">
+            <option display="Yes" id="module.driver.display.clut.enable.true" value="true"/>
+            <option display="No" id="module.driver.display.clut.enable.false" value="false"/>
+        </property>
+        <property default="256" display="CLUT|Size" id="module.driver.display.clut.size" description="Specify the number of entries for the CLUT source data buffer. Each entry consumes 4 bytes (1 word).">
+            <constraint display="Must be a valid non-negative integer with a maximum configurable value of 256"> testInteger("${module.driver.display.clut.size}") &amp;&amp; ("${module.driver.display.clut.size}" &gt;= 0) &amp;&amp; ("${module.driver.display.clut.size}" &lt;= 256)
+            </constraint>
+        </property>
+
+        <!-- TCON/Clock configurations -->
+        <property default="module.driver.display.tcon_hsync.tcon_pin_1" display="TCON|Hsync pin select" id="module.driver.display.tcon_hsync" description="Select the TCON pin used for the Hsync signal to match to your system.">
+            <option display="Not used" id="module.driver.display.tcon_hsync.tcon_pin_none" value="GLCDC_TCON_PIN_NONE"/>
+            <option display="LCD_TCON0" id="module.driver.display.tcon_hsync.tcon_pin_0" value="GLCDC_TCON_PIN_0"/>
+            <option display="LCD_TCON1" id="module.driver.display.tcon_hsync.tcon_pin_1" value="GLCDC_TCON_PIN_1"/>
+            <option display="LCD_TCON2" id="module.driver.display.tcon_hsync.tcon_pin_2" value="GLCDC_TCON_PIN_2"/>
+            <option display="LCD_TCON3" id="module.driver.display.tcon_hsync.tcon_pin_3" value="GLCDC_TCON_PIN_3"/>
+        </property>
+        <property default="module.driver.display.tcon_vsync.tcon_pin_0" display="TCON|Vsync pin select" id="module.driver.display.tcon_vsync" description="Select TCON pin used for Vsync signal to match to your system.">
+            <option display="Not used" id="module.driver.display.tcon_vsync.tcon_pin_none" value="GLCDC_TCON_PIN_NONE"/>
+            <option display="LCD_TCON0" id="module.driver.display.tcon_vsync.tcon_pin_0" value="GLCDC_TCON_PIN_0"/>
+            <option display="LCD_TCON1" id="module.driver.display.tcon_vsync.tcon_pin_1" value="GLCDC_TCON_PIN_1"/>
+            <option display="LCD_TCON2" id="module.driver.display.tcon_vsync.tcon_pin_2" value="GLCDC_TCON_PIN_2"/>
+            <option display="LCD_TCON3" id="module.driver.display.tcon_vsync.tcon_pin_3" value="GLCDC_TCON_PIN_3"/>
+        </property>
+        <property default="module.driver.display.tcon_de.tcon_pin_2" display="TCON|Data enable (DE) pin select" id="module.driver.display.tcon_de" description="Select TCON pin used for DataEnable signal to match to your system.">
+            <option display="Not used" id="module.driver.display.tcon_de.tcon_pin_none" value="GLCDC_TCON_PIN_NONE"/>
+            <option display="LCD_TCON0" id="module.driver.display.tcon_de.tcon_pin_0" value="GLCDC_TCON_PIN_0"/>
+            <option display="LCD_TCON1" id="module.driver.display.tcon_de.tcon_pin_1" value="GLCDC_TCON_PIN_1"/>
+            <option display="LCD_TCON2" id="module.driver.display.tcon_de.tcon_pin_2" value="GLCDC_TCON_PIN_2"/>
+            <option display="LCD_TCON3" id="module.driver.display.tcon_de.tcon_pin_3" value="GLCDC_TCON_PIN_3"/>
+        </property>
+        <property default="module.driver.display.clksrc.clk_src_internal" display="TCON|Panel clock source" id="module.driver.display.clksrc" description="Choose between an internal GLCDCLK generated from PCLKA or an external clock provided to the LCD_EXTCLK pin.">
+            <option display="Internal clock (GLCDCLK)" id="module.driver.display.clksrc.clk_src_internal" value="GLCDC_CLK_SRC_INTERNAL"/>
+            <option display="External clock (LCD_EXTCLK)" id="module.driver.display.clksrc.clk_src_external" value="GLCDC_CLK_SRC_EXTERNAL"/>
+        </property>
+        <property default="module.driver.display.clock_div_ratio.panel_clk_divisor_8" display="TCON|Panel clock division ratio" id="module.driver.display.clock_div_ratio" description="Select the clock source divider value.">
+            <option display="1/1" id="module.driver.display.clock_div_ratio.panel_clk_divisor_1" value="GLCDC_PANEL_CLK_DIVISOR_1"/>
+            <option display="1/2" id="module.driver.display.clock_div_ratio.panel_clk_divisor_2" value="GLCDC_PANEL_CLK_DIVISOR_2"/>
+            <option display="1/3" id="module.driver.display.clock_div_ratio.panel_clk_divisor_3" value="GLCDC_PANEL_CLK_DIVISOR_3"/>
+            <option display="1/4" id="module.driver.display.clock_div_ratio.panel_clk_divisor_4" value="GLCDC_PANEL_CLK_DIVISOR_4"/>
+            <option display="1/5" id="module.driver.display.clock_div_ratio.panel_clk_divisor_5" value="GLCDC_PANEL_CLK_DIVISOR_5"/>
+            <option display="1/6" id="module.driver.display.clock_div_ratio.panel_clk_divisor_6" value="GLCDC_PANEL_CLK_DIVISOR_6"/>
+            <option display="1/7" id="module.driver.display.clock_div_ratio.panel_clk_divisor_7" value="GLCDC_PANEL_CLK_DIVISOR_7"/>
+            <option display="1/8" id="module.driver.display.clock_div_ratio.panel_clk_divisor_8" value="GLCDC_PANEL_CLK_DIVISOR_8"/>
+            <option display="1/9" id="module.driver.display.clock_div_ratio.panel_clk_divisor_9" value="GLCDC_PANEL_CLK_DIVISOR_9"/>
+            <option display="1/12" id="module.driver.display.clock_div_ratio.panel_clk_divisor_12" value="GLCDC_PANEL_CLK_DIVISOR_12"/>
+            <option display="1/16" id="module.driver.display.clock_div_ratio.panel_clk_divisor_16" value="GLCDC_PANEL_CLK_DIVISOR_16"/>
+            <option display="1/24" id="module.driver.display.clock_div_ratio.panel_clk_divisor_24" value="GLCDC_PANEL_CLK_DIVISOR_24"/>
+            <option display="1/32" id="module.driver.display.clock_div_ratio.panel_clk_divisor_32" value="GLCDC_PANEL_CLK_DIVISOR_32"/>
+        </property>
+
+        <!-- Misc correction configurations -->
+        <property default="module.driver.display.correction_proc_order.correction_proc_order_brightness_contrast2gamma" display="Color Correction|Process order" id="module.driver.display.correction_proc_order" description="Select the color correction processing order.">
+            <option display="Brightness/contrast first" id="module.driver.display.correction_proc_order.correction_proc_order_brightness_contrast2gamma" value="GLCDC_CORRECTION_PROC_ORDER_BRIGHTNESS_CONTRAST2GAMMA"/>
+            <option display="Gamma first" id="module.driver.display.correction_proc_order.correction_proc_order_gamma2brightness_contrast" value="GLCDC_CORRECTION_PROC_ORDER_GAMMA2BRIGHTNESS_CONTRAST"/>
+        </property>
+
+        <!-- Color Correction configurations -->
+        <property default="module.driver.display.output.brightness.false" display="Color Correction|Brightness|Enabled" id="module.driver.display.output.brightness.enable" description="Enable brightness color correction.">
+            <option display="Yes" id="module.driver.display.output.brightness.true" value="true"/>
+            <option display="No" id="module.driver.display.output.brightness.false" value="false"/>
+        </property>
+        <property default="512" display="Color Correction|Brightness|Red channel" id="module.driver.display.output.brightness.r" description="Red component of the brightness calibration. This value is divided by 512 to determine gain.">
+            <constraint display="Value must be an integer from 0 to 1023"> testInteger("${module.driver.display.output.brightness.r}")  &amp;&amp; ("${module.driver.display.output.brightness.r}" &gt;= 0) &amp;&amp; ("${module.driver.display.output.brightness.r}" &lt;= 1023)
+            </constraint>
+        </property>
+        <property default="512" display="Color Correction|Brightness|Green channel" id="module.driver.display.output.brightness.g" description="Green component of the brightness calibration. This value is divided by 512 to determine gain.">
+            <constraint display="Value must be an integer from 0 to 1023"> testInteger("${module.driver.display.output.brightness.g}")  &amp;&amp; ("${module.driver.display.output.brightness.g}" &gt;= 0) &amp;&amp; ("${module.driver.display.output.brightness.g}" &lt;= 1023)
+            </constraint>
+        </property>
+        <property default="512" display="Color Correction|Brightness|Blue channel" id="module.driver.display.output.brightness.b" description="Blue component of the brightness calibration. This value is divided by 512 to determine gain.">
+            <constraint display="Value must be an integer from 0 to 1023"> testInteger("${module.driver.display.output.brightness.b}")  &amp;&amp; ("${module.driver.display.output.brightness.b}" &gt;= 0) &amp;&amp; ("${module.driver.display.output.brightness.b}" &lt;= 1023)
+            </constraint>
+        </property>
+        <property default="module.driver.display.output.contrast.false" display="Color Correction|Contrast|Enabled" id="module.driver.display.output.contrast.enable" description="Enable contrast color correction.">
+            <option display="Yes" id="module.driver.display.output.contrast.true" value="true"/>
+            <option display="No" id="module.driver.display.output.contrast.false" value="false"/>
+        </property>
+        <property default="128" display="Color Correction|Contrast|Red channel gain" id="module.driver.display.output.contrast.r" description="Red component of the contrast calibration. This value is divided by 128 to determine gain.">
+            <constraint display="Value must be an integer from 0 to 255"> testInteger("${module.driver.display.output.contrast.r}")  &amp;&amp; ("${module.driver.display.output.contrast.r}" &gt;= 0) &amp;&amp; ("${module.driver.display.output.contrast.r}" &lt;= 255)
+            </constraint>
+        </property>
+        <property default="128" display="Color Correction|Contrast|Green channel gain" id="module.driver.display.output.contrast.g" description="Green component of the contrast calibration. This value is divided by 128 to determine gain.">
+            <constraint display="Value must be an integer from 0 to 255"> testInteger("${module.driver.display.output.contrast.g}")  &amp;&amp; ("${module.driver.display.output.contrast.g}" &gt;= 0) &amp;&amp; ("${module.driver.display.output.contrast.g}" &lt;= 255)
+            </constraint>
+        </property>
+        <property default="128" display="Color Correction|Contrast|Blue channel gain" id="module.driver.display.output.contrast.b" description="Blue component of the contrast calibration. This value is divided by 128 to determine gain.">
+            <constraint display="Value must be an integer from 0 to 255"> testInteger("${module.driver.display.output.contrast.b}")  &amp;&amp; ("${module.driver.display.output.contrast.b}" &gt;= 0) &amp;&amp; ("${module.driver.display.output.contrast.b}" &lt;= 255)
+            </constraint>
+        </property>
+        <property default="module.driver.display.output.gamma.r.enable.off" display="Color Correction|Gamma|Red" id="module.driver.display.output.gamma.r.enable" description="Enable gamma color correction for the red channel.">
+            <option display="On" id="module.driver.display.output.gamma.r.enable.on" value="true"/>
+            <option display="Off" id="module.driver.display.output.gamma.r.enable.off" value="false"/>
+        </property>
+        <property default="module.driver.display.output.gamma.g.enable.off" display="Color Correction|Gamma|Green" id="module.driver.display.output.gamma.g.enable" description="Enable gamma color correction for the green channel.">
+            <option display="On" id="module.driver.display.output.gamma.g.enable.on" value="true"/>
+            <option display="Off" id="module.driver.display.output.gamma.g.enable.off" value="false"/>
+        </property>
+        <property default="module.driver.display.output.gamma.b.enable.off" display="Color Correction|Gamma|Blue" id="module.driver.display.output.gamma.b.enable" description="Enable gamma color correction for the blue channel.">
+            <option display="On" id="module.driver.display.output.gamma.b.enable.on" value="true"/>
+            <option display="Off" id="module.driver.display.output.gamma.b.enable.off" value="false"/>
+        </property>
+        <property default="module.driver.display.output.gamma.table_mode.variable" display="Color Correction|Gamma|Table Mode" id="module.driver.display.output.gamma.table_mode" description="Set to Constant to override the automatically-generated RAM gamma tables with a constant declaration using the provided values.">
+            <option display="Constant" id="module.driver.display.output.gamma.table_mode.constant" value="true"/>
+            <option display="Variable" id="module.driver.display.output.gamma.table_mode.variable" value="false"/>
+        </property>
+
+        <!-- Gamma Tables -->
+        <property default="1024" id="module.driver.display.gamma.r.gain.0" display="Color Correction|Gamma|Tables|Red|Gain|0" description="Enter a gain value from 0 to 2047 (corresponding to gain of 0 and 1.999, respectively).">
+            <constraint display="Value must be an integer from 0 to 2047"> testInteger("${module.driver.display.gamma.r.gain.0}")  &amp;&amp; ("${module.driver.display.gamma.r.gain.0}" &gt;= 0) &amp;&amp; ("${module.driver.display.gamma.r.gain.0}" &lt;= 2047) </constraint>
+        </property>
+        <property default="1024" id="module.driver.display.gamma.r.gain.1" display="Color Correction|Gamma|Tables|Red|Gain|1" description="Enter a gain value from 0 to 2047 (corresponding to gain of 0 and 1.999, respectively).">
+            <constraint display="Value must be an integer from 0 to 2047"> testInteger("${module.driver.display.gamma.r.gain.1}")  &amp;&amp; ("${module.driver.display.gamma.r.gain.1}" &gt;= 0) &amp;&amp; ("${module.driver.display.gamma.r.gain.1}" &lt;= 2047) </constraint>
+        </property>
+        <property default="1024" id="module.driver.display.gamma.r.gain.2" display="Color Correction|Gamma|Tables|Red|Gain|2" description="Enter a gain value from 0 to 2047 (corresponding to gain of 0 and 1.999, respectively).">
+            <constraint display="Value must be an integer from 0 to 2047"> testInteger("${module.driver.display.gamma.r.gain.2}")  &amp;&amp; ("${module.driver.display.gamma.r.gain.2}" &gt;= 0) &amp;&amp; ("${module.driver.display.gamma.r.gain.2}" &lt;= 2047) </constraint>
+        </property>
+        <property default="1024" id="module.driver.display.gamma.r.gain.3" display="Color Correction|Gamma|Tables|Red|Gain|3" description="Enter a gain value from 0 to 2047 (corresponding to gain of 0 and 1.999, respectively).">
+            <constraint display="Value must be an integer from 0 to 2047"> testInteger("${module.driver.display.gamma.r.gain.3}")  &amp;&amp; ("${module.driver.display.gamma.r.gain.3}" &gt;= 0) &amp;&amp; ("${module.driver.display.gamma.r.gain.3}" &lt;= 2047) </constraint>
+        </property>
+        <property default="1024" id="module.driver.display.gamma.r.gain.4" display="Color Correction|Gamma|Tables|Red|Gain|4" description="Enter a gain value from 0 to 2047 (corresponding to gain of 0 and 1.999, respectively).">
+            <constraint display="Value must be an integer from 0 to 2047"> testInteger("${module.driver.display.gamma.r.gain.4}")  &amp;&amp; ("${module.driver.display.gamma.r.gain.4}" &gt;= 0) &amp;&amp; ("${module.driver.display.gamma.r.gain.4}" &lt;= 2047) </constraint>
+        </property>
+        <property default="1024" id="module.driver.display.gamma.r.gain.5" display="Color Correction|Gamma|Tables|Red|Gain|5" description="Enter a gain value from 0 to 2047 (corresponding to gain of 0 and 1.999, respectively).">
+            <constraint display="Value must be an integer from 0 to 2047"> testInteger("${module.driver.display.gamma.r.gain.5}")  &amp;&amp; ("${module.driver.display.gamma.r.gain.5}" &gt;= 0) &amp;&amp; ("${module.driver.display.gamma.r.gain.5}" &lt;= 2047) </constraint>
+        </property>
+        <property default="1024" id="module.driver.display.gamma.r.gain.6" display="Color Correction|Gamma|Tables|Red|Gain|6" description="Enter a gain value from 0 to 2047 (corresponding to gain of 0 and 1.999, respectively).">
+            <constraint display="Value must be an integer from 0 to 2047"> testInteger("${module.driver.display.gamma.r.gain.6}")  &amp;&amp; ("${module.driver.display.gamma.r.gain.6}" &gt;= 0) &amp;&amp; ("${module.driver.display.gamma.r.gain.6}" &lt;= 2047) </constraint>
+        </property>
+        <property default="1024" id="module.driver.display.gamma.r.gain.7" display="Color Correction|Gamma|Tables|Red|Gain|7" description="Enter a gain value from 0 to 2047 (corresponding to gain of 0 and 1.999, respectively).">
+            <constraint display="Value must be an integer from 0 to 2047"> testInteger("${module.driver.display.gamma.r.gain.7}")  &amp;&amp; ("${module.driver.display.gamma.r.gain.7}" &gt;= 0) &amp;&amp; ("${module.driver.display.gamma.r.gain.7}" &lt;= 2047) </constraint>
+        </property>
+        <property default="1024" id="module.driver.display.gamma.r.gain.8" display="Color Correction|Gamma|Tables|Red|Gain|8" description="Enter a gain value from 0 to 2047 (corresponding to gain of 0 and 1.999, respectively).">
+            <constraint display="Value must be an integer from 0 to 2047"> testInteger("${module.driver.display.gamma.r.gain.8}")  &amp;&amp; ("${module.driver.display.gamma.r.gain.8}" &gt;= 0) &amp;&amp; ("${module.driver.display.gamma.r.gain.8}" &lt;= 2047) </constraint>
+        </property>
+        <property default="1024" id="module.driver.display.gamma.r.gain.9" display="Color Correction|Gamma|Tables|Red|Gain|9" description="Enter a gain value from 0 to 2047 (corresponding to gain of 0 and 1.999, respectively).">
+            <constraint display="Value must be an integer from 0 to 2047"> testInteger("${module.driver.display.gamma.r.gain.9}")  &amp;&amp; ("${module.driver.display.gamma.r.gain.9}" &gt;= 0) &amp;&amp; ("${module.driver.display.gamma.r.gain.9}" &lt;= 2047) </constraint>
+        </property>
+        <property default="1024" id="module.driver.display.gamma.r.gain.10" display="Color Correction|Gamma|Tables|Red|Gain|10" description="Enter a gain value from 0 to 2047 (corresponding to gain of 0 and 1.999, respectively).">
+            <constraint display="Value must be an integer from 0 to 2047"> testInteger("${module.driver.display.gamma.r.gain.10}")  &amp;&amp; ("${module.driver.display.gamma.r.gain.10}" &gt;= 0) &amp;&amp; ("${module.driver.display.gamma.r.gain.10}" &lt;= 2047) </constraint>
+        </property>
+        <property default="1024" id="module.driver.display.gamma.r.gain.11" display="Color Correction|Gamma|Tables|Red|Gain|11" description="Enter a gain value from 0 to 2047 (corresponding to gain of 0 and 1.999, respectively).">
+            <constraint display="Value must be an integer from 0 to 2047"> testInteger("${module.driver.display.gamma.r.gain.11}")  &amp;&amp; ("${module.driver.display.gamma.r.gain.11}" &gt;= 0) &amp;&amp; ("${module.driver.display.gamma.r.gain.11}" &lt;= 2047) </constraint>
+        </property>
+        <property default="1024" id="module.driver.display.gamma.r.gain.12" display="Color Correction|Gamma|Tables|Red|Gain|12" description="Enter a gain value from 0 to 2047 (corresponding to gain of 0 and 1.999, respectively).">
+            <constraint display="Value must be an integer from 0 to 2047"> testInteger("${module.driver.display.gamma.r.gain.12}")  &amp;&amp; ("${module.driver.display.gamma.r.gain.12}" &gt;= 0) &amp;&amp; ("${module.driver.display.gamma.r.gain.12}" &lt;= 2047) </constraint>
+        </property>
+        <property default="1024" id="module.driver.display.gamma.r.gain.13" display="Color Correction|Gamma|Tables|Red|Gain|13" description="Enter a gain value from 0 to 2047 (corresponding to gain of 0 and 1.999, respectively).">
+            <constraint display="Value must be an integer from 0 to 2047"> testInteger("${module.driver.display.gamma.r.gain.13}")  &amp;&amp; ("${module.driver.display.gamma.r.gain.13}" &gt;= 0) &amp;&amp; ("${module.driver.display.gamma.r.gain.13}" &lt;= 2047) </constraint>
+        </property>
+        <property default="1024" id="module.driver.display.gamma.r.gain.14" display="Color Correction|Gamma|Tables|Red|Gain|14" description="Enter a gain value from 0 to 2047 (corresponding to gain of 0 and 1.999, respectively).">
+            <constraint display="Value must be an integer from 0 to 2047"> testInteger("${module.driver.display.gamma.r.gain.14}")  &amp;&amp; ("${module.driver.display.gamma.r.gain.14}" &gt;= 0) &amp;&amp; ("${module.driver.display.gamma.r.gain.14}" &lt;= 2047) </constraint>
+        </property>
+        <property default="1024" id="module.driver.display.gamma.r.gain.15" display="Color Correction|Gamma|Tables|Red|Gain|15" description="Enter a gain value from 0 to 2047 (corresponding to gain of 0 and 1.999, respectively).">
+            <constraint display="Value must be an integer from 0 to 2047"> testInteger("${module.driver.display.gamma.r.gain.15}")  &amp;&amp; ("${module.driver.display.gamma.r.gain.15}" &gt;= 0) &amp;&amp; ("${module.driver.display.gamma.r.gain.15}" &lt;= 2047) </constraint>
+        </property>
+        <property default="64" id="module.driver.display.gamma.r.threshold.1" display="Color Correction|Gamma|Tables|Red|Threshold|1" description="Enter a threshold value between the surrounding values less than or equal to 1023.">
+            <constraint display="Value must be an integer from 0 to 1023"> testInteger("${module.driver.display.gamma.r.threshold.1}")  &amp;&amp; ("${module.driver.display.gamma.r.threshold.1}" &gt;= 0) &amp;&amp; ("${module.driver.display.gamma.r.threshold.1}" &lt;= 1023) </constraint>
+        </property>
+        <property default="128" id="module.driver.display.gamma.r.threshold.2" display="Color Correction|Gamma|Tables|Red|Threshold|2" description="Enter a threshold value between the surrounding values less than or equal to 1023.">
+            <constraint display="Value must be an integer from 0 to 1023"> testInteger("${module.driver.display.gamma.r.threshold.2}")  &amp;&amp; ("${module.driver.display.gamma.r.threshold.2}" &gt;= 0) &amp;&amp; ("${module.driver.display.gamma.r.threshold.2}" &lt;= 1023) </constraint>
+        </property>
+        <property default="192" id="module.driver.display.gamma.r.threshold.3" display="Color Correction|Gamma|Tables|Red|Threshold|3" description="Enter a threshold value between the surrounding values less than or equal to 1023.">
+            <constraint display="Value must be an integer from 0 to 1023"> testInteger("${module.driver.display.gamma.r.threshold.3}")  &amp;&amp; ("${module.driver.display.gamma.r.threshold.3}" &gt;= 0) &amp;&amp; ("${module.driver.display.gamma.r.threshold.3}" &lt;= 1023) </constraint>
+        </property>
+        <property default="256" id="module.driver.display.gamma.r.threshold.4" display="Color Correction|Gamma|Tables|Red|Threshold|4" description="Enter a threshold value between the surrounding values less than or equal to 1023.">
+            <constraint display="Value must be an integer from 0 to 1023"> testInteger("${module.driver.display.gamma.r.threshold.4}")  &amp;&amp; ("${module.driver.display.gamma.r.threshold.4}" &gt;= 0) &amp;&amp; ("${module.driver.display.gamma.r.threshold.4}" &lt;= 1023) </constraint>
+        </property>
+        <property default="320" id="module.driver.display.gamma.r.threshold.5" display="Color Correction|Gamma|Tables|Red|Threshold|5" description="Enter a threshold value between the surrounding values less than or equal to 1023.">
+            <constraint display="Value must be an integer from 0 to 1023"> testInteger("${module.driver.display.gamma.r.threshold.5}")  &amp;&amp; ("${module.driver.display.gamma.r.threshold.5}" &gt;= 0) &amp;&amp; ("${module.driver.display.gamma.r.threshold.5}" &lt;= 1023) </constraint>
+        </property>
+        <property default="384" id="module.driver.display.gamma.r.threshold.6" display="Color Correction|Gamma|Tables|Red|Threshold|6" description="Enter a threshold value between the surrounding values less than or equal to 1023.">
+            <constraint display="Value must be an integer from 0 to 1023"> testInteger("${module.driver.display.gamma.r.threshold.6}")  &amp;&amp; ("${module.driver.display.gamma.r.threshold.6}" &gt;= 0) &amp;&amp; ("${module.driver.display.gamma.r.threshold.6}" &lt;= 1023) </constraint>
+        </property>
+        <property default="448" id="module.driver.display.gamma.r.threshold.7" display="Color Correction|Gamma|Tables|Red|Threshold|7" description="Enter a threshold value between the surrounding values less than or equal to 1023.">
+            <constraint display="Value must be an integer from 0 to 1023"> testInteger("${module.driver.display.gamma.r.threshold.7}")  &amp;&amp; ("${module.driver.display.gamma.r.threshold.7}" &gt;= 0) &amp;&amp; ("${module.driver.display.gamma.r.threshold.7}" &lt;= 1023) </constraint>
+        </property>
+        <property default="512" id="module.driver.display.gamma.r.threshold.8" display="Color Correction|Gamma|Tables|Red|Threshold|8" description="Enter a threshold value between the surrounding values less than or equal to 1023.">
+            <constraint display="Value must be an integer from 0 to 1023"> testInteger("${module.driver.display.gamma.r.threshold.8}")  &amp;&amp; ("${module.driver.display.gamma.r.threshold.8}" &gt;= 0) &amp;&amp; ("${module.driver.display.gamma.r.threshold.8}" &lt;= 1023) </constraint>
+        </property>
+        <property default="576" id="module.driver.display.gamma.r.threshold.9" display="Color Correction|Gamma|Tables|Red|Threshold|9" description="Enter a threshold value between the surrounding values less than or equal to 1023.">
+            <constraint display="Value must be an integer from 0 to 1023"> testInteger("${module.driver.display.gamma.r.threshold.9}")  &amp;&amp; ("${module.driver.display.gamma.r.threshold.9}" &gt;= 0) &amp;&amp; ("${module.driver.display.gamma.r.threshold.9}" &lt;= 1023) </constraint>
+        </property>
+        <property default="640" id="module.driver.display.gamma.r.threshold.10" display="Color Correction|Gamma|Tables|Red|Threshold|10" description="Enter a threshold value between the surrounding values less than or equal to 1023.">
+            <constraint display="Value must be an integer from 0 to 1023"> testInteger("${module.driver.display.gamma.r.threshold.10}")  &amp;&amp; ("${module.driver.display.gamma.r.threshold.10}" &gt;= 0) &amp;&amp; ("${module.driver.display.gamma.r.threshold.10}" &lt;= 1023) </constraint>
+        </property>
+        <property default="704" id="module.driver.display.gamma.r.threshold.11" display="Color Correction|Gamma|Tables|Red|Threshold|11" description="Enter a threshold value between the surrounding values less than or equal to 1023.">
+            <constraint display="Value must be an integer from 0 to 1023"> testInteger("${module.driver.display.gamma.r.threshold.11}")  &amp;&amp; ("${module.driver.display.gamma.r.threshold.11}" &gt;= 0) &amp;&amp; ("${module.driver.display.gamma.r.threshold.11}" &lt;= 1023) </constraint>
+        </property>
+        <property default="768" id="module.driver.display.gamma.r.threshold.12" display="Color Correction|Gamma|Tables|Red|Threshold|12" description="Enter a threshold value between the surrounding values less than or equal to 1023.">
+            <constraint display="Value must be an integer from 0 to 1023"> testInteger("${module.driver.display.gamma.r.threshold.12}")  &amp;&amp; ("${module.driver.display.gamma.r.threshold.12}" &gt;= 0) &amp;&amp; ("${module.driver.display.gamma.r.threshold.12}" &lt;= 1023) </constraint>
+        </property>
+        <property default="832" id="module.driver.display.gamma.r.threshold.13" display="Color Correction|Gamma|Tables|Red|Threshold|13" description="Enter a threshold value between the surrounding values less than or equal to 1023.">
+            <constraint display="Value must be an integer from 0 to 1023"> testInteger("${module.driver.display.gamma.r.threshold.13}")  &amp;&amp; ("${module.driver.display.gamma.r.threshold.13}" &gt;= 0) &amp;&amp; ("${module.driver.display.gamma.r.threshold.13}" &lt;= 1023) </constraint>
+        </property>
+        <property default="896" id="module.driver.display.gamma.r.threshold.14" display="Color Correction|Gamma|Tables|Red|Threshold|14" description="Enter a threshold value between the surrounding values less than or equal to 1023.">
+            <constraint display="Value must be an integer from 0 to 1023"> testInteger("${module.driver.display.gamma.r.threshold.14}")  &amp;&amp; ("${module.driver.display.gamma.r.threshold.14}" &gt;= 0) &amp;&amp; ("${module.driver.display.gamma.r.threshold.14}" &lt;= 1023) </constraint>
+        </property>
+        <property default="960" id="module.driver.display.gamma.r.threshold.15" display="Color Correction|Gamma|Tables|Red|Threshold|15" description="Enter a threshold value between the surrounding values less than or equal to 1023.">
+            <constraint display="Value must be an integer from 0 to 1023"> testInteger("${module.driver.display.gamma.r.threshold.15}")  &amp;&amp; ("${module.driver.display.gamma.r.threshold.15}" &gt;= 0) &amp;&amp; ("${module.driver.display.gamma.r.threshold.15}" &lt;= 1023) </constraint>
+        </property>
+        <property default="1024" id="module.driver.display.gamma.g.gain.0" display="Color Correction|Gamma|Tables|Green|Gain|0" description="Enter a gain value from 0 to 2047 (corresponding to gain of 0 and 1.999, respectively).">
+            <constraint display="Value must be an integer from 0 to 2047"> testInteger("${module.driver.display.gamma.g.gain.0}")  &amp;&amp; ("${module.driver.display.gamma.g.gain.0}" &gt;= 0) &amp;&amp; ("${module.driver.display.gamma.g.gain.0}" &lt;= 2047) </constraint>
+        </property>
+        <property default="1024" id="module.driver.display.gamma.g.gain.1" display="Color Correction|Gamma|Tables|Green|Gain|1" description="Enter a gain value from 0 to 2047 (corresponding to gain of 0 and 1.999, respectively).">
+            <constraint display="Value must be an integer from 0 to 2047"> testInteger("${module.driver.display.gamma.g.gain.1}")  &amp;&amp; ("${module.driver.display.gamma.g.gain.1}" &gt;= 0) &amp;&amp; ("${module.driver.display.gamma.g.gain.1}" &lt;= 2047) </constraint>
+        </property>
+        <property default="1024" id="module.driver.display.gamma.g.gain.2" display="Color Correction|Gamma|Tables|Green|Gain|2" description="Enter a gain value from 0 to 2047 (corresponding to gain of 0 and 1.999, respectively).">
+            <constraint display="Value must be an integer from 0 to 2047"> testInteger("${module.driver.display.gamma.g.gain.2}")  &amp;&amp; ("${module.driver.display.gamma.g.gain.2}" &gt;= 0) &amp;&amp; ("${module.driver.display.gamma.g.gain.2}" &lt;= 2047) </constraint>
+        </property>
+        <property default="1024" id="module.driver.display.gamma.g.gain.3" display="Color Correction|Gamma|Tables|Green|Gain|3" description="Enter a gain value from 0 to 2047 (corresponding to gain of 0 and 1.999, respectively).">
+            <constraint display="Value must be an integer from 0 to 2047"> testInteger("${module.driver.display.gamma.g.gain.3}")  &amp;&amp; ("${module.driver.display.gamma.g.gain.3}" &gt;= 0) &amp;&amp; ("${module.driver.display.gamma.g.gain.3}" &lt;= 2047) </constraint>
+        </property>
+        <property default="1024" id="module.driver.display.gamma.g.gain.4" display="Color Correction|Gamma|Tables|Green|Gain|4" description="Enter a gain value from 0 to 2047 (corresponding to gain of 0 and 1.999, respectively).">
+            <constraint display="Value must be an integer from 0 to 2047"> testInteger("${module.driver.display.gamma.g.gain.4}")  &amp;&amp; ("${module.driver.display.gamma.g.gain.4}" &gt;= 0) &amp;&amp; ("${module.driver.display.gamma.g.gain.4}" &lt;= 2047) </constraint>
+        </property>
+        <property default="1024" id="module.driver.display.gamma.g.gain.5" display="Color Correction|Gamma|Tables|Green|Gain|5" description="Enter a gain value from 0 to 2047 (corresponding to gain of 0 and 1.999, respectively).">
+            <constraint display="Value must be an integer from 0 to 2047"> testInteger("${module.driver.display.gamma.g.gain.5}")  &amp;&amp; ("${module.driver.display.gamma.g.gain.5}" &gt;= 0) &amp;&amp; ("${module.driver.display.gamma.g.gain.5}" &lt;= 2047) </constraint>
+        </property>
+        <property default="1024" id="module.driver.display.gamma.g.gain.6" display="Color Correction|Gamma|Tables|Green|Gain|6" description="Enter a gain value from 0 to 2047 (corresponding to gain of 0 and 1.999, respectively).">
+            <constraint display="Value must be an integer from 0 to 2047"> testInteger("${module.driver.display.gamma.g.gain.6}")  &amp;&amp; ("${module.driver.display.gamma.g.gain.6}" &gt;= 0) &amp;&amp; ("${module.driver.display.gamma.g.gain.6}" &lt;= 2047) </constraint>
+        </property>
+        <property default="1024" id="module.driver.display.gamma.g.gain.7" display="Color Correction|Gamma|Tables|Green|Gain|7" description="Enter a gain value from 0 to 2047 (corresponding to gain of 0 and 1.999, respectively).">
+            <constraint display="Value must be an integer from 0 to 2047"> testInteger("${module.driver.display.gamma.g.gain.7}")  &amp;&amp; ("${module.driver.display.gamma.g.gain.7}" &gt;= 0) &amp;&amp; ("${module.driver.display.gamma.g.gain.7}" &lt;= 2047) </constraint>
+        </property>
+        <property default="1024" id="module.driver.display.gamma.g.gain.8" display="Color Correction|Gamma|Tables|Green|Gain|8" description="Enter a gain value from 0 to 2047 (corresponding to gain of 0 and 1.999, respectively).">
+            <constraint display="Value must be an integer from 0 to 2047"> testInteger("${module.driver.display.gamma.g.gain.8}")  &amp;&amp; ("${module.driver.display.gamma.g.gain.8}" &gt;= 0) &amp;&amp; ("${module.driver.display.gamma.g.gain.8}" &lt;= 2047) </constraint>
+        </property>
+        <property default="1024" id="module.driver.display.gamma.g.gain.9" display="Color Correction|Gamma|Tables|Green|Gain|9" description="Enter a gain value from 0 to 2047 (corresponding to gain of 0 and 1.999, respectively).">
+            <constraint display="Value must be an integer from 0 to 2047"> testInteger("${module.driver.display.gamma.g.gain.9}")  &amp;&amp; ("${module.driver.display.gamma.g.gain.9}" &gt;= 0) &amp;&amp; ("${module.driver.display.gamma.g.gain.9}" &lt;= 2047) </constraint>
+        </property>
+        <property default="1024" id="module.driver.display.gamma.g.gain.10" display="Color Correction|Gamma|Tables|Green|Gain|10" description="Enter a gain value from 0 to 2047 (corresponding to gain of 0 and 1.999, respectively).">
+            <constraint display="Value must be an integer from 0 to 2047"> testInteger("${module.driver.display.gamma.g.gain.10}")  &amp;&amp; ("${module.driver.display.gamma.g.gain.10}" &gt;= 0) &amp;&amp; ("${module.driver.display.gamma.g.gain.10}" &lt;= 2047) </constraint>
+        </property>
+        <property default="1024" id="module.driver.display.gamma.g.gain.11" display="Color Correction|Gamma|Tables|Green|Gain|11" description="Enter a gain value from 0 to 2047 (corresponding to gain of 0 and 1.999, respectively).">
+            <constraint display="Value must be an integer from 0 to 2047"> testInteger("${module.driver.display.gamma.g.gain.11}")  &amp;&amp; ("${module.driver.display.gamma.g.gain.11}" &gt;= 0) &amp;&amp; ("${module.driver.display.gamma.g.gain.11}" &lt;= 2047) </constraint>
+        </property>
+        <property default="1024" id="module.driver.display.gamma.g.gain.12" display="Color Correction|Gamma|Tables|Green|Gain|12" description="Enter a gain value from 0 to 2047 (corresponding to gain of 0 and 1.999, respectively).">
+            <constraint display="Value must be an integer from 0 to 2047"> testInteger("${module.driver.display.gamma.g.gain.12}")  &amp;&amp; ("${module.driver.display.gamma.g.gain.12}" &gt;= 0) &amp;&amp; ("${module.driver.display.gamma.g.gain.12}" &lt;= 2047) </constraint>
+        </property>
+        <property default="1024" id="module.driver.display.gamma.g.gain.13" display="Color Correction|Gamma|Tables|Green|Gain|13" description="Enter a gain value from 0 to 2047 (corresponding to gain of 0 and 1.999, respectively).">
+            <constraint display="Value must be an integer from 0 to 2047"> testInteger("${module.driver.display.gamma.g.gain.13}")  &amp;&amp; ("${module.driver.display.gamma.g.gain.13}" &gt;= 0) &amp;&amp; ("${module.driver.display.gamma.g.gain.13}" &lt;= 2047) </constraint>
+        </property>
+        <property default="1024" id="module.driver.display.gamma.g.gain.14" display="Color Correction|Gamma|Tables|Green|Gain|14" description="Enter a gain value from 0 to 2047 (corresponding to gain of 0 and 1.999, respectively).">
+            <constraint display="Value must be an integer from 0 to 2047"> testInteger("${module.driver.display.gamma.g.gain.14}")  &amp;&amp; ("${module.driver.display.gamma.g.gain.14}" &gt;= 0) &amp;&amp; ("${module.driver.display.gamma.g.gain.14}" &lt;= 2047) </constraint>
+        </property>
+        <property default="1024" id="module.driver.display.gamma.g.gain.15" display="Color Correction|Gamma|Tables|Green|Gain|15" description="Enter a gain value from 0 to 2047 (corresponding to gain of 0 and 1.999, respectively).">
+            <constraint display="Value must be an integer from 0 to 2047"> testInteger("${module.driver.display.gamma.g.gain.15}")  &amp;&amp; ("${module.driver.display.gamma.g.gain.15}" &gt;= 0) &amp;&amp; ("${module.driver.display.gamma.g.gain.15}" &lt;= 2047) </constraint>
+        </property>
+        <property default="64" id="module.driver.display.gamma.g.threshold.1" display="Color Correction|Gamma|Tables|Green|Threshold|1" description="Enter a threshold value between the surrounding values less than or equal to 1023.">
+            <constraint display="Value must be an integer from 0 to 1023"> testInteger("${module.driver.display.gamma.g.threshold.1}")  &amp;&amp; ("${module.driver.display.gamma.g.threshold.1}" &gt;= 0) &amp;&amp; ("${module.driver.display.gamma.g.threshold.1}" &lt;= 1023) </constraint>
+        </property>
+        <property default="128" id="module.driver.display.gamma.g.threshold.2" display="Color Correction|Gamma|Tables|Green|Threshold|2" description="Enter a threshold value between the surrounding values less than or equal to 1023.">
+            <constraint display="Value must be an integer from 0 to 1023"> testInteger("${module.driver.display.gamma.g.threshold.2}")  &amp;&amp; ("${module.driver.display.gamma.g.threshold.2}" &gt;= 0) &amp;&amp; ("${module.driver.display.gamma.g.threshold.2}" &lt;= 1023) </constraint>
+        </property>
+        <property default="192" id="module.driver.display.gamma.g.threshold.3" display="Color Correction|Gamma|Tables|Green|Threshold|3" description="Enter a threshold value between the surrounding values less than or equal to 1023.">
+            <constraint display="Value must be an integer from 0 to 1023"> testInteger("${module.driver.display.gamma.g.threshold.3}")  &amp;&amp; ("${module.driver.display.gamma.g.threshold.3}" &gt;= 0) &amp;&amp; ("${module.driver.display.gamma.g.threshold.3}" &lt;= 1023) </constraint>
+        </property>
+        <property default="256" id="module.driver.display.gamma.g.threshold.4" display="Color Correction|Gamma|Tables|Green|Threshold|4" description="Enter a threshold value between the surrounding values less than or equal to 1023.">
+            <constraint display="Value must be an integer from 0 to 1023"> testInteger("${module.driver.display.gamma.g.threshold.4}")  &amp;&amp; ("${module.driver.display.gamma.g.threshold.4}" &gt;= 0) &amp;&amp; ("${module.driver.display.gamma.g.threshold.4}" &lt;= 1023) </constraint>
+        </property>
+        <property default="320" id="module.driver.display.gamma.g.threshold.5" display="Color Correction|Gamma|Tables|Green|Threshold|5" description="Enter a threshold value between the surrounding values less than or equal to 1023.">
+            <constraint display="Value must be an integer from 0 to 1023"> testInteger("${module.driver.display.gamma.g.threshold.5}")  &amp;&amp; ("${module.driver.display.gamma.g.threshold.5}" &gt;= 0) &amp;&amp; ("${module.driver.display.gamma.g.threshold.5}" &lt;= 1023) </constraint>
+        </property>
+        <property default="384" id="module.driver.display.gamma.g.threshold.6" display="Color Correction|Gamma|Tables|Green|Threshold|6" description="Enter a threshold value between the surrounding values less than or equal to 1023.">
+            <constraint display="Value must be an integer from 0 to 1023"> testInteger("${module.driver.display.gamma.g.threshold.6}")  &amp;&amp; ("${module.driver.display.gamma.g.threshold.6}" &gt;= 0) &amp;&amp; ("${module.driver.display.gamma.g.threshold.6}" &lt;= 1023) </constraint>
+        </property>
+        <property default="448" id="module.driver.display.gamma.g.threshold.7" display="Color Correction|Gamma|Tables|Green|Threshold|7" description="Enter a threshold value between the surrounding values less than or equal to 1023.">
+            <constraint display="Value must be an integer from 0 to 1023"> testInteger("${module.driver.display.gamma.g.threshold.7}")  &amp;&amp; ("${module.driver.display.gamma.g.threshold.7}" &gt;= 0) &amp;&amp; ("${module.driver.display.gamma.g.threshold.7}" &lt;= 1023) </constraint>
+        </property>
+        <property default="512" id="module.driver.display.gamma.g.threshold.8" display="Color Correction|Gamma|Tables|Green|Threshold|8" description="Enter a threshold value between the surrounding values less than or equal to 1023.">
+            <constraint display="Value must be an integer from 0 to 1023"> testInteger("${module.driver.display.gamma.g.threshold.8}")  &amp;&amp; ("${module.driver.display.gamma.g.threshold.8}" &gt;= 0) &amp;&amp; ("${module.driver.display.gamma.g.threshold.8}" &lt;= 1023) </constraint>
+        </property>
+        <property default="576" id="module.driver.display.gamma.g.threshold.9" display="Color Correction|Gamma|Tables|Green|Threshold|9" description="Enter a threshold value between the surrounding values less than or equal to 1023.">
+            <constraint display="Value must be an integer from 0 to 1023"> testInteger("${module.driver.display.gamma.g.threshold.9}")  &amp;&amp; ("${module.driver.display.gamma.g.threshold.9}" &gt;= 0) &amp;&amp; ("${module.driver.display.gamma.g.threshold.9}" &lt;= 1023) </constraint>
+        </property>
+        <property default="640" id="module.driver.display.gamma.g.threshold.10" display="Color Correction|Gamma|Tables|Green|Threshold|10" description="Enter a threshold value between the surrounding values less than or equal to 1023.">
+            <constraint display="Value must be an integer from 0 to 1023"> testInteger("${module.driver.display.gamma.g.threshold.10}")  &amp;&amp; ("${module.driver.display.gamma.g.threshold.10}" &gt;= 0) &amp;&amp; ("${module.driver.display.gamma.g.threshold.10}" &lt;= 1023) </constraint>
+        </property>
+        <property default="704" id="module.driver.display.gamma.g.threshold.11" display="Color Correction|Gamma|Tables|Green|Threshold|11" description="Enter a threshold value between the surrounding values less than or equal to 1023.">
+            <constraint display="Value must be an integer from 0 to 1023"> testInteger("${module.driver.display.gamma.g.threshold.11}")  &amp;&amp; ("${module.driver.display.gamma.g.threshold.11}" &gt;= 0) &amp;&amp; ("${module.driver.display.gamma.g.threshold.11}" &lt;= 1023) </constraint>
+        </property>
+        <property default="768" id="module.driver.display.gamma.g.threshold.12" display="Color Correction|Gamma|Tables|Green|Threshold|12" description="Enter a threshold value between the surrounding values less than or equal to 1023.">
+            <constraint display="Value must be an integer from 0 to 1023"> testInteger("${module.driver.display.gamma.g.threshold.12}")  &amp;&amp; ("${module.driver.display.gamma.g.threshold.12}" &gt;= 0) &amp;&amp; ("${module.driver.display.gamma.g.threshold.12}" &lt;= 1023) </constraint>
+        </property>
+        <property default="832" id="module.driver.display.gamma.g.threshold.13" display="Color Correction|Gamma|Tables|Green|Threshold|13" description="Enter a threshold value between the surrounding values less than or equal to 1023.">
+            <constraint display="Value must be an integer from 0 to 1023"> testInteger("${module.driver.display.gamma.g.threshold.13}")  &amp;&amp; ("${module.driver.display.gamma.g.threshold.13}" &gt;= 0) &amp;&amp; ("${module.driver.display.gamma.g.threshold.13}" &lt;= 1023) </constraint>
+        </property>
+        <property default="896" id="module.driver.display.gamma.g.threshold.14" display="Color Correction|Gamma|Tables|Green|Threshold|14" description="Enter a threshold value between the surrounding values less than or equal to 1023.">
+            <constraint display="Value must be an integer from 0 to 1023"> testInteger("${module.driver.display.gamma.g.threshold.14}")  &amp;&amp; ("${module.driver.display.gamma.g.threshold.14}" &gt;= 0) &amp;&amp; ("${module.driver.display.gamma.g.threshold.14}" &lt;= 1023) </constraint>
+        </property>
+        <property default="960" id="module.driver.display.gamma.g.threshold.15" display="Color Correction|Gamma|Tables|Green|Threshold|15" description="Enter a threshold value between the surrounding values less than or equal to 1023.">
+            <constraint display="Value must be an integer from 0 to 1023"> testInteger("${module.driver.display.gamma.g.threshold.15}")  &amp;&amp; ("${module.driver.display.gamma.g.threshold.15}" &gt;= 0) &amp;&amp; ("${module.driver.display.gamma.g.threshold.15}" &lt;= 1023) </constraint>
+        </property>
+        <property default="1024" id="module.driver.display.gamma.b.gain.0" display="Color Correction|Gamma|Tables|Blue|Gain|0" description="Enter a gain value from 0 to 2047 (corresponding to gain of 0 and 1.999, respectively).">
+            <constraint display="Value must be an integer from 0 to 2047"> testInteger("${module.driver.display.gamma.b.gain.0}")  &amp;&amp; ("${module.driver.display.gamma.b.gain.0}" &gt;= 0) &amp;&amp; ("${module.driver.display.gamma.b.gain.0}" &lt;= 2047) </constraint>
+        </property>
+        <property default="1024" id="module.driver.display.gamma.b.gain.1" display="Color Correction|Gamma|Tables|Blue|Gain|1" description="Enter a gain value from 0 to 2047 (corresponding to gain of 0 and 1.999, respectively).">
+            <constraint display="Value must be an integer from 0 to 2047"> testInteger("${module.driver.display.gamma.b.gain.1}")  &amp;&amp; ("${module.driver.display.gamma.b.gain.1}" &gt;= 0) &amp;&amp; ("${module.driver.display.gamma.b.gain.1}" &lt;= 2047) </constraint>
+        </property>
+        <property default="1024" id="module.driver.display.gamma.b.gain.2" display="Color Correction|Gamma|Tables|Blue|Gain|2" description="Enter a gain value from 0 to 2047 (corresponding to gain of 0 and 1.999, respectively).">
+            <constraint display="Value must be an integer from 0 to 2047"> testInteger("${module.driver.display.gamma.b.gain.2}")  &amp;&amp; ("${module.driver.display.gamma.b.gain.2}" &gt;= 0) &amp;&amp; ("${module.driver.display.gamma.b.gain.2}" &lt;= 2047) </constraint>
+        </property>
+        <property default="1024" id="module.driver.display.gamma.b.gain.3" display="Color Correction|Gamma|Tables|Blue|Gain|3" description="Enter a gain value from 0 to 2047 (corresponding to gain of 0 and 1.999, respectively).">
+            <constraint display="Value must be an integer from 0 to 2047"> testInteger("${module.driver.display.gamma.b.gain.3}")  &amp;&amp; ("${module.driver.display.gamma.b.gain.3}" &gt;= 0) &amp;&amp; ("${module.driver.display.gamma.b.gain.3}" &lt;= 2047) </constraint>
+        </property>
+        <property default="1024" id="module.driver.display.gamma.b.gain.4" display="Color Correction|Gamma|Tables|Blue|Gain|4" description="Enter a gain value from 0 to 2047 (corresponding to gain of 0 and 1.999, respectively).">
+            <constraint display="Value must be an integer from 0 to 2047"> testInteger("${module.driver.display.gamma.b.gain.4}")  &amp;&amp; ("${module.driver.display.gamma.b.gain.4}" &gt;= 0) &amp;&amp; ("${module.driver.display.gamma.b.gain.4}" &lt;= 2047) </constraint>
+        </property>
+        <property default="1024" id="module.driver.display.gamma.b.gain.5" display="Color Correction|Gamma|Tables|Blue|Gain|5" description="Enter a gain value from 0 to 2047 (corresponding to gain of 0 and 1.999, respectively).">
+            <constraint display="Value must be an integer from 0 to 2047"> testInteger("${module.driver.display.gamma.b.gain.5}")  &amp;&amp; ("${module.driver.display.gamma.b.gain.5}" &gt;= 0) &amp;&amp; ("${module.driver.display.gamma.b.gain.5}" &lt;= 2047) </constraint>
+        </property>
+        <property default="1024" id="module.driver.display.gamma.b.gain.6" display="Color Correction|Gamma|Tables|Blue|Gain|6" description="Enter a gain value from 0 to 2047 (corresponding to gain of 0 and 1.999, respectively).">
+            <constraint display="Value must be an integer from 0 to 2047"> testInteger("${module.driver.display.gamma.b.gain.6}")  &amp;&amp; ("${module.driver.display.gamma.b.gain.6}" &gt;= 0) &amp;&amp; ("${module.driver.display.gamma.b.gain.6}" &lt;= 2047) </constraint>
+        </property>
+        <property default="1024" id="module.driver.display.gamma.b.gain.7" display="Color Correction|Gamma|Tables|Blue|Gain|7" description="Enter a gain value from 0 to 2047 (corresponding to gain of 0 and 1.999, respectively).">
+            <constraint display="Value must be an integer from 0 to 2047"> testInteger("${module.driver.display.gamma.b.gain.7}")  &amp;&amp; ("${module.driver.display.gamma.b.gain.7}" &gt;= 0) &amp;&amp; ("${module.driver.display.gamma.b.gain.7}" &lt;= 2047) </constraint>
+        </property>
+        <property default="1024" id="module.driver.display.gamma.b.gain.8" display="Color Correction|Gamma|Tables|Blue|Gain|8" description="Enter a gain value from 0 to 2047 (corresponding to gain of 0 and 1.999, respectively).">
+            <constraint display="Value must be an integer from 0 to 2047"> testInteger("${module.driver.display.gamma.b.gain.8}")  &amp;&amp; ("${module.driver.display.gamma.b.gain.8}" &gt;= 0) &amp;&amp; ("${module.driver.display.gamma.b.gain.8}" &lt;= 2047) </constraint>
+        </property>
+        <property default="1024" id="module.driver.display.gamma.b.gain.9" display="Color Correction|Gamma|Tables|Blue|Gain|9" description="Enter a gain value from 0 to 2047 (corresponding to gain of 0 and 1.999, respectively).">
+            <constraint display="Value must be an integer from 0 to 2047"> testInteger("${module.driver.display.gamma.b.gain.9}")  &amp;&amp; ("${module.driver.display.gamma.b.gain.9}" &gt;= 0) &amp;&amp; ("${module.driver.display.gamma.b.gain.9}" &lt;= 2047) </constraint>
+        </property>
+        <property default="1024" id="module.driver.display.gamma.b.gain.10" display="Color Correction|Gamma|Tables|Blue|Gain|10" description="Enter a gain value from 0 to 2047 (corresponding to gain of 0 and 1.999, respectively).">
+            <constraint display="Value must be an integer from 0 to 2047"> testInteger("${module.driver.display.gamma.b.gain.10}")  &amp;&amp; ("${module.driver.display.gamma.b.gain.10}" &gt;= 0) &amp;&amp; ("${module.driver.display.gamma.b.gain.10}" &lt;= 2047) </constraint>
+        </property>
+        <property default="1024" id="module.driver.display.gamma.b.gain.11" display="Color Correction|Gamma|Tables|Blue|Gain|11" description="Enter a gain value from 0 to 2047 (corresponding to gain of 0 and 1.999, respectively).">
+            <constraint display="Value must be an integer from 0 to 2047"> testInteger("${module.driver.display.gamma.b.gain.11}")  &amp;&amp; ("${module.driver.display.gamma.b.gain.11}" &gt;= 0) &amp;&amp; ("${module.driver.display.gamma.b.gain.11}" &lt;= 2047) </constraint>
+        </property>
+        <property default="1024" id="module.driver.display.gamma.b.gain.12" display="Color Correction|Gamma|Tables|Blue|Gain|12" description="Enter a gain value from 0 to 2047 (corresponding to gain of 0 and 1.999, respectively).">
+            <constraint display="Value must be an integer from 0 to 2047"> testInteger("${module.driver.display.gamma.b.gain.12}")  &amp;&amp; ("${module.driver.display.gamma.b.gain.12}" &gt;= 0) &amp;&amp; ("${module.driver.display.gamma.b.gain.12}" &lt;= 2047) </constraint>
+        </property>
+        <property default="1024" id="module.driver.display.gamma.b.gain.13" display="Color Correction|Gamma|Tables|Blue|Gain|13" description="Enter a gain value from 0 to 2047 (corresponding to gain of 0 and 1.999, respectively).">
+            <constraint display="Value must be an integer from 0 to 2047"> testInteger("${module.driver.display.gamma.b.gain.13}")  &amp;&amp; ("${module.driver.display.gamma.b.gain.13}" &gt;= 0) &amp;&amp; ("${module.driver.display.gamma.b.gain.13}" &lt;= 2047) </constraint>
+        </property>
+        <property default="1024" id="module.driver.display.gamma.b.gain.14" display="Color Correction|Gamma|Tables|Blue|Gain|14" description="Enter a gain value from 0 to 2047 (corresponding to gain of 0 and 1.999, respectively).">
+            <constraint display="Value must be an integer from 0 to 2047"> testInteger("${module.driver.display.gamma.b.gain.14}")  &amp;&amp; ("${module.driver.display.gamma.b.gain.14}" &gt;= 0) &amp;&amp; ("${module.driver.display.gamma.b.gain.14}" &lt;= 2047) </constraint>
+        </property>
+        <property default="1024" id="module.driver.display.gamma.b.gain.15" display="Color Correction|Gamma|Tables|Blue|Gain|15" description="Enter a gain value from 0 to 2047 (corresponding to gain of 0 and 1.999, respectively).">
+            <constraint display="Value must be an integer from 0 to 2047"> testInteger("${module.driver.display.gamma.b.gain.15}")  &amp;&amp; ("${module.driver.display.gamma.b.gain.15}" &gt;= 0) &amp;&amp; ("${module.driver.display.gamma.b.gain.15}" &lt;= 2047) </constraint>
+        </property>
+        <property default="64" id="module.driver.display.gamma.b.threshold.1" display="Color Correction|Gamma|Tables|Blue|Threshold|1" description="Enter a threshold value between the surrounding values less than or equal to 1023.">
+            <constraint display="Value must be an integer from 0 to 1023"> testInteger("${module.driver.display.gamma.b.threshold.1}")  &amp;&amp; ("${module.driver.display.gamma.b.threshold.1}" &gt;= 0) &amp;&amp; ("${module.driver.display.gamma.b.threshold.1}" &lt;= 1023) </constraint>
+        </property>
+        <property default="128" id="module.driver.display.gamma.b.threshold.2" display="Color Correction|Gamma|Tables|Blue|Threshold|2" description="Enter a threshold value between the surrounding values less than or equal to 1023.">
+            <constraint display="Value must be an integer from 0 to 1023"> testInteger("${module.driver.display.gamma.b.threshold.2}")  &amp;&amp; ("${module.driver.display.gamma.b.threshold.2}" &gt;= 0) &amp;&amp; ("${module.driver.display.gamma.b.threshold.2}" &lt;= 1023) </constraint>
+        </property>
+        <property default="192" id="module.driver.display.gamma.b.threshold.3" display="Color Correction|Gamma|Tables|Blue|Threshold|3" description="Enter a threshold value between the surrounding values less than or equal to 1023.">
+            <constraint display="Value must be an integer from 0 to 1023"> testInteger("${module.driver.display.gamma.b.threshold.3}")  &amp;&amp; ("${module.driver.display.gamma.b.threshold.3}" &gt;= 0) &amp;&amp; ("${module.driver.display.gamma.b.threshold.3}" &lt;= 1023) </constraint>
+        </property>
+        <property default="256" id="module.driver.display.gamma.b.threshold.4" display="Color Correction|Gamma|Tables|Blue|Threshold|4" description="Enter a threshold value between the surrounding values less than or equal to 1023.">
+            <constraint display="Value must be an integer from 0 to 1023"> testInteger("${module.driver.display.gamma.b.threshold.4}")  &amp;&amp; ("${module.driver.display.gamma.b.threshold.4}" &gt;= 0) &amp;&amp; ("${module.driver.display.gamma.b.threshold.4}" &lt;= 1023) </constraint>
+        </property>
+        <property default="320" id="module.driver.display.gamma.b.threshold.5" display="Color Correction|Gamma|Tables|Blue|Threshold|5" description="Enter a threshold value between the surrounding values less than or equal to 1023.">
+            <constraint display="Value must be an integer from 0 to 1023"> testInteger("${module.driver.display.gamma.b.threshold.5}")  &amp;&amp; ("${module.driver.display.gamma.b.threshold.5}" &gt;= 0) &amp;&amp; ("${module.driver.display.gamma.b.threshold.5}" &lt;= 1023) </constraint>
+        </property>
+        <property default="384" id="module.driver.display.gamma.b.threshold.6" display="Color Correction|Gamma|Tables|Blue|Threshold|6" description="Enter a threshold value between the surrounding values less than or equal to 1023.">
+            <constraint display="Value must be an integer from 0 to 1023"> testInteger("${module.driver.display.gamma.b.threshold.6}")  &amp;&amp; ("${module.driver.display.gamma.b.threshold.6}" &gt;= 0) &amp;&amp; ("${module.driver.display.gamma.b.threshold.6}" &lt;= 1023) </constraint>
+        </property>
+        <property default="448" id="module.driver.display.gamma.b.threshold.7" display="Color Correction|Gamma|Tables|Blue|Threshold|7" description="Enter a threshold value between the surrounding values less than or equal to 1023.">
+            <constraint display="Value must be an integer from 0 to 1023"> testInteger("${module.driver.display.gamma.b.threshold.7}")  &amp;&amp; ("${module.driver.display.gamma.b.threshold.7}" &gt;= 0) &amp;&amp; ("${module.driver.display.gamma.b.threshold.7}" &lt;= 1023) </constraint>
+        </property>
+        <property default="512" id="module.driver.display.gamma.b.threshold.8" display="Color Correction|Gamma|Tables|Blue|Threshold|8" description="Enter a threshold value between the surrounding values less than or equal to 1023.">
+            <constraint display="Value must be an integer from 0 to 1023"> testInteger("${module.driver.display.gamma.b.threshold.8}")  &amp;&amp; ("${module.driver.display.gamma.b.threshold.8}" &gt;= 0) &amp;&amp; ("${module.driver.display.gamma.b.threshold.8}" &lt;= 1023) </constraint>
+        </property>
+        <property default="576" id="module.driver.display.gamma.b.threshold.9" display="Color Correction|Gamma|Tables|Blue|Threshold|9" description="Enter a threshold value between the surrounding values less than or equal to 1023.">
+            <constraint display="Value must be an integer from 0 to 1023"> testInteger("${module.driver.display.gamma.b.threshold.9}")  &amp;&amp; ("${module.driver.display.gamma.b.threshold.9}" &gt;= 0) &amp;&amp; ("${module.driver.display.gamma.b.threshold.9}" &lt;= 1023) </constraint>
+        </property>
+        <property default="640" id="module.driver.display.gamma.b.threshold.10" display="Color Correction|Gamma|Tables|Blue|Threshold|10" description="Enter a threshold value between the surrounding values less than or equal to 1023.">
+            <constraint display="Value must be an integer from 0 to 1023"> testInteger("${module.driver.display.gamma.b.threshold.10}")  &amp;&amp; ("${module.driver.display.gamma.b.threshold.10}" &gt;= 0) &amp;&amp; ("${module.driver.display.gamma.b.threshold.10}" &lt;= 1023) </constraint>
+        </property>
+        <property default="704" id="module.driver.display.gamma.b.threshold.11" display="Color Correction|Gamma|Tables|Blue|Threshold|11" description="Enter a threshold value between the surrounding values less than or equal to 1023.">
+            <constraint display="Value must be an integer from 0 to 1023"> testInteger("${module.driver.display.gamma.b.threshold.11}")  &amp;&amp; ("${module.driver.display.gamma.b.threshold.11}" &gt;= 0) &amp;&amp; ("${module.driver.display.gamma.b.threshold.11}" &lt;= 1023) </constraint>
+        </property>
+        <property default="768" id="module.driver.display.gamma.b.threshold.12" display="Color Correction|Gamma|Tables|Blue|Threshold|12" description="Enter a threshold value between the surrounding values less than or equal to 1023.">
+            <constraint display="Value must be an integer from 0 to 1023"> testInteger("${module.driver.display.gamma.b.threshold.12}")  &amp;&amp; ("${module.driver.display.gamma.b.threshold.12}" &gt;= 0) &amp;&amp; ("${module.driver.display.gamma.b.threshold.12}" &lt;= 1023) </constraint>
+        </property>
+        <property default="832" id="module.driver.display.gamma.b.threshold.13" display="Color Correction|Gamma|Tables|Blue|Threshold|13" description="Enter a threshold value between the surrounding values less than or equal to 1023.">
+            <constraint display="Value must be an integer from 0 to 1023"> testInteger("${module.driver.display.gamma.b.threshold.13}")  &amp;&amp; ("${module.driver.display.gamma.b.threshold.13}" &gt;= 0) &amp;&amp; ("${module.driver.display.gamma.b.threshold.13}" &lt;= 1023) </constraint>
+        </property>
+        <property default="896" id="module.driver.display.gamma.b.threshold.14" display="Color Correction|Gamma|Tables|Blue|Threshold|14" description="Enter a threshold value between the surrounding values less than or equal to 1023.">
+            <constraint display="Value must be an integer from 0 to 1023"> testInteger("${module.driver.display.gamma.b.threshold.14}")  &amp;&amp; ("${module.driver.display.gamma.b.threshold.14}" &gt;= 0) &amp;&amp; ("${module.driver.display.gamma.b.threshold.14}" &lt;= 1023) </constraint>
+        </property>
+        <property default="960" id="module.driver.display.gamma.b.threshold.15" display="Color Correction|Gamma|Tables|Blue|Threshold|15" description="Enter a threshold value between the surrounding values less than or equal to 1023.">
+            <constraint display="Value must be an integer from 0 to 1023"> testInteger("${module.driver.display.gamma.b.threshold.15}")  &amp;&amp; ("${module.driver.display.gamma.b.threshold.15}" &gt;= 0) &amp;&amp; ("${module.driver.display.gamma.b.threshold.15}" &lt;= 1023) </constraint>
+        </property>
+
+        <!-- Dither configurations -->
+        <property default="module.driver.display.output.dithering_on.false" display="Dithering|Enabled" id="module.driver.display.output.dithering_on" description="Enable dithering to reduce the effect of color banding.">
+            <option display="Yes" id="module.driver.display.output.dithering_on.true" value="true"/>
+            <option display="No" id="module.driver.display.output.dithering_on.false" value="false"/>
+        </property>
+        <property default="module.driver.display.dithering_mode.dithering_mode_trancate" display="Dithering|Mode" id="module.driver.display.dithering_mode" description="Select the dithering mode.">
+            <option display="Truncate" id="module.driver.display.dithering_mode.dithering_mode_trancate" value="GLCDC_DITHERING_MODE_TRUNCATE"/>
+            <option display="Round off" id="module.driver.display.dithering_mode.dithering_mode_round_off" value="GLCDC_DITHERING_MODE_ROUND_off"/>
+            <option display="2x2 Pattern" id="module.driver.display.dithering_mode.dithering_mode_2x2pattern" value="GLCDC_DITHERING_MODE_2X2PATTERN"/>
+        </property>
+        <property default="module.driver.display.dithering_pattern_A.dithering_pattern_11" display="Dithering|Pattern A" id="module.driver.display.dithering_pattern_A" description="Select the dithering pattern.">
+            <option display="Pattern 00" id="module.driver.display.dithering_pattern_A.dithering_pattern_00" value="GLCDC_DITHERING_PATTERN_00"/>
+            <option display="Pattern 01" id="module.driver.display.dithering_pattern_A.dithering_pattern_01" value="GLCDC_DITHERING_PATTERN_01"/>
+            <option display="Pattern 10" id="module.driver.display.dithering_pattern_A.dithering_pattern_10" value="GLCDC_DITHERING_PATTERN_10"/>
+            <option display="Pattern 11" id="module.driver.display.dithering_pattern_A.dithering_pattern_11" value="GLCDC_DITHERING_PATTERN_11"/>
+        </property>
+        <property default="module.driver.display.dithering_pattern_B.dithering_pattern_11" display="Dithering|Pattern B" id="module.driver.display.dithering_pattern_B" description="Select the dithering pattern.">
+            <option display="Pattern 00" id="module.driver.display.dithering_pattern_B.dithering_pattern_00" value="GLCDC_DITHERING_PATTERN_00"/>
+            <option display="Pattern 01" id="module.driver.display.dithering_pattern_B.dithering_pattern_01" value="GLCDC_DITHERING_PATTERN_01"/>
+            <option display="Pattern 10" id="module.driver.display.dithering_pattern_B.dithering_pattern_10" value="GLCDC_DITHERING_PATTERN_10"/>
+            <option display="Pattern 11" id="module.driver.display.dithering_pattern_B.dithering_pattern_11" value="GLCDC_DITHERING_PATTERN_11"/>
+        </property>
+        <property default="module.driver.display.dithering_pattern_C.dithering_pattern_11" display="Dithering|Pattern C" id="module.driver.display.dithering_pattern_C" description="Select the dithering pattern.">
+            <option display="Pattern 00" id="module.driver.display.dithering_pattern_C.dithering_pattern_00" value="GLCDC_DITHERING_PATTERN_00"/>
+            <option display="Pattern 01" id="module.driver.display.dithering_pattern_C.dithering_pattern_01" value="GLCDC_DITHERING_PATTERN_01"/>
+            <option display="Pattern 10" id="module.driver.display.dithering_pattern_C.dithering_pattern_10" value="GLCDC_DITHERING_PATTERN_10"/>
+            <option display="Pattern 11" id="module.driver.display.dithering_pattern_C.dithering_pattern_11" value="GLCDC_DITHERING_PATTERN_11"/>
+        </property>
+        <property default="module.driver.display.dithering_pattern_D.dithering_pattern_11" display="Dithering|Pattern D" id="module.driver.display.dithering_pattern_D" description="Select the dithering pattern.">
+            <option display="Pattern 00" id="module.driver.display.dithering_pattern_D.dithering_pattern_00" value="GLCDC_DITHERING_PATTERN_00"/>
+            <option display="Pattern 01" id="module.driver.display.dithering_pattern_D.dithering_pattern_01" value="GLCDC_DITHERING_PATTERN_01"/>
+            <option display="Pattern 10" id="module.driver.display.dithering_pattern_D.dithering_pattern_10" value="GLCDC_DITHERING_PATTERN_10"/>
+            <option display="Pattern 11" id="module.driver.display.dithering_pattern_D.dithering_pattern_11" value="GLCDC_DITHERING_PATTERN_11"/>
+        </property>
+        <peripheral name="GLCDC" component="glcdc0" />
+        <header>
+
+            #define GLCDC_CFG_LAYER_1_ENABLE (${module.driver.display.input0.enable})
+            #define GLCDC_CFG_LAYER_2_ENABLE (${module.driver.display.input1.enable})
+
+            #define GLCDC_CFG_CLUT_ENABLE (${module.driver.display.clut.enable})
+
+            #define GLCDC_CFG_CORRECTION_GAMMA_ENABLE_R       (${module.driver.display.output.gamma.r.enable})
+            #define GLCDC_CFG_CORRECTION_GAMMA_ENABLE_G       (${module.driver.display.output.gamma.g.enable})
+            #define GLCDC_CFG_CORRECTION_GAMMA_ENABLE_B       (${module.driver.display.output.gamma.b.enable})
+
+            /* Display on GLCDC Instance. */
+            extern const display_instance_t ${module.driver.display.name};
+            extern display_runtime_cfg_t ${module.driver.display.name}_runtime_cfg_fg;
+            extern display_runtime_cfg_t ${module.driver.display.name}_runtime_cfg_bg;
+
+            /** Access the GLCDC instance using these structures when calling API functions directly (::p_api is not used). */
+            extern glcdc_instance_ctrl_t ${module.driver.display.name}_ctrl;
+            extern const display_cfg_t ${module.driver.display.name}_cfg;
+
+            #if ((GLCDC_CFG_CORRECTION_GAMMA_ENABLE_R | GLCDC_CFG_CORRECTION_GAMMA_ENABLE_G | GLCDC_CFG_CORRECTION_GAMMA_ENABLE_B) &amp;&amp; GLCDC_CFG_COLOR_CORRECTION_ENABLE &amp;&amp; !(${module.driver.display.output.gamma.table_mode}))
+            extern display_gamma_correction_t ${module.driver.display.name}_gamma_cfg;
+            #endif
+
+            #if GLCDC_CFG_CLUT_ENABLE
+            extern display_clut_cfg_t ${module.driver.display.name}_clut_cfg_glcdc;
+            #endif
+
+            #ifndef ${module.driver.display.callback}
+            void ${module.driver.display.callback}(display_callback_args_t * p_args);
+            #endif
+
+            #define ${module.driver.display.input0.format}_0
+            #if defined (DISPLAY_IN_FORMAT_32BITS_RGB888_0) || defined (DISPLAY_IN_FORMAT_32BITS_ARGB8888_0)
+            #define DISPLAY_BITS_PER_PIXEL_INPUT0 (32)
+            #elif defined (DISPLAY_IN_FORMAT_16BITS_RGB565_0) || defined (DISPLAY_IN_FORMAT_16BITS_ARGB1555_0) || defined (DISPLAY_IN_FORMAT_16BITS_ARGB4444_0)
+            #define DISPLAY_BITS_PER_PIXEL_INPUT0 (16)
+            #elif defined (DISPLAY_IN_FORMAT_CLUT8_0)
+            #define DISPLAY_BITS_PER_PIXEL_INPUT0 (8)
+            #elif defined (DISPLAY_IN_FORMAT_CLUT4_0)
+            #define DISPLAY_BITS_PER_PIXEL_INPUT0 (4)
+            #else
+            #define DISPLAY_BITS_PER_PIXEL_INPUT0 (1)
+            #endif
+            #define DISPLAY_HSIZE_INPUT0                 (${module.driver.display.input0.hsize})
+            #define DISPLAY_VSIZE_INPUT0                 (${module.driver.display.input0.vsize})
+            #define DISPLAY_BUFFER_STRIDE_BYTES_INPUT0   (((DISPLAY_HSIZE_INPUT0 * DISPLAY_BITS_PER_PIXEL_INPUT0 + 0x1FF) &gt;&gt; 9) &lt;&lt; 6)
+            #define DISPLAY_BUFFER_STRIDE_PIXELS_INPUT0  ((DISPLAY_BUFFER_STRIDE_BYTES_INPUT0 * 8) / DISPLAY_BITS_PER_PIXEL_INPUT0)
+            #if GLCDC_CFG_LAYER_1_ENABLE
+            extern uint8_t ${module.driver.display.input0.buffer_name}[${module.driver.display.input0.buffer_number}][DISPLAY_BUFFER_STRIDE_BYTES_INPUT0 * DISPLAY_VSIZE_INPUT0];
+            #endif
+
+            #define ${module.driver.display.input1.format}_1
+            #if defined (DISPLAY_IN_FORMAT_32BITS_RGB888_1) || defined (DISPLAY_IN_FORMAT_32BITS_ARGB8888_1)
+            #define DISPLAY_BITS_PER_PIXEL_INPUT1 (32)
+            #elif defined (DISPLAY_IN_FORMAT_16BITS_RGB565_1) || defined (DISPLAY_IN_FORMAT_16BITS_ARGB1555_1) || defined (DISPLAY_IN_FORMAT_16BITS_ARGB4444_1)
+            #define DISPLAY_BITS_PER_PIXEL_INPUT1 (16)
+            #elif defined (DISPLAY_IN_FORMAT_CLUT8_1)
+            #define DISPLAY_BITS_PER_PIXEL_INPUT1 (8)
+            #elif defined (DISPLAY_IN_FORMAT_CLUT4_1)
+            #define DISPLAY_BITS_PER_PIXEL_INPUT1 (4)
+            #else
+            #define DISPLAY_BITS_PER_PIXEL_INPUT1 (1)
+            #endif
+            #define DISPLAY_HSIZE_INPUT1                 (${module.driver.display.input1.hsize})
+            #define DISPLAY_VSIZE_INPUT1                 (${module.driver.display.input1.vsize})
+            #define DISPLAY_BUFFER_STRIDE_BYTES_INPUT1   (((DISPLAY_HSIZE_INPUT1 * DISPLAY_BITS_PER_PIXEL_INPUT1 + 0x1FF) &gt;&gt; 9) &lt;&lt; 6)
+            #define DISPLAY_BUFFER_STRIDE_PIXELS_INPUT1  ((DISPLAY_BUFFER_STRIDE_BYTES_INPUT1 * 8) / DISPLAY_BITS_PER_PIXEL_INPUT1)
+            #if GLCDC_CFG_LAYER_2_ENABLE
+            extern uint8_t ${module.driver.display.input1.buffer_name}[${module.driver.display.input1.buffer_number}][DISPLAY_BUFFER_STRIDE_BYTES_INPUT1 * DISPLAY_VSIZE_INPUT1];
+            #endif
+
+        </header>
+
+        <includes>
+            #include &quot;r_glcdc.h&quot;
+            #include &quot;r_display_api.h&quot;
+        </includes>
+
+        <declarations>
+
+        /** Display framebuffer */
+        #if GLCDC_CFG_LAYER_1_ENABLE
+        uint8_t ${module.driver.display.input0.buffer_name}[${module.driver.display.input0.buffer_number}][DISPLAY_BUFFER_STRIDE_BYTES_INPUT0 * DISPLAY_VSIZE_INPUT0] BSP_ALIGN_VARIABLE(64) BSP_PLACE_IN_SECTION(&quot;${module.driver.display.input0.section}&quot;);
+        #else
+        /** Graphics Layer 1 is specified not to be used when starting */
+        #endif
+        #if GLCDC_CFG_LAYER_2_ENABLE
+        uint8_t ${module.driver.display.input1.buffer_name}[${module.driver.display.input1.buffer_number}][DISPLAY_BUFFER_STRIDE_BYTES_INPUT1 * DISPLAY_VSIZE_INPUT1] BSP_ALIGN_VARIABLE(64) BSP_PLACE_IN_SECTION(&quot;${module.driver.display.input1.section}&quot;);
+        #else
+        /** Graphics Layer 2 is specified not to be used when starting */
+        #endif
+
+        #if GLCDC_CFG_CLUT_ENABLE
+        /** Display CLUT buffer to be used for updating CLUT */
+        static uint32_t CLUT_buffer[${module.driver.display.clut.size}];
+
+        /** Display CLUT configuration(only used if using CLUT format) */
+        display_clut_cfg_t ${module.driver.display.name}_clut_cfg_glcdc =
+        {
+            .p_base              = (uint32_t *)CLUT_buffer,
+            .start               = 0,   /* User have to update this setting when using */
+            .size                = 256  /* User have to update this setting when using */
+        };
+        #else
+        /** CLUT is specified not to be used */
+        #endif
+
+        #if (${module.driver.display.output.gamma.table_mode})
+         #define GLCDC_CFG_CORRECTION_GAMMA_TABLE_CONST   const
+         #define GLCDC_CFG_CORRECTION_GAMMA_TABLE_CAST    (uint16_t *)
+         #define GLCDC_CFG_CORRECTION_GAMMA_CFG_CAST      (display_gamma_correction_t *)
+        #else
+         #define GLCDC_CFG_CORRECTION_GAMMA_TABLE_CONST
+         #define GLCDC_CFG_CORRECTION_GAMMA_TABLE_CAST
+         #define GLCDC_CFG_CORRECTION_GAMMA_CFG_CAST
+        #endif
+
+        #if ((GLCDC_CFG_CORRECTION_GAMMA_ENABLE_R | GLCDC_CFG_CORRECTION_GAMMA_ENABLE_G | GLCDC_CFG_CORRECTION_GAMMA_ENABLE_B) &amp;&amp; GLCDC_CFG_COLOR_CORRECTION_ENABLE)
+        /** Gamma correction tables */
+        #if GLCDC_CFG_CORRECTION_GAMMA_ENABLE_R
+        static GLCDC_CFG_CORRECTION_GAMMA_TABLE_CONST uint16_t glcdc_gamma_r_gain[DISPLAY_GAMMA_CURVE_ELEMENT_NUM] = {${module.driver.display.gamma.r.gain.0}, ${module.driver.display.gamma.r.gain.1}, ${module.driver.display.gamma.r.gain.2}, ${module.driver.display.gamma.r.gain.3}, ${module.driver.display.gamma.r.gain.4}, ${module.driver.display.gamma.r.gain.5}, ${module.driver.display.gamma.r.gain.6}, ${module.driver.display.gamma.r.gain.7}, ${module.driver.display.gamma.r.gain.8}, ${module.driver.display.gamma.r.gain.9}, ${module.driver.display.gamma.r.gain.10}, ${module.driver.display.gamma.r.gain.11}, ${module.driver.display.gamma.r.gain.12}, ${module.driver.display.gamma.r.gain.13}, ${module.driver.display.gamma.r.gain.14}, ${module.driver.display.gamma.r.gain.15}};
+        static GLCDC_CFG_CORRECTION_GAMMA_TABLE_CONST uint16_t glcdc_gamma_r_threshold[DISPLAY_GAMMA_CURVE_ELEMENT_NUM] = {0, ${module.driver.display.gamma.r.threshold.1}, ${module.driver.display.gamma.r.threshold.2}, ${module.driver.display.gamma.r.threshold.3}, ${module.driver.display.gamma.r.threshold.4}, ${module.driver.display.gamma.r.threshold.5}, ${module.driver.display.gamma.r.threshold.6}, ${module.driver.display.gamma.r.threshold.7}, ${module.driver.display.gamma.r.threshold.8}, ${module.driver.display.gamma.r.threshold.9}, ${module.driver.display.gamma.r.threshold.10}, ${module.driver.display.gamma.r.threshold.11}, ${module.driver.display.gamma.r.threshold.12}, ${module.driver.display.gamma.r.threshold.13}, ${module.driver.display.gamma.r.threshold.14}, ${module.driver.display.gamma.r.threshold.15}};
+        #endif
+        #if GLCDC_CFG_CORRECTION_GAMMA_ENABLE_G
+        static GLCDC_CFG_CORRECTION_GAMMA_TABLE_CONST uint16_t glcdc_gamma_g_gain[DISPLAY_GAMMA_CURVE_ELEMENT_NUM] = {${module.driver.display.gamma.g.gain.0}, ${module.driver.display.gamma.g.gain.1}, ${module.driver.display.gamma.g.gain.2}, ${module.driver.display.gamma.g.gain.3}, ${module.driver.display.gamma.g.gain.4}, ${module.driver.display.gamma.g.gain.5}, ${module.driver.display.gamma.g.gain.6}, ${module.driver.display.gamma.g.gain.7}, ${module.driver.display.gamma.g.gain.8}, ${module.driver.display.gamma.g.gain.9}, ${module.driver.display.gamma.g.gain.10}, ${module.driver.display.gamma.g.gain.11}, ${module.driver.display.gamma.g.gain.12}, ${module.driver.display.gamma.g.gain.13}, ${module.driver.display.gamma.g.gain.14}, ${module.driver.display.gamma.g.gain.15}};
+        static GLCDC_CFG_CORRECTION_GAMMA_TABLE_CONST uint16_t glcdc_gamma_g_threshold[DISPLAY_GAMMA_CURVE_ELEMENT_NUM] = {0, ${module.driver.display.gamma.g.threshold.1}, ${module.driver.display.gamma.g.threshold.2}, ${module.driver.display.gamma.g.threshold.3}, ${module.driver.display.gamma.g.threshold.4}, ${module.driver.display.gamma.g.threshold.5}, ${module.driver.display.gamma.g.threshold.6}, ${module.driver.display.gamma.g.threshold.7}, ${module.driver.display.gamma.g.threshold.8}, ${module.driver.display.gamma.g.threshold.9}, ${module.driver.display.gamma.g.threshold.10}, ${module.driver.display.gamma.g.threshold.11}, ${module.driver.display.gamma.g.threshold.12}, ${module.driver.display.gamma.g.threshold.13}, ${module.driver.display.gamma.g.threshold.14}, ${module.driver.display.gamma.g.threshold.15}};
+        #endif
+        #if GLCDC_CFG_CORRECTION_GAMMA_ENABLE_B
+        static GLCDC_CFG_CORRECTION_GAMMA_TABLE_CONST uint16_t glcdc_gamma_b_gain[DISPLAY_GAMMA_CURVE_ELEMENT_NUM] = {${module.driver.display.gamma.b.gain.0}, ${module.driver.display.gamma.b.gain.1}, ${module.driver.display.gamma.b.gain.2}, ${module.driver.display.gamma.b.gain.3}, ${module.driver.display.gamma.b.gain.4}, ${module.driver.display.gamma.b.gain.5}, ${module.driver.display.gamma.b.gain.6}, ${module.driver.display.gamma.b.gain.7}, ${module.driver.display.gamma.b.gain.8}, ${module.driver.display.gamma.b.gain.9}, ${module.driver.display.gamma.b.gain.10}, ${module.driver.display.gamma.b.gain.11}, ${module.driver.display.gamma.b.gain.12}, ${module.driver.display.gamma.b.gain.13}, ${module.driver.display.gamma.b.gain.14}, ${module.driver.display.gamma.b.gain.15}};
+        static GLCDC_CFG_CORRECTION_GAMMA_TABLE_CONST uint16_t glcdc_gamma_b_threshold[DISPLAY_GAMMA_CURVE_ELEMENT_NUM] = {0, ${module.driver.display.gamma.b.threshold.1}, ${module.driver.display.gamma.b.threshold.2}, ${module.driver.display.gamma.b.threshold.3}, ${module.driver.display.gamma.b.threshold.4}, ${module.driver.display.gamma.b.threshold.5}, ${module.driver.display.gamma.b.threshold.6}, ${module.driver.display.gamma.b.threshold.7}, ${module.driver.display.gamma.b.threshold.8}, ${module.driver.display.gamma.b.threshold.9}, ${module.driver.display.gamma.b.threshold.10}, ${module.driver.display.gamma.b.threshold.11}, ${module.driver.display.gamma.b.threshold.12}, ${module.driver.display.gamma.b.threshold.13}, ${module.driver.display.gamma.b.threshold.14}, ${module.driver.display.gamma.b.threshold.15}};
+        #endif
+        GLCDC_CFG_CORRECTION_GAMMA_TABLE_CONST display_gamma_correction_t ${module.driver.display.name}_gamma_cfg =
+        {
+            .r =
+            {
+                .enable      = GLCDC_CFG_CORRECTION_GAMMA_ENABLE_R,
+        #if GLCDC_CFG_CORRECTION_GAMMA_ENABLE_R
+                .gain        = GLCDC_CFG_CORRECTION_GAMMA_TABLE_CAST glcdc_gamma_r_gain,
+                .threshold   = GLCDC_CFG_CORRECTION_GAMMA_TABLE_CAST glcdc_gamma_r_threshold
+        #else
+                .gain        = NULL,
+                .threshold   = NULL
+        #endif
+            },
+            .g =
+            {
+                .enable      = GLCDC_CFG_CORRECTION_GAMMA_ENABLE_G,
+        #if GLCDC_CFG_CORRECTION_GAMMA_ENABLE_G
+                .gain        = GLCDC_CFG_CORRECTION_GAMMA_TABLE_CAST glcdc_gamma_g_gain,
+                .threshold   = GLCDC_CFG_CORRECTION_GAMMA_TABLE_CAST glcdc_gamma_g_threshold
+        #else
+                .gain        = NULL,
+                .threshold   = NULL
+        #endif
+            },
+            .b =
+            {
+                .enable      = GLCDC_CFG_CORRECTION_GAMMA_ENABLE_B,
+        #if GLCDC_CFG_CORRECTION_GAMMA_ENABLE_B
+                .gain        = GLCDC_CFG_CORRECTION_GAMMA_TABLE_CAST glcdc_gamma_b_gain,
+                .threshold   = GLCDC_CFG_CORRECTION_GAMMA_TABLE_CAST glcdc_gamma_b_threshold
+        #else
+                .gain        = NULL,
+                .threshold   = NULL
+        #endif
+            }
+        };
+        #endif
+
+        #define RA_NOT_DEFINED (1)
+        #if (RA_NOT_DEFINED != ${module.driver.display_on_glcdc.requires.dsi::module.driver.mipi_dsi.name})
+          const mipi_dsi_instance_t ${module.driver.display_on_glcdc.requires.dsi::module.driver.mipi_dsi.name};
+        #endif
+        /** Display device extended configuration */
+        const glcdc_extended_cfg_t ${module.driver.display.name}_extend_cfg =
+        {
+            .tcon_hsync            = ${module.driver.display.tcon_hsync},
+            .tcon_vsync            = ${module.driver.display.tcon_vsync},
+            .tcon_de               = ${module.driver.display.tcon_de},
+            .correction_proc_order = ${module.driver.display.correction_proc_order},
+            .clksrc                = ${module.driver.display.clksrc},
+            .clock_div_ratio       = ${module.driver.display.clock_div_ratio},
+            .dithering_mode        = ${module.driver.display.dithering_mode},
+            .dithering_pattern_A   = ${module.driver.display.dithering_pattern_A},
+            .dithering_pattern_B   = ${module.driver.display.dithering_pattern_B},
+            .dithering_pattern_C   = ${module.driver.display.dithering_pattern_C},
+            .dithering_pattern_D   = ${module.driver.display.dithering_pattern_D},
+        #if (RA_NOT_DEFINED != ${module.driver.display_on_glcdc.requires.dsi::module.driver.mipi_dsi.name})
+            .phy_layer             = (void*)&amp;${module.driver.display_on_glcdc.requires.dsi::module.driver.mipi_dsi.name}
+        #else
+            .phy_layer             = NULL
+        #endif
+        };
+        #undef RA_NOT_DEFINED
+
+        /** Display control block instance */
+        glcdc_instance_ctrl_t ${module.driver.display.name}_ctrl;
+
+        /** Display interface configuration */
+        const display_cfg_t ${module.driver.display.name}_cfg =
+        {
+            /** Input1(Graphics1 layer) configuration */
+            .input[0] =
+            {
+                #if GLCDC_CFG_LAYER_1_ENABLE
+                .p_base              = (uint32_t *)&amp;${module.driver.display.input0.buffer_name}[0],
+                #else
+                .p_base              = NULL,
+                #endif
+                .hsize               = DISPLAY_HSIZE_INPUT0,
+                .vsize               = DISPLAY_VSIZE_INPUT0,
+                .hstride             = DISPLAY_BUFFER_STRIDE_PIXELS_INPUT0,
+                .format              = ${module.driver.display.input0.format},
+                .line_descending_enable = ${module.driver.display.input0.line_descending_enable},
+                .lines_repeat_enable = ${module.driver.display.input0.lines_repeat_enable},
+                .lines_repeat_times  = ${module.driver.display.input0.lines_repeat_times}
+            },
+
+            /** Input2(Graphics2 layer) configuration */
+            .input[1] =
+            {
+                #if GLCDC_CFG_LAYER_2_ENABLE
+                .p_base              = (uint32_t *)&amp;${module.driver.display.input1.buffer_name}[0],
+                #else
+                .p_base              = NULL,
+                #endif
+                .hsize               = DISPLAY_HSIZE_INPUT1,
+                .vsize               = DISPLAY_VSIZE_INPUT1,
+                .hstride             = DISPLAY_BUFFER_STRIDE_PIXELS_INPUT1,
+                .format              = ${module.driver.display.input1.format},
+                .line_descending_enable = ${module.driver.display.input1.line_descending_enable},
+                .lines_repeat_enable = ${module.driver.display.input1.lines_repeat_enable},
+                .lines_repeat_times  = ${module.driver.display.input1.lines_repeat_times}
+             },
+
+            /** Input1(Graphics1 layer) layer configuration */
+            .layer[0] =
+            {
+                .coordinate = {
+                        .x           = ${module.driver.display.layer0.coordinate.x},
+                        .y           = ${module.driver.display.layer0.coordinate.y}
+                },
+                .fade_control        = ${module.driver.display.layer0.fade_control},
+                .fade_speed          = ${module.driver.display.layer0.fade_speed}
+            },
+
+            /** Input2(Graphics2 layer) layer configuration */
+            .layer[1] =
+            {
+                .coordinate = {
+                        .x           = ${module.driver.display.layer1.coordinate.x},
+                        .y           = ${module.driver.display.layer1.coordinate.y}
+                },
+                .fade_control        = ${module.driver.display.layer1.fade_control},
+                .fade_speed          = ${module.driver.display.layer1.fade_speed}
+            },
+
+            /** Output configuration */
+            .output =
+            {
+                .htiming =
+                {
+                    .total_cyc       = ${module.driver.display.output.htiming.total_cyc},
+                    .display_cyc     = ${module.driver.display.output.htiming.display_cyc},
+                    .back_porch      = ${module.driver.display.output.htiming.back_porch},
+                    .sync_width       = ${module.driver.display.output.htiming.sync_width},
+                    .sync_polarity   = ${module.driver.display.output.htiming.sync_polarity}
+                },
+                .vtiming =
+                {
+                    .total_cyc       = ${module.driver.display.output.vtiming.total_cyc},
+                    .display_cyc     = ${module.driver.display.output.vtiming.display_cyc},
+                    .back_porch      = ${module.driver.display.output.vtiming.back_porch},
+                    .sync_width       = ${module.driver.display.output.vtiming.sync_width},
+                    .sync_polarity   = ${module.driver.display.output.vtiming.sync_polarity}
+                },
+                .format              = ${module.driver.display.output.format},
+                .endian              = ${module.driver.display.output.endian},
+                .color_order         = ${module.driver.display.output.color_order},
+                .data_enable_polarity = ${module.driver.display.output.data_enable_polarity},
+                .sync_edge           = ${module.driver.display.output.sync_edge},
+                .bg_color =
+                {
+                    .byte = {
+                        .a           = ${module.driver.display.output.bg_color.byte.a},
+                        .r           = ${module.driver.display.output.bg_color.byte.r},
+                        .g           = ${module.driver.display.output.bg_color.byte.g},
+                        .b           = ${module.driver.display.output.bg_color.byte.b}
+                    }
+                },
+#if (GLCDC_CFG_COLOR_CORRECTION_ENABLE)
+                .brightness =
+                {
+                    .enable          = ${module.driver.display.output.brightness.enable},
+                    .r               = ${module.driver.display.output.brightness.r},
+                    .g               = ${module.driver.display.output.brightness.g},
+                    .b               = ${module.driver.display.output.brightness.b}
+                },
+                .contrast =
+                {
+                    .enable          = ${module.driver.display.output.contrast.enable},
+                    .r               = ${module.driver.display.output.contrast.r},
+                    .g               = ${module.driver.display.output.contrast.g},
+                    .b               = ${module.driver.display.output.contrast.b}
+                },
+#if (GLCDC_CFG_CORRECTION_GAMMA_ENABLE_R | GLCDC_CFG_CORRECTION_GAMMA_ENABLE_G | GLCDC_CFG_CORRECTION_GAMMA_ENABLE_B)
+ #if ${module.driver.display.output.gamma.table_mode}
+                .p_gamma_correction  = GLCDC_CFG_CORRECTION_GAMMA_CFG_CAST (&amp;${module.driver.display.name}_gamma_cfg),
+ #else
+                .p_gamma_correction  = &amp;${module.driver.display.name}_gamma_cfg,
+ #endif
+#else
+                .p_gamma_correction  = NULL,
+#endif
+#endif
+                .dithering_on        = ${module.driver.display.output.dithering_on}
+            },
+
+            /** Display device callback function pointer */
+            .p_callback              = ${module.driver.display.callback},
+            .p_context               = NULL,
+
+            /** Display device extended configuration */
+            .p_extend                = (void *)(&amp;${module.driver.display.name}_extend_cfg),
+
+            .line_detect_ipl        = ${module.driver.display.line_detect_ipl},
+            .underflow_1_ipl        = ${module.driver.display.underflow_1_ipl},
+            .underflow_2_ipl        = ${module.driver.display.underflow_2_ipl},
+
+#if defined(VECTOR_NUMBER_GLCDC_LINE_DETECT)
+            .line_detect_irq        = VECTOR_NUMBER_GLCDC_LINE_DETECT,
+#else
+            .line_detect_irq        = FSP_INVALID_VECTOR,
+#endif
+#if defined(VECTOR_NUMBER_GLCDC_UNDERFLOW_1)
+            .underflow_1_irq        = VECTOR_NUMBER_GLCDC_UNDERFLOW_1,
+#else
+            .underflow_1_irq        = FSP_INVALID_VECTOR,
+#endif
+#if defined(VECTOR_NUMBER_GLCDC_UNDERFLOW_2)
+            .underflow_2_irq        = VECTOR_NUMBER_GLCDC_UNDERFLOW_2,
+#else
+            .underflow_2_irq        = FSP_INVALID_VECTOR,
+#endif
+        };
+
+#if GLCDC_CFG_LAYER_1_ENABLE
+        /** Display on GLCDC run-time configuration(for the graphics1 layer) */
+        display_runtime_cfg_t ${module.driver.display.name}_runtime_cfg_bg =
+        {
+            .input =
+            {
+                #if (${module.driver.display.input0.enable})
+                .p_base              = (uint32_t *)&amp;${module.driver.display.input0.buffer_name}[0],
+                #else
+                .p_base              = NULL,
+                #endif
+                .hsize               = DISPLAY_HSIZE_INPUT0,
+                .vsize               = DISPLAY_VSIZE_INPUT0,
+                .hstride             = DISPLAY_BUFFER_STRIDE_PIXELS_INPUT0,
+                .format              = ${module.driver.display.input0.format},
+                .line_descending_enable = ${module.driver.display.input0.line_descending_enable},
+                .lines_repeat_enable = ${module.driver.display.input0.lines_repeat_enable},
+                .lines_repeat_times  = ${module.driver.display.input0.lines_repeat_times}
+            },
+            .layer =
+            {
+                .coordinate = {
+                        .x           = ${module.driver.display.layer0.coordinate.x},
+                        .y           = ${module.driver.display.layer0.coordinate.y}
+                },
+                .fade_control        = ${module.driver.display.layer0.fade_control},
+                .fade_speed          = ${module.driver.display.layer0.fade_speed}
+            }
+        };
+#endif
+#if GLCDC_CFG_LAYER_2_ENABLE
+        /** Display on GLCDC run-time configuration(for the graphics2 layer) */
+        display_runtime_cfg_t ${module.driver.display.name}_runtime_cfg_fg =
+        {
+            .input =
+            {
+                #if (${module.driver.display.input1.enable})
+                .p_base              = (uint32_t *)&amp;${module.driver.display.input1.buffer_name}[0],
+                #else
+                .p_base              = NULL,
+                #endif
+                .hsize               = DISPLAY_HSIZE_INPUT1,
+                .vsize               = DISPLAY_VSIZE_INPUT1,
+                .hstride             = DISPLAY_BUFFER_STRIDE_PIXELS_INPUT1,
+                .format              = ${module.driver.display.input1.format},
+                .line_descending_enable = ${module.driver.display.input1.line_descending_enable},
+                .lines_repeat_enable = ${module.driver.display.input1.lines_repeat_enable},
+                .lines_repeat_times  = ${module.driver.display.input1.lines_repeat_times}
+             },
+            .layer =
+            {
+                .coordinate = {
+                        .x           = ${module.driver.display.layer1.coordinate.x},
+                        .y           = ${module.driver.display.layer1.coordinate.y}
+                },
+                .fade_control        = ${module.driver.display.layer1.fade_control},
+                .fade_speed          = ${module.driver.display.layer1.fade_speed}
+            }
+        };
+#endif
+
+/* Instance structure to use this module. */
+const display_instance_t ${module.driver.display.name} =
+{
+    .p_ctrl        = &amp;${module.driver.display.name}_ctrl,
+    .p_cfg         = (display_cfg_t *)&amp;${module.driver.display.name}_cfg,
+    .p_api         = (display_api_t *)&amp;g_display_on_glcdc
+};
+        </declarations>
+        <api configurable="true">
+            <file>ra/fsp/inc/instances/r_glcdc.h</file>
+            <file>ra/fsp/inc/api/r_display_api.h</file>
+        </api>
+    </module>
+</raModuleDescription>

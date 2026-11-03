@@ -1,0 +1,233 @@
+﻿<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.driver.usbx_hhid" path="fsp_cfg/r_usb_hhid_cfg.h" version="0">
+        <property id="config.driver.usbx_hhid.int_in" display="Interrupt In Pipe" default="config.driver.usbx_hhid.int_in.pipe6" description="Select the pipe number for interrupt in transfer.">
+            <option id="config.driver.usbx_hhid.int_in.pipe6" display="USB PIPE6" value="USB_PIPE6"/>
+            <option id="config.driver.usbx_hhid.int_in.pipe7" display="USB PIPE7" value="USB_PIPE7"/>
+            <option id="config.driver.usbx_hhid.int_in.pipe8" display="USB PIPE8" value="USB_PIPE8"/>
+            <option id="config.driver.usbx_hhid.int_in.pipe9" display="USB PIPE9" value="USB_PIPE9"/>
+            <option id="config.driver.usbx_hhid.int_in.pipe_no_use" display="NO USE" value="USB_NULL"/>
+        </property>
+        <property id="config.driver.usbx_hhid.int_out" display="Interrupt Out Pipe" default="config.driver.usbx_hhid.int_out.pipe_no_use" description="Select the pipe number for interrupt out transfer.">
+            <option id="config.driver.usbx_hhid.int_out.pipe6" display="USB PIPE6" value="USB_PIPE6"/>
+            <option id="config.driver.usbx_hhid.int_out.pipe7" display="USB PIPE7" value="USB_PIPE7"/>
+            <option id="config.driver.usbx_hhid.int_out.pipe8" display="USB PIPE8" value="USB_PIPE8"/>
+            <option id="config.driver.usbx_hhid.int_out.pipe9" display="USB PIPE9" value="USB_PIPE9"/>
+            <option id="config.driver.usbx_hhid.int_out.pipe_no_use" display="NO USE" value="USB_NULL"/>
+        </property>
+        <property id="config.driver.usbx_hhid.int_in2" display="Interrupt In Pipe 2" default="config.driver.usbx_hhid.int_in2.pipe_no_use" description="Specify the pipe number for interrupt in transfer only when using USB Hub.">
+            <option id="config.driver.usbx_hhid.int_in2.pipe6" display="USB PIPE6" value="USB_PIPE6"/>
+            <option id="config.driver.usbx_hhid.int_in2.pipe7" display="USB PIPE7" value="USB_PIPE7"/>
+            <option id="config.driver.usbx_hhid.int_in2.pipe8" display="USB PIPE8" value="USB_PIPE8"/>
+            <option id="config.driver.usbx_hhid.int_in2.pipe_no_use" display="NO USE" value="USB_NULL"/>
+        </property>
+        <property id="config.driver.usbx_hhid.int_in3" display="Interrupt In Pipe 3" default="config.driver.usbx_hhid.int_in3.pipe_no_use" description="Select the pipe number for interrupt in transfer only when using USB Hub.">
+            <option id="config.driver.usbx_hhid.int_in3.pipe6" display="USB PIPE6" value="USB_PIPE6"/>
+            <option id="config.driver.usbx_hhid.int_in3.pipe7" display="USB PIPE7" value="USB_PIPE7"/>
+            <option id="config.driver.usbx_hhid.int_in3.pipe8" display="USB PIPE8" value="USB_PIPE8"/>
+            <option id="config.driver.usbx_hhid.int_in3.pipe_no_use" display="NO USE" value="USB_NULL"/>
+        </property>
+        <content>
+            #ifdef __cplusplus
+            extern "C" {
+            #endif
+
+            #define USB_CFG_HHID_INT_IN  (${config.driver.usbx_hhid.int_in})
+            #define USB_CFG_HHID_INT_IN2 (${config.driver.usbx_hhid.int_in2})
+            #define USB_CFG_HHID_INT_IN3 (${config.driver.usbx_hhid.int_in3})
+            #define USB_CFG_HHID_INT_OUT (${config.driver.usbx_hhid.int_out})
+
+            #ifdef __cplusplus
+            }
+            #endif
+        </content>
+    </config>
+    <module config="config.driver.usbx_hhid" display="Connectivity|Azure RTOS USBX HHID" id="module.driver.usbx_hhid" version="1" url="https://github.com/eclipse-threadx/rtos-docs/blob/main/rtos-docs/usbx/index.md">
+        <constraint display="Unique name required for each instance">
+            "${interface.driver.usbx_hhid.${module.driver.usbx_hhid.name}}" === "1"
+        </constraint>
+        <constraint display="Requires USB Peripheral">
+          "${interface.mcu.usb_fs.external}" === "1"
+        </constraint>
+        <constraint display="The USB pipe numbers for Interrupt In and Interrupt Out must be different.">
+            !(("${config.driver.usbx_hhid.int_in}" === "config.driver.usbx_hhid.int_in.pipe6") &amp;&amp;
+            ("${config.driver.usbx_hhid.int_out}" === "config.driver.usbx_hhid.int_out.pipe6"))
+        </constraint>
+        <constraint display="The USB pipe numbers for Interrupt In and Interrupt Out must be different.">
+            !(("${config.driver.usbx_hhid.int_in}" === "config.driver.usbx_hhid.int_in.pipe7") &amp;&amp;
+            ("${config.driver.usbx_hhid.int_out}" === "config.driver.usbx_hhid.int_out.pipe7"))
+        </constraint>
+        <constraint display="The USB pipe numbers for Interrupt In and Interrupt Out must be different.">
+            !(("${config.driver.usbx_hhid.int_in}" === "config.driver.usbx_hhid.int_in.pipe8") &amp;&amp;
+            ("${config.driver.usbx_hhid.int_out}" === "config.driver.usbx_hhid.int_out.pipe8"))
+        </constraint>
+        <constraint display="The USB pipe numbers for Interrupt In and Interrupt Out must be different.">
+            !(("${config.driver.usbx_hhid.int_in}" === "config.driver.usbx_hhid.int_in.pipe9") &amp;&amp;
+            ("${config.driver.usbx_hhid.int_out}" === "config.driver.usbx_hhid.int_out.pipe9"))
+        </constraint>
+        <constraint display="Specify either the Interrupt In or Interrupt Out USB pipe.">
+            !(("${config.driver.usbx_hhid.int_in}" === "config.driver.usbx_hhid.int_in.pipe_no_use") &amp;&amp;
+            ("${config.driver.usbx_hhid.int_out}" === "config.driver.usbx_hhid.int_out.pipe_no_use"))
+        </constraint>
+        <constraint display="The USB pipe numbers for Interrupt In must be different.">
+            !(("${config.driver.usbx_hhid.int_in}" === "config.driver.usbx_hhid.int_in.pipe6") &amp;&amp;
+            ("${config.driver.usbx_hhid.int_in2}" === "config.driver.usbx_hhid.int_in2.pipe6"))
+        </constraint>
+        <constraint display="The USB pipe numbers for Interrupt In must be different.">
+            !(("${config.driver.usbx_hhid.int_in}" === "config.driver.usbx_hhid.int_in.pipe7") &amp;&amp;
+            ("${config.driver.usbx_hhid.int_in2}" === "config.driver.usbx_hhid.int_in2.pipe7"))
+        </constraint>
+        <constraint display="The USB pipe numbers for Interrupt In must be different.">
+            !(("${config.driver.usbx_hhid.int_in}" === "config.driver.usbx_hhid.int_in.pipe8") &amp;&amp;
+            ("${config.driver.usbx_hhid.int_in2}" === "config.driver.usbx_hhid.int_in2.pipe8"))
+        </constraint>
+        <constraint display="The USB pipe numbers for Interrupt In must be different.">
+            !(("${config.driver.usbx_hhid.int_in}" === "config.driver.usbx_hhid.int_in.pipe6") &amp;&amp;
+            ("${config.driver.usbx_hhid.int_in3}" === "config.driver.usbx_hhid.int_in3.pipe6"))
+        </constraint>
+        <constraint display="The USB pipe numbers for Interrupt In must be different.">
+            !(("${config.driver.usbx_hhid.int_in}" === "config.driver.usbx_hhid.int_in.pipe7") &amp;&amp;
+            ("${config.driver.usbx_hhid.int_in3}" === "config.driver.usbx_hhid.int_in3.pipe7"))
+        </constraint>
+        <constraint display="The USB pipe numbers for Interrupt In must be different.">
+            !(("${config.driver.usbx_hhid.int_in}" === "config.driver.usbx_hhid.int_in.pipe8") &amp;&amp;
+            ("${config.driver.usbx_hhid.int_in3}" === "config.driver.usbx_hhid.int_in3.pipe8"))
+        </constraint>
+        <constraint display="The USB pipe numbers for Interrupt In must be different.">
+            !(("${config.driver.usbx_hhid.int_in2}" === "config.driver.usbx_hhid.int_in2.pipe6") &amp;&amp;
+            ("${config.driver.usbx_hhid.int_in3}" === "config.driver.usbx_hhid.int_in3.pipe6"))
+        </constraint>
+        <constraint display="The USB pipe numbers for Interrupt In must be different.">
+            !(("${config.driver.usbx_hhid.int_in2}" === "config.driver.usbx_hhid.int_in2.pipe7") &amp;&amp;
+            ("${config.driver.usbx_hhid.int_in3}" === "config.driver.usbx_hhid.int_in3.pipe7"))
+        </constraint>
+        <constraint display="The USB pipe numbers for Interrupt In must be different.">
+            !(("${config.driver.usbx_hhid.int_in2}" === "config.driver.usbx_hhid.int_in2.pipe8") &amp;&amp;
+            ("${config.driver.usbx_hhid.int_in3}" === "config.driver.usbx_hhid.int_in3.pipe8"))
+        </constraint>
+        <constraint display="The USB pipe numbers for Interrupt In must be different.">
+            !(("${config.driver.usbx_hhid.int_out}" === "config.driver.usbx_hhid.int_out.pipe6") &amp;&amp;
+            ("${config.driver.usbx_hhid.int_in2}" === "config.driver.usbx_hhid.int_in2.pipe6"))
+        </constraint>
+        <constraint display="The USB pipe numbers for Interrupt In must be different.">
+            !(("${config.driver.usbx_hhid.int_out}" === "config.driver.usbx_hhid.int_out.pipe7") &amp;&amp;
+            ("${config.driver.usbx_hhid.int_in2}" === "config.driver.usbx_hhid.int_in2.pipe7"))
+        </constraint>
+        <constraint display="The USB pipe numbers for Interrupt In must be different.">
+            !(("${config.driver.usbx_hhid.int_out}" === "config.driver.usbx_hhid.int_out.pipe8") &amp;&amp;
+            ("${config.driver.usbx_hhid.int_in2}" === "config.driver.usbx_hhid.int_in2.pipe8"))
+        </constraint>
+        <constraint display="The USB pipe numbers for Interrupt In must be different.">
+            !(("${config.driver.usbx_hhid.int_out}" === "config.driver.usbx_hhid.int_out.pipe6") &amp;&amp;
+            ("${config.driver.usbx_hhid.int_in3}" === "config.driver.usbx_hhid.int_in3.pipe6"))
+        </constraint>
+        <constraint display="The USB pipe numbers for Interrupt In must be different.">
+            !(("${config.driver.usbx_hhid.int_out}" === "config.driver.usbx_hhid.int_out.pipe7") &amp;&amp;
+            ("${config.driver.usbx_hhid.int_in3}" === "config.driver.usbx_hhid.int_in3.pipe7"))
+        </constraint>
+        <constraint display="The USB pipe numbers for Interrupt In must be different.">
+            !(("${config.driver.usbx_hhid.int_out}" === "config.driver.usbx_hhid.int_out.pipe8") &amp;&amp;
+            ("${config.driver.usbx_hhid.int_in3}" === "config.driver.usbx_hhid.int_in3.pipe8"))
+        </constraint>
+        <constraint display="The USB PIPE9 can not be specified when using USB Hub.">
+            !(("${config.driver.usbx_hhid.int_in}" === "config.driver.usbx_hhid.int_in.pipe9") &amp;&amp;
+            ("${config.driver.usbx_hhid.int_in2}" === "config.driver.usbx_hhid.int_in2.pipe6"))
+        </constraint>
+        <constraint display="The USB PIPE9 can not be specified when using USB Hub.">
+            !(("${config.driver.usbx_hhid.int_in}" === "config.driver.usbx_hhid.int_in.pipe9") &amp;&amp;
+            ("${config.driver.usbx_hhid.int_in2}" === "config.driver.usbx_hhid.int_in2.pipe7"))
+        </constraint>
+        <constraint display="The USB PIPE9 can not be specified when using USB Hub.">
+            !(("${config.driver.usbx_hhid.int_in}" === "config.driver.usbx_hhid.int_in.pipe9") &amp;&amp;
+            ("${config.driver.usbx_hhid.int_in2}" === "config.driver.usbx_hhid.int_in2.pipe8"))
+        </constraint>
+        <constraint display="The USB PIPE9 can not be specified when using USB Hub.">
+            !(("${config.driver.usbx_hhid.int_in}" === "config.driver.usbx_hhid.int_in.pipe9") &amp;&amp;
+            ("${config.driver.usbx_hhid.int_in3}" === "config.driver.usbx_hhid.int_in3.pipe6"))
+        </constraint>
+        <constraint display="The USB PIPE9 can not be specified when using USB Hub.">
+            !(("${config.driver.usbx_hhid.int_in}" === "config.driver.usbx_hhid.int_in.pipe9") &amp;&amp;
+            ("${config.driver.usbx_hhid.int_in3}" === "config.driver.usbx_hhid.int_in3.pipe7"))
+        </constraint>
+        <constraint display="The USB PIPE9 can not be specified when using USB Hub.">
+            !(("${config.driver.usbx_hhid.int_in}" === "config.driver.usbx_hhid.int_in.pipe9") &amp;&amp;
+            ("${config.driver.usbx_hhid.int_in3}" === "config.driver.usbx_hhid.int_in3.pipe8"))
+        </constraint>
+        <constraint display="The USB PIPE9 can not be specified when using USB Hub.">
+            !(("${config.driver.usbx_hhid.int_out}" === "config.driver.usbx_hhid.int_out.pipe9") &amp;&amp;
+            ("${config.driver.usbx_hhid.int_in2}" === "config.driver.usbx_hhid.int_in2.pipe6"))
+        </constraint>
+        <constraint display="The USB PIPE9 can not be specified when using USB Hub.">
+            !(("${config.driver.usbx_hhid.int_out}" === "config.driver.usbx_hhid.int_out.pipe9") &amp;&amp;
+            ("${config.driver.usbx_hhid.int_in2}" === "config.driver.usbx_hhid.int_in2.pipe7"))
+        </constraint>
+        <constraint display="The USB PIPE9 can not be specified when using USB Hub.">
+            !(("${config.driver.usbx_hhid.int_out}" === "config.driver.usbx_hhid.int_out.pipe9") &amp;&amp;
+            ("${config.driver.usbx_hhid.int_in2}" === "config.driver.usbx_hhid.int_in2.pipe8"))
+        </constraint>
+        <constraint display="The USB PIPE9 can not be specified when using USB Hub.">
+            !(("${config.driver.usbx_hhid.int_out}" === "config.driver.usbx_hhid.int_out.pipe9") &amp;&amp;
+            ("${config.driver.usbx_hhid.int_in3}" === "config.driver.usbx_hhid.int_in3.pipe6"))
+        </constraint>
+        <constraint display="The USB PIPE9 can not be specified when using USB Hub.">
+            !(("${config.driver.usbx_hhid.int_out}" === "config.driver.usbx_hhid.int_out.pipe9") &amp;&amp;
+            ("${config.driver.usbx_hhid.int_in3}" === "config.driver.usbx_hhid.int_in3.pipe7"))
+        </constraint>
+        <constraint display="The USB PIPE9 can not be specified when using USB Hub.">
+            !(("${config.driver.usbx_hhid.int_out}" === "config.driver.usbx_hhid.int_out.pipe9") &amp;&amp;
+            ("${config.driver.usbx_hhid.int_in3}" === "config.driver.usbx_hhid.int_in3.pipe8"))
+        </constraint>
+        <constraint display="The user can not specify NO USE when using USB Hub.">
+            !(("${config.driver.usbx_hhid.int_in2}" === "config.driver.usbx_hhid.int_in2.pipe_no_use") &amp;&amp;
+            ("${config.driver.usbx_hhid.int_in3}" === "config.driver.usbx_hhid.int_in3.pipe6"))
+        </constraint>
+        <constraint display="The user can not specify NO USE when using USB Hub.">
+            !(("${config.driver.usbx_hhid.int_in2}" === "config.driver.usbx_hhid.int_in2.pipe_no_use") &amp;&amp;
+            ("${config.driver.usbx_hhid.int_in3}" === "config.driver.usbx_hhid.int_in3.pipe7"))
+        </constraint>
+        <constraint display="The user can not specify NO USE when using USB Hub.">
+            !(("${config.driver.usbx_hhid.int_in2}" === "config.driver.usbx_hhid.int_in2.pipe_no_use") &amp;&amp;
+            ("${config.driver.usbx_hhid.int_in3}" === "config.driver.usbx_hhid.int_in3.pipe8"))
+        </constraint>
+        <constraint display="The user can not specify NO USE when using USB Hub.">
+            !(("${config.driver.usbx_hhid.int_in3}" === "config.driver.usbx_hhid.int_in3.pipe_no_use") &amp;&amp;
+            ("${config.driver.usbx_hhid.int_in2}" === "config.driver.usbx_hhid.int_in2.pipe6"))
+        </constraint>
+        <constraint display="The user can not specify NO USE when using USB Hub.">
+            !(("${config.driver.usbx_hhid.int_in3}" === "config.driver.usbx_hhid.int_in3.pipe_no_use") &amp;&amp;
+            ("${config.driver.usbx_hhid.int_in2}" === "config.driver.usbx_hhid.int_in2.pipe7"))
+        </constraint>
+        <constraint display="The user can not specify NO USE when using USB Hub.">
+            !(("${config.driver.usbx_hhid.int_in3}" === "config.driver.usbx_hhid.int_in3.pipe_no_use") &amp;&amp;
+            ("${config.driver.usbx_hhid.int_in2}" === "config.driver.usbx_hhid.int_in2.pipe8"))
+        </constraint>
+        <requires id="module.azure.usbx_hhid.requires.threadx" interface="interface.rtos.tx" visible="false" display="Requires ThreadX"/>
+        <requires id="module.azure.usbx_basic.requires.full_module" interface="interface.mcu.usb.pipes.0.1.2.3.4.5.6.7.8.9" visible="false" display="Requires USB Full Module" />
+        <requires id="module.driver.usbx_hhid.requires.usb_basic" interface="interface.middleware.rm_usbx_port_hid" visible="true" display="USBX HHID">
+            <override property="module.middleware.rm_usbx_port.usb_mode" value="module.middleware.rm_usbx_port.usb_mode.host"/>
+            <override property="module.middleware.rm_usbx_port.usb_classtype" value="module.middleware.rm_usbx_port.usb_classtype.hhid"/>
+            <override property="module.middleware.rm_usbx_port.p_usb_reg" value="NULL"/>
+        </requires>
+        <provides interface="interface.driver.usbx_hhid" />
+        <provides interface="interface.driver.usbx_hhid.${module.driver.usbx_hhid.name}" />
+        <property default="usbx_hhid" id="module.driver.usbx_hhid.usbx_hhid_interface" description=""/>
+        <property default="g_usbx_hhid${_instance}" display="Name" id="module.driver.usbx_hhid.name" description="Module name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.usbx_hhid.name}")</constraint>
+        </property>
+        <header>
+        /** CDC Driver on USB Instance. */
+        </header>
+        <includes>
+#include "ux_host_class_hid.h"
+#include "ux_host_class_hid_keyboard.h"
+#include "ux_host_class_hid_mouse.h"
+#include "ux_host_class_hid_remote_control.h"
+        </includes>
+        <declarations>
+        </declarations>
+        <functions>
+        </functions>
+        <api configurable="true">
+        </api>
+    </module>
+</raModuleDescription>

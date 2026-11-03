@@ -1,0 +1,522 @@
+<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.driver.cec" path="fsp_cfg/r_cec_cfg.h" version="0">
+        <property default="config.driver.cec.param_checking_enable.bsp" display="Parameter Checking" id="config.driver.cec.param_checking_enable" description="If selected code for parameter checking is included in the build.">
+            <option display="Default (BSP)" id="config.driver.cec.param_checking_enable.bsp" value="(BSP_CFG_PARAM_CHECKING_ENABLE)"/>
+            <option display="Enabled" id="config.driver.cec.param_checking_enable.enabled" value="(1)"/>
+            <option display="Disabled" id="config.driver.cec.param_checking_enable.disabled" value="(0)"/>
+        </property>
+        <property default="14" display="CEC Message Max Data Size" id="config.driver.cec.max_payload_size" description="Maximum Data Size for CEC Message Transmission/Reception.">
+            <constraint display="CEC message max data size must be a positive integer">testInteger("${config.driver.cec.max_payload_size}")  &amp;&amp; (${config.driver.cec.max_payload_size} &gt; 0)</constraint>
+        </property>
+
+
+        <content>
+        #ifdef __cplusplus
+        extern "C" {
+        #endif
+
+        #define CEC_CFG_PARAM_CHECKING_ENABLE ${config.driver.cec.param_checking_enable}
+        #define CEC_DATA_BUFFER_LENGTH (${config.driver.cec.max_payload_size})
+
+        #ifdef __cplusplus
+        }
+        #endif
+        </content>
+    </config>
+    <module config="config.driver.cec" display="Connectivity|${module.driver.cec.name} CEC (r_cec)" id="module.driver.cec_on_cec" version="1" url="group___c_e_c.html">
+        <constraint display="Requires CEC peripheral">
+            "${interface.mcu.cec.external}" === "1"
+        </constraint>
+        <constraint display="Unique name required for each instance">
+            "${interface.driver.cec.${module.driver.cec.name}}" === "1"
+        </constraint>
+        <constraint display="Using CECCLK as clock source requires it to be enabled on the clocks tab.">
+            (("module.driver.cec.clock_source.cecclk" != "${module.driver.ctl0_clock_select}") &amp;&amp; ("module.driver.cec.clock_source.cecclk_div_256" != "${module.driver.ctl0_clock_select}")) || (testExists("${board.clock.peripheral.cec}") &amp;&amp; (${board.clock.peripheral.cec} &gt; 0))
+        </constraint>
+        <constraint display="CEC reception data sampling time must be less than reception logical zero minimum low width setting.">
+            (${module.driver.rx_data_sample_time} &lt; ${module.driver.bit_width_rx_zero_low_min})
+        </constraint>
+        <constraint display="CEC reception data sampling time must be greater than reception logical one maximum low width setting.">
+            (${module.driver.rx_data_sample_time} &gt; ${module.driver.bit_width_rx_one_low_max})
+        </constraint>
+        <constraint display="CEC reception logical zero minimum low width setting must be less than reception logical zero maximum low width setting.">
+            (${module.driver.bit_width_rx_zero_low_min} &lt; ${module.driver.bit_width_rx_zero_low_max})
+        </constraint>
+        <constraint display="CEC reception logical one minimum low width setting must be less than reception logical one maximum low width setting.">
+            (${module.driver.bit_width_rx_one_low_min} &lt; ${module.driver.bit_width_rx_one_low_max})
+        </constraint>
+        <constraint display="CEC reception start bit minimum low width setting must be less than reception start bit maximum time.">
+            (${module.driver.bit_width_rx_start_overall_min} &lt; ${module.driver.bit_width_rx_start_overall_max})
+        </constraint>
+        <constraint display="CEC reception ovarall minimum bit width setting must be less than reception overall maximum bit width setting.">
+            (${module.driver.bit_width_rx_bit_overall_min} &lt; ${module.driver.bit_width_rx_bit_overall_max})
+        </constraint>
+        <requires id="module.driver.cec_on_cec.requires.cec" interface="interface.mcu.cec.external" visible="false" display="Requires CEC peripheral" />
+        <provides interface="interface.driver.cec" />
+        <provides interface="interface.driver.cec.${module.driver.cec.name}" />
+        <provides interface="interface.peripheral.cec" />
+        <property default="g_cec${_instance}" display="General|Name" id="module.driver.cec.name" description="Module name">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.cec.name}")</constraint>
+        </property>
+        <property default="module.driver.cec.clock_source.pclkb_div_1024" display="Control Configuration|Clock Select" id="module.driver.ctl0_clock_select" description="CEC Clock Select Configuration">
+            <option display="PCLKB / 32" id="module.driver.cec.clock_source.pclkb_div_32" value="CEC_CLOCK_SOURCE_PCLKB_DIV_32"/>
+            <option display="PCLKB / 64" id="module.driver.cec.clock_source.pclkb_div_64" value="CEC_CLOCK_SOURCE_PCLKB_DIV_64"/>
+            <option display="PCLKB / 128" id="module.driver.cec.clock_source.pclkb_div_128" value="CEC_CLOCK_SOURCE_PCLKB_DIV_128"/>
+            <option display="PCLKB / 256" id="module.driver.cec.clock_source.pclkb_div_256" value="CEC_CLOCK_SOURCE_PCLKB_DIV_256"/>
+            <option display="PCLKB / 512" id="module.driver.cec.clock_source.pclkb_div_512" value="CEC_CLOCK_SOURCE_PCLKB_DIV_512"/>
+            <option display="PCLKB / 1024" id="module.driver.cec.clock_source.pclkb_div_1024" value="CEC_CLOCK_SOURCE_PCLKB_DIV_1024"/>
+            <option display="CECCLK" id="module.driver.cec.clock_source.cecclk" value="CEC_CLOCK_SOURCE_CECCLK"/>
+            <option display="CECCLK / 256" id="module.driver.cec.clock_source.cecclk_div_256" value="CEC_CLOCK_SOURCE_CECCLK_DIV_256"/>
+        </property>
+        <property default="module.driver.cec.ctl0_ackten.enabled" display="Control Configuration|Ack Bit Timing Error Enable" id="module.driver.ctl0_ackten" description="CEC Ack Bit Timing Error Enable">
+            <option display="Disabled" id="module.driver.cec.ctl0_ackten.disabled" value="(0)"/>
+            <option display="Enabled" id="module.driver.cec.ctl0_ackten.enabled" value="(1)"/>
+        </property>
+        <property default="module.driver.ctl1_sft_slct.7bit" display="Control Configuration|Signal-Free Time Bit Width" id="module.driver.ctl1_sft_slct" description="Signal-Free Time Data Bit Width Select">
+            <option display="3-data bit width" id="module.driver.ctl1_sft_slct.3bit" value="0U"/>
+            <option display="5-data bit width" id="module.driver.ctl1_sft_slct.5bit" value="1U"/>
+            <option display="7-data bit width" id="module.driver.ctl1_sft_slct.7bit" value="2U"/>
+            <option display="Does not detect signal-free time." id="module.driver.ctl1_sft_slct.none" value="3U"/>
+        </property>
+        <property default="module.driver.cec.ctl1_sterrd_en.enabled" display="Control Configuration|Start Bit Error Detection Enable" id="module.driver.ctl1_sterrd_en" description="Enable to detect timing errors during start bit reception.">
+            <option display="Disabled" id="module.driver.cec.ctl1_sterrd_en.disabled" value="(0)"/>
+            <option display="Enabled" id="module.driver.cec.ctl1_sterrd_en.enabled" value="(1)"/>
+        </property>
+        <property default="module.driver.cec.ctl1_blerrd_en.enabled" display="Control Configuration|Bus Lock Detection Enable" id="module.driver.ctl1_blerrd_en" description="Enable to detect sticking of receive data to high or low.">
+            <option display="Disabled" id="module.driver.cec.ctl1_blerrd_en.disabled" value="(0)"/>
+            <option display="Enabled" id="module.driver.cec.ctl1_blerrd_en.enabled" value="(1)"/>
+        </property>
+        <property default="module.driver.cec.ctl1_cdfc_en.enabled" display="Control Configuration|Digital Filter Enable" id="module.driver.ctl1_cdfc_en" description="Enable to use a digital filter.">
+            <option display="Disabled" id="module.driver.cec.ctl1_cdfc_en.disabled" value="(0)"/>
+            <option display="Enabled" id="module.driver.cec.ctl1_cdfc_en.enabled" value="(1)"/>
+        </property>
+        <property default="module.driver.cec.err_detect_lerplen.disabled" display="Control Configuration|Long Bit Width Error Pulse Output Enable" id="module.driver.err_detect_lerplen" description="Enable to output an error handling pulse when a long bit width error is detected.">
+            <option display="Disabled" id="module.driver.cec.err_detect_lerplen.disabled" value="(0)"/>
+            <option display="Enabled" id="module.driver.cec.err_detect_lerplen.enabled" value="(1)"/>
+        </property>
+        <property default="module.driver.cec.err_detect_rercven.enabled" display="Control Configuration|Start Detection Reception Restart Enable" id="module.driver.err_detect_rercven" description="Enable to restart reception after a start bit error is detected.">
+            <option display="Disabled" id="module.driver.cec.err_detect_rercven.disabled" value="(0)"/>
+            <option display="Enabled" id="module.driver.cec.err_detect_rercven.enabled" value="(1)"/>
+        </property>
+
+        <!-- Bit timing data -->
+        <property default="180" display="Bit Width Timing|Transmit|Start Bit Low Time" id="module.driver.bit_width_tx_start_low" description="CEC transmission start bit low width setting (CEC Clock Cycles).">
+            <constraint display="CEC transmission start bit low width setting must be a positive integer.">
+                testInteger("${module.driver.bit_width_tx_start_low}")  &amp;&amp; (${module.driver.bit_width_tx_start_low} &gt; 0)
+            </constraint>
+            <constraint display="CEC transmission start bit low width setting must be less than 512.">
+                (${module.driver.bit_width_tx_start_low} &lt; 512)
+            </constraint>
+        </property>
+        <property default="220" display="Bit Width Timing|Transmit|Start Bit Width Time" id="module.driver.bit_width_tx_start_high" description="CEC transmission start bit high width setting (CEC Clock Cycles).">
+            <constraint display="CEC transmission start bit high width setting must be a positive integer.">
+                testInteger("${module.driver.bit_width_tx_start_high}")  &amp;&amp; (${module.driver.bit_width_tx_start_high} &gt; 0)
+            </constraint>
+            <constraint display="CEC transmission start bit high width setting must be less than 512.">
+                (${module.driver.bit_width_tx_start_high} &lt; 512)
+            </constraint>
+        </property>
+        <property default="73" display="Bit Width Timing|Transmit|Logical Zero Low Time" id="module.driver.bit_width_tx_zero_low" description="CEC transmission logical zero low width setting (CEC Clock Cycles).">
+            <constraint display="CEC transmission logical zero low width setting must be a positive integer.">
+                testInteger("${module.driver.bit_width_tx_zero_low}")  &amp;&amp; (${module.driver.bit_width_tx_zero_low} &gt; 0)
+            </constraint>
+            <constraint display="CEC transmission logical zero low width setting must be less than 512.">
+                (${module.driver.bit_width_tx_zero_low} &lt; 512)
+            </constraint>
+        </property>
+        <property default="29" display="Bit Width Timing|Transmit|Logical One Low Time" id="module.driver.bit_width_tx_one_low" description="CEC transmission logical one low width setting (CEC Clock Cycles).">
+            <constraint display="CEC transmission logical one low width setting must be a positive integer.">
+                testInteger("${module.driver.bit_width_tx_one_low}")  &amp;&amp; (${module.driver.bit_width_tx_one_low} &gt; 0)
+            </constraint>
+            <constraint display="CEC transmission logical one low width setting must be less than 512.">
+                (${module.driver.bit_width_tx_one_low} &lt; 512)
+            </constraint>
+        </property>
+        <property default="117" display="Bit Width Timing|Transmit|Overall Bit Width Time" id="module.driver.bit_width_tx_bit_overall" description="CEC transmission overall data bit width time setting (CEC Clock Cycles).">
+            <constraint display="CEC transmission overall data bit width time setting must be a positive integer.">
+                testInteger("${module.driver.bit_width_tx_bit_overall}")  &amp;&amp; (${module.driver.bit_width_tx_bit_overall} &gt; 0)
+            </constraint>
+            <constraint display="CEC transmission overall data bit width time setting must be less than 512.">
+                (${module.driver.bit_width_tx_bit_overall} &lt; 512)
+            </constraint>
+        </property>
+        <property default="49" display="Bit Width Timing|Receive|Data Sample Time" id="module.driver.rx_data_sample_time" description="CEC reception data sampling time setting (CEC Clock Cycles).">
+            <constraint display="CEC reception data sampling time must be a positive integer.">
+                testInteger("${module.driver.rx_data_sample_time}")  &amp;&amp; (${module.driver.rx_data_sample_time} &gt; 0)
+            </constraint>
+            <constraint display="CEC reception data sampling time must be less than 512.">
+                (${module.driver.rx_data_sample_time} &lt; 512)
+            </constraint>
+        </property>
+        <property default="117" display="Bit Width Timing|Receive|Data Bit Reference Width" id="module.driver.rx_data_bit_reference_width" description="CEC data bit reference width setting (CEC Clock Cycles).">
+            <constraint display="CEC reception data bit reference width must be a positive integer.">
+                testInteger("${module.driver.rx_data_bit_reference_width}")  &amp;&amp; (${module.driver.rx_data_bit_reference_width} &gt;= 0)
+            </constraint>
+            <constraint display="CEC data bit reference width must be less than 512.">
+                (${module.driver.rx_data_bit_reference_width} &lt; 512)
+            </constraint>
+        </property>
+        <property default="171" display="Bit Width Timing|Receive|Start Bit Low Min Time" id="module.driver.bit_width_rx_start_low_min" description="CEC reception start bit minimum low width setting (CEC Clock Cycles). Not used when Start Bit Error Detection and restart Rx on Error are not enabled.">
+            <constraint display="CEC reception start bit minimum low width setting must be a positive integer.">
+                testInteger("${module.driver.bit_width_rx_start_low_min}")  &amp;&amp; (${module.driver.bit_width_rx_start_low_min} &gt; 0)
+            </constraint>
+            <constraint display="CEC reception start bit minimum low width setting must be less than 512.">
+                (${module.driver.bit_width_rx_start_low_min} &lt; 512)
+            </constraint>
+            <constraint display="CEC reception start bit minimum low width setting must .">
+                (${module.driver.bit_width_rx_start_low_min} &lt; 512)
+            </constraint>
+        </property>
+        <property default="190" display="Bit Width Timing|Receive|Start Bit Low Max Time" id="module.driver.bit_width_rx_start_low_max" description="CEC reception start bit maximum low width setting  (CEC Clock Cycles). Not used when Start Bit Error Detection and restart Rx on Error are not enabled.">
+            <constraint display="CEC reception start bit maximum low width setting must be a positive integer.">
+                testInteger("${module.driver.bit_width_rx_start_low_max}")  &amp;&amp; (${module.driver.bit_width_rx_start_low_max} &gt; 0)
+            </constraint>
+            <constraint display="CEC reception start bit maximum low width setting must be less than 512.">
+                (${module.driver.bit_width_rx_start_low_max} &lt; 512)
+            </constraint>
+        </property>
+        <property default="210" display="Bit Width Timing|Receive|Start Bit Min Time" id="module.driver.bit_width_rx_start_overall_min" description="CEC start bit minimum time setting (CEC Clock Cycles). Not used when Start Bit Error Detection and restart Rx on Error are not enabled.">
+            <constraint display="CEC start bit minimum time setting must be a positive integer.">
+                testInteger("${module.driver.bit_width_rx_start_overall_min}")  &amp;&amp; (${module.driver.bit_width_rx_start_overall_min} &gt; 0)
+            </constraint>
+            <constraint display="CEC start bit minimum time setting must be less than 512.">
+                (${module.driver.bit_width_rx_start_overall_min} &lt; 512)
+            </constraint>
+        </property>
+        <property default="229" display="Bit Width Timing|Receive|Start Bit Max Time" id="module.driver.bit_width_rx_start_overall_max" description="CEC start bit maximum time setting (CEC Clock Cycles). Not used when Start Bit Error Detection and restart Rx on Error are not enabled.">
+            <constraint display="CEC reception start bit maximum time setting must be a positive integer.">
+                testInteger("${module.driver.bit_width_rx_start_overall_max}")  &amp;&amp; (${module.driver.bit_width_rx_start_overall_max} &gt; 0)
+            </constraint>
+            <constraint display="CEC reception start bit maximum time setting must be less than 512.">
+                (${module.driver.bit_width_rx_start_overall_max} &lt; 512)
+            </constraint>
+        </property>
+        <property default="64" display="Bit Width Timing|Receive|Logical Zero Low Min Time" id="module.driver.bit_width_rx_zero_low_min" description="CEC reception logical zero minimum low width setting (CEC Clock Cycles).">
+            <constraint display="CEC reception logical zero minimum low width setting must be a positive integer.">
+                testInteger("${module.driver.bit_width_rx_zero_low_min}")  &amp;&amp; (${module.driver.bit_width_rx_zero_low_min} &gt; 0)
+            </constraint>
+            <constraint display="CEC reception logical zero minimum low width setting must be less than 512.">
+                (${module.driver.bit_width_rx_zero_low_min} &lt; 512)
+            </constraint>
+        </property>
+        <property default="83" display="Bit Width Timing|Receive|Logical Zero Low Max Time" id="module.driver.bit_width_rx_zero_low_max" description="CEC reception logical zero maximum low width setting (CEC Clock Cycles).">
+            <constraint display="CEC reception locical zero maximum low width setting must be a positive integer.">
+                testInteger("${module.driver.bit_width_rx_zero_low_max}")  &amp;&amp; (${module.driver.bit_width_rx_zero_low_max} &gt; 0)
+            </constraint>
+            <constraint display="CEC reception locical zero maximum low width setting must be less than 512.">
+                (${module.driver.bit_width_rx_zero_low_max} &lt; 512)
+            </constraint>
+        </property>
+        <property default="20" display="Bit Width Timing|Receive|Logical One Low Min Time" id="module.driver.bit_width_rx_one_low_min" description="CEC reception logical one minimum low width setting (CEC Clock Cycles).">
+            <constraint display="CEC reception logical one minimum low width setting must be a positive integer.">
+                testInteger("${module.driver.bit_width_rx_one_low_min}")  &amp;&amp; (${module.driver.bit_width_rx_one_low_min} &gt; 0)
+            </constraint>
+            <constraint display="CEC reception logical one minimum low width setting must be less than 512.">
+                (${module.driver.bit_width_rx_one_low_min} &lt; 512)
+            </constraint>
+        </property>
+        <property default="39" display="Bit Width Timing|Receive|Logical One Low Max Time" id="module.driver.bit_width_rx_one_low_max" description="CEC reception logical one maximum low width (CEC Clock Cycles).">
+            <constraint display="CEC reception logical one maximum low width setting must be a positive integer.">
+                testInteger("${module.driver.bit_width_rx_one_low_max}")  &amp;&amp; (${module.driver.bit_width_rx_one_low_max} &gt; 0)
+            </constraint>
+            <constraint display="CEC reception logical one maximum low width setting must be less than 512.">(
+                ${module.driver.bit_width_rx_one_low_max} &lt; 512)
+            </constraint>
+        </property>
+        <property default="100" display="Bit Width Timing|Receive|Overall Bit Width Min Time" id="module.driver.bit_width_rx_bit_overall_min" description="CEC reception overall minimum bit width setting (CEC Clock Cycles).">
+            <constraint display="CEC reception overall minimum bit width setting must be a positive integer.">
+                testInteger("${module.driver.bit_width_rx_bit_overall_min}")  &amp;&amp; (${module.driver.bit_width_rx_bit_overall_min} &gt; 0)
+            </constraint>
+            <constraint display="CEC reception overall minimum bit width setting must be less than 512.">
+                (${module.driver.bit_width_rx_bit_overall_min} &lt; 512)
+            </constraint>
+        </property>
+        <property default="134" display="Bit Width Timing|Receive|Overall Bit Width Max Time" id="module.driver.bit_width_rx_bit_overall_max" description="CEC reception overall maximum bit width setting (CEC Clock Cycles).">
+            <constraint display="CEC reception overall maximum bit width setting must be a positive integer.">
+                testInteger("${module.driver.bit_width_rx_bit_overall_max}")  &amp;&amp; (${module.driver.bit_width_rx_bit_overall_max} &gt; 0)
+            </constraint>
+            <constraint display="CEC reception overall maximum bit width setting must be less than 512.">
+                (${module.driver.bit_width_rx_bit_overall_max} &lt; 512)
+            </constraint>
+        </property>
+        <property default="" display="Interrupts|Interrupt Priority Level" id="module.driver.cec.ipl" description="Error/Data/Message interrupt priority level.">
+            <select enum="enum.mcu.nvic.priorities.mandatory"/>
+            <interrupt event="event.cec.intda" isr="cec_data_isr"/>
+            <interrupt event="event.cec.intce" isr="cec_message_isr"/>
+            <interrupt event="event.cec.interr" isr="cec_error_isr"/>
+        </property>
+        <property default="g_rm_cec${_instance}_callback" display="Interrupts|Callback Function" id="module.driver.cec.p_callback" description="Callback function">
+            <constraint display="Callback Function must be a valid C symbol">testSymbol("${module.driver.cec.p_callback}")</constraint>
+        </property>
+        <property default="module.driver.ctl1_cesel_slct.on_ack_and_sft" display="Interrupts|Communication Complete Interrupt Timing" id="module.driver.ctl1_cesel_slct" description="Communication Complete Interrupt (INTCE) Generation Timing Select">
+            <option display="After Last Frame and Signal Free Time" id="module.driver.ctl1_cesel_slct.on_ack_and_sft" value="0U"/>
+            <option display="After Last Frame" id="module.driver.ctl1_cesel_slct.on_ack" value="1U"/>
+            <option display="After Signal Free Time" id="module.driver.ctl1_cesel_slct.on_sft" value="2U"/>
+        </property>
+        <property default="module.driver.cec.ctl1_cintmk_en.disabled" display="Interrupts|Address Mismatch Interrupt Enable" id="module.driver.ctl1_cintmk_en" description="Enable to generate an interrupt when the addresses do not match.">
+            <option display="Disabled" id="module.driver.cec.ctl1_cintmk_en.disabled" value="(0)"/>
+            <option display="Enabled" id="module.driver.cec.ctl1_cintmk_en.enabled" value="(1)"/>
+        </property>
+        <property default="module.driver.cec.intda_timing_select.eom" display="Interrupts|Data Interrupt Timing Selection" id="module.driver.intda_timing_select" description="INTDA reception interrupt timing selection (EOM or ACK).">
+            <option display="EOM timing (9th bit of data)" id="module.driver.cec.intda_timing_select.eom" value="(0)"/>
+            <option display="ACK Timing (10th bit of data)" id="module.driver.cec.intda_timing_select.ack" value="(1)"/>
+        </property>
+        <peripheral name="CEC" component="cec" />
+        <symbol id="symbol.driver.cec.name" value="${module.driver.cec.name}"/>
+        <symbol id="symbol.driver.cec.guard.open" value="${module.driver.cec.name}_open_guard"/>
+        <symbol id="symbol.driver.cec.guard.macro.open" value="FSP_GUARD_${module.driver.cec.name}_R_CEC_Open"/>
+        <symbol id="symbol.driver.cec.guard.media_init" value="${module.driver.cec.name}_media_init_guard"/>
+        <symbol id="symbol.driver.cec.guard.macro.media_init" value="FSP_GUARD_${module.driver.cec.name}_R_CEC_MediaInit"/>
+        <symbol id="symbol.driver.cec.guard.close" value="${module.driver.cec.name}_close_guard"/>
+        <symbol id="symbol.driver.cec.guard.macro.close" value="FSP_GUARD_${module.driver.cec.name}_R_CEC_Close"/>
+        <symbol id="symbol.driver.cec.guard.write" value="${module.driver.cec.name}_write_guard"/>
+        <symbol id="symbol.driver.cec.guard.macro.write" value="FSP_GUARD_${module.driver.cec.name}_R_CEC_Write"/>
+        <symbol id="symbol.driver.cec.guard.status_get" value="${module.driver.cec.name}_status_get_guard"/>
+        <symbol id="symbol.driver.cec.guard.macro.status_get" value="FSP_GUARD_${module.driver.cec.name}_R_CEC_StatusGet"/>
+        <symbol id="symbol.driver.cec.guard.callback_set" value="${module.driver.cec.name}_callback_set_guard"/>
+        <symbol id="symbol.driver.cec.guard.macro.callback_set" value="FSP_GUARD_${module.driver.cec.name}_R_CEC_CallbackSet"/>
+        <symbol id="symbol.driver.cec.nsc_api" value="${module.driver.cec.name}_nsc_api"/>
+        <symbol id="symbol.driver.cec.bit_timing_cfg" value="${module.driver.cec.name}_bit_timing_cfg"/>
+        <symbol id="symbol.driver.cec.cfg" value="${module.driver.cec.name}_cfg"/>
+        <symbol id="symbol.driver.cec.ctrl" value="${module.driver.cec.name}_ctrl"/>
+        <symbol id="symbol.driver.cec.extended_cfg" value="${module.driver.cec.name}_extended_cfg"/>
+        <header>
+        #include "r_cec.h"
+        #include "r_cec_api.h"
+
+        extern cec_instance_t ${module.driver.cec.name};
+        extern cec_instance_ctrl_t ${module.driver.cec.name}_ctrl;
+        extern const cec_cfg_t ${module.driver.cec.name}_cfg;
+        #ifndef ${module.driver.cec.p_callback}
+        void ${module.driver.cec.p_callback}(cec_callback_args_t * p_args);
+        #endif
+        </header>
+        <includes>
+            #include &quot;r_cec.h&quot;
+            #include &quot;r_cec_api.h&quot;
+        </includes>
+        <declarations>
+        cec_instance_ctrl_t ${module.driver.cec.name}_ctrl;
+
+        const cec_timing_t ${module.driver.cec.name}_bit_timing_cfg =
+        {
+            .bit_width_tx_start_low =         ${module.driver.bit_width_tx_start_low},
+            .bit_width_tx_start_high =        ${module.driver.bit_width_tx_start_high},
+            .bit_width_tx_zero_low =          ${module.driver.bit_width_tx_zero_low},
+            .bit_width_tx_one_low =           ${module.driver.bit_width_tx_one_low},
+            .bit_width_tx_bit_overall =       ${module.driver.bit_width_tx_bit_overall},
+            .bit_width_rx_start_low_min =     ${module.driver.bit_width_rx_start_low_min},
+            .bit_width_rx_start_low_max =     ${module.driver.bit_width_rx_start_low_max},
+            .bit_width_rx_start_overall_min = ${module.driver.bit_width_rx_start_overall_min},
+            .bit_width_rx_start_overall_max = ${module.driver.bit_width_rx_start_overall_max},
+            .bit_width_rx_zero_low_min =      ${module.driver.bit_width_rx_zero_low_min},
+            .bit_width_rx_zero_low_max =      ${module.driver.bit_width_rx_zero_low_max},
+            .bit_width_rx_one_low_min =       ${module.driver.bit_width_rx_one_low_min},
+            .bit_width_rx_one_low_max =       ${module.driver.bit_width_rx_one_low_max},
+            .bit_width_rx_bit_overall_min =   ${module.driver.bit_width_rx_bit_overall_min},
+            .bit_width_rx_bit_overall_max =   ${module.driver.bit_width_rx_bit_overall_max},
+        };
+
+        const cec_extended_cfg_t ${module.driver.cec.name}_extended_cfg =
+        {
+
+            .ctl0_clock_select =              (${module.driver.ctl0_clock_select} &lt;&lt; R_CEC_CECCTL0_CCL_Pos),
+            .ctl0_ackten =                    (${module.driver.ctl0_ackten} &lt;&lt; R_CEC_CECCTL0_ACKTEN_Pos),
+            .ctl1 =                           ((${module.driver.ctl1_sft_slct} &lt;&lt; R_CEC_CECCTL1_SFT_Pos) |
+                                               (${module.driver.ctl1_cesel_slct} &lt;&lt; R_CEC_CECCTL1_CESEL_Pos) |
+                                               (${module.driver.ctl1_sterrd_en} &lt;&lt; R_CEC_CECCTL1_STERRD_Pos) |
+                                               (${module.driver.ctl1_blerrd_en} &lt;&lt; R_CEC_CECCTL1_BLERRD_Pos) |
+                                               (${module.driver.ctl1_cintmk_en} &lt;&lt; R_CEC_CECCTL1_CINTMK_Pos) |
+                                               (${module.driver.ctl1_cdfc_en} &lt;&lt; R_CEC_CECCTL1_CDFC_Pos)),
+            .err_detect_lerplen =             (${module.driver.err_detect_lerplen} &lt;&lt; R_CEC_CECEXMD_LERPLEN_Pos),
+            .err_detect_rercven =             (${module.driver.err_detect_rercven} &lt;&lt; R_CEC_CECEXMD_RERCVEN_Pos),
+            .intda_timing_select =            (${module.driver.intda_timing_select} &lt;&lt; R_CEC_CECEXMD_RCVINTDSEL_Pos),
+        };
+
+        const cec_cfg_t ${module.driver.cec.name}_cfg =
+        {
+            .bit_timing_cfg =             &amp;${module.driver.cec.name}_bit_timing_cfg,
+            .rx_data_sample_time =             ${module.driver.rx_data_sample_time},
+            .rx_data_bit_reference_width =     ${module.driver.rx_data_bit_reference_width},
+            .p_callback = ${module.driver.cec.p_callback},
+            .p_context = NULL,
+            .p_extend = (void*)&amp;${module.driver.cec.name}_extended_cfg,
+
+            .ipl =                         ${module.driver.cec.ipl},
+        #if defined (VECTOR_NUMBER_CEC_INTERR)
+            .error_irq             = VECTOR_NUMBER_CEC_INTERR,
+        #else
+            .error_irq             = FSP_INVALID_VECTOR,
+        #endif
+        #if defined (VECTOR_NUMBER_CEC_INTDA)
+            .data_irq             = VECTOR_NUMBER_CEC_INTDA,
+        #else
+            .data_irq             = FSP_INVALID_VECTOR,
+        #endif
+        #if defined (VECTOR_NUMBER_CEC_INTCE)
+            .msg_irq              = VECTOR_NUMBER_CEC_INTCE,
+        #else
+            .msg_irq              = FSP_INVALID_VECTOR,
+        #endif
+        };
+
+        cec_instance_t ${module.driver.cec.name} =
+        {
+            .p_ctrl = &amp;${module.driver.cec.name}_ctrl,
+            .p_cfg  = &amp;${module.driver.cec.name}_cfg,
+            .p_api  = &amp;g_cec_on_cec
+        };
+        </declarations>
+        <guard>
+            <header>
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.cec.name}_open_guard(cec_ctrl_t *const p_ctrl, cec_cfg_t const *const p_cfg);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.cec.name}_media_init_guard(cec_ctrl_t *const p_ctrl, cec_addr_t local_address);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.cec.name}_close_guard(cec_ctrl_t *const p_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.cec.name}_write_guard(cec_ctrl_t *const p_ctrl, cec_message_t const *const p_message, uint32_t message_size);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.cec.name}_status_get_guard(cec_ctrl_t *const p_ctrl, cec_status_t *const p_status);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.cec.name}_callback_set_guard(cec_ctrl_t *const p_ctrl, void(*p_callback)(cec_callback_args_t *), void const *const p_context, cec_callback_args_t *const p_callback_memory);
+
+            </header>
+            <template name="${module.driver.cec.name}_guard.c">
+                <![CDATA[
+                    #include "guard.h"
+
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.cec.name}_open_guard (cec_ctrl_t *const p_ctrl, cec_cfg_t const *const p_cfg)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+    FSP_PARAMETER_NOT_USED(p_cfg);
+
+    return R_CEC_Open(&${module.driver.cec.name}_ctrl, &${module.driver.cec.name}_cfg);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.cec.name}_media_init_guard (cec_ctrl_t *const p_ctrl, cec_addr_t local_address)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+
+    return R_CEC_MediaInit(&${module.driver.cec.name}_ctrl, local_address);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.cec.name}_close_guard (cec_ctrl_t *const p_ctrl)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+
+    return R_CEC_Close(&${module.driver.cec.name}_ctrl);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.cec.name}_write_guard (cec_ctrl_t *const p_ctrl, cec_message_t const *const p_message, uint32_t message_size)
+{
+    /* Verify all pointers are in non-secure memory. */
+    cec_message_t const *const p_message_checked = cmse_check_pointed_object((cec_message_t *) p_message, CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_message_checked != NULL);
+
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+
+    return R_CEC_Write(&${module.driver.cec.name}_ctrl, p_message_checked, message_size);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.cec.name}_status_get_guard (cec_ctrl_t *const p_ctrl, cec_status_t *const p_status)
+{
+    /* Verify all pointers are in non-secure memory. */
+    cec_status_t *const p_status_checked = cmse_check_address_range((void *) p_status, sizeof(cec_status_t), CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_status_checked != NULL);
+
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+
+    return R_CEC_StatusGet(&${module.driver.cec.name}_ctrl, p_status_checked);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.cec.name}_callback_set_guard (cec_ctrl_t *const p_ctrl, void(*p_callback)(cec_callback_args_t *), void const *const p_context, cec_callback_args_t *const p_callback_memory)
+{
+    /* Verify all pointers are in non-secure memory. */
+    void(*p_callback_checked)(cec_callback_args_t *) = (void(*)(cec_callback_args_t *)) cmse_check_address_range((void *) p_callback, sizeof(void *), CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_callback_checked != NULL);
+    cec_callback_args_t *const p_callback_memory_checked = cmse_check_pointed_object(p_callback_memory, CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_callback_memory_checked != NULL);
+
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+    FSP_PARAMETER_NOT_USED(p_context);
+
+    return R_CEC_CallbackSet(&${module.driver.cec.name}_ctrl, p_callback_checked, p_context, p_callback_memory_checked);
+}
+
+                ]]>
+            </template>
+        </guard>
+        <nsc>
+            <header>
+
+#define FSP_GUARD_${module.driver.cec.name}_R_CEC_Open() ${module.driver.cec.name}_open_guard(FSP_SECURE_ARGUMENT, FSP_SECURE_ARGUMENT)
+
+#define FSP_GUARD_${module.driver.cec.name}_R_CEC_MediaInit(local_address) ${module.driver.cec.name}_media_init_guard(FSP_SECURE_ARGUMENT, local_address)
+
+#define FSP_GUARD_${module.driver.cec.name}_R_CEC_Close() ${module.driver.cec.name}_close_guard(FSP_SECURE_ARGUMENT)
+
+#define FSP_GUARD_${module.driver.cec.name}_R_CEC_Write(p_message, message_size) ${module.driver.cec.name}_write_guard(FSP_SECURE_ARGUMENT, p_message, message_size)
+
+#define FSP_GUARD_${module.driver.cec.name}_R_CEC_StatusGet(p_status) ${module.driver.cec.name}_status_get_guard(FSP_SECURE_ARGUMENT, p_status)
+
+#define FSP_GUARD_${module.driver.cec.name}_R_CEC_CallbackSet(p_callback, p_context, p_callback_memory) ${module.driver.cec.name}_callback_set_guard(FSP_SECURE_ARGUMENT, p_callback, p_context, p_callback_memory)
+
+
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.cec.name}_open_guard(cec_ctrl_t *const p_ctrl, cec_cfg_t const *const p_cfg);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.cec.name}_media_init_guard(cec_ctrl_t *const p_ctrl, cec_addr_t local_address);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.cec.name}_close_guard(cec_ctrl_t *const p_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.cec.name}_write_guard(cec_ctrl_t *const p_ctrl, cec_message_t const *const p_message, uint32_t message_size);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.cec.name}_status_get_guard(cec_ctrl_t *const p_ctrl, cec_status_t *const p_status);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.cec.name}_callback_set_guard(cec_ctrl_t *const p_ctrl, void(*p_callback)(cec_callback_args_t *), void const *const p_context, cec_callback_args_t *const p_callback_memory);
+
+
+extern const cec_instance_t ${module.driver.cec.name};
+            </header>
+            <declarations>
+                <![CDATA[
+static const cec_api_t ${module.driver.cec.name}_nsc_api =
+{
+    .open = ${module.driver.cec.name}_open_guard,
+    .mediaInit = ${module.driver.cec.name}_media_init_guard,
+    .close = ${module.driver.cec.name}_close_guard,
+    .write = ${module.driver.cec.name}_write_guard,
+    .statusGet = ${module.driver.cec.name}_status_get_guard,
+    .callbackSet = ${module.driver.cec.name}_callback_set_guard,
+};
+const cec_instance_t ${module.driver.cec.name} =
+{
+    .p_api = &${module.driver.cec.name}_nsc_api,
+    .p_ctrl = FSP_SECURE_ARGUMENT,
+    .p_cfg = FSP_SECURE_ARGUMENT,
+};
+                ]]>
+            </declarations>
+        </nsc>
+        <api configurable="true">
+            <file>ra/fsp/inc/instances/r_cec.h</file>
+            <file>ra/fsp/inc/api/r_cec_api.h</file>
+        </api>
+    </module>
+</raModuleDescription>

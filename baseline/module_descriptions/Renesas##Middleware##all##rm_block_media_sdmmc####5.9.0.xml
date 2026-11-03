@@ -1,0 +1,302 @@
+<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.driver.rm_block_media_sdmmc" path="driver/rm_block_media_sdmmc_cfg.h" version="0">
+        <property default="config.driver.rm_block_media_sdmmc.param_checking_enable.bsp" display="Parameter Checking" id="config.driver.rm_block_media_sdmmc.param_checking_enable" description="If selected code for parameter checking is included in the build.">
+            <option display="Default (BSP)" id="config.driver.rm_block_media_sdmmc.param_checking_enable.bsp" value="(BSP_CFG_PARAM_CHECKING_ENABLE)"/>
+            <option display="Enabled" id="config.driver.rm_block_media_sdmmc.param_checking_enable.enabled" value="(1)"/>
+            <option display="Disabled" id="config.driver.rm_block_media_sdmmc.param_checking_enable.disabled" value="(0)"/>
+        </property>
+        <content>
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#define RM_BLOCK_MEDIA_SDMMC_CFG_PARAM_CHECKING_ENABLE ${config.driver.rm_block_media_sdmmc.param_checking_enable}
+
+#ifdef __cplusplus
+}
+#endif
+        </content>
+    </config>
+    <module config="config.driver.rm_block_media_sdmmc" display="Storage|${module.driver.rm_block_media.name} Block Media SD/MMC (rm_block_media_sdmmc)" id="module.driver.rm_block_media_on_rm_block_media_sdmmc" version="1" url="group___r_m___b_l_o_c_k___m_e_d_i_a___s_d_m_m_c.html">
+        <constraint display="Unique name required for each instance">
+            "${interface.driver.rm_block_media.${module.driver.rm_block_media.name}}" === "1"
+        </constraint>
+        <constraint display="Requires lower level SDMMC driver">
+            testExists("${module.driver.rm_block_media.requires.sdmmc::module.driver.sdmmc.name}")
+        </constraint>
+        <requires id="module.driver.rm_block_media.requires.sdmmc" interface="interface.driver.sdmmc" display="Add SDMMC Driver [Required]">
+            <override property="module.driver.sdmmc.p_callback" value="rm_block_media_sdmmc_callback"/>
+            <override property="module.driver.sdmmc.p_context" value="&amp;${module.driver.rm_block_media.name}_ctrl"/>
+        </requires>
+        <provides interface="interface.driver.rm_block_media" />
+        <provides interface="interface.driver.rm_block_media_sdmmc_on_rm_block_media" />
+        <provides interface="interface.driver.rm_block_media_pmsc" />
+        <provides interface="interface.driver.rm_block_media.${module.driver.rm_block_media.name}" />
+        <provides interface="interface.driver.rm_block_media_no_usb" />
+        <property default="g_rm_block_media${_instance}" display="Name" id="module.driver.rm_block_media.name" description="Module name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.rm_block_media.name}")</constraint>
+        </property>
+        <property default="NULL" display="Callback" id="module.driver.rm_block_media.callback" description="A user callback function can be provided. If this callback function is provided, it will be  called when a card is inserted or removed.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.rm_block_media.callback}")</constraint>
+        </property>
+        <property default="NULL" id="module.driver.rm_block_media.p_context" />
+        <symbol id="symbol.driver.rm_block_media.name" value="${module.driver.rm_block_media.name}"/>
+        <symbol id="symbol.driver.rm_block_media.guard.open" value="${module.driver.rm_block_media.name}_open_guard"/>
+        <symbol id="symbol.driver.rm_block_media.guard.macro.open" value="FSP_GUARD_${module.driver.rm_block_media.name}_RM_BLOCK_MEDIA_SDMMC_Open"/>
+        <symbol id="symbol.driver.rm_block_media.guard.media_init" value="${module.driver.rm_block_media.name}_media_init_guard"/>
+        <symbol id="symbol.driver.rm_block_media.guard.macro.media_init" value="FSP_GUARD_${module.driver.rm_block_media.name}_RM_BLOCK_MEDIA_SDMMC_MediaInit"/>
+        <symbol id="symbol.driver.rm_block_media.guard.read" value="${module.driver.rm_block_media.name}_read_guard"/>
+        <symbol id="symbol.driver.rm_block_media.guard.macro.read" value="FSP_GUARD_${module.driver.rm_block_media.name}_RM_BLOCK_MEDIA_SDMMC_Read"/>
+        <symbol id="symbol.driver.rm_block_media.guard.write" value="${module.driver.rm_block_media.name}_write_guard"/>
+        <symbol id="symbol.driver.rm_block_media.guard.macro.write" value="FSP_GUARD_${module.driver.rm_block_media.name}_RM_BLOCK_MEDIA_SDMMC_Write"/>
+        <symbol id="symbol.driver.rm_block_media.guard.erase" value="${module.driver.rm_block_media.name}_erase_guard"/>
+        <symbol id="symbol.driver.rm_block_media.guard.macro.erase" value="FSP_GUARD_${module.driver.rm_block_media.name}_RM_BLOCK_MEDIA_SDMMC_Erase"/>
+        <symbol id="symbol.driver.rm_block_media.guard.callback_set" value="${module.driver.rm_block_media.name}_callback_set_guard"/>
+        <symbol id="symbol.driver.rm_block_media.guard.macro.callback_set" value="FSP_GUARD_${module.driver.rm_block_media.name}_RM_BLOCK_MEDIA_SDMMC_CallbackSet"/>
+        <symbol id="symbol.driver.rm_block_media.guard.status_get" value="${module.driver.rm_block_media.name}_status_get_guard"/>
+        <symbol id="symbol.driver.rm_block_media.guard.macro.status_get" value="FSP_GUARD_${module.driver.rm_block_media.name}_RM_BLOCK_MEDIA_SDMMC_StatusGet"/>
+        <symbol id="symbol.driver.rm_block_media.guard.info_get" value="${module.driver.rm_block_media.name}_info_get_guard"/>
+        <symbol id="symbol.driver.rm_block_media.guard.macro.info_get" value="FSP_GUARD_${module.driver.rm_block_media.name}_RM_BLOCK_MEDIA_SDMMC_InfoGet"/>
+        <symbol id="symbol.driver.rm_block_media.guard.close" value="${module.driver.rm_block_media.name}_close_guard"/>
+        <symbol id="symbol.driver.rm_block_media.guard.macro.close" value="FSP_GUARD_${module.driver.rm_block_media.name}_RM_BLOCK_MEDIA_SDMMC_Close"/>
+        <symbol id="symbol.driver.rm_block_media.nsc_api" value="${module.driver.rm_block_media.name}_nsc_api"/>
+        <symbol id="symbol.driver.rm_block_media.cfg" value="${module.driver.rm_block_media.name}_cfg"/>
+        <symbol id="symbol.driver.rm_block_media.cfg_extend" value="${module.driver.rm_block_media.name}_cfg_extend"/>
+        <symbol id="symbol.driver.rm_block_media.ctrl" value="${module.driver.rm_block_media.name}_ctrl"/>
+        <header>
+extern const rm_block_media_instance_t ${module.driver.rm_block_media.name};
+
+/** Access the SDMMC instance using these structures when calling API functions directly (::p_api is not used). */
+extern rm_block_media_sdmmc_instance_ctrl_t ${module.driver.rm_block_media.name}_ctrl;
+extern const rm_block_media_cfg_t ${module.driver.rm_block_media.name}_cfg;
+
+#ifndef ${module.driver.rm_block_media.callback}
+void ${module.driver.rm_block_media.callback}(rm_block_media_callback_args_t * p_args);
+#endif
+        </header>
+        <includes>#include &quot;rm_block_media_sdmmc.h&quot;
+#include &quot;rm_block_media_api.h&quot;</includes>
+        <declarations>
+const rm_block_media_sdmmc_extended_cfg_t ${module.driver.rm_block_media.name}_cfg_extend =
+{
+    .p_sdmmc = &amp;${module.driver.rm_block_media.requires.sdmmc::module.driver.sdmmc.name},
+};
+const rm_block_media_cfg_t ${module.driver.rm_block_media.name}_cfg =
+{
+    .p_extend = &amp;${module.driver.rm_block_media.name}_cfg_extend,
+    .p_callback = ${module.driver.rm_block_media.callback},
+    .p_context = ${module.driver.rm_block_media.p_context},
+};
+rm_block_media_sdmmc_instance_ctrl_t ${module.driver.rm_block_media.name}_ctrl;
+const rm_block_media_instance_t ${module.driver.rm_block_media.name} =
+{
+    .p_api  = &amp;g_rm_block_media_on_sdmmc,
+    .p_ctrl = &amp;${module.driver.rm_block_media.name}_ctrl,
+    .p_cfg  = &amp;${module.driver.rm_block_media.name}_cfg,
+};
+        </declarations>
+        <guard>
+            <header>
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.rm_block_media.name}_open_guard(rm_block_media_ctrl_t *const p_ctrl, rm_block_media_cfg_t const *const p_cfg);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.rm_block_media.name}_media_init_guard(rm_block_media_ctrl_t *const p_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.rm_block_media.name}_read_guard(rm_block_media_ctrl_t *const p_ctrl, uint8_t *const p_dest_address, uint32_t const block_address, uint32_t const num_blocks);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.rm_block_media.name}_write_guard(rm_block_media_ctrl_t *const p_ctrl, uint8_t const *const p_src_address, uint32_t const block_address, uint32_t const num_blocks);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.rm_block_media.name}_erase_guard(rm_block_media_ctrl_t *const p_ctrl, uint32_t const block_address, uint32_t const num_blocks);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.rm_block_media.name}_callback_set_guard(rm_block_media_ctrl_t *const p_ctrl, void(*p_callback)(rm_block_media_callback_args_t *), void const *const p_context, rm_block_media_callback_args_t *const p_callback_memory);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.rm_block_media.name}_status_get_guard(rm_block_media_ctrl_t *const p_api_ctrl, rm_block_media_status_t *const p_status);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.rm_block_media.name}_info_get_guard(rm_block_media_ctrl_t *const p_ctrl, rm_block_media_info_t *const p_info);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.rm_block_media.name}_close_guard(rm_block_media_ctrl_t *const p_ctrl);
+
+            </header>
+            <template name="${module.driver.rm_block_media.name}_guard.c">
+                <![CDATA[
+                    #include "guard.h"
+
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.rm_block_media.name}_open_guard (rm_block_media_ctrl_t *const p_ctrl, rm_block_media_cfg_t const *const p_cfg)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+    FSP_PARAMETER_NOT_USED(p_cfg);
+
+    return RM_BLOCK_MEDIA_SDMMC_Open(&${module.driver.rm_block_media.name}_ctrl, &${module.driver.rm_block_media.name}_cfg);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.rm_block_media.name}_media_init_guard (rm_block_media_ctrl_t *const p_ctrl)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+
+    return RM_BLOCK_MEDIA_SDMMC_MediaInit(&${module.driver.rm_block_media.name}_ctrl);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.rm_block_media.name}_read_guard (rm_block_media_ctrl_t *const p_ctrl, uint8_t *const p_dest_address, uint32_t const block_address, uint32_t const num_blocks)
+{
+    /* Verify all pointers are in non-secure memory. */
+    uint8_t *const p_dest_address_checked = cmse_check_address_range((void *) p_dest_address, (num_blocks * ${module.driver.rm_block_media.name}_ctrl.sector_size_bytes), CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_dest_address_checked != NULL);
+
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+
+    return RM_BLOCK_MEDIA_SDMMC_Read(&${module.driver.rm_block_media.name}_ctrl, p_dest_address_checked, block_address, num_blocks);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.rm_block_media.name}_write_guard (rm_block_media_ctrl_t *const p_ctrl, uint8_t const *const p_src_address, uint32_t const block_address, uint32_t const num_blocks)
+{
+    /* Verify all pointers are in non-secure memory. */
+    uint8_t const *const p_src_address_checked = cmse_check_address_range((void *) p_src_address, (num_blocks * ${module.driver.rm_block_media.name}_ctrl.sector_size_bytes), CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_src_address_checked != NULL);
+
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+
+    return RM_BLOCK_MEDIA_SDMMC_Write(&${module.driver.rm_block_media.name}_ctrl, p_src_address_checked, block_address, num_blocks);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.rm_block_media.name}_erase_guard (rm_block_media_ctrl_t *const p_ctrl, uint32_t const block_address, uint32_t const num_blocks)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+
+    return RM_BLOCK_MEDIA_SDMMC_Erase(&${module.driver.rm_block_media.name}_ctrl, block_address, num_blocks);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.rm_block_media.name}_callback_set_guard (rm_block_media_ctrl_t *const p_ctrl, void(*p_callback)(rm_block_media_callback_args_t *), void const *const p_context, rm_block_media_callback_args_t *const p_callback_memory)
+{
+    /* Verify all pointers are in non-secure memory. */
+    void(*p_callback_checked)(rm_block_media_callback_args_t *) = (void(*)(rm_block_media_callback_args_t *)) cmse_check_address_range((void *) p_callback, sizeof(void *), CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_callback_checked != NULL);
+    rm_block_media_callback_args_t *const p_callback_memory_checked = cmse_check_pointed_object(p_callback_memory, CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_callback_memory_checked != NULL);
+
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+    FSP_PARAMETER_NOT_USED(p_context);
+
+    return RM_BLOCK_MEDIA_SDMMC_CallbackSet(&${module.driver.rm_block_media.name}_ctrl, p_callback_checked, p_context, p_callback_memory_checked);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.rm_block_media.name}_status_get_guard (rm_block_media_ctrl_t *const p_api_ctrl, rm_block_media_status_t *const p_status)
+{
+    /* Verify all pointers are in non-secure memory. */
+    rm_block_media_status_t *const p_status_checked = cmse_check_pointed_object(p_status, CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_status_checked != NULL);
+
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+
+    return RM_BLOCK_MEDIA_SDMMC_StatusGet(&${module.driver.rm_block_media.name}_ctrl, p_status_checked);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.rm_block_media.name}_info_get_guard (rm_block_media_ctrl_t *const p_ctrl, rm_block_media_info_t *const p_info)
+{
+    /* Verify all pointers are in non-secure memory. */
+    rm_block_media_info_t *const p_info_checked = cmse_check_pointed_object(p_info, CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_info_checked != NULL);
+
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+
+    return RM_BLOCK_MEDIA_SDMMC_InfoGet(&${module.driver.rm_block_media.name}_ctrl, p_info_checked);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.rm_block_media.name}_close_guard (rm_block_media_ctrl_t *const p_ctrl)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+
+    return RM_BLOCK_MEDIA_SDMMC_Close(&${module.driver.rm_block_media.name}_ctrl);
+}
+
+                ]]>
+            </template>
+        </guard>
+        <nsc>
+            <header>
+
+#define FSP_GUARD_${module.driver.rm_block_media.name}_RM_BLOCK_MEDIA_SDMMC_Open() ${module.driver.rm_block_media.name}_open_guard(FSP_SECURE_ARGUMENT, FSP_SECURE_ARGUMENT)
+
+#define FSP_GUARD_${module.driver.rm_block_media.name}_RM_BLOCK_MEDIA_SDMMC_MediaInit() ${module.driver.rm_block_media.name}_media_init_guard(FSP_SECURE_ARGUMENT)
+
+#define FSP_GUARD_${module.driver.rm_block_media.name}_RM_BLOCK_MEDIA_SDMMC_Read(p_dest_address, block_address, num_blocks) ${module.driver.rm_block_media.name}_read_guard(FSP_SECURE_ARGUMENT, p_dest_address, block_address, num_blocks)
+
+#define FSP_GUARD_${module.driver.rm_block_media.name}_RM_BLOCK_MEDIA_SDMMC_Write(p_src_address, block_address, num_blocks) ${module.driver.rm_block_media.name}_write_guard(FSP_SECURE_ARGUMENT, p_src_address, block_address, num_blocks)
+
+#define FSP_GUARD_${module.driver.rm_block_media.name}_RM_BLOCK_MEDIA_SDMMC_Erase(block_address, num_blocks) ${module.driver.rm_block_media.name}_erase_guard(FSP_SECURE_ARGUMENT, block_address, num_blocks)
+
+#define FSP_GUARD_${module.driver.rm_block_media.name}_RM_BLOCK_MEDIA_SDMMC_CallbackSet(p_callback, p_context, p_callback_memory) ${module.driver.rm_block_media.name}_callback_set_guard(FSP_SECURE_ARGUMENT, p_callback, p_context, p_callback_memory)
+
+#define FSP_GUARD_${module.driver.rm_block_media.name}_RM_BLOCK_MEDIA_SDMMC_StatusGet(p_status) ${module.driver.rm_block_media.name}_status_get_guard(FSP_SECURE_ARGUMENT, p_status)
+
+#define FSP_GUARD_${module.driver.rm_block_media.name}_RM_BLOCK_MEDIA_SDMMC_InfoGet(p_info) ${module.driver.rm_block_media.name}_info_get_guard(FSP_SECURE_ARGUMENT, p_info)
+
+#define FSP_GUARD_${module.driver.rm_block_media.name}_RM_BLOCK_MEDIA_SDMMC_Close() ${module.driver.rm_block_media.name}_close_guard(FSP_SECURE_ARGUMENT)
+
+
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.rm_block_media.name}_open_guard(rm_block_media_ctrl_t *const p_ctrl, rm_block_media_cfg_t const *const p_cfg);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.rm_block_media.name}_media_init_guard(rm_block_media_ctrl_t *const p_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.rm_block_media.name}_read_guard(rm_block_media_ctrl_t *const p_ctrl, uint8_t *const p_dest_address, uint32_t const block_address, uint32_t const num_blocks);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.rm_block_media.name}_write_guard(rm_block_media_ctrl_t *const p_ctrl, uint8_t const *const p_src_address, uint32_t const block_address, uint32_t const num_blocks);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.rm_block_media.name}_erase_guard(rm_block_media_ctrl_t *const p_ctrl, uint32_t const block_address, uint32_t const num_blocks);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.rm_block_media.name}_callback_set_guard(rm_block_media_ctrl_t *const p_ctrl, void(*p_callback)(rm_block_media_callback_args_t *), void const *const p_context, rm_block_media_callback_args_t *const p_callback_memory);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.rm_block_media.name}_status_get_guard(rm_block_media_ctrl_t *const p_api_ctrl, rm_block_media_status_t *const p_status);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.rm_block_media.name}_info_get_guard(rm_block_media_ctrl_t *const p_ctrl, rm_block_media_info_t *const p_info);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.rm_block_media.name}_close_guard(rm_block_media_ctrl_t *const p_ctrl);
+
+
+extern const rm_block_media_instance_t ${module.driver.rm_block_media.name};
+            </header>
+            <declarations>
+                <![CDATA[
+static const rm_block_media_api_t ${module.driver.rm_block_media.name}_nsc_api =
+{
+    .open = ${module.driver.rm_block_media.name}_open_guard,
+    .mediaInit = ${module.driver.rm_block_media.name}_media_init_guard,
+    .read = ${module.driver.rm_block_media.name}_read_guard,
+    .write = ${module.driver.rm_block_media.name}_write_guard,
+    .erase = ${module.driver.rm_block_media.name}_erase_guard,
+    .callbackSet = ${module.driver.rm_block_media.name}_callback_set_guard,
+    .statusGet = ${module.driver.rm_block_media.name}_status_get_guard,
+    .infoGet = ${module.driver.rm_block_media.name}_info_get_guard,
+    .close = ${module.driver.rm_block_media.name}_close_guard,
+};
+const rm_block_media_instance_t ${module.driver.rm_block_media.name} =
+{
+    .p_api = &${module.driver.rm_block_media.name}_nsc_api,
+    .p_ctrl = FSP_SECURE_ARGUMENT,
+    .p_cfg = FSP_SECURE_ARGUMENT,
+};
+                ]]>
+            </declarations>
+        </nsc>
+    </module>
+</raModuleDescription>

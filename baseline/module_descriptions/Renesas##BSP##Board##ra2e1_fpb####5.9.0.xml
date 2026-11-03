@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<raModuleDescription>
+  <config id="config.board.ra2e1_fpb" path="fsp_cfg/bsp/board_cfg.h" version="0">
+    <content>#include "../../../ra/board/ra2e1_fpb/board.h"</content>
+  </config>
+  <board config="config.board.ra2e1_fpb" device="R7FA2E1A92DFM" display="RA2|RA2E1|FPB-RA2E1" id="board.ra2e1_fpb" version="0" debugger="com.renesas.hardwaredebug.arm.e2lite">
+    <description>Fast Prototyping Board for RA2E1 MCU Group&#xA;Visit https://www.renesas.com/ra/fpb-ra2e1 to get kit user’s manual, quick start guide, errata, design package, example projects, etc.</description>
+    <capability id="capability.led"/>
+  </board>
+</raModuleDescription>

@@ -1,0 +1,174 @@
+<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.aws.ota" path="aws/ota_config.h" version="0">
+        <property default="" description="Add a path to your custom ota_config.h file. It can be used to override some or all of the configurations defined here, and to define additional configurations." display="Custom ota_config.h" id="config.aws.ota.custom_ota_config">
+            <export>eval('' +
+'var input = "${config.aws.ota.custom_ota_config}";' +
+'if (input != "")' +
+'{' +
+'    input = \'#include "\' + input + \'"\';' +
+'}' +
+'    input' +
+                '')</export>
+        </property>
+        <property display="Log2 File Block Size" id="config.aws.ota.otaconfiglog2_file_block_size" default="11" description="Log base 2 of the size of the file data block message (excluding the header). e.g. 11: 2^11 = 2048bytes">
+            <constraint display="Value must be a non-negative integer">testInteger("${config.aws.ota.otaconfiglog2_file_block_size}")  &amp;&amp; ("${config.aws.ota.otaconfiglog2_file_block_size}" &gt;= 0)</constraint>
+        </property>
+        <property display="Self Test Response Wait (ms)" id="config.aws.ota.otaconfigself_test_response_wait_ms" default="16000" description="Milliseconds to wait for the self test phase to succeed before we force reset.">
+            <constraint display="Value must be a non-negative integer">testInteger("${config.aws.ota.otaconfigself_test_response_wait_ms}")  &amp;&amp; ("${config.aws.ota.otaconfigself_test_response_wait_ms}" &gt;= 0)</constraint>
+        </property>
+        <property display="File Request Wait (ms)" id="config.aws.ota.otaconfigfile_request_wait_ms" default="10000" description="Milliseconds to wait before requesting data blocks from the OTA service if nothing is happening.">
+            <constraint display="Value must be a non-negative integer">testInteger("${config.aws.ota.otaconfigfile_request_wait_ms}")  &amp;&amp; ("${config.aws.ota.otaconfigfile_request_wait_ms}" &gt;= 0)</constraint>
+        </property>
+        <property display="Max Thingname Length" id="config.aws.ota.otaconfigmax_thingname_len" default="64" description="The maximum allowed length of the thing name used by the OTA agent.">
+            <constraint display="Value must be a non-negative integer">testInteger("${config.aws.ota.otaconfigmax_thingname_len}")  &amp;&amp; ("${config.aws.ota.otaconfigmax_thingname_len}" &gt;= 0)</constraint>
+        </property>
+        <property display="Max Num Blocks Request" id="config.aws.ota.otaconfigmax_num_blocks_request" default="1" description="The maximum number of data blocks requested from OTA streaming service.">
+            <constraint display="Value must be a non-negative integer">testInteger("${config.aws.ota.otaconfigmax_num_blocks_request}")  &amp;&amp; ("${config.aws.ota.otaconfigmax_num_blocks_request}" &gt;= 0)</constraint>
+        </property>
+        <property display="Max Num Request Momentum" id="config.aws.ota.otaconfigmax_num_request_momentum" default="32" description="The maximum number of requests allowed to send without a response before we abort.">
+            <constraint display="Value must be a non-negative integer">testInteger("${config.aws.ota.otaconfigmax_num_request_momentum}")  &amp;&amp; ("${config.aws.ota.otaconfigmax_num_request_momentum}" &gt;= 0)</constraint>
+        </property>
+        <property display="Ota Update Status Frequency" id="config.aws.ota.otaconfigota_update_status_frequency" default="64" description="How frequently the device will report its OTA progress to the cloud.">
+            <constraint display="Value must be a non-negative integer">testInteger("${config.aws.ota.otaconfigota_update_status_frequency}")  &amp;&amp; ("${config.aws.ota.otaconfigota_update_status_frequency}" &gt;= 0)</constraint>
+        </property>
+        <property display="Max Num OTA Data Buffers" id="config.aws.ota.otaconfigmax_num_ota_data_buffers" default="1" description="The number of data buffers reserved by the OTA agent.">
+            <constraint display="Value must be a non-negative integer">testInteger("${config.aws.ota.otaconfigmax_num_ota_data_buffers}")  &amp;&amp; ("${config.aws.ota.otaconfigmax_num_ota_data_buffers}" &gt;= 0)</constraint>
+        </property>
+        <property display="Allow Downgrade" id="config.aws.ota.otaconfigallowdowngrade" default="config.aws.ota.otaconfigallowdowngrade.disallowed" description="Flag to enable booting into updates that have an identical or lower version than the current version.">
+            <option display="Allowed" id="config.aws.ota.otaconfigallowdowngrade.allowed" value="1"/>
+            <option display="Disallowed" id="config.aws.ota.otaconfigallowdowngrade.disallowed" value="0"/>
+        </property>
+        <property display="Ota Firmware Update File Type ID" id="config.aws.ota.configota_firmware_update_file_type_id" default="0" description="The file type id received in the job document.">
+            <constraint display="Value must be a non-negative integer">testInteger("${config.aws.ota.configota_firmware_update_file_type_id}")  &amp;&amp; ("${config.aws.ota.configota_firmware_update_file_type_id}" &gt;= 0)</constraint>
+        </property>
+        <property display="Enabled Control Protocol" id="config.aws.ota.configenabled_control_protocol" default="config.aws.ota.configenabled_control_protocol.mqtt" description="The protocol selected for OTA control operations.">
+            <option display="OTA Control Over MQTT" id="config.aws.ota.configenabled_control_protocol.mqtt" value="OTA_CONTROL_OVER_MQTT"/>
+        </property>
+        <property display="Enabled Data Protcols" id="config.aws.ota.configenabled_data_protocols" default="config.aws.ota.configenabled_data_protocols.mqtt" description="The protocol selected for OTA data operations.">
+            <option display="OTA Data Over MQTT" id="config.aws.ota.configenabled_data_protocols.mqtt" value="OTA_DATA_OVER_MQTT"/>
+            <option display="OTA Data Over HTTP" id="config.aws.ota.configenabled_data_protocols.http" value="OTA_DATA_OVER_HTTP"/>
+            <option display="OTA Data Over MQTT and HTTP" id="config.aws.ota.configenabled_data_protocols.mqtt_and_http" value="OTA_DATA_OVER_MQTT | OTA_DATA_OVER_HTTP"/>
+        </property>
+        <property display="OTA Primary Data Protocol" id="config.aws.ota.configota_primary_data_protocol" default="config.aws.ota.configota_primary_data_protocol.mqtt" description="The preferred protocol selected for OTA data operations.">
+            <option display="OTA Data Over MQTT" id="config.aws.ota.configota_primary_data_protocol.mqtt" value="OTA_DATA_OVER_MQTT"/>
+            <option display="OTA Data Over HTTP" id="config.aws.ota.configota_primary_data_protocol.http" value="OTA_DATA_OVER_HTTP"/>
+        </property>
+        <property display="OTA Events Polling Timeout (ms)" id="config.aws.ota.configota_events_polling_timeout_ms" default="1000" description="The polling timeout (milliseconds) to receive messages from event queue.">
+            <constraint display="Value must be a non-negative integer">testInteger("${config.aws.ota.configota_events_polling_timeout_ms}")  &amp;&amp; ("${config.aws.ota.configota_events_polling_timeout_ms}" &gt;= 0)</constraint>
+        </property>
+        <property display="Version|Major" id="config.aws.ota.version_major" default="0" description="Major Version number used when updating.">
+            <constraint display="Value must be a non-negative integer">testInteger("${config.aws.ota.version_major}")  &amp;&amp; ("${config.aws.ota.version_major}" &gt;= 0)</constraint>
+        </property>
+        <property display="Version|Minor" id="config.aws.ota.version_minor" default="0" description="Minor Version number used when updating.">
+            <constraint display="Value must be a non-negative integer">testInteger("${config.aws.ota.version_minor}")  &amp;&amp; ("${config.aws.ota.version_minor}" &gt;= 0)</constraint>
+        </property>
+        <property display="Version|Build" id="config.aws.ota.version_build" default="1" description="Build Version number used when updating.">
+            <constraint display="Value must be a non-negative integer">testInteger("${config.aws.ota.version_build}")  &amp;&amp; ("${config.aws.ota.version_build}" &gt;= 0)</constraint>
+        </property>
+        <content>
+${config.aws.ota.custom_ota_config}
+
+#ifndef otaconfigLOG2_FILE_BLOCK_SIZE
+    #define otaconfigLOG2_FILE_BLOCK_SIZE    ${config.aws.ota.otaconfiglog2_file_block_size}UL
+#endif
+
+#ifndef otaconfigSELF_TEST_RESPONSE_WAIT_MS
+    #define otaconfigSELF_TEST_RESPONSE_WAIT_MS    ${config.aws.ota.otaconfigself_test_response_wait_ms}U
+#endif
+
+#ifndef otaconfigFILE_REQUEST_WAIT_MS
+    #define otaconfigFILE_REQUEST_WAIT_MS    ${config.aws.ota.otaconfigfile_request_wait_ms}U
+#endif
+
+#ifndef otaconfigMAX_THINGNAME_LEN
+    #define otaconfigMAX_THINGNAME_LEN    ${config.aws.ota.otaconfigmax_thingname_len}U
+#endif
+
+#ifndef otaconfigMAX_NUM_BLOCKS_REQUEST
+    #define otaconfigMAX_NUM_BLOCKS_REQUEST    ${config.aws.ota.otaconfigmax_num_blocks_request}U
+#endif
+
+#ifndef otaconfigMAX_NUM_REQUEST_MOMENTUM
+    #define otaconfigMAX_NUM_REQUEST_MOMENTUM    ${config.aws.ota.otaconfigmax_num_request_momentum}U
+#endif
+
+#ifndef otaconfigOTA_UPDATE_STATUS_FREQUENCY
+    #define otaconfigOTA_UPDATE_STATUS_FREQUENCY    ${config.aws.ota.otaconfigota_update_status_frequency}U
+#endif
+
+#ifndef otaconfigMAX_NUM_OTA_DATA_BUFFERS
+    #define otaconfigMAX_NUM_OTA_DATA_BUFFERS    ${config.aws.ota.otaconfigmax_num_ota_data_buffers}U
+#endif
+
+#ifndef otaconfigAllowDowngrade
+    #define otaconfigAllowDowngrade    ${config.aws.ota.otaconfigallowdowngrade}U
+#endif
+
+#ifndef configOTA_FIRMWARE_UPDATE_FILE_TYPE_ID
+    #define configOTA_FIRMWARE_UPDATE_FILE_TYPE_ID    ${config.aws.ota.configota_firmware_update_file_type_id}U
+#endif
+
+#ifndef configENABLED_CONTROL_PROTOCOL
+    #define configENABLED_CONTROL_PROTOCOL    ( ${config.aws.ota.configenabled_control_protocol} )
+#endif
+
+#ifndef configENABLED_DATA_PROTOCOLS
+    #define configENABLED_DATA_PROTOCOLS    ( ${config.aws.ota.configenabled_data_protocols} )
+#endif
+
+#ifndef configOTA_PRIMARY_DATA_PROTOCOL
+    #define configOTA_PRIMARY_DATA_PROTOCOL    ( ${config.aws.ota.configota_primary_data_protocol} )
+#endif
+
+#ifndef otaconfigOTA_FILE_TYPE
+    #define otaconfigOTA_FILE_TYPE    uint8_t
+#endif
+
+#ifndef configOTA_POLLING_EVENTS_TIMEOUT_MS
+#define configOTA_POLLING_EVENTS_TIMEOUT_MS     ( ${config.aws.ota.configota_events_polling_timeout_ms} )
+#endif
+
+#ifndef otaconfigOTA_VERION_MAJOR
+    #define otaconfigOTA_VERION_MAJOR ${config.aws.ota.version_major}
+#endif
+#ifndef otaconfigOTA_VERION_MINOR
+    #define otaconfigOTA_VERION_MINOR ${config.aws.ota.version_minor}
+#endif
+#ifndef otaconfigOTA_VERION_BUILD
+    #define otaconfigOTA_VERION_BUILD ${config.aws.ota.version_build}
+#endif
+        </content>
+    </config>
+    <module id="module.aws.ota" display="Networking|AWS IoT Over-the-air Update Library" config="config.aws.ota" common="1" version="0" url="https://github.com/aws/ota-for-aws-iot-embedded-sdk">
+        <!-- Highlight Error when HTTPS Support is enabled and NetX Secure block is missing -->
+        <constraint display ="Requires HTTP when using Data over HTTP">
+			("${config.aws.ota.configenabled_data_protocols}" === "config.aws.ota.configenabled_data_protocols.mqtt") || ("${interface.aws.newcoreHttps}" &gt;= "1")
+        </constraint>
+        <constraint display ="Requires HTTP when using Data over HTTP">
+			("${config.aws.ota.configota_primary_data_protocol}" === "config.aws.ota.configota_primary_data_protocol.mqtt") || ("${interface.aws.newcoreHttps}" &gt;= "1")
+        </constraint>
+        <requires id="module.aws.ota.requires.newcoremqtt" interface="interface.aws.newcoremqtt" display="Add Core MQTT" find="true"/>
+        <requires id="module.aws.ota.requires.newcoreHttps" interface="interface.aws.newcoreHttps" display="Add Core HTTP (Optional)" find="false"/>
+        <requires id="module.aws.ota.requires.aws_ota_port" interface="interface.middleware.aws_ota_port" display="Add AWS OTA Port" find="true"/>
+        <requires id="module.aws.ota.requires.corejson" interface="interface.aws.corejson" display="Add coreJSON" find="true"/>
+        <requires id="module.aws.ota.requires.tinycbor" interface="interface.intel.tinycbor" display="Add TinyCBOR" find="true"/>
+        <provides interface="interface.aws.ota" />
+
+        <includes>
+#include "ota_config.h"
+#include "ota_appversion32.h"
+        </includes>
+        <declarations>
+/*
+ * Structure used for encoding firmware version.
+ */
+const AppVersion32_t appFirmwareVersion =
+{
+    .u.x.major = otaconfigOTA_VERION_MAJOR,
+    .u.x.minor = otaconfigOTA_VERION_MINOR,
+    .u.x.build = otaconfigOTA_VERION_BUILD,
+};
+        </declarations>
+    </module>
+</raModuleDescription>

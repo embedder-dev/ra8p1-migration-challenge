@@ -1,0 +1,375 @@
+<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.driver.ble_abs_spp" path="fsp_cfg/rm_ble_abs_spp_cfg.h" version="0">
+        <property id="config.driver.ble_abs_spp.parameter_checking_enable" display="Parameter Checking" default="config.driver.ble_abs_spp.parameter_checking_enable.bsp" description="Specify whether to include code for API parameter checking.">
+            <option id="config.driver.ble_abs_spp.parameter_checking_enable.bsp" display="Default (BSP)" value="BSP_CFG_PARAM_CHECKING_ENABLE" />
+            <option id="config.driver.ble_abs_spp.parameter_checking_enable.enabled" display="Enable" value="1" />
+            <option id="config.driver.ble_abs_spp.parameter_checking_enable.disabled" display="Disable" value="0" />
+        </property>
+        <!--<property default="module.driver.ble_abs_spp.irq_port.PORT_01" display="IRQ Port" id="module.driver.ble_abs_spp.irq_port" description="Specify the module irq pin port for the MCU.">
+            <option id="module.driver.ble_abs_spp.irq_port.PORT_00" display="00" value="00" />
+            <option id="module.driver.ble_abs_spp.irq_port.PORT_01" display="01" value="01" />
+            <option id="module.driver.ble_abs_spp.irq_port.PORT_02" display="02" value="02" />
+            <option id="module.driver.ble_abs_spp.irq_port.PORT_03" display="03" value="03" />
+            <option id="module.driver.ble_abs_spp.irq_port.PORT_04" display="04" value="04" />
+            <option id="module.driver.ble_abs_spp.irq_port.PORT_05" display="05" value="05" />
+            <option id="module.driver.ble_abs_spp.irq_port.PORT_06" display="06" value="06" />
+            <option id="module.driver.ble_abs_spp.irq_port.PORT_07" display="07" value="07" />
+            <option id="module.driver.ble_abs_spp.irq_port.PORT_08" display="08" value="08" />
+            <option id="module.driver.ble_abs_spp.irq_port.PORT_09" display="09" value="09" />
+            <option id="module.driver.ble_abs_spp.irq_port.PORT_10" display="10" value="10" />
+            <option id="module.driver.ble_abs_spp.irq_port.PORT_11" display="11" value="11" />
+        </property>
+        <property default="module.driver.ble_abs_spp.irq_pin.PIN_11" display="IRQ Pin" id="module.driver.ble_abs_spp.irq_pin" description="Specify the module reset pin for the MCU.">
+            <option id="module.driver.ble_abs_spp.irq_pin.PIN_00" display="00" value="00" />
+            <option id="module.driver.ble_abs_spp.irq_pin.PIN_01" display="01" value="01" />
+            <option id="module.driver.ble_abs_spp.irq_pin.PIN_02" display="02" value="02" />
+            <option id="module.driver.ble_abs_spp.irq_pin.PIN_03" display="03" value="03" />
+            <option id="module.driver.ble_abs_spp.irq_pin.PIN_04" display="04" value="04" />
+            <option id="module.driver.ble_abs_spp.irq_pin.PIN_05" display="05" value="05" />
+            <option id="module.driver.ble_abs_spp.irq_pin.PIN_06" display="06" value="06" />
+            <option id="module.driver.ble_abs_spp.irq_pin.PIN_07" display="07" value="07" />
+            <option id="module.driver.ble_abs_spp.irq_pin.PIN_08" display="08" value="08" />
+            <option id="module.driver.ble_abs_spp.irq_pin.PIN_09" display="09" value="09" />
+            <option id="module.driver.ble_abs_spp.irq_pin.PIN_10" display="10" value="10" />
+            <option id="module.driver.ble_abs_spp.irq_pin.PIN_11" display="11" value="11" />
+            <option id="module.driver.ble_abs_spp.irq_pin.PIN_12" display="12" value="12" />
+            <option id="module.driver.ble_abs_spp.irq_pin.PIN_13" display="13" value="13" />
+            <option id="module.driver.ble_abs_spp.irq_pin.PIN_14" display="14" value="14" />
+            <option id="module.driver.ble_abs_spp.irq_pin.PIN_15" display="15" value="15" />
+        </property>-->
+        <property default="module.driver.ble_abs_spp.reset_port.PORT_03" display="Reset Port" id="module.driver.ble_abs_spp.reset_port" description="Specify the module reset pin port for the MCU.">
+            <option id="module.driver.ble_abs_spp.reset_port.PORT_00" display="00" value="00" />
+            <option id="module.driver.ble_abs_spp.reset_port.PORT_01" display="01" value="01" />
+            <option id="module.driver.ble_abs_spp.reset_port.PORT_02" display="02" value="02" />
+            <option id="module.driver.ble_abs_spp.reset_port.PORT_03" display="03" value="03" />
+            <option id="module.driver.ble_abs_spp.reset_port.PORT_04" display="04" value="04" />
+            <option id="module.driver.ble_abs_spp.reset_port.PORT_05" display="05" value="05" />
+            <option id="module.driver.ble_abs_spp.reset_port.PORT_06" display="06" value="06" />
+            <option id="module.driver.ble_abs_spp.reset_port.PORT_07" display="07" value="07" />
+            <option id="module.driver.ble_abs_spp.reset_port.PORT_08" display="08" value="08" />
+            <option id="module.driver.ble_abs_spp.reset_port.PORT_09" display="09" value="09" />
+            <option id="module.driver.ble_abs_spp.reset_port.PORT_10" display="10" value="10" />
+            <option id="module.driver.ble_abs_spp.reset_port.PORT_11" display="11" value="11" />
+        </property>
+        <property default="module.driver.ble_abs_spp.reset_pin.PIN_10" display="Reset Pin" id="module.driver.ble_abs_spp.reset_pin" description="Specify the module reset pin for the MCU.">
+            <option id="module.driver.ble_abs_spp.reset_pin.PIN_00" display="00" value="00" />
+            <option id="module.driver.ble_abs_spp.reset_pin.PIN_01" display="01" value="01" />
+            <option id="module.driver.ble_abs_spp.reset_pin.PIN_02" display="02" value="02" />
+            <option id="module.driver.ble_abs_spp.reset_pin.PIN_03" display="03" value="03" />
+            <option id="module.driver.ble_abs_spp.reset_pin.PIN_04" display="04" value="04" />
+            <option id="module.driver.ble_abs_spp.reset_pin.PIN_05" display="05" value="05" />
+            <option id="module.driver.ble_abs_spp.reset_pin.PIN_06" display="06" value="06" />
+            <option id="module.driver.ble_abs_spp.reset_pin.PIN_07" display="07" value="07" />
+            <option id="module.driver.ble_abs_spp.reset_pin.PIN_08" display="08" value="08" />
+            <option id="module.driver.ble_abs_spp.reset_pin.PIN_09" display="09" value="09" />
+            <option id="module.driver.ble_abs_spp.reset_pin.PIN_10" display="10" value="10" />
+            <option id="module.driver.ble_abs_spp.reset_pin.PIN_11" display="11" value="11" />
+            <option id="module.driver.ble_abs_spp.reset_pin.PIN_12" display="12" value="12" />
+            <option id="module.driver.ble_abs_spp.reset_pin.PIN_13" display="13" value="13" />
+            <option id="module.driver.ble_abs_spp.reset_pin.PIN_14" display="14" value="14" />
+            <option id="module.driver.ble_abs_spp.reset_pin.PIN_15" display="15" value="15" />
+        </property>
+        <property default="module.driver.ble_abs_spp.pb5_port.PORT_03" display="UART/SPI Select Port (PB5)" id="module.driver.ble_abs_spp.pb5_port" description="Specify the module PB5 (UART/SPI select) port for the MCU.">
+            <option id="module.driver.ble_abs_spp.pb5_port.PORT_00" display="00" value="00" />
+            <option id="module.driver.ble_abs_spp.pb5_port.PORT_01" display="01" value="01" />
+            <option id="module.driver.ble_abs_spp.pb5_port.PORT_02" display="02" value="02" />
+            <option id="module.driver.ble_abs_spp.pb5_port.PORT_03" display="03" value="03" />
+            <option id="module.driver.ble_abs_spp.pb5_port.PORT_04" display="04" value="04" />
+            <option id="module.driver.ble_abs_spp.pb5_port.PORT_05" display="05" value="05" />
+            <option id="module.driver.ble_abs_spp.pb5_port.PORT_06" display="06" value="06" />
+            <option id="module.driver.ble_abs_spp.pb5_port.PORT_07" display="07" value="07" />
+            <option id="module.driver.ble_abs_spp.pb5_port.PORT_08" display="08" value="08" />
+            <option id="module.driver.ble_abs_spp.pb5_port.PORT_09" display="09" value="09" />
+            <option id="module.driver.ble_abs_spp.pb5_port.PORT_10" display="10" value="10" />
+            <option id="module.driver.ble_abs_spp.pb5_port.PORT_11" display="11" value="11" />
+        </property>
+        <property default="module.driver.ble_abs_spp.pb5_pin.PIN_11" display="UART/SPI Select Pin (PB5)" id="module.driver.ble_abs_spp.pb5_pin" description="Specify the module PB5 (UART/SPI select) pin for the MCU.">
+            <option id="module.driver.ble_abs_spp.pb5_pin.PIN_00" display="00" value="00" />
+            <option id="module.driver.ble_abs_spp.pb5_pin.PIN_01" display="01" value="01" />
+            <option id="module.driver.ble_abs_spp.pb5_pin.PIN_02" display="02" value="02" />
+            <option id="module.driver.ble_abs_spp.pb5_pin.PIN_03" display="03" value="03" />
+            <option id="module.driver.ble_abs_spp.pb5_pin.PIN_04" display="04" value="04" />
+            <option id="module.driver.ble_abs_spp.pb5_pin.PIN_05" display="05" value="05" />
+            <option id="module.driver.ble_abs_spp.pb5_pin.PIN_06" display="06" value="06" />
+            <option id="module.driver.ble_abs_spp.pb5_pin.PIN_07" display="07" value="07" />
+            <option id="module.driver.ble_abs_spp.pb5_pin.PIN_08" display="08" value="08" />
+            <option id="module.driver.ble_abs_spp.pb5_pin.PIN_09" display="09" value="09" />
+            <option id="module.driver.ble_abs_spp.pb5_pin.PIN_10" display="10" value="10" />
+            <option id="module.driver.ble_abs_spp.pb5_pin.PIN_11" display="11" value="11" />
+            <option id="module.driver.ble_abs_spp.pb5_pin.PIN_12" display="12" value="12" />
+            <option id="module.driver.ble_abs_spp.pb5_pin.PIN_13" display="13" value="13" />
+            <option id="module.driver.ble_abs_spp.pb5_pin.PIN_14" display="14" value="14" />
+            <option id="module.driver.ble_abs_spp.pb5_pin.PIN_15" display="15" value="15" />
+        </property>
+        <property default="module.driver.ble_abs_spp.software_ssl_port.PIN_DISABLE" display="SPI Software SSL Port" id="module.driver.ble_abs_spp.software_ssl_port" description="Specify the port to use for controlling SSL using the ioport module.">
+            <option id="module.driver.ble_abs_spp.software_ssl_port.PIN_DISABLE" display="Disabled" value="FF" />
+            <option id="module.driver.ble_abs_spp.software_ssl_port.PORT_00" display="00" value="00" />
+            <option id="module.driver.ble_abs_spp.software_ssl_port.PORT_01" display="01" value="01" />
+            <option id="module.driver.ble_abs_spp.software_ssl_port.PORT_02" display="02" value="02" />
+            <option id="module.driver.ble_abs_spp.software_ssl_port.PORT_03" display="03" value="03" />
+            <option id="module.driver.ble_abs_spp.software_ssl_port.PORT_04" display="04" value="04" />
+            <option id="module.driver.ble_abs_spp.software_ssl_port.PORT_05" display="05" value="05" />
+            <option id="module.driver.ble_abs_spp.software_ssl_port.PORT_06" display="06" value="06" />
+            <option id="module.driver.ble_abs_spp.software_ssl_port.PORT_07" display="07" value="07" />
+            <option id="module.driver.ble_abs_spp.software_ssl_port.PORT_08" display="08" value="08" />
+            <option id="module.driver.ble_abs_spp.software_ssl_port.PORT_09" display="09" value="09" />
+            <option id="module.driver.ble_abs_spp.software_ssl_port.PORT_10" display="10" value="10" />
+            <option id="module.driver.ble_abs_spp.software_ssl_port.PORT_11" display="11" value="11" />
+        </property>
+        <property default="module.driver.ble_abs_spp.software_ssl_pin.PIN_DISABLE" display="SPI Software SSL Pin" id="module.driver.ble_abs_spp.software_ssl_pin" description="Specify the pin to use for controlling SSL using the ioport module.">
+            <option id="module.driver.ble_abs_spp.software_ssl_pin.PIN_DISABLE" display="Disabled" value="FF" />
+            <option id="module.driver.ble_abs_spp.software_ssl_pin.PIN_00" display="00" value="00" />
+            <option id="module.driver.ble_abs_spp.software_ssl_pin.PIN_01" display="01" value="01" />
+            <option id="module.driver.ble_abs_spp.software_ssl_pin.PIN_02" display="02" value="02" />
+            <option id="module.driver.ble_abs_spp.software_ssl_pin.PIN_03" display="03" value="03" />
+            <option id="module.driver.ble_abs_spp.software_ssl_pin.PIN_04" display="04" value="04" />
+            <option id="module.driver.ble_abs_spp.software_ssl_pin.PIN_05" display="05" value="05" />
+            <option id="module.driver.ble_abs_spp.software_ssl_pin.PIN_06" display="06" value="06" />
+            <option id="module.driver.ble_abs_spp.software_ssl_pin.PIN_07" display="07" value="07" />
+            <option id="module.driver.ble_abs_spp.software_ssl_pin.PIN_08" display="08" value="08" />
+            <option id="module.driver.ble_abs_spp.software_ssl_pin.PIN_09" display="09" value="09" />
+            <option id="module.driver.ble_abs_spp.software_ssl_pin.PIN_10" display="10" value="10" />
+            <option id="module.driver.ble_abs_spp.software_ssl_pin.PIN_11" display="11" value="11" />
+            <option id="module.driver.ble_abs_spp.software_ssl_pin.PIN_12" display="12" value="12" />
+            <option id="module.driver.ble_abs_spp.software_ssl_pin.PIN_13" display="13" value="13" />
+            <option id="module.driver.ble_abs_spp.software_ssl_pin.PIN_14" display="14" value="14" />
+            <option id="module.driver.ble_abs_spp.software_ssl_pin.PIN_15" display="15" value="15" />
+        </property>
+        <property default="module.driver.ble_abs_spp.tx_power_level.p34" display="Transmit Power Level (in dBm)" id="module.driver.ble_abs_spp.tx_power_level" description="Specify the module transmit power in dBm.">
+            <option id="module.driver.ble_abs_spp.tx_power_level.p0" display="-50.00" value="0" />
+            <option id="module.driver.ble_abs_spp.tx_power_level.p1" display="-30.00" value="1" />
+            <option id="module.driver.ble_abs_spp.tx_power_level.p2" display="-25.18" value="2" />
+            <option id="module.driver.ble_abs_spp.tx_power_level.p3" display="-19.27" value="3" />
+            <option id="module.driver.ble_abs_spp.tx_power_level.p4" display="-15.88" value="4" />
+            <option id="module.driver.ble_abs_spp.tx_power_level.p5" display="-13.29" value="5" />
+            <option id="module.driver.ble_abs_spp.tx_power_level.p6" display="-11.40" value="6" />
+            <option id="module.driver.ble_abs_spp.tx_power_level.p7" display="-9.89" value="7" />
+            <option id="module.driver.ble_abs_spp.tx_power_level.p8" display="-8.65" value="8" />
+            <option id="module.driver.ble_abs_spp.tx_power_level.p9" display="-7.65" value="9" />
+            <option id="module.driver.ble_abs_spp.tx_power_level.p10" display="-6.67" value="10" />
+            <option id="module.driver.ble_abs_spp.tx_power_level.p11" display="-5.81" value="11" />
+            <option id="module.driver.ble_abs_spp.tx_power_level.p12" display="-5.03" value="12" />
+            <option id="module.driver.ble_abs_spp.tx_power_level.p13" display="-4.26" value="13" />
+            <option id="module.driver.ble_abs_spp.tx_power_level.p14" display="-3.61" value="14" />
+            <option id="module.driver.ble_abs_spp.tx_power_level.p15" display="-3.03" value="15" />
+            <option id="module.driver.ble_abs_spp.tx_power_level.p16" display="-2.48" value="16" />
+            <option id="module.driver.ble_abs_spp.tx_power_level.p17" display="-1.89" value="17" />
+            <option id="module.driver.ble_abs_spp.tx_power_level.p18" display="-1.42" value="18" />
+            <option id="module.driver.ble_abs_spp.tx_power_level.p19" display="-0.97" value="19" />
+            <option id="module.driver.ble_abs_spp.tx_power_level.p20" display="-0.14" value="20" />
+            <option id="module.driver.ble_abs_spp.tx_power_level.p21" display="0.04" value="21" />
+            <option id="module.driver.ble_abs_spp.tx_power_level.p22" display="0.58" value="22" />
+            <option id="module.driver.ble_abs_spp.tx_power_level.p23" display="0.90" value="23" />
+            <option id="module.driver.ble_abs_spp.tx_power_level.p24" display="1.17" value="24" />
+            <option id="module.driver.ble_abs_spp.tx_power_level.p25" display="1.45" value="25" />
+            <option id="module.driver.ble_abs_spp.tx_power_level.p26" display="1.73" value="26" />
+            <option id="module.driver.ble_abs_spp.tx_power_level.p27" display="1.99" value="27" />
+            <option id="module.driver.ble_abs_spp.tx_power_level.p28" display="2.39" value="28" />
+            <option id="module.driver.ble_abs_spp.tx_power_level.p29" display="2.61" value="29" />
+            <option id="module.driver.ble_abs_spp.tx_power_level.p30" display="2.81" value="30" />
+            <option id="module.driver.ble_abs_spp.tx_power_level.p31" display="3.01" value="31" />
+            <option id="module.driver.ble_abs_spp.tx_power_level.p32" display="3.23" value="32" />
+            <option id="module.driver.ble_abs_spp.tx_power_level.p33" display="3.94" value="33" />
+            <option id="module.driver.ble_abs_spp.tx_power_level.p34" display="4.57" value="34" />
+            <option id="module.driver.ble_abs_spp.tx_power_level.p35" display="5.13" value="35" />
+            <option id="module.driver.ble_abs_spp.tx_power_level.p36" display="5.65" value="36" />
+            <option id="module.driver.ble_abs_spp.tx_power_level.p37" display="6.14" value="37" />
+            <option id="module.driver.ble_abs_spp.tx_power_level.p38" display="6.60" value="38" />
+            <option id="module.driver.ble_abs_spp.tx_power_level.p39" display="7.02" value="39" />
+            <option id="module.driver.ble_abs_spp.tx_power_level.p40" display="7.41" value="40" />
+            <option id="module.driver.ble_abs_spp.tx_power_level.p41" display="7.79" value="41" />
+            <option id="module.driver.ble_abs_spp.tx_power_level.p42" display="8.13" value="42" />
+            <option id="module.driver.ble_abs_spp.tx_power_level.p43" display="8.44" value="43" />
+        </property>
+        <content>
+            #ifdef __cplusplus
+            extern "C" {
+            #endif
+
+            #define BLE_ABS_CFG_RF_CONNECTION_MAXIMUM (1)
+            #define BLE_ABS_CFG_RF_CONNECTION_DATA_MAXIMUM (251)
+            #define BLE_ABS_CFG_RF_ADVERTISING_DATA_MAXIMUM (1650)
+            #define BLE_ABS_CFG_RF_ADVERTISING_SET_MAXIMUM (1)
+            #define BLE_ABS_CFG_RF_SYNC_SET_MAXIMUM (1)
+            #define BLE_ABS_CFG_ENABLE_SECURE_DATA (0)
+            #define BLE_ABS_CFG_SECURE_DATA_DATAFLASH_BLOCK (0)
+            #define BLE_ABS_CFG_NUMBER_BONDING (1)
+            #define BLE_ABS_CFG_EVENT_NOTIFY_CONNECTION_START (1)
+            #define BLE_ABS_CFG_EVENT_NOTIFY_CONNECTION_CLOSE (1)
+            #define BLE_ABS_CFG_EVENT_NOTIFY_ADVERTISING_START (1)
+            #define BLE_ABS_CFG_EVENT_NOTIFY_ADVERTISING_CLOSE (1)
+            #define BLE_ABS_CFG_EVENT_NOTIFY_SCANNING_START (0)
+            #define BLE_ABS_CFG_EVENT_NOTIFY_SCANNING_CLOSE (0)
+            #define BLE_ABS_CFG_EVENT_NOTIFY_INITIATING_START (0)
+            #define BLE_ABS_CFG_EVENT_NOTIFY_INITIATING_CLOSE (0)
+            #define BLE_ABS_CFG_EVENT_NOTIFY_DEEP_SLEEP_START (0)
+            #define BLE_ABS_CFG_EVENT_NOTIFY_DEEP_SLEEP_WAKEUP (0)
+            #define BLE_ABS_CFG_RF_CLVAL (6)
+            #define BLE_ABS_CFG_RF_DCDC_CONVERTER_ENABLE (0)
+            #define BLE_ABS_CFG_RF_EXT32K_EN (0)
+            #define BLE_ABS_CFG_RF_MCU_CLKOUT_PORT (0)
+            #define BLE_ABS_CFG_RF_MCU_CLKOUT_FREQ (0)
+            #define BLE_ABS_CFG_RF_SCA (0)
+            #define BLE_ABS_CFG_RF_MAX_TX_POW (0)
+            #define BLE_ABS_CFG_RF_DEF_TX_POW (0)
+            #define BLE_ABS_CFG_RF_CLKOUT_EN (0)
+            #define BLE_ABS_CFG_RF_DEEP_SLEEP_EN (1)
+            #define BLE_ABS_CFG_MCU_MAIN_CLK_KHZ (8000)
+            #define BLE_ABS_CFG_DEV_DATA_CF_BLOCK (255)
+            #define BLE_ABS_CFG_DEV_DATA_DF_BLOCK (-1)
+            #define BLE_ABS_CFG_GATT_MTU_SIZE (247)
+            #define BLE_ABS_CFG_TIMER_NUMBER_OF_SLOT (10)
+            #define BLE_ABS_CFG_PARAMETER_CHECKING_ENABLE (${config.driver.ble_abs_spp.parameter_checking_enable})
+            #define BLE_ABS_CFG_RESET_PIN  BSP_IO_PORT_${module.driver.ble_abs_spp.reset_port}_PIN_${module.driver.ble_abs_spp.reset_pin}
+            #define BLE_ABS_CFG_PB5_PIN    BSP_IO_PORT_${module.driver.ble_abs_spp.pb5_port}_PIN_${module.driver.ble_abs_spp.pb5_pin}
+#if (0x${module.driver.ble_abs_spp.software_ssl_pin} != 0xFF) &amp;&amp; (0x${module.driver.ble_abs_spp.software_ssl_port} != 0xFF)
+            #define BLE_ABS_CFG_SSL_PIN    BSP_IO_PORT_${module.driver.ble_abs_spp.software_ssl_port}_PIN_${module.driver.ble_abs_spp.software_ssl_pin}
+#endif
+            #define BLE_CFG_RF_CONN_MAX    (1)
+            #define BLE_ABS_CFG_TRANSMIT_POWER_INDEX (${module.driver.ble_abs_spp.tx_power_level})
+
+#if ${interface.driver.ble_abs_spp_transport_spi} > 0
+            #define RM_BLE_ABS_SPP_TRANSPORT_INTERFACE_SPI
+#else
+            #define RM_BLE_ABS_SPP_TRANSPORT_INTERFACE_UART
+#endif
+
+            #ifdef __cplusplus
+            }
+            #endif
+        </content>
+    </config>
+    <module id="module.driver.ble_abs_spp_on_ble" config="config.driver.ble_abs_spp" display="Networking|SPP BLE Abstraction (rm_ble_abs_spp)" version="0" url="group___b_l_e___a_b_s.html">
+        <constraint display="BLE Transport Interface is required.">
+            testExists("${module.driver.ble_abs_spp_on_ble.requires.ble_abs_spp_transport::module.driver.ble_abs_spp_transport.name}")
+        </constraint>
+        <constraint display="BSP heap is required. Please add a heap under BSP|RA Common|Heap Size.">
+        "${config.bsp.common.heap}" &gt; 0
+        </constraint>
+        <constraint display="FreeRTOS Dynamic Memory Allocation is required. Please enable it under Thread|Common|Memory Allocation|Support Dynamic Allocation.">
+            "${config.awsfreertos.thread.configsupport_dynamic_allocation}" == "config.awsfreertos.thread.configsupport_dynamic_allocation.enabled" || !testExists("${interface.rtos.rtos}")
+        </constraint>
+        <requires id="module.driver.ble_abs_spp_on_ble.requires.r_ble_spp" interface="interface.middleware.r_ble_spp" display="Requires RYZ012 SPP Driver Layer" find="true" />
+        <requires id="module.driver.ble_abs_spp_on_ble.requires.ble_abs_spp_transport" interface="interface.driver.ble_abs_spp_transport" display="Transport Interface for communicating with the module." find="true" />
+        <provides interface="interface.driver.ble_abs_spp" />
+        <provides interface="interface.driver.ble_abs_spp_on_ble" />
+        <provides interface="interface.driver.ble_abs_spp.${module.driver.ble_abs_spp.name}" />
+        <property default="g_ble_abs${_instance}" display="General|Name" id="module.driver.ble_abs_spp.name" description="Module name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.ble_abs_spp.name}")</constraint>
+        </property>
+        <property display="General|GAP callback" id="module.driver.ble_abs_spp.gap_callback" default="gap_cb" description="If QE is used, set to &quot;gap_cb&quot;.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.ble_abs_spp.gap_callback}")</constraint>
+        </property>
+        <property display="General|Vendor specific callback" id="module.driver.ble_abs_spp.vendor_specific_callback" default="vs_cb" description="If QE is used, set to &quot;vs_cb&quot;.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.ble_abs_spp.vendor_specific_callback}")</constraint>
+        </property>
+        <property display="General|GATT server callback parameter" id="module.driver.ble_abs_spp.server_cb_list" default="gs_abs_gatts_cb_param" description="If QE is used, set to &quot;gs_abs_gattc_cb_param&quot;.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.ble_abs_spp.server_cb_list}")</constraint>
+        </property>
+        <property display="General|GATT server callback number" id="module.driver.ble_abs_spp.gatt_server_init_callback_number" default="2" description="The number of GATT Server callback functions.">
+            <constraint display="Must be a valid number">testInteger("${module.driver.ble_abs_spp.gatt_server_init_callback_number}") &amp;&amp; ("${module.driver.ble_abs_spp.gatt_server_init_callback_number}" &gt;= 0) </constraint>
+        </property>
+        <property display="General|GATT client callback parameter" id="module.driver.ble_abs_spp.client_cb_list" default="gs_abs_gattc_cb_param" description="Set GATT client callback parameter. If QE is used, set to &quot;gs_abs_gattc_cb_param&quot;.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.ble_abs_spp.client_cb_list}")</constraint>
+        </property>
+        <property display="General|GATT client callback number" id="module.driver.ble_abs_spp.gatt_client_init_callback_number" default="2" description="The number of GATT Server callback functions.">
+            <constraint display="Must be a valid number">testInteger("${module.driver.ble_abs_spp.gatt_client_init_callback_number}") &amp;&amp; ("${module.driver.ble_abs_spp.gatt_client_init_callback_number}" &gt;= 0) </constraint>
+        </property>
+        <property id="module.driver.ble_abs_spp.p_context" default="NULL">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.ble_abs_spp.p_context}")</constraint>
+            <export>eval('' +
+            'var output = "${module.driver.ble_abs_spp.p_context}";' +
+            'if ("NULL" !== output){' +
+            'output = "&amp;" + output  ;' +
+            '}' +
+            'output')
+            </export>
+        </property>
+        <property id="module.driver.ble_abs_spp.p_extend" default="NULL">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.ble_abs_spp.p_extend}")</constraint>
+            <export>eval('' +
+            'var output = "${module.driver.ble_abs_spp.p_extend}";' +
+            'if ("NULL" !== output){' +
+            'output = "&amp;" + output  ;' +
+            '}' +
+            'output')
+            </export>
+        </property>
+        <header>
+void r_ble_rf_notify_event_start(uint32_t param);
+void r_ble_rf_notify_event_close(uint32_t param);
+void r_ble_rf_notify_deep_sleep(uint32_t param);
+
+/** BLE_ABS on BLE Instance. */
+extern const ble_abs_instance_t ${module.driver.ble_abs_spp.name};
+
+/** Access the BLE_ABS instance using these structures when calling API functions directly (::p_api is not used). */
+extern ble_abs_instance_ctrl_t ${module.driver.ble_abs_spp.name}_ctrl;
+extern const ble_abs_cfg_t ${module.driver.ble_abs_spp.name}_cfg;
+
+/** Callback used by ble_abs_spp Instance. */
+#ifndef ${module.driver.ble_abs_spp.gap_callback}
+void ${module.driver.ble_abs_spp.gap_callback}(uint16_t type, ble_status_t result, st_ble_evt_data_t *p_data);
+#endif
+
+#ifndef ${module.driver.ble_abs_spp.vendor_specific_callback}
+void ${module.driver.ble_abs_spp.vendor_specific_callback}(uint16_t type, ble_status_t result, st_ble_vs_evt_data_t *p_data);
+#endif
+
+#ifndef ${module.driver.ble_abs_spp.server_cb_list}
+extern ble_abs_gatt_server_callback_set_t ${module.driver.ble_abs_spp.server_cb_list}[];
+#else
+ble_abs_gatt_server_callback_set_t ${module.driver.ble_abs_spp.server_cb_list}[];
+#endif
+
+#ifndef ${module.driver.ble_abs_spp.client_cb_list}
+extern ble_abs_gatt_client_callback_set_t ${module.driver.ble_abs_spp.client_cb_list}[];
+#else
+ble_abs_gatt_client_callback_set_t ${module.driver.ble_abs_spp.client_cb_list}[];
+#endif
+
+        </header>
+        <includes>
+#include "rm_ble_abs.h"
+#include "rm_ble_abs_api.h"
+        </includes>
+        <declarations>
+ble_abs_instance_ctrl_t ${module.driver.ble_abs_spp.name}_ctrl;
+
+const ble_abs_cfg_t ${module.driver.ble_abs_spp.name}_cfg =
+{
+    .gap_callback = ${module.driver.ble_abs_spp.gap_callback},
+    .vendor_specific_callback = ${module.driver.ble_abs_spp.vendor_specific_callback},
+    .p_pairing_parameter = NULL,
+    .p_gatt_server_callback_list = ${module.driver.ble_abs_spp.server_cb_list},
+    .gatt_server_callback_list_number = ${module.driver.ble_abs_spp.gatt_server_init_callback_number},
+    .p_gatt_client_callback_list = ${module.driver.ble_abs_spp.client_cb_list},
+    .gatt_client_callback_list_number = ${module.driver.ble_abs_spp.gatt_client_init_callback_number},
+#ifdef RM_BLE_ABS_SPP_TRANSPORT_INTERFACE_UART
+    .p_uart_instance = &amp;${module.driver.ble_abs_spp_on_ble.requires.ble_abs_spp_transport::module.driver.ble_abs_spp_transport.name}_UART_INSTANCE,
+    .p_spi_instance = NULL,
+    .p_irq_instance = NULL,
+#endif
+#ifdef RM_BLE_ABS_SPP_TRANSPORT_INTERFACE_SPI
+    .p_uart_instance = NULL,
+    .p_spi_instance = &amp;${module.driver.ble_abs_spp_on_ble.requires.ble_abs_spp_transport::module.driver.ble_abs_spp_transport.name}_SPI_INSTANCE,
+    .p_irq_instance = &amp;${module.driver.ble_abs_spp_on_ble.requires.ble_abs_spp_transport::module.driver.ble_abs_spp_transport.name}_IRQ_INSTANCE,
+#endif
+    .p_callback = NULL,
+    .p_context = ${module.driver.ble_abs_spp.p_context},
+    .p_extend = ${module.driver.ble_abs_spp.p_extend},
+};
+
+/* Instance structure to use this module. */
+const ble_abs_instance_t ${module.driver.ble_abs_spp.name} =
+{
+    .p_ctrl        = &amp;${module.driver.ble_abs_spp.name}_ctrl,
+    .p_cfg         = &amp;${module.driver.ble_abs_spp.name}_cfg,
+    .p_api         = &amp;g_ble_abs_on_ble
+};
+        </declarations>
+        <functions>
+        </functions>
+    </module>
+</raModuleDescription>

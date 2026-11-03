@@ -1,0 +1,517 @@
+﻿<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.middleware.motor_driver" path="fsp_cfg/rm_motor_driver_cfg.h" version="0">
+        <property default="config.middleware.motor_driver.param_checking_enable.bsp" display="Parameter Checking" id="config.middleware.motor_driver.param_checking_enable" description="If selected code for parameter checking is included in the build.">
+            <option display="Default (BSP)" id="config.middleware.motor_driver.param_checking_enable.bsp" value="(BSP_CFG_PARAM_CHECKING_ENABLE)"/>
+            <option display="Enabled" id="config.middleware.motor_driver.param_checking_enable.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.motor_driver.param_checking_enable.disabled" value="(0)"/>
+        </property>
+        <property default="config.middleware.motor_driver.adc_b_support.disabled" display="ADC_B Support" id="config.middleware.motor_driver.adc_b_support" description="Select ADC_B module support.">
+            <option display="Enabled" id="config.middleware.motor_driver.adc_b_support.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.motor_driver.adc_b_support.disabled" value="(0)"/>
+        </property>
+        <property default="config.middleware.motor_driver.shared_adc.disabled" display="Shared ADC support" id="config.middleware.motor_driver.shared_adc" description="Select Shared ADC support.">
+            <option display="Enabled" id="config.middleware.motor_driver.shared_adc.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.motor_driver.shared_adc.disabled" value="(0)"/>
+        </property>
+        <property default="1" display="Supported Motor Number" id="config.middleware.motor_driver.support_motor_num" description="">
+            <constraint display="Must be greater than 1."> testInteger("${config.middleware.motor_driver.support_motor_num}") &amp;&amp; ("${config.middleware.motor_driver.support_motor_num}" &gt; 0)</constraint>
+        </property>
+
+        <content>
+            #ifdef __cplusplus
+            extern "C" {
+            #endif
+
+            #define MOTOR_DRIVER_CFG_PARAM_CHECKING_ENABLE   ${config.middleware.motor_driver.param_checking_enable}
+            #define MOTOR_DRIVER_CFG_ADC_B_SUPPORTED ${config.middleware.motor_driver.adc_b_support}
+            #define MOTOR_DRIVER_CFG_SUPPORT_SHARED_ADC ${config.middleware.motor_driver.shared_adc}
+            #define MOTOR_DRIVER_CFG_SUPPORT_MOTOR_NUM ${config.middleware.motor_driver.support_motor_num}
+
+            #ifdef __cplusplus
+            }
+            #endif
+        </content>
+    </config>
+    <module config="config.middleware.motor_driver" display="Motor|ADC and PWM Modulation (rm_motor_driver)" id="module.middleware.motor_driver" version="1" url="group___m_o_t_o_r___d_r_i_v_e_r.html">
+        <constraint display="Unique name required for each instance">
+            "${interface.middleware.motor_driver.${module.middleware.motor_driver.name}}" === "1"
+        </constraint>
+        <constraint display="Requires GPT three phase PWM Driver">
+            testExists("${module.middleware.motor_driver.requires.three_phase::module.driver.three_phase.name}")
+        </constraint>
+        <constraint display="When ADC_B module is used, ADC_B supported must be enabled">
+            (( "${interface.driver.adc_on_adc_b}" === "1" ) &amp;&amp; ( "${config.middleware.motor_driver.adc_b_support}" === "config.middleware.motor_driver.adc_b_support.enabled" )) || (( "${interface.driver.adc_on_adc_b}" !== "1" ) &amp;&amp; ( "${config.middleware.motor_driver.adc_b_support}" === "config.middleware.motor_driver.adc_b_support.disabled" ))
+        </constraint>
+        <constraint display="Select only one ADC module.">
+            ((testExists("${module.middleware.motor_driver.requires.adc::module.driver.adc.name}")) &amp;&amp; (!testExists("${module.middleware.motor_driver.requires.motor_adc_shared::module.middleware.motor_adc_shared.name}"))) || ((!testExists("${module.middleware.motor_driver.requires.adc::module.driver.adc.name}")) &amp;&amp; (testExists("${module.middleware.motor_driver.requires.motor_adc_shared::module.middleware.motor_adc_shared.name}")))
+        </constraint>
+
+        <requires id="module.middleware.motor_driver.requires.adc" interface="interface.driver.adc" find="false" display="Add ADC driver">
+            <override property="module.driver.adc.resolution" value="ADC_RESOLUTION_12_BIT"/>
+            <override property="module.driver.adc.alignment" value="ADC_ALIGNMENT_RIGHT"/>
+            <override property="module.driver.adc.add_average_count" value="module.driver.adc.add_average_count.add_off"/>
+            <override property="module.driver.adc.adc_vref_control" value="ADC_VREF_CONTROL_VREFH"/>
+            <override property="module.driver.adc.p_context" value="${module.middleware.motor_driver.name}"/>
+        </requires>
+        <requires id="module.middleware.motor_driver.requires.adc2" interface="interface.driver.adc" find="false" display="Add secondary ADC instance to support 1shunt feature [Option]">
+            <override property="module.driver.adc.resolution" value="ADC_RESOLUTION_12_BIT"/>
+            <override property="module.driver.adc.alignment" value="ADC_ALIGNMENT_RIGHT"/>
+            <override property="module.driver.adc.clearing" value="ADC_CLEAR_AFTER_READ_OFF"/>
+            <override property="module.driver.adc.double_trigger_mode" value="ADC_DOUBLE_TRIGGER_DISABLED"/>
+            <override property="module.driver.adc.add_average_count" value="module.driver.adc.add_average_count.add_off"/>
+            <override property="module.driver.adc.adc_vref_control" value="ADC_VREF_CONTROL_VREFH"/>
+            <override property="module.driver.adc.p_context" value="${module.middleware.motor_driver.name}"/>
+        </requires>
+
+        <requires id="module.middleware.motor_driver.requires.three_phase" interface="interface.driver.three_phase" find="true" display="Add GPT three phase PWM driver [Mandatory]">
+            <override property="module.driver.three_phase.period" value="${module.middleware.motor_driver.pwm_carrier_freq}"/>
+            <override property="module.driver.three_phase.unit" value="module.driver.three_phase.unit.unit_period_usec"/>
+            <override property="module.driver.three_phase.dead_time_count_up" value="${module.middleware.motor_driver.dead_time}"/>
+            <override property="module.driver.three_phase.dead_time_count_down" value="${module.middleware.motor_driver.dead_time}"/>
+            <override property="module.driver.three_phase.gtioca_stop_level" value="module.driver.three_phase.gtioca_stop_level.${module.middleware.motor_driver.gtioca_stop_level}"/>
+            <override property="module.driver.three_phase.gtiocb_stop_level" value="module.driver.three_phase.gtiocb_stop_level.${module.middleware.motor_driver.gtiocb_stop_level}"/>
+        </requires>
+        <requires id="module.middleware.motor_driver.requires.motor_adc_shared" interface="interface.middleware.motor_adc_shared" find="false" display="Add Shared ADC instance [Optional]"/>
+
+        <provides interface="interface.middleware.motor_driver" />
+        <provides interface="interface.middleware.motor_driver.${module.middleware.motor_driver.name}" />
+
+        <!-- Module Name -->
+        <property default="g_motor_driver${_instance}" display="General|Name" id="module.middleware.motor_driver.name" description="Module name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.middleware.motor_driver.name}")</constraint>
+        </property>
+
+        <!-- General Settings -->
+        <property display="General|Shunt type" id="module.middleware.motor_driver.shunt" default="module.middleware.motor_driver.shunt.2_shunt" description="Select shunt type">
+            <option id="module.middleware.motor_driver.shunt.1_shunt" display="1 shunt" value="MOTOR_DRIVER_SHUNT_TYPE_1_SHUNT" />
+            <option id="module.middleware.motor_driver.shunt.2_shunt" display="2 shunt" value="MOTOR_DRIVER_SHUNT_TYPE_2_SHUNT" />
+            <option id="module.middleware.motor_driver.shunt.3_shunt" display="3 shunt" value="MOTOR_DRIVER_SHUNT_TYPE_3_SHUNT" />
+        </property>
+        <property display="General|Modulation method" id="module.middleware.motor_driver.modulation_method" default="module.middleware.motor_driver.modulation_method.svpwm" description="Select PWM modulation method">
+            <option id="module.middleware.motor_driver.modulation_method.svpwm" display="SVPWM" value="MOTOR_DRIVER_MODULATION_METHOD_SVPWM" />
+            <option id="module.middleware.motor_driver.modulation_method.spwm" display="SPWM" value="MOTOR_DRIVER_MODULATION_METHOD_SPWM" />
+        </property>
+        <property default="0" display="General|PWM output port UP" id="module.middleware.motor_driver.port_up" description="PWM output port UP">
+        </property>
+        <property default="0" display="General|PWM output port UN" id="module.middleware.motor_driver.port_un" description="PWM output port UN">
+        </property>
+        <property default="0" display="General|PWM output port VP" id="module.middleware.motor_driver.port_vp" description="PWM output port VP">
+        </property>
+        <property default="0" display="General|PWM output port VN" id="module.middleware.motor_driver.port_vn" description="PWM output port VN">
+        </property>
+        <property default="0" display="General|PWM output port WP" id="module.middleware.motor_driver.port_wp" description="PWM output port WP">
+        </property>
+        <property default="0" display="General|PWM output port WN" id="module.middleware.motor_driver.port_wn" description="PWM output port WN">
+        </property>
+        <property default="120" display="General|PWM Timer Frequency (MHz)" id="module.middleware.motor_driver.pwm_timer_freq" description="GPT PWM timer frequency">
+            <constraint display="Must be a valid integer.">
+            testInteger("${module.middleware.motor_driver.pwm_timer_freq}") &amp;&amp; 
+            ("${module.middleware.motor_driver.pwm_timer_freq}" &gt;= 0)
+            </constraint>
+        </property>
+        <property default="50" display="General|PWM Carrier Period (Microseconds)" id="module.middleware.motor_driver.pwm_carrier_freq" description="GPT PWM carrier period">
+            <constraint display="Must be a valid integer.">
+            testInteger("${module.middleware.motor_driver.pwm_carrier_freq}") &amp;&amp; 
+            ("${module.middleware.motor_driver.pwm_carrier_freq}" &gt;= 0)
+            </constraint>
+        </property>
+        <property default="240" display="General|Dead Time (Raw Counts)" id="module.middleware.motor_driver.dead_time" description="GPT PWM dead time">
+            <constraint display="Must be a valid integer.">
+            testInteger("${module.middleware.motor_driver.dead_time}") &amp;&amp; 
+            ("${module.middleware.motor_driver.dead_time}" &gt;= 0)
+            </constraint>
+        </property>
+        <property default="27.5F" display="General|Current Range (A)" id="module.middleware.motor_driver.current_range" description="Current range to measure(Maximum input current)">
+            <constraint display="Must be a valid value">
+            eval('' +
+            'var input = "${module.middleware.motor_driver.current_range}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?$","i");' +
+            'var regex_float_with_suffix = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?F$","i");' +
+            ' ( regex_float.test(input) || regex_float_with_suffix.test(input))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${module.middleware.motor_driver.current_range}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)$","i");' +
+            'if (regex_float.test(output)){' +
+            'output = output + "F";' +
+            '}' +
+            'output')
+            </export>
+        </property>
+        <property default="111.0F" display="General|Voltage Range (V)" id="module.middleware.motor_driver.vdc_range" description="Voltage range to measure(Maximum input Main Line Voltage)">
+            <constraint display="Must be a valid value">
+            eval('' +
+            'var input = "${module.middleware.motor_driver.vdc_range}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?$","i");' +
+            'var regex_float_with_suffix = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?F$","i");' +
+            ' ( regex_float.test(input) || regex_float_with_suffix.test(input))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${module.middleware.motor_driver.vdc_range}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)$","i");' +
+            'if (regex_float.test(output)){' +
+            'output = output + "F";' +
+            '}' +
+            'output')
+            </export>
+        </property>
+        <property default="500" display="General|Counts for current offset measurement" id="module.middleware.motor_driver.offset_count" description="How many times to measure current offset">
+            <constraint display="Must be a valid integer.">
+            testInteger("${module.middleware.motor_driver.offset_count}") &amp;&amp; 
+            ("${module.middleware.motor_driver.offset_count}" &gt;= 0)
+            </constraint>
+        </property>
+
+        <!-- Select ADC channel -->
+        <property default="0" display="General|A/D conversion channel for U Phase current" id="module.middleware.motor_driver.iu_ad_ch" description="Specify the A/D channel for U phase current (channel availability varies by MCU)">
+            <constraint display="Value must be a supported channel number">
+                testInteger("${module.middleware.motor_driver.iu_ad_ch}") &amp;&amp; ("${module.middleware.motor_driver.iu_ad_ch}" &gt;= 0) &amp;&amp; (("${module.middleware.motor_driver.iu_ad_ch}") &lt;= 28)
+            </constraint>
+        </property>
+        <property default="2" display="General|A/D conversion channel for W Phase current" id="module.middleware.motor_driver.iw_ad_ch" description="Specify the A/D channel for W phase current (channel availability varies by MCU)">
+            <constraint display="Value must be a supported channel number">
+                testInteger("${module.middleware.motor_driver.iw_ad_ch}") &amp;&amp; ("${module.middleware.motor_driver.iw_ad_ch}" &gt;= 0) &amp;&amp; (("${module.middleware.motor_driver.iw_ad_ch}") &lt;= 28)
+            </constraint>
+        </property>
+        <property default="5" display="General|A/D conversion channel for Main Line Voltage" id="module.middleware.motor_driver.vdc_ad_ch" description="Specify the A/D channel for main line voltage (channel availability varies by MCU)">
+            <constraint display="Value must be a supported channel number">
+                testInteger("${module.middleware.motor_driver.vdc_ad_ch}") &amp;&amp; ("${module.middleware.motor_driver.vdc_ad_ch}" &gt;= 0) &amp;&amp; (("${module.middleware.motor_driver.vdc_ad_ch}") &lt;= 28)
+            </constraint>
+        </property>
+        <property default="1" display="General|A/D conversion channel for V Phase current" id="module.middleware.motor_driver.iv_ad_ch" description="Specify the A/D channel for V phase current (channel availability varies by MCU)">
+            <constraint display="Value must be a supported channel number">
+                testInteger("${module.middleware.motor_driver.iv_ad_ch}") &amp;&amp; ("${module.middleware.motor_driver.iv_ad_ch}" &gt;= 0) &amp;&amp; (("${module.middleware.motor_driver.iv_ad_ch}") &lt;= 28)
+            </constraint>
+        </property>
+        <property default="27" display="General|A/D conversion channel for sin signal" id="module.middleware.motor_driver.sin_ad_ch" description="Specify the A/D channel for sin signal of induction sensor (channel availability varies by MCU)">
+            <constraint display="Value must be a supported channel number">
+                testInteger("${module.middleware.motor_driver.sin_ad_ch}") &amp;&amp; ("${module.middleware.motor_driver.sin_ad_ch}" &gt;= 0) &amp;&amp; (("${module.middleware.motor_driver.sin_ad_ch}") &lt;= 28)
+            </constraint>
+        </property>
+        <property default="28" display="General|A/D conversion channel for cos signal" id="module.middleware.motor_driver.cos_ad_ch" description="Specify the A/D channel for cos signal of induction sensor (channel availability varies by MCU)">
+            <constraint display="Value must be a supported channel number">
+                testInteger("${module.middleware.motor_driver.cos_ad_ch}") &amp;&amp; ("${module.middleware.motor_driver.cos_ad_ch}" &gt;= 0) &amp;&amp; (("${module.middleware.motor_driver.cos_ad_ch}") &lt;= 28)
+            </constraint>
+        </property>
+
+        <property default="0" display="General|Using ADC Scan Group" id="module.middleware.motor_driver.adc_group" description="For MCUs with ADC_B, select the scan group used.">
+            <constraint display="Value should be between 0 to 8 (valid only with ADC_B module)">
+                testInteger("${module.middleware.motor_driver.adc_group}") &amp;&amp; ("${module.middleware.motor_driver.adc_group}" &gt;= 0) &amp;&amp; (("${module.middleware.motor_driver.adc_group}") &lt;= 8)
+            </constraint>
+        </property>
+
+        <!-- Select ADC module only valid with g_adc -->
+        <property default="0" display="General|A/D conversion unit for U Phase current" id="module.middleware.motor_driver.iu_ad_unit" description="Select the A/D conversion module for U phase current (only valid with adc module)">
+            <constraint display="Must be a valid non-negative value.">("${module.middleware.motor_driver.iu_ad_unit}" &gt;= 0)</constraint>
+        </property>
+        <property default="0" display="General|A/D conversion unit for W Phase current" id="module.middleware.motor_driver.iw_ad_unit" description="Select the A/D conversion module for W phase current (only valid with adc module)">
+            <constraint display="Must be a valid non-negative value.">("${module.middleware.motor_driver.iw_ad_unit}" &gt;= 0)</constraint>
+        </property>
+        <property default="0" display="General|A/D conversion unit for main line voltage" id="module.middleware.motor_driver.vdc_ad_unit" description="Select the A/D conversion module for main line voltage (only valid with adc module)">
+            <constraint display="Must be a valid non-negative value.">("${module.middleware.motor_driver.vdc_ad_unit}" &gt;= 0)</constraint>
+        </property>
+        <property default="0" display="General|A/D conversion unit for V Phase current" id="module.middleware.motor_driver.iv_ad_unit" description="Select the A/D conversion module for V phase current (only valid with adc module)">
+            <constraint display="Must be a valid non-negative value.">("${module.middleware.motor_driver.iv_ad_unit}" &gt;= 0)</constraint>
+        </property>
+        <property default="0" display="General|A/D conversion unit for sin signal" id="module.middleware.motor_driver.sin_ad_unit" description="Select the A/D conversion module for sin signal of induction sensor (only valid with adc module)">
+            <constraint display="Must be a valid non-negative value.">("${module.middleware.motor_driver.sin_ad_unit}" &gt;= 0)</constraint>
+        </property>
+        <property default="0" display="General|A/D conversion unit for cos signal" id="module.middleware.motor_driver.cos_ad_unit" description="Select the A/D conversion module for cos signal of induction sensor (only valid with adc module)">
+            <constraint display="Must be a valid non-negative value.">("${module.middleware.motor_driver.cos_ad_unit}" &gt;= 0)</constraint>
+        </property>
+
+        <property default="module.middleware.motor_driver.interrupt_adc.1st" display="General|ADC interrupt module" id="module.middleware.motor_driver.interrupt_adc" description="Select from which module ADC intterupt happens (only valid with adc module)">
+            <option display="1st" id="module.middleware.motor_driver.interrupt_adc.1st" value="MOTOR_DRIVER_SELECT_ADC_INSTANCE_FIRST"/>
+            <option display="2nd" id="module.middleware.motor_driver.interrupt_adc.2nd" value="MOTOR_DRIVER_SELECT_ADC_INSTANCE_SECOND"/>
+        </property>
+
+        <property default="20.0" display="General|Adjustment value to current A/D" id="module.middleware.motor_driver.ad_crnt_adjust" description="Value to adjust 1shunt A/D double buffer">
+            <constraint display="Must be a valid non-negative value.">
+            eval('' +
+            'var input = "${module.middleware.motor_driver.ad_crnt_adjust}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?$","i");' +
+            'var regex_float_with_suffix = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?F$","i");' +
+            ' ( regex_float.test(input) || regex_float_with_suffix.test(input))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${module.middleware.motor_driver.ad_crnt_adjust}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)$","i");' +
+            'if (regex_float.test(output)){' +
+            'output = output + "F";' +
+            '}' +
+            'output')
+            </export>
+        </property>
+        <property default="300" display="General|Minimum difference of PWM duty" id="module.middleware.motor_driver.diff_min" description="Minimum difference of PWM duty">
+            <constraint display="Must be a valid non-negative value.">
+                testInteger("${module.middleware.motor_driver.diff_min}") &amp;&amp; ("${module.middleware.motor_driver.diff_min}" &gt;= 0)
+            </constraint>
+        </property>
+        <property default="240" display="General|Adjustment delay of A/D conversion" id="module.middleware.motor_driver.adjust_adc_delay" description="Adjustment delay of A/D conversion">
+            <constraint display="Must be a valid non-negative value.">
+                testInteger("${module.middleware.motor_driver.adjust_adc_delay}") &amp;&amp; ("${module.middleware.motor_driver.adjust_adc_delay}" &gt;= 0)
+            </constraint>
+        </property>
+        <property default="module.middleware.motor_driver.trigger_phase.phase_u" display="General|1shunt interrupt phase" id="module.middleware.motor_driver.trigger_phase" description="Select the phase which occures ADC end interrupt. (Only valid with 1shunt)">
+            <option id="module.middleware.motor_driver.trigger_phase.phase_u" display="PHASE_U" value="MOTOR_DRIVER_PHASE_U_PHASE" />
+            <option id="module.middleware.motor_driver.trigger_phase.phase_v" display="PHASE_V" value="MOTOR_DRIVER_PHASE_V_PHASE" />
+            <option id="module.middleware.motor_driver.trigger_phase.phase_w" display="PHASE_W" value="MOTOR_DRIVER_PHASE_W_PHASE" />
+        </property>
+        <property default="24.0F" display="General|Input Voltage (V)" id="module.middleware.motor_driver.input_vdc" description="Input voltage">
+            <constraint display="Must be a valid value">
+            eval('' +
+            'var input = "${module.middleware.motor_driver.input_vdc}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?$","i");' +
+            'var regex_float_with_suffix = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?F$","i");' +
+            ' ( regex_float.test(input) || regex_float_with_suffix.test(input))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${module.middleware.motor_driver.input_vdc}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)$","i");' +
+            'if (regex_float.test(output)){' +
+            'output = output + "F";' +
+            '}' +
+            'output')
+            </export>
+        </property>
+        <property default="0xFFF" display="General|Resolution of A/D conversion" id="module.middleware.motor_driver.ad_resolution" description="Resolution of A/D conversion">
+            <constraint display="Must be a valid Resolution of ADC.">
+                testInteger("${module.middleware.motor_driver.ad_resolution}") &amp;&amp; ("${module.middleware.motor_driver.ad_resolution}" &gt; 0)
+            </constraint>
+        </property>
+        <property default="0x745" display="General|Offset of A/D conversion for current" id="module.middleware.motor_driver.ad_current_offset" description="Offset of A/D conversion for current">
+            <constraint display="Must be a valid non-negative value.">
+                testInteger("${module.middleware.motor_driver.ad_current_offset}") &amp;&amp; ("${module.middleware.motor_driver.ad_current_offset}" &gt;= 0)
+            </constraint>
+        </property>
+        <property default="0.66F" display="General|Conversion level of A/D conversion for voltage" id="module.middleware.motor_driver.ad_voltage_conversion" description="Conversion level of A/D conversion for voltage">
+            <constraint display="Must be a valid value">
+            eval('' +
+            'var input = "${module.middleware.motor_driver.ad_voltage_conversion}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?$","i");' +
+            'var regex_float_with_suffix = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?F$","i");' +
+            ' ( regex_float.test(input) || regex_float_with_suffix.test(input))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${module.middleware.motor_driver.ad_voltage_conversion}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)$","i");' +
+            'if (regex_float.test(output)){' +
+            'output = output + "F";' +
+            '}' +
+            'output')
+            </export>
+        </property>
+        <property default="module.middleware.motor_driver.gtioca_stop_level.pin_level_high" display="General|GTIOCA Stop Level" id="module.middleware.motor_driver.gtioca_stop_level" description="Select the behavior of the output pin when the timer is stopped.">
+            <option display="Pin Level Low" id="module.middleware.motor_driver.gtioca_stop_level.pin_level_low" value="pin_level_low"/>
+            <option display="Pin Level High" id="module.middleware.motor_driver.gtioca_stop_level.pin_level_high" value="pin_level_high"/>
+        </property>
+        <property default="module.middleware.motor_driver.gtiocb_stop_level.pin_level_high" display="General|GTIOCB Stop Level" id="module.middleware.motor_driver.gtiocb_stop_level" description="Select the behavior of the output pin when the timer is stopped.">
+            <option display="Pin Level Low" id="module.middleware.motor_driver.gtiocb_stop_level.pin_level_low" value="pin_level_low"/>
+            <option display="Pin Level High" id="module.middleware.motor_driver.gtiocb_stop_level.pin_level_high" value="pin_level_high"/>
+        </property>
+
+        <!-- Modulation Settings -->
+        <property default="0.9375F" display="Modulation|Maximum Duty" id="module.middleware.motor_driver.max_duty" description="Maximum duty of PWM">
+            <constraint display="Must be a valid value">
+            eval('' +
+            'var input = "${module.middleware.motor_driver.max_duty}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?$","i");' +
+            'var regex_float_with_suffix = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)?F$","i");' +
+            ' ( regex_float.test(input) || regex_float_with_suffix.test(input))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${module.middleware.motor_driver.max_duty}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)([.]{1}[0-9]+)$","i");' +
+            'if (regex_float.test(output)){' +
+            'output = output + "F";' +
+            '}' +
+            'output')
+            </export>
+        </property>
+
+        <!-- Motor Callback Settings -->
+        <property default="NULL" display="Interrupts|Callback" id="module.middleware.motor_driver.driver_callback" description="A user callback function. If this callback function is provided, it is called at A/D conversion finish interrupt.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.middleware.motor_driver.driver_callback}")</constraint>
+        </property>
+        <property default="NULL" id="module.middleware.motor_driver.driver_context">
+            <export>eval('' +
+            'var string = "${module.middleware.motor_driver.driver_context}";' +
+            'if ("NULL" !== string){' +
+            'string = "&amp;" + string  ;' +
+            '}' +
+            'String(string)')
+            </export>
+        </property>
+
+        <!-- Contents -->
+        <header>
+/** Motor Driver Instance. */
+extern const motor_driver_instance_t ${module.middleware.motor_driver.name};
+
+/** Access the Motor Driver instance using these structures
+ ** when calling API functions directly (::p_api is not used). */
+extern motor_driver_instance_ctrl_t ${module.middleware.motor_driver.name}_ctrl;
+extern const motor_driver_extended_cfg_t ${module.middleware.motor_driver.name}_extend;
+extern const motor_driver_cfg_t ${module.middleware.motor_driver.name}_cfg;
+
+#ifndef ${module.middleware.motor_driver.driver_callback}
+void ${module.middleware.motor_driver.driver_callback}(motor_driver_callback_args_t * p_args);
+#endif
+        </header>
+
+        <includes>
+#include &quot;rm_motor_driver.h&quot;
+        </includes>
+
+        <declarations>
+
+/* Motor Driver Configuration */
+motor_driver_instance_ctrl_t ${module.middleware.motor_driver.name}_ctrl;
+
+const motor_driver_extended_cfg_t ${module.middleware.motor_driver.name}_extend =
+{
+  .u2_pwm_timer_freq = ${module.middleware.motor_driver.pwm_timer_freq},
+  .u2_pwm_carrier_freq = 1.0F / (${module.middleware.motor_driver.pwm_carrier_freq} / 1000.0F),
+  .pwm_carrier_freq = 1.0F / (${module.middleware.motor_driver.pwm_carrier_freq} / 1000.0F),
+  .u2_deadtime = ${module.middleware.motor_driver.dead_time},
+  .f_current_range = ${module.middleware.motor_driver.current_range},
+  .f_vdc_range = ${module.middleware.motor_driver.vdc_range},
+  .f_ad_resolution = ${module.middleware.motor_driver.ad_resolution},
+  .f_ad_current_offset = ${module.middleware.motor_driver.ad_current_offset},
+  .f_ad_voltage_conversion = ${module.middleware.motor_driver.ad_voltage_conversion},
+  .u2_offset_calc_count = ${module.middleware.motor_driver.offset_count},
+  .modulation_method = ${module.middleware.motor_driver.modulation_method},
+  .port_up = (bsp_io_port_pin_t)${module.middleware.motor_driver.port_up},
+  .port_un = (bsp_io_port_pin_t)${module.middleware.motor_driver.port_un},
+  .port_vp = (bsp_io_port_pin_t)${module.middleware.motor_driver.port_vp},
+  .port_vn = (bsp_io_port_pin_t)${module.middleware.motor_driver.port_vn},
+  .port_wp = (bsp_io_port_pin_t)${module.middleware.motor_driver.port_wp},
+  .port_wn = (bsp_io_port_pin_t)${module.middleware.motor_driver.port_wn},
+  .f_ad_current_adjust = ${module.middleware.motor_driver.ad_crnt_adjust},
+  .s4_difference_minimum = ${module.middleware.motor_driver.diff_min},
+  .s4_adjust_adc_delay = ${module.middleware.motor_driver.adjust_adc_delay},
+  .trigger_phase = ${module.middleware.motor_driver.trigger_phase},
+  .adc_group = (adc_group_mask_t)${module.middleware.motor_driver.adc_group},
+  .mod_param.f4_vdc = ${module.middleware.motor_driver.input_vdc},
+  .mod_param.f4_1_div_vdc = 1.0F / ${module.middleware.motor_driver.input_vdc},
+  .mod_param.f4_voltage_error_ratio = ((float)${module.middleware.motor_driver.dead_time} / (float)${module.middleware.motor_driver.pwm_timer_freq}) / (float)${module.middleware.motor_driver.pwm_carrier_freq},
+  .mod_param.f4_max_duty = ${module.middleware.motor_driver.max_duty},
+  .mod_param.f4_min_duty = ((float)${module.middleware.motor_driver.dead_time} / (float)${module.middleware.motor_driver.pwm_timer_freq}) / (float)${module.middleware.motor_driver.pwm_carrier_freq},
+  .mod_param.f4_neutral_duty = 0.5F,
+  .mod_param.u1_sat_flag = 0U,
+
+  .iu_ad_unit = ${module.middleware.motor_driver.iu_ad_unit},
+  .iv_ad_unit = ${module.middleware.motor_driver.iv_ad_unit},
+  .iw_ad_unit = ${module.middleware.motor_driver.iw_ad_unit},
+  .vdc_ad_unit = ${module.middleware.motor_driver.vdc_ad_unit},
+  .sin_ad_unit = ${module.middleware.motor_driver.sin_ad_unit},
+  .cos_ad_unit = ${module.middleware.motor_driver.cos_ad_unit},
+
+  .interrupt_adc = ${module.middleware.motor_driver.interrupt_adc},
+
+#define RA_NOT_DEFINED (1)
+#if (RA_NOT_DEFINED == ${module.middleware.motor_driver.requires.motor_adc_shared::module.middleware.motor_adc_shared.name})
+  .p_shared_cfg = NULL,
+#else
+  .p_shared_cfg = &amp;${module.middleware.motor_driver.requires.motor_adc_shared::module.middleware.motor_adc_shared.name}_extend_cfg,
+#endif
+#undef RA_NOT_DEFINED
+
+};
+
+const motor_driver_cfg_t ${module.middleware.motor_driver.name}_cfg =
+{
+#define RA_NOT_DEFINED (1)
+#if (RA_NOT_DEFINED == ${module.middleware.motor_driver.requires.adc::module.driver.adc.name})
+  .p_adc_instance = NULL,
+#else
+  .p_adc_instance = &amp;${module.middleware.motor_driver.requires.adc::module.driver.adc.name},
+#endif
+#undef RA_NOT_DEFINED
+  .iu_ad_ch = (adc_channel_t)${module.middleware.motor_driver.iu_ad_ch},
+  .iv_ad_ch = (adc_channel_t)${module.middleware.motor_driver.iv_ad_ch},
+  .iw_ad_ch = (adc_channel_t)${module.middleware.motor_driver.iw_ad_ch},
+  .vdc_ad_ch = (adc_channel_t)${module.middleware.motor_driver.vdc_ad_ch},
+  .sin_ad_ch = (adc_channel_t)${module.middleware.motor_driver.sin_ad_ch},
+  .cos_ad_ch = (adc_channel_t)${module.middleware.motor_driver.cos_ad_ch},
+#define RA_NOT_DEFINED (1)
+#if (RA_NOT_DEFINED == ${module.middleware.motor_driver.requires.adc2::module.driver.adc.name})
+  .p_adc2_instance = NULL,
+#else
+  .p_adc2_instance = &amp;${module.middleware.motor_driver.requires.adc2::module.driver.adc.name},
+#endif
+#undef RA_NOT_DEFINED
+  .shunt = ${module.middleware.motor_driver.shunt},
+  .p_three_phase_instance = &amp;${module.middleware.motor_driver.requires.three_phase::module.driver.three_phase.name},
+  .p_callback = ${module.middleware.motor_driver.driver_callback},
+  .p_context = ${module.middleware.motor_driver.driver_context},
+  .p_extend = &amp;${module.middleware.motor_driver.name}_extend,
+};
+
+/* Instance structure to use Motor Driver module. */
+const motor_driver_instance_t ${module.middleware.motor_driver.name} =
+{
+  .p_ctrl = &amp;${module.middleware.motor_driver.name}_ctrl,
+  .p_cfg  = &amp;${module.middleware.motor_driver.name}_cfg,
+  .p_api  = &amp;g_motor_driver_on_motor_driver,
+};
+        </declarations>
+    </module>
+
+    <module config="config.middleware.motor_driver" display="Motor|Shared ADC module (on rm_motor_driver) " id="module.middleware.motor_adc_shared" version="1" common="1" url="group___m_o_t_o_r___d_r_i_v_e_r.html">
+        <requires id="module.middleware.motor_adc_shared.requires.adc" interface="interface.driver.adc" find="true" display="Add ADC module">
+        </requires>
+        <requires id="module.middleware.motor_adc_shared.requires.secondary_adc" interface="interface.driver.adc" find="false" display="Add secondary ADC module (r_adc only) [Optional]">
+        </requires>
+        <provides interface="interface.middleware.motor_adc_shared" />
+        <provides interface="interface.middleware.motor_adc_shared.${module.middleware.motor_adc_shared.name}" />
+        <property default="g_motor_adc_shared${_instance}" display="General|Name" id="module.middleware.motor_adc_shared.name" description="Module name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.middleware.motor_adc_shared.name}")</constraint>
+        </property>
+
+        <header>
+/** Motor Driver shared ADC module. */
+extern motor_driver_shared_instance_ctrl_t ${module.middleware.motor_adc_shared.name}_instance_ctrl;
+extern const motor_driver_extended_shared_cfg_t ${module.middleware.motor_adc_shared.name}_extend_cfg;
+        </header>
+
+        <includes>
+#include &quot;rm_motor_driver.h&quot;
+        </includes>
+
+        <declarations>
+
+motor_driver_shared_instance_ctrl_t ${module.middleware.motor_adc_shared.name}_instance_ctrl;
+
+const motor_driver_extended_shared_cfg_t ${module.middleware.motor_adc_shared.name}_extend_cfg =
+{
+#define RA_NOT_DEFINED (1)
+#if (RA_NOT_DEFINED == ${module.middleware.motor_adc_shared.requires.adc::module.driver.adc.name})
+  .p_adc_instance_first = NULL,
+#else
+  .p_adc_instance_first = &amp;${module.middleware.motor_adc_shared.requires.adc::module.driver.adc.name},
+#endif
+#undef RA_NOT_DEFINED
+
+#define RA_NOT_DEFINED (1)
+#if (RA_NOT_DEFINED == ${module.middleware.motor_adc_shared.requires.secondary_adc::module.driver.adc.name})
+  .p_adc_instance_second = NULL,
+#else
+  .p_adc_instance_second = &amp;${module.middleware.motor_adc_shared.requires.secondary_adc::module.driver.adc.name},
+#endif
+#undef RA_NOT_DEFINED
+
+  .p_shared_instance_ctrl = &amp;${module.middleware.motor_adc_shared.name}_instance_ctrl,
+};
+
+        </declarations>
+    </module>
+</raModuleDescription>
+

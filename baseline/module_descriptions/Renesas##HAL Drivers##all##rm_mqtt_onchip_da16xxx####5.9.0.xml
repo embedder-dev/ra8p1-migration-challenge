@@ -1,0 +1,545 @@
+<?xml version="1.0" ?>
+
+<raModuleDescription>
+    <!-- ERROR: Module tree can only include 2 levels (1 separater |) Networking|DA16XXX|MQTT Client on DA16XXX (rm_mqtt_onchip_da16xxx) -->
+    <config id="config.driver.mqtt_onchip_da16xxx" path="fsp_cfg/rm_mqtt_onchip_da16xxx_cfg.h" version="0">
+        <property default="config.driver.mqtt_onchip_da16xxx.param_checking_enable.bsp" display="Parameter Checking" id="config.driver.mqtt_onchip_da16xxx.param_checking_enable" description="If selected code for parameter checking is included in the build.">
+            <option display="Default (BSP)" id="config.driver.mqtt_onchip_da16xxx.param_checking_enable.bsp" value="(BSP_CFG_PARAM_CHECKING_ENABLE)"/>
+            <option display="Enabled" id="config.driver.mqtt_onchip_da16xxx.param_checking_enable.enabled" value="(1)"/>
+            <option display="Disabled" id="config.driver.mqtt_onchip_da16xxx.param_checking_enable.disabled" value="(0)"/>
+        </property>
+        <property default="512" display="Size of MQTT RX buffer" id="config.driver.mqtt_onchip_da16xxx.rx_size" description="Size in bytes of the MQTT buffer used for receiving subscribed data. Must be an integer greater than 0.">
+            <constraint display="Must be an integer greater than 0">
+            testInteger("${config.driver.mqtt_onchip_da16xxx.rx_size}") &amp;&amp; ("${config.driver.mqtt_onchip_da16xxx.rx_size}" &gt; 0)
+            </constraint>
+        </property>
+        <property default="512" display="Size of MQTT TX buffer" id="config.driver.mqtt_onchip_da16xxx.tx_size" description="Size in bytes of the MQTT buffer used for sending commands and publishing data. Maximum publishing length is 2063 bytes">
+            <constraint display="Must be an integer greater than 200 and less than 2064">
+                testInteger("${config.driver.mqtt_onchip_da16xxx.tx_size}")  &amp;&amp; ("${config.driver.mqtt_onchip_da16xxx.tx_size}" &gt; 200) &amp;&amp; ("${config.driver.mqtt_onchip_da16xxx.tx_size}" &lt; 2064)
+            </constraint>
+        </property>
+        <content>
+        #ifdef __cplusplus
+        extern "C" {
+        #endif
+
+        #define MQTT_ONCHIP_DA16XXX_CFG_PARAM_CHECKING_ENABLED          (${config.driver.mqtt_onchip_da16xxx.param_checking_enable})
+        #define MQTT_ONCHIP_DA16XXX_CFG_CMD_TX_BUF_SIZE                 (${config.driver.mqtt_onchip_da16xxx.tx_size})
+        #define MQTT_ONCHIP_DA16XXX_CFG_CMD_RX_BUF_SIZE                 (${config.driver.mqtt_onchip_da16xxx.rx_size})
+
+        #ifdef __cplusplus
+        }
+        #endif
+        </content>
+    </config>
+    <module config="config.driver.mqtt_onchip_da16xxx" id="module.driver.mqtt_onchip_da16xxx" display="Networking|MQTT Client on DA16XXX (rm_mqtt_onchip_da16xxx)" version="1" visible="true" url="group___m_q_t_t___o_n_c_h_i_p___d_a16_x_x_x.html">
+        <constraint display="Mutexes must be enabled in the FreeRTOS thread config under Common|General|Use Mutexes.">
+          ("${config.awsfreertos.thread.configuse_mutexes}" === "config.awsfreertos.thread.configuse_mutexes.enabled") ||
+            !testExists("${interface.rtos.awsfreertos}")
+        </constraint>
+        <constraint display="MQTT RX buffer size must be less than or equal to Wi-Fi buffer">
+            (${config.driver.mqtt_onchip_da16xxx.rx_size} &lt;= ${config.driver.at_transport_da16xxx.cmd_port_rx_size})
+        </constraint>
+        <requires id="module.driver.mqtt_onchip_da16xxx.requires.wifi_da16xxx" interface="interface.driver.wifi_da16xxx" display="Add WiFi" find="true">
+            <override property="config.driver.wifi_da16xxx.num_sockets" value="config.driver.wifi_da16xxx.num_sockets.one"/>
+            <override property="config.driver.wifi_da16xxx.socket_rx_size" value="0"/>
+        </requires>
+        <provides interface="interface.driver.mqtt_onchip_da16xxx"/>
+        <provides interface="interface.driver.mqtt"/>
+        <property default="" display="Certificates|MQTT Certificates Header File" id="module.driver.mqtt_onchip_da16xxx.mqtt_certs" description="Name of header file that will contain certificates (macros). User must create header file if this field is populated.">
+            <constraint display="Must be a valid C symbol">testSymbol("${module.driver.mqtt_onchip_da16xxx.mqtt_certs}")</constraint>
+            <export><![CDATA[eval('' +
+'  var string = "";                                                                     ' +
+'                                                                                       ' +
+'  /* If empty string then NULL */                                                      ' +
+'  if("${module.driver.mqtt_onchip_da16xxx.mqtt_certs}" != "")                          ' +
+'  {                                                                                    ' +
+'    string = "#include \\\"${module.driver.mqtt_onchip_da16xxx.mqtt_certs}.h\\\"\\n";  ' +
+'    string += "#define CERT_INCLUDE"                                                   ' +
+'  }                                                                                    ' +
+'  /* Output final result */                                                            ' +
+'  string                                                                               ' +
+  '')
+]]>            </export>
+        </property>
+        <property default="module.driver.mqtt_onchip_da16xxx.use_mqtt_v311.enabled" display="Use MQTT protocol v3.1.1" id="module.driver.mqtt_onchip_da16xxx.use_mqtt_v311">
+            <option id="module.driver.mqtt_onchip_da16xxx.use_mqtt_v311.disabled" display="Disabled" value="0"/>
+            <option id="module.driver.mqtt_onchip_da16xxx.use_mqtt_v311.enabled" display="Enabled" value="1"/>
+        </property>
+        <property default="10" display="MQTT Receive Maximum Timeout (ms)" id="module.driver.mqtt_onchip_da16xxx.rx_timeout" description="Timeout for the MQTT Receive function to check the buffer for incoming MQTT messages in milliseconds.">
+            <constraint display="Timeout must be an integer greater than 0 and less than 65535">testInteger("${module.driver.mqtt_onchip_da16xxx.rx_timeout}")  &amp;&amp; ("${module.driver.mqtt_onchip_da16xxx.rx_timeout}" &gt; 0) &amp;&amp; ("${module.driver.mqtt_onchip_da16xxx.rx_timeout}" &lt; 65535)</constraint>
+        </property>
+        <property default="10" display="MQTT Transit Maximum Timeout (ms)" id="module.driver.mqtt_onchip_da16xxx.tx_timeout" description="Timeout for publishing MQTT messages in milliseconds.">
+            <constraint display="Timeout must be an integer greater than 0 and less than 65535">testInteger("${module.driver.mqtt_onchip_da16xxx.tx_timeout}")  &amp;&amp; ("${module.driver.mqtt_onchip_da16xxx.tx_timeout}" &gt; 0) &amp;&amp; ("${module.driver.mqtt_onchip_da16xxx.tx_timeout}" &lt; 65535)</constraint>
+        </property>
+        <property default="module.driver.mqtt_onchip_da16xxx.clean_session.enabled" display="Clean Session" id="module.driver.mqtt_onchip_da16xxx.clean_session">
+            <option id="module.driver.mqtt_onchip_da16xxx.clean_session.disabled" display="Disabled" value="0"/>
+            <option id="module.driver.mqtt_onchip_da16xxx.clean_session.enabled" display="Enabled" value="1"/>
+        </property>
+        <property default="" display="ALPN|ALPN 1" id="module.driver.mqtt_onchip_da16xxx.alpn_1" description="Select Application Layer Protocol Negotiations (ALPNs)">
+            <export><![CDATA[eval('' +
+'  var string = "";                                                                     ' +
+'                                                                                       ' +
+'  /* If empty string then NULL */                                                      ' +
+'  if("${module.driver.mqtt_onchip_da16xxx.alpn_1}" == "")                              ' +
+'  {                                                                                    ' +
+'    string = "NULL";                                                                   ' +
+'  }                                                                                    ' +
+'  else string = "\\\"${module.driver.mqtt_onchip_da16xxx.alpn_1}\\\"";                 ' +
+'  /* Output final result */                                                            ' +
+'  string                                                                               ' +
+  '')
+  ]]>            </export>
+        </property>
+        <property default="" display="ALPN|ALPN 2" id="module.driver.mqtt_onchip_da16xxx.alpn_2" description="Select Application Layer Protocol Negotiations (ALPNs)">
+            <export><![CDATA[eval('' +
+'  var string = "";                                                                     ' +
+'                                                                                       ' +
+'  /* If empty string then NULL */                                                      ' +
+'  if("${module.driver.mqtt_onchip_da16xxx.alpn_2}" == "")                              ' +
+'  {                                                                                    ' +
+'    string = "NULL";                                                                   ' +
+'  }                                                                                    ' +
+'  else string = "\\\"${module.driver.mqtt_onchip_da16xxx.alpn_2}\\\"";                 ' +
+'  /* Output final result */                                                            ' +
+'  string                                                                               ' +
+  '')
+  ]]>            </export>
+        </property>
+        <property default="" display="ALPN|ALPN 3" id="module.driver.mqtt_onchip_da16xxx.alpn_3" description="Select Application Layer Protocol Negotiations (ALPNs)">
+            <export><![CDATA[eval('' +
+'  var string = "";                                                                     ' +
+'                                                                                       ' +
+'  /* If empty string then NULL */                                                      ' +
+'  if("${module.driver.mqtt_onchip_da16xxx.alpn_3}" == "")                              ' +
+'  {                                                                                    ' +
+'    string = "NULL";                                                                   ' +
+'  }                                                                                    ' +
+'  else string = "\\\"${module.driver.mqtt_onchip_da16xxx.alpn_3}\\\"";                 ' +
+'  /* Output final result */                                                            ' +
+'  string                                                                               ' +
+  '')
+  ]]>            </export>
+        </property>
+        <property default="" id="module.driver.mqtt_onchip_da16xxx.alpn_count">
+            <export><![CDATA[eval('' +
+'  var count = 0;                                                                       ' +
+'                                                                                       ' +
+'  /* If alpn populated then increment */                                               ' +
+'  if("${module.driver.mqtt_onchip_da16xxx.alpn_1}" != "")                              ' +
+'  {                                                                                    ' +
+'    count++;                                                                           ' +
+'  }                                                                                    ' +
+'  if("${module.driver.mqtt_onchip_da16xxx.alpn_2}" != "")                              ' +
+'  {                                                                                    ' +
+'    count++;                                                                           ' +
+'  }                                                                                    ' +
+'  if("${module.driver.mqtt_onchip_da16xxx.alpn_3}" != "")                              ' +
+'  {                                                                                    ' +
+'    count++;                                                                           ' +
+'  }                                                                                    ' +
+'  /* Output final result */                                                            ' +
+'  count                                                                                ' +
+  '')
+  ]]>            </export>
+        </property>
+        <property default="60" display="Keep Alive (s)" id="module.driver.mqtt_onchip_da16xxx.keep_alive" description="MQTT ping period to check if connection is still active.">
+            <constraint display="Must be an integer greater than 0 and less than 65535">testInteger("${module.driver.mqtt_onchip_da16xxx.keep_alive}")  &amp;&amp; ("${module.driver.mqtt_onchip_da16xxx.keep_alive}" &gt; 0) &amp;&amp; ("${module.driver.mqtt_onchip_da16xxx.keep_alive}" &lt; 65535)</constraint>
+        </property>
+        <property default="" display="Client Identifier" id="module.driver.mqtt_onchip_da16xxx.client_identifier">
+            <export><![CDATA[eval('' +
+'  var string = "";                                                                     ' +
+'                                                                                       ' +
+'  /* If empty string then NULL */                                                      ' +
+'  if("${module.driver.mqtt_onchip_da16xxx.client_identifier}" == "")                   ' +
+'  {                                                                                    ' +
+'    string = "NULL";                                                                   ' +
+'  }                                                                                    ' +
+'  else string = "\\\"${module.driver.mqtt_onchip_da16xxx.client_identifier}\\\"";      ' +
+'  /* Output final result */                                                            ' +
+'  string                                                                               ' +
+  '')
+  ]]>            </export>
+        </property>
+        <property default="" id="module.driver.mqtt_onchip_da16xxx.client_identifier_length">
+            <export>"${module.driver.mqtt_onchip_da16xxx.client_identifier}".length</export>
+        </property>
+        <property default="" display="Host Name (or IP address)" id="module.driver.mqtt_onchip_da16xxx.host_name">
+            <export><![CDATA[eval('' +
+'  var string = "";                                                                     ' +
+'                                                                                       ' +
+'  /* If empty string then NULL */                                                      ' +
+'  if("${module.driver.mqtt_onchip_da16xxx.host_name}" == "")                           ' +
+'  {                                                                                    ' +
+'    string = "NULL";                                                                   ' +
+'  }                                                                                    ' +
+'  else string = "\\\"${module.driver.mqtt_onchip_da16xxx.host_name}\\\"";              ' +
+'  /* Output final result */                                                            ' +
+'  string                                                                               ' +
+  '')
+  ]]>            </export>
+        </property>
+        <property default="8883" display="MQTT Port" id="module.driver.mqtt_onchip_da16xxx.mqtt_port">
+            <constraint display="Must be an integer greater than 0 and less than 65535">testInteger("${module.driver.mqtt_onchip_da16xxx.mqtt_port}")  &amp;&amp; ("${module.driver.mqtt_onchip_da16xxx.mqtt_port}" &gt; 0) &amp;&amp; ("${module.driver.mqtt_onchip_da16xxx.mqtt_port}" &lt; 65535)</constraint>
+        </property>
+        <property default="" display="MQTT User Name" id="module.driver.mqtt_onchip_da16xxx.user_name">
+            <constraint display="Must be a valid C symbol">testSymbol("${module.driver.mqtt_onchip_da16xxx.user_name}")</constraint>
+            <export><![CDATA[eval('' +
+'  var string = "";                                                                     ' +
+'                                                                                       ' +
+'  /* If empty string then NULL */                                                      ' +
+'  if("${module.driver.mqtt_onchip_da16xxx.user_name}" == "")                           ' +
+'  {                                                                                    ' +
+'    string = "NULL";                                                                   ' +
+'  }                                                                                    ' +
+'  else string = "\\\"${module.driver.mqtt_onchip_da16xxx.user_name}\\\"";              ' +
+'  /* Output final result */                                                            ' +
+'  string                                                                               ' +
+  '')
+  ]]>            </export>
+
+        </property>
+        <property default="" id="module.driver.mqtt_onchip_da16xxx.user_name_length">
+            <export>"${module.driver.mqtt_onchip_da16xxx.user_name}".length</export>
+        </property>
+        <property default="" display="MQTT Password" id="module.driver.mqtt_onchip_da16xxx.password">
+            <constraint display="Must be a valid C symbol">testSymbol("${module.driver.mqtt_onchip_da16xxx.password}")</constraint>
+            <export><![CDATA[eval('' +
+'  var string = "";                                                                     ' +
+'                                                                                       ' +
+'  /* If empty string then NULL */                                                      ' +
+'  if("${module.driver.mqtt_onchip_da16xxx.password}" == "")                            ' +
+'  {                                                                                    ' +
+'    string = "NULL";                                                                   ' +
+'  }                                                                                    ' +
+'  else string = "\\\"${module.driver.mqtt_onchip_da16xxx.password}\\\"";               ' +
+'  /* Output final result */                                                            ' +
+'  string                                                                               ' +
+  '')
+  ]]>            </export>
+        </property>
+        <property default="" id="module.driver.mqtt_onchip_da16xxx.password_length">
+            <export>"${module.driver.mqtt_onchip_da16xxx.password}".length</export>
+        </property>
+        <property default="ROOT_CA" display="Certificates|Root CA" id="module.driver.mqtt_onchip_da16xxx.root_ca" description="Links to user-defined macro of the same name for Root CA which user must define in application header.">
+            <constraint display="Must be a valid C symbol">testSymbol("${module.driver.mqtt_onchip_da16xxx.root_ca}")</constraint>
+        </property>
+        <property default="CLIENT_CERT" display="Certificates|Client Certificate" id="module.driver.mqtt_onchip_da16xxx.client_cert" description="Links to user-defined macro of the same name for client certificate which user must define in application header.">
+            <constraint display="Must be a valid C symbol">testSymbol("${module.driver.mqtt_onchip_da16xxx.client_cert}")</constraint>
+        </property>
+        <property default="PRIVATE_KEY" display="Certificates|Private Key" id="module.driver.mqtt_onchip_da16xxx.private_key" description="Links to user-defined macro of the same name for private key which user must define in application header.">
+            <constraint display="Must be a valid C symbol">testSymbol("${module.driver.mqtt_onchip_da16xxx.private_key}")</constraint>
+        </property>
+        <property default="" display="Last Will Topic" id="module.driver.mqtt_onchip_da16xxx.will_topic" description="Topic for MQTT Last Will message.">
+            <export><![CDATA[eval('' +
+'  var string = "";                                                                     ' +
+'                                                                                       ' +
+'  /* If empty string then NULL */                                                      ' +
+'  if("${module.driver.mqtt_onchip_da16xxx.will_topic}" == "")                          ' +
+'  {                                                                                    ' +
+'    string = "NULL";                                                                   ' +
+'  }                                                                                    ' +
+'  else string = "\\\"${module.driver.mqtt_onchip_da16xxx.will_topic}\\\"";             ' +
+'  /* Output final result */                                                            ' +
+'  string                                                                               ' +
+  '')
+  ]]>            </export>
+        </property>
+        <property default="" display="Last Will Message" id="module.driver.mqtt_onchip_da16xxx.will_message" description="Payload for MQTT Last Will message.">
+            <export><![CDATA[eval('' +
+'  var string = "";                                                                     ' +
+'                                                                                       ' +
+'  /* If empty string then NULL */                                                      ' +
+'  if("${module.driver.mqtt_onchip_da16xxx.will_message}" == "")                        ' +
+'  {                                                                                    ' +
+'    string = "NULL";                                                                   ' +
+'  }                                                                                    ' +
+'  else string = "\\\"${module.driver.mqtt_onchip_da16xxx.will_message}\\\"";           ' +
+'  /* Output final result */                                                            ' +
+'  string                                                                               ' +
+  '')
+  ]]>            </export>
+        </property>
+        <property default="" display="Server Name Indication (SNI)" id="module.driver.mqtt_onchip_da16xxx.sni_name">
+            <export><![CDATA[eval('' +
+'  var string = "";                                                                     ' +
+'                                                                                       ' +
+'  /* If empty string then NULL */                                                      ' +
+'  if("${module.driver.mqtt_onchip_da16xxx.sni_name}" == "")                            ' +
+'  {                                                                                    ' +
+'    string = "NULL";                                                                   ' +
+'  }                                                                                    ' +
+'  else string = "\\\"${module.driver.mqtt_onchip_da16xxx.sni_name}\\\"";               ' +
+'  /* Output final result */                                                            ' +
+'  string                                                                               ' +
+  '')
+  ]]>            </export>
+        </property>
+        <property default="module.driver.mqtt_onchip_da16xxx.will_qos.0" display="Last Will QoS" id="module.driver.mqtt_onchip_da16xxx.will_qos" description="Quality-of-Service for MQTT Last Will message.">
+            <option id="module.driver.mqtt_onchip_da16xxx.will_qos.0" display="0" value="MQTT_ONCHIP_DA16XXX_QOS_0"/>
+            <option id="mmodule.driver.mqtt_onchip_da16xxx.will_qos.1" display="1" value="MQTT_ONCHIP_DA16XXX_QOS_1"/>
+            <option id="mmodule.driver.mqtt_onchip_da16xxx.will_qos.2" display="2" value="MQTT_ONCHIP_DA16XXX_QOS_2"/>
+        </property>
+        <property bitmapPrefix="" default="0U" display="TLS Cipher Suites" id="module.driver.mqtt_onchip_da16xxx.tls_cipher_suites" description="Select TLS Cipher Suites">
+            <option display="TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA" id="module.driver.mqtt_onchip_da16xxx.tls_cipher_suites.cs0" value="TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA"/>
+            <option display="TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA" id="module.driver.mqtt_onchip_da16xxx.tls_cipher_suites.cs1" value="TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA"/>
+            <option display="TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256" id="module.driver.mqtt_onchip_da16xxx.tls_cipher_suites.cs2" value="TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256"/>
+            <option display="TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384" id="module.driver.mqtt_onchip_da16xxx.tls_cipher_suites.cs3" value="TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384"/>
+            <option display="TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256" id="module.driver.mqtt_onchip_da16xxx.tls_cipher_suites.cs4" value="TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256"/>
+            <option display="TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384" id="module.driver.mqtt_onchip_da16xxx.tls_cipher_suites.cs5" value="TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384"/>
+            <option display="TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA" id="module.driver.mqtt_onchip_da16xxx.tls_cipher_suites.cs6" value="TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA"/>
+            <option display="TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA" id="module.driver.mqtt_onchip_da16xxx.tls_cipher_suites.cs7" value="TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA"/>
+            <option display="TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256" id="module.driver.mqtt_onchip_da16xxx.tls_cipher_suites.cs8" value="TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256"/>
+            <option display="TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384" id="module.driver.mqtt_onchip_da16xxx.tls_cipher_suites.cs9" value="TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384"/>
+            <option display="TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256" id="module.driver.mqtt_onchip_da16xxx.tls_cipher_suites.cs10" value="TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256"/>
+            <option display="TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384" id="module.driver.mqtt_onchip_da16xxx.tls_cipher_suites.cs11" value="TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384"/>
+            <export><![CDATA[eval('' +
+'  var cipher_list = "";                                                                                            ' +
+'                                                                                                                   ' +
+'  /* If no cipher suites checked then return NULL */                                                               ' +
+'  if("${module.driver.mqtt_onchip_da16xxx.tls_cipher_suites}" == "")                                               ' +
+'  {                                                                                                                ' +
+'    cipher_list = "{ 0 }";                                                                                         ' +
+'  }                                                                                                                ' +
+'                                                                                                                   ' +
+'  /* If cipher suites are checked parse bitmapPrefix output into an initialization for an array of enums */        ' +
+'  else                                                                                                             ' +
+'  {                                                                                                                ' +
+'    var cipher_arr = "${module.driver.mqtt_onchip_da16xxx.tls_cipher_suites}".replaceAll(" ", "").split("|");      ' +
+'    for (var i = 0; i < cipher_arr.length; i++)                                                                    ' +
+'    {                                                                                                              ' +
+'      if (cipher_arr[i] != "")                                                                                     ' +
+'      {                                                                                                            ' +
+'        if (i != 0)                                                                                                ' +
+'        {                                                                                                          ' +
+'          cipher_list += ",";                                                                                      ' +
+'        }                                                                                                          ' +
+'        cipher_list += cipher_arr[i];                                                                              ' +
+'      }                                                                                                            ' +
+'    }                                                                                                              ' +
+'    cipher_list = "{" + cipher_list + "}";                                                                         ' +
+'  }                                                                                                                ' +
+'                                                                                                                   ' +
+'  /* Output final result */                                                                                        ' +
+'  cipher_list                                                                                                      ' +
+  '')
+  ]]>            </export>
+        </property>
+        <property default="" id="module.driver.mqtt_onchip_da16xxx.tls_cipher_count">
+            <export><![CDATA[eval('' +
+'  var count = 0;                                                                                                   ' +
+'                                                                                                                   ' +
+'   var cipher_arr = "${module.driver.mqtt_onchip_da16xxx.tls_cipher_suites}".replaceAll(" ", "").split("|");       ' +
+'  /* If alpn populated then increment */                                                                           ' +
+'  for(var i = 0; i < cipher_arr.length; i++)                                                                       ' +
+'  {                                                                                                                ' +
+'    if(cipher_arr[i] != "")                                                                                        ' +
+'    {                                                                                                              ' +
+'       count++;                                                                                                    ' +
+'    }                                                                                                              ' +
+'  }                                                                                                                ' +
+'  /* Output final result */                                                                                        ' +
+'  count                                                                                                            ' +
+  '')
+  ]]>            </export>
+
+        </property>
+        <property default="mqtt${_instance}_callback" display="Interrupts|Callback" id="module.driver.mqtt_onchip_da16xxx.p_callback" description="A user callback function. This callback function must be provided. It is called from the MQTT Receive function to process subscribed MQTT messages.">
+            <constraint display="Must be a valid C symbol">testSymbol("${module.driver.mqtt_onchip_da16xxx.p_callback}")</constraint>
+        </property>
+
+        <header>
+                extern const mqtt_onchip_da16xxx_cfg_t          g_mqtt_onchip_da16xxx_cfg;
+
+                #ifndef ${module.driver.mqtt_onchip_da16xxx.p_callback}
+                    void ${module.driver.mqtt_onchip_da16xxx.p_callback}(mqtt_onchip_da16xxx_callback_args_t *p_args);
+                #endif
+
+        </header>
+
+        <includes>
+                    #include &quot;rm_mqtt_onchip_da16xxx.h&quot;
+
+        </includes>
+
+        <declarations>
+                    ${module.driver.mqtt_onchip_da16xxx.mqtt_certs}
+
+                    /** MQTT Onchip da16xxx configuration */
+                    const mqtt_onchip_da16xxx_cfg_t     g_mqtt_onchip_da16xxx_cfg =
+                    {
+                        #define RA_NOT_DEFINED (1)
+
+                        .use_mqtt_v311 =            (${module.driver.mqtt_onchip_da16xxx.use_mqtt_v311}),
+                        .rx_timeout =               (${module.driver.mqtt_onchip_da16xxx.rx_timeout}),
+                        .tx_timeout =               (${module.driver.mqtt_onchip_da16xxx.tx_timeout}),
+                        .p_callback =               ${module.driver.mqtt_onchip_da16xxx.p_callback},
+                        .clean_session =            (${module.driver.mqtt_onchip_da16xxx.clean_session}),
+                        .alpn_count =               (${module.driver.mqtt_onchip_da16xxx.alpn_count}),
+                        .p_alpns =                  {${module.driver.mqtt_onchip_da16xxx.alpn_1}, ${module.driver.mqtt_onchip_da16xxx.alpn_2}, ${module.driver.mqtt_onchip_da16xxx.alpn_3}},
+                        .tls_cipher_count =         (${module.driver.mqtt_onchip_da16xxx.tls_cipher_count}),
+                        .keep_alive_seconds =       (${module.driver.mqtt_onchip_da16xxx.keep_alive}),
+                        .p_client_identifier =      ${module.driver.mqtt_onchip_da16xxx.client_identifier},
+                        .client_identifier_length = (${module.driver.mqtt_onchip_da16xxx.client_identifier_length}),
+                        .p_host_name =              ${module.driver.mqtt_onchip_da16xxx.host_name},
+                        .mqtt_port =                (${module.driver.mqtt_onchip_da16xxx.mqtt_port}),
+                        .p_mqtt_user_name =         ${module.driver.mqtt_onchip_da16xxx.user_name},
+                        .user_name_length =         (${module.driver.mqtt_onchip_da16xxx.user_name_length}),
+                        .p_mqtt_password =          ${module.driver.mqtt_onchip_da16xxx.password},
+                        .password_length =          (${module.driver.mqtt_onchip_da16xxx.password_length}),
+#ifdef CERT_INCLUDE
+                        .p_root_ca =                ${module.driver.mqtt_onchip_da16xxx.root_ca},
+                        .root_ca_size =             (sizeof(${module.driver.mqtt_onchip_da16xxx.root_ca})),
+                        .p_client_cert =            ${module.driver.mqtt_onchip_da16xxx.client_cert},
+                        .client_cert_size =         (sizeof(${module.driver.mqtt_onchip_da16xxx.client_cert})),
+                        .p_client_private_key =     ${module.driver.mqtt_onchip_da16xxx.private_key},
+                        .private_key_size =         (sizeof(${module.driver.mqtt_onchip_da16xxx.private_key})),
+#else
+                        .p_root_ca =                NULL,
+                        .root_ca_size =             0,
+                        .p_client_cert =            NULL,
+                        .client_cert_size =         0,
+                        .p_client_private_key =     NULL,
+                        .private_key_size =         0,
+#endif
+                        .p_will_topic =             ${module.driver.mqtt_onchip_da16xxx.will_topic},
+                        .p_will_msg =               ${module.driver.mqtt_onchip_da16xxx.will_message},
+                        .p_sni_name =               ${module.driver.mqtt_onchip_da16xxx.sni_name},
+                        .will_qos_level =           (${module.driver.mqtt_onchip_da16xxx.will_qos}),
+                        .p_tls_cipher_suites =      ${module.driver.mqtt_onchip_da16xxx.tls_cipher_suites},
+                        .p_transport_instance = &amp;g_at_transport_da16xxx,
+                    };
+
+        </declarations>
+
+    </module>
+    <developerSupport>
+        <template category="function_call" display="DA16XXX On-chip Client Example" id="module.driver.mqtt_onchip_da16xxx.mqtt_client_example" version="1">
+            <platform id="fsp" max="" min="1.1.0"/>
+            <moduleRef id="module.driver.mqtt_onchip_da16xxx">
+                <function id="mqtt_onchip_client_example"/>
+            </moduleRef>
+            <content>
+/* User must set these values for their desired Wi-Fi AP and publish/subscribe info */
+#define WIFI_SSID                       "access_point_ssid"
+#define WIFI_PWD                        "password"
+#define PUBLISH_TOPIC                   "feeds/temperature"
+#define SUBSCRIBE_TOPIC                 "feeds/led"
+#define CONNECT_TIMEOUT                 1000
+
+/* Example publish topic with dummy data - user can add more topics or populate with data */
+mqtt_onchip_da16xxx_pub_info_t pubTopics[1] =
+{
+    {
+        .p_topic_name      = PUBLISH_TOPIC,
+        .topic_name_Length = sizeof(PUBLISH_TOPIC),
+        .p_payload         = "52.2",
+        .payload_length    = 4
+    }
+};
+
+/* Example subscribe topic - user can add more topics or change QoS level */
+mqtt_onchip_da16xxx_sub_info_t subTopics[1] =
+{
+    {
+        .qos                 = MQTT_ONCHIP_DA16XXX_QOS_0,
+        .p_topic_filter      = SUBSCRIBE_TOPIC,
+        .topic_filter_length = sizeof(SUBSCRIBE_TOPIC)
+    }
+};
+
+uint8_t cb_flag;
+mqtt_onchip_da16xxx_instance_ctrl_t g_rm_mqtt_onchip_da16xxx_instance;
+
+void mqtt_onchip_basic_example(void);
+void mqtt0_callback(mqtt_onchip_da16xxx_callback_args_t * p_args);
+
+/* User MQTT callback example which sets a flag if a '1' is sent on the subscribed topic  */
+void mqtt0_callback (mqtt_onchip_da16xxx_callback_args_t * p_args)
+{
+    /* When published data is received, callback is entered with packet info*/
+    int data = 0;
+
+    /* Check that the topic in the packet matches subscribed topic */
+    char * ptr = strstr(p_args->p_topic, SUBSCRIBE_TOPIC);
+    if (ptr != NULL)
+    {
+        /* If value is 1, set callback flag to exit receive loop */
+        data = strtol((char *) p_args->p_data, NULL, 10);
+
+        if (data)
+        {
+            cb_flag = 1;
+        }
+    }
+}
+
+void mqtt_onchip_basic_example (void)
+{
+/* MQTT Example using DA16xxx on-chip MQTT Client
+ * NOTE: User must provide a valid Wi-Fi AP above to be connected to when calling this function
+ * NOTE: If a secure broker is being connected to, the certificate header should be defined in the configurator and populated
+ * NOTE: If a broker username and password is required, it must be defined in the configurator
+ * NOTE: Ensure that the Wi-Fi AP details, and publish/subscribe topics are set in the macros above
+ */
+    WIFIReturnCode_t wifi_err;
+    fsp_err_t        mqtt_err;
+
+    /* Setup Access Point connection parameters */
+    WIFINetworkParams_t net_params =
+    {
+        .ucChannel                  = 0,
+        .xPassword.xWPA.cPassphrase = WIFI_PWD,
+        .ucSSID                     = WIFI_SSID,
+        .xPassword.xWPA.ucLength    = sizeof(WIFI_PWD),
+        .ucSSIDLength               = sizeof(WIFI_SSID),
+        .xSecurity                  = eWiFiSecurityWPA2,
+    };
+
+    /* Open connection to the Wifi Module */
+    wifi_err = WIFI_On();
+    assert(eWiFiSuccess == wifi_err);
+
+    /* Connect to the Access Point */
+    wifi_err = WIFI_ConnectAP(&amp;net_params);
+    assert(eWiFiSuccess == wifi_err);
+
+    /* Initialize the MQTT Client connection */
+    mqtt_err = RM_MQTT_DA16XXX_Open(&amp;g_rm_mqtt_onchip_da16xxx_instance, &amp;g_mqtt_onchip_da16xxx_cfg);
+    assert(FSP_SUCCESS == mqtt_err);
+
+    /* Subscribe to MQTT topics to be received */
+    mqtt_err = RM_MQTT_DA16XXX_Subscribe(&amp;g_rm_mqtt_onchip_da16xxx_instance, subTopics, 1);
+    assert(FSP_SUCCESS == mqtt_err);
+
+    /* Connect to the MQTT Broker */
+    mqtt_err = RM_MQTT_DA16XXX_Connect(&amp;g_rm_mqtt_onchip_da16xxx_instance, CONNECT_TIMEOUT);
+    assert(FSP_SUCCESS == mqtt_err);
+
+    /* Publish data to the MQTT Broker */
+    mqtt_err = RM_MQTT_DA16XXX_Publish(&amp;g_rm_mqtt_onchip_da16xxx_instance, &amp;pubTopics[0]);
+    assert(FSP_SUCCESS == mqtt_err);
+
+    /* Loop to receive data from the MQTT Broker */
+    do
+    {
+        RM_MQTT_DA16XXX_Receive(&amp;g_rm_mqtt_onchip_da16xxx_instance, &amp;g_mqtt_onchip_da16xxx_cfg);
+        R_BSP_SoftwareDelay(CONNECT_TIMEOUT, BSP_DELAY_UNITS_MILLISECONDS);
+    } while (cb_flag == 0);
+
+    /* Disconnect from the MQTT Broker */
+    mqtt_err = RM_MQTT_DA16XXX_Disconnect(&amp;g_rm_mqtt_onchip_da16xxx_instance);
+    assert(FSP_SUCCESS == mqtt_err);
+
+    /* Close the MQTT Client module */
+    mqtt_err = RM_MQTT_DA16XXX_Close(&amp;g_rm_mqtt_onchip_da16xxx_instance);
+    assert(FSP_SUCCESS == mqtt_err);
+}
+
+            </content>
+        </template>
+    </developerSupport>
+</raModuleDescription>
+
+
+

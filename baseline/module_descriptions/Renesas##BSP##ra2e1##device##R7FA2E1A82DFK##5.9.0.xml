@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="utf-8"?>
+<raModuleDescription>
+  <device id="R7FA2E1A82DFK" irqCount="32">
+    <select bsp="bsp.ra2e1.R7FA2E1A82DFK" />
+    <select bsp="bsp.ra2e1" />
+    <select bsp="bsp.ra2e1.fsp" />
+    <select bsp="bsp.ra2e1.events" />
+    <select bsp="bsp.ra" />
+  </device>
+  <config id="config.bsp.ra2e1.R7FA2E1A82DFK" path="fsp_cfg/bsp/bsp_mcu_device_pn_cfg.h" version="0">
+    <property id="config.bsp.part_number" display="part_number" default="config.bsp.part_number.value">
+      <option id="config.bsp.part_number.value" display="R7FA2E1A82DFK" value="R7FA2E1A82DFK" />
+    </property>
+    <property id="config.bsp.rom_size_bytes" display="rom_size_bytes" default="config.bsp.rom_size_bytes.value">
+      <option id="config.bsp.rom_size_bytes.value" display="98304" value="98304" />
+    </property>
+    <property id="config.bsp.rom_size_bytes_hidden" default="98304"/>
+    <property id="config.bsp.ram_size_bytes" display="ram_size_bytes" default="config.bsp.ram_size_bytes.value">
+      <option id="config.bsp.ram_size_bytes.value" display="16384" value="16384" />
+    </property>
+    <property id="config.bsp.data_flash_size_bytes" display="data_flash_size_bytes" default="config.bsp.data_flash_size_bytes.value">
+      <option id="config.bsp.data_flash_size_bytes.value" display="4096" value="4096" />
+    </property>
+    <property id="config.bsp.package_style" display="package_style" default="config.bsp.package_style.value">
+      <option id="config.bsp.package_style.value" display="LQFP" value="LQFP" />
+    </property>
+    <property id="config.bsp.package_pins" display="package_pins" default="config.bsp.package_pins.value">
+      <option id="config.bsp.package_pins.value" display="64" value="64" />
+    </property>
+    <property id="config.bsp.irq_count_hidden" default="32"/>
+    <content>
+      #define BSP_MCU_${config.bsp.part_number}
+      #define BSP_MCU_FEATURE_SET ('A')
+      #define BSP_ROM_SIZE_BYTES (${config.bsp.rom_size_bytes})
+      #define BSP_RAM_SIZE_BYTES (${config.bsp.ram_size_bytes})
+      #define BSP_DATA_FLASH_SIZE_BYTES (${config.bsp.data_flash_size_bytes})
+      #define BSP_PACKAGE_${config.bsp.package_style}
+      #define BSP_PACKAGE_PINS (${config.bsp.package_pins})
+    </content>
+  </config>
+  <bsp id="bsp.ra2e1.R7FA2E1A82DFK" config="config.bsp.ra2e1.R7FA2E1A82DFK" display="R7FA2E1A82DFK" version="0">
+    <provides interface="interface.mcu.r7fa2e1a82dfk" />
+    <provides interface="interface.mcu.feature_set.a" />
+    <provides interface="interface.mcu.ra2e1.a" />
+    <provides interface="interface.mcu.acmp.external" />
+    <provides interface="interface.mcu.acmplp.external" />
+    <provides interface="interface.mcu.acmplp.external.0" />
+    <provides interface="interface.mcu.acmplp.external.1" />
+    <provides interface="interface.mcu.adc.external" />
+    <provides interface="interface.mcu.adc.external.0" />
+    <provides interface="interface.mcu.agt.external" />
+    <provides interface="interface.mcu.agt.external.0" />
+    <provides interface="interface.mcu.agt.external.1" />
+    <provides interface="interface.mcu.analog.external" />
+    <provides interface="interface.mcu.cac.external" />
+    <provides interface="interface.mcu.cgc.external" />
+    <provides interface="interface.mcu.crc.external" />
+    <provides interface="interface.mcu.ctsu.external" />
+    <provides interface="interface.mcu.debug.external" />
+    <provides interface="interface.mcu.doc.external" />
+    <provides interface="interface.mcu.dtc.external" />
+    <provides interface="interface.mcu.elc.external" />
+    <provides interface="interface.mcu.flash.external" />
+    <provides interface="interface.mcu.flash_lp.external" />
+    <provides interface="interface.mcu.gpt.external" />
+    <provides interface="interface.mcu.gpt.external.0" />
+    <provides interface="interface.mcu.gpt.external.4" />
+    <provides interface="interface.mcu.gpt.external.4.gtdvu" />
+    <provides interface="interface.mcu.gpt.external.4.event_count" />
+    <provides interface="interface.mcu.gpt.external.5" />
+    <provides interface="interface.mcu.gpt.external.5.gtdvu" />
+    <provides interface="interface.mcu.gpt.external.5.event_count" />
+    <provides interface="interface.mcu.gpt.external.6" />
+    <provides interface="interface.mcu.gpt.external.6.gtdvu" />
+    <provides interface="interface.mcu.gpt.external.6.event_count" />
+    <provides interface="interface.mcu.gpt.external.7" />
+    <provides interface="interface.mcu.gpt.external.7.gtdvu" />
+    <provides interface="interface.mcu.gpt.external.7.event_count" />
+    <provides interface="interface.mcu.gpt.external.8" />
+    <provides interface="interface.mcu.gpt.external.8.gtdvu" />
+    <provides interface="interface.mcu.gpt.external.8.event_count" />
+    <provides interface="interface.mcu.gpt.external.9" />
+    <provides interface="interface.mcu.gpt.external.9.gtdvu" />
+    <provides interface="interface.mcu.gpt.external.9.event_count" />
+    <provides interface="interface.mcu.gpt_ops.external" />
+    <provides interface="interface.mcu.gpt_poeg.external" />
+    <provides interface="interface.mcu.gpt_poeg.external.0" />
+    <provides interface="interface.mcu.gpt_poeg.external.1" />
+    <provides interface="interface.mcu.icu.external" />
+    <provides interface="interface.mcu.icu_ext_irq.external" />
+    <provides interface="interface.mcu.icu_ext_irq.external.0" />
+    <provides interface="interface.mcu.icu_ext_irq.external.1" />
+    <provides interface="interface.mcu.icu_ext_irq.external.2" />
+    <provides interface="interface.mcu.icu_ext_irq.external.3" />
+    <provides interface="interface.mcu.icu_ext_irq.external.4" />
+    <provides interface="interface.mcu.icu_ext_irq.external.5" />
+    <provides interface="interface.mcu.icu_ext_irq.external.6" />
+    <provides interface="interface.mcu.icu_ext_irq.external.7" />
+    <provides interface="interface.mcu.iic.external" />
+    <provides interface="interface.mcu.iic.external.0" />
+    <provides interface="interface.mcu.iic0wu.external" />
+    <provides interface="interface.mcu.iwdt.external" />
+    <provides interface="interface.mcu.kint.external" />
+    <provides interface="interface.mcu.kint.external.0" />
+    <provides interface="interface.mcu.mpu.external" />
+    <provides interface="interface.mcu.mpu.external.0" />
+    <provides interface="interface.mcu.mstp.external" />
+    <provides interface="interface.mcu.pfs.external" />
+    <provides interface="interface.mcu.port.external" />
+    <provides interface="interface.mcu.port.external.0" />
+    <provides interface="interface.mcu.port.external.1" />
+    <provides interface="interface.mcu.port.external.2" />
+    <provides interface="interface.mcu.port.external.3" />
+    <provides interface="interface.mcu.port.external.4" />
+    <provides interface="interface.mcu.port.external.5" />
+    <provides interface="interface.mcu.port.external.9" />
+    <provides interface="interface.mcu.rsip.external" />
+    <provides interface="interface.mcu.rsip.external.aes" />
+    <provides interface="interface.mcu.rtc.external" />
+    <provides interface="interface.mcu.sci.external" />
+    <provides interface="interface.mcu.sci.external.0" />
+    <provides interface="interface.mcu.sci.external.1" />
+    <provides interface="interface.mcu.sci.external.2" />
+    <provides interface="interface.mcu.sci.external.9" />
+    <provides interface="interface.mcu.spi.external" />
+    <provides interface="interface.mcu.spi.external.0" />
+    <provides interface="interface.mcu.sram.external" />
+    <provides interface="interface.mcu.system.external" />
+    <provides interface="interface.mcu.trng.external" />
+    <provides interface="interface.mcu.wdt.external" />
+    <provides interface="interface.mcu.wdt.external.0" />
+    <enum id="enum.mcu.acmplp.external.channels" default="enum.mcu.acmplp.external.channels.0">
+      <option id="enum.mcu.acmplp.external.channels.0" display="ACMPLP0" value="0" />
+      <option id="enum.mcu.acmplp.external.channels.1" display="ACMPLP1" value="1" />
+    </enum>
+    <enum id="enum.mcu.adc.external.channels" default="enum.mcu.adc.external.channels.0">
+      <option id="enum.mcu.adc.external.channels.0" display="ADC0" value="0" />
+    </enum>
+    <enum id="enum.mcu.agt.external.channels" default="enum.mcu.agt.external.channels.0">
+      <option id="enum.mcu.agt.external.channels.0" display="AGT0" value="0" />
+      <option id="enum.mcu.agt.external.channels.1" display="AGT1" value="1" />
+    </enum>
+    <enum id="enum.mcu.gpt.external.channels" default="enum.mcu.gpt.external.channels.0">
+      <option id="enum.mcu.gpt.external.channels.0" display="GPT0" value="0" />
+      <option id="enum.mcu.gpt.external.channels.4" display="GPT4" value="4" />
+      <option id="enum.mcu.gpt.external.channels.5" display="GPT5" value="5" />
+      <option id="enum.mcu.gpt.external.channels.6" display="GPT6" value="6" />
+      <option id="enum.mcu.gpt.external.channels.7" display="GPT7" value="7" />
+      <option id="enum.mcu.gpt.external.channels.8" display="GPT8" value="8" />
+      <option id="enum.mcu.gpt.external.channels.9" display="GPT9" value="9" />
+    </enum>
+    <enum id="enum.mcu.gpt_poeg.external.channels" default="enum.mcu.gpt_poeg.external.channels.0">
+      <option id="enum.mcu.gpt_poeg.external.channels.0" display="GPT_POEG0" value="0" />
+      <option id="enum.mcu.gpt_poeg.external.channels.1" display="GPT_POEG1" value="1" />
+    </enum>
+    <enum id="enum.mcu.icu_ext_irq.external.channels" default="enum.mcu.icu_ext_irq.external.channels.0">
+      <option id="enum.mcu.icu_ext_irq.external.channels.0" display="ICU_EXT_IRQ0" value="0" />
+      <option id="enum.mcu.icu_ext_irq.external.channels.1" display="ICU_EXT_IRQ1" value="1" />
+      <option id="enum.mcu.icu_ext_irq.external.channels.2" display="ICU_EXT_IRQ2" value="2" />
+      <option id="enum.mcu.icu_ext_irq.external.channels.3" display="ICU_EXT_IRQ3" value="3" />
+      <option id="enum.mcu.icu_ext_irq.external.channels.4" display="ICU_EXT_IRQ4" value="4" />
+      <option id="enum.mcu.icu_ext_irq.external.channels.5" display="ICU_EXT_IRQ5" value="5" />
+      <option id="enum.mcu.icu_ext_irq.external.channels.6" display="ICU_EXT_IRQ6" value="6" />
+      <option id="enum.mcu.icu_ext_irq.external.channels.7" display="ICU_EXT_IRQ7" value="7" />
+    </enum>
+    <enum id="enum.mcu.iic.external.channels" default="enum.mcu.iic.external.channels.0">
+      <option id="enum.mcu.iic.external.channels.0" display="IIC0" value="0" />
+    </enum>
+    <enum id="enum.mcu.kint.external.channels" default="enum.mcu.kint.external.channels.0">
+      <option id="enum.mcu.kint.external.channels.0" display="KINT0" value="0" />
+    </enum>
+    <enum id="enum.mcu.mpu.external.channels" default="enum.mcu.mpu.external.channels.0">
+      <option id="enum.mcu.mpu.external.channels.0" display="MPU0" value="0" />
+    </enum>
+    <enum id="enum.mcu.port.external.channels" default="enum.mcu.port.external.channels.0">
+      <option id="enum.mcu.port.external.channels.0" display="PORT0" value="0" />
+      <option id="enum.mcu.port.external.channels.1" display="PORT1" value="1" />
+      <option id="enum.mcu.port.external.channels.2" display="PORT2" value="2" />
+      <option id="enum.mcu.port.external.channels.3" display="PORT3" value="3" />
+      <option id="enum.mcu.port.external.channels.4" display="PORT4" value="4" />
+      <option id="enum.mcu.port.external.channels.5" display="PORT5" value="5" />
+      <option id="enum.mcu.port.external.channels.9" display="PORT9" value="9" />
+    </enum>
+    <enum id="enum.mcu.sci.external.channels" default="enum.mcu.sci.external.channels.0">
+      <option id="enum.mcu.sci.external.channels.0" display="SCI0" value="0" />
+      <option id="enum.mcu.sci.external.channels.1" display="SCI1" value="1" />
+      <option id="enum.mcu.sci.external.channels.2" display="SCI2" value="2" />
+      <option id="enum.mcu.sci.external.channels.9" display="SCI9" value="9" />
+    </enum>
+    <enum id="enum.mcu.spi.external.channels" default="enum.mcu.spi.external.channels.0">
+      <option id="enum.mcu.spi.external.channels.0" display="SPI0" value="0" />
+    </enum>
+    <enum id="enum.mcu.wdt.external.channels" default="enum.mcu.wdt.external.channels.0">
+      <option id="enum.mcu.wdt.external.channels.0" display="WDT0" value="0" />
+    </enum>
+  </bsp>
+</raModuleDescription>

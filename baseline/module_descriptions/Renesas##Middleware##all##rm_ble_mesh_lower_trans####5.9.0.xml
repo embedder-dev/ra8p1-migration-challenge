@@ -1,0 +1,96 @@
+<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.middleware.rm_ble_mesh_lower_trans" path="fsp_cfg/rm_ble_mesh_lower_trans_cfg.h" version="0">
+        <content>
+            #ifdef __cplusplus
+            extern "C" {
+            #endif
+
+            #ifdef __cplusplus
+            }
+            #endif
+        </content>
+    </config>
+    <module id="module.middleware.rm_ble_mesh_lower_trans_on_rm_ble_mesh_lower_trans" display="Networking|BLE Mesh Network modules|BLE Mesh Lower Trans (rm_ble_mesh_lower_trans)" config="config.middleware.rm_ble_mesh_lower_trans" common="1" version="0" visible="true" url="group___r_m___b_l_e___m_e_s_h___l_o_w_e_r___t_r_a_n_s.html">
+
+        <constraint display="Requires Low Level Library Implementation">
+            "${interface.middleware.rm_ble_mesh_network_on_rm_ble_mesh_network}" === "1"
+        </constraint>
+        <constraint display="BLE Mesh Lower Trans middleware not support R_BLE_SPP module">
+          "${interface.mcu.radio}" === "1"
+        </constraint>
+        <requires id="module.middleware.rm_ble_mesh_lower_trans.requires.rm_ble_mesh_network" interface="interface.middleware.rm_ble_mesh_network.${module.middleware.rm_ble_mesh_network.name}" visible="true" display="Add BLE Mesh Network Module" find="true"/>
+
+        <provides interface="interface.middleware.rm_ble_mesh_lower_trans"/>
+        <provides interface="interface.middleware.rm_ble_mesh_lower_trans_on_rm_ble_mesh_lower_trans"/>
+        <provides interface="interface.middleware.rm_ble_mesh_lower_trans.${module.middleware.rm_ble_mesh_lower_trans.name}"/>
+
+        <property display="General|Name" id="module.middleware.rm_ble_mesh_lower_trans.name" default="g_rm_ble_mesh_lower_trans${_instance}" description="Module name.">
+            <constraint display="Name Must Be a Valid C Symbol">testSymbol("${module.middleware.rm_ble_mesh_lower_trans.name}")</constraint>
+        </property>
+
+        <property display="Channel Number" id="module.middleware.rm_ble_mesh_lower_trans.channel" default="0" description="Select channel corresponding to the channel number of the hardware.">
+            <constraint display="Invalid Channel Number">testInteger("${module.middleware.rm_ble_mesh_lower_trans.channel}") &amp;&amp; ("${module.middleware.rm_ble_mesh_lower_trans.channel}" &gt;= 0) &amp;&amp; ("${module.middleware.rm_ble_mesh_lower_trans.channel}" &lt;= 4294967295)</constraint>
+        </property>
+
+        <property display="Notification Enable" default="module.middleware.rm_ble_mesh_lower_trans.notification.disabled" id="module.middleware.rm_ble_mesh_lower_trans.notification" description="Whether to enable the notification or not.">
+            <option display="Enabled" id="module.middleware.rm_ble_mesh_lower_trans.notification.enabled" value="(1)"/>
+            <option display="Disabled" id="module.middleware.rm_ble_mesh_lower_trans.notification.disabled" value="(0)"/>
+        </property>
+
+        <property display="Callback" id="module.middleware.rm_ble_mesh_lower_trans.lower_trans_callback" default="NULL" description="Callback function name.">
+            <constraint display="Name Must Be a Valid C Symbol">testSymbol("${module.middleware.rm_ble_mesh_lower_trans.lower_trans_callback}")</constraint>
+        </property>
+
+        <property id="module.middleware.rm_ble_mesh_lower_trans.p_context" default="NULL">
+            <constraint display="Name Must Be a Valid C Symbol">testSymbol("${module.middleware.rm_ble_mesh_lower_trans.p_context}")</constraint>
+            <export>eval('' +
+                'var output = "${module.middleware.rm_ble_mesh_lower_trans.p_context}";' +
+                'if ("NULL" !== output) {' +
+                'output = "&amp;" + output;' +
+                '}' +
+                'output')
+            </export>
+        </property>
+
+        <header>
+/** BLE Mesh Lower Trans on BLE Mesh Lower Trans Instance. */
+extern const rm_ble_mesh_lower_trans_instance_t ${module.middleware.rm_ble_mesh_lower_trans.name};
+
+/** Access the BLE Mesh lower trans instance using these structures when calling API functions directly (::p_api is not used). */
+extern rm_ble_mesh_lower_trans_instance_ctrl_t ${module.middleware.rm_ble_mesh_lower_trans.name}_ctrl;
+extern const rm_ble_mesh_lower_trans_cfg_t ${module.middleware.rm_ble_mesh_lower_trans.name}_cfg;
+
+#ifndef ${module.middleware.rm_ble_mesh_lower_trans.lower_trans_callback}
+void ${module.middleware.rm_ble_mesh_lower_trans.lower_trans_callback}(rm_ble_mesh_lower_trans_callback_args_t * p_args);
+#endif
+        </header>
+        <includes>
+#include "rm_ble_mesh_lower_trans.h"
+#include "rm_ble_mesh_lower_trans_api.h"
+        </includes>
+        <declarations>
+rm_ble_mesh_lower_trans_instance_ctrl_t ${module.middleware.rm_ble_mesh_lower_trans.name}_ctrl;
+
+/** BLE MESH configuration parameters. */
+const rm_ble_mesh_lower_trans_cfg_t ${module.middleware.rm_ble_mesh_lower_trans.name}_cfg =
+{
+    /** the parameters for initialization. */
+    .channel                 = ${module.middleware.rm_ble_mesh_lower_trans.channel},
+    .notification            = (rm_ble_mesh_lower_trans_notification_t) ${module.middleware.rm_ble_mesh_lower_trans.notification},
+    .p_mesh_network_instance = &amp;${module.middleware.rm_ble_mesh_lower_trans.requires.rm_ble_mesh_network::module.middleware.rm_ble_mesh_network.name},
+    .p_callback              = ${module.middleware.rm_ble_mesh_lower_trans.lower_trans_callback},
+    .p_context               = ${module.middleware.rm_ble_mesh_lower_trans.p_context},
+    .p_extend                = NULL
+};
+
+/** This structure encompasses everything that is needed to use an instance of this interface. */
+const rm_ble_mesh_lower_trans_instance_t ${module.middleware.rm_ble_mesh_lower_trans.name} =
+{
+    .p_ctrl = &amp;${module.middleware.rm_ble_mesh_lower_trans.name}_ctrl,
+    .p_cfg  = &amp;${module.middleware.rm_ble_mesh_lower_trans.name}_cfg,
+    .p_api  = &amp;g_rm_ble_mesh_lower_trans_on_rm_ble_mesh_lower_trans
+};
+        </declarations>
+    </module>
+</raModuleDescription>

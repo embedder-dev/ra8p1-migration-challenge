@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<raModuleDescription>
+    <module config="config.azure.ewf" id="module.azure.ewf.interface.uart" display="Networking|Azure EWF Interface on r_uart" common="1" version="0" url="https://azure.github.io/embedded-wireless-framework/html/index.html" visible="false">
+        <constraint display="DTC not supported in the Embedded Wireless Framework.">
+            ("${config.driver.sci_uart.dtc_support}" === "config.driver.sci_uart.dtc_support.disabled")
+        </constraint>
+        <requires id="module.azure.ewf.interface.uart.requires.r_uart" interface="interface.driver.uart" display="Requires UART Peripheral" find="true">
+            <override property="module.driver.uart.callback" value="user_uart_callback"/>
+            <override property="module.driver.uart.name" value="g_uart0"/>
+        </requires>
+        <provides interface="interface.azure.ewf.interface" />
+        <includes>
+#include &quot;ewf_interface_ra_uart.h&quot;
+        </includes>
+    </module>
+</raModuleDescription>

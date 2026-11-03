@@ -1,0 +1,1180 @@
+﻿<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.driver.adc" path="fsp_cfg/r_adc_cfg.h" version="0">
+        <property default="config.driver.adc.param_checking_enable.bsp" display="Parameter Checking" id="config.driver.adc.param_checking_enable" description="If selected code for parameter checking is included in the build.">
+            <option display="Default (BSP)" id="config.driver.adc.param_checking_enable.bsp" value="(BSP_CFG_PARAM_CHECKING_ENABLE)"/>
+            <option display="Enabled" id="config.driver.adc.param_checking_enable.enabled" value="(1)"/>
+            <option display="Disabled" id="config.driver.adc.param_checking_enable.disabled" value="(0)"/>
+        </property>
+        <content>
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#define ADC_CFG_PARAM_CHECKING_ENABLE ${config.driver.adc.param_checking_enable}
+
+#ifdef __cplusplus
+}
+#endif
+        </content>
+    </config>
+    <module config="config.driver.adc" display="Analog|${module.driver.adc.name} ADC (r_adc)" id="module.driver.adc_on_adc" version="1" url="group___a_d_c.html">
+        <constraint id="module.driver.adc.add_avg_constraint" display="Select channels in Input|Addition/Averaging Mask">
+            (("${module.driver.adc.add_mask}".length != 0) || ("${module.driver.adc.add_average_count}" === "module.driver.adc.add_average_count.add_off"))
+        </constraint>
+        <constraint id="module.driver.adc.sample_hold_constraint" display="'Sample and Hold Channels' are not available on selected MCU">
+            (("${module.driver.adc.sample_hold_mask}".length === 0) || ((Number("${config.bsp.fsp.mcu.adc.sample_and_hold}")) === 1))
+        </constraint>
+        <constraint id="module.driver.adc.scan_end_constraint" display="Requires Interrupts|Scan End Interrupt Priority enabled">
+          (("${module.driver.adc.p_callback}" === "NULL") || ("${module.driver.adc.mode}" == "module.driver.adc.mode.mode_group_scan")) || ("${module.driver.adc.scan_end_ipl}" != "_disabled")
+        </constraint>
+        <constraint id="module.driver.adc.callback_constraint" display="Enter a function name in Interrupts|Callback if interrupts are used">
+          ("${module.driver.adc.p_callback}" != "NULL") || (("${module.driver.adc.scan_end_ipl}" == "_disabled") &amp;&amp; ("${module.driver.adc.scan_end_b_ipl}" == "_disabled"))
+        </constraint>
+        <constraint id="module.driver.adc.scan_end_b_constraint" display="Requires Interrupts|Scan End Group B Interrupt Priority and Interrupts|Scan End Interrupt Priority to be enabled">
+            (("${module.driver.adc.p_callback}" === "NULL") || ("${module.driver.adc.mode}" != "module.driver.adc.mode.mode_group_scan")) ||
+            (("${module.driver.adc.scan_end_b_ipl}" != "_disabled") &amp;&amp; ("${module.driver.adc.scan_end_ipl}" != "_disabled"))
+        </constraint>
+        <constraint id="module.driver.adc.unit_available_constraint" display="Unit not available on selected MCU">
+            "${interface.mcu.adc.${module.driver.adc.unit}}" === "1"
+        </constraint>
+        <constraint id="module.driver.adc.unique_name_constraint" display="Unique name required for each instance">
+       ("${interface.driver.adc.${module.driver.adc.name}}" === "1")
+        </constraint>
+        <constraint id="module.driver.adc.elc_driver_constraint" display="ELC signal source selection requires an ELC Driver">
+            ( (!"${module.driver.adc.trigger}".startsWith("_signal.")) &amp;&amp;
+              (!"${module.driver.adc.trigger_group_b}".startsWith("_signal.")) ) ||
+            ("1" === "${interface.driver.elc}")
+        </constraint>
+        <constraint id="module.driver.adc.double_trigger_source_constraint" display="Double-trigger mode requires an ELC or GPT event trigger">
+             (("enum.driver.adc.trigger.trigger_software" != "${module.driver.adc.trigger}") &amp;&amp;
+             ("enum.driver.adc.trigger.trigger_async_external" != "${module.driver.adc.trigger}")) ||
+             ("module.driver.adc.mode.dt.enabled" != "${module.driver.adc.mode.dt}")
+        </constraint>
+        <constraint id="module.driver.adc.double_trigger_mode_constraint" display="Double-trigger mode cannot be used with Continuous Scan mode">
+            ("module.driver.adc.mode.mode_continuous_scan" != "${module.driver.adc.mode}") ||
+            ("module.driver.adc.mode.dt.disabled" === "${module.driver.adc.mode.dt}")
+        </constraint>
+        <constraint id="module.driver.adc.trigger_group_b_source_constraint">
+            eval('\n' +
+                 '// =======================================================================================================                                                    \n' +
+                 '// ========================  Below is a Copy of Group A Trigger Property  ================================                                                    \n' +
+                 '// ============ "startsWith" replaced by comparison to MDF enum due to order of operations ===============                                                    \n' +
+                 '// =======================================================================================================                                                    \n' +
+                 'var trigger_a_is_software  = "${module.driver.adc.trigger}" == "enum.driver.adc.trigger.trigger_software";                                                    \n' +
+                 'var trigger_a_is_external  = "${module.driver.adc.trigger}" == "enum.driver.adc.trigger.trigger_async_external";                                              \n' +
+                 'var trigger_a_is_gpt       = "${module.driver.adc.trigger}".startsWith("enum.driver.adc.trigger.trigger_gpt");                                                \n' +
+                 'var double_trigger_ex      = "module.driver.adc.mode.dt.enabled_ex" == "${module.driver.adc.mode.dt}";                                                        \n' +
+                 'var output = "ADC_START_SOURCE_ELC_AD0";                                                                                                                      \n' +
+                 'if(double_trigger_ex){                                                                                                                                        \n' +
+                 '    output = "ADC_START_SOURCE_ELC_AD01";                                                                                                                     \n' +
+                 '}else if(trigger_a_is_software){                                                                                                                              \n' +
+                 '    output = "ADC_START_SOURCE_DISABLED";                                                                                                                     \n' +
+                 '} else if(trigger_a_is_gpt || trigger_a_is_external){                                                                                                         \n' +
+                 '    output = "ADC_START_SOURCE_${module.driver.adc.trigger}";                                                                                                 \n' +
+                 '} else{                                                                                                                                                       \n' +
+                 '    output = "ADC_START_SOURCE_ELC_AD0";                                                                                                                      \n' +
+                 '}                                                                                                                                                             \n' +
+                 '// =======================================================================================================                                                    \n' +
+                 '                                                                                                                                                              \n' +
+                 ' var trigger_a = output;                                                                                                                                      \n' +
+                 '                                                                                                                                                              \n' +
+                 '// =======================================================================================================                                                    \n' +
+                 '// ========================  Below is a Copy of Group B Trigger Property  ================================                                                    \n' +
+                 '// ============ "startsWith" replaced by comparison to MDF enum due to order of operations ===============                                                    \n' +
+                 '// =======================================================================================================                                                    \n' +
+                 'var trigger_b_is_disabled  = "${module.driver.adc.trigger_group_b}" == "_disabled";                                                                           \n' +
+                 'var trigger_b_is_gpt       = "${module.driver.adc.trigger_group_b}".startsWith("enum.driver.adc.trigger.trigger_gpt");                                        \n' +
+                 'output = "ADC_START_SOURCE_DISABLED";                                                                                                                         \n' +
+                 'if(trigger_b_is_gpt){                                                                                                                                         \n' +
+                 '    output = "ADC_START_SOURCE_${module.driver.adc.trigger_group_b}";                                                                                         \n' +
+                 '} else if(trigger_b_is_disabled){                                                                                                                             \n' +
+                 '    output = "ADC_START_SOURCE_DISABLED";                                                                                                                     \n' +
+                 '} else{                                                                                                                                                       \n' +
+                 '    output = "ADC_START_SOURCE_ELC_AD1";                                                                                                                      \n' +
+                 '}                                                                                                                                                             \n' +
+                 '                                                                                                                                                              \n' +
+                 '// =======================================================================================================                                                    \n' +
+                 '                                                                                                                                                              \n' +
+                 ' var trigger_b = output;                                                                                                                                      \n' +
+                 '                                                                                                                                                              \n' +
+                 '// =======================================================================================================                                                    \n' +
+                 '// ======================================== Below is Constraint ==========================================                                                    \n' +
+                 '// =======================================================================================================                                                    \n' +
+                 'var constraint_output = null;                                                                                                                                 \n' +
+                 'var trigger_a_is_elc       = "${module.driver.adc.trigger}".startsWith("_signal");                                                                            \n' +
+                 'var trigger_b_is_external  = "${module.driver.adc.trigger_group_b}" == "enum.driver.adc.trigger.trigger_async_external";                                      \n' +
+                 'var trigger_b_is_software  = "${module.driver.adc.trigger_group_b}" == "enum.driver.adc.trigger.trigger_software";                                            \n' +
+                 '                                                                                                                                                              \n' +
+                 '/* NOTE: Order of these conditions matters */                                                                                                                 \n' +
+                 'if(!trigger_a_is_elc &amp;&amp; double_trigger_ex){                                                                                                           \n' +
+                 '    /* NOTE: This is a limitation of the driver, not the hardware - Changing driver behavior would impact backwards compatability */                          \n' +
+                 '    constraint_output = "Group A trigger must not be External, Software, or GPT when Double-trigger Extended is selected.";                                   \n' +
+                 '} else if("${module.driver.adc.trigger}" == "${module.driver.adc.trigger_group_b}" &amp;&amp; !trigger_a_is_software){                                        \n' +
+                 '    constraint_output = "Group A and Group B triggers must not select the same source.";                                                                      \n' +
+                 '} else if(trigger_b_is_external){                                                                                                                             \n' +
+                 '    constraint_output = "Group B trigger must not be set to External.";                                                                                       \n' +
+                 '} else if(trigger_b_is_software){                                                                                                                             \n' +
+                 '    constraint_output = "Group B trigger must not be set to Software.";                                                                                       \n' +
+                 '} else if(double_trigger_ex &amp;&amp; (trigger_b == "ADC_START_SOURCE_ELC_AD1")){                                                                            \n' +
+                 '    constraint_output = "Group B trigger must not be set to ELC when Double-trigger Extended mode is enabled, since both ELC events are in use by Group A.";  \n' +
+                 '}                                                                                                                                                             \n' +
+                 'constraint_output')
+        </constraint>
+        <constraint id="module.driver.adc.double_trigger_sensors_constraint" display="Sensors cannot be selected as the scan channel in double-trigger mode">
+            !(testOption("${module.driver.adc.scan_mask}", "module.driver.adc.scan_mask.temperature") ||
+              testOption("${module.driver.adc.scan_mask}", "module.driver.adc.scan_mask.voltage")) ||
+              ("module.driver.adc.mode.dt.disabled" === "${module.driver.adc.mode.dt}")
+        </constraint>
+        <constraint id="module.driver.adc.double_trigger_channel_constraint" display="Exactly one Group A channel (Input|Channel Scan Mask) must be selected in double-trigger mode">
+            ((testOption("${module.driver.adc.scan_mask}", "module.driver.adc.scan_mask.channel_0") +
+            testOption("${module.driver.adc.scan_mask}", "module.driver.adc.scan_mask.channel_1") +
+            testOption("${module.driver.adc.scan_mask}", "module.driver.adc.scan_mask.channel_2") +
+            testOption("${module.driver.adc.scan_mask}", "module.driver.adc.scan_mask.channel_3") +
+            testOption("${module.driver.adc.scan_mask}", "module.driver.adc.scan_mask.channel_4") +
+            testOption("${module.driver.adc.scan_mask}", "module.driver.adc.scan_mask.channel_5") +
+            testOption("${module.driver.adc.scan_mask}", "module.driver.adc.scan_mask.channel_6") +
+            testOption("${module.driver.adc.scan_mask}", "module.driver.adc.scan_mask.channel_7") +
+            testOption("${module.driver.adc.scan_mask}", "module.driver.adc.scan_mask.channel_8") +
+            testOption("${module.driver.adc.scan_mask}", "module.driver.adc.scan_mask.channel_9") +
+            testOption("${module.driver.adc.scan_mask}", "module.driver.adc.scan_mask.channel_10") +
+            testOption("${module.driver.adc.scan_mask}", "module.driver.adc.scan_mask.channel_11") +
+            testOption("${module.driver.adc.scan_mask}", "module.driver.adc.scan_mask.channel_12") +
+            testOption("${module.driver.adc.scan_mask}", "module.driver.adc.scan_mask.channel_13") +
+            testOption("${module.driver.adc.scan_mask}", "module.driver.adc.scan_mask.channel_14") +
+            testOption("${module.driver.adc.scan_mask}", "module.driver.adc.scan_mask.channel_15") +
+            testOption("${module.driver.adc.scan_mask}", "module.driver.adc.scan_mask.channel_16") +
+            testOption("${module.driver.adc.scan_mask}", "module.driver.adc.scan_mask.channel_17") +
+            testOption("${module.driver.adc.scan_mask}", "module.driver.adc.scan_mask.channel_18") +
+            testOption("${module.driver.adc.scan_mask}", "module.driver.adc.scan_mask.channel_19") +
+            testOption("${module.driver.adc.scan_mask}", "module.driver.adc.scan_mask.channel_20") +
+            testOption("${module.driver.adc.scan_mask}", "module.driver.adc.scan_mask.channel_21") +
+            testOption("${module.driver.adc.scan_mask}", "module.driver.adc.scan_mask.channel_22") +
+            testOption("${module.driver.adc.scan_mask}", "module.driver.adc.scan_mask.channel_23") +
+            testOption("${module.driver.adc.scan_mask}", "module.driver.adc.scan_mask.channel_24") +
+            testOption("${module.driver.adc.scan_mask}", "module.driver.adc.scan_mask.channel_25") +
+            testOption("${module.driver.adc.scan_mask}", "module.driver.adc.scan_mask.channel_26") +
+            testOption("${module.driver.adc.scan_mask}", "module.driver.adc.scan_mask.channel_27") +
+            testOption("${module.driver.adc.scan_mask}", "module.driver.adc.scan_mask.channel_28") +
+            testOption("${module.driver.adc.scan_mask}", "module.driver.adc.scan_mask.temperature") +
+            testOption("${module.driver.adc.scan_mask}", "module.driver.adc.scan_mask.voltage")) === 1) ||
+            ("module.driver.adc.mode.dt.disabled" === "${module.driver.adc.mode.dt}")
+        </constraint>
+        <constraint id="module.driver.adc.group_channel_constraint" display="The same channel cannot be selected in both Group A and Group B">
+            !(testOption("${module.driver.adc.scan_mask}", "module.driver.adc.scan_mask.channel_0") &amp;&amp; testOption("${module.driver.adc.scan_mask_group_b}", "module.driver.adc.scan_mask_group_b.channel_0")) &amp;&amp;
+            !(testOption("${module.driver.adc.scan_mask}", "module.driver.adc.scan_mask.channel_1") &amp;&amp; testOption("${module.driver.adc.scan_mask_group_b}", "module.driver.adc.scan_mask_group_b.channel_1")) &amp;&amp;
+            !(testOption("${module.driver.adc.scan_mask}", "module.driver.adc.scan_mask.channel_2") &amp;&amp; testOption("${module.driver.adc.scan_mask_group_b}", "module.driver.adc.scan_mask_group_b.channel_2")) &amp;&amp;
+            !(testOption("${module.driver.adc.scan_mask}", "module.driver.adc.scan_mask.channel_3") &amp;&amp; testOption("${module.driver.adc.scan_mask_group_b}", "module.driver.adc.scan_mask_group_b.channel_3")) &amp;&amp;
+            !(testOption("${module.driver.adc.scan_mask}", "module.driver.adc.scan_mask.channel_4") &amp;&amp; testOption("${module.driver.adc.scan_mask_group_b}", "module.driver.adc.scan_mask_group_b.channel_4")) &amp;&amp;
+            !(testOption("${module.driver.adc.scan_mask}", "module.driver.adc.scan_mask.channel_5") &amp;&amp; testOption("${module.driver.adc.scan_mask_group_b}", "module.driver.adc.scan_mask_group_b.channel_5")) &amp;&amp;
+            !(testOption("${module.driver.adc.scan_mask}", "module.driver.adc.scan_mask.channel_6") &amp;&amp; testOption("${module.driver.adc.scan_mask_group_b}", "module.driver.adc.scan_mask_group_b.channel_6")) &amp;&amp;
+            !(testOption("${module.driver.adc.scan_mask}", "module.driver.adc.scan_mask.channel_7") &amp;&amp; testOption("${module.driver.adc.scan_mask_group_b}", "module.driver.adc.scan_mask_group_b.channel_7")) &amp;&amp;
+            !(testOption("${module.driver.adc.scan_mask}", "module.driver.adc.scan_mask.channel_8") &amp;&amp; testOption("${module.driver.adc.scan_mask_group_b}", "module.driver.adc.scan_mask_group_b.channel_8")) &amp;&amp;
+            !(testOption("${module.driver.adc.scan_mask}", "module.driver.adc.scan_mask.channel_9") &amp;&amp; testOption("${module.driver.adc.scan_mask_group_b}", "module.driver.adc.scan_mask_group_b.channel_9")) &amp;&amp;
+            !(testOption("${module.driver.adc.scan_mask}", "module.driver.adc.scan_mask.channel_10") &amp;&amp; testOption("${module.driver.adc.scan_mask_group_b}", "module.driver.adc.scan_mask_group_b.channel_10")) &amp;&amp;
+            !(testOption("${module.driver.adc.scan_mask}", "module.driver.adc.scan_mask.channel_11") &amp;&amp; testOption("${module.driver.adc.scan_mask_group_b}", "module.driver.adc.scan_mask_group_b.channel_11")) &amp;&amp;
+            !(testOption("${module.driver.adc.scan_mask}", "module.driver.adc.scan_mask.channel_12") &amp;&amp; testOption("${module.driver.adc.scan_mask_group_b}", "module.driver.adc.scan_mask_group_b.channel_12")) &amp;&amp;
+            !(testOption("${module.driver.adc.scan_mask}", "module.driver.adc.scan_mask.channel_13") &amp;&amp; testOption("${module.driver.adc.scan_mask_group_b}", "module.driver.adc.scan_mask_group_b.channel_13")) &amp;&amp;
+            !(testOption("${module.driver.adc.scan_mask}", "module.driver.adc.scan_mask.channel_14") &amp;&amp; testOption("${module.driver.adc.scan_mask_group_b}", "module.driver.adc.scan_mask_group_b.channel_14")) &amp;&amp;
+            !(testOption("${module.driver.adc.scan_mask}", "module.driver.adc.scan_mask.channel_15") &amp;&amp; testOption("${module.driver.adc.scan_mask_group_b}", "module.driver.adc.scan_mask_group_b.channel_15")) &amp;&amp;
+            !(testOption("${module.driver.adc.scan_mask}", "module.driver.adc.scan_mask.channel_16") &amp;&amp; testOption("${module.driver.adc.scan_mask_group_b}", "module.driver.adc.scan_mask_group_b.channel_16")) &amp;&amp;
+            !(testOption("${module.driver.adc.scan_mask}", "module.driver.adc.scan_mask.channel_17") &amp;&amp; testOption("${module.driver.adc.scan_mask_group_b}", "module.driver.adc.scan_mask_group_b.channel_17")) &amp;&amp;
+            !(testOption("${module.driver.adc.scan_mask}", "module.driver.adc.scan_mask.channel_18") &amp;&amp; testOption("${module.driver.adc.scan_mask_group_b}", "module.driver.adc.scan_mask_group_b.channel_18")) &amp;&amp;
+            !(testOption("${module.driver.adc.scan_mask}", "module.driver.adc.scan_mask.channel_19") &amp;&amp; testOption("${module.driver.adc.scan_mask_group_b}", "module.driver.adc.scan_mask_group_b.channel_19")) &amp;&amp;
+            !(testOption("${module.driver.adc.scan_mask}", "module.driver.adc.scan_mask.channel_20") &amp;&amp; testOption("${module.driver.adc.scan_mask_group_b}", "module.driver.adc.scan_mask_group_b.channel_20")) &amp;&amp;
+            !(testOption("${module.driver.adc.scan_mask}", "module.driver.adc.scan_mask.channel_21") &amp;&amp; testOption("${module.driver.adc.scan_mask_group_b}", "module.driver.adc.scan_mask_group_b.channel_21")) &amp;&amp;
+            !(testOption("${module.driver.adc.scan_mask}", "module.driver.adc.scan_mask.channel_22") &amp;&amp; testOption("${module.driver.adc.scan_mask_group_b}", "module.driver.adc.scan_mask_group_b.channel_22")) &amp;&amp;
+            !(testOption("${module.driver.adc.scan_mask}", "module.driver.adc.scan_mask.channel_23") &amp;&amp; testOption("${module.driver.adc.scan_mask_group_b}", "module.driver.adc.scan_mask_group_b.channel_23")) &amp;&amp;
+            !(testOption("${module.driver.adc.scan_mask}", "module.driver.adc.scan_mask.channel_24") &amp;&amp; testOption("${module.driver.adc.scan_mask_group_b}", "module.driver.adc.scan_mask_group_b.channel_24")) &amp;&amp;
+            !(testOption("${module.driver.adc.scan_mask}", "module.driver.adc.scan_mask.channel_25") &amp;&amp; testOption("${module.driver.adc.scan_mask_group_b}", "module.driver.adc.scan_mask_group_b.channel_25")) &amp;&amp;
+            !(testOption("${module.driver.adc.scan_mask}", "module.driver.adc.scan_mask.channel_26") &amp;&amp; testOption("${module.driver.adc.scan_mask_group_b}", "module.driver.adc.scan_mask_group_b.channel_26")) &amp;&amp;
+            !(testOption("${module.driver.adc.scan_mask}", "module.driver.adc.scan_mask.channel_27") &amp;&amp; testOption("${module.driver.adc.scan_mask_group_b}", "module.driver.adc.scan_mask_group_b.channel_27")) &amp;&amp;
+            !(testOption("${module.driver.adc.scan_mask}", "module.driver.adc.scan_mask.channel_28") &amp;&amp; testOption("${module.driver.adc.scan_mask_group_b}", "module.driver.adc.scan_mask_group_b.channel_28")) &amp;&amp;
+            !(testOption("${module.driver.adc.scan_mask}", "module.driver.adc.scan_mask.temperature") &amp;&amp; testOption("${module.driver.adc.scan_mask_group_b}", "module.driver.adc.scan_mask_group_b.temperature")) &amp;&amp;
+            !(testOption("${module.driver.adc.scan_mask}", "module.driver.adc.scan_mask.voltage") &amp;&amp; testOption("${module.driver.adc.scan_mask_group_b}", "module.driver.adc.scan_mask_group_b.voltage"))
+        </constraint>
+        <constraint id="module.driver.adc.temp_volt_channel_constraint" display="In Single Scan mode, when selecting Temperature Sensor or Internal Reference Voltage, do not select any other analog channel.">
+            (("module.driver.adc.mode.mode_single_scan" != "${module.driver.adc.mode}")) ||
+            ((Number("${config.bsp.fsp.mcu.adc.sensors_are_exclusive}") === 1) &amp;&amp;
+            !((testOption("${module.driver.adc.scan_mask}", "module.driver.adc.scan_mask.voltage") || testOption("${module.driver.adc.scan_mask}", "module.driver.adc.scan_mask.temperature")) &amp;&amp;
+            ((testOption("${module.driver.adc.scan_mask}", "module.driver.adc.scan_mask.channel_0")) ||
+            (testOption("${module.driver.adc.scan_mask}", "module.driver.adc.scan_mask.channel_1")) ||
+            (testOption("${module.driver.adc.scan_mask}", "module.driver.adc.scan_mask.channel_2")) ||
+            (testOption("${module.driver.adc.scan_mask}", "module.driver.adc.scan_mask.channel_3")) ||
+            (testOption("${module.driver.adc.scan_mask}", "module.driver.adc.scan_mask.channel_4")) ||
+            (testOption("${module.driver.adc.scan_mask}", "module.driver.adc.scan_mask.channel_5")) ||
+            (testOption("${module.driver.adc.scan_mask}", "module.driver.adc.scan_mask.channel_6")) ||
+            (testOption("${module.driver.adc.scan_mask}", "module.driver.adc.scan_mask.channel_7")) ||
+            (testOption("${module.driver.adc.scan_mask}", "module.driver.adc.scan_mask.channel_8")) ||
+            (testOption("${module.driver.adc.scan_mask}", "module.driver.adc.scan_mask.channel_9")) ||
+            (testOption("${module.driver.adc.scan_mask}", "module.driver.adc.scan_mask.channel_10")) ||
+            (testOption("${module.driver.adc.scan_mask}", "module.driver.adc.scan_mask.channel_11")) ||
+            (testOption("${module.driver.adc.scan_mask}", "module.driver.adc.scan_mask.channel_12")) ||
+            (testOption("${module.driver.adc.scan_mask}", "module.driver.adc.scan_mask.channel_13")) ||
+            (testOption("${module.driver.adc.scan_mask}", "module.driver.adc.scan_mask.channel_14")) ||
+            (testOption("${module.driver.adc.scan_mask}", "module.driver.adc.scan_mask.channel_15")) ||
+            (testOption("${module.driver.adc.scan_mask}", "module.driver.adc.scan_mask.channel_16")) ||
+            (testOption("${module.driver.adc.scan_mask}", "module.driver.adc.scan_mask.channel_17")) ||
+            (testOption("${module.driver.adc.scan_mask}", "module.driver.adc.scan_mask.channel_18")) ||
+            (testOption("${module.driver.adc.scan_mask}", "module.driver.adc.scan_mask.channel_19")) ||
+            (testOption("${module.driver.adc.scan_mask}", "module.driver.adc.scan_mask.channel_20")) ||
+            (testOption("${module.driver.adc.scan_mask}", "module.driver.adc.scan_mask.channel_21")) ||
+            (testOption("${module.driver.adc.scan_mask}", "module.driver.adc.scan_mask.channel_22")) ||
+            (testOption("${module.driver.adc.scan_mask}", "module.driver.adc.scan_mask.channel_23")) ||
+            (testOption("${module.driver.adc.scan_mask}", "module.driver.adc.scan_mask.channel_24")) ||
+            (testOption("${module.driver.adc.scan_mask}", "module.driver.adc.scan_mask.channel_25")) ||
+            (testOption("${module.driver.adc.scan_mask}", "module.driver.adc.scan_mask.channel_26")) ||
+            (testOption("${module.driver.adc.scan_mask}", "module.driver.adc.scan_mask.channel_27")) ||
+            (testOption("${module.driver.adc.scan_mask}", "module.driver.adc.scan_mask.channel_28"))))) ||
+            (Number("${config.bsp.fsp.mcu.adc.sensors_are_exclusive}") === 0)
+        </constraint>
+        <constraint id="module.driver.adc.temp_volt_channel_constraint" display="In Single Scan mode, do not simultaneously select both Temperature Sensor and Internal Reference Voltage.">
+            (("module.driver.adc.mode.mode_single_scan" != "${module.driver.adc.mode}")) ||
+            ((Number("${config.bsp.fsp.mcu.adc.sensors_are_exclusive}") === 1) &amp;&amp;
+            (!(testOption("${module.driver.adc.scan_mask}", "module.driver.adc.scan_mask.temperature") &amp;&amp; testOption("${module.driver.adc.scan_mask}", "module.driver.adc.scan_mask.voltage")))) ||
+            (Number("${config.bsp.fsp.mcu.adc.sensors_are_exclusive}") === 0)
+        </constraint>
+        <constraint id="module.driver.adc.group_b_interrupt_constraint" display="Requires Interrupts|Group B Trigger to be not Disabled in Group Scan Mode.">
+            (("${module.driver.adc.trigger_group_b}" != "_disabled") ||
+             ("${module.driver.adc.mode}" != "module.driver.adc.mode.mode_group_scan"))
+        </constraint>
+        <constraint id="module.driver.adc.group_b_trigger_constraint" display="When Group B Trigger is not Disabled, it is required that General|Mode is Group Scan or General|Double-trigger is Enabled (extended mode).">
+            (("${module.driver.adc.trigger_group_b}" == "_disabled") ||
+             ("${module.driver.adc.mode}" == "module.driver.adc.mode.mode_group_scan") ||
+             ("module.driver.adc.mode.dt.enabled_ex" === "${module.driver.adc.mode.dt}"))
+        </constraint>
+        <constraint id="module.driver.adc.peripheral_constraint" display="Requires ADC peripheral">
+          "${interface.mcu.adc}" === "1"
+        </constraint>
+        <constraint id="module.driver.adc.clock_constraint" display="Requires ADC peripheral clock between 1MHz minimum and the maximum allowed in the Electrical Characteristics section of the hardware manual">
+          testExists("${board.clock.peripheral.adc}") &amp;&amp; (Number("${board.clock.peripheral.adc}") &gt;= 1000000) &amp;&amp; (Number("${board.clock.peripheral.adc}") &lt;= (Number("${config.bsp.fsp.mcu.adc.max_freq_hz}")))
+        </constraint>
+        <constraint id="module.driver.adc.compare.upper_reverence_a_constraint" display="Upper reference value must be greater than or equal to lower reference value when Window Mode is set to Enabled.">
+            ("${module.driver.adc.compare.window_mode}" == "module.driver.adc.compare.window_mode.disabled") || (Number("${module.driver.adc.compare.window_a.ref_upper}") &gt;= (Number("${module.driver.adc.compare.window_a.ref_lower}")))
+
+        </constraint>
+        <constraint id="module.driver.adc.compare.upper_reference_b_constraint" display="Upper reference value must be greater than or equal to lower reference value when Window Mode is set to Enabled.">
+            ("${module.driver.adc.compare.window_mode}" == "module.driver.adc.compare.window_mode.disabled") || (Number("${module.driver.adc.compare.window_b.ref_upper}") &gt;= (Number("${module.driver.adc.compare.window_b.ref_lower}")))
+
+        </constraint>
+        <constraint id="module.driver.adc.compare.channel_constraint" display="The same channel cannot be selected in both Window A and Window B">
+            (!(testOption("${module.driver.adc.compare.window_a.channels}", "module.driver.adc.compare.window_a.channels.channel_0") &amp;&amp; ("${module.driver.adc.compare.window_b.channel}" === "module.driver.adc.compare.window_b.channel.channel_0")) &amp;&amp;
+            !(testOption("${module.driver.adc.compare.window_a.channels}", "module.driver.adc.compare.window_a.channels.channel_1") &amp;&amp; ("${module.driver.adc.compare.window_b.channel}" === "module.driver.adc.compare.window_b.channel.channel_1")) &amp;&amp;
+            !(testOption("${module.driver.adc.compare.window_a.channels}", "module.driver.adc.compare.window_a.channels.channel_2") &amp;&amp; ("${module.driver.adc.compare.window_b.channel}" === "module.driver.adc.compare.window_b.channel.channel_2")) &amp;&amp;
+            !(testOption("${module.driver.adc.compare.window_a.channels}", "module.driver.adc.compare.window_a.channels.channel_3") &amp;&amp; ("${module.driver.adc.compare.window_b.channel}" === "module.driver.adc.compare.window_b.channel.channel_3")) &amp;&amp;
+            !(testOption("${module.driver.adc.compare.window_a.channels}", "module.driver.adc.compare.window_a.channels.channel_4") &amp;&amp; ("${module.driver.adc.compare.window_b.channel}" === "module.driver.adc.compare.window_b.channel.channel_4")) &amp;&amp;
+            !(testOption("${module.driver.adc.compare.window_a.channels}", "module.driver.adc.compare.window_a.channels.channel_5") &amp;&amp; ("${module.driver.adc.compare.window_b.channel}" === "module.driver.adc.compare.window_b.channel.channel_5")) &amp;&amp;
+            !(testOption("${module.driver.adc.compare.window_a.channels}", "module.driver.adc.compare.window_a.channels.channel_6") &amp;&amp; ("${module.driver.adc.compare.window_b.channel}" === "module.driver.adc.compare.window_b.channel.channel_6")) &amp;&amp;
+            !(testOption("${module.driver.adc.compare.window_a.channels}", "module.driver.adc.compare.window_a.channels.channel_7") &amp;&amp; ("${module.driver.adc.compare.window_b.channel}" === "module.driver.adc.compare.window_b.channel.channel_7")) &amp;&amp;
+            !(testOption("${module.driver.adc.compare.window_a.channels}", "module.driver.adc.compare.window_a.channels.channel_8") &amp;&amp; ("${module.driver.adc.compare.window_b.channel}" === "module.driver.adc.compare.window_b.channel.channel_8")) &amp;&amp;
+            !(testOption("${module.driver.adc.compare.window_a.channels}", "module.driver.adc.compare.window_a.channels.channel_9") &amp;&amp; ("${module.driver.adc.compare.window_b.channel}" === "module.driver.adc.compare.window_b.channel.channel_9")) &amp;&amp;
+            !(testOption("${module.driver.adc.compare.window_a.channels}", "module.driver.adc.compare.window_a.channels.channel_10") &amp;&amp; ("${module.driver.adc.compare.window_b.channel}" === "module.driver.adc.compare.window_b.channel.channel_10")) &amp;&amp;
+            !(testOption("${module.driver.adc.compare.window_a.channels}", "module.driver.adc.compare.window_a.channels.channel_11") &amp;&amp; ("${module.driver.adc.compare.window_b.channel}" === "module.driver.adc.compare.window_b.channel.channel_11")) &amp;&amp;
+            !(testOption("${module.driver.adc.compare.window_a.channels}", "module.driver.adc.compare.window_a.channels.channel_12") &amp;&amp; ("${module.driver.adc.compare.window_b.channel}" === "module.driver.adc.compare.window_b.channel.channel_12")) &amp;&amp;
+            !(testOption("${module.driver.adc.compare.window_a.channels}", "module.driver.adc.compare.window_a.channels.channel_13") &amp;&amp; ("${module.driver.adc.compare.window_b.channel}" === "module.driver.adc.compare.window_b.channel.channel_13")) &amp;&amp;
+            !(testOption("${module.driver.adc.compare.window_a.channels}", "module.driver.adc.compare.window_a.channels.channel_14") &amp;&amp; ("${module.driver.adc.compare.window_b.channel}" === "module.driver.adc.compare.window_b.channel.channel_14")) &amp;&amp;
+            !(testOption("${module.driver.adc.compare.window_a.channels}", "module.driver.adc.compare.window_a.channels.channel_15") &amp;&amp; ("${module.driver.adc.compare.window_b.channel}" === "module.driver.adc.compare.window_b.channel.channel_15")) &amp;&amp;
+            !(testOption("${module.driver.adc.compare.window_a.channels}", "module.driver.adc.compare.window_a.channels.channel_16") &amp;&amp; ("${module.driver.adc.compare.window_b.channel}" === "module.driver.adc.compare.window_b.channel.channel_16")) &amp;&amp;
+            !(testOption("${module.driver.adc.compare.window_a.channels}", "module.driver.adc.compare.window_a.channels.channel_17") &amp;&amp; ("${module.driver.adc.compare.window_b.channel}" === "module.driver.adc.compare.window_b.channel.channel_17")) &amp;&amp;
+            !(testOption("${module.driver.adc.compare.window_a.channels}", "module.driver.adc.compare.window_a.channels.channel_18") &amp;&amp; ("${module.driver.adc.compare.window_b.channel}" === "module.driver.adc.compare.window_b.channel.channel_18")) &amp;&amp;
+            !(testOption("${module.driver.adc.compare.window_a.channels}", "module.driver.adc.compare.window_a.channels.channel_19") &amp;&amp; ("${module.driver.adc.compare.window_b.channel}" === "module.driver.adc.compare.window_b.channel.channel_19")) &amp;&amp;
+            !(testOption("${module.driver.adc.compare.window_a.channels}", "module.driver.adc.compare.window_a.channels.channel_20") &amp;&amp; ("${module.driver.adc.compare.window_b.channel}" === "module.driver.adc.compare.window_b.channel.channel_20")) &amp;&amp;
+            !(testOption("${module.driver.adc.compare.window_a.channels}", "module.driver.adc.compare.window_a.channels.channel_21") &amp;&amp; ("${module.driver.adc.compare.window_b.channel}" === "module.driver.adc.compare.window_b.channel.channel_21")) &amp;&amp;
+            !(testOption("${module.driver.adc.compare.window_a.channels}", "module.driver.adc.compare.window_a.channels.channel_22") &amp;&amp; ("${module.driver.adc.compare.window_b.channel}" === "module.driver.adc.compare.window_b.channel.channel_22")) &amp;&amp;
+            !(testOption("${module.driver.adc.compare.window_a.channels}", "module.driver.adc.compare.window_a.channels.channel_23") &amp;&amp; ("${module.driver.adc.compare.window_b.channel}" === "module.driver.adc.compare.window_b.channel.channel_23")) &amp;&amp;
+            !(testOption("${module.driver.adc.compare.window_a.channels}", "module.driver.adc.compare.window_a.channels.channel_24") &amp;&amp; ("${module.driver.adc.compare.window_b.channel}" === "module.driver.adc.compare.window_b.channel.channel_24")) &amp;&amp;
+            !(testOption("${module.driver.adc.compare.window_a.channels}", "module.driver.adc.compare.window_a.channels.channel_25") &amp;&amp; ("${module.driver.adc.compare.window_b.channel}" === "module.driver.adc.compare.window_b.channel.channel_25")) &amp;&amp;
+            !(testOption("${module.driver.adc.compare.window_a.channels}", "module.driver.adc.compare.window_a.channels.channel_26") &amp;&amp; ("${module.driver.adc.compare.window_b.channel}" === "module.driver.adc.compare.window_b.channel.channel_26")) &amp;&amp;
+            !(testOption("${module.driver.adc.compare.window_a.channels}", "module.driver.adc.compare.window_a.channels.channel_27") &amp;&amp; ("${module.driver.adc.compare.window_b.channel}" === "module.driver.adc.compare.window_b.channel.channel_27")) &amp;&amp;
+            !(testOption("${module.driver.adc.compare.window_a.channels}", "module.driver.adc.compare.window_a.channels.channel_28") &amp;&amp; ("${module.driver.adc.compare.window_b.channel}" === "module.driver.adc.compare.window_b.channel.channel_28")) &amp;&amp;
+            !(testOption("${module.driver.adc.compare.window_a.channels}", "module.driver.adc.compare.window_a.channels.temperature") &amp;&amp; ("${module.driver.adc.compare.window_b.channel}" === "module.driver.adc.compare.window_b.channel.temperature")) &amp;&amp;
+            !(testOption("${module.driver.adc.compare.window_a.channels}", "module.driver.adc.compare.window_a.channels.voltage") &amp;&amp; ("${module.driver.adc.compare.window_b.channel}" === "module.driver.adc.compare.window_b.channel.voltage"))) ||
+            !(("${module.driver.adc.compare.window_a.enable}" == "module.driver.adc.compare.window_a.enable.enabled") &amp;&amp; ("${module.driver.adc.compare.window_b.enable}" == "module.driver.adc.compare.window_b.enable.enabled"))
+        </constraint>
+        <constraint id="module.driver.adc.compare.sensor_constraint" display="When the temperature sensor or voltage reference is selected for comparison in one window the other window cannot be used.">
+            !(((testOption("${module.driver.adc.compare.window_a.channels}", "module.driver.adc.compare.window_a.channels.temperature") || testOption("${module.driver.adc.compare.window_a.channels}", "module.driver.adc.compare.window_a.channels.voltage")) &amp;&amp; ("${module.driver.adc.compare.window_b.enable}" == "module.driver.adc.compare.window_b.enable.enabled")) ||
+              (("${module.driver.adc.compare.window_b.channel}" == "module.driver.adc.compare.window_b.channel.temperature") || ("${module.driver.adc.compare.window_b.channel}" == "module.driver.adc.compare.window_b.channel.voltage")) &amp;&amp; ("${module.driver.adc.compare.window_a.enable}" == "module.driver.adc.compare.window_a.enable.enabled"))
+        </constraint>
+        <constraint id="module.driver.adc.group_b_ipl_constraint" display="Interrupts|Scan End Group B Interrupt Priority should be Disabled if Interrupts|Group B Trigger is Disabled.">
+            (("_disabled" == "${module.driver.adc.scan_end_b_ipl}") || ("_disabled" != "${module.driver.adc.trigger_group_b}"))
+        </constraint>
+        <requires id="module.driver.adc.requires.adc" interface="interface.mcu.adc" visible="false" display="Requires ADC peripheral" />
+        <provides interface="interface.driver.adc" />
+        <provides interface="interface.driver.adc_on_adc" />
+        <provides interface="interface.driver.adc.${module.driver.adc.name}" />
+        <provides interface="interface.peripheral.adc${module.driver.adc.unit}" />
+        <provides interface="interface.peripheral.tsn" />
+        <property default="g_adc${_instance}" display="General|Name" id="module.driver.adc.name" description="Module name">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.adc.name}")</constraint>
+            <signal event="event.adc0.scan.end" />
+            <signal event="event.adc0.scan.end.b"/>
+            <signal event="event.adc0.window.a" />
+            <signal event="event.adc0.window.b" />
+            <signal event="event.adc0.compare.match" />
+            <signal event="event.adc0.compare.mismatch" />
+            <signal event="event.adc1.scan.end" />
+            <signal event="event.adc1.scan.end.b" />
+            <signal event="event.adc1.window.a" />
+            <signal event="event.adc1.window.b" />
+            <signal event="event.adc1.compare.match" />
+            <signal event="event.adc1.compare.mismatch" />
+        </property>
+        <property default="0" display="General|Unit" id="module.driver.adc.unit" description="Specifies the ADC Unit to be used.">
+            <constraint display="Unit must be a non-negative integer">testInteger("${module.driver.adc.unit}")  &amp;&amp; ("${module.driver.adc.unit}" &gt;= 0)</constraint>
+            <signal event="event.adc${module.driver.adc.unit}.scan.end" />
+            <signal event="event.adc${module.driver.adc.unit}.compare.match" />
+            <signal event="event.adc${module.driver.adc.unit}.compare.mismatch" />
+        </property>
+        <property default="" display="General|Resolution" id="module.driver.adc.resolution" description="Specifies the conversion resolution for this unit.">
+            <select enum="enum.mcu.adc.resolution" />
+        </property>
+        <property default="" display="General|Alignment" id="module.driver.adc.alignment" description="Specifies the conversion result alignment.">
+            <select enum="enum.mcu.adc.alignment" />
+        </property>
+        <property default="module.driver.adc.clearing.clear_after_read_on" display="General|Clear after read" id="module.driver.adc.clearing" description="Specifies if the result register will be automatically cleared after the conversion result is read.">
+            <option display="Off" id="module.driver.adc.clearing.clear_after_read_off" value="ADC_CLEAR_AFTER_READ_OFF"/>
+            <option display="On" id="module.driver.adc.clearing.clear_after_read_on" value="ADC_CLEAR_AFTER_READ_ON"/>
+        </property>
+        <property default="module.driver.adc.mode.mode_single_scan" display="General|Mode" id="module.driver.adc.mode" description="Specifies the mode that this ADC unit is used in.">
+            <option display="Single Scan" id="module.driver.adc.mode.mode_single_scan" value="ADC_MODE_SINGLE_SCAN"/>
+            <option display="Continuous Scan" id="module.driver.adc.mode.mode_continuous_scan" value="ADC_MODE_CONTINUOUS_SCAN"/>
+            <option display="Group Scan" id="module.driver.adc.mode.mode_group_scan" value="ADC_MODE_GROUP_SCAN"/>
+        </property>
+        <property default="module.driver.adc.mode.dt.disabled" display="General|Double-trigger" id="module.driver.adc.mode.dt" description="When enabled, the scan-end interrupt for Group A is only thrown on every second scan. Extended double-trigger mode (single-scan only) triggers on both ELC events, allowing (for example) a scan on two different timer compare match values.\n\nIn group mode Group B is unaffected.\n\n">
+            <option display="Disabled" id="module.driver.adc.mode.dt.disabled" value="ADC_DOUBLE_TRIGGER_DISABLED"/>
+            <option display="Enabled" id="module.driver.adc.mode.dt.enabled" value="ADC_DOUBLE_TRIGGER_ENABLED"/>
+            <option display="Enabled (extended mode)" id="module.driver.adc.mode.dt.enabled_ex" value="ADC_DOUBLE_TRIGGER_ENABLED_EXTENDED"/>
+        </property>
+        <property bitmapPrefix="ADC_MASK_" default="" display="Input|Channel Scan Mask (channel availability varies by MCU)" id="module.driver.adc.scan_mask" description="In Normal mode of operation, this bitmask field specifies the channels that are enabled in that ADC unit. In group mode, this field specifies which channels belong to group A.">
+            <option display="Channel 0" id="module.driver.adc.scan_mask.channel_0" value="CHANNEL_0"/>
+            <option display="Channel 1" id="module.driver.adc.scan_mask.channel_1" value="CHANNEL_1"/>
+            <option display="Channel 2" id="module.driver.adc.scan_mask.channel_2" value="CHANNEL_2"/>
+            <option display="Channel 3" id="module.driver.adc.scan_mask.channel_3" value="CHANNEL_3"/>
+            <option display="Channel 4" id="module.driver.adc.scan_mask.channel_4" value="CHANNEL_4"/>
+            <option display="Channel 5" id="module.driver.adc.scan_mask.channel_5" value="CHANNEL_5"/>
+            <option display="Channel 6" id="module.driver.adc.scan_mask.channel_6" value="CHANNEL_6"/>
+            <option display="Channel 7" id="module.driver.adc.scan_mask.channel_7" value="CHANNEL_7"/>
+            <option display="Channel 8" id="module.driver.adc.scan_mask.channel_8" value="CHANNEL_8"/>
+            <option display="Channel 9" id="module.driver.adc.scan_mask.channel_9" value="CHANNEL_9"/>
+            <option display="Channel 10" id="module.driver.adc.scan_mask.channel_10" value="CHANNEL_10"/>
+            <option display="Channel 11" id="module.driver.adc.scan_mask.channel_11" value="CHANNEL_11"/>
+            <option display="Channel 12" id="module.driver.adc.scan_mask.channel_12" value="CHANNEL_12"/>
+            <option display="Channel 13" id="module.driver.adc.scan_mask.channel_13" value="CHANNEL_13"/>
+            <option display="Channel 14" id="module.driver.adc.scan_mask.channel_14" value="CHANNEL_14"/>
+            <option display="Channel 15" id="module.driver.adc.scan_mask.channel_15" value="CHANNEL_15"/>
+            <option display="Channel 16" id="module.driver.adc.scan_mask.channel_16" value="CHANNEL_16"/>
+            <option display="Channel 17" id="module.driver.adc.scan_mask.channel_17" value="CHANNEL_17"/>
+            <option display="Channel 18" id="module.driver.adc.scan_mask.channel_18" value="CHANNEL_18"/>
+            <option display="Channel 19" id="module.driver.adc.scan_mask.channel_19" value="CHANNEL_19"/>
+            <option display="Channel 20" id="module.driver.adc.scan_mask.channel_20" value="CHANNEL_20"/>
+            <option display="Channel 21" id="module.driver.adc.scan_mask.channel_21" value="CHANNEL_21"/>
+            <option display="Channel 22" id="module.driver.adc.scan_mask.channel_22" value="CHANNEL_22"/>
+            <option display="Channel 23" id="module.driver.adc.scan_mask.channel_23" value="CHANNEL_23"/>
+            <option display="Channel 24" id="module.driver.adc.scan_mask.channel_24" value="CHANNEL_24"/>
+            <option display="Channel 25" id="module.driver.adc.scan_mask.channel_25" value="CHANNEL_25"/>
+            <option display="Channel 26" id="module.driver.adc.scan_mask.channel_26" value="CHANNEL_26"/>
+            <option display="Channel 27" id="module.driver.adc.scan_mask.channel_27" value="CHANNEL_27"/>
+            <option display="Channel 28" id="module.driver.adc.scan_mask.channel_28" value="CHANNEL_28"/>
+            <option display="Temperature Sensor" id="module.driver.adc.scan_mask.temperature" value="TEMPERATURE"/>
+            <option display="Internal Reference Voltage" id="module.driver.adc.scan_mask.voltage" value="VOLT"/>
+        </property>
+        <property bitmapPrefix="ADC_MASK_" default="" display="Input|Group B Scan Mask (channel availability varies by MCU)" id="module.driver.adc.scan_mask_group_b" description="In group mode, this field specifies which channels belong to group B.">
+            <option display="Channel 0" id="module.driver.adc.scan_mask_group_b.channel_0" value="CHANNEL_0"/>
+            <option display="Channel 1" id="module.driver.adc.scan_mask_group_b.channel_1" value="CHANNEL_1"/>
+            <option display="Channel 2" id="module.driver.adc.scan_mask_group_b.channel_2" value="CHANNEL_2"/>
+            <option display="Channel 3" id="module.driver.adc.scan_mask_group_b.channel_3" value="CHANNEL_3"/>
+            <option display="Channel 4" id="module.driver.adc.scan_mask_group_b.channel_4" value="CHANNEL_4"/>
+            <option display="Channel 5" id="module.driver.adc.scan_mask_group_b.channel_5" value="CHANNEL_5"/>
+            <option display="Channel 6" id="module.driver.adc.scan_mask_group_b.channel_6" value="CHANNEL_6"/>
+            <option display="Channel 7" id="module.driver.adc.scan_mask_group_b.channel_7" value="CHANNEL_7"/>
+            <option display="Channel 8" id="module.driver.adc.scan_mask_group_b.channel_8" value="CHANNEL_8"/>
+            <option display="Channel 9" id="module.driver.adc.scan_mask_group_b.channel_9" value="CHANNEL_9"/>
+            <option display="Channel 10" id="module.driver.adc.scan_mask_group_b.channel_10" value="CHANNEL_10"/>
+            <option display="Channel 11" id="module.driver.adc.scan_mask_group_b.channel_11" value="CHANNEL_11"/>
+            <option display="Channel 12" id="module.driver.adc.scan_mask_group_b.channel_12" value="CHANNEL_12"/>
+            <option display="Channel 13" id="module.driver.adc.scan_mask_group_b.channel_13" value="CHANNEL_13"/>
+            <option display="Channel 14" id="module.driver.adc.scan_mask_group_b.channel_14" value="CHANNEL_14"/>
+            <option display="Channel 15" id="module.driver.adc.scan_mask_group_b.channel_15" value="CHANNEL_15"/>
+            <option display="Channel 16" id="module.driver.adc.scan_mask_group_b.channel_16" value="CHANNEL_16"/>
+            <option display="Channel 17" id="module.driver.adc.scan_mask_group_b.channel_17" value="CHANNEL_17"/>
+            <option display="Channel 18" id="module.driver.adc.scan_mask_group_b.channel_18" value="CHANNEL_18"/>
+            <option display="Channel 19" id="module.driver.adc.scan_mask_group_b.channel_19" value="CHANNEL_19"/>
+            <option display="Channel 20" id="module.driver.adc.scan_mask_group_b.channel_20" value="CHANNEL_20"/>
+            <option display="Channel 21" id="module.driver.adc.scan_mask_group_b.channel_21" value="CHANNEL_21"/>
+            <option display="Channel 22" id="module.driver.adc.scan_mask_group_b.channel_22" value="CHANNEL_22"/>
+            <option display="Channel 23" id="module.driver.adc.scan_mask_group_b.channel_23" value="CHANNEL_23"/>
+            <option display="Channel 24" id="module.driver.adc.scan_mask_group_b.channel_24" value="CHANNEL_24"/>
+            <option display="Channel 25" id="module.driver.adc.scan_mask_group_b.channel_25" value="CHANNEL_25"/>
+            <option display="Channel 26" id="module.driver.adc.scan_mask_group_b.channel_26" value="CHANNEL_26"/>
+            <option display="Channel 27" id="module.driver.adc.scan_mask_group_b.channel_27" value="CHANNEL_27"/>
+            <option display="Channel 28" id="module.driver.adc.scan_mask_group_b.channel_28" value="CHANNEL_28"/>
+            <option display="Temperature Sensor" id="module.driver.adc.scan_mask_group_b.temperature" value="TEMPERATURE"/>
+            <option display="Internal Reference Voltage" id="module.driver.adc.scan_mask_group_b.voltage" value="VOLT"/>
+        </property>
+        <property default="" display="Interrupts|Normal/Group A Trigger" id="module.driver.adc.trigger" description="Specifies the trigger type to be used for this unit. Triggers that specify ADC Unit must be selected for correct ADC unit to operate correctly. ">
+            <select enum="enum.driver.adc.trigger" />
+            <select enum="_signal" />
+            <linkConstraint display="Requires an ELC peripheral function for ADC">
+                "${_link}" === "link.adc${module.driver.adc.unit}"
+            </linkConstraint>
+        </property>
+        <property default="" id="module.driver.adc.trigger_source" description="Hidden Property - Specifies the trigger (A) source. ">
+            <export><![CDATA[eval('\n' +
+                    'var trigger_a_is_software  = "${module.driver.adc.trigger}".startsWith("SOFTWARE");                                 \n' +
+                    'var trigger_a_is_external  = "${module.driver.adc.trigger}".startsWith("ASYNC");                                    \n' +
+                    'var trigger_a_is_gpt       = "${module.driver.adc.trigger}".startsWith("GPT");                                      \n' +
+                    'var double_trigger_ex    = "ADC_DOUBLE_TRIGGER_ENABLED_EXTENDED" == "${module.driver.adc.mode.dt}"                  \n' +
+                    'var output = "ADC_START_SOURCE_ELC_AD0";                                                                            \n' +
+                    'if(double_trigger_ex){                                                                                              \n' +
+                    '    output = "ADC_START_SOURCE_ELC_AD01 /* AD01 (both ELC ADC events) when Double-trigger Extended is enabled */";  \n' +
+                    '}else if(trigger_a_is_software){                                                                                    \n' +
+                    '    output = "ADC_START_SOURCE_DISABLED";                                                                           \n' +
+                    '} else if(trigger_a_is_gpt || trigger_a_is_external){                                                               \n' +
+                    '    output = "ADC_START_SOURCE_${module.driver.adc.trigger}";                                                       \n' +
+                    '} else{                                                                                                             \n' +
+                    '    output = "ADC_START_SOURCE_ELC_AD0 /* AD0 for Group A. AD1 for Group B */";                                     \n' +
+                    '}                                                                                                                   \n' +
+                    '                                                                                                                    \n' +
+                    'output')]]>
+            </export>
+        </property>
+        <property default="" display="Interrupts|Group B Trigger" id="module.driver.adc.trigger_group_b" description="Specifies the trigger for Group B scanning in group scanning mode. This event is also used to trigger Group A in extended double-trigger mode. Triggers that specify ADC Unit must be selected for correct ADC unit to operate correctly.">
+            <select enum="enum.disabled" />
+            <select enum="enum.driver.adc.trigger" />
+            <select enum="_signal" />
+            <linkConstraint display="Requires an ELC peripheral function for ADC Group B">
+                "${_link}" === "link.adc${module.driver.adc.unit}b"
+            </linkConstraint>
+        </property>
+        <property default="" id="module.driver.adc.trigger_group_b_source" description="Hidden Property - Specifies the trigger (B) source. ">
+            <export><![CDATA[eval('\n' +
+                    'var trigger_b_is_disabled  = "${module.driver.adc.trigger_group_b}".startsWith("NULL"); /* See enum.disabled */    \n' +
+                    'var trigger_b_is_gpt       = "${module.driver.adc.trigger_group_b}".startsWith("GPT");                             \n' +
+                    'var output = "ADC_START_SOURCE_DISABLED";                                                                          \n' +
+                    'if(trigger_b_is_gpt){                                                                                              \n' +
+                    '    output = "ADC_START_SOURCE_${module.driver.adc.trigger_group_b}";                                              \n' +
+                    '} else if(trigger_b_is_disabled){                                                                                  \n' +
+                    '    output = "ADC_START_SOURCE_DISABLED";                                                                          \n' +
+                    '} else{                                                                                                            \n' +
+                    '    output = "ADC_START_SOURCE_ELC_AD1 /* AD0 for Group A. AD1 for Group B */";                                    \n' +
+                    '}                                                                                                                  \n' +
+                    '                                                                                                                   \n' +
+                    'output')]]>
+            </export>
+        </property>
+        <property default="module.driver.adc.priority_group_a.group_a_priority_off" display="Interrupts|Group Priority (Valid only in Group Scan Mode)" id="module.driver.adc.priority_group_a" description="Determines whether an ongoing group B scan can be interrupted by a group A trigger, whether it should abort on a group A trigger, or if it should pause to allow group A scan and restart immediately after group A scan is complete.">
+            <option display="Group A cannot interrupt Group B" id="module.driver.adc.priority_group_a.group_a_priority_off" value="ADC_GROUP_A_PRIORITY_OFF"/>
+            <option display="Group A can interrupt Group B; Group B scan restarts at next trigger" id="module.driver.adc.priority_group_a.group_a_group_b_wait_for_trigger" value="ADC_GROUP_A_GROUP_B_WAIT_FOR_TRIGGER"/>
+            <option display="Group A can interrupt Group B; Group B scan restarts immediately" id="module.driver.adc.priority_group_a.group_a_group_b_restart_scan" value="ADC_GROUP_A_GROUP_B_RESTART_SCAN"/>
+            <option display="Group A can interrupt Group B; Group B scan restarts immediately and scans continuously" id="module.driver.adc.priority_group_a.group_a_group_b_continuous_scan" value="ADC_GROUP_A_GROUP_B_CONTINUOUS_SCAN"/>
+        </property>
+        <property default="" display="Input|Add/Average Count" id="module.driver.adc.add_average_count" description="Specifies if addition or averaging needs to be done for any of the channels in this unit.">
+            <select enum="enum.mcu.adc.add_average_count" />
+        </property>
+        <property default="" display="Input|Reference Voltage control" id="module.driver.adc.adc_vref_control" description="Specify VREFH/VREFADC output voltage control.">
+            <select enum="enum.mcu.adc.adc_vref_control" />
+        </property>
+        <property bitmapPrefix="ADC_MASK_" default="" display="Input|Addition/Averaging Mask (channel availability varies by MCU and unit)" id="module.driver.adc.add_mask" description="Select channels to include in the Addition/Averaging Mask">
+            <option display="Channel 0" id="module.driver.adc.add_mask.channel_0" value="CHANNEL_0"/>
+            <option display="Channel 1" id="module.driver.adc.add_mask.channel_1" value="CHANNEL_1"/>
+            <option display="Channel 2" id="module.driver.adc.add_mask.channel_2" value="CHANNEL_2"/>
+            <option display="Channel 3" id="module.driver.adc.add_mask.channel_3" value="CHANNEL_3"/>
+            <option display="Channel 4" id="module.driver.adc.add_mask.channel_4" value="CHANNEL_4"/>
+            <option display="Channel 5" id="module.driver.adc.add_mask.channel_5" value="CHANNEL_5"/>
+            <option display="Channel 6" id="module.driver.adc.add_mask.channel_6" value="CHANNEL_6"/>
+            <option display="Channel 7" id="module.driver.adc.add_mask.channel_7" value="CHANNEL_7"/>
+            <option display="Channel 8" id="module.driver.adc.add_mask.channel_8" value="CHANNEL_8"/>
+            <option display="Channel 9" id="module.driver.adc.add_mask.channel_9" value="CHANNEL_9"/>
+            <option display="Channel 10" id="module.driver.adc.add_mask.channel_10" value="CHANNEL_10"/>
+            <option display="Channel 11" id="module.driver.adc.add_mask.channel_11" value="CHANNEL_11"/>
+            <option display="Channel 12" id="module.driver.adc.add_mask.channel_12" value="CHANNEL_12"/>
+            <option display="Channel 13" id="module.driver.adc.add_mask.channel_13" value="CHANNEL_13"/>
+            <option display="Channel 14" id="module.driver.adc.add_mask.channel_14" value="CHANNEL_14"/>
+            <option display="Channel 15" id="module.driver.adc.add_mask.channel_15" value="CHANNEL_15"/>
+            <option display="Channel 16" id="module.driver.adc.add_mask.channel_16" value="CHANNEL_16"/>
+            <option display="Channel 17" id="module.driver.adc.add_mask.channel_17" value="CHANNEL_17"/>
+            <option display="Channel 18" id="module.driver.adc.add_mask.channel_18" value="CHANNEL_18"/>
+            <option display="Channel 19" id="module.driver.adc.add_mask.channel_19" value="CHANNEL_19"/>
+            <option display="Channel 20" id="module.driver.adc.add_mask.channel_20" value="CHANNEL_20"/>
+            <option display="Channel 21" id="module.driver.adc.add_mask.channel_21" value="CHANNEL_21"/>
+            <option display="Channel 22" id="module.driver.adc.add_mask.channel_22" value="CHANNEL_22"/>
+            <option display="Channel 23" id="module.driver.adc.add_mask.channel_23" value="CHANNEL_23"/>
+            <option display="Channel 24" id="module.driver.adc.add_mask.channel_24" value="CHANNEL_24"/>
+            <option display="Channel 25" id="module.driver.adc.add_mask.channel_25" value="CHANNEL_25"/>
+            <option display="Channel 26" id="module.driver.adc.add_mask.channel_26" value="CHANNEL_26"/>
+            <option display="Channel 27" id="module.driver.adc.add_mask.channel_27" value="CHANNEL_27"/>
+            <option display="Channel 28" id="module.driver.adc.add_mask.channel_28" value="CHANNEL_28"/>
+            <option display="Temperature Sensor" id="module.driver.adc.add_mask.temperature" value="TEMPERATURE"/>
+            <option display="Internal Reference Voltage" id="module.driver.adc.add_mask.voltage" value="VOLT"/>
+        </property>
+        <property bitmapPrefix="ADC_MASK_" default="" display="Input|Sample and Hold|Sample and Hold Channels (Available only on selected MCUs)" id="module.driver.adc.sample_hold_mask" description="Specifies if this channel is included in the Sample and Hold Mask.">
+            <option display="Channel 0" id="module.driver.adc.sample_hold_mask.channel_0" value="CHANNEL_0"/>
+            <option display="Channel 1" id="module.driver.adc.sample_hold_mask.channel_1" value="CHANNEL_1"/>
+            <option display="Channel 2" id="module.driver.adc.sample_hold_mask.channel_2" value="CHANNEL_2"/>
+        </property>
+        <property default="24" display="Input|Sample and Hold|Sample Hold States (Applies only to channels 0, 1, 2)" id="module.driver.adc.sample_hold_states" description="Specifies the updated sample-and-hold count for the channel dedicated sample-and-hold circuit">
+            <constraint display="Must be a valid non-negative integer with configurable value 4 to 255">testInteger("${module.driver.adc.sample_hold_states}")  &amp;&amp; ("${module.driver.adc.sample_hold_states}" &gt;= 4) &amp;&amp; ("${module.driver.adc.sample_hold_states}" &lt;= 255)</constraint>
+        </property>
+        <property default="module.driver.adc.compare.window_mode.disabled" display="Input|Window Compare|Window Mode" id="module.driver.adc.compare.window_mode" description="When disabled, ADC values will be compared only with the lower reference on each comparator. When enabled, both the lower and upper reference values will be used to create a comparison window.">
+            <option display="Disabled" id="module.driver.adc.compare.window_mode.disabled" value="(0)"/>
+            <option display="Enabled" id="module.driver.adc.compare.window_mode.enabled" value="(ADC_COMPARE_CFG_WINDOW_ENABLE)"/>
+        </property>
+        <property default="module.driver.adc.compare.event_mode.or" display="Input|Window Compare|Event Output" id="module.driver.adc.compare.event_mode" description="Select how comparison results should be composited for event output.">
+            <option display="OR" id="module.driver.adc.compare.event_mode.or" value="(ADC_COMPARE_CFG_EVENT_OUTPUT_OR)"/>
+            <option display="XOR" id="module.driver.adc.compare.event_mode.xor" value="(ADC_COMPARE_CFG_EVENT_OUTPUT_XOR)"/>
+            <option display="AND" id="module.driver.adc.compare.event_mode.and" value="(ADC_COMPARE_CFG_EVENT_OUTPUT_AND)"/>
+        </property>
+        <property default="module.driver.adc.compare.window_a.enable.disabled" display="Input|Window Compare|Window A|Enable" id="module.driver.adc.compare.window_a.enable" description="Enable or disable comparison with Window A.">
+            <option display="Disabled" id="module.driver.adc.compare.window_a.enable.disabled" value="(0)"/>
+            <option display="Enabled" id="module.driver.adc.compare.window_a.enable.enabled" value="(R_ADC0_ADCMPCR_CMPAE_Msk | R_ADC0_ADCMPCR_CMPAIE_Msk)"/>
+        </property>
+        <property bitmapPrefix="ADC_MASK_" default="" display="Input|Window Compare|Window A|Channels to compare (channel availability varies by MCU and unit)" id="module.driver.adc.compare.window_a.channels" description="Select channels to be compared to Window A.">
+            <option display="Channel 0" id="module.driver.adc.compare.window_a.channels.channel_0" value="CHANNEL_0"/>
+            <option display="Channel 1" id="module.driver.adc.compare.window_a.channels.channel_1" value="CHANNEL_1"/>
+            <option display="Channel 2" id="module.driver.adc.compare.window_a.channels.channel_2" value="CHANNEL_2"/>
+            <option display="Channel 3" id="module.driver.adc.compare.window_a.channels.channel_3" value="CHANNEL_3"/>
+            <option display="Channel 4" id="module.driver.adc.compare.window_a.channels.channel_4" value="CHANNEL_4"/>
+            <option display="Channel 5" id="module.driver.adc.compare.window_a.channels.channel_5" value="CHANNEL_5"/>
+            <option display="Channel 6" id="module.driver.adc.compare.window_a.channels.channel_6" value="CHANNEL_6"/>
+            <option display="Channel 7" id="module.driver.adc.compare.window_a.channels.channel_7" value="CHANNEL_7"/>
+            <option display="Channel 8" id="module.driver.adc.compare.window_a.channels.channel_8" value="CHANNEL_8"/>
+            <option display="Channel 9" id="module.driver.adc.compare.window_a.channels.channel_9" value="CHANNEL_9"/>
+            <option display="Channel 10" id="module.driver.adc.compare.window_a.channels.channel_10" value="CHANNEL_10"/>
+            <option display="Channel 11" id="module.driver.adc.compare.window_a.channels.channel_11" value="CHANNEL_11"/>
+            <option display="Channel 12" id="module.driver.adc.compare.window_a.channels.channel_12" value="CHANNEL_12"/>
+            <option display="Channel 13" id="module.driver.adc.compare.window_a.channels.channel_13" value="CHANNEL_13"/>
+            <option display="Channel 14" id="module.driver.adc.compare.window_a.channels.channel_14" value="CHANNEL_14"/>
+            <option display="Channel 15" id="module.driver.adc.compare.window_a.channels.channel_15" value="CHANNEL_15"/>
+            <option display="Channel 16" id="module.driver.adc.compare.window_a.channels.channel_16" value="CHANNEL_16"/>
+            <option display="Channel 17" id="module.driver.adc.compare.window_a.channels.channel_17" value="CHANNEL_17"/>
+            <option display="Channel 18" id="module.driver.adc.compare.window_a.channels.channel_18" value="CHANNEL_18"/>
+            <option display="Channel 19" id="module.driver.adc.compare.window_a.channels.channel_19" value="CHANNEL_19"/>
+            <option display="Channel 20" id="module.driver.adc.compare.window_a.channels.channel_20" value="CHANNEL_20"/>
+            <option display="Channel 21" id="module.driver.adc.compare.window_a.channels.channel_21" value="CHANNEL_21"/>
+            <option display="Channel 22" id="module.driver.adc.compare.window_a.channels.channel_22" value="CHANNEL_22"/>
+            <option display="Channel 23" id="module.driver.adc.compare.window_a.channels.channel_23" value="CHANNEL_23"/>
+            <option display="Channel 24" id="module.driver.adc.compare.window_a.channels.channel_24" value="CHANNEL_24"/>
+            <option display="Channel 25" id="module.driver.adc.compare.window_a.channels.channel_25" value="CHANNEL_25"/>
+            <option display="Channel 26" id="module.driver.adc.compare.window_a.channels.channel_26" value="CHANNEL_26"/>
+            <option display="Channel 27" id="module.driver.adc.compare.window_a.channels.channel_27" value="CHANNEL_27"/>
+            <option display="Channel 28" id="module.driver.adc.compare.window_a.channels.channel_28" value="CHANNEL_28"/>
+            <option display="Temperature Sensor" id="module.driver.adc.compare.window_a.channels.temperature" value="TEMPERATURE"/>
+            <option display="Internal Reference Voltage" id="module.driver.adc.compare.window_a.channels.voltage" value="VOLT"/>
+        </property>
+        <property bitmapPrefix="ADC_MASK_" default="" display="Input|Window Compare|Window A|Channel comparison mode (channel availability varies by MCU and unit)" id="module.driver.adc.compare.window_a.channel_mode" description="Checking a box sets the comparison mode for that channel to Greater Than or Inside Window depending on whether Window Mode is disabled or enabled (respectively). If left unchecked the comparison mode will likewise be Less Than or Outside Window (respectively).">
+            <option display="Channel 0" id="module.driver.adc.compare.window_a.channel_mode.channel_0" value="CHANNEL_0"/>
+            <option display="Channel 1" id="module.driver.adc.compare.window_a.channel_mode.channel_1" value="CHANNEL_1"/>
+            <option display="Channel 2" id="module.driver.adc.compare.window_a.channel_mode.channel_2" value="CHANNEL_2"/>
+            <option display="Channel 3" id="module.driver.adc.compare.window_a.channel_mode.channel_3" value="CHANNEL_3"/>
+            <option display="Channel 4" id="module.driver.adc.compare.window_a.channel_mode.channel_4" value="CHANNEL_4"/>
+            <option display="Channel 5" id="module.driver.adc.compare.window_a.channel_mode.channel_5" value="CHANNEL_5"/>
+            <option display="Channel 6" id="module.driver.adc.compare.window_a.channel_mode.channel_6" value="CHANNEL_6"/>
+            <option display="Channel 7" id="module.driver.adc.compare.window_a.channel_mode.channel_7" value="CHANNEL_7"/>
+            <option display="Channel 8" id="module.driver.adc.compare.window_a.channel_mode.channel_8" value="CHANNEL_8"/>
+            <option display="Channel 9" id="module.driver.adc.compare.window_a.channel_mode.channel_9" value="CHANNEL_9"/>
+            <option display="Channel 10" id="module.driver.adc.compare.window_a.channel_mode.channel_10" value="CHANNEL_10"/>
+            <option display="Channel 11" id="module.driver.adc.compare.window_a.channel_mode.channel_11" value="CHANNEL_11"/>
+            <option display="Channel 12" id="module.driver.adc.compare.window_a.channel_mode.channel_12" value="CHANNEL_12"/>
+            <option display="Channel 13" id="module.driver.adc.compare.window_a.channel_mode.channel_13" value="CHANNEL_13"/>
+            <option display="Channel 14" id="module.driver.adc.compare.window_a.channel_mode.channel_14" value="CHANNEL_14"/>
+            <option display="Channel 15" id="module.driver.adc.compare.window_a.channel_mode.channel_15" value="CHANNEL_15"/>
+            <option display="Channel 16" id="module.driver.adc.compare.window_a.channel_mode.channel_16" value="CHANNEL_16"/>
+            <option display="Channel 17" id="module.driver.adc.compare.window_a.channel_mode.channel_17" value="CHANNEL_17"/>
+            <option display="Channel 18" id="module.driver.adc.compare.window_a.channel_mode.channel_18" value="CHANNEL_18"/>
+            <option display="Channel 19" id="module.driver.adc.compare.window_a.channel_mode.channel_19" value="CHANNEL_19"/>
+            <option display="Channel 20" id="module.driver.adc.compare.window_a.channel_mode.channel_20" value="CHANNEL_20"/>
+            <option display="Channel 21" id="module.driver.adc.compare.window_a.channel_mode.channel_21" value="CHANNEL_21"/>
+            <option display="Channel 22" id="module.driver.adc.compare.window_a.channel_mode.channel_22" value="CHANNEL_22"/>
+            <option display="Channel 23" id="module.driver.adc.compare.window_a.channel_mode.channel_23" value="CHANNEL_23"/>
+            <option display="Channel 24" id="module.driver.adc.compare.window_a.channel_mode.channel_24" value="CHANNEL_24"/>
+            <option display="Channel 25" id="module.driver.adc.compare.window_a.channel_mode.channel_25" value="CHANNEL_25"/>
+            <option display="Channel 26" id="module.driver.adc.compare.window_a.channel_mode.channel_26" value="CHANNEL_26"/>
+            <option display="Channel 27" id="module.driver.adc.compare.window_a.channel_mode.channel_27" value="CHANNEL_27"/>
+            <option display="Channel 28" id="module.driver.adc.compare.window_a.channel_mode.channel_28" value="CHANNEL_28"/>
+            <option display="Temperature Sensor" id="module.driver.adc.compare.window_a.channel_mode.temperature" value="TEMPERATURE"/>
+            <option display="Internal Reference Voltage" id="module.driver.adc.compare.window_a.channel_mode.voltage" value="VOLT"/>
+        </property>
+        <property default="0" display="Input|Window Compare|Window A|Lower Reference" id="module.driver.adc.compare.window_a.ref_lower" description="Set the lower comparison value.">
+            <constraint display="Must be a positive 16-bit integer.">
+                testInteger("${module.driver.adc.compare.window_a.ref_lower}") &amp;&amp; ("${module.driver.adc.compare.window_a.ref_lower}" &gt;= 0)  &amp;&amp; ("${module.driver.adc.compare.window_a.ref_lower}" &lt;= 65535)
+            </constraint>
+        </property>
+        <property default="0" display="Input|Window Compare|Window A|Upper Reference" id="module.driver.adc.compare.window_a.ref_upper" description="Set the upper comparison value.">
+            <constraint display="Must be a positive 16-bit integer.">
+                testInteger("${module.driver.adc.compare.window_a.ref_upper}") &amp;&amp; ("${module.driver.adc.compare.window_a.ref_upper}" &gt;= 0)  &amp;&amp; ("${module.driver.adc.compare.window_a.ref_upper}" &lt;= 65535)
+            </constraint>
+        </property>
+        <property default="module.driver.adc.compare.window_b.enable.disabled" display="Input|Window Compare|Window B|Enable" id="module.driver.adc.compare.window_b.enable" description="Enable or disable comparison with Window B.">
+            <option display="Disabled" id="module.driver.adc.compare.window_b.enable.disabled" value="(0)"/>
+            <option display="Enabled" id="module.driver.adc.compare.window_b.enable.enabled" value="(R_ADC0_ADCMPCR_CMPBE_Msk | R_ADC0_ADCMPCR_CMPBIE_Msk)"/>
+        </property>
+        <property default="module.driver.adc.compare.window_b.channel.channel_0" display="Input|Window Compare|Window B|Channel to compare (channel availability varies by MCU and unit)" id="module.driver.adc.compare.window_b.channel" description="Select a channel to be compared to Window B.">
+            <option display="Not Selected" id="module.driver.adc.compare.window_b.channel.none" value="(ADC_WINDOW_B_CHANNEL_NONE)"/>
+            <option display="Channel 0" id="module.driver.adc.compare.window_b.channel.channel_0" value="(ADC_WINDOW_B_CHANNEL_0)"/>
+            <option display="Channel 1" id="module.driver.adc.compare.window_b.channel.channel_1" value="(ADC_WINDOW_B_CHANNEL_1)"/>
+            <option display="Channel 2" id="module.driver.adc.compare.window_b.channel.channel_2" value="(ADC_WINDOW_B_CHANNEL_2)"/>
+            <option display="Channel 3" id="module.driver.adc.compare.window_b.channel.channel_3" value="(ADC_WINDOW_B_CHANNEL_3)"/>
+            <option display="Channel 4" id="module.driver.adc.compare.window_b.channel.channel_4" value="(ADC_WINDOW_B_CHANNEL_4)"/>
+            <option display="Channel 5" id="module.driver.adc.compare.window_b.channel.channel_5" value="(ADC_WINDOW_B_CHANNEL_5)"/>
+            <option display="Channel 6" id="module.driver.adc.compare.window_b.channel.channel_6" value="(ADC_WINDOW_B_CHANNEL_6)"/>
+            <option display="Channel 7" id="module.driver.adc.compare.window_b.channel.channel_7" value="(ADC_WINDOW_B_CHANNEL_7)"/>
+            <option display="Channel 8" id="module.driver.adc.compare.window_b.channel.channel_8" value="(ADC_WINDOW_B_CHANNEL_8)"/>
+            <option display="Channel 9" id="module.driver.adc.compare.window_b.channel.channel_9" value="(ADC_WINDOW_B_CHANNEL_9)"/>
+            <option display="Channel 10" id="module.driver.adc.compare.window_b.channel.channel_10" value="(ADC_WINDOW_B_CHANNEL_10)"/>
+            <option display="Channel 11" id="module.driver.adc.compare.window_b.channel.channel_11" value="(ADC_WINDOW_B_CHANNEL_11)"/>
+            <option display="Channel 12" id="module.driver.adc.compare.window_b.channel.channel_12" value="(ADC_WINDOW_B_CHANNEL_12)"/>
+            <option display="Channel 13" id="module.driver.adc.compare.window_b.channel.channel_13" value="(ADC_WINDOW_B_CHANNEL_13)"/>
+            <option display="Channel 14" id="module.driver.adc.compare.window_b.channel.channel_14" value="(ADC_WINDOW_B_CHANNEL_14)"/>
+            <option display="Channel 15" id="module.driver.adc.compare.window_b.channel.channel_15" value="(ADC_WINDOW_B_CHANNEL_15)"/>
+            <option display="Channel 16" id="module.driver.adc.compare.window_b.channel.channel_16" value="(ADC_WINDOW_B_CHANNEL_16)"/>
+            <option display="Channel 17" id="module.driver.adc.compare.window_b.channel.channel_17" value="(ADC_WINDOW_B_CHANNEL_17)"/>
+            <option display="Channel 18" id="module.driver.adc.compare.window_b.channel.channel_18" value="(ADC_WINDOW_B_CHANNEL_18)"/>
+            <option display="Channel 19" id="module.driver.adc.compare.window_b.channel.channel_19" value="(ADC_WINDOW_B_CHANNEL_19)"/>
+            <option display="Channel 20" id="module.driver.adc.compare.window_b.channel.channel_20" value="(ADC_WINDOW_B_CHANNEL_20)"/>
+            <option display="Channel 21" id="module.driver.adc.compare.window_b.channel.channel_21" value="(ADC_WINDOW_B_CHANNEL_21)"/>
+            <option display="Channel 22" id="module.driver.adc.compare.window_b.channel.channel_22" value="(ADC_WINDOW_B_CHANNEL_22)"/>
+            <option display="Channel 23" id="module.driver.adc.compare.window_b.channel.channel_23" value="(ADC_WINDOW_B_CHANNEL_23)"/>
+            <option display="Channel 24" id="module.driver.adc.compare.window_b.channel.channel_24" value="(ADC_WINDOW_B_CHANNEL_24)"/>
+            <option display="Channel 25" id="module.driver.adc.compare.window_b.channel.channel_25" value="(ADC_WINDOW_B_CHANNEL_25)"/>
+            <option display="Channel 26" id="module.driver.adc.compare.window_b.channel.channel_26" value="(ADC_WINDOW_B_CHANNEL_26)"/>
+            <option display="Channel 27" id="module.driver.adc.compare.window_b.channel.channel_27" value="(ADC_WINDOW_B_CHANNEL_27)"/>
+            <option display="Channel 28" id="module.driver.adc.compare.window_b.channel.channel_28" value="(ADC_WINDOW_B_CHANNEL_28)"/>
+            <option display="Temperature Sensor" id="module.driver.adc.compare.window_b.channel.temperature" value="(ADC_WINDOW_B_CHANNEL_TEMPERATURE)"/>
+            <option display="Internal Reference Voltage" id="module.driver.adc.compare.window_b.channel.voltage" value="(ADC_WINDOW_B_CHANNEL_VOLT)"/>
+        </property>
+        <property default="module.driver.adc.compare.window_b.mode" display="Input|Window Compare|Window B|Comparison mode" id="module.driver.adc.compare.window_b.mode" description="Select the comparison mode for Window B. For each option, the first condition applies when Window Mode is disabled and the second option applies when Window Mode is enabled.">
+            <option display="Less Than or Outside Window" id="module.driver.adc.compare.window_b.mode.less_outside" value="(ADC_WINDOW_B_MODE_LESS_THAN_OR_OUTSIDE)"/>
+            <option display="Greater Than or Inside Window" id="module.driver.adc.compare.window_b.mode.more_inside" value="(ADC_WINDOW_B_MODE_GREATER_THAN_OR_INSIDE)"/>
+        </property>
+        <property default="0" display="Input|Window Compare|Window B|Lower Reference" id="module.driver.adc.compare.window_b.ref_lower" description="Set the lower comparison value.">
+            <constraint display="Must be a positive 16-bit integer.">
+                testInteger("${module.driver.adc.compare.window_b.ref_lower}") &amp;&amp; ("${module.driver.adc.compare.window_b.ref_lower}" &gt;= 0)  &amp;&amp; ("${module.driver.adc.compare.window_b.ref_lower}" &lt;= 65535)
+            </constraint>
+        </property>
+        <property default="0" display="Input|Window Compare|Window B|Upper Reference" id="module.driver.adc.compare.window_b.ref_upper" description="Set the upper comparison value.">
+            <constraint display="Must be a positive 16-bit integer.">
+                testInteger("${module.driver.adc.compare.window_b.ref_upper}") &amp;&amp; ("${module.driver.adc.compare.window_b.ref_upper}" &gt;= 0)  &amp;&amp; ("${module.driver.adc.compare.window_b.ref_upper}" &lt;= 65535)
+            </constraint>
+        </property>
+        <property default="NULL" id="module.driver.adc.p_context" />
+        <property default="NULL" display="Interrupts|Callback" id="module.driver.adc.p_callback" description="A user callback function. If this callback function is provided, it is called from the interrupt service routine (ISR) each time the ADC scan completes.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.adc.p_callback}")</constraint>
+        </property>
+        <property default="" display="Interrupts|Scan End Interrupt Priority" id="module.driver.adc.scan_end_ipl" description="Select scan end interrupt priority.">
+            <select enum="enum.mcu.nvic.priorities.optional"/>
+            <interrupt event="event.adc${module.driver.adc.unit}.scan.end" isr="adc_scan_end_isr"/>
+        </property>
+        <property default="" display="Interrupts|Scan End Group B Interrupt Priority" id="module.driver.adc.scan_end_b_ipl" description="Select group B scan end interrupt priority.">
+            <select enum="enum.mcu.nvic.priorities.optional"/>
+            <interrupt event="event.adc${module.driver.adc.unit}.scan.end.b" isr="adc_scan_end_b_isr"/>
+        </property>
+        <property default="" display="Interrupts|Window Compare A Interrupt Priority" id="module.driver.adc.window_a_ipl" description="Select Window Compare A interrupt priority.">
+            <select enum="enum.mcu.nvic.priorities.optional"/>
+            <interrupt event="event.adc${module.driver.adc.unit}.window.a" isr="adc_window_compare_isr"/>
+        </property>
+        <property default="" display="Interrupts|Window Compare B Interrupt Priority" id="module.driver.adc.window_b_ipl" description="Select Window Compare B interrupt priority.">
+            <select enum="enum.mcu.nvic.priorities.optional"/>
+            <interrupt event="event.adc${module.driver.adc.unit}.window.b" isr="adc_window_compare_isr"/>
+        </property>
+        <property default="" display="Extra|ADC Ring Buffer" id="module.driver.adc.adbuf" description="ADC Ring Buffer to be used only with DMAC transfers, keep this property disabled for normal ADC operations. When enabled, ADC converted data is stored in ADBUF registers in place of ADDR registers. The read API will not read from this location for normal ADC operations.">
+            <select enum="enum.driver.adc.adbuf" />
+        </property>
+        <property default="NULL" id="module.driver.adc.adc_dmac_name"/>
+        <property default="0" id="module.driver.adc.channels_per_block">
+            <export><![CDATA[eval('' +
+                    '    var scan_mask_string = "${module.driver.adc.scan_mask}";' +
+                    '    var channels = scan_mask_string.split("|").length - 1;' +
+                    '    channels' +
+                    '')
+                    ]]>
+            </export>
+        </property>
+        <peripheral name="" component="adc${module.driver.adc.unit}_40_digital_41" />
+        <peripheral name="ADC${module.driver.adc.unit}" component="adc${module.driver.adc.unit}" />
+        <peripheral name="ADC12${module.driver.adc.unit}" component="adc12${module.driver.adc.unit}" />
+        <symbol id="symbol.driver.adc.name" value="${module.driver.adc.name}"/>
+        <symbol id="symbol.driver.adc.guard.open" value="${module.driver.adc.name}_open_guard"/>
+        <symbol id="symbol.driver.adc.guard.macro.open" value="FSP_GUARD_${module.driver.adc.name}_R_ADC_Open"/>
+        <symbol id="symbol.driver.adc.guard.scan_cfg" value="${module.driver.adc.name}_scan_cfg_guard"/>
+        <symbol id="symbol.driver.adc.guard.macro.scan_cfg" value="FSP_GUARD_${module.driver.adc.name}_R_ADC_ScanCfg"/>
+        <symbol id="symbol.driver.adc.guard.info_get" value="${module.driver.adc.name}_info_get_guard"/>
+        <symbol id="symbol.driver.adc.guard.macro.info_get" value="FSP_GUARD_${module.driver.adc.name}_R_ADC_InfoGet"/>
+        <symbol id="symbol.driver.adc.guard.scan_start" value="${module.driver.adc.name}_scan_start_guard"/>
+        <symbol id="symbol.driver.adc.guard.macro.scan_start" value="FSP_GUARD_${module.driver.adc.name}_R_ADC_ScanStart"/>
+        <symbol id="symbol.driver.adc.guard.scan_group_start" value="${module.driver.adc.name}_scan_group_start_guard"/>
+        <symbol id="symbol.driver.adc.guard.macro.scan_group_start" value="FSP_GUARD_${module.driver.adc.name}_R_ADC_ScanGroupStart"/>
+        <symbol id="symbol.driver.adc.guard.scan_stop" value="${module.driver.adc.name}_scan_stop_guard"/>
+        <symbol id="symbol.driver.adc.guard.macro.scan_stop" value="FSP_GUARD_${module.driver.adc.name}_R_ADC_ScanStop"/>
+        <symbol id="symbol.driver.adc.guard.status_get" value="${module.driver.adc.name}_status_get_guard"/>
+        <symbol id="symbol.driver.adc.guard.macro.status_get" value="FSP_GUARD_${module.driver.adc.name}_R_ADC_StatusGet"/>
+        <symbol id="symbol.driver.adc.guard.read" value="${module.driver.adc.name}_read_guard"/>
+        <symbol id="symbol.driver.adc.guard.macro.read" value="FSP_GUARD_${module.driver.adc.name}_R_ADC_Read"/>
+        <symbol id="symbol.driver.adc.guard.read32" value="${module.driver.adc.name}_read32_guard"/>
+        <symbol id="symbol.driver.adc.guard.macro.read32" value="FSP_GUARD_${module.driver.adc.name}_R_ADC_Read32"/>
+        <symbol id="symbol.driver.adc.guard.sample_state_count_set" value="${module.driver.adc.name}_sample_state_count_set_guard"/>
+        <symbol id="symbol.driver.adc.guard.macro.sample_state_count_set" value="FSP_GUARD_${module.driver.adc.name}_R_ADC_SampleStateCountSet"/>
+        <symbol id="symbol.driver.adc.guard.close" value="${module.driver.adc.name}_close_guard"/>
+        <symbol id="symbol.driver.adc.guard.macro.close" value="FSP_GUARD_${module.driver.adc.name}_R_ADC_Close"/>
+        <symbol id="symbol.driver.adc.guard.offset_set" value="${module.driver.adc.name}_offset_set_guard"/>
+        <symbol id="symbol.driver.adc.guard.macro.offset_set" value="FSP_GUARD_${module.driver.adc.name}_R_ADC_OffsetSet"/>
+        <symbol id="symbol.driver.adc.guard.calibrate" value="${module.driver.adc.name}_calibrate_guard"/>
+        <symbol id="symbol.driver.adc.guard.macro.calibrate" value="FSP_GUARD_${module.driver.adc.name}_R_ADC_Calibrate"/>
+        <symbol id="symbol.driver.adc.guard.callback_set" value="${module.driver.adc.name}_callback_set_guard"/>
+        <symbol id="symbol.driver.adc.guard.macro.callback_set" value="FSP_GUARD_${module.driver.adc.name}_R_ADC_CallbackSet"/>
+        <symbol id="symbol.driver.adc.nsc_api" value="${module.driver.adc.name}_nsc_api"/>
+        <symbol id="symbol.driver.adc.cfg" value="${module.driver.adc.name}_cfg"/>
+        <symbol id="symbol.driver.adc.cfg_extend" value="${module.driver.adc.name}_cfg_extend"/>
+        <symbol id="symbol.driver.adc.channel_cfg" value="${module.driver.adc.name}_channel_cfg"/>
+        <symbol id="symbol.driver.adc.ctrl" value="${module.driver.adc.name}_ctrl"/>
+        <symbol id="symbol.driver.adc.window_cfg" value="${module.driver.adc.name}_window_cfg"/>
+        <header>
+/** ADC on ADC Instance. */
+extern const adc_instance_t ${module.driver.adc.name};
+
+/** Access the ADC instance using these structures when calling API functions directly (::p_api is not used). */
+extern adc_instance_ctrl_t ${module.driver.adc.name}_ctrl;
+extern const adc_cfg_t ${module.driver.adc.name}_cfg;
+extern const adc_channel_cfg_t ${module.driver.adc.name}_channel_cfg;
+
+#ifndef ${module.driver.adc.p_callback}
+void ${module.driver.adc.p_callback}(adc_callback_args_t * p_args);
+#endif
+
+#ifndef ${module.driver.adc.adc_dmac_name}
+#define ADC_DMAC_CHANNELS_PER_BLOCK_${module.driver.adc.adc_dmac_name}  ${module.driver.adc.channels_per_block}
+#endif
+        </header>
+        <includes>
+#include &quot;r_adc.h&quot;
+#include &quot;r_adc_api.h&quot;
+        </includes>
+        <declarations>
+
+adc_instance_ctrl_t ${module.driver.adc.name}_ctrl;
+const adc_extended_cfg_t ${module.driver.adc.name}_cfg_extend =
+{
+    .add_average_count   = ${module.driver.adc.add_average_count},
+    .clearing            = ${module.driver.adc.clearing},
+    .trigger             = ${module.driver.adc.trigger_source},
+    .trigger_group_b     = ${module.driver.adc.trigger_group_b_source},
+    .double_trigger_mode = ${module.driver.adc.mode.dt},
+    .adc_vref_control    = ${module.driver.adc.adc_vref_control},
+    .enable_adbuf        = ${module.driver.adc.adbuf},
+#if defined(VECTOR_NUMBER_ADC${module.driver.adc.unit}_WINDOW_A)
+    .window_a_irq        = VECTOR_NUMBER_ADC${module.driver.adc.unit}_WINDOW_A,
+#else
+    .window_a_irq        = FSP_INVALID_VECTOR,
+#endif
+    .window_a_ipl        = ${module.driver.adc.window_a_ipl},
+#if defined(VECTOR_NUMBER_ADC${module.driver.adc.unit}_WINDOW_B)
+    .window_b_irq      = VECTOR_NUMBER_ADC${module.driver.adc.unit}_WINDOW_B,
+#else
+    .window_b_irq      = FSP_INVALID_VECTOR,
+#endif
+    .window_b_ipl      = ${module.driver.adc.window_b_ipl},
+};
+const adc_cfg_t ${module.driver.adc.name}_cfg =
+{
+    .unit                = ${module.driver.adc.unit},
+    .mode                = ${module.driver.adc.mode},
+    .resolution          = ${module.driver.adc.resolution},
+    .alignment           = (adc_alignment_t) ${module.driver.adc.alignment},
+    .trigger             = (adc_trigger_t)0xF, // Not used
+    .p_callback          = ${module.driver.adc.p_callback},
+    /** If NULL then do not add &amp; */
+#if defined(${module.driver.adc.p_context})
+    .p_context           = ${module.driver.adc.p_context},
+#else
+    .p_context           = &amp;${module.driver.adc.p_context},
+#endif
+    .p_extend            = &amp;${module.driver.adc.name}_cfg_extend,
+#if defined(VECTOR_NUMBER_ADC${module.driver.adc.unit}_SCAN_END)
+    .scan_end_irq        = VECTOR_NUMBER_ADC${module.driver.adc.unit}_SCAN_END,
+#else
+    .scan_end_irq        = FSP_INVALID_VECTOR,
+#endif
+    .scan_end_ipl        = ${module.driver.adc.scan_end_ipl},
+#if defined(VECTOR_NUMBER_ADC${module.driver.adc.unit}_SCAN_END_B)
+    .scan_end_b_irq      = VECTOR_NUMBER_ADC${module.driver.adc.unit}_SCAN_END_B,
+#else
+    .scan_end_b_irq      = FSP_INVALID_VECTOR,
+#endif
+    .scan_end_b_ipl      = ${module.driver.adc.scan_end_b_ipl},
+};
+#if (${module.driver.adc.compare.window_a.enable} | ${module.driver.adc.compare.window_b.enable})
+const adc_window_cfg_t ${module.driver.adc.name}_window_cfg =
+{
+    .compare_mask        = ${module.driver.adc.compare.window_a.channels} 0,
+    .compare_mode_mask   = ${module.driver.adc.compare.window_a.channel_mode} 0,
+    .compare_cfg         = (adc_compare_cfg_t) (${module.driver.adc.compare.window_mode} | ${module.driver.adc.compare.window_a.enable} | ${module.driver.adc.compare.window_b.enable} | ${module.driver.adc.compare.event_mode}),
+    .compare_ref_low     = ${module.driver.adc.compare.window_a.ref_lower},
+    .compare_ref_high    = ${module.driver.adc.compare.window_a.ref_upper},
+    .compare_b_channel   = ${module.driver.adc.compare.window_b.channel},
+    .compare_b_mode      = ${module.driver.adc.compare.window_b.mode},
+    .compare_b_ref_low   = ${module.driver.adc.compare.window_b.ref_lower},
+    .compare_b_ref_high  = ${module.driver.adc.compare.window_b.ref_upper},
+};
+#endif
+const adc_channel_cfg_t ${module.driver.adc.name}_channel_cfg =
+{
+    .scan_mask           = ${module.driver.adc.scan_mask} 0,
+    .scan_mask_group_b   = ${module.driver.adc.scan_mask_group_b} 0,
+    .priority_group_a    = ${module.driver.adc.priority_group_a},
+    .add_mask            = ${module.driver.adc.add_mask} 0,
+    .sample_hold_mask    = ${module.driver.adc.sample_hold_mask} 0,
+    .sample_hold_states  = ${module.driver.adc.sample_hold_states},
+#if (${module.driver.adc.compare.window_a.enable} | ${module.driver.adc.compare.window_b.enable})
+    .p_window_cfg        = (adc_window_cfg_t *) &amp;${module.driver.adc.name}_window_cfg,
+#else
+    .p_window_cfg        = NULL,
+#endif
+};
+/* Instance structure to use this module. */
+const adc_instance_t ${module.driver.adc.name} =
+{
+    .p_ctrl    = &amp;${module.driver.adc.name}_ctrl,
+    .p_cfg     = &amp;${module.driver.adc.name}_cfg,
+    .p_channel_cfg = &amp;${module.driver.adc.name}_channel_cfg,
+    .p_api     = &amp;g_adc_on_adc
+};
+        </declarations>
+        <guard>
+            <header>
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.adc.name}_open_guard(adc_ctrl_t *p_ctrl, adc_cfg_t const *const p_cfg);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.adc.name}_scan_cfg_guard(adc_ctrl_t *p_ctrl, void const *const p_channel_cfg);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.adc.name}_info_get_guard(adc_ctrl_t *p_ctrl, adc_info_t *p_adc_info);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.adc.name}_scan_start_guard(adc_ctrl_t *p_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.adc.name}_scan_group_start_guard(adc_ctrl_t *p_ctrl, adc_group_mask_t group_id);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.adc.name}_scan_stop_guard(adc_ctrl_t *p_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.adc.name}_status_get_guard(adc_ctrl_t *p_ctrl, adc_status_t *p_status);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.adc.name}_read_guard(adc_ctrl_t *p_ctrl, adc_channel_t const reg_id, uint16_t *const p_data);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.adc.name}_read32_guard(adc_ctrl_t *p_ctrl, adc_channel_t const reg_id, uint32_t *const p_data);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.adc.name}_sample_state_count_set_guard(adc_ctrl_t *p_ctrl, adc_sample_state_t *p_sample);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.adc.name}_close_guard(adc_ctrl_t *p_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.adc.name}_offset_set_guard(adc_ctrl_t *const p_ctrl, adc_channel_t const reg_id, int32_t offset);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.adc.name}_calibrate_guard(adc_ctrl_t *const p_ctrl, void const *p_extend);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.adc.name}_callback_set_guard(adc_ctrl_t *const p_api_ctrl, void(*p_callback)(adc_callback_args_t *), void const *const p_context, adc_callback_args_t *const p_callback_memory);
+
+            </header>
+            <template name="${module.driver.adc.name}_guard.c">
+                <![CDATA[
+                    #include "guard.h"
+
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.adc.name}_open_guard (adc_ctrl_t *p_ctrl, adc_cfg_t const *const p_cfg)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+    FSP_PARAMETER_NOT_USED(p_cfg);
+
+    return R_ADC_Open(&${module.driver.adc.name}_ctrl, &${module.driver.adc.name}_cfg);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.adc.name}_scan_cfg_guard (adc_ctrl_t *p_ctrl, void const *const p_channel_cfg)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+    FSP_PARAMETER_NOT_USED(p_channel_cfg);
+
+    return R_ADC_ScanCfg(&${module.driver.adc.name}_ctrl, &${module.driver.adc.name}_channel_cfg);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.adc.name}_info_get_guard (adc_ctrl_t *p_ctrl, adc_info_t *p_adc_info)
+{
+    /* Verify all pointers are in non-secure memory. */
+    adc_info_t * p_adc_info_checked = cmse_check_pointed_object(p_adc_info, CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_adc_info_checked != NULL);
+
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+
+    return R_ADC_InfoGet(&${module.driver.adc.name}_ctrl, p_adc_info_checked);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.adc.name}_scan_start_guard (adc_ctrl_t *p_ctrl)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+
+    return R_ADC_ScanStart(&${module.driver.adc.name}_ctrl);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.adc.name}_scan_group_start_guard (adc_ctrl_t *p_ctrl, adc_group_mask_t group_id)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+
+    return R_ADC_ScanGroupStart(&${module.driver.adc.name}_ctrl, group_id);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.adc.name}_scan_stop_guard (adc_ctrl_t *p_ctrl)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+
+    return R_ADC_ScanStop(&${module.driver.adc.name}_ctrl);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.adc.name}_status_get_guard (adc_ctrl_t *p_ctrl, adc_status_t *p_status)
+{
+    /* Verify all pointers are in non-secure memory. */
+    adc_status_t * p_status_checked = cmse_check_pointed_object(p_status, CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_status_checked != NULL);
+
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+
+    return R_ADC_StatusGet(&${module.driver.adc.name}_ctrl, p_status_checked);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.adc.name}_read_guard (adc_ctrl_t *p_ctrl, adc_channel_t const reg_id, uint16_t *const p_data)
+{
+    /* Verify all pointers are in non-secure memory. */
+    uint16_t *const p_data_checked = cmse_check_address_range((void *) p_data, 2, CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_data_checked != NULL);
+
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+
+    return R_ADC_Read(&${module.driver.adc.name}_ctrl, reg_id, p_data_checked);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.adc.name}_read32_guard (adc_ctrl_t *p_ctrl, adc_channel_t const reg_id, uint32_t *const p_data)
+{
+    /* Verify all pointers are in non-secure memory. */
+    uint32_t *const p_data_checked = cmse_check_address_range((void *) p_data, 4, CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_data_checked != NULL);
+
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+
+    return R_ADC_Read32(&${module.driver.adc.name}_ctrl, reg_id, p_data_checked);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.adc.name}_sample_state_count_set_guard (adc_ctrl_t *p_ctrl, adc_sample_state_t *p_sample)
+{
+    /* Verify all pointers are in non-secure memory. */
+    adc_sample_state_t * p_sample_checked = cmse_check_pointed_object(p_sample, CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_sample_checked != NULL);
+
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+
+    return R_ADC_SampleStateCountSet(&${module.driver.adc.name}_ctrl, p_sample_checked);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.adc.name}_close_guard (adc_ctrl_t *p_ctrl)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+
+    return R_ADC_Close(&${module.driver.adc.name}_ctrl);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.adc.name}_offset_set_guard (adc_ctrl_t *const p_ctrl, adc_channel_t const reg_id, int32_t offset)
+{
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+
+    return R_ADC_OffsetSet(&${module.driver.adc.name}_ctrl, reg_id, offset);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.adc.name}_calibrate_guard (adc_ctrl_t *const p_ctrl, void const *p_extend)
+{
+    /* Verify all pointers are in non-secure memory. */
+    void const * p_extend_checked = cmse_check_address_range((void *) p_extend, 0, CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_extend == p_extend_checked);
+
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+
+    return R_ADC_Calibrate(&${module.driver.adc.name}_ctrl, p_extend_checked);
+}
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.adc.name}_callback_set_guard (adc_ctrl_t *const p_api_ctrl, void(*p_callback)(adc_callback_args_t *), void const *const p_context, adc_callback_args_t *const p_callback_memory)
+{
+    /* Verify all pointers are in non-secure memory. */
+    void(*p_callback_checked)(adc_callback_args_t *) = (void(*)(adc_callback_args_t *)) cmse_check_address_range((void *) p_callback, sizeof(void *), CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_callback_checked != NULL);
+    adc_callback_args_t *const p_callback_memory_checked = cmse_check_pointed_object(p_callback_memory, CMSE_AU_NONSECURE);
+    FSP_ASSERT(p_callback_memory_checked != NULL);
+
+    /* TODO: add your own security checks here */
+
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+    FSP_PARAMETER_NOT_USED(p_context);
+
+    return R_ADC_CallbackSet(&${module.driver.adc.name}_ctrl, p_callback_checked, p_context, p_callback_memory_checked);
+}
+
+                ]]>
+            </template>
+        </guard>
+        <nsc>
+            <header>
+
+#define FSP_GUARD_${module.driver.adc.name}_R_ADC_Open() ${module.driver.adc.name}_open_guard(FSP_SECURE_ARGUMENT, FSP_SECURE_ARGUMENT)
+
+#define FSP_GUARD_${module.driver.adc.name}_R_ADC_ScanCfg() ${module.driver.adc.name}_scan_cfg_guard(FSP_SECURE_ARGUMENT, FSP_SECURE_ARGUMENT)
+
+#define FSP_GUARD_${module.driver.adc.name}_R_ADC_InfoGet(p_adc_info) ${module.driver.adc.name}_info_get_guard(FSP_SECURE_ARGUMENT, p_adc_info)
+
+#define FSP_GUARD_${module.driver.adc.name}_R_ADC_ScanStart() ${module.driver.adc.name}_scan_start_guard(FSP_SECURE_ARGUMENT)
+
+#define FSP_GUARD_${module.driver.adc.name}_R_ADC_ScanGroupStart(group_id) ${module.driver.adc.name}_scan_group_start_guard(FSP_SECURE_ARGUMENT, group_id)
+
+#define FSP_GUARD_${module.driver.adc.name}_R_ADC_ScanStop() ${module.driver.adc.name}_scan_stop_guard(FSP_SECURE_ARGUMENT)
+
+#define FSP_GUARD_${module.driver.adc.name}_R_ADC_StatusGet(p_status) ${module.driver.adc.name}_status_get_guard(FSP_SECURE_ARGUMENT, p_status)
+
+#define FSP_GUARD_${module.driver.adc.name}_R_ADC_Read(reg_id, p_data) ${module.driver.adc.name}_read_guard(FSP_SECURE_ARGUMENT, reg_id, p_data)
+
+#define FSP_GUARD_${module.driver.adc.name}_R_ADC_Read32(reg_id, p_data) ${module.driver.adc.name}_read32_guard(FSP_SECURE_ARGUMENT, reg_id, p_data)
+
+#define FSP_GUARD_${module.driver.adc.name}_R_ADC_SampleStateCountSet(p_sample) ${module.driver.adc.name}_sample_state_count_set_guard(FSP_SECURE_ARGUMENT, p_sample)
+
+#define FSP_GUARD_${module.driver.adc.name}_R_ADC_Close() ${module.driver.adc.name}_close_guard(FSP_SECURE_ARGUMENT)
+
+#define FSP_GUARD_${module.driver.adc.name}_R_ADC_OffsetSet(reg_id, offset) ${module.driver.adc.name}_offset_set_guard(FSP_SECURE_ARGUMENT, reg_id, offset)
+
+#define FSP_GUARD_${module.driver.adc.name}_R_ADC_Calibrate(p_extend) ${module.driver.adc.name}_calibrate_guard(FSP_SECURE_ARGUMENT, p_extend)
+
+#define FSP_GUARD_${module.driver.adc.name}_R_ADC_CallbackSet(p_callback, p_context, p_callback_memory) ${module.driver.adc.name}_callback_set_guard(FSP_SECURE_ARGUMENT, p_callback, p_context, p_callback_memory)
+
+
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.adc.name}_open_guard(adc_ctrl_t *p_ctrl, adc_cfg_t const *const p_cfg);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.adc.name}_scan_cfg_guard(adc_ctrl_t *p_ctrl, void const *const p_channel_cfg);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.adc.name}_info_get_guard(adc_ctrl_t *p_ctrl, adc_info_t *p_adc_info);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.adc.name}_scan_start_guard(adc_ctrl_t *p_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.adc.name}_scan_group_start_guard(adc_ctrl_t *p_ctrl, adc_group_mask_t group_id);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.adc.name}_scan_stop_guard(adc_ctrl_t *p_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.adc.name}_status_get_guard(adc_ctrl_t *p_ctrl, adc_status_t *p_status);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.adc.name}_read_guard(adc_ctrl_t *p_ctrl, adc_channel_t const reg_id, uint16_t *const p_data);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.adc.name}_read32_guard(adc_ctrl_t *p_ctrl, adc_channel_t const reg_id, uint32_t *const p_data);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.adc.name}_sample_state_count_set_guard(adc_ctrl_t *p_ctrl, adc_sample_state_t *p_sample);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.adc.name}_close_guard(adc_ctrl_t *p_ctrl);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.adc.name}_offset_set_guard(adc_ctrl_t *const p_ctrl, adc_channel_t const reg_id, int32_t offset);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.adc.name}_calibrate_guard(adc_ctrl_t *const p_ctrl, void const *p_extend);
+
+BSP_CMSE_NONSECURE_ENTRY fsp_err_t ${module.driver.adc.name}_callback_set_guard(adc_ctrl_t *const p_api_ctrl, void(*p_callback)(adc_callback_args_t *), void const *const p_context, adc_callback_args_t *const p_callback_memory);
+
+
+extern const adc_instance_t ${module.driver.adc.name};
+            </header>
+            <declarations>
+                <![CDATA[
+static const adc_api_t ${module.driver.adc.name}_nsc_api =
+{
+    .open = ${module.driver.adc.name}_open_guard,
+    .scanCfg = ${module.driver.adc.name}_scan_cfg_guard,
+    .infoGet = ${module.driver.adc.name}_info_get_guard,
+    .scanStart = ${module.driver.adc.name}_scan_start_guard,
+    .scanGroupStart = ${module.driver.adc.name}_scan_group_start_guard,
+    .scanStop = ${module.driver.adc.name}_scan_stop_guard,
+    .scanStatusGet = ${module.driver.adc.name}_status_get_guard,
+    .read = ${module.driver.adc.name}_read_guard,
+    .read32 = ${module.driver.adc.name}_read32_guard,
+    .close = ${module.driver.adc.name}_close_guard,
+    .offsetSet = ${module.driver.adc.name}_offset_set_guard,
+    .calibrate = ${module.driver.adc.name}_calibrate_guard,
+    .callbackSet = ${module.driver.adc.name}_callback_set_guard,
+};
+const adc_instance_t ${module.driver.adc.name} =
+{
+    .p_api = &${module.driver.adc.name}_nsc_api,
+    .p_ctrl = FSP_SECURE_ARGUMENT,
+    .p_cfg = FSP_SECURE_ARGUMENT,
+};
+                ]]>
+            </declarations>
+        </nsc>
+        <api configurable="true">
+            <file>ra/fsp/inc/instances/r_adc.h</file>
+            <file>ra/fsp/inc/api/r_adc_api.h</file>
+            <file>ra/fsp/inc/api/r_elc_api.h</file>
+            <file>ra/fsp/inc/api/r_transfer_api.h</file>
+        </api>
+    </module>
+
+    <module config="config.driver.adc" display="Analog|${module.driver.adc.with.dmac.name} ADC-DMAC Integration (r_adc)" id="module.driver.adc_on_adc_with_dmac" version="1" url="group___a_d_c.html">
+        <constraint display="Specified number of 'Samples per channel' is not supported by selected MCU">
+            testInteger("${module.driver.adc.with.dmac.samples.per.channel}") &amp;&amp; ("${module.driver.adc.with.dmac.samples.per.channel}" &gt; 0) &amp;&amp; ("${module.driver.adc.with.dmac.samples.per.channel}" &lt;= (Number("${config.bsp.fsp.mcu.adc_dmac.samples_per_channel}")))
+        </constraint>
+        <constraint display="Unique name required for each instance">
+       ("${interface.driver.adc.with.dmac.${module.driver.adc.with.dmac.name}}" === "1")
+        </constraint>
+        <requires id="module.driver.adc.with.dmac.requires.adc.with.dmac" interface="interface.mcu.adc.has.adbuf" visible="false" display="Requires ADC-DMAC function" />
+        <requires id="module.driver.adc.with.dmac.requires.adc" interface="interface.driver.adc" display="Add ADC Driver [Required]">
+            <override property="module.driver.adc.mode" value="ADC_MODE_SINGLE_SCAN" />
+            <override property="module.driver.adc.priority_group_a" value="ADC_GROUP_A_PRIORITY_OFF" />
+            <override property="module.driver.adc.adbuf" value="module.driver.adc.adbuf.enabled" />
+            <override property="module.driver.adc.adc_dmac_name" value="${module.driver.adc.with.dmac.name_upper}"/>
+        </requires>
+        <requires id="module.driver.adc.requires.adc" interface="interface.mcu.adc" visible="false" display="Requires ADC peripheral" />
+        <requires id="module.driver.adc.with.dmac.requires.dmac" interface="interface.driver.transfer_on_dmac" display="Add DMAC Driver [Required]">
+            <override property="module.driver.transfer.mode" value="module.driver.transfer.mode.mode_repeat_block"/>
+            <override property="module.driver.transfer.interrupt" value="module.driver.transfer.interrupt.interrupt_end"/>
+            <override property="module.driver.transfer.dest_addr_mode" value="module.driver.transfer.dest_addr_mode.addr_mode_offset"/>
+            <override property="module.driver.transfer.src_addr_mode" value="module.driver.transfer.src_addr_mode.addr_mode_incremented"/>
+            <override property="module.driver.transfer.p_src" value="&amp;(R_ADC${module.driver.adc.with.dmac.requires.adc::module.driver.adc.unit}->ADBUF0)" />
+            <override property="module.driver.transfer.length" value="ADC_DMAC_CHANNELS_PER_BLOCK_${module.driver.adc.with.dmac.name_upper}"/>
+            <override property="module.driver.transfer.repeat_area" value="module.driver.transfer.repeat_area.repeat_area_source"/>
+            <override property="module.driver.transfer.size" value="module.driver.transfer.size.size_2_byte"/>
+            <override property="module.driver.transfer.num_blocks" value="${module.driver.adc.with.dmac.samples.per.channel}"/>
+            <override property="module.driver.transfer.src.buffer" value="16" />
+            <override property="module.driver.transfer.offset" value="0"/>
+        </requires>
+        <provides interface="interface.driver.adc.with.dmac" />
+        <provides interface="interface.driver.adc.with.dmac.${module.driver.adc.with.dmac.name}" />
+        <property default="" id="module.driver.adc.with.dmac.name_upper">
+            <export>"${module.driver.adc.with.dmac.name}".toUpperCase()</export>
+        </property>
+        <property default="g_adc_with_dmac${_instance}" display="General|Name" id="module.driver.adc.with.dmac.name" description="Module name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.driver.adc.with.dmac.name}")</constraint>
+        </property>
+        <property default="1" display="General|Samples per channel (Varies by MCU)" id="module.driver.adc.with.dmac.samples.per.channel" description="Enter number of samples per channel, this serves as total number of blocks to transfer">
+            <constraint display="Must be a valid non-negative integer greater than 0">testInteger("${module.driver.adc.with.dmac.samples.per.channel}")  &amp;&amp; ("${module.driver.adc.with.dmac.samples.per.channel}" &gt;= 0)</constraint>
+        </property>
+    </module>
+
+</raModuleDescription>

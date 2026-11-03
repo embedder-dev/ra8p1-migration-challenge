@@ -1,0 +1,411 @@
+﻿<?xml version="1.0" ?>
+
+<raModuleDescription>
+    <config id="config.driver.wifi_onchip_silex" path="fsp_cfg/rm_wifi_onchip_silex_cfg.h" version="0">
+        <property default="config.driver.wifi_onchip_silex.param_checking_enable.bsp" display="Parameter Checking" id="config.driver.wifi_onchip_silex.param_checking_enable" description="If selected code for parameter checking is included in the build.">
+            <option display="Default (BSP)" id="config.driver.wifi_onchip_silex.param_checking_enable.bsp" value="(BSP_CFG_PARAM_CHECKING_ENABLE)"/>
+            <option display="Enabled" id="config.driver.wifi_onchip_silex.param_checking_enable.enabled" value="(1)"/>
+            <option display="Disabled" id="config.driver.wifi_onchip_silex.param_checking_enable.disabled" value="(0)"/>
+        </property>
+        <property default="config.driver.wifi_onchip_silex.num_sockets.one" display="Number of supported socket instances" id="config.driver.wifi_onchip_silex.num_sockets" description="Enable number of socket instances">
+            <option display="1" id="config.driver.wifi_onchip_silex.num_sockets.one" value="(1)"/>
+            <option display="2" id="config.driver.wifi_onchip_silex.num_sockets.two" value="(2)"/>
+            <option display="3" id="config.driver.wifi_onchip_silex.num_sockets.three" value="(3)"/>
+            <option display="4" id="config.driver.wifi_onchip_silex.num_sockets.four" value="(4)"/>
+            <option display="5" id="config.driver.wifi_onchip_silex.num_sockets.five" value="(5)"/>
+            <option display="6" id="config.driver.wifi_onchip_silex.num_sockets.six" value="(6)"/>
+            <option display="7" id="config.driver.wifi_onchip_silex.num_sockets.seven" value="(7)"/>
+            <option display="8" id="config.driver.wifi_onchip_silex.num_sockets.eight" value="(8)"/>
+            <option display="9" id="config.driver.wifi_onchip_silex.num_sockets.nine" value="(9)"/>
+            <option display="10" id="config.driver.wifi_onchip_silex.num_sockets.ten" value="(10)"/>
+            <option display="11" id="config.driver.wifi_onchip_silex.num_sockets.eleven" value="(11)"/>
+            <option display="12" id="config.driver.wifi_onchip_silex.num_sockets.twelve" value="(12)"/>
+            <option display="13" id="config.driver.wifi_onchip_silex.num_sockets.thirteen" value="(13)"/>
+            <option display="14" id="config.driver.wifi_onchip_silex.num_sockets.fourteen" value="(14)"/>
+            <option display="15" id="config.driver.wifi_onchip_silex.num_sockets.fifteen" value="(15)"/>
+            <option display="16" id="config.driver.wifi_onchip_silex.num_sockets.sixteen" value="(16)"/>
+        </property>
+        <property default="4096" display="Size of RX buffer for socket" id="config.driver.wifi_onchip_silex.socket_rx_size"/>
+        <property default="1500" display="Size of TX buffer for CMD Port" id="config.driver.wifi_onchip_silex.cmd_port_tx_size"/>
+        <property default="3000" display="Size of RX buffer for CMD Port" id="config.driver.wifi_onchip_silex.cmd_port_rx_size"/>
+        <property default="10000" display="Semaphore maximum timeout" id="config.driver.wifi_onchip_silex.sem_max_timeout"/>
+        <property default="10" display="Number of retries for AT commands" id="config.driver.wifi_onchip_silex.max_retries_uart_comms"/>
+        <property default="module.driver.wifi_onchip_silex.pin_control_port.PORT_06" display="Module Reset Port" id="module.driver.wifi_onchip_silex.pin_control_port" description="Specify the module reset pin port for the MCU.">
+            <option id="module.driver.wifi_onchip_silex.pin_control_port.PORT_00" display="00" value="00" />
+            <option id="module.driver.wifi_onchip_silex.pin_control_port.PORT_01" display="01" value="01" />
+            <option id="module.driver.wifi_onchip_silex.pin_control_port.PORT_02" display="02" value="02" />
+            <option id="module.driver.wifi_onchip_silex.pin_control_port.PORT_03" display="03" value="03" />
+            <option id="module.driver.wifi_onchip_silex.pin_control_port.PORT_04" display="04" value="04" />
+            <option id="module.driver.wifi_onchip_silex.pin_control_port.PORT_05" display="05" value="05" />
+            <option id="module.driver.wifi_onchip_silex.pin_control_port.PORT_06" display="06" value="06" />
+            <option id="module.driver.wifi_onchip_silex.pin_control_port.PORT_07" display="07" value="07" />
+            <option id="module.driver.wifi_onchip_silex.pin_control_port.PORT_08" display="08" value="08" />
+            <option id="module.driver.wifi_onchip_silex.pin_control_port.PORT_09" display="09" value="09" />
+            <option id="module.driver.wifi_onchip_silex.pin_control_port.PORT_10" display="10" value="10" />
+            <option id="module.driver.wifi_onchip_silex.pin_control_port.PORT_11" display="11" value="11" />
+        </property>
+        <property default="module.driver.wifi_onchip_silex.pin_control_pin.PIN_03" display="Module Reset Pin" id="module.driver.wifi_onchip_silex.pin_control_pin" description="Specify the module reset pin for the MCU.">
+            <option id="module.driver.wifi_onchip_silex.pin_control_pin.PIN_00" display="00" value="00" />
+            <option id="module.driver.wifi_onchip_silex.pin_control_pin.PIN_01" display="01" value="01" />
+            <option id="module.driver.wifi_onchip_silex.pin_control_pin.PIN_02" display="02" value="02" />
+            <option id="module.driver.wifi_onchip_silex.pin_control_pin.PIN_03" display="03" value="03" />
+            <option id="module.driver.wifi_onchip_silex.pin_control_pin.PIN_04" display="04" value="04" />
+            <option id="module.driver.wifi_onchip_silex.pin_control_pin.PIN_05" display="05" value="05" />
+            <option id="module.driver.wifi_onchip_silex.pin_control_pin.PIN_06" display="06" value="06" />
+            <option id="module.driver.wifi_onchip_silex.pin_control_pin.PIN_07" display="07" value="07" />
+            <option id="module.driver.wifi_onchip_silex.pin_control_pin.PIN_08" display="08" value="08" />
+            <option id="module.driver.wifi_onchip_silex.pin_control_pin.PIN_09" display="09" value="09" />
+            <option id="module.driver.wifi_onchip_silex.pin_control_pin.PIN_10" display="10" value="10" />
+            <option id="module.driver.wifi_onchip_silex.pin_control_pin.PIN_11" display="11" value="11" />
+            <option id="module.driver.wifi_onchip_silex.pin_control_pin.PIN_12" display="12" value="12" />
+            <option id="module.driver.wifi_onchip_silex.pin_control_pin.PIN_13" display="13" value="13" />
+            <option id="module.driver.wifi_onchip_silex.pin_control_pin.PIN_14" display="14" value="14" />
+            <option id="module.driver.wifi_onchip_silex.pin_control_pin.PIN_15" display="15" value="15" />
+        </property>
+        <property default="config.driver.wifi_onchip_silex.enable_sntp_client.disabled" display="Enable SNTP Client" id="config.driver.wifi_onchip_silex.enable_sntp_client" description="Should the SNTP client of the module be enabled">
+            <option display="Enabled" id="config.driver.wifi_onchip_silex.enable_sntp_client.enabled" value="1"/>
+            <option display="Disabled" id="config.driver.wifi_onchip_silex.enable_sntp_client.disabled" value="0"/>
+        </property>
+        <content>
+            #ifdef __cplusplus
+            extern "C" {
+            #endif
+
+            #define WIFI_ONCHIP_SILEX_CFG_PARAM_CHECKING_ENABLED        (${config.driver.wifi_onchip_silex.param_checking_enable})
+            #define WIFI_ONCHIP_SILEX_CFG_NUM_CREATEABLE_SOCKETS        (${config.driver.wifi_onchip_silex.num_sockets})
+            #define WIFI_ONCHIP_SILEX_CFG_MAX_SOCKET_RX_SIZE            (${config.driver.wifi_onchip_silex.socket_rx_size})
+            #define WIFI_ONCHIP_SILEX_CFG_CMD_TX_BUF_SIZE               (${config.driver.wifi_onchip_silex.cmd_port_tx_size})
+            #define WIFI_ONCHIP_SILEX_CFG_CMD_RX_BUF_SIZE               (${config.driver.wifi_onchip_silex.cmd_port_rx_size})
+            #define WIFI_ONCHIP_SILEX_CFG_RESET_PIN                     BSP_IO_PORT_${module.driver.wifi_onchip_silex.pin_control_port}_PIN_${module.driver.wifi_onchip_silex.pin_control_pin}
+            #define WIFI_ONCHIP_SILEX_CFG_SEM_MAX_TIMEOUT               (${config.driver.wifi_onchip_silex.sem_max_timeout})
+            #define WIFI_ONCHIP_SILEX_CFG_MAX_NUMBER_UART_PORTS         (2)
+            #define WIFI_ONCHIP_SILEX_CFG_MAX_RETRIES_UART_COMMS        (${config.driver.wifi_onchip_silex.max_retries_uart_comms})
+            #define WIFI_ONCHIP_SILEX_CFG_TLS_SUPPORT                   (${interface.secure_sockets.tls_support})
+            #define WIFI_ONCHIP_SILEX_CFG_SNTP_ENABLE                   (${config.driver.wifi_onchip_silex.enable_sntp_client})
+
+            #ifdef __cplusplus
+            }
+            #endif
+        </content>
+    </config>
+    <module config="config.driver.wifi_onchip_silex" display="Networking|WiFi Onchip Silex Driver using UART (rm_wifi_onchip_silex)" id="module.driver.wifi_onchip_silex_using_sci_uart" common="1" visible="false" version="1" url="group___w_i_f_i___o_n_c_h_i_p___s_i_l_e_x.html">
+        <constraint display="Mutexes must be enabled in the FreeRTOS thread config under Common|General|Use Mutexes.">
+            "${config.awsfreertos.thread.configuse_mutexes}" === "config.awsfreertos.thread.configuse_mutexes.enabled"
+        </constraint>
+        <constraint display="Two UARTs must be used to enable use of multiple sockets.">
+            ("${config.driver.wifi_onchip_silex.num_sockets}" === "config.driver.wifi_onchip_silex.num_sockets.one") ||
+            (testExists("${module.driver.wifi_onchip_silex_using_sci_uart.requires.uart_data::module.driver.uart.name}"))
+        </constraint>
+        <requires interface="_rtos" />
+        <requires id="module.driver.wifi_onchip_silex_using_sci_uart.wifi.common" interface="interface.aws.wifi.common" display="Requires WiFi Common" find="true"/>
+        <requires id="module.driver.wifi_onchip_silex_using_sci_uart.requires.uart_cmd" interface="interface.driver.uart" display="Requires UART Peripheral Cmd/Data Port" find="true">
+            <override property="module.driver.uart.callback" value="rm_wifi_onchip_silex_uart_callback"/>
+        </requires>
+        <requires id="module.driver.wifi_onchip_silex_using_sci_uart.requires.uart_data" interface="interface.driver.uart" display="Optional UART Peripheral Cmd Port (used only in dual UART mode)" find="false" optional="true">
+            <override property="module.driver.uart.callback" value="rm_wifi_onchip_silex_uart_callback"/>
+        </requires>
+
+        <provides interface="interface.driver.wifi_onchip_silex" />
+        <provides interface="interface.driver.wifi" />
+
+        <property default="wifi_onchip_silex" id="module.driver.wifi_onchip_silex.wifi_onchip_silex_interface" description=""/>
+
+        <property default="0.0.0.0" display="SNTP server IPv4 address" id="module.driver.wifi_onchip_silex.sntp_server_ip">
+            <constraint display="Must be a valid IPv4 address">eval('' +
+            'var input = "${module.driver.wifi_onchip_silex.sntp_server_ip}";' +
+            'var regex = RegExp("^(?:(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])\.){3}(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])$","i");' +
+            'regex.test(input)')
+            </constraint>
+        </property>
+        <property default="0" display="SNTP Timezone Offset from UTC Hours" id="module.driver.wifi_onchip_silex.sntp_timezone_offset_hours" description="Value in hours from 12 to -12">
+            <constraint display="Must be between 12 and -12 hours"> testInteger(${module.driver.wifi_onchip_silex.sntp_timezone_offset_hours}) &amp;&amp; (${module.driver.wifi_onchip_silex.sntp_timezone_offset_hours} &gt;= -12  &amp;&amp;  ${module.driver.wifi_onchip_silex.sntp_timezone_offset_hours} &lt;= 12) </constraint>
+        </property>
+        <property default="0" display="SNTP Timezone Offset from UTC Minutes" id="module.driver.wifi_onchip_silex.sntp_timezone_offset_minutes" description="Value in minutes from 0 to 59">
+            <constraint display="Must be between 0 and 59 minutes"> testInteger(${module.driver.wifi_onchip_silex.sntp_timezone_offset_minutes}) &amp;&amp; (${module.driver.wifi_onchip_silex.sntp_timezone_offset_minutes} &gt;= 0  &amp;&amp;  ${module.driver.wifi_onchip_silex.sntp_timezone_offset_minutes} &lt;= 59) </constraint>
+        </property>
+        <property default="module.driver.wifi_onchip_silex.use_daylight_saving_time.disabled" display="Use Daylight Savings Time" id="module.driver.wifi_onchip_silex.use_daylight_saving_time" description="Specify if daytime savings should be used for local time calulation">
+            <option display="Enabled" id="module.driver.wifi_onchip_silex.use_daylight_saving_time.enabled" value="1"/>
+            <option display="Disabled" id="module.driver.wifi_onchip_silex.use_daylight_saving_time.disabled" value="0"/>
+        </property>
+
+        <header>
+           extern const wifi_onchip_silex_cfg_t          g_wifi_onchip_silex_cfg;
+           extern const char *                           g_wifi_onchip_silex_uart_cmd_baud;
+        </header>
+
+        <includes>
+            #include &quot;rm_wifi_onchip_silex.h&quot;
+        </includes>
+
+        <declarations>
+
+            const char * g_wifi_onchip_silex_uart_cmd_baud = "${module.driver.wifi_onchip_silex_using_sci_uart.requires.uart_cmd::module.driver.uart.baud}";
+
+            /** WiFi Onchip Silex configuration */
+            const wifi_onchip_silex_cfg_t     g_wifi_onchip_silex_cfg =
+            {
+                #define RA_NOT_DEFINED (1)
+
+                #if (RA_NOT_DEFINED == ${module.driver.wifi_onchip_silex_using_sci_uart.requires.uart_data::module.driver.uart.name} )
+                    .num_uarts = 1,
+                #else
+                    .num_uarts = 2,
+                #endif
+
+                .num_sockets = WIFI_ONCHIP_SILEX_CFG_NUM_CREATEABLE_SOCKETS,
+                .reset_pin = WIFI_ONCHIP_SILEX_CFG_RESET_PIN,
+
+                .sntp_enabled = (wifi_onchip_silex_sntp_enable_t)WIFI_ONCHIP_SILEX_CFG_SNTP_ENABLE,
+                .sntp_server_ip = (uint8_t*)"${module.driver.wifi_onchip_silex.sntp_server_ip}",
+                .sntp_timezone_offset_from_utc_hours = ${module.driver.wifi_onchip_silex.sntp_timezone_offset_hours},
+                .sntp_timezone_offset_from_utc_minutes = ${module.driver.wifi_onchip_silex.sntp_timezone_offset_minutes},
+                .sntp_timezone_use_daylight_savings = (wifi_onchip_silex_sntp_daylight_savings_enable_t)${module.driver.wifi_onchip_silex.use_daylight_saving_time},
+
+                .uart_instances =
+                {
+
+                #if (RA_NOT_DEFINED == ${module.driver.wifi_onchip_silex_using_sci_uart.requires.uart_cmd::module.driver.uart.name})
+                    NULL,
+                #else
+                    &amp;${module.driver.wifi_onchip_silex_using_sci_uart.requires.uart_cmd::module.driver.uart.name},
+                #endif
+
+                #if (RA_NOT_DEFINED == ${module.driver.wifi_onchip_silex_using_sci_uart.requires.uart_data::module.driver.uart.name})
+                    NULL
+                #else
+                    &amp;${module.driver.wifi_onchip_silex_using_sci_uart.requires.uart_data::module.driver.uart.name}
+                #endif
+
+                #undef RA_NOT_DEFINED
+                }
+            };
+
+        </declarations>
+    </module>
+    <config id="config.driver.wifi_onchip_silex_azure" path="fsp_cfg/rm_wifi_onchip_silex_cfg_azure.h" version="0">
+        <property default="config.driver.wifi_onchip_silex_azure.param_checking_enable.bsp" display="Parameter Checking" id="config.driver.wifi_onchip_silex_azure.param_checking_enable" description="If selected code for parameter checking is included in the build.">
+            <option display="Default (BSP)" id="config.driver.wifi_onchip_silex_azure.param_checking_enable.bsp" value="(BSP_CFG_PARAM_CHECKING_ENABLE)"/>
+            <option display="Enabled" id="config.driver.wifi_onchip_silex_azure.param_checking_enable.enabled" value="(1)"/>
+            <option display="Disabled" id="config.driver.wifi_onchip_silex_azure.param_checking_enable.disabled" value="(0)"/>
+        </property>
+        <property default="config.driver.wifi_onchip_silex_azure.num_sockets.one" display="Number of supported socket instances" id="config.driver.wifi_onchip_silex_azure.num_sockets" description="Enable number of socket instances">
+            <option display="1" id="config.driver.wifi_onchip_silex_azure.num_sockets.one" value="(1)"/>
+            <option display="2" id="config.driver.wifi_onchip_silex_azure.num_sockets.two" value="(2)"/>
+            <option display="3" id="config.driver.wifi_onchip_silex_azure.num_sockets.three" value="(3)"/>
+            <option display="4" id="config.driver.wifi_onchip_silex_azure.num_sockets.four" value="(4)"/>
+            <option display="5" id="config.driver.wifi_onchip_silex_azure.num_sockets.five" value="(5)"/>
+            <option display="6" id="config.driver.wifi_onchip_silex_azure.num_sockets.six" value="(6)"/>
+            <option display="7" id="config.driver.wifi_onchip_silex_azure.num_sockets.seven" value="(7)"/>
+            <option display="8" id="config.driver.wifi_onchip_silex_azure.num_sockets.eight" value="(8)"/>
+            <option display="9" id="config.driver.wifi_onchip_silex_azure.num_sockets.nine" value="(9)"/>
+            <option display="10" id="config.driver.wifi_onchip_silex_azure.num_sockets.ten" value="(10)"/>
+            <option display="11" id="config.driver.wifi_onchip_silex_azure.num_sockets.eleven" value="(11)"/>
+            <option display="12" id="config.driver.wifi_onchip_silex_azure.num_sockets.twelve" value="(12)"/>
+            <option display="13" id="config.driver.wifi_onchip_silex_azure.num_sockets.thirteen" value="(13)"/>
+            <option display="14" id="config.driver.wifi_onchip_silex_azure.num_sockets.fourteen" value="(14)"/>
+            <option display="15" id="config.driver.wifi_onchip_silex_azure.num_sockets.fifteen" value="(15)"/>
+            <option display="16" id="config.driver.wifi_onchip_silex_azure.num_sockets.sixteen" value="(16)"/>
+        </property>
+        <property default="1500" display="Size of TX buffer for CMD Port" id="config.driver.wifi_onchip_silex_azure.cmd_port_tx_size">
+            <constraint display="Value must be a non-negative integer">
+               testInteger(${config.driver.wifi_onchip_silex_azure.cmd_port_tx_size}) &amp;&amp;
+               (${config.driver.wifi_onchip_silex_azure.cmd_port_tx_size} &gt;= 0)
+            </constraint>
+        </property>
+        <property default="3000" display="Size of RX buffer for CMD Port" id="config.driver.wifi_onchip_silex_azure.cmd_port_rx_size">
+            <constraint display="Value must be a non-negative integer">
+               testInteger(${config.driver.wifi_onchip_silex_azure.cmd_port_rx_size}) &amp;&amp;
+               (${config.driver.wifi_onchip_silex_azure.cmd_port_rx_size} &gt;= 0)
+            </constraint>
+        </property>
+        <property default="10000" display="Semaphore maximum timeout" id="config.driver.wifi_onchip_silex_azure.sem_max_timeout">
+            <constraint display="Value must be a non-negative integer">
+               testInteger(${config.driver.wifi_onchip_silex_azure.sem_max_timeout}) &amp;&amp;
+               (${config.driver.wifi_onchip_silex_azure.sem_max_timeout} &gt;= 0)
+            </constraint>
+        </property>
+        <property default="10" display="Number of retries for AT commands" id="config.driver.wifi_onchip_silex_azure.max_retries_uart_comms">
+            <constraint display="Value must be a non-negative integer">
+               testInteger(${config.driver.wifi_onchip_silex_azure.max_retries_uart_comms}) &amp;&amp;
+               (${config.driver.wifi_onchip_silex_azure.max_retries_uart_comms} &gt;= 0)
+            </constraint>
+        </property>
+        <property default="config.driver.wifi_onchip_silex_azure.pin_control_port.PORT_06" display="Module Reset Port" id="config.driver.wifi_onchip_silex_azure.pin_control_port" description="Specify the module reset pin port for the MCU.">
+            <option id="config.driver.wifi_onchip_silex_azure.pin_control_port.PORT_00" display="00" value="00" />
+            <option id="config.driver.wifi_onchip_silex_azure.pin_control_port.PORT_01" display="01" value="01" />
+            <option id="config.driver.wifi_onchip_silex_azure.pin_control_port.PORT_02" display="02" value="02" />
+            <option id="config.driver.wifi_onchip_silex_azure.pin_control_port.PORT_03" display="03" value="03" />
+            <option id="config.driver.wifi_onchip_silex_azure.pin_control_port.PORT_04" display="04" value="04" />
+            <option id="config.driver.wifi_onchip_silex_azure.pin_control_port.PORT_05" display="05" value="05" />
+            <option id="config.driver.wifi_onchip_silex_azure.pin_control_port.PORT_06" display="06" value="06" />
+            <option id="config.driver.wifi_onchip_silex_azure.pin_control_port.PORT_07" display="07" value="07" />
+            <option id="config.driver.wifi_onchip_silex_azure.pin_control_port.PORT_08" display="08" value="08" />
+            <option id="config.driver.wifi_onchip_silex_azure.pin_control_port.PORT_09" display="09" value="09" />
+            <option id="config.driver.wifi_onchip_silex_azure.pin_control_port.PORT_10" display="10" value="10" />
+            <option id="config.driver.wifi_onchip_silex_azure.pin_control_port.PORT_11" display="11" value="11" />
+            <option id="config.driver.wifi_onchip_silex_azure.pin_control_port.PORT_12" display="12" value="12" />
+            <option id="config.driver.wifi_onchip_silex_azure.pin_control_port.PORT_13" display="13" value="13" />
+            <option id="config.driver.wifi_onchip_silex_azure.pin_control_port.PORT_14" display="14" value="14" />
+        </property>
+        <property default="config.driver.wifi_onchip_silex_azure.pin_control_pin.PIN_03" display="Module Reset Pin" id="config.driver.wifi_onchip_silex_azure.pin_control_pin" description="Specify the module reset pin for the MCU.">
+            <option id="config.driver.wifi_onchip_silex_azure.pin_control_pin.PIN_00" display="00" value="00" />
+            <option id="config.driver.wifi_onchip_silex_azure.pin_control_pin.PIN_01" display="01" value="01" />
+            <option id="config.driver.wifi_onchip_silex_azure.pin_control_pin.PIN_02" display="02" value="02" />
+            <option id="config.driver.wifi_onchip_silex_azure.pin_control_pin.PIN_03" display="03" value="03" />
+            <option id="config.driver.wifi_onchip_silex_azure.pin_control_pin.PIN_04" display="04" value="04" />
+            <option id="config.driver.wifi_onchip_silex_azure.pin_control_pin.PIN_05" display="05" value="05" />
+            <option id="config.driver.wifi_onchip_silex_azure.pin_control_pin.PIN_06" display="06" value="06" />
+            <option id="config.driver.wifi_onchip_silex_azure.pin_control_pin.PIN_07" display="07" value="07" />
+            <option id="config.driver.wifi_onchip_silex_azure.pin_control_pin.PIN_08" display="08" value="08" />
+            <option id="config.driver.wifi_onchip_silex_azure.pin_control_pin.PIN_09" display="09" value="09" />
+            <option id="config.driver.wifi_onchip_silex_azure.pin_control_pin.PIN_10" display="10" value="10" />
+            <option id="config.driver.wifi_onchip_silex_azure.pin_control_pin.PIN_11" display="11" value="11" />
+            <option id="config.driver.wifi_onchip_silex_azure.pin_control_pin.PIN_12" display="12" value="12" />
+            <option id="config.driver.wifi_onchip_silex_azure.pin_control_pin.PIN_13" display="13" value="13" />
+            <option id="config.driver.wifi_onchip_silex_azure.pin_control_pin.PIN_14" display="14" value="14" />
+            <option id="config.driver.wifi_onchip_silex_azure.pin_control_pin.PIN_15" display="15" value="15" />
+        </property>
+        <property default="config.driver.wifi_onchip_silex_azure.enable_sntp_client.disabled" display="Enable SNTP Client" id="config.driver.wifi_onchip_silex_azure.enable_sntp_client" description="Should the SNTP client of the module be enabled">
+            <option display="Enabled" id="config.driver.wifi_onchip_silex_azure.enable_sntp_client.enabled" value="1"/>
+            <option display="Disabled" id="config.driver.wifi_onchip_silex_azure.enable_sntp_client.disabled" value="0"/>
+        </property>
+        <property default="32" display="Max SSID Length" id="config.driver.wifi_onchip_silex_azure.max_ssid_len" description="Max SSID length">
+            <constraint display="Value must be a non-negative integer">
+               testInteger(${config.driver.wifi_onchip_silex_azure.max_ssid_len}) &amp;&amp;
+               (${config.driver.wifi_onchip_silex_azure.max_ssid_len} &gt;= 0)
+            </constraint>
+        </property>
+        <property default="6" display="Max BSSID Length" id="config.driver.wifi_onchip_silex_azure.max_bssid_len" description="Max BSSID length">
+            <constraint display="Value must be a non-negative integer">
+               testInteger(${config.driver.wifi_onchip_silex_azure.max_bssid_len}) &amp;&amp;
+               (${config.driver.wifi_onchip_silex_azure.max_bssid_len} &gt;= 0)
+            </constraint>
+        </property>
+        <property default="32" display="Max Passphrase Length" id="config.driver.wifi_onchip_silex_azure.max_passphrase_len" description="Max passphrase length">
+            <constraint display="Value must be a non-negative integer">
+               testInteger(${config.driver.wifi_onchip_silex_azure.max_passphrase_len}) &amp;&amp;
+               (${config.driver.wifi_onchip_silex_azure.max_passphrase_len} &gt;= 0)
+            </constraint>
+        </property>
+        <content>
+            #ifdef __cplusplus
+            extern "C" {
+            #endif
+
+            #define WIFI_ONCHIP_SILEX_CFG_PARAM_CHECKING_ENABLED        (${config.driver.wifi_onchip_silex_azure.param_checking_enable})
+            #define WIFI_ONCHIP_SILEX_CFG_NUM_CREATEABLE_SOCKETS        (${config.driver.wifi_onchip_silex_azure.num_sockets})
+            #define WIFI_ONCHIP_SILEX_CFG_CMD_TX_BUF_SIZE               (${config.driver.wifi_onchip_silex_azure.cmd_port_tx_size})
+            #define WIFI_ONCHIP_SILEX_CFG_CMD_RX_BUF_SIZE               (${config.driver.wifi_onchip_silex_azure.cmd_port_rx_size})
+            #define WIFI_ONCHIP_SILEX_CFG_RESET_PIN                     BSP_IO_PORT_${config.driver.wifi_onchip_silex_azure.pin_control_port}_PIN_${config.driver.wifi_onchip_silex_azure.pin_control_pin}
+            #define WIFI_ONCHIP_SILEX_CFG_SEM_MAX_TIMEOUT               (${config.driver.wifi_onchip_silex_azure.sem_max_timeout})
+            #define WIFI_ONCHIP_SILEX_CFG_MAX_NUMBER_UART_PORTS         (2)
+            #define WIFI_ONCHIP_SILEX_CFG_MAX_RETRIES_UART_COMMS        (${config.driver.wifi_onchip_silex_azure.max_retries_uart_comms})
+            #define WIFI_ONCHIP_SILEX_CFG_SNTP_ENABLE                   (${config.driver.wifi_onchip_silex_azure.enable_sntp_client})
+            #define wificonfigMAX_SSID_LEN                              (${config.driver.wifi_onchip_silex_azure.max_ssid_len})
+            #define wificonfigMAX_BSSID_LEN                             (${config.driver.wifi_onchip_silex_azure.max_bssid_len})
+            #define wificonfigMAX_PASSPHRASE_LEN                        (${config.driver.wifi_onchip_silex_azure.max_passphrase_len})
+
+            #ifdef __cplusplus
+            }
+            #endif
+        </content>
+    </config>
+    <module config="config.driver.wifi_onchip_silex_azure" display="Networking|WiFi Onchip Silex Driver using UART (rm_wifi_onchip_silex)" id="module.driver.wifi_onchip_silex_using_sci_uart_azure" common="1" visible="false" version="1" url="group___w_i_f_i___o_n_c_h_i_p___s_i_l_e_x.html">
+        <constraint display="Using multiple sockets not recommended on SAU UART as it doesn't support flow control. Flow control is required to maintain reliability with multiple sockets.">
+            (!testExists("${interface.driver.uart_on_sau_uart}")) || ("${config.driver.wifi_onchip_silex_azure.num_sockets}" === "config.driver.wifi_onchip_silex_azure.num_sockets.one")
+        </constraint>
+        <constraint display="Two UARTs must be used to enable use of multiple sockets.">
+            ("${config.driver.wifi_onchip_silex_azure.num_sockets}" === "config.driver.wifi_onchip_silex_azure.num_sockets.one") ||
+            (testExists("${module.driver.wifi_onchip_silex_using_sci_uart_azure.requires.uart_data::module.driver.uart.name}"))
+        </constraint>
+        <constraint id="module.driver.wifi_onchip_silex_using_sci_uart_azure.constraintwifi" display="When using two UARTs Hardware CTS and software RTS or Hardware CTS and Hardware RTS flow control must be enabled for the Cmd port.">
+            (testExists("${interface.driver.uart_on_sau_uart}")) || ((!testExists("${module.driver.wifi_onchip_silex_using_sci_uart_azure.requires.uart_data::module.driver.uart.name}")) ||
+            ("module.driver.uart.flow_control.ctsrts" === "${module.driver.wifi_onchip_silex_using_sci_uart_azure.requires.uart_cmd::module.driver.uart.flow_control}") ||
+            ("module.driver.uart.flow_control.hardware.ctsrts" === "${module.driver.wifi_onchip_silex_using_sci_uart_azure.requires.uart_cmd::module.driver.uart.flow_control}"))
+        </constraint>
+        <requires interface="_rtos" />
+        <requires id="module.driver.wifi_onchip_silex_using_sci_uart_azure.requires.uart_cmd" interface="interface.driver.uart" display="Requires UART Peripheral Cmd/Data Port" find="true">
+            <override property="module.driver.uart.callback" value="rm_wifi_onchip_silex_uart_callback"/>
+        </requires>
+        <requires id="module.driver.wifi_onchip_silex_using_sci_uart_azure.requires.uart_data" interface="interface.driver.uart" display="Optional UART Peripheral Cmd Port (used only in dual UART mode)" find="false" optional="true">
+            <override property="module.driver.uart.callback" value="rm_wifi_onchip_silex_uart_callback"/>
+        </requires>
+
+        <provides interface="interface.driver.wifi_onchip_silex_azure" />
+        <provides interface="interface.driver.wifi" />
+
+        <property default="wifi_onchip_silex" id="module.driver.wifi_onchip_silex.wifi_onchip_silex_interface" description=""/>
+
+        <property default="0.0.0.0" display="SNTP server IPv4 address" id="module.driver.wifi_onchip_silex.sntp_server_ip">
+            <constraint display="Must be a valid IPv4 address">eval('' +
+            'var input = "${module.driver.wifi_onchip_silex.sntp_server_ip}";' +
+            'var regex = RegExp("^(?:(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])\.){3}(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])$","i");' +
+            'regex.test(input)')
+            </constraint>
+        </property>
+        <property default="0" display="SNTP Timezone Offset from UTC Hours" id="module.driver.wifi_onchip_silex.sntp_timezone_offset_hours" description="Value in hours from 12 to -12">
+            <constraint display="Must be between 12 and -12 hours"> testInteger(${module.driver.wifi_onchip_silex.sntp_timezone_offset_hours}) &amp;&amp; (${module.driver.wifi_onchip_silex.sntp_timezone_offset_hours} &gt;= -12  &amp;&amp;  ${module.driver.wifi_onchip_silex.sntp_timezone_offset_hours} &lt;= 12) </constraint>
+        </property>
+        <property default="0" display="SNTP Timezone Offset from UTC Minutes" id="module.driver.wifi_onchip_silex.sntp_timezone_offset_minutes" description="Value in minutes from 0 to 59">
+            <constraint display="Must be between 0 and 59 minutes"> testInteger(${module.driver.wifi_onchip_silex.sntp_timezone_offset_minutes}) &amp;&amp; (${module.driver.wifi_onchip_silex.sntp_timezone_offset_minutes} &gt;= 0  &amp;&amp;  ${module.driver.wifi_onchip_silex.sntp_timezone_offset_minutes} &lt;= 59) </constraint>
+        </property>
+        <property default="module.driver.wifi_onchip_silex.use_daylight_saving_time.disabled" display="Use Daylight Savings Time" id="module.driver.wifi_onchip_silex.use_daylight_saving_time" description="Specify if daytime savings should be used for local time calulation">
+            <option display="Enabled" id="module.driver.wifi_onchip_silex.use_daylight_saving_time.enabled" value="1"/>
+            <option display="Disabled" id="module.driver.wifi_onchip_silex.use_daylight_saving_time.disabled" value="0"/>
+        </property>
+
+        <header>
+           extern const wifi_onchip_silex_cfg_t          g_wifi_onchip_silex_cfg;
+           extern const char *                           g_wifi_onchip_silex_uart_cmd_baud;
+        </header>
+
+        <includes>
+            #include &quot;rm_wifi_onchip_silex.h&quot;
+        </includes>
+
+        <declarations>
+
+            const char * g_wifi_onchip_silex_uart_cmd_baud = "${module.driver.wifi_onchip_silex_using_sci_uart_azure.requires.uart_cmd::module.driver.uart.baud}";
+
+            /** WiFi Onchip Silex configuration */
+            const wifi_onchip_silex_cfg_t     g_wifi_onchip_silex_cfg =
+            {
+                #define RA_NOT_DEFINED (1)
+
+                #if (RA_NOT_DEFINED == ${module.driver.wifi_onchip_silex_using_sci_uart_azure.requires.uart_data::module.driver.uart.name} )
+                    .num_uarts = 1,
+                #else
+                    .num_uarts = 2,
+                #endif
+
+                .num_sockets = WIFI_ONCHIP_SILEX_CFG_NUM_CREATEABLE_SOCKETS,
+                .reset_pin = WIFI_ONCHIP_SILEX_CFG_RESET_PIN,
+
+                .sntp_enabled = (wifi_onchip_silex_sntp_enable_t)WIFI_ONCHIP_SILEX_CFG_SNTP_ENABLE,
+                .sntp_server_ip = (uint8_t*)"${module.driver.wifi_onchip_silex.sntp_server_ip}",
+                .sntp_timezone_offset_from_utc_hours = ${module.driver.wifi_onchip_silex.sntp_timezone_offset_hours},
+                .sntp_timezone_offset_from_utc_minutes = ${module.driver.wifi_onchip_silex.sntp_timezone_offset_minutes},
+                .sntp_timezone_use_daylight_savings = (wifi_onchip_silex_sntp_daylight_savings_enable_t)${module.driver.wifi_onchip_silex.use_daylight_saving_time},
+
+                .uart_instances =
+                {
+
+                #if (RA_NOT_DEFINED == ${module.driver.wifi_onchip_silex_using_sci_uart_azure.requires.uart_cmd::module.driver.uart.name})
+                    NULL,
+                #else
+                    &amp;${module.driver.wifi_onchip_silex_using_sci_uart_azure.requires.uart_cmd::module.driver.uart.name},
+                #endif
+
+                #if (RA_NOT_DEFINED == ${module.driver.wifi_onchip_silex_using_sci_uart_azure.requires.uart_data::module.driver.uart.name})
+                    NULL
+                #else
+                    &amp;${module.driver.wifi_onchip_silex_using_sci_uart_azure.requires.uart_data::module.driver.uart.name}
+                #endif
+
+                #undef RA_NOT_DEFINED
+                }
+            };
+
+        </declarations>
+    </module>
+</raModuleDescription>

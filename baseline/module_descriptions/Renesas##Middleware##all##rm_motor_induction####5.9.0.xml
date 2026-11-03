@@ -1,0 +1,218 @@
+﻿<?xml version="1.0" ?>
+<raModuleDescription>
+    <config id="config.middleware.motor_induction" path="fsp_cfg/rm_motor_induction_cfg.h" version="0">
+        <property default="config.middleware.motor_induction.param_checking_enable.bsp" display="Parameter Checking" id="config.middleware.motor_induction.param_checking_enable" description="If selected code for parameter checking is included in the build.">
+            <option display="Default (BSP)" id="config.middleware.motor_induction.param_checking_enable.bsp" value="(BSP_CFG_PARAM_CHECKING_ENABLE)"/>
+            <option display="Enabled" id="config.middleware.motor_induction.param_checking_enable.enabled" value="(1)"/>
+            <option display="Disabled" id="config.middleware.motor_induction.param_checking_enable.disabled" value="(0)"/>
+        </property>
+
+        <content>
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#define MOTOR_INDUCTION_CFG_PARAM_CHECKING_ENABLE   ${config.middleware.motor_induction.param_checking_enable}
+
+#ifdef __cplusplus
+}
+#endif
+        </content>
+    </config>
+    <module config="config.middleware.motor_induction" display="Motor|Motor vector control with induction sensor (rm_motor_induction)" id="module.middleware.motor_induction" version="1" url="group___m_o_t_o_r___i_n_d_u_c_t_i_o_n.html">
+        <constraint display="Requires Motor Speed driver">
+            testExists("${module.middleware.motor_induction.requires.speed::module.middleware.motor_speed.name}")
+        </constraint>
+        <constraint display="Requires Motor Current driver">
+            testExists("${module.middleware.motor_induction.requires.current::module.middleware.motor_current.name}")
+        </constraint>
+        <constraint display="Unique name required for each instance">
+            ("${interface.middleware.motor_induction.${module.middleware.motor_induction.name}}" === "1")
+        </constraint>
+        <!-- Speed Module  -->
+        <requires id="module.middleware.motor_induction.requires.speed" interface="interface.middleware.motor_speed" find="true" display="Add motor speed module [Mandatory]">
+            <override property="module.middleware.motor_speed.control_type" value="module.middleware.motor_speed.control_type.induction"/>
+            <override property="module.middleware.motor_speed.sc_callback" value="rm_motor_induction_speed_callback"/>
+            <override property="module.middleware.motor_speed.sc_context" value="${module.middleware.motor_induction.name}"/>
+            <override property="module.middleware.motor_speed.st_input" value="(${module.middleware.motor_induction.name}_ctrl.st_speed_input)"/>
+            <override property="module.middleware.motor_speed.st_output" value="(${module.middleware.motor_induction.name}_ctrl.st_speed_output)"/>
+        </requires>
+
+        <!-- Current Module  -->
+        <requires id="module.middleware.motor_induction.requires.current" interface="interface.middleware.motor_current" find="true" display="Add motor current module [Mandatory]">
+            <override property="module.middleware.motor_current.ctrl_type" value="module.middleware.motor_current.ctrl_type.induction"/>
+            <override property="module.middleware.motor_current.cc_callback" value="rm_motor_induction_current_callback"/>
+            <override property="module.middleware.motor_current.cc_context" value="${module.middleware.motor_induction.name}"/>
+        </requires>
+
+        <!-- Inertia estimate Module  -->
+        <requires id="module.middleware.motor_induction.requires.inertia_estimate" interface="interface.middleware.motor_inertia_estimate" find="false" display="Add motor Inertia estimate module [Optional]">
+        </requires>
+
+        <!-- Return origin Module  -->
+        <requires id="module.middleware.motor_induction.requires.return_origin" interface="interface.middleware.motor_return_origin" find="false" display="Add motor Return origin module [Optional]">
+        </requires>
+
+        <provides interface="interface.middleware.motor_induction" />
+        <provides interface="interface.middleware.motor_induction.${module.middleware.motor_induction.name}" />
+
+        <!-- Module Name -->
+        <property default="g_motor_induction${_instance}" display="General|Name" id="module.middleware.motor_induction.name" description="Module name.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.middleware.motor_induction.name}")</constraint>
+        </property>
+
+        <!-- General Settings -->
+        <property default="2.0F" display="General|Limit of over current (A)" id="module.middleware.motor_induction.f_over_current" description="Limit of over current.(Detection threshold)">
+            <constraint display="Must be a valid value">
+            eval('' +
+            'var input = "${module.middleware.motor_induction.f_over_current}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)(\.[0-9]+)?$","i");' +
+            'var regex_float_with_suffix = RegExp("^([1-9][0-9]*|0)(\.[0-9]+)?F$","i");' +
+            ' ( regex_float.test(input) || regex_float_with_suffix.test(input))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${module.middleware.motor_induction.f_over_current}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)(\.[0-9]+)$","i");' +
+            'if (regex_float.test(output)){' +
+            'output = output + "F";' +
+            '}' +
+            'output')
+            </export>
+        </property>
+        <property default="28.0F" display="General|Limit of over voltage (V)" id="module.middleware.motor_induction.f_over_voltage" description="Limit of over voltage.(Detection threshold)">
+            <constraint display="Must be a valid value">
+            eval('' +
+            'var input = "${module.middleware.motor_induction.f_over_voltage}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)(\.[0-9]+)?$","i");' +
+            'var regex_float_with_suffix = RegExp("^([1-9][0-9]*|0)(\.[0-9]+)?F$","i");' +
+            ' ( regex_float.test(input) || regex_float_with_suffix.test(input))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${module.middleware.motor_induction.f_over_voltage}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)(\.[0-9]+)$","i");' +
+            'if (regex_float.test(output)){' +
+            'output = output + "F";' +
+            '}' +
+            'output')
+            </export>
+        </property>
+        <property default="3000.0F" display="General|Limit of over speed (rpm)" id="module.middleware.motor_induction.f_over_speed" description="Limit of over speed.(Detection threshold)">
+            <constraint display="Must be a valid value">
+            eval('' +
+            'var input = "${module.middleware.motor_induction.f_over_speed}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)(\.[0-9]+)?$","i");' +
+            'var regex_float_with_suffix = RegExp("^([1-9][0-9]*|0)(\.[0-9]+)?F$","i");' +
+            ' ( regex_float.test(input) || regex_float_with_suffix.test(input))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${module.middleware.motor_induction.f_over_speed}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)(\.[0-9]+)$","i");' +
+            'if (regex_float.test(output)){' +
+            'output = output + "F";' +
+            '}' +
+            'output')
+            </export>
+        </property>
+        <property default="18.0F" display="General|Limit of low voltage (V)" id="module.middleware.motor_induction.f_low_voltage" description="Limit of low voltage.(Detection threshold)">
+            <constraint display="Must be a valid value">
+            eval('' +
+            'var input = "${module.middleware.motor_induction.f_low_voltage}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)(\.[0-9]+)?$","i");' +
+            'var regex_float_with_suffix = RegExp("^([1-9][0-9]*|0)(\.[0-9]+)?F$","i");' +
+            ' ( regex_float.test(input) || regex_float_with_suffix.test(input))')
+            </constraint>
+            <export>
+            eval('' +
+            'var output = "${module.middleware.motor_induction.f_low_voltage}";' +
+            'var regex_float = RegExp("^([1-9][0-9]*|0)(\.[0-9]+)$","i");' +
+            'if (regex_float.test(output)){' +
+            'output = output + "F";' +
+            '}' +
+            'output')
+            </export>
+        </property>
+
+        <!-- Callback Settings -->
+        <property default="NULL" display="Interrupts|Callback" id="module.middleware.motor_induction.callback" description="A user callback function. If this callback function is provided, it is called at speed control cyclic interrupt.">
+            <constraint display="Name must be a valid C symbol">testSymbol("${module.middleware.motor_induction.callback}")
+            </constraint>
+        </property>
+        <property default="NULL" id="module.middleware.motor_induction.context">
+            <export>eval('' +
+            'var string = "${module.middleware.motor_induction.context}";' +
+            'if ("NULL" !== string){' +
+            'string = "&amp;" + string  ;' +
+            '}' +
+            'String(string)')
+            </export>
+        </property>
+
+        <!-- Contents -->
+        <header>
+/** Motor vector control with induction sensor instance. */
+extern const motor_instance_t ${module.middleware.motor_induction.name};
+
+/** Access the motor induction control instance using these structures
+    when calling API functions directly (::p_api is not used). */
+extern motor_induction_instance_ctrl_t ${module.middleware.motor_induction.name}_ctrl;
+extern const motor_induction_extended_cfg_t ${module.middleware.motor_induction.name}_extend;
+extern const motor_cfg_t ${module.middleware.motor_induction.name}_cfg;
+
+#ifndef ${module.middleware.motor_induction.callback}
+void ${module.middleware.motor_induction.callback}(motor_callback_args_t * p_args);
+#endif
+        </header>
+
+        <includes>
+#include &quot;rm_motor_induction.h&quot;
+        </includes>
+        <macros>
+        </macros>
+        <declarations>
+
+/* Motor induction control configuration */
+motor_induction_instance_ctrl_t ${module.middleware.motor_induction.name}_ctrl;
+
+const motor_induction_extended_cfg_t ${module.middleware.motor_induction.name}_extend =
+{
+  .f_overcurrent_limit = ${module.middleware.motor_induction.f_over_current} * 1.414213562F * 1.5F,
+  .f_overvoltage_limit = ${module.middleware.motor_induction.f_over_voltage},
+  .f_overspeed_limit = ${module.middleware.motor_induction.f_over_speed},
+  .f_lowvoltage_limit = ${module.middleware.motor_induction.f_low_voltage},
+
+#define RA_NOT_DEFINED (1)
+#if (RA_NOT_DEFINED == ${module.middleware.motor_induction.requires.inertia_estimate::module.middleware.motor_inertia_estimate.name})
+  .p_motor_inertia_estimate_instance = NULL,
+#else
+  .p_motor_inertia_estimate_instance = &amp;${module.middleware.motor_induction.requires.inertia_estimate::module.middleware.motor_inertia_estimate.name},
+#endif
+#if (RA_NOT_DEFINED == ${module.middleware.motor_induction.requires.return_origin::module.middleware.motor_return_origin.name} )
+  .p_motor_return_origin_instance = NULL,
+#else
+  .p_motor_return_origin_instance = &amp;${module.middleware.motor_induction.requires.return_origin::module.middleware.motor_return_origin.name},
+#endif
+#undef RA_NOT_DEFINED
+};
+
+const motor_cfg_t ${module.middleware.motor_induction.name}_cfg =
+{
+  .p_callback = ${module.middleware.motor_induction.callback},
+  .p_context = ${module.middleware.motor_induction.context},
+  .p_motor_speed_instance = &amp;${module.middleware.motor_induction.requires.speed::module.middleware.motor_speed.name},
+  .p_motor_current_instance = &amp;${module.middleware.motor_induction.requires.current::module.middleware.motor_current.name},
+  .p_extend = &amp;${module.middleware.motor_induction.name}_extend,
+};
+
+/* Instance structure to use motor induction control module. */
+const motor_instance_t ${module.middleware.motor_induction.name} =
+{
+    .p_ctrl = &amp;${module.middleware.motor_induction.name}_ctrl,
+    .p_cfg  = &amp;${module.middleware.motor_induction.name}_cfg,
+    .p_api  = &amp;g_motor_on_motor_induction,
+};
+        </declarations>
+    </module>
+</raModuleDescription>
